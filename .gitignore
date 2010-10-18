@@ -1,0 +1,11 @@
+.idea/
+target/
+dist/
+project/boot/
+project/plugins/project/
+project/plugins/src_managed/
+*.log
+*.tmproj
+lib_managed/
+*.swp
+*.iml
