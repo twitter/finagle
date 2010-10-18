@@ -1,8 +1,6 @@
 package com.twitter.netty.channel
 
-import java.net.SocketAddress
 import org.jboss.netty.channel._
-import com.twitter.netty.util.ChannelPool
 
 class BalancedChannelSink extends AbstractChannelSink {
   override def eventSunk(p: ChannelPipeline, e: ChannelEvent) {
@@ -22,20 +20,20 @@ class BalancedChannelSink extends AbstractChannelSink {
     e.getState match {
       case ChannelState.OPEN =>
         if (java.lang.Boolean.FALSE eq value)
-          ch.close(future)
+          ch.realClose(future)
       case ChannelState.BOUND =>
         // XXX - dispatch bound/connected, too?
         if (value ne null) {
           future.setSuccess()
-          Channels.fireChannelBound(ch, value.asInstanceOf[ChannelPool with SocketAddress])
+          Channels.fireChannelBound(ch, value.asInstanceOf[BalancedAddress])
         } else {
-          ch.close(future)
+          ch.realClose(future)
         }
       case ChannelState.CONNECTED =>
         if (value ne null)
-          ch.connect(value.asInstanceOf[ChannelPool with SocketAddress], future)
+          ch.realConnect(value.asInstanceOf[BalancedAddress], future)
         else
-          ch.close(future)
+          ch.realClose(future)
       case ChannelState.INTEREST_OPS =>
         // TODO: not yet supported, but may be relevant to us.
         future.setSuccess()
@@ -44,7 +42,7 @@ class BalancedChannelSink extends AbstractChannelSink {
 
   def handleMessageEvent(p: ChannelPipeline, e: MessageEvent) {
     val ch = e.getChannel.asInstanceOf[BalancedChannel]
-    ch.messageReceived(e)
+    ch.realWrite(e)
   }
 
 }
