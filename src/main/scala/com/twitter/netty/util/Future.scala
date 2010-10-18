@@ -21,7 +21,7 @@ object Error {
   def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause)
 }
 
-class RichChannelFuture(val self: ChannelFuture) extends Proxy {
+class RichChannelFuture(val self: ChannelFuture) {
   def apply(f: ChannelFuture => Unit) {
     if (self.isDone) {
       f(self)

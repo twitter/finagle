@@ -5,7 +5,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
 
   val nettyRepo = "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
 
-  val netty = "org.jboss.netty" % "netty" % "3.2.2.Final"
+  val netty = "org.jboss.netty" % "netty" % "3.2.2.Final" withSources()
   val util = "com.twitter" %% "util" % "1.2-SNAPSHOT"
 
   val mockito = "org.mockito" % "mockito-all" % "1.8.5" % "test" withSources()

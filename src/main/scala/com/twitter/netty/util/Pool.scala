@@ -1,7 +1,6 @@
 package com.twitter.netty.util
 
 import java.util.concurrent.ConcurrentLinkedQueue
-
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{Channels, Channel, ChannelFuture}
 
