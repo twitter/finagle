@@ -9,12 +9,12 @@ class ChannelSnooper(name: String) extends ChannelDownstreamHandler with Channel
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    printer("%10s ? %s".format(name, e))
+    printer("%10s ↑ %s".format(name, e))
     ctx.sendUpstream(e)
   }
 
   override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    printer("%10s ? %s".format(name, e))
+    printer("%10s ↓ %s".format(name, e))
     ctx.sendDownstream(e)
   }
 }
