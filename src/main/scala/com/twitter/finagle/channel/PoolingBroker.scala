@@ -1,7 +1,7 @@
-package com.twitter.netty.channel
+package com.twitter.finagle.channel
 
-import com.twitter.netty.util.{Error, Ok}
-import com.twitter.netty.util.Conversions._
+import com.twitter.finagle.util.{Error, Ok}
+import com.twitter.finagle.util.Conversions._
 import org.jboss.netty.channel.{MessageEvent, Channels}
 
 class PoolingBroker(channelPool: ChannelPool) extends Broker {

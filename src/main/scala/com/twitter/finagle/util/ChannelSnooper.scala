@@ -1,4 +1,4 @@
-package com.twitter.netty.util
+package com.twitter.finagle.util
 
 import java.io.PrintStream
 import org.jboss.netty.channel._

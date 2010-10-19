@@ -1,4 +1,4 @@
-package com.twitter.netty.channel
+package com.twitter.finagle.channel
 
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelFactory}
 
