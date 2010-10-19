@@ -7,16 +7,16 @@ import com.twitter.netty.util.Conversions._
 // keep most of the functionality here actually, but have it invoked
 // by the sink.
 
-class BalancedChannel(
-  factory: BalancedChannelFactory,
+class BrokeredChannel(
+  factory: BrokeredChannelFactory,
   pipeline: ChannelPipeline,
   sink: ChannelSink)
   extends AbstractChannel(null/* parent */, factory, pipeline, sink)
 {
   val config = new DefaultChannelConfig
-  @volatile private var balancedAddress: Option[BalancedAddress] = None
+  @volatile private var balancedAddress: Option[BrokeredAddress] = None
 
-  protected[channel] def realConnect(balancedAddress: BalancedAddress, future: ChannelFuture) {
+  protected[channel] def realConnect(balancedAddress: BrokeredAddress, future: ChannelFuture) {
     this.balancedAddress = Some(balancedAddress)
     future.setSuccess()
     Channels.fireChannelConnected(this, balancedAddress)
@@ -69,7 +69,7 @@ class BalancedChannel(
       // & give the channel back to the pool.
       ctx.getChannel.getPipeline.remove(this)
       balancedAddress.foreach(_.release(ctx.getChannel))
-      Channels.fireMessageReceived(BalancedChannel.this, e.getMessage)
+      Channels.fireMessageReceived(BrokeredChannel.this, e.getMessage)
     }
   }
 

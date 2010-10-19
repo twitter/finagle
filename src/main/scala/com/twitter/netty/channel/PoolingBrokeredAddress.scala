@@ -4,7 +4,7 @@ import org.jboss.netty.channel.{Channels, Channel}
 import java.util.concurrent.ConcurrentLinkedQueue
 import org.jboss.netty.bootstrap.ClientBootstrap
 
-class PoolingBalancedAddress(clientBootstrap: ClientBootstrap) extends BalancedAddress {
+class PoolingBrokeredAddress(clientBootstrap: ClientBootstrap) extends BrokeredAddress {
   private val queue = new ConcurrentLinkedQueue[Channel]
 
   def reserve() = {

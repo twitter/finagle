@@ -2,11 +2,11 @@ package com.twitter.netty.channel
 
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelFactory}
 
-class BalancedChannelFactory extends ChannelFactory {
-  val sink = new BalancedChannelSink
+class BrokeredChannelFactory extends ChannelFactory {
+  val sink = new BrokeredChannelSink
 
   def newChannel(pipeline: ChannelPipeline): Channel =
-    new BalancedChannel(this, pipeline, sink)
+    new BrokeredChannel(this, pipeline, sink)
 
   def releaseExternalResources() = ()
 }

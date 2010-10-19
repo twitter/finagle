@@ -2,7 +2,7 @@ package com.twitter.netty.channel
 
 import org.jboss.netty.channel._
 
-class BalancedChannelSink extends AbstractChannelSink {
+class BrokeredChannelSink extends AbstractChannelSink {
   override def eventSunk(p: ChannelPipeline, e: ChannelEvent) {
     e match {
       case e: ChannelStateEvent =>
@@ -13,7 +13,7 @@ class BalancedChannelSink extends AbstractChannelSink {
   }
 
   def handleChannelStateEvent(p: ChannelPipeline, e: ChannelStateEvent) {
-    val ch = e.getChannel.asInstanceOf[BalancedChannel]
+    val ch = e.getChannel.asInstanceOf[BrokeredChannel]
     val value = e.getValue
     val future = e.getFuture
 
@@ -25,13 +25,13 @@ class BalancedChannelSink extends AbstractChannelSink {
         // XXX - dispatch bound/connected, too?
         if (value ne null) {
           future.setSuccess()
-          Channels.fireChannelBound(ch, value.asInstanceOf[BalancedAddress])
+          Channels.fireChannelBound(ch, value.asInstanceOf[BrokeredAddress])
         } else {
           ch.realClose(future)
         }
       case ChannelState.CONNECTED =>
         if (value ne null)
-          ch.realConnect(value.asInstanceOf[BalancedAddress], future)
+          ch.realConnect(value.asInstanceOf[BrokeredAddress], future)
         else
           ch.realClose(future)
       case ChannelState.INTEREST_OPS =>
@@ -41,7 +41,7 @@ class BalancedChannelSink extends AbstractChannelSink {
   }
 
   def handleMessageEvent(p: ChannelPipeline, e: MessageEvent) {
-    val ch = e.getChannel.asInstanceOf[BalancedChannel]
+    val ch = e.getChannel.asInstanceOf[BrokeredChannel]
     ch.realWrite(e)
   }
 
