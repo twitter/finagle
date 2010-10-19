@@ -1,17 +1,17 @@
 package com.twitter.netty.channel
 
+import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{Channels, Channel}
 import java.util.concurrent.ConcurrentLinkedQueue
-import org.jboss.netty.bootstrap.ClientBootstrap
 
-class PoolingBrokeredAddress(clientBootstrap: ClientBootstrap) extends BrokeredAddress {
+class ChannelPool(clientBootstrap: ClientBootstrap) {
   private val queue = new ConcurrentLinkedQueue[Channel]
-
+  
   def reserve() = {
     var channel: Channel = null
     do {
       channel = queue.poll()
-    } while ((channel ne null) && !channel.isConnected)
+    } while ((channel ne null) && !isHealthy(channel))
 
     if (channel ne null)
       Channels.succeededFuture(channel)
@@ -19,12 +19,12 @@ class PoolingBrokeredAddress(clientBootstrap: ClientBootstrap) extends BrokeredA
       make()
   }
 
-  def release(channel: Channel) {
-    if (channel.isConnected)
-      queue.offer(channel)
+  def release(item: Channel) {
+    if (isHealthy(item)) queue.offer(item)
   }
 
-  override def toString = "ChannelPool:%x".format(hashCode)
-
   private def make() = clientBootstrap.connect()
+  private def isHealthy(channel: Channel) = channel.isOpen
+
+  override def toString = "Pool:%x".format(hashCode)
 }

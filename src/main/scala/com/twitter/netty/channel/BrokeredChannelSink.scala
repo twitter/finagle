@@ -25,13 +25,13 @@ class BrokeredChannelSink extends AbstractChannelSink {
         // XXX - dispatch bound/connected, too?
         if (value ne null) {
           future.setSuccess()
-          Channels.fireChannelBound(ch, value.asInstanceOf[BrokeredAddress])
+          Channels.fireChannelBound(ch, value.asInstanceOf[Broker])
         } else {
           ch.realClose(future)
         }
       case ChannelState.CONNECTED =>
         if (value ne null)
-          ch.realConnect(value.asInstanceOf[BrokeredAddress], future)
+          ch.realConnect(value.asInstanceOf[Broker], future)
         else
           ch.realClose(future)
       case ChannelState.INTEREST_OPS =>

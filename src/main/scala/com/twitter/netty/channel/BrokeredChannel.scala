@@ -1,8 +1,6 @@
 package com.twitter.netty.channel
 
 import org.jboss.netty.channel._
-import com.twitter.netty.util._
-import com.twitter.netty.util.Conversions._
 
 // keep most of the functionality here actually, but have it invoked
 // by the sink.
@@ -14,63 +12,43 @@ class BrokeredChannel(
   extends AbstractChannel(null/* parent */, factory, pipeline, sink)
 {
   val config = new DefaultChannelConfig
-  @volatile private var balancedAddress: Option[BrokeredAddress] = None
+  @volatile private var broker: Option[Broker] = None
 
-  protected[channel] def realConnect(balancedAddress: BrokeredAddress, future: ChannelFuture) {
-    this.balancedAddress = Some(balancedAddress)
+  protected[channel] def realConnect(broker: Broker, future: ChannelFuture) {
+    this.broker = Some(broker)
     future.setSuccess()
-    Channels.fireChannelConnected(this, balancedAddress)
+    Channels.fireChannelConnected(this, broker)
   }
 
   protected[channel] def realClose(future: ChannelFuture) {
-    if (balancedAddress.isDefined) {
-      // We're bound, so unbind / disconnect.
+    // to ensure consistency, we don't want to deliver any new
+    // messages after the channel has been closed.
+
+    // TODO: if we have an outstanding request, notify the broker to
+    // cancel requests (probably this means just sink them).
+
+    if (broker.isDefined) {
       Channels.fireChannelDisconnected(this)
       Channels.fireChannelUnbound(this)
     } else {
-      balancedAddress = None
+      broker = None
     }
 
     Channels.fireChannelClosed(this)
     future.setSuccess()
   }
 
-  val pool = null
   protected[channel] def realWrite(e: MessageEvent) {
-    // TODO: buffer requests when another is outstanding.
-    for (balancedAddress <- balancedAddress)
-      balancedAddress.reserve() {
-        case Ok(channel) =>
-          channel.getPipeline.addLast("handleMessage", handleMessage)
-          Channels.write(channel, e.getMessage)
-        case Error(_) =>
-          // XXX - propagate the error.. need to ask the pool for its
-          // retry policy. if we still can't make a request, then
-          // we've failed, and we issue a disconnect / realClose.
-          Channels.fireChannelDisconnected(this)
-      }
+    // XXX we lost the future here.
+    broker.foreach(_.dispatch(this, e))
   }
 
   // TODO: local binding.
-  def getRemoteAddress = balancedAddress.getOrElse(null)
-  def getLocalAddress = getRemoteAddress
+  def getRemoteAddress = broker.getOrElse(null)
+  def getLocalAddress = getRemoteAddress // XXX
 
   // TODO: reflect real state.
-  def isConnected = true
-  def isBound = true
+  def isConnected = broker.isDefined
+  def isBound = broker.isDefined
   def getConfig = config
-
-  // This is where a lot of the tricky code lay: we need to handle
-  // disconnections, application failures, etc. while making the pool
-  // the arbiter of the policies regarding these events.
-  private val handleMessage = new SimpleChannelUpstreamHandler {
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-      // Done with a request cycle: remove ourselves from the pipeline
-      // & give the channel back to the pool.
-      ctx.getChannel.getPipeline.remove(this)
-      balancedAddress.foreach(_.release(ctx.getChannel))
-      Channels.fireMessageReceived(BrokeredChannel.this, e.getMessage)
-    }
-  }
-
 }
