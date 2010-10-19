@@ -39,7 +39,6 @@ class BrokeredChannel(
   }
 
   protected[channel] def realWrite(e: MessageEvent) {
-    // XXX we lost the future here.
     broker.foreach(_.dispatch(this, e))
   }
 
