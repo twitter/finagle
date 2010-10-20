@@ -12,7 +12,7 @@ class BrokeredChannelSink extends AbstractChannelSink {
     }
   }
 
-  def handleChannelStateEvent(p: ChannelPipeline, e: ChannelStateEvent) {
+  private def handleChannelStateEvent(p: ChannelPipeline, e: ChannelStateEvent) {
     val ch = e.getChannel.asInstanceOf[BrokeredChannel]
     val value = e.getValue
     val future = e.getFuture
@@ -40,7 +40,7 @@ class BrokeredChannelSink extends AbstractChannelSink {
     }
   }
 
-  def handleMessageEvent(p: ChannelPipeline, e: MessageEvent) {
+  private def handleMessageEvent(p: ChannelPipeline, e: MessageEvent) {
     val ch = e.getChannel.asInstanceOf[BrokeredChannel]
     ch.realWrite(e)
   }

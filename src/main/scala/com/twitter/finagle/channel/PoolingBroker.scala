@@ -8,6 +8,7 @@ class PoolingBroker(channelPool: ChannelPool) extends Broker {
   def dispatch(handlingChannel: BrokeredChannel, e: MessageEvent) {
     channelPool.reserve() {
       case Ok(channel) =>
+        // XXX add a callback to release the connection.
         val handler = new BrokeredRequestHandler(handlingChannel)
         handler.write(channel, e)
       case Error(throwable) =>
