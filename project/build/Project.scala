@@ -47,5 +47,5 @@ class Project(info: ProjectInfo) extends StandardProject(info) {
   val slf4jNop = "org.slf4j" % "slf4j-nop" % "1.6.1"
 
   // Temporary?
-  val thrift = "org.apache.thrift" % "libthrift" % "0.5.0"
+  val thrift = "thrift" % "libthrift" % "0.2.0"
 }
