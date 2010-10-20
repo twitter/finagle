@@ -45,4 +45,5 @@ class Project(info: ProjectInfo) extends StandardProject(info) {
 
   lazy val compileTestThriftJava = compileTestThriftAction("java") describedAs("Compile (test) thrift into java")
   override def testCompileAction = super.testCompileAction dependsOn(compileTestThriftJava)
+
 }
