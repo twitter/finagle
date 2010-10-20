@@ -19,7 +19,7 @@ import ChannelBufferConversions._
  * channel. The method name & argument thrift structure (POJO) is
  * given.
  */
-case class ThriftCall[T <: TBase[_, _], R <: TBase[_, _]]
+case class ThriftCall[T <: TBase[_], R <: TBase[_]]
 (method: String, args: T)(implicit man: Manifest[R])
 {
   def newResponseInstance: R = man.erasure.newInstance.asInstanceOf[R]
@@ -29,7 +29,7 @@ class ThriftCodec extends SimpleChannelHandler
 {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
   var seqid = 0
-  val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_, _]]]
+  val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
