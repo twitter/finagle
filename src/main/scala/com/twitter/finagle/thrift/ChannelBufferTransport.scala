@@ -5,34 +5,23 @@ import org.apache.thrift.transport.TTransport
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-trait ChannelBufferTransport extends TTransport {
+class ChannelBufferTransport(underlying: ChannelBuffer) extends TTransport {
   override def isOpen = true
   override def open() {}
   override def close() {}
 
-  override def read(buffer: Array[Byte], offset: Int, length: Int): Int =
-    throw new NotImplementedException
-  override def write(buffer: Array[Byte], offset: Int, length: Int): Unit =
-    throw new NotImplementedException
-}
-
-class WritableChannelBufferTransport(initialSize: Int) extends ChannelBufferTransport {
-  def this() = this(4192)
-
-  val writeableBuffer = ChannelBuffers.dynamicBuffer(initialSize)
-
-  override def write(buffer: Array[Byte], offset: Int, length: Int) {
-    writeableBuffer.writeBytes(buffer, offset, length)
-  }
-}
-
-class ReadableChannelBufferTransport(readableBuffer: ChannelBuffer)
-extends ChannelBufferTransport
-{
-  override def read(buffer: Array[Byte], offset: Int, length: Int) = {
-    val readableBytes = readableBuffer.readableBytes
-    val bytesToRead = if (length > readableBytes) readableBytes else length
-    readableBuffer.readBytes(buffer, offset, bytesToRead)
+  override def read(buffer: Array[Byte], offset: Int, length: Int): Int = {
+    val bytesToRead = math.min(length, underlying.readableBytes)
+    underlying.readBytes(buffer, offset, bytesToRead)
     bytesToRead
   }
+
+  override def write(buffer: Array[Byte], offset: Int, length: Int) {
+    underlying.writeBytes(buffer, offset, length)
+  }
+}
+
+object ChannelBufferConversions {
+  implicit def channelBufferToChannelBufferTransport(buf: ChannelBuffer) =
+    new ChannelBufferTransport(buf)
 }

@@ -2,16 +2,23 @@ package com.twitter.finagle.thrift
 
 import scala.reflect.Manifest
 
+import java.util.concurrent.atomic.AtomicReference
+
 import org.apache.thrift.{TBase, TApplicationException}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.apache.thrift.transport.{
-  AutoExpandingBufferWriteTransport, AutoExpandingBufferReadTransport}
 
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.{
   SimpleChannelHandler, ChannelHandlerContext,
   MessageEvent, ChannelEvent, Channels}
 
+import ChannelBufferConversions._
+
+/**
+ * The ThriftCall object represents a thrift dispatch on the
+ * channel. The method name & argument thrift structure (POJO) is
+ * given.
+ */
 case class ThriftCall[T <: TBase[_, _], R <: TBase[_, _]]
 (method: String, args: T)(implicit man: Manifest[R])
 {
@@ -20,9 +27,9 @@ case class ThriftCall[T <: TBase[_, _], R <: TBase[_, _]]
 
 class ThriftCodec extends SimpleChannelHandler
 {
-  val factory = new TBinaryProtocol.Factory(true, true)
+  val protocolFactory = new TBinaryProtocol.Factory(true, true)
   var seqid = 0
-  @volatile var currentCall: ThriftCall[_, _ <: TBase[_, _]] = null
+  val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_, _]]]
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
@@ -33,20 +40,30 @@ class ThriftCodec extends SimpleChannelHandler
     val e = c.asInstanceOf[MessageEvent]
 
     e.getMessage match {
-      case call@ThriftCall(method, args) =>
-        currentCall = call
-        val transport = new WritableChannelBufferTransport
-        val oprot = factory.getProtocol(transport)
+      case thisCall@ThriftCall(method, args) =>
+        if (!currentCall.compareAndSet(null, thisCall)) {
+          // TODO: is this the right ("netty") way of propagating
+          // individual failures?  do we also want to throw it up the
+          // channel?
+          c.getFuture.setFailure(new Exception(
+            "There may be only one outstanding Thrift call at a time"))
+          return
+        }
+
+        val writeBuffer = ChannelBuffers.dynamicBuffer()
+        val oprot = protocolFactory.getProtocol(writeBuffer)
 
         seqid += 1
 
         oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
         args.write(oprot)
         oprot.writeMessageEnd()
-        Channels.write(ctx, c.getFuture, transport.writeableBuffer, e.getRemoteAddress)
+        Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
 
       case _ =>
-        throw new IllegalArgumentException("Unrecognized request type")
+        val exc = new IllegalArgumentException("Unrecognized request type")
+        c.getFuture.setFailure(exc)
+        throw exc
     }
   }
 
@@ -60,33 +77,38 @@ class ThriftCodec extends SimpleChannelHandler
 
     e.getMessage match {
       case buffer: ChannelBuffer =>
-        val transport = new ReadableChannelBufferTransport(buffer)
-        val iprot = factory.getProtocol(transport)      
+        val iprot = protocolFactory.getProtocol(buffer)
         val msg = iprot.readMessageBegin()
 
         if (msg.`type` == TMessageType.EXCEPTION) {
           val exc = TApplicationException.read(iprot)
           iprot.readMessageEnd()
           Channels.fireExceptionCaught(ctx, exc)
+          currentCall.set(null)
           return
         }
 
         if (msg.seqid != seqid) {
-          // TODO: This means the channel is in an inconsistent
-          // state. Should we request a close? What do other protocol
-          // codecs do?
+          // This means the channel is in an inconsistent state, so we
+          // both fire the exception (upstream), and close the channel
+          // (downstream).
           val exc = new TApplicationException(
             TApplicationException.BAD_SEQUENCE_ID,
             "out of sequence response")
           Channels.fireExceptionCaught(ctx, exc)
+          Channels.close(ctx, Channels.future(ctx.getChannel))
           return
         }
 
-        // We have a good reply: decode it & send it upstream.
-        val result = currentCall.newResponseInstance
+        // Our reply is good! decode it & send it upstream.
+        val result = currentCall.get().newResponseInstance
 
         result.read(iprot)
         iprot.readMessageEnd()
+
+        // Done with the current call cycle: we can now accept another
+        // request.
+        currentCall.set(null)
 
         Channels.fireMessageReceived(ctx, result, e.getRemoteAddress)
 
