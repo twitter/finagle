@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicReference
 import java.lang.reflect.{Method, ParameterizedType, Proxy}
 import scala.reflect.Manifest
 
-import org.apache.thrift.async.AsyncMethodCallback
 import org.apache.thrift.{TBase, TApplicationException}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 
@@ -80,7 +79,6 @@ class ServerThriftCodec[T](implementation: Object)(implicit man: Manifest[T]) ex
 class ThriftCodec extends SimpleChannelHandler
 {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
-  var seqid = 0
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
   def callForMessage(method: String): ThriftCall[_, _] = throw new AbstractMethodError
   var reads = 0
