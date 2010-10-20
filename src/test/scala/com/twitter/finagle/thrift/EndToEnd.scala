@@ -24,6 +24,9 @@ object EndToEndSpec extends Specification {
       bloop.reverse
   }
 
+  // TODO: test with a traditional thrift stack over local loopback
+  // TCP
+
   "talk silly to each other" in {
     // ** Set up the server.
     val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
@@ -53,7 +56,7 @@ object EndToEndSpec extends Specification {
         pipeline.addLast("codec", new ThriftCodec)
         pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
           override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-            callResults update Return(e.getMessage.asInstanceOf[Silly.bleep_result])
+            callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
           }
         })
 
