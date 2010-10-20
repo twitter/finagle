@@ -1,6 +1,7 @@
 package com.twitter.finagle.thrift
 
-import org.jboss.netty.channel.{SimpleChannelHandler, ChannelEvent, ChannelHandlerContext}
+import org.jboss.netty.channel.{
+  SimpleChannelHandler, ChannelEvent, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.{
   FrameDecoder, LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
