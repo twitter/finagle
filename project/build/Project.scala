@@ -25,7 +25,7 @@ class Project(info: ProjectInfo) extends StandardProject(info) {
   }
 
   // Temporary?
-  val thrift = "org.apache.thrift" % "libthrift" % "0.2.0"
+  val thrift = "thrift" % "libthrift" % "0.2.0"
   val slf4j = "org.slf4j" % "slf4j-simple" % "1.5.8"
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.5.8"
 }
