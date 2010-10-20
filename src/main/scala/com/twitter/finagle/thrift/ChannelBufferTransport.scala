@@ -21,6 +21,25 @@ class ChannelBufferTransport(underlying: ChannelBuffer) extends TTransport {
   }
 }
 
+class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer)
+extends TTransport {
+  override def isOpen = true
+  override def open() {}
+  override def close() {}
+
+  override def read(buffer: Array[Byte], offset: Int, length: Int) = {
+    val readableBytes = input.readableBytes()
+    val bytesToRead = math.min(length, readableBytes)
+    input.readBytes(buffer, offset, bytesToRead)
+    bytesToRead
+  }
+
+  override def write(buffer: Array[Byte], offset: Int, length: Int) {
+    output.writeBytes(buffer, offset, length)
+  }
+
+}
+
 object ChannelBufferConversions {
   implicit def channelBufferToChannelBufferTransport(buf: ChannelBuffer) =
     new ChannelBufferTransport(buf)
