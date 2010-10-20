@@ -13,10 +13,12 @@ class Project(info: ProjectInfo) extends StandardProject(info) {
 
   val mockito = "org.mockito" % "mockito-all" % "1.8.5" % "test" withSources()
   val specs = "org.scala-tools.testing" %% "specs" % "1.6.5" % "test" withSources()
+  val slf4jNop = "org.slf4j" % "slf4j-nop" % "1.6.1"
+  val thrift = "thrift" % "libthrift" % "0.2.0"
 
   // TODO: consolidate all of this stuff & contribute back to
   // standard-project.
-  val thriftCompilerPath = "/Users/marius/pkg/thrift-0.5.0/compiler/cpp/thrift"
+  val thriftCompilerPath = "thrift"
   override def compileThriftAction(lang: String) = task {
     import Process._
     outputPath.asFile.mkdirs()
@@ -44,8 +46,4 @@ class Project(info: ProjectInfo) extends StandardProject(info) {
   lazy val compileTestThriftJava = compileTestThriftAction("java") describedAs("Compile (test) thrift into java")
   override def testCompileAction = super.testCompileAction dependsOn(compileTestThriftJava)
 
-  val slf4jNop = "org.slf4j" % "slf4j-nop" % "1.6.1"
-
-  // Temporary?
-  val thrift = "org.apache.thrift" % "libthrift" % "0.5.0"
 }

@@ -1,6 +1,5 @@
 package com.twitter.finagle.thrift
 
-import org.apache.commons.lang.NotImplementedException
 import org.apache.thrift.transport.TTransport
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
