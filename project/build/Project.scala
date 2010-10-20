@@ -18,12 +18,14 @@ class Project(info: ProjectInfo) extends StandardProject(info) {
     import Process._
     outputPath.asFile.mkdirs()
     val tasks = thriftSources.getPaths.map { path =>
-      execTask { "/Users/marius/pkg/thrift-0.5.0/compiler/cpp/thrift --gen %s -o %s %s".format(lang, outputPath.absolutePath, path) }
+      val thriftBinary = System.getProperty("THRIFT_BINARY", "thrift")
+      execTask { "%s --gen %s -o %s %s".format(thriftBinary, lang, outputPath.absolutePath, path) }
     }
     if (tasks.isEmpty) None else tasks.reduceLeft { _ && _ }.run
   }
 
-
   // Temporary?
-  val thrift = "org.apache.thrift" % "libthrift" % "0.5.0"
+  val thrift = "org.apache.thrift" % "libthrift" % "0.2.0"
+  val slf4j = "org.slf4j" % "slf4j-simple" % "1.5.8"
+  val slf4jApi = "org.slf4j" % "slf4j-api" % "1.5.8"
 }
