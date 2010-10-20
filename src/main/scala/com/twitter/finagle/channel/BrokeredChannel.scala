@@ -1,10 +1,8 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.channel._
 import java.nio.channels.NotYetConnectedException
-import local.{LocalAddress, LocalChannel}
-// keep most of the functionality here actually, but have it invoked
-// by the sink.
+import org.jboss.netty.channel.local.LocalAddress
+import org.jboss.netty.channel._
 
 class BrokeredChannel(
   factory: BrokeredChannelFactory,
@@ -24,12 +22,8 @@ class BrokeredChannel(
   }
 
   protected[channel] def realClose(future: ChannelFuture) {
-    // to ensure consistency, we don't want to deliver any new
-    // messages after the channel has been closed.
-
     // TODO: if we have an outstanding request, notify the broker to
     // cancel requests (probably this means just sink them).
-
     if (broker.isDefined) {
       Channels.fireChannelDisconnected(this)
       Channels.fireChannelUnbound(this)
@@ -47,11 +41,9 @@ class BrokeredChannel(
     }
   }
 
-  // TODO: local binding.
   def getRemoteAddress = broker.getOrElse(null)
   def getLocalAddress = if (broker.isDefined) localAddress else null
 
-  // TODO: reflect real state.
   def isConnected = broker.isDefined
   def isBound = broker.isDefined
   def getConfig = config

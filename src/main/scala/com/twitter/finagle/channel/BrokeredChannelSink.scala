@@ -22,7 +22,6 @@ class BrokeredChannelSink extends AbstractChannelSink {
         if (java.lang.Boolean.FALSE eq value)
           ch.realClose(future)
       case ChannelState.BOUND =>
-        // XXX - dispatch bound/connected, too?
         if (value ne null) {
           future.setSuccess()
           Channels.fireChannelBound(ch, value.asInstanceOf[Broker])
@@ -35,7 +34,6 @@ class BrokeredChannelSink extends AbstractChannelSink {
         else
           ch.realClose(future)
       case ChannelState.INTEREST_OPS =>
-        // TODO: not yet supported, but may be relevant to us.
         future.setSuccess()
     }
   }
