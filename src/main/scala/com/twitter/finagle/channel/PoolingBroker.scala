@@ -12,7 +12,7 @@ class PoolingBroker(channelPool: ChannelPool) extends Broker {
           case Ok(channel) =>
             channelPool.release(channel)
           case Error(cause) =>
-            // XXX fireExceptionCaught untested
+            Channels.fireExceptionCaught(handlingChannel, cause)            
             channelPool.release(channel)
         }
       case Error(throwable) =>

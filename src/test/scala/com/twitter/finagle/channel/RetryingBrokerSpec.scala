@@ -12,6 +12,7 @@ class RetryingBrokerSpec extends Specification with Mockito {
     var invocations = 0
     val tries = 3
     val someMessage = mock[Object]
+    val brokeredChannel = new BrokeredChannelFactory().newChannel(Channels.pipeline())
 
     "when it never succeeds" in {
       val underlying = new Broker {
@@ -20,7 +21,6 @@ class RetryingBrokerSpec extends Specification with Mockito {
           e.getFuture.setFailure(exception)
         }
       }
-      val brokeredChannel = new BrokeredChannelFactory().newChannel(Channels.pipeline())
       brokeredChannel.connect(new RetryingBroker(underlying, tries))
 
       "retries up to $tries times" in {
@@ -40,7 +40,6 @@ class RetryingBrokerSpec extends Specification with Mockito {
           else future.setSuccess()
         }
       }
-      val brokeredChannel = new BrokeredChannelFactory().newChannel(Channels.pipeline())
       brokeredChannel.connect(new RetryingBroker(underlying, tries))
 
       "retries until it succeeds" in {
