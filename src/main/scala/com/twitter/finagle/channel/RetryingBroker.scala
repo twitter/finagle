@@ -19,7 +19,6 @@ class RetryingBroker(underlying: Broker, tries: Int) extends Broker {
         if (triesLeft > 1)
           dispatch(triesLeft - 1, handlingChannel, e)
         else {
-          println(incomingFuture)
           incomingFuture.setFailure(cause)
         }
     }
