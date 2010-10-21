@@ -12,7 +12,7 @@ class BrokeredChannelSink extends AbstractChannelSink {
     }
   }
 
-  def handleChannelStateEvent(p: ChannelPipeline, e: ChannelStateEvent) {
+  private def handleChannelStateEvent(p: ChannelPipeline, e: ChannelStateEvent) {
     val ch = e.getChannel.asInstanceOf[BrokeredChannel]
     val value = e.getValue
     val future = e.getFuture
@@ -22,7 +22,6 @@ class BrokeredChannelSink extends AbstractChannelSink {
         if (java.lang.Boolean.FALSE eq value)
           ch.realClose(future)
       case ChannelState.BOUND =>
-        // XXX - dispatch bound/connected, too?
         if (value ne null) {
           future.setSuccess()
           Channels.fireChannelBound(ch, value.asInstanceOf[Broker])
@@ -35,12 +34,11 @@ class BrokeredChannelSink extends AbstractChannelSink {
         else
           ch.realClose(future)
       case ChannelState.INTEREST_OPS =>
-        // TODO: not yet supported, but may be relevant to us.
         future.setSuccess()
     }
   }
 
-  def handleMessageEvent(p: ChannelPipeline, e: MessageEvent) {
+  private def handleMessageEvent(p: ChannelPipeline, e: MessageEvent) {
     val ch = e.getChannel.asInstanceOf[BrokeredChannel]
     ch.realWrite(e)
   }

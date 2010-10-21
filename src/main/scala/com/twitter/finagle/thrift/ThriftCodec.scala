@@ -65,8 +65,9 @@ class ThriftCodec extends SimpleChannelHandler
           // TODO: is this the right ("netty") way of propagating
           // individual failures?  do we also want to throw it up the
           // channel?
-          c.getFuture.setFailure(new Exception(
-            "There may be only one outstanding Thrift call at a time"))
+          val exc = new Exception("There may be only one outstanding Thrift call at a time")
+          Channels.fireExceptionCaught(ctx, exc)
+          c.getFuture.setFailure(exc)
           return
         }
 
@@ -88,8 +89,8 @@ class ThriftCodec extends SimpleChannelHandler
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
       case _ =>
         val exc = new IllegalArgumentException("Unrecognized request type")
+        Channels.fireExceptionCaught(ctx, exc)
         c.getFuture.setFailure(exc)
-        throw exc
     }
   }
 

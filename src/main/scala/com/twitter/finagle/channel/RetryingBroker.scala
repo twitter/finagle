@@ -16,10 +16,11 @@ class RetryingBroker(underlying: Broker, tries: Int) extends Broker {
       case Ok(channel) =>
         incomingFuture.setSuccess()
       case Error(cause) =>
-        if (triesLeft > 0)
+        if (triesLeft > 1)
           dispatch(triesLeft - 1, handlingChannel, e)
-        else
+        else {
           incomingFuture.setFailure(cause)
+        }
     }
 
     val errorInterceptingMessageEvent = new DownstreamMessageEvent(
