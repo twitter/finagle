@@ -19,38 +19,30 @@ import com.twitter.silly.Silly
 import com.twitter.finagle.util.Conversions._
 
 object AsyncServerEndToEndSpec extends Specification {
-  class SillyImpl extends Silly.Iface {
-    def bleep(bloop: String): String =
-      bloop.reverse
-  }
-
   // TODO: test with a traditional thrift stack over local loopback
   // TCP
 
   "talk silly to each other ... asynchronously" in {
     // ** Set up the server.
+    ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
+
     val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
     serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("framer", new ThriftFrameCodec)
-        val codec = new ThriftServerCodec
-        ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
-        pipeline.addLast("codec", codec)
+        pipeline.addLast("codec", new ThriftServerCodec)
         pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
           override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
             val msg = e.getMessage.asInstanceOf[ThriftCall[_, _]]
-            println("message received in handler: %s".format(msg))
             msg match {
               case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result] =>
                 val args = bleep.args.asInstanceOf[Silly.bleep_args]
-                println("Bleep: request=%s".format(args.request))
                 val response = bleep.newResponseInstance
                 response.setSuccess(args.request.reverse)
-                println("Sending response %s".format(response))
-                Channels.write(ctx.getChannel, new ThriftResponse[Silly.bleep_result](response, bleep))
+                Channels.write(ctx.getChannel, new ThriftReply[Silly.bleep_result](response, bleep))
               case _ =>
-                println("The message's type could not be determined")
+                throw new IllegalArgumentException
             }
           }
         })

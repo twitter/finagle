@@ -27,7 +27,7 @@ case class ThriftCall[T <: TBase[_], R <: TBase[_]]
   def newInstance: ThriftCall[T,R] = new ThriftCall[T,R](method, newArgInstance)
 }
 
-case class ThriftResponse[R <: TBase[_]](response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
+case class ThriftReply[R <: TBase[_]](response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
 
 object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCall[_,_]] {
   def add(c: ThriftCall[_,_]): Unit = put(c.method, c)
@@ -52,7 +52,6 @@ class ThriftCodec extends SimpleChannelHandler
   protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    println("handleDownstream")
     if (!c.isInstanceOf[MessageEvent]) {
       super.handleDownstream(ctx, c)
       return
@@ -64,8 +63,8 @@ class ThriftCodec extends SimpleChannelHandler
       writes += 1
 
     e.getMessage match {
-      case thisRequest@ThriftCall(method, args) =>
-        if (!currentCall.compareAndSet(null, thisRequest)) {
+      case thisCall@ThriftCall(method, args) =>
+        if (!currentCall.compareAndSet(null, thisCall)) {
           // TODO: is this the right ("netty") way of propagating
           // individual failures?  do we also want to throw it up the
           // channel?
@@ -82,14 +81,13 @@ class ThriftCodec extends SimpleChannelHandler
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
       // Handle wrapped thrift response
-      case thisResponse@ThriftResponse(response, call) =>
+      case thisReply@ThriftReply(response, call) =>
         val writeBuffer = ChannelBuffers.dynamicBuffer()
         val oprot = protocolFactory.getProtocol(writeBuffer)
 
         oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, seqid))
         response.write(oprot)
         oprot.writeMessageEnd()
-        println("Handled response in handleDownstream: Response=[%s] Call=[%s]".format(response, call))
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
       case _ =>
         val exc = new IllegalArgumentException("Unrecognized request type")
@@ -99,7 +97,6 @@ class ThriftCodec extends SimpleChannelHandler
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    println("handleUpstream")
     if (!c.isInstanceOf[MessageEvent]) {
       super.handleUpstream(ctx, c)
       return
@@ -137,20 +134,14 @@ class ThriftCodec extends SimpleChannelHandler
           return
         }
 
-        println(getClass.getName)
-        println("\tCurrentCall: %s".format(currentCall))
-
         if (server) {
           // Find the method and its related args
           val request = ThriftTypes(msg.name).newInstance
           val args = request.args.asInstanceOf[TBase[_]]
           args.read(iprot)
           iprot.readMessageEnd()
-          println("Server: Received message: %s".format(request))
           Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
         } else {
-          println("Client")
-
           // Our reply is good! decode it & send it upstream.
           val result = currentCall.get().newResponseInstance
           result.read(iprot)
