@@ -14,7 +14,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
     val broker = new Broker {
       def dispatch(e: MessageEvent) = {
         e.getFuture.setSuccess()
-        UpcomingMessageEvent.successfulEvent(e.getChannel, null)
+        UpcomingMessageEvent.successfulEvent(e.getChannel, mock[Object])
       }
     }
     val factory = mock[BrokeredChannelFactory]
