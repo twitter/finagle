@@ -12,13 +12,18 @@ class RetryingBrokerSpec extends Specification with Mockito {
     var invocations = 0
     val tries = 3
     val someMessage = mock[Object]
-    val brokeredChannel = new BrokeredChannelFactory().newChannel(Channels.pipeline())
+    val pipeline = Channels.pipeline()
+    pipeline.addLast("silenceWarnings", new SimpleChannelUpstreamHandler {
+      override def exceptionCaught(ctx: ChannelHandlerContext, exc: ExceptionEvent) {}
+    })
+    val brokeredChannel = new BrokeredChannelFactory().newChannel(pipeline)
 
     "when it never succeeds" in {
       val underlying = new Broker {
-        def dispatch(brokeredChannel: BrokeredChannel, e: MessageEvent) {
+        def dispatch(e: MessageEvent)  = {
           invocations += 1
           e.getFuture.setFailure(exception)
+          UpcomingMessageEvent.failedEvent(e.getChannel, exception)
         }
       }
       brokeredChannel.connect(new RetryingBroker(underlying, tries))
@@ -33,11 +38,16 @@ class RetryingBrokerSpec extends Specification with Mockito {
 
     "when it eventually succeeds" in {
       val underlying = new Broker {
-        def dispatch(brokeredChannel: BrokeredChannel, e: MessageEvent) {
+        def dispatch(e: MessageEvent) = {
           invocations += 1
           val future = e.getFuture
-          if (invocations < 3) future.setFailure(exception)
-          else future.setSuccess()
+          if (invocations < 3) {
+            future.setFailure(exception)
+            UpcomingMessageEvent.failedEvent(e.getChannel, exception)
+          } else {
+            future.setSuccess()
+            UpcomingMessageEvent.successfulEvent(e.getChannel, someMessage)
+          }
         }
       }
       brokeredChannel.connect(new RetryingBroker(underlying, tries))

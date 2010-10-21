@@ -4,6 +4,9 @@ import java.nio.channels.NotYetConnectedException
 import org.jboss.netty.channel.local.LocalAddress
 import org.jboss.netty.channel._
 
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.{Ok, Error}
+
 class BrokeredChannel(
   factory: BrokeredChannelFactory,
   pipeline: ChannelPipeline,
@@ -36,8 +39,26 @@ class BrokeredChannel(
 
   protected[channel] def realWrite(e: MessageEvent) {
     broker match {
-      case Some(broker) => broker.dispatch(this, e)
-      case None => e.getFuture.setFailure(new NotYetConnectedException)
+      case Some(broker) =>
+        // Propagate events up on the channel as well.
+        val responseEvent = broker.dispatch(e)
+
+        e.getFuture() {
+          case Ok(_) =>
+            Channels.fireWriteComplete(this, 1)
+          case Error(cause) =>
+            Channels.fireExceptionCaught(this, cause)
+        }
+
+        responseEvent.getFuture() {
+          case Ok(_) =>
+            Channels.fireMessageReceived(this, responseEvent.getMessage)
+          case Error(cause) =>
+            Channels.fireExceptionCaught(this, cause)
+        }
+
+      case None =>
+        e.getFuture.setFailure(new NotYetConnectedException)
     }
   }
 

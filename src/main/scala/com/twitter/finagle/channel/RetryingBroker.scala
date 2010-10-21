@@ -1,26 +1,26 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.channel.{DefaultChannelFuture, DownstreamMessageEvent, MessageEvent}
+import org.jboss.netty.channel.{
+  Channels, DefaultChannelFuture,
+  DownstreamMessageEvent, MessageEvent}
 import com.twitter.finagle.util.{Error, Ok}
 import com.twitter.finagle.util.Conversions._
 
 class RetryingBroker(underlying: Broker, tries: Int) extends Broker {
-  def dispatch(handlingChannel: BrokeredChannel, e: MessageEvent) {
-    dispatch(tries, handlingChannel, e)
-  }
+  def dispatch(e: MessageEvent) = dispatch(tries, e)
 
-  def dispatch(triesLeft: Int, handlingChannel: BrokeredChannel, e: MessageEvent) {
+  def dispatch(triesLeft: Int, e: MessageEvent): UpcomingMessageEvent = {
     val incomingFuture = e.getFuture
-    val interceptErrors = new DefaultChannelFuture(e.getChannel, false)
+    val interceptErrors = Channels.future(e.getChannel)
     interceptErrors {
       case Ok(channel) =>
         incomingFuture.setSuccess()
       case Error(cause) =>
+        // TODO: distinguish between *retriable* cause and non?
         if (triesLeft > 1)
-          dispatch(triesLeft - 1, handlingChannel, e)
-        else {
+          dispatch(triesLeft - 1, e)
+        else
           incomingFuture.setFailure(cause)
-        }
     }
 
     val errorInterceptingMessageEvent = new DownstreamMessageEvent(
@@ -29,6 +29,6 @@ class RetryingBroker(underlying: Broker, tries: Int) extends Broker {
       e.getMessage,
       e.getRemoteAddress)
 
-    underlying.dispatch(handlingChannel, errorInterceptingMessageEvent)
+    underlying.dispatch(errorInterceptingMessageEvent)
   }
 }
