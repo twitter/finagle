@@ -7,7 +7,8 @@ trait LoadedBroker extends Broker {
 }
 
 class LeastLoadedBroker(endpoints: Seq[LoadedBroker]) extends Broker {
-  def dispatch(e: MessageEvent) = leastLoadedEndpoint.dispatch(e)
+  def dispatch(e: MessageEvent) =
+    leastLoadedEndpoint.dispatch(e)
 
   private def leastLoadedEndpoint =
     endpoints.min(new Ordering[LoadedBroker] {

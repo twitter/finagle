@@ -2,7 +2,7 @@ package com.twitter.finagle.channel
 
 import java.nio.channels.ClosedChannelException
 
-import com.twitter.finagle.util.{Error, Ok}
+import com.twitter.finagle.util.{Error, Ok, Cancelled}
 import com.twitter.finagle.util.Conversions._
 import org.jboss.netty.channel._
 
@@ -12,10 +12,16 @@ class PoolingBroker(channelPool: ChannelPool) extends Broker {
 
     channelPool.reserve() {
       case Ok(channel) =>
-        responseEvent.getFuture always { _ => channelPool.release(channel) }
+        // if (responseEvent.getFuture.isCancelled) {
+        //   channelPool.release(channel)
+        // } else {...
         connectChannel(channel, e, responseEvent)
+        responseEvent.getFuture onSuccessOrFailure { channelPool.release(channel) }
+
       case Error(cause) =>
         responseEvent.setFailure(cause)
+
+      case Cancelled => ()
     }
 
     responseEvent

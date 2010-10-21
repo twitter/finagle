@@ -15,6 +15,10 @@ class UpcomingMessageEvent(channel: Channel) extends MessageEvent {
     future.setFailure(cause)
   }
 
+  def cancel() {
+    future.cancel()
+  }
+
   def getChannel: Channel = channel
   def getFuture: ChannelFuture = future
 

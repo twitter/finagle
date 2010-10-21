@@ -5,7 +5,7 @@ import org.jboss.netty.channel.local.LocalAddress
 import org.jboss.netty.channel._
 
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error}
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 
 class BrokeredChannel(
   factory: BrokeredChannelFactory,
@@ -48,6 +48,7 @@ class BrokeredChannel(
             Channels.fireWriteComplete(this, 1)
           case Error(cause) =>
             Channels.fireExceptionCaught(this, cause)
+          case _ => ()
         }
 
         responseEvent.getFuture() {
@@ -55,6 +56,7 @@ class BrokeredChannel(
             Channels.fireMessageReceived(this, responseEvent.getMessage)
           case Error(cause) =>
             Channels.fireExceptionCaught(this, cause)
+          case _ => ()
         }
 
       case None =>
