@@ -1,5 +1,7 @@
 package com.twitter.finagle.util
 
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
+
 import org.jboss.netty.channel._
 
 /**
@@ -24,6 +26,7 @@ object Error_ {
   def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause, f.getChannel)
 }
 
+// TODO: decide what to do about cancellation here.
 class RichChannelFuture(val self: ChannelFuture) {
   def apply(f: ChannelFuture => Unit) {
     if (self.isDone) {
@@ -36,7 +39,7 @@ class RichChannelFuture(val self: ChannelFuture) {
   }
 
   def proxyTo(other: ChannelFuture) {
-    apply {
+    this {
       case Ok(channel)  => other.setSuccess()
       case Error(cause) => other.setFailure(cause)
     }
@@ -48,7 +51,7 @@ class RichChannelFuture(val self: ChannelFuture) {
   def flatMap(f: Channel => ChannelFuture): ChannelFuture = {
     val future = new LatentChannelFuture
 
-    apply {
+    this {
       case Ok(channel) =>
         val nextFuture = f(channel)
         nextFuture.addListener(new ChannelFutureListener {
@@ -71,7 +74,7 @@ class RichChannelFuture(val self: ChannelFuture) {
   def map[T](f: Channel => Channel) = {
     val future = new LatentChannelFuture
 
-    apply {
+    this {
       case Ok(channel) =>
         future.setChannel(f(channel))
         future.setSuccess()
@@ -84,21 +87,62 @@ class RichChannelFuture(val self: ChannelFuture) {
   }
 
   def foreach[T](f: Channel => T) {
-    apply {
+    this {
       case Ok(channel) => f(channel)
       case _ => ()
     }
   }
 
+  def onSuccess(f: => Unit) {
+    foreach { _ => f }
+  }
+
   def onError(f: Throwable => Unit) {
-    apply {
+    this {
       case Error(cause) => f(cause)
       case Ok(_) => ()
     }
   }
 
   def always(f: Channel => Unit) =
-    apply { case future => f(future.getChannel) }
+    this { case future => f(future.getChannel) }
+
+  def orElse(other: RichChannelFuture): ChannelFuture = {
+    val combined = new LatentChannelFuture
+
+    this.proxyTo(combined)
+    other.proxyTo(combined)
+
+    combined
+  }
+
+  def andThen(next: ChannelFuture): ChannelFuture = flatMap { _ => next }
+
+  def joinWith(other: RichChannelFuture): ChannelFuture = {
+    val joined = Channels.future(self.getChannel)
+    val latch = new AtomicBoolean(false)
+    @volatile var cause: Throwable = null
+
+    def maybeSatisfy() =
+      if (!latch.compareAndSet(false, true)) {
+        if (cause ne null)
+          joined.setFailure(cause)
+        else
+          joined.setSuccess()
+      }
+
+    for (f <- List(this, other)) {
+      f {
+        case Ok(_) =>
+          maybeSatisfy()
+        case Error(theCause) =>
+          cause = theCause
+          maybeSatisfy()
+      }
+    }
+
+    joined
+  }
 
   def close() {
     self.addListener(ChannelFutureListener.CLOSE)

@@ -161,7 +161,7 @@ object ThriftCodecSpec extends Specification {
       // Make one call.
       Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
       ch.downstreamEvents must haveSize(1)
-      
+
       // Try another before replying.
       val f = Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
       ch.downstreamEvents must haveSize(1)

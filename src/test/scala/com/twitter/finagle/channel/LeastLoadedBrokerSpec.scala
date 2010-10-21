@@ -17,8 +17,8 @@ object LeastLoadedBrokerSpec extends Specification with Mockito {
     val messageEvent = mock[MessageEvent]
 
     "dispatches to the least loaded" in {
-      leastLoadedBroker.dispatch(channel, messageEvent)
-      there was one(broker1).dispatch(channel, messageEvent)
+      leastLoadedBroker.dispatch(messageEvent)
+      there was one(broker1).dispatch(messageEvent)
     }
   }
 }

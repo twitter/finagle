@@ -12,8 +12,9 @@ import org.jboss.netty.channel.local.LocalAddress
 object BrokeredChannelSpec extends Specification with Mockito {
   "BrokeredChannel" should {
     val broker = new Broker {
-      def dispatch(handlingChannel: BrokeredChannel, e: MessageEvent) {
+      def dispatch(e: MessageEvent) = {
         e.getFuture.setSuccess()
+        UpcomingMessageEvent.successfulEvent(e.getChannel, null)
       }
     }
     val factory = mock[BrokeredChannelFactory]
