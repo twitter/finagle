@@ -75,12 +75,12 @@ object ThriftCodecSpec extends Specification {
 
       ch.upstreamEvents must haveSize(0)
       ch.downstreamEvents must haveSize(1)
-  
+
       ch.downstreamEvents(0) must haveType[MessageEvent]
       val m = ch.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
       m must haveType[ChannelBuffer]
       val buf = m.asInstanceOf[ChannelBuffer]
-      
+
       val iprot = new TBinaryProtocol(buf, true, true)
       val msg = iprot.readMessageBegin()
 
@@ -89,7 +89,7 @@ object ThriftCodecSpec extends Specification {
 
       val args = new Silly.bleep_args()
       args.read(iprot)
-      
+
       args.request must be_==("the arg")
     }
 

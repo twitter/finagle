@@ -20,30 +20,29 @@ import ChannelBufferConversions._
  * given.
  */
 case class ThriftCall[T <: TBase[_], R <: TBase[_]]
-(method: String, args: T)(implicit val tman: Manifest[T], implicit val rman: Manifest[R])
-{
+(method: String, args: T)
+(implicit val tman: Manifest[T], implicit val rman: Manifest[R]) {
   def newResponseInstance: R = rman.erasure.newInstance.asInstanceOf[R]
   def newArgInstance: T = tman.erasure.newInstance.asInstanceOf[T]
   def newInstance: ThriftCall[T,R] = new ThriftCall[T,R](method, newArgInstance)
 }
 
-case class ThriftReply[R <: TBase[_]](response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
+case class ThriftReply[R <: TBase[_]]
+(response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
 
 object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCall[_,_]] {
   def add(c: ThriftCall[_,_]): Unit = put(c.method, c)
 }
 
-class ThriftServerCodec
-extends ThriftCodec
-{
+class ThriftServerCodec extends ThriftCodec {
   override protected def server = true
 }
 
-class ThriftCodec extends SimpleChannelHandler
-{
+class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
+  var reads = 0
+  var writes = 0
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
-  var seqid = 0
 
   // FIXME: this should probably be pulled out to the top level to make it easier to access and emphasize its global-ness.
 
@@ -56,8 +55,6 @@ class ThriftCodec extends SimpleChannelHandler
     }
 
     val e = c.asInstanceOf[MessageEvent]
-
-    if (!server) seqid += 1
 
     e.getMessage match {
       case thisCall@ThriftCall(method, args) =>
@@ -74,19 +71,21 @@ class ThriftCodec extends SimpleChannelHandler
         val writeBuffer = ChannelBuffers.dynamicBuffer()
         val oprot = protocolFactory.getProtocol(writeBuffer)
 
-        oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
+        reads += 1
+        oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, reads))
         args.write(oprot)
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
-      // Handle wrapped thrift response
+
       case thisReply@ThriftReply(response, call) =>
         val writeBuffer = ChannelBuffers.dynamicBuffer()
         val oprot = protocolFactory.getProtocol(writeBuffer)
-
-        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, seqid))
+        writes += 1
+        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, writes))
         response.write(oprot)
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
+
       case _ =>
         val exc = new IllegalArgumentException("Unrecognized request type")
         Channels.fireExceptionCaught(ctx, exc)
@@ -100,15 +99,12 @@ class ThriftCodec extends SimpleChannelHandler
       return
     }
 
-    if (server) seqid += 1
-
     val e = c.asInstanceOf[MessageEvent]
 
     e.getMessage match {
       case buffer: ChannelBuffer =>
         val iprot = protocolFactory.getProtocol(buffer)
         val msg = iprot.readMessageBegin()
-
 
         if (msg.`type` == TMessageType.EXCEPTION) {
           val exc = TApplicationException.read(iprot)
@@ -118,28 +114,27 @@ class ThriftCodec extends SimpleChannelHandler
           return
         }
 
-        if (msg.seqid != seqid) { // FIXME: this needs to be fixed. The sequence number needs to be checked.
-          println("Sequence ID crap")
+        // val seqid = if (server) writes else reads
+        if (!server && msg.seqid != reads) {
           // This means the channel is in an inconsistent state, so we
           // both fire the exception (upstream), and close the channel
           // (downstream).
           val exc = new TApplicationException(
             TApplicationException.BAD_SEQUENCE_ID,
-            "out of sequence response (got %d expected %d)".format(msg.seqid, seqid))
+            "out of sequence response (got %d expected %d)".format(msg.seqid, reads))
           Channels.fireExceptionCaught(ctx, exc)
           Channels.close(ctx, Channels.future(ctx.getChannel))
           return
         }
 
         if (server) {
-          // Find the method and its related args
           val request = ThriftTypes(msg.name).newInstance
           val args = request.args.asInstanceOf[TBase[_]]
           args.read(iprot)
           iprot.readMessageEnd()
+
           Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
         } else {
-          // Our reply is good! decode it & send it upstream.
           val result = currentCall.get().newResponseInstance
           result.read(iprot)
           iprot.readMessageEnd()
