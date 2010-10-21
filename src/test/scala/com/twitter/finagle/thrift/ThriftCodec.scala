@@ -62,17 +62,15 @@ object ThriftCodecSpec extends Specification {
     }
   }
 
-  def makeChannel = SunkChannel {
+
+  def makeChannel(codec: SimpleChannelHandler) = SunkChannel {
     val pipeline = Channels.pipeline()
-    pipeline.addLast("encoder", new ThriftCodec)
+    pipeline.addLast("codec", codec)
     pipeline
   }
 
-  def makeServerChannel = SunkChannel {
-    val pipeline = Channels.pipeline()
-    pipeline.addLast("encoder", new ThriftServerCodec)
-    pipeline
-  }
+  def makeChannel(): SunkChannel = makeChannel(new ThriftCodec)
+  def makeServerChannel(): SunkChannel = makeChannel(new ThriftServerCodec)
 
   "request serialization" should {
     "encode downstream ThriftCall as TMessage" in {
@@ -99,7 +97,7 @@ object ThriftCodecSpec extends Specification {
       args.request must be_==("the arg")
     }
 
-    "encode upstream TMessage as ThriftCall" in {
+    "decode upstream TMessage to ThriftCall" in {
       val request = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("spondee"))
       val ch = makeServerChannel
       ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
@@ -107,6 +105,14 @@ object ThriftCodecSpec extends Specification {
       val m = ch.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
       val c = m.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
       m mustNot beNull
+
+      "throws an exception with no corresponding ThriftCall registered" in {
+        val badRequest = TMessage("bloop", TMessageType.CALL, 1, new Silly.bleep_args())
+        Channels.fireMessageReceived(ch, badRequest)
+        val e = ch.upstreamEvents(1).asInstanceOf[DefaultExceptionEvent]
+        val cause = e.getCause.asInstanceOf[TApplicationException]
+        cause.getType mustEqual TApplicationException.UNKNOWN_METHOD
+      }
     }
 
     "serialize exceptions" in {

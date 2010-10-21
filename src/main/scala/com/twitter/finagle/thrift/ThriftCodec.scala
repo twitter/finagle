@@ -123,10 +123,19 @@ class ThriftCodec extends SimpleChannelHandler {
         }
 
         if (server) {
-          val request = ThriftTypes(msg.name).newInstance
-          val args = request.args.asInstanceOf[TBase[_]]
-
-          args.read(iprot)
+          var request: ThriftCall[_,_] = null
+          try {
+            request = ThriftTypes(msg.name).newInstance
+          } catch {
+            case e: java.util.NoSuchElementException =>
+              val exc = new TApplicationException(
+                TApplicationException.UNKNOWN_METHOD,
+                "unknown method '%s'".format(msg.name))
+              Channels.fireExceptionCaught(ctx, exc)
+              Channels.close(ctx, Channels.future(ctx.getChannel))
+             return
+          }
+          request.args.asInstanceOf[TBase[_]].read(iprot)
           iprot.readMessageEnd()
 
           Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
