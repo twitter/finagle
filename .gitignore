@@ -9,4 +9,5 @@ project/plugins/src_managed/
 lib_managed/
 *.swp
 *.iml
+out/
 .ensime
