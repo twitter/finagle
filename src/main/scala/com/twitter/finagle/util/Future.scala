@@ -14,29 +14,38 @@ class LatentChannelFuture extends DefaultChannelFuture(null, false) {
   override def getChannel() = channel
 }
 
-object Ok {
-  def unapply(f: ChannelFuture) = if (f.isSuccess) Some(f.getChannel) else None
-}
-
-object Error {
-  def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause)
-}
-
-object Error_ {
-  def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause, f.getChannel)
-}
+sealed abstract class State
+case object Cancelled extends State
+case class Ok(channel: Channel) extends State
+case class Error(cause: Throwable) extends State
 
 // TODO: decide what to do about cancellation here.
 class RichChannelFuture(val self: ChannelFuture) {
-  def apply(f: ChannelFuture => Unit) {
-    if (self.isDone) {
-      f(self)
-    } else {
-      self.addListener(new ChannelFutureListener {
-        def operationComplete(future: ChannelFuture) { f(future) }
-      })
-    }
+  def apply(f: State => Unit) {
+    self.addListener(new ChannelFutureListener {
+      def operationComplete(future: ChannelFuture) {
+        f(new RichChannelFuture(future).state)
+      }
+    })
   }
+
+  // def apply(f: ChannelFuture => Unit) {
+  //   if (self.isDone) {
+  //     f(self)
+  //   } else {
+  //     self.addListener(new ChannelFutureListener {
+  //       def operationComplete(future: ChannelFuture) { f(future) }
+  //     })
+  //   }
+  // }
+
+  def state: State =
+    if (self.isSuccess)
+      Ok(self.getChannel)
+    else if (self.isCancelled)
+      Cancelled
+    else
+      Error(self.getCause)
 
   def proxyTo(other: ChannelFuture) {
     this {
@@ -93,19 +102,29 @@ class RichChannelFuture(val self: ChannelFuture) {
     }
   }
 
-  def onSuccess(f: => Unit) {
+  def onSuccess(f: => Unit) = {
     foreach { _ => f }
+    self
   }
 
-  def onError(f: Throwable => Unit) {
+  def onError(f: Throwable => Unit) = {
     this {
       case Error(cause) => f(cause)
-      case Ok(_) => ()
+      case _ => ()
+    }
+    self
+  }
+
+  def onSuccessOrFailure(f: => Unit) {
+    this {
+      case Cancelled => ()
+      case _ => f
     }
   }
 
-  def always(f: Channel => Unit) =
-    this { case future => f(future.getChannel) }
+  // tbd
+  // def always(f: Channel => Unit) =
+  //   this { case state: State => f(self.getChannel) }
 
   def orElse(other: RichChannelFuture): ChannelFuture = {
     val combined = new LatentChannelFuture
@@ -153,3 +172,25 @@ object Conversions {
   implicit def channelFutureToRichChannelFuture(f: ChannelFuture) =
     new RichChannelFuture(f)
 }
+
+// object Ok {
+//   import Conversions._
+//   def unapply(f: ChannelFuture) = if (f.isSuccess) Some(f.getChannel) else None
+// }
+//  
+// object Error {
+//   import Conversions._
+//   def unapply(f: ChannelFuture) = if (f.isSuccess && !f.isCancelled) None else Some(f.getCause)
+// }
+//  
+// object Cancelled {
+//   import Conversions._
+//   def unapply(f: ChannelFuture) = if (f.isSuccess || !f.isCancelled) None else Some(())
+// }
+
+object Error_ {
+  import Conversions._
+  def unapply(f: ChannelFuture) =
+    if (f.isSuccess && !f.isCancelled) None else Some(f.getCause, f.getChannel)
+}
+
