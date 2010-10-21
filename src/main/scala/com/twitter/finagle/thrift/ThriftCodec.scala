@@ -5,7 +5,7 @@ import java.lang.reflect.{Method, ParameterizedType, Proxy}
 import scala.reflect.Manifest
 
 import org.apache.thrift.{TBase, TApplicationException}
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocol}
 
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.{
@@ -20,84 +20,52 @@ import ChannelBufferConversions._
  * given.
  */
 case class ThriftCall[T <: TBase[_], R <: TBase[_]]
-(method: String, args: T)(implicit man: Manifest[R])
+(method: String, args: T)(implicit val tman: Manifest[T], implicit val rman: Manifest[R])
 {
-  def newResponseInstance: R = man.erasure.newInstance.asInstanceOf[R]
+  def newResponseInstance: R = rman.erasure.newInstance.asInstanceOf[R]
+  def newArgInstance: T = tman.erasure.newInstance.asInstanceOf[T]
+  def newInstance: ThriftCall[T,R] = new ThriftCall[T,R](method, newArgInstance)
 }
 
-class ServerThriftCodec[T](implementation: Object)(implicit man: Manifest[T]) extends ThriftCodec
+case class ThriftResponse[R <: TBase[_]](response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
+
+object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCall[_,_]] {
+  def add(c: ThriftCall[_,_]): Unit = put(c.method, c)
+}
+
+class ThriftServerCodec
+extends ThriftCodec
 {
-  private def methodNamed(name: String, c: Class[_]): Option[Method] =
-      c.getDeclaredMethods.find(_.getName == name)
-
-  override def callForMessage(methodName: String): ThriftCall[_, _] = {
-    val iface = man.erasure
-    val ifaceMethod = methodNamed(methodName, iface)
-    val implMethod = methodNamed(methodName, implementation.getClass)
-    println("Interface method: %s".format(ifaceMethod))
-    println("Implementation method: %s".format(implMethod))
-    (ifaceMethod, implMethod) match {
-      case (Some(iface: Method), Some(impl: Method)) =>
-        // println("Iface: %s, Impl: %s".format(iface, impl))
-        val implMethodParams = impl.getParameterTypes
-        val implMethodExpectedParams = implMethodParams.slice(0, implMethodParams.size - 1)
-        val ifaceParams = iface.getParameterTypes
-        // val eqParams = (new HashSet(ifaceParams) ** HashSet(implMethodExpectedParams)).length == ifaceParams.length
-        // println("Ret: Impl: %s, Iface: %s, Eq: %s".format(implMethodParams.last, iface.getReturnType, implMethodParams.last == iface.getReturnType))
-        // val asyncDelegateType = implMethodParams.last
-        // if (asyncDelegateType.isInstanceOf[ParameterizedType]) {
-        //   val t = asyncDelegateType.asInstanceOf[ParameterizedType]
-        //   println("Parameterized Type: %s".format(t.getActualTypeArguments()))
-        // }
-
-        // println("Sizes: Impl: %d, Iface: %d".format(implMethodExpectedParams.size, ifaceParams.size))
-        // println("EqSize: %s".format())
-        if (implMethodExpectedParams.size != ifaceParams.size)
-          throw new IllegalArgumentException(
-            "Arity mismatch, '%s' incongruent with '%s'".format(implMethodExpectedParams, ifaceParams))
-        var compatible = true
-        for (i <- 0 until ifaceParams.size) {
-          println("%d: %s\t%s".format(i, ifaceParams(i), implMethodParams(i)))
-          if (ifaceParams(i) ne implMethodParams(i))
-            throw new IllegalArgumentException(
-              "Expected '%s' to be of type '%s'".format(implMethodParams(i), ifaceParams(i)))
-        }
-        println("Will invoke %s".format(implMethod))
-        // implMethod.invoke(implementation, List().toArray)
-        // println("ImplMethodParams: %s".format(implMethodParams))
-        // println("Expected: %s".format(implMethodExpectedParams))
-//        println("EqP: %s, EqR: %s".format(eqParams, eqRet))
-//        Proxy.getProxyClass(iface.getClass.getClassLoader, List(AsyncMethodCallback[ifaceMethod.getReturnType]).toArray)
-//        val sig = iface.getParameterTypes + AsyncMethodCallback[ifaceMethod.getReturnType]
-      case _ => () // GFY
-    }
-
-    null
-  }
+  override protected def server = true
 }
 
 class ThriftCodec extends SimpleChannelHandler
 {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
-  def callForMessage(method: String): ThriftCall[_, _] = throw new AbstractMethodError
   var reads = 0
   var writes = 0
 
+  // FIXME: this should probably be pulled out to the top level to make it easier to access and emphasize its global-ness.
+
   private def seqid = reads + writes
+  protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
+    println("handleDownstream")
     if (!c.isInstanceOf[MessageEvent]) {
       super.handleDownstream(ctx, c)
       return
     }
 
     val e = c.asInstanceOf[MessageEvent]
-    writes += 1
+
+    if (!server)
+      writes += 1
 
     e.getMessage match {
-      case thisCall@ThriftCall(method, args) =>
-        if (!currentCall.compareAndSet(null, thisCall)) {
+      case thisRequest@ThriftCall(method, args) =>
+        if (!currentCall.compareAndSet(null, thisRequest)) {
           // TODO: is this the right ("netty") way of propagating
           // individual failures?  do we also want to throw it up the
           // channel?
@@ -113,7 +81,16 @@ class ThriftCodec extends SimpleChannelHandler
         args.write(oprot)
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
+      // Handle wrapped thrift response
+      case thisResponse@ThriftResponse(response, call) =>
+        val writeBuffer = ChannelBuffers.dynamicBuffer()
+        val oprot = protocolFactory.getProtocol(writeBuffer)
 
+        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, seqid))
+        response.write(oprot)
+        oprot.writeMessageEnd()
+        println("Handled response in handleDownstream: Response=[%s] Call=[%s]".format(response, call))
+        Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
       case _ =>
         val exc = new IllegalArgumentException("Unrecognized request type")
         c.getFuture.setFailure(exc)
@@ -122,12 +99,14 @@ class ThriftCodec extends SimpleChannelHandler
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
+    println("handleUpstream")
     if (!c.isInstanceOf[MessageEvent]) {
       super.handleUpstream(ctx, c)
       return
     }
 
-    reads += 1
+    if (server)
+      reads += 1
 
     val e = c.asInstanceOf[MessageEvent]
 
@@ -145,7 +124,8 @@ class ThriftCodec extends SimpleChannelHandler
           return
         }
 
-        if (msg.seqid != seqid) {
+        if (false && msg.seqid != seqid) { // FIXME: this needs to be fixed. The sequence number needs to be checked.
+          println("Sequence ID crap")
           // This means the channel is in an inconsistent state, so we
           // both fire the exception (upstream), and close the channel
           // (downstream).
@@ -157,23 +137,31 @@ class ThriftCodec extends SimpleChannelHandler
           return
         }
 
-        // Our reply is good! decode it & send it upstream.
-        val result = currentCall.get().newResponseInstance
-        // if (currentCall eq null) {
-        //   // Find the method and its related args
-        //   callForMessage(msg.name)
-        // }
+        println(getClass.getName)
+        println("\tCurrentCall: %s".format(currentCall))
 
-        var result = currentCall.newResponseInstance
+        if (server) {
+          // Find the method and its related args
+          val request = ThriftTypes(msg.name).newInstance
+          val args = request.args.asInstanceOf[TBase[_]]
+          args.read(iprot)
+          iprot.readMessageEnd()
+          println("Server: Received message: %s".format(request))
+          Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
+        } else {
+          println("Client")
 
-        result.read(iprot)
-        iprot.readMessageEnd()
+          // Our reply is good! decode it & send it upstream.
+          val result = currentCall.get().newResponseInstance
+          result.read(iprot)
+          iprot.readMessageEnd()
 
-        // Done with the current call cycle: we can now accept another
-        // request.
-        currentCall.set(null)
+          // Done with the current call cycle: we can now accept another
+          // request.
+          currentCall.set(null)
 
-        Channels.fireMessageReceived(ctx, result, e.getRemoteAddress)
+          Channels.fireMessageReceived(ctx, result, e.getRemoteAddress)
+        }
 
       case _ =>
         Channels.fireExceptionCaught(

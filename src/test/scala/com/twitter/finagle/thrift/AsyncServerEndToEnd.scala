@@ -18,7 +18,7 @@ import com.twitter.silly.Silly
 
 import com.twitter.finagle.util.Conversions._
 
-object EndToEndSpec extends Specification {
+object AsyncServerEndToEndSpec extends Specification {
   class SillyImpl extends Silly.Iface {
     def bleep(bloop: String): String =
       bloop.reverse
@@ -27,20 +27,33 @@ object EndToEndSpec extends Specification {
   // TODO: test with a traditional thrift stack over local loopback
   // TCP
 
-  "talk silly to each other" in {
+  "talk silly to each other ... asynchronously" in {
     // ** Set up the server.
     val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
     serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline() = {
-        val processor = new Silly.Processor(new Silly.Iface {
-          def bleep(bloop: String): String =
-            bloop.reverse
-        })
-        val processorFactory = new TProcessorFactory(processor)
-
         val pipeline = Channels.pipeline()
         pipeline.addLast("framer", new ThriftFrameCodec)
-        pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory))
+        val codec = new ThriftServerCodec
+        ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
+        pipeline.addLast("codec", codec)
+        pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
+          override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+            val msg = e.getMessage.asInstanceOf[ThriftCall[_, _]]
+            println("message received in handler: %s".format(msg))
+            msg match {
+              case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result] =>
+                val args = bleep.args.asInstanceOf[Silly.bleep_args]
+                println("Bleep: request=%s".format(args.request))
+                val response = bleep.newResponseInstance
+                response.setSuccess(args.request.reverse)
+                println("Sending response %s".format(response))
+                Channels.write(ctx.getChannel, new ThriftResponse[Silly.bleep_result](response, bleep))
+              case _ =>
+                println("The message's type could not be determined")
+            }
+          }
+        })
         pipeline
       }
     })
@@ -64,7 +77,7 @@ object EndToEndSpec extends Specification {
       }
     })
 
-    val addr = new LocalAddress("thrift")
+    val addr = new LocalAddress("thrift-async")
     serverBootstrap.bind(addr)
     for (ch <- clientBootstrap.connect(addr)) {
       val thriftCall =
