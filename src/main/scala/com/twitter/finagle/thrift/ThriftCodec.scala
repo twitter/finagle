@@ -43,12 +43,10 @@ class ThriftCodec extends SimpleChannelHandler
 {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
-  var reads = 0
-  var writes = 0
+  var seqid = 0
 
   // FIXME: this should probably be pulled out to the top level to make it easier to access and emphasize its global-ness.
 
-  private def seqid = reads + writes
   protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
@@ -59,8 +57,7 @@ class ThriftCodec extends SimpleChannelHandler
 
     val e = c.asInstanceOf[MessageEvent]
 
-    if (!server)
-      writes += 1
+    if (!server) seqid += 1
 
     e.getMessage match {
       case thisCall@ThriftCall(method, args) =>
@@ -102,8 +99,7 @@ class ThriftCodec extends SimpleChannelHandler
       return
     }
 
-    if (server)
-      reads += 1
+    if (server) seqid += 1
 
     val e = c.asInstanceOf[MessageEvent]
 
@@ -121,7 +117,7 @@ class ThriftCodec extends SimpleChannelHandler
           return
         }
 
-        if (false && msg.seqid != seqid) { // FIXME: this needs to be fixed. The sequence number needs to be checked.
+        if (msg.seqid != seqid) { // FIXME: this needs to be fixed. The sequence number needs to be checked.
           println("Sequence ID crap")
           // This means the channel is in an inconsistent state, so we
           // both fire the exception (upstream), and close the channel
