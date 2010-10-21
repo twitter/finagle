@@ -145,7 +145,7 @@ object ThriftCodecSpec extends Specification {
       ch.upstreamEvents(0) must matchExceptionEvent(
         new TApplicationException(
           TApplicationException.BAD_SEQUENCE_ID,
-          "out of sequence response"))
+          "out of sequence response (got 2 expected 1)"))
 
       // Additionally, the channel is closed by the codec.
       ch.downstreamEvents must haveSize(2)
@@ -161,7 +161,7 @@ object ThriftCodecSpec extends Specification {
       // Make one call.
       Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
       ch.downstreamEvents must haveSize(1)
-      
+
       // Try another before replying.
       val f = Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
       ch.downstreamEvents must haveSize(1)

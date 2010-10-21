@@ -40,12 +40,8 @@ class ThriftServerCodec extends ThriftCodec {
 
 class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
-  var reads = 0
-  var writes = 0
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
-
-  // FIXME: this should probably be pulled out to the top level to make it easier to access and emphasize its global-ness.
-
+  var seqid = if (server) 1 else 0
   protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
@@ -71,8 +67,8 @@ class ThriftCodec extends SimpleChannelHandler {
         val writeBuffer = ChannelBuffers.dynamicBuffer()
         val oprot = protocolFactory.getProtocol(writeBuffer)
 
-        reads += 1
-        oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, reads))
+        seqid += 1
+        oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
         args.write(oprot)
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
@@ -80,8 +76,8 @@ class ThriftCodec extends SimpleChannelHandler {
       case thisReply@ThriftReply(response, call) =>
         val writeBuffer = ChannelBuffers.dynamicBuffer()
         val oprot = protocolFactory.getProtocol(writeBuffer)
-        writes += 1
-        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, writes))
+
+        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, seqid))
         response.write(oprot)
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
@@ -114,14 +110,13 @@ class ThriftCodec extends SimpleChannelHandler {
           return
         }
 
-        // val seqid = if (server) writes else reads
-        if (!server && msg.seqid != reads) {
+        if (msg.seqid != seqid) {
           // This means the channel is in an inconsistent state, so we
           // both fire the exception (upstream), and close the channel
           // (downstream).
           val exc = new TApplicationException(
             TApplicationException.BAD_SEQUENCE_ID,
-            "out of sequence response (got %d expected %d)".format(msg.seqid, reads))
+            "out of sequence response (got %d expected %d)".format(msg.seqid, seqid))
           Channels.fireExceptionCaught(ctx, exc)
           Channels.close(ctx, Channels.future(ctx.getChannel))
           return
@@ -130,6 +125,7 @@ class ThriftCodec extends SimpleChannelHandler {
         if (server) {
           val request = ThriftTypes(msg.name).newInstance
           val args = request.args.asInstanceOf[TBase[_]]
+
           args.read(iprot)
           iprot.readMessageEnd()
 
