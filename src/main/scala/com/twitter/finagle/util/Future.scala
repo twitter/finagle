@@ -6,7 +6,7 @@ import org.jboss.netty.channel._
  * A ChannelFuture that doesn't need to have a channel on creation.
  */
 class LatentChannelFuture extends DefaultChannelFuture(null, false) {
-  var channel: Channel = _
+  @volatile private var channel: Channel = _
 
   def setSuccess(c: Channel) { setChannel(c); super.setSuccess() }
   def setChannel(c: Channel) { channel = c }
