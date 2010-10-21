@@ -8,7 +8,6 @@ import org.jboss.netty.channel._
 class LatentChannelFuture extends DefaultChannelFuture(null, false) {
   @volatile private var channel: Channel = _
 
-  def setSuccess(c: Channel) { setChannel(c); super.setSuccess() }
   def setChannel(c: Channel) { channel = c }
   override def getChannel() = channel
 }
@@ -21,6 +20,10 @@ object Error {
   def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause)
 }
 
+object Error_ {
+  def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause, f.getChannel)
+}
+
 class RichChannelFuture(val self: ChannelFuture) {
   def apply(f: ChannelFuture => Unit) {
     if (self.isDone) {
@@ -29,6 +32,13 @@ class RichChannelFuture(val self: ChannelFuture) {
       self.addListener(new ChannelFutureListener {
         def operationComplete(future: ChannelFuture) { f(future) }
       })
+    }
+  }
+
+  def proxyTo(other: ChannelFuture) {
+    apply {
+      case Ok(channel)  => other.setSuccess()
+      case Error(cause) => other.setFailure(cause)
     }
   }
 
@@ -43,11 +53,11 @@ class RichChannelFuture(val self: ChannelFuture) {
         val nextFuture = f(channel)
         nextFuture.addListener(new ChannelFutureListener {
           def operationComplete(nextFuture: ChannelFuture) {
-            if (nextFuture.isSuccess) {
-              future.setSuccess(nextFuture.getChannel)
-            } else {
+            future.setChannel(nextFuture.getChannel)
+            if (nextFuture.isSuccess)
+              future.setSuccess()
+            else
               future.setFailure(nextFuture.getCause)
-            }
           }
         })
 
@@ -63,9 +73,11 @@ class RichChannelFuture(val self: ChannelFuture) {
 
     apply {
       case Ok(channel) =>
-        future.setSuccess(f(channel))
-      case Error(throwable) =>
-        future.setFailure(throwable)
+        future.setChannel(f(channel))
+        future.setSuccess()
+      case Error_(cause, channel) =>
+        future.setChannel(channel)
+        future.setFailure(cause)
     }
 
     future
@@ -77,6 +89,16 @@ class RichChannelFuture(val self: ChannelFuture) {
       case _ => ()
     }
   }
+
+  def onError(f: Throwable => Unit) {
+    apply {
+      case Error(cause) => f(cause)
+      case Ok(_) => ()
+    }
+  }
+
+  def always(f: Channel => Unit) =
+    apply { case future => f(future.getChannel) }
 
   def close() {
     self.addListener(ChannelFutureListener.CLOSE)
