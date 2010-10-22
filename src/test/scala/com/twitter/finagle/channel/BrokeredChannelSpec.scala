@@ -13,6 +13,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
   "BrokeredChannel" should {
     val factory = mock[BrokeredChannelFactory]
     val pipeline = Channels.pipeline()
+    pipeline.addLast("silenceWarnings", new SimpleChannelUpstreamHandler)
     val sink = new BrokeredChannelSink
     val brokeredChannel = new BrokeredChannel(factory, pipeline, sink)
     val defaultBroker = new Broker {
@@ -115,28 +116,50 @@ object BrokeredChannelSpec extends Specification with Mockito {
         responseEvent.getFuture.isCancelled must beTrue
       }
 
-      "on write success the write complete event is not triggered" in {
+      "on write success" in {
         var writeCompletionFuture: ChannelFuture = null
+        val responseEvent = new UpcomingMessageEvent(brokeredChannel)
         brokeredChannel.connect(new Broker {
           def dispatch(e: MessageEvent) = {
             writeCompletionFuture = e.getFuture
-            new UpcomingMessageEvent(e.getChannel)
+            responseEvent
           }
         })
 
         var writeCompleteWasCalled = false
-        brokeredChannel.getPipeline.addLast(
-          "observer", new SimpleChannelUpstreamHandler() {
-            override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
-              writeCompleteWasCalled = true
-            }
+        var exceptionCaughtWasCalled = false
+        var messageReceivedWasCalled = false
+        brokeredChannel.getPipeline.addLast("handler", new SimpleChannelUpstreamHandler() {
+          override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
+            writeCompleteWasCalled = true
           }
-        )
+
+          override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+            exceptionCaughtWasCalled = true
+          }
+
+          override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
+            messageReceivedWasCalled = true
+          }
+        })
 
         Channels.write(brokeredChannel, "hey")
         Channels.close(brokeredChannel).await()
         writeCompletionFuture.setSuccess()
-        writeCompleteWasCalled must beFalse
+
+        "the write complete event is not triggered" in {
+          writeCompleteWasCalled must beFalse
+        }
+
+        "when the response is a success" in {
+          responseEvent.getFuture.setSuccess()
+          messageReceivedWasCalled must beFalse
+        }
+
+        "when the response fails" in {
+          responseEvent.getFuture.setFailure(new Exception)
+          exceptionCaughtWasCalled must beFalse
+        }
       }
 
       "on write failure the write exception event is not triggered" in {

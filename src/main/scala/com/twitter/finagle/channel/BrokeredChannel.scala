@@ -28,20 +28,17 @@ class BrokeredChannel(
   }
 
   protected[channel] def realClose(future: ChannelFuture) {
-    // TODO: if we have an outstanding request, notify the broker to
-    // cancel requests (probably this means just sink them).
+    val responseEvent = currentResponseEvent.get
+    if (responseEvent ne null)
+      responseEvent.cancel()
+
+    setClosed()
+    Channels.fireChannelClosed(this)
     if (broker.isDefined) {
       Channels.fireChannelDisconnected(this)
       Channels.fireChannelUnbound(this)
       broker = None
     }
-
-    val responseEvent = currentResponseEvent.get
-    if (responseEvent ne null)
-      responseEvent.cancel()
-
-    Channels.fireChannelClosed(this)
-    setClosed()
   }
 
   protected[channel] def realWrite(e: MessageEvent) {
@@ -49,7 +46,6 @@ class BrokeredChannel(
       case Some(broker) =>
         // TODO: ensure that there is only one outstanding responseEvent.
 
-        // Propagate events up on the channel as well.
         val responseEvent = broker.dispatch(e)
         currentResponseEvent.set(responseEvent)
 
@@ -62,13 +58,13 @@ class BrokeredChannel(
         }
 
         responseEvent.getFuture() {
-          case Ok(_) if (isOpen) => // XXX TESTME
+          case Ok(_) if (isOpen) =>
             Channels.fireMessageReceived(this, responseEvent.getMessage)
             currentResponseEvent.set(null)
-          case Error(cause) if (isOpen) => // XXX TESTME
+          case Error(cause) if (isOpen) =>
             Channels.fireExceptionCaught(this, cause)
             currentResponseEvent.set(null)
-          case _ => ()
+          case e => ()
         }
 
       case None =>
