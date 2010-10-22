@@ -19,11 +19,35 @@ class PoolingBrokerSpec extends Specification with Mockito {
     val poolingPipeline = Channels.pipeline()
     poolingPipeline.addLast("silenceWarnings", new SimpleChannelUpstreamHandler)
     val poolingChannel = new BrokeredChannelFactory().newChannel(poolingPipeline)
-    poolingChannel.connect(new PoolingBroker(pool))
+    val poolingBroker = new PoolingBroker(pool)
+    poolingChannel.connect(poolingBroker)
+
+    "when response is cancelled prior to getting connection" in {
+      var reservedDispatchWasInvoked = false
+
+      reservedChannel.connect(new Broker {
+        def dispatch(e: MessageEvent) = {
+          reservedDispatchWasInvoked = true
+          null
+        }
+      })
+
+      val future = Channels.future(poolingChannel)
+
+      val responseEvent = poolingBroker.dispatch(
+        new DownstreamMessageEvent(poolingChannel, future, "something", null))
+
+      responseEvent.cancel()
+      reservationFuture.setSuccess()
+
+      reservedDispatchWasInvoked must beFalse
+
+      there was one(pool).reserve()
+      there was one(pool).release(reservedChannel)
+    }
 
     "when the reservation is successful" in {
       reservationFuture.setSuccess()
-
       "when the message is sent successfully" in {
         "dispatch reserves and releases connection from the pool" in {
           val responseEvent = new UpcomingMessageEvent(poolingChannel)
@@ -42,6 +66,7 @@ class PoolingBrokerSpec extends Specification with Mockito {
           responseEvent.setMessage("something")
           there was one(pool).release(reservedChannel)
         }
+
 
         "the response is forwarded back to the poolingChannel" in {
           var messageReceivedWasCalled = false

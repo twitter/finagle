@@ -12,12 +12,12 @@ class PoolingBroker(channelPool: ChannelPool) extends Broker {
 
     channelPool.reserve() {
       case Ok(channel) =>
-        // if (responseEvent.getFuture.isCancelled) {
-        //   channelPool.release(channel)
-        // } else {...
-        connectChannel(channel, e, responseEvent)
-        responseEvent.getFuture onSuccessOrFailure { channelPool.release(channel) }
-
+        if (responseEvent.getFuture.isCancelled) {
+          channelPool.release(channel)
+        } else {
+          connectChannel(channel, e, responseEvent)
+          responseEvent.getFuture onSuccessOrFailure { channelPool.release(channel) }
+        }
       case Error(cause) =>
         responseEvent.setFailure(cause)
 

@@ -2,9 +2,12 @@ package com.twitter.finagle.channel
 
 import org.jboss.netty.channel._
 
+import com.twitter.finagle.util.Cancelled
+import com.twitter.finagle.util.Conversions._
+
 class UpcomingMessageEvent(channel: Channel) extends MessageEvent {
   @volatile private var message: Option[AnyRef] = None
-  private val future = Channels.future(channel)
+  private val future = Channels.future(channel, true)
 
   def setMessage(message: AnyRef) {
     this.message = Some(message)
