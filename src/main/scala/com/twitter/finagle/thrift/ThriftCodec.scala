@@ -41,7 +41,7 @@ class ThriftServerCodec extends ThriftCodec {
 class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
-  var seqid = if (server) 1 else 0
+  var seqid = 0
   protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
@@ -109,6 +109,8 @@ class ThriftCodec extends SimpleChannelHandler {
           currentCall.set(null)
           return
         }
+
+        if (server) seqid += 1
 
         if (msg.seqid != seqid) {
           // This means the channel is in an inconsistent state, so we

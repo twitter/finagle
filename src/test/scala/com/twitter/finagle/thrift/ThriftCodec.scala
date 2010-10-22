@@ -97,22 +97,43 @@ object ThriftCodecSpec extends Specification {
       args.request must be_==("the arg")
     }
 
+    ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
+
     "decode upstream TMessage to ThriftCall" in {
       val request = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("spondee"))
       val ch = makeServerChannel
-      ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
       Channels.fireMessageReceived(ch, request)
       val m = ch.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
       val c = m.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
       m mustNot beNull
 
       "throws an exception with no corresponding ThriftCall registered" in {
-        val badRequest = TMessage("bloop", TMessageType.CALL, 1, new Silly.bleep_args())
+        val badRequest = TMessage("bloop", TMessageType.CALL, 2, new Silly.bleep_args())
         Channels.fireMessageReceived(ch, badRequest)
         val e = ch.upstreamEvents(1).asInstanceOf[DefaultExceptionEvent]
         val cause = e.getCause.asInstanceOf[TApplicationException]
         cause.getType mustEqual TApplicationException.UNKNOWN_METHOD
       }
+    }
+
+    def extractMessage(event: AnyRef): Option[MessageEvent] = {
+      event match {
+        case me: MessageEvent => Some(me)
+        case ex: DefaultExceptionEvent =>
+          throw new Exception("Got exception instead of MessageEvent: %s".format(ex.getCause))
+      }
+    }
+
+    "multiple calls on the same server increment the sequence #" in {
+      val request1 = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("thetabet"))
+      val request2 = TMessage("bleep", TMessageType.CALL, 2, new Silly.bleep_args("wheelbarrow"))
+      val ch = makeServerChannel
+      Channels.fireMessageReceived(ch, request1)
+      ch.upstreamEvents must haveSize(1)
+      extractMessage(ch.upstreamEvents(0)) must haveClass[Some[ThriftCall[_,_]]]
+      Channels.fireMessageReceived(ch, request2)
+      ch.upstreamEvents must haveSize(2)
+      extractMessage(ch.upstreamEvents(1)) must haveClass[Some[ThriftCall[_,_]]]
     }
 
     "serialize exceptions" in {
