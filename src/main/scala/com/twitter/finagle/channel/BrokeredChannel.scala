@@ -1,13 +1,13 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.atomic.AtomicReference
-
 import java.nio.channels.NotYetConnectedException
 import org.jboss.netty.channel.local.LocalAddress
 import org.jboss.netty.channel._
-
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
+import java.util.concurrent.atomic.AtomicReference
+
+class TooManyDicksOnTheDanceFloorException extends Exception
 
 class BrokeredChannel(
   factory: BrokeredChannelFactory,
@@ -18,7 +18,7 @@ class BrokeredChannel(
   val config = new DefaultChannelConfig
   private val localAddress = new LocalAddress(LocalAddress.EPHEMERAL)
   @volatile private var broker: Option[Broker] = None
-  private val currentResponseEvent = new AtomicReference[UpcomingMessageEvent](null)
+  private val currentState = new AtomicReference[State](Idle)
 
   protected[channel] def realConnect(broker: Broker, future: ChannelFuture) {
     this.broker = Some(broker)
@@ -28,9 +28,10 @@ class BrokeredChannel(
   }
 
   protected[channel] def realClose(future: ChannelFuture) {
-    val responseEvent = currentResponseEvent.get
-    if (responseEvent ne null)
-      responseEvent.cancel()
+    currentState.get match {
+      case WaitingForResponse(responseEvent) => responseEvent.cancel()
+      case _ =>
+    }
 
     setClosed()
     Channels.fireChannelClosed(this)
@@ -44,27 +45,30 @@ class BrokeredChannel(
   protected[channel] def realWrite(e: MessageEvent) {
     broker match {
       case Some(broker) =>
-        // TODO: ensure that there is only one outstanding responseEvent.
+        if (currentState.compareAndSet(Idle, PreparingRequest())) {
+          val responseEvent = broker.dispatch(e)
+          currentState.set(WaitingForResponse(responseEvent))
+          e.getFuture() {
+            case Ok(_) if (isOpen) =>
+              Channels.fireWriteComplete(this, 1)
+            case Error(cause) if (isOpen) =>
+                Channels.fireExceptionCaught(this, cause)
+            case _ => ()
+          }
 
-        val responseEvent = broker.dispatch(e)
-        currentResponseEvent.set(responseEvent)
+          responseEvent.getFuture() { state =>
+            state match {
+              case Ok(_) if (isOpen) =>
+                Channels.fireMessageReceived(this, responseEvent.getMessage)
+              case Error(cause) if (isOpen) =>
+                Channels.fireExceptionCaught(this, cause)
+              case _ => ()
+            }
+            currentState.set(Idle)
+          }
 
-        e.getFuture() {
-          case Ok(_) if (isOpen) =>
-            Channels.fireWriteComplete(this, 1)
-          case Error(cause) if (isOpen) =>
-              Channels.fireExceptionCaught(this, cause)
-          case _ => ()
-        }
-
-        responseEvent.getFuture() {
-          case Ok(_) if (isOpen) =>
-            Channels.fireMessageReceived(this, responseEvent.getMessage)
-            currentResponseEvent.set(null)
-          case Error(cause) if (isOpen) =>
-            Channels.fireExceptionCaught(this, cause)
-            currentResponseEvent.set(null)
-          case e => ()
+        } else {
+          Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
         }
 
       case None =>
@@ -78,4 +82,9 @@ class BrokeredChannel(
   def isConnected = broker.isDefined
   def isBound = broker.isDefined
   def getConfig = config
+
+  private abstract class State
+  private object Idle extends State
+  private case class PreparingRequest() extends State
+  private case class WaitingForResponse(responseEvent: UpcomingMessageEvent) extends State
 }

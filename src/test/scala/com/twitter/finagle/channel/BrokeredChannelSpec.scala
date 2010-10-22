@@ -26,7 +26,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
 
     "before you connect" in {
       "writing throws an exception" in {
-        val future = Channels.write(brokeredChannel, ChannelBuffers.copiedBuffer("yermom", Charset.forName("UTF-8")))
+        val future = Channels.write(brokeredChannel, "yermom")
         future.await()
         future.getCause must haveClass[NotYetConnectedException]
       }
@@ -51,6 +51,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
     "when you are connected" in {
       var channelConnectedWasCalled = false
       var channelBoundWasCalled = false
+      var exceptionCaughtWasCalled = false
       brokeredChannel.getPipeline.addLast("handler", new SimpleChannelHandler {
         override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
           channelConnectedWasCalled = true
@@ -58,6 +59,11 @@ object BrokeredChannelSpec extends Specification with Mockito {
 
         override def channelBound(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
           channelBoundWasCalled = true
+        }
+
+
+        override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+          exceptionCaughtWasCalled = true
         }
       })
 
@@ -84,10 +90,35 @@ object BrokeredChannelSpec extends Specification with Mockito {
         brokeredChannel.isBound must beTrue
       }
 
-      "write dispatches" in {
-        val future = Channels.write(brokeredChannel, ChannelBuffers.copiedBuffer("yermom", Charset.forName("UTF-8")))
-        future.await()
-        future.isSuccess must beTrue
+      "write" in {
+        "dispatches" in {
+          val future = Channels.write(brokeredChannel, "yermom")
+          future.await()
+          future.isSuccess must beTrue
+        }
+
+        "when writing twice" in {
+          var dispatchCalledCount = 0
+          val responseEvent = new UpcomingMessageEvent(brokeredChannel)
+          val connectFuture = brokeredChannel.connect(new Broker {
+            def dispatch(e: MessageEvent) = {
+              dispatchCalledCount += 1
+              responseEvent
+            }
+          })
+          Channels.write(brokeredChannel, "yermom")
+
+          "an exception is raised" in {
+            exceptionCaughtWasCalled must beFalse
+            Channels.write(brokeredChannel, "yermom")
+            exceptionCaughtWasCalled must beTrue
+          }
+
+          "dispatch is NOT called twice" in {
+            Channels.write(brokeredChannel, "yermom")
+            dispatchCalledCount mustBe 1
+          }
+        }
       }
 
       "getLocalAddress is ephemeral" in {
