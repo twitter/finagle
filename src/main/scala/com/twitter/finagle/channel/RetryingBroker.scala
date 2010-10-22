@@ -1,9 +1,7 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.channel.{
-  Channels, DefaultChannelFuture,
-  DownstreamMessageEvent, MessageEvent}
-import com.twitter.finagle.util.{Error, Ok}
+import org.jboss.netty.channel.{Channels, DownstreamMessageEvent, MessageEvent}
+import com.twitter.finagle.util.{Cancelled, Error, Ok}
 import com.twitter.finagle.util.Conversions._
 
 class RetryingBroker(underlying: Broker, tries: Int) extends Broker {

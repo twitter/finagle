@@ -56,7 +56,7 @@ class BrokeredChannel(
         e.getFuture() {
           case Ok(_) if (isOpen) =>
             Channels.fireWriteComplete(this, 1)
-          case Error(cause) if (isOpen) => // XXXTESTME
+          case Error(cause) if (isOpen) =>
               Channels.fireExceptionCaught(this, cause)
           case _ => ()
         }

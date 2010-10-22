@@ -51,6 +51,7 @@ class RichChannelFuture(val self: ChannelFuture) {
     this {
       case Ok(channel)  => other.setSuccess()
       case Error(cause) => other.setFailure(cause)
+      case Cancelled    => other.cancel()
     }
   }
 
@@ -72,9 +73,10 @@ class RichChannelFuture(val self: ChannelFuture) {
               future.setFailure(nextFuture.getCause)
           }
         })
-
       case Error(throwable) =>
         future.setFailure(throwable)
+      case Cancelled =>
+        future.cancel()
     }
 
     future
@@ -82,14 +84,16 @@ class RichChannelFuture(val self: ChannelFuture) {
 
   def map[T](f: Channel => Channel) = {
     val future = new LatentChannelFuture
+    future.setChannel(self.getChannel)
 
     this {
       case Ok(channel) =>
         future.setChannel(f(channel))
         future.setSuccess()
-      case Error_(cause, channel) =>
-        future.setChannel(channel)
+      case Error(cause) =>
         future.setFailure(cause)
+      case Cancelled =>
+        future.cancel()
     }
 
     future
@@ -172,25 +176,3 @@ object Conversions {
   implicit def channelFutureToRichChannelFuture(f: ChannelFuture) =
     new RichChannelFuture(f)
 }
-
-// object Ok {
-//   import Conversions._
-//   def unapply(f: ChannelFuture) = if (f.isSuccess) Some(f.getChannel) else None
-// }
-//  
-// object Error {
-//   import Conversions._
-//   def unapply(f: ChannelFuture) = if (f.isSuccess && !f.isCancelled) None else Some(f.getCause)
-// }
-//  
-// object Cancelled {
-//   import Conversions._
-//   def unapply(f: ChannelFuture) = if (f.isSuccess || !f.isCancelled) None else Some(())
-// }
-
-object Error_ {
-  import Conversions._
-  def unapply(f: ChannelFuture) =
-    if (f.isSuccess && !f.isCancelled) None else Some(f.getCause, f.getChannel)
-}
-

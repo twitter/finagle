@@ -98,7 +98,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
       }
     }
 
-    
+
     "when the channel is closed" in {
       "the response event is cancelled" in {
         val responseEvent = new UpcomingMessageEvent(brokeredChannel)
@@ -112,7 +112,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
         Channels.write(brokeredChannel, "hey")
         responseEvent.getFuture.isCancelled must beFalse
         Channels.close(brokeredChannel)
-        responseEvent.getFuture.isCancelled must beTrue        
+        responseEvent.getFuture.isCancelled must beTrue
       }
 
       "on write success the write complete event is not triggered" in {
@@ -124,26 +124,43 @@ object BrokeredChannelSpec extends Specification with Mockito {
           }
         })
 
-        var writeCompleteFired = false
-
+        var writeCompleteWasCalled = false
         brokeredChannel.getPipeline.addLast(
           "observer", new SimpleChannelUpstreamHandler() {
             override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
-              writeCompleteFired = true
+              writeCompleteWasCalled = true
             }
           }
         )
 
         Channels.write(brokeredChannel, "hey")
-        writeCompletionFuture mustNot beNull
-
         Channels.close(brokeredChannel).await()
-        brokeredChannel.isOpen must beFalse
-
         writeCompletionFuture.setSuccess()
+        writeCompleteWasCalled must beFalse
+      }
 
+      "on write failure the write exception event is not triggered" in {
+        var writeCompletionFuture: ChannelFuture = null
+        brokeredChannel.connect(new Broker {
+          def dispatch(e: MessageEvent) = {
+            writeCompletionFuture = e.getFuture
+            new UpcomingMessageEvent(e.getChannel)
+          }
+        })
 
-        writeCompleteFired must beFalse
+        var exceptionCaughtWasCalled = false
+        brokeredChannel.getPipeline.addLast(
+          "observer", new SimpleChannelUpstreamHandler() {
+            override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+              exceptionCaughtWasCalled = true
+            }
+          }
+        )
+
+        Channels.write(brokeredChannel, "hey")
+        Channels.close(brokeredChannel).await()
+        writeCompletionFuture.setFailure(new Exception)
+        exceptionCaughtWasCalled must beFalse
       }
     }
 
@@ -194,7 +211,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
       }
 
       "isOpen becomes false" in {
-        brokeredChannel.isOpen must beFalse        
+        brokeredChannel.isOpen must beFalse
       }
     }
 
