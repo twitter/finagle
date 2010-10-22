@@ -1,5 +1,7 @@
 package com.twitter.finagle.util
 
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
+
 import org.jboss.netty.channel._
 
 /**
@@ -12,31 +14,41 @@ class LatentChannelFuture extends DefaultChannelFuture(null, false) {
   override def getChannel() = channel
 }
 
-object Ok {
-  def unapply(f: ChannelFuture) = if (f.isSuccess) Some(f.getChannel) else None
-}
+sealed abstract class State
+case object Cancelled extends State
+case class Ok(channel: Channel) extends State
+case class Error(cause: Throwable) extends State
 
-object Error {
-  def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause)
-}
-
-object Error_ {
-  def unapply(f: ChannelFuture) = if (f.isSuccess) None else Some(f.getCause, f.getChannel)
-}
-
+// TODO: decide what to do about cancellation here.
 class RichChannelFuture(val self: ChannelFuture) {
-  def apply(f: ChannelFuture => Unit) {
-    if (self.isDone) {
-      f(self)
-    } else {
-      self.addListener(new ChannelFutureListener {
-        def operationComplete(future: ChannelFuture) { f(future) }
-      })
-    }
+  def apply(f: State => Unit) {
+    self.addListener(new ChannelFutureListener {
+      def operationComplete(future: ChannelFuture) {
+        f(new RichChannelFuture(future).state)
+      }
+    })
   }
 
+  // def apply(f: ChannelFuture => Unit) {
+  //   if (self.isDone) {
+  //     f(self)
+  //   } else {
+  //     self.addListener(new ChannelFutureListener {
+  //       def operationComplete(future: ChannelFuture) { f(future) }
+  //     })
+  //   }
+  // }
+
+  def state: State =
+    if (self.isSuccess)
+      Ok(self.getChannel)
+    else if (self.isCancelled)
+      Cancelled
+    else
+      Error(self.getCause)
+
   def proxyTo(other: ChannelFuture) {
-    apply {
+    this {
       case Ok(channel)  => other.setSuccess()
       case Error(cause) => other.setFailure(cause)
     }
@@ -48,7 +60,7 @@ class RichChannelFuture(val self: ChannelFuture) {
   def flatMap(f: Channel => ChannelFuture): ChannelFuture = {
     val future = new LatentChannelFuture
 
-    apply {
+    this {
       case Ok(channel) =>
         val nextFuture = f(channel)
         nextFuture.addListener(new ChannelFutureListener {
@@ -71,7 +83,7 @@ class RichChannelFuture(val self: ChannelFuture) {
   def map[T](f: Channel => Channel) = {
     val future = new LatentChannelFuture
 
-    apply {
+    this {
       case Ok(channel) =>
         future.setChannel(f(channel))
         future.setSuccess()
@@ -84,21 +96,72 @@ class RichChannelFuture(val self: ChannelFuture) {
   }
 
   def foreach[T](f: Channel => T) {
-    apply {
+    this {
       case Ok(channel) => f(channel)
       case _ => ()
     }
   }
 
-  def onError(f: Throwable => Unit) {
-    apply {
+  def onSuccess(f: => Unit) = {
+    foreach { _ => f }
+    self
+  }
+
+  def onError(f: Throwable => Unit) = {
+    this {
       case Error(cause) => f(cause)
-      case Ok(_) => ()
+      case _ => ()
+    }
+    self
+  }
+
+  def onSuccessOrFailure(f: => Unit) {
+    this {
+      case Cancelled => ()
+      case _ => f
     }
   }
 
-  def always(f: Channel => Unit) =
-    apply { case future => f(future.getChannel) }
+  // tbd
+  // def always(f: Channel => Unit) =
+  //   this { case state: State => f(self.getChannel) }
+
+  def orElse(other: RichChannelFuture): ChannelFuture = {
+    val combined = new LatentChannelFuture
+
+    this.proxyTo(combined)
+    other.proxyTo(combined)
+
+    combined
+  }
+
+  def andThen(next: ChannelFuture): ChannelFuture = flatMap { _ => next }
+
+  def joinWith(other: RichChannelFuture): ChannelFuture = {
+    val joined = Channels.future(self.getChannel)
+    val latch = new AtomicBoolean(false)
+    @volatile var cause: Throwable = null
+
+    def maybeSatisfy() =
+      if (!latch.compareAndSet(false, true)) {
+        if (cause ne null)
+          joined.setFailure(cause)
+        else
+          joined.setSuccess()
+      }
+
+    for (f <- List(this, other)) {
+      f {
+        case Ok(_) =>
+          maybeSatisfy()
+        case Error(theCause) =>
+          cause = theCause
+          maybeSatisfy()
+      }
+    }
+
+    joined
+  }
 
   def close() {
     self.addListener(ChannelFutureListener.CLOSE)
@@ -109,3 +172,25 @@ object Conversions {
   implicit def channelFutureToRichChannelFuture(f: ChannelFuture) =
     new RichChannelFuture(f)
 }
+
+// object Ok {
+//   import Conversions._
+//   def unapply(f: ChannelFuture) = if (f.isSuccess) Some(f.getChannel) else None
+// }
+//  
+// object Error {
+//   import Conversions._
+//   def unapply(f: ChannelFuture) = if (f.isSuccess && !f.isCancelled) None else Some(f.getCause)
+// }
+//  
+// object Cancelled {
+//   import Conversions._
+//   def unapply(f: ChannelFuture) = if (f.isSuccess || !f.isCancelled) None else Some(())
+// }
+
+object Error_ {
+  import Conversions._
+  def unapply(f: ChannelFuture) =
+    if (f.isSuccess && !f.isCancelled) None else Some(f.getCause, f.getChannel)
+}
+

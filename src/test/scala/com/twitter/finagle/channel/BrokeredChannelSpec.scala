@@ -11,15 +11,17 @@ import org.jboss.netty.channel.local.LocalAddress
 
 object BrokeredChannelSpec extends Specification with Mockito {
   "BrokeredChannel" should {
-    val broker = new Broker {
-      def dispatch(handlingChannel: BrokeredChannel, e: MessageEvent) {
-        e.getFuture.setSuccess()
-      }
-    }
     val factory = mock[BrokeredChannelFactory]
     val pipeline = Channels.pipeline()
     val sink = new BrokeredChannelSink
     val brokeredChannel = new BrokeredChannel(factory, pipeline, sink)
+    val defaultBroker = new Broker {
+      def dispatch(e: MessageEvent) = {
+        e.getFuture.setSuccess()
+        UpcomingMessageEvent.successfulEvent(e.getChannel, mock[Object])
+      }
+    }
+
 
     "before you connect" in {
       "writing throws an exception" in {
@@ -58,7 +60,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
         }
       })
 
-      val connectFuture = brokeredChannel.connect(broker)
+      val connectFuture = brokeredChannel.connect(defaultBroker)
 
       "the future returns" in {
         connectFuture.await(100, TimeUnit.MILLISECONDS) mustNot throwA[Exception]
@@ -92,7 +94,56 @@ object BrokeredChannelSpec extends Specification with Mockito {
       }
 
       "getRemoteAddress is the broker" in {
-        brokeredChannel.getRemoteAddress mustEqual broker
+        brokeredChannel.getRemoteAddress mustEqual defaultBroker
+      }
+    }
+
+    
+    "when the channel is closed" in {
+      "the response event is cancelled" in {
+        val responseEvent = new UpcomingMessageEvent(brokeredChannel)
+        brokeredChannel.connect(new Broker {
+          def dispatch(e: MessageEvent) = {
+            e.getFuture.setSuccess()
+            responseEvent
+          }
+        })
+
+        Channels.write(brokeredChannel, "hey")
+        responseEvent.getFuture.isCancelled must beFalse
+        Channels.close(brokeredChannel)
+        responseEvent.getFuture.isCancelled must beTrue        
+      }
+
+      "on write success the write complete event is not triggered" in {
+        var writeCompletionFuture: ChannelFuture = null
+        brokeredChannel.connect(new Broker {
+          def dispatch(e: MessageEvent) = {
+            writeCompletionFuture = e.getFuture
+            new UpcomingMessageEvent(e.getChannel)
+          }
+        })
+
+        var writeCompleteFired = false
+
+        brokeredChannel.getPipeline.addLast(
+          "observer", new SimpleChannelUpstreamHandler() {
+            override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
+              writeCompleteFired = true
+            }
+          }
+        )
+
+        Channels.write(brokeredChannel, "hey")
+        writeCompletionFuture mustNot beNull
+
+        Channels.close(brokeredChannel).await()
+        brokeredChannel.isOpen must beFalse
+
+        writeCompletionFuture.setSuccess()
+
+
+        writeCompleteFired must beFalse
       }
     }
 
@@ -117,7 +168,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
         }
       })
 
-      brokeredChannel.connect(broker).await(100, TimeUnit.MILLISECONDS)
+      brokeredChannel.connect(defaultBroker).await(100, TimeUnit.MILLISECONDS)
       val closeFuture = brokeredChannel.close()
 
       "writing throws an exception" in {
@@ -127,7 +178,7 @@ object BrokeredChannelSpec extends Specification with Mockito {
       }
 
       "future returns" in {
-        closeFuture.await(100, TimeUnit.MILLISECONDS) mustNot throwA[Exception]
+        closeFuture.await(100, TimeUnit.MILLISECONDS) must beTrue
       }
 
       "channelClosed handler triggers" in {
@@ -142,6 +193,9 @@ object BrokeredChannelSpec extends Specification with Mockito {
         channelDisconnectedWasCalled mustBe true
       }
 
+      "isOpen becomes false" in {
+        brokeredChannel.isOpen must beFalse        
+      }
     }
 
   }

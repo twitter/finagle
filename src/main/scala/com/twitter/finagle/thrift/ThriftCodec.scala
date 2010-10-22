@@ -1,11 +1,11 @@
 package com.twitter.finagle.thrift
 
+import java.util.concurrent.atomic.AtomicReference
+import java.lang.reflect.{Method, ParameterizedType, Proxy}
 import scala.reflect.Manifest
 
-import java.util.concurrent.atomic.AtomicReference
-
 import org.apache.thrift.{TBase, TApplicationException}
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocol}
 
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.{
@@ -20,16 +20,29 @@ import ChannelBufferConversions._
  * given.
  */
 case class ThriftCall[T <: TBase[_], R <: TBase[_]]
-(method: String, args: T)(implicit man: Manifest[R])
-{
-  def newResponseInstance: R = man.erasure.newInstance.asInstanceOf[R]
+(method: String, args: T)
+(implicit val tman: Manifest[T], implicit val rman: Manifest[R]) {
+  def newResponseInstance: R = rman.erasure.newInstance.asInstanceOf[R]
+  def newArgInstance: T = tman.erasure.newInstance.asInstanceOf[T]
+  def newInstance: ThriftCall[T,R] = new ThriftCall[T,R](method, newArgInstance)
 }
 
-class ThriftCodec extends SimpleChannelHandler
-{
+case class ThriftReply[R <: TBase[_]]
+(response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
+
+object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCall[_,_]] {
+  def add(c: ThriftCall[_,_]): Unit = put(c.method, c)
+}
+
+class ThriftServerCodec extends ThriftCodec {
+  override protected def server = true
+}
+
+class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
-  var seqid = 0
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
+  var seqid = 0
+  protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
@@ -55,9 +68,17 @@ class ThriftCodec extends SimpleChannelHandler
         val oprot = protocolFactory.getProtocol(writeBuffer)
 
         seqid += 1
-
         oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
         args.write(oprot)
+        oprot.writeMessageEnd()
+        Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
+
+      case thisReply@ThriftReply(response, call) =>
+        val writeBuffer = ChannelBuffers.dynamicBuffer()
+        val oprot = protocolFactory.getProtocol(writeBuffer)
+
+        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, seqid))
+        response.write(oprot)
         oprot.writeMessageEnd()
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
 
@@ -89,29 +110,48 @@ class ThriftCodec extends SimpleChannelHandler
           return
         }
 
+        if (server) seqid += 1
+
         if (msg.seqid != seqid) {
           // This means the channel is in an inconsistent state, so we
           // both fire the exception (upstream), and close the channel
           // (downstream).
           val exc = new TApplicationException(
             TApplicationException.BAD_SEQUENCE_ID,
-            "out of sequence response")
+            "out of sequence response (got %d expected %d)".format(msg.seqid, seqid))
           Channels.fireExceptionCaught(ctx, exc)
           Channels.close(ctx, Channels.future(ctx.getChannel))
           return
         }
 
-        // Our reply is good! decode it & send it upstream.
-        val result = currentCall.get().newResponseInstance
+        if (server) {
+          var request: ThriftCall[_,_] = null
+          try {
+            request = ThriftTypes(msg.name).newInstance
+          } catch {
+            case e: java.util.NoSuchElementException =>
+              val exc = new TApplicationException(
+                TApplicationException.UNKNOWN_METHOD,
+                "unknown method '%s'".format(msg.name))
+              Channels.fireExceptionCaught(ctx, exc)
+              Channels.close(ctx, Channels.future(ctx.getChannel))
+             return
+          }
+          request.args.asInstanceOf[TBase[_]].read(iprot)
+          iprot.readMessageEnd()
 
-        result.read(iprot)
-        iprot.readMessageEnd()
+          Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
+        } else {
+          val result = currentCall.get().newResponseInstance
+          result.read(iprot)
+          iprot.readMessageEnd()
 
-        // Done with the current call cycle: we can now accept another
-        // request.
-        currentCall.set(null)
+          // Done with the current call cycle: we can now accept another
+          // request.
+          currentCall.set(null)
 
-        Channels.fireMessageReceived(ctx, result, e.getRemoteAddress)
+          Channels.fireMessageReceived(ctx, result, e.getRemoteAddress)
+        }
 
       case _ =>
         Channels.fireExceptionCaught(
