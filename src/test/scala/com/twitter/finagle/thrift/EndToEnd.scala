@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import scala.util.Random
 
 import java.util.concurrent.Executors
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress, Socket}
 
 import org.specs.Specification
 
@@ -31,7 +31,21 @@ import com.twitter.finagle.util.Conversions._
 
 object PickRandomPort {
   val rng = new Random
-  def apply(): Int = (math.abs(rng.nextInt) % 65000) + 1024
+  def apply(): Int = {
+    val retries = 5
+    for (i <- 0 until retries) {
+      val port = (math.abs(rng.nextInt) % 65000) + 1024
+      val address = new InetSocketAddress(InetAddress.getLocalHost, port)
+      val sock = new Socket
+      try {
+        sock.bind(address)
+      } finally {
+        sock.close()
+      }
+      return port
+    }
+    throw new Exception("Couldn't find an open port")
+  }
 }
 
 object EndToEndSpec extends Specification {
