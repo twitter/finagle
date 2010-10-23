@@ -1,11 +1,14 @@
 package com.twitter.finagle.channel
 
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
 import java.nio.channels.NotYetConnectedException
-import org.jboss.netty.channel.local.LocalAddress
+
 import org.jboss.netty.channel._
+import org.jboss.netty.channel.local.LocalAddress
+
+import com.twitter.finagle.util.{Ok, Error}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled}
-import java.util.concurrent.atomic.AtomicReference
 
 class TooManyDicksOnTheDanceFloorException extends Exception
 
@@ -18,17 +21,36 @@ class BrokeredChannel(
   val config = new DefaultChannelConfig
   private val localAddress = new LocalAddress(LocalAddress.EPHEMERAL)
   @volatile private var broker: Option[Broker] = None
-  private val currentState = new AtomicReference[State](Idle)
 
-  protected[channel] def realConnect(broker: Broker, future: ChannelFuture) {
+  private var currentState: State = Idle
+  private val nwaiters = new AtomicInteger(0)
+  private val executionQueue = new LinkedBlockingQueue[Function0[Unit]]
+
+  def serialized[T](f: T => Unit): T => Unit = { x => serialized { f(x) } }
+  def serialized(f: => Unit) {
+    executionQueue offer { () => f }
+
+    if (nwaiters.getAndIncrement() == 0) {
+      do {
+        executionQueue.poll()()
+      } while (nwaiters.decrementAndGet() > 0)
+    }
+  }
+
+  protected[channel] def realConnect(broker: Broker, future: ChannelFuture) = serialized {
     this.broker = Some(broker)
     future.setSuccess()
     Channels.fireChannelConnected(this, broker)
     Channels.fireChannelBound(this, broker)
   }
 
-  protected[channel] def realClose(future: ChannelFuture) {
-    currentState.get match {
+  // We can close this race by having some synchronization method on
+  // channel ops basically.  Maybe in terms of a "currentOperation"
+  // future or something, that we can chain.
+
+
+  protected[channel] def realClose(future: ChannelFuture) = serialized {
+    currentState match {
       case WaitingForResponse(responseEvent) => responseEvent.cancel()
       case _ =>
     }
@@ -42,38 +64,41 @@ class BrokeredChannel(
     }
   }
 
-  protected[channel] def realWrite(e: MessageEvent) {
+  protected[channel] def realWrite(e: MessageEvent): Unit = serialized {
     broker match {
-      case Some(broker) =>
-        if (currentState.compareAndSet(Idle, PreparingRequest())) {
-          val responseEvent = broker.dispatch(e)
-          currentState.set(WaitingForResponse(responseEvent))
-          e.getFuture() {
-            case Ok(_) if (isOpen) =>
-              Channels.fireWriteComplete(this, 1)
-            case Error(cause) if (isOpen) =>
-                Channels.fireExceptionCaught(this, cause)
-            case _ => ()
-          }
+      case Some(broker) if currentState == Idle =>
+        val responseEvent = broker.dispatch(e)
+        currentState = WaitingForResponse(responseEvent)
 
-          responseEvent.getFuture() { state =>
+        e.getFuture() { serialized {
+          case Ok(_) if this.isOpen =>
+            Channels.fireWriteComplete(this, 1)
+          case Error(cause) if isOpen =>
+            Channels.fireExceptionCaught(this, cause)
+          case _ => ()
+        }}
+
+        responseEvent.getFuture() { state =>
+          serialized {
             state match {
-              case Ok(_) if (isOpen) =>
+              case Ok(_) if this.isOpen =>
                 Channels.fireMessageReceived(this, responseEvent.getMessage)
-              case Error(cause) if (isOpen) =>
+              case Error(cause) if isOpen =>
                 Channels.fireExceptionCaught(this, cause)
               case _ => ()
             }
-            currentState.set(Idle)
+            currentState = Idle
           }
-
-        } else {
-          Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
         }
 
-      case None =>
+
+      case Some(_) if currentState != Idle =>
+        Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
+
+      case _ =>
         e.getFuture.setFailure(new NotYetConnectedException)
     }
+    ()
   }
 
   def getRemoteAddress = broker.getOrElse(null)
@@ -83,8 +108,8 @@ class BrokeredChannel(
   def isBound = broker.isDefined
   def getConfig = config
 
-  private abstract class State
-  private object Idle extends State
-  private case class PreparingRequest() extends State
+  private sealed abstract class State
+  private case object Idle extends State
+  private case object PreparingRequest extends State
   private case class WaitingForResponse(responseEvent: UpcomingMessageEvent) extends State
 }
