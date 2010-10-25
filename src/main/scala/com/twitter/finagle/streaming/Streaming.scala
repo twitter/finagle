@@ -5,9 +5,12 @@ import java.net.InetSocketAddress
 import java.nio.charset.Charset
 
 import org.jboss.netty.bootstrap.ClientBootstrap
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
   Channels, ChannelPipelineFactory, SimpleChannelUpstreamHandler,
   ChannelHandlerContext, MessageEvent}
+import org.jboss.netty.handler.codec.frame.{DelimiterBasedFrameDecoder, Delimiters}
+
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.handler.codec.http.{
   HttpClientCodec, DefaultHttpRequest, HttpVersion, HttpMethod,
@@ -51,6 +54,9 @@ object Streaming {
       def getPipeline = {
         val pipeline = Channels.pipeline()
         // pipeline.addLast("snooper", new SimpleChannelSnooper("app"))
+        val delim = Delimiters.lineDelimiter
+        val decoder = new DelimiterBasedFrameDecoder(Int.MaxValue, delim(0), delim(1))
+        pipeline.addLast("unframer", decoder)
         pipeline.addLast("counter", new SimpleChannelUpstreamHandler {
           var count = 0
           override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

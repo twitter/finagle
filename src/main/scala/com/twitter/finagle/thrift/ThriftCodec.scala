@@ -38,6 +38,7 @@ class ThriftServerCodec extends ThriftCodec {
   override protected def server = true
 }
 
+
 class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
