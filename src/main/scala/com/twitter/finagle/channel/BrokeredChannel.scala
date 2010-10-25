@@ -73,19 +73,11 @@ class BrokeredChannel(
           case _ => ()
         }}
 
-        responseEvent.getFuture() { state =>
-          serialized {
-            state match {
-              case Ok(_) if this.isOpen =>
-                Channels.fireMessageReceived(this, responseEvent.getMessage)
-              case Error(cause) if isOpen =>
-                Channels.fireExceptionCaught(this, cause)
-              case _ => ()
-            }
-            waitingForResponse = None
-          }
+        responseEvent.getDoneFuture onSuccessOrFailure {
+          waitingForResponse = None          
         }
 
+        proxyMessages(responseEvent)
 
       case Some(_) if waitingForResponse.isDefined =>
         Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
@@ -94,6 +86,22 @@ class BrokeredChannel(
         e.getFuture.setFailure(new NotYetConnectedException)
     }
     ()
+  }
+
+  def proxyMessages(responseEvent: UpcomingMessageEvent) {
+    responseEvent.getFuture() { state =>
+      serialized {
+        state match {
+          case Ok(_) if this.isOpen =>
+            Channels.fireMessageReceived(this, responseEvent.getMessage)
+            for (next <- responseEvent.getNext)
+              proxyMessages(next)
+          case Error(cause) if isOpen =>
+            Channels.fireExceptionCaught(this, cause)
+          case _ => ()
+        }
+      }
+    }
   }
 
   def getRemoteAddress = broker.getOrElse(null)

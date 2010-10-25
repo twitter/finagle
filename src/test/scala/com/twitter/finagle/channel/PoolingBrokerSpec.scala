@@ -63,7 +63,7 @@ class PoolingBrokerSpec extends Specification with Mockito {
           there was one(pool).reserve()
           there was no(pool).release(reservedChannel)
 
-          responseEvent.setMessage("something")
+          responseEvent.setFinalMessage("something")
           there was one(pool).release(reservedChannel)
         }
 

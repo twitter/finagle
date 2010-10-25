@@ -29,16 +29,6 @@ class RichChannelFuture(val self: ChannelFuture) {
     })
   }
 
-  // def apply(f: ChannelFuture => Unit) {
-  //   if (self.isDone) {
-  //     f(self)
-  //   } else {
-  //     self.addListener(new ChannelFutureListener {
-  //       def operationComplete(future: ChannelFuture) { f(future) }
-  //     })
-  //   }
-  // }
-
   def state: State =
     if (self.isSuccess)
       Ok(self.getChannel)
@@ -60,6 +50,8 @@ class RichChannelFuture(val self: ChannelFuture) {
    */
   def flatMap(f: Channel => ChannelFuture): ChannelFuture = {
     val future = new LatentChannelFuture
+
+    // TODO: cancellation.
 
     this {
       case Ok(channel) =>
