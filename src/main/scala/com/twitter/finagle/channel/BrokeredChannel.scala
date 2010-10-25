@@ -21,8 +21,8 @@ class BrokeredChannel(
   val config = new DefaultChannelConfig
   private val localAddress = new LocalAddress(LocalAddress.EPHEMERAL)
   @volatile private var broker: Option[Broker] = None
+  private var waitingForResponse: Option[UpcomingMessageEvent] = None
 
-  private var currentState: State = Idle
   private val nwaiters = new AtomicInteger(0)
   private val executionQueue = new LinkedBlockingQueue[Function0[Unit]]
 
@@ -45,10 +45,10 @@ class BrokeredChannel(
   }
 
   protected[channel] def realClose(future: ChannelFuture) = serialized {
-    currentState match {
-      case WaitingForResponse(responseEvent) => responseEvent.cancel()
-      case _ =>
-    }
+    for (response <- waitingForResponse)
+      response.cancel()
+
+    waitingForResponse = None
 
     setClosed()
     Channels.fireChannelClosed(this)
@@ -61,9 +61,9 @@ class BrokeredChannel(
 
   protected[channel] def realWrite(e: MessageEvent): Unit = serialized {
     broker match {
-      case Some(broker) if currentState == Idle =>
+      case Some(broker) if !waitingForResponse.isDefined =>
         val responseEvent = broker.dispatch(e)
-        currentState = WaitingForResponse(responseEvent)
+        waitingForResponse = Some(responseEvent)
 
         e.getFuture() { serialized {
           case Ok(_) if this.isOpen =>
@@ -82,12 +82,12 @@ class BrokeredChannel(
                 Channels.fireExceptionCaught(this, cause)
               case _ => ()
             }
-            currentState = Idle
+            waitingForResponse = None
           }
         }
 
 
-      case Some(_) if currentState != Idle =>
+      case Some(_) if waitingForResponse.isDefined =>
         Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
 
       case _ =>
