@@ -44,11 +44,6 @@ class BrokeredChannel(
     Channels.fireChannelBound(this, broker)
   }
 
-  // We can close this race by having some synchronization method on
-  // channel ops basically.  Maybe in terms of a "currentOperation"
-  // future or something, that we can chain.
-
-
   protected[channel] def realClose(future: ChannelFuture) = serialized {
     currentState match {
       case WaitingForResponse(responseEvent) => responseEvent.cancel()
