@@ -17,5 +17,4 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val thrift = "thrift" % "libthrift" % "0.2.0"
 
   val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.6.1" withSources()
-  // val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.6.1" withSources()
 }
