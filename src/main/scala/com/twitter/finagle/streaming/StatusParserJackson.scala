@@ -1,6 +1,6 @@
 /** Copyright 2010 Twitter, Inc. */
 // Initially lifted from Hosebird, then hacked to shit
-package com.twitter.finagle.hosebird
+package com.twitter.finagle.streaming
 
 import java.io.{StringReader, IOException}
 

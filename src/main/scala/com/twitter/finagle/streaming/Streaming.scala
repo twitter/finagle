@@ -14,7 +14,7 @@ import org.jboss.netty.handler.codec.frame.{DelimiterBasedFrameDecoder, Delimite
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.handler.codec.http.{
   HttpClientCodec, DefaultHttpRequest, HttpVersion, HttpMethod,
-  HttpHeaders, HttpChunk}
+  HttpHeaders, HttpChunk, HttpChunkAggregator}
 
 import com.twitter.finagle.http
 import com.twitter.finagle.util.{
@@ -57,17 +57,12 @@ object Streaming {
         val delim = Delimiters.lineDelimiter
         val decoder = new DelimiterBasedFrameDecoder(Int.MaxValue, delim(0), delim(1))
         pipeline.addLast("unframer", decoder)
+        pipeline.addLast("codec", new HosebirdCodec)
         pipeline.addLast("counter", new SimpleChannelUpstreamHandler {
           var count = 0
           override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-            e.getMessage match {
-              case chunk: HttpChunk =>
-                count += 1
-                if (count % 1000 == 0)
-                  println("count: %d".format(count))
-                //println(chunk.getContent().toString(Charset.forName("UTF-8")))
-              case _ =>
-            }
+            val msg = e.getMessage.asInstanceOf[CachedMessage]
+            println("Type: %s; Message: %s".format(Name.forKind(msg.kind), msg.message))
           }
         })
 
@@ -78,7 +73,7 @@ object Streaming {
     bootstrap.connect(streamingClientBroker) {
       case Ok(channel) =>
         val request = new DefaultHttpRequest(
-          HttpVersion.HTTP_1_1, HttpMethod.GET, "/1/statuses/firehose.json")
+          HttpVersion.HTTP_1_1, HttpMethod.GET, "/1/statuses/sample.json")
 
         // Special skunkstream user.
         request.setHeader(

@@ -1,10 +1,9 @@
 /** Copyright 2010 Twitter, Inc. */
-package com.twitter.finagle.hosebird
+package com.twitter.finagle.streaming
 
 case class CachedMessage(message: String, kind: Int)
 
 object CachedMessage {
-
   // Kind as bitmask
   val KIND_UNKNOWN =       0
   val KIND_STATUS =        1
@@ -24,16 +23,4 @@ object CachedMessage {
 
   // Public and Restricted can be explicitly selected by userid
   val SCOPE_SELECTABLE =   3
-
-  object Kind extends Enumeration {
-    type Kind = Value
-    val Unknown =         0
-    val StatusUpdate =    1
-    val StatusDeletion =  2
-    val Limit =           4
-    val ScrubGeo =        8
-    val Social =         16
-    val DirectMessage =  32
-  }
-
 }

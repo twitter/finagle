@@ -1,4 +1,4 @@
-package com.twitter.finagle.hosebird
+package com.twitter.finagle.streaming
 
 import CachedMessage._
 
@@ -29,6 +29,19 @@ object State {
   }
 }
 
+object Name {
+  def forKind(i: Int) = i match {
+    case KIND_UNKNOWN =>       "Unknown"
+    case KIND_STATUS =>        "Status"
+    case KIND_STATUS_DELETE => "StatusDelete"
+    case KIND_LIMIT =>         "Limit"
+    case KIND_SCRUB_GEO =>     "ScrubGeo"
+    case KIND_SOCIAL =>        "Social"
+    case KIND_DM =>            "DirectMessage"
+  }
+}
+
+
 class State {
   def wrapped = State.wrap(this)
   var kind = KIND_UNKNOWN
@@ -45,20 +58,4 @@ class State {
   var createdAtOpt: Option[String] = None
   var textOpt: Option[String] = None
   var annotationsOpt: Option[Seq[Annotation]] = None
-
-  // def reset() {
-  //   userIdOpt = None
-  //   retweetUserIdOpt = None
-  //   statusIdOpt = None
-  //   limitTrackOpt = None
-  //   geoOpt = None
-  //   placeOpt = None
-  //   sourceOpt = None
-  //   inReplyToUserIdOpt = None
-  //   idOpt = None
-  //   retweetIdOpt = None
-  //   createdAtOpt = None
-  //   textOpt = None
-  //   annotationsOpt = None
-  // }
 }
