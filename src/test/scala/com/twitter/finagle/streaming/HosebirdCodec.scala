@@ -5,6 +5,7 @@ import org.specs.matcher.Matcher
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 import com.twitter.finagle.SunkChannel
 import com.twitter.silly.Silly
 
@@ -30,8 +31,13 @@ object HosebirdCodecSpec extends HosebirdSpecification {
   "read one item from the JSON input stream" in {
     val line = sampleJSONInputStream.readLine()
     val ch = makeChannel(new HosebirdCodec)
+    val buf = ChannelBuffers.wrappedBuffer(line.getBytes)
+    val chunk = new DefaultHttpChunk(buf)
     ch.upstreamEvents must haveSize(0)
-    Channels.fireMessageReceived(ch, line)
+    Channels.fireMessageReceived(ch, chunk)
     ch.upstreamEvents must haveSize(1)
+    val m = ch.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
+    m must haveClass[CachedMessage]
+    m.asInstanceOf[CachedMessage].kind mustEqual CachedMessage.KIND_STATUS
   }
 }
