@@ -5,7 +5,8 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   override def managedStyle = ManagedStyle.Maven
 
   val nettyRepo = "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
-  val twitterRepo = "twitter.com" at "http://www.lag.net/nest/"
+  val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
+
   val codehausRepo = "codehaus.org" at "http://repository.codehaus.org/"
 
   val netty = "org.jboss.netty" % "netty" % "3.2.2.Final" withSources()
