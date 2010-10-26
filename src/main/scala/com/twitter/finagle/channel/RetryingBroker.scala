@@ -7,7 +7,7 @@ import com.twitter.finagle.util.Conversions._
 class RetryingBroker(underlying: Broker, tries: Int) extends Broker {
   def dispatch(e: MessageEvent) = dispatch(tries, e)
 
-  def dispatch(triesLeft: Int, e: MessageEvent): UpcomingMessageEvent = {
+  def dispatch(triesLeft: Int, e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
     val interceptErrors = Channels.future(e.getChannel)
     interceptErrors {
@@ -19,6 +19,8 @@ class RetryingBroker(underlying: Broker, tries: Int) extends Broker {
           dispatch(triesLeft - 1, e)
         else
           incomingFuture.setFailure(cause)
+      case Cancelled =>
+        incomingFuture.cancel()
     }
 
     val errorInterceptingMessageEvent = new DownstreamMessageEvent(

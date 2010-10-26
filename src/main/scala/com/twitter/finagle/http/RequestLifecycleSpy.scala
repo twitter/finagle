@@ -9,15 +9,17 @@ import com.twitter.finagle.channel.Broker
 
 object RequestLifecycleSpy extends SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    e.getMessage match {
-      case response: HttpResponse if response.isChunked =>
-        Broker.setChannelBusy(ctx.getChannel)
-      case response: HttpResponse if !response.isChunked =>
-        Broker.setChannelIdle(ctx.getChannel)
-      case response: HttpChunkTrailer =>
-        Broker.setChannelIdle(ctx.getChannel)
-      case _ =>
-    }
+    // XXX
+    
+    // e.getMessage match {
+    //   case response: HttpResponse if response.isChunked =>
+    //     Broker.setChannelBusy(ctx.getChannel)
+    //   case response: HttpResponse if !response.isChunked =>
+    //     Broker.setChannelIdle(ctx.getChannel)
+    //   case response: HttpChunkTrailer =>
+    //     Broker.setChannelIdle(ctx.getChannel)
+    //   case _ =>
+    // }
 
     super.messageReceived(ctx, e)
   }

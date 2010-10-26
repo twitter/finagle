@@ -23,7 +23,7 @@ class RetryingBrokerSpec extends Specification with Mockito {
         def dispatch(e: MessageEvent)  = {
           invocations += 1
           e.getFuture.setFailure(exception)
-          UpcomingMessageEvent.failedEvent(e.getChannel, exception)
+          ReplyFuture.failed(exception)
         }
       }
       brokeredChannel.connect(new RetryingBroker(underlying, tries))
@@ -43,10 +43,10 @@ class RetryingBrokerSpec extends Specification with Mockito {
           val future = e.getFuture
           if (invocations < 3) {
             future.setFailure(exception)
-            UpcomingMessageEvent.failedEvent(e.getChannel, exception)
+            ReplyFuture.failed(exception)
           } else {
             future.setSuccess()
-            UpcomingMessageEvent.successfulEvent(e.getChannel, someMessage)
+            ReplyFuture.success(someMessage)
           }
         }
       }

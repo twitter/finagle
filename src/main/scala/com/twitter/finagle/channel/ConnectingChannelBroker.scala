@@ -15,58 +15,69 @@ trait ConnectingChannelBroker extends Broker {
   def putChannel(channel: Channel)
 
   def dispatch(e: MessageEvent) = {
-    val responseEvent = new UpcomingMessageEvent(e.getChannel)
+    val replyFuture = new ReplyFuture
 
     getChannel {
+      case Ok(channel) if replyFuture.isCancelled =>
+        putChannel(channel)
+
       case Ok(channel) =>
-        if (responseEvent.getFuture.isCancelled) {
+        connectChannel(channel, e, replyFuture)
+
+        // XXX XXX
+        replyFuture onSuccessOrFailure {
           putChannel(channel)
-        } else {
-          connectChannel(channel, e, responseEvent)
-          responseEvent.getDoneFuture onSuccessOrFailure {
-            putChannel(channel)
-          }
         }
+
+        // XXX
+        // responseEvent.getDoneFuture onSuccessOrFailure {
+        //   putChannel(channel)
+        // }
       case Error(cause) =>
-        responseEvent.setFailure(cause)
+        replyFuture.setFailure(cause)
 
       case Cancelled => ()
     }
 
-    responseEvent
+    replyFuture
   }
 
-  protected def connectChannel(to: Channel, e: MessageEvent, responseEvent: UpcomingMessageEvent) {
-    val handler = new ChannelConnectingHandler(responseEvent, to, e)
+  protected def connectChannel(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) {
+    val handler = new ChannelConnectingHandler(replyFuture, to)
     to.getPipeline.addLast("handler", handler)
     Channels.write(to, e.getMessage).proxyTo(e.getFuture)
   }
 
   private class ChannelConnectingHandler(
-    responseEvent: UpcomingMessageEvent,
-    to: Channel, e: MessageEvent)
+    firstReplyFuture: ReplyFuture,
+    to: Channel)
     extends SimpleChannelUpstreamHandler
   {
-    var currentResponseEvent = responseEvent
+    var replyFuture = firstReplyFuture
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-      if (Broker.isChannelIdle(ctx.getChannel)) {
-        currentResponseEvent.setFinalMessage(e.getMessage)
-        to.getPipeline.remove(this)
-      } else {
-        currentResponseEvent =
-          currentResponseEvent.setNextMessage(e.getMessage)
-      }
+      replyFuture.setReply(Reply.Done(e.getMessage))
+      // XXX
+      
+      // currentResponseEvent.setMessage(FinalBrokeredMessage(e.getMessage))
+
+      // if (Broker.isChannelIdle(ctx.getChannel)) {
+      //   currentResponseEvent.setFinalMessage(e.getMessage)
+      //   to.getPipeline.remove(this)
+      // } else {
+      //   currentResponseEvent =
+      //     currentResponseEvent.setNextMessage(e.getMessage)
+      // }
     }
 
     // We rely on the underlying protocol handlers to close channels
     // on errors. (This is probably the only sane policy).
     override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-      currentResponseEvent.setFailure(new ClosedChannelException)
+      replyFuture.setFailure(new ClosedChannelException)
     }
 
     override def exceptionCaught(ctx: ChannelHandlerContext, exc: ExceptionEvent) {
-      currentResponseEvent.setFailure(exc.getCause)
+      replyFuture.setFailure(exc.getCause)
     }
   }
 }

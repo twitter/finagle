@@ -7,7 +7,7 @@ import java.nio.channels.NotYetConnectedException
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local.LocalAddress
 
-import com.twitter.finagle.util.{Ok, Error}
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
 class TooManyDicksOnTheDanceFloorException extends Exception
@@ -21,7 +21,7 @@ class BrokeredChannel(
   val config = new DefaultChannelConfig
   private val localAddress = new LocalAddress(LocalAddress.EPHEMERAL)
   @volatile private var broker: Option[Broker] = None
-  private var waitingForResponse: Option[UpcomingMessageEvent] = None
+  private var waitingForReply: Option[ReplyFuture] = None
 
   private val nwaiters = new AtomicInteger(0)
   private val executionQueue = new LinkedBlockingQueue[Function0[Unit]]
@@ -45,10 +45,10 @@ class BrokeredChannel(
   }
 
   protected[channel] def realClose(future: ChannelFuture) = serialized {
-    for (response <- waitingForResponse)
-      response.cancel()
+    for (reply <- waitingForReply)
+      reply.cancel()
 
-    waitingForResponse = None
+    waitingForReply = None
 
     setClosed()
     Channels.fireChannelClosed(this)
@@ -61,9 +61,9 @@ class BrokeredChannel(
 
   protected[channel] def realWrite(e: MessageEvent): Unit = serialized {
     broker match {
-      case Some(broker) if !waitingForResponse.isDefined =>
-        val responseEvent = broker.dispatch(e)
-        waitingForResponse = Some(responseEvent)
+      case Some(broker) if !waitingForReply.isDefined =>
+        val replyFuture = broker.dispatch(e)
+        waitingForReply = Some(replyFuture)
 
         e.getFuture() { serialized {
           case Ok(_) if this.isOpen =>
@@ -73,36 +73,43 @@ class BrokeredChannel(
           case _ => ()
         }}
 
-        responseEvent.getDoneFuture onSuccessOrFailure {
-          waitingForResponse = None          
-        }
+        proxyMessages(replyFuture)
 
-        proxyMessages(responseEvent)
-
-      case Some(_) if waitingForResponse.isDefined =>
+      case Some(_) if waitingForReply.isDefined =>
         Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
 
       case _ =>
         e.getFuture.setFailure(new NotYetConnectedException)
     }
+
     ()
   }
 
-  def proxyMessages(responseEvent: UpcomingMessageEvent) {
-    responseEvent.getFuture() { state =>
-      serialized {
-        state match {
-          case Ok(_) if this.isOpen =>
-            Channels.fireMessageReceived(this, responseEvent.getMessage)
-            for (next <- responseEvent.getNext)
+  def proxyMessages(replyFuture: ReplyFuture): Unit =
+    replyFuture { state => serialized {
+      if (!isOpen)  // ignore closed channels.
+        return
+
+      state match {
+        case Ok(_) =>
+          replyFuture.getReply match {
+            case Reply.Done(message) =>
+              Channels.fireMessageReceived(this, message)
+              waitingForReply = None
+            case Reply.More(message, next) =>
+              Channels.fireMessageReceived(this, message)
+              waitingForReply = Some(next)
               proxyMessages(next)
-          case Error(cause) if isOpen =>
-            Channels.fireExceptionCaught(this, cause)
-          case _ => ()
-        }
+          }
+
+        case Error(cause) =>
+          Channels.fireExceptionCaught(this, cause)
+          waitingForReply = None
+
+        case Cancelled =>
+          // XXX
       }
-    }
-  }
+    }}
 
   def getRemoteAddress = broker.getOrElse(null)
   def getLocalAddress = if (broker.isDefined) localAddress else null
@@ -110,9 +117,4 @@ class BrokeredChannel(
   def isConnected = broker.isDefined
   def isBound = broker.isDefined
   def getConfig = config
-
-  private sealed abstract class State
-  private case object Idle extends State
-  private case object PreparingRequest extends State
-  private case class WaitingForResponse(responseEvent: UpcomingMessageEvent) extends State
 }

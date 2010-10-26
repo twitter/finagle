@@ -34,10 +34,10 @@ class PoolingBrokerSpec extends Specification with Mockito {
 
       val future = Channels.future(poolingChannel)
 
-      val responseEvent = poolingBroker.dispatch(
+      val replyFuture = poolingBroker.dispatch(
         new DownstreamMessageEvent(poolingChannel, future, "something", null))
 
-      responseEvent.cancel()
+      replyFuture.cancel()
       reservationFuture.setSuccess()
 
       reservedDispatchWasInvoked must beFalse
@@ -50,12 +50,12 @@ class PoolingBrokerSpec extends Specification with Mockito {
       reservationFuture.setSuccess()
       "when the message is sent successfully" in {
         "dispatch reserves and releases connection from the pool" in {
-          val responseEvent = new UpcomingMessageEvent(poolingChannel)
+          val replyFuture = new ReplyFuture
 
           reservedChannel.connect(new Broker {
             def dispatch(e: MessageEvent) = {
               e.getFuture.setSuccess()
-              responseEvent
+              replyFuture
             }
           })
 
@@ -63,7 +63,7 @@ class PoolingBrokerSpec extends Specification with Mockito {
           there was one(pool).reserve()
           there was no(pool).release(reservedChannel)
 
-          responseEvent.setFinalMessage("something")
+          replyFuture.setReply(Reply.Done("something"))
           there was one(pool).release(reservedChannel)
         }
 
@@ -73,7 +73,7 @@ class PoolingBrokerSpec extends Specification with Mockito {
           reservedChannel.connect(new Broker {
             def dispatch(e: MessageEvent) = {
               e.getFuture.setSuccess()
-              UpcomingMessageEvent.successfulEvent(e.getChannel, someMessage)
+              ReplyFuture.success(someMessage)
             }
           })
           poolingChannel.getPipeline.addLast("handler", new SimpleChannelUpstreamHandler {
@@ -92,7 +92,7 @@ class PoolingBrokerSpec extends Specification with Mockito {
           def dispatch(e: MessageEvent) = {
             val exc = new Exception
             e.getFuture.setFailure(exc)
-            UpcomingMessageEvent.failedEvent(e.getChannel, exc)
+            ReplyFuture.failed(exc)
           }
         })
 
