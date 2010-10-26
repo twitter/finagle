@@ -51,7 +51,7 @@ trait ConnectingChannelBroker extends Broker {
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
       e match {
-        case PartialUpstreamMessageEvent(message, _, _) =>
+        case PartialUpstreamMessageEvent(_, message, _) =>
           val next = new ReplyFuture
           replyFuture.setReply(Reply.More(message, next))
           replyFuture = next

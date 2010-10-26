@@ -49,11 +49,12 @@ object Streaming {
   }
 
   def main(args: Array[String]) {
+    val Array(authHeader) = args
+
     val bootstrap = new ClientBootstrap(new BrokeredChannelFactory)
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = Channels.pipeline()
-        // pipeline.addLast("snooper", new SimpleChannelSnooper("app"))
         val delim = Delimiters.lineDelimiter
         val decoder = new DelimiterBasedFrameDecoder(Int.MaxValue, delim(0), delim(1))
         pipeline.addLast("unframer", decoder)
@@ -75,10 +76,7 @@ object Streaming {
         val request = new DefaultHttpRequest(
           HttpVersion.HTTP_1_1, HttpMethod.GET, "/1/statuses/sample.json")
 
-        // Special skunkstream user.
-        request.setHeader(
-          HttpHeaders.Names.AUTHORIZATION,
-          "Basic c2t1bmtzdHJlYW06YmViM29iNHlldA==")
+        request.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic %s".format(authHeader))
         request.setHeader(HttpHeaders.Names.HOST, STREAM_HOST)
 
         Channels.write(channel, request)

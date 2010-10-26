@@ -2,7 +2,7 @@ package com.twitter.finagle.streaming
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.http.DefaultHttpChunk
+import org.jboss.netty.handler.codec.http.HttpChunk
 
 class StreamingCodec extends SimpleChannelUpstreamHandler {
   val parser = new StatusParserJackson
@@ -11,17 +11,15 @@ class StreamingCodec extends SimpleChannelUpstreamHandler {
   private def stringFromUtf8Bytes(bytes: Array[Byte]): String =
     new String(bytes, UTF_8)
 
-  override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (!c.isInstanceOf[MessageEvent]) {
-      super.handleUpstream(ctx, c)
-      return
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    e.getMessage match {
+      case chunk: HttpChunk =>
+        val text = stringFromUtf8Bytes(chunk.getContent().array())
+        Channels.fireMessageReceived(
+          ctx, new CachedMessage(text, parser.parse(text)),
+          e.getRemoteAddress)
+      case _ => ()                      // swallow
     }
 
-    val e = c.asInstanceOf[MessageEvent]
-    val chunk = e.getMessage().asInstanceOf[DefaultHttpChunk]
-    val text = stringFromUtf8Bytes(chunk.getContent().array())
-    Channels.fireMessageReceived(ctx,
-                                 new CachedMessage(text, parser.parse(text)),
-                                 e.getRemoteAddress)
   }
 }
