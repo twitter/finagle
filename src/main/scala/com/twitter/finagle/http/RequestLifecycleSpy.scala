@@ -5,22 +5,20 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.handler.codec.http.{
   HttpChunkTrailer, HttpResponse, HttpChunk}
 
-import com.twitter.finagle.channel.Broker
+import com.twitter.finagle.channel.PartialUpstreamMessageEvent
 
 object RequestLifecycleSpy extends SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    // XXX
-    
-    // e.getMessage match {
-    //   case response: HttpResponse if response.isChunked =>
-    //     Broker.setChannelBusy(ctx.getChannel)
-    //   case response: HttpResponse if !response.isChunked =>
-    //     Broker.setChannelIdle(ctx.getChannel)
-    //   case response: HttpChunkTrailer =>
-    //     Broker.setChannelIdle(ctx.getChannel)
-    //   case _ =>
-    // }
+    val upstreamMessage = 
+      e.getMessage match {
+        case response: HttpResponse if response.isChunked =>
+          PartialUpstreamMessageEvent(e)
+        case _: HttpChunkTrailer => e
+        case c: HttpChunk =>
+          PartialUpstreamMessageEvent(e)
+        case _ => e
+      }
 
-    super.messageReceived(ctx, e)
+    super.messageReceived(ctx, upstreamMessage)
   }
 }

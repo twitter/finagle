@@ -34,8 +34,8 @@ object Streaming {
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = Channels.pipeline()
-        // pipeline.addLast("snooper", new SimpleChannelSnooper("chan"))
         // pipeline.addLast("snooper_", new ChannelBufferSnooper("http"))
+        // pipeline.addLast("snooper", new SimpleChannelSnooper("chan"))
         pipeline.addLast("http", new HttpClientCodec)
         pipeline.addLast("lifecycleSpy", http.RequestLifecycleSpy)
         pipeline
@@ -72,12 +72,12 @@ object Streaming {
     bootstrap.connect(streamingClientBroker) {
       case Ok(channel) =>
         val request = new DefaultHttpRequest(
-          HttpVersion.HTTP_1_1, HttpMethod.GET, "/1/statuses/firehose.json")
+          HttpVersion.HTTP_1_1, HttpMethod.GET, "/1/statuses/sample.json")
 
         // Special skunkstream user.
         request.setHeader(
           HttpHeaders.Names.AUTHORIZATION,
-          "Basic c2t1bmtzdHJlYW06a29sNXplcm42aQ==")
+          "Basic c2t1bmtzdHJlYW06YmViM29iNHlldA==")
         request.setHeader(HttpHeaders.Names.HOST, STREAM_HOST)
 
         Channels.write(channel, request)

@@ -107,7 +107,7 @@ class BrokeredChannel(
           waitingForReply = None
 
         case Cancelled =>
-          // XXX
+          // XXXTODO
       }
     }}
 

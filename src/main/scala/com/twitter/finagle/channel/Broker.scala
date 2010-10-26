@@ -5,6 +5,9 @@ import org.jboss.netty.channel.{
   Channel, ChannelFuture, MessageEvent,
   ChannelLocal, DefaultChannelFuture}
 
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
+import com.twitter.finagle.util.Conversions._
+
 sealed abstract class Reply
 object Reply {
   case class Done(message: AnyRef) extends Reply
@@ -20,6 +23,18 @@ class ReplyFuture extends DefaultChannelFuture(null, true) {
   }
 
   def getReply = reply
+
+  def whenDone(f: => Unit): Unit = whenDone0 { () => f }
+  def whenDone0(f: Function0[Unit]) {
+    this onSuccessOrFailure {
+      getReply match {
+        case Reply.More(_, next) =>
+          next.whenDone(f)
+        case _ =>
+          f()
+      }
+    }
+  }
 }
 
 object ReplyFuture {

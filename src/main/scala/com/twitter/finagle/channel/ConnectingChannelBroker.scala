@@ -23,16 +23,10 @@ trait ConnectingChannelBroker extends Broker {
 
       case Ok(channel) =>
         connectChannel(channel, e, replyFuture)
-
-        // XXX XXX
-        replyFuture onSuccessOrFailure {
+        replyFuture whenDone {
           putChannel(channel)
         }
 
-        // XXX
-        // responseEvent.getDoneFuture onSuccessOrFailure {
-        //   putChannel(channel)
-        // }
       case Error(cause) =>
         replyFuture.setFailure(cause)
 
@@ -56,18 +50,15 @@ trait ConnectingChannelBroker extends Broker {
     var replyFuture = firstReplyFuture
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-      replyFuture.setReply(Reply.Done(e.getMessage))
-      // XXX
-      
-      // currentResponseEvent.setMessage(FinalBrokeredMessage(e.getMessage))
-
-      // if (Broker.isChannelIdle(ctx.getChannel)) {
-      //   currentResponseEvent.setFinalMessage(e.getMessage)
-      //   to.getPipeline.remove(this)
-      // } else {
-      //   currentResponseEvent =
-      //     currentResponseEvent.setNextMessage(e.getMessage)
-      // }
+      e match {
+        case PartialUpstreamMessageEvent(message, _, _) =>
+          val next = new ReplyFuture
+          replyFuture.setReply(Reply.More(message, next))
+          replyFuture = next
+        case _ =>
+          replyFuture.setReply(Reply.Done(e.getMessage))
+          to.getPipeline.remove(this)
+      }
     }
 
     // We rely on the underlying protocol handlers to close channels

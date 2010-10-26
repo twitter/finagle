@@ -27,8 +27,8 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     e match {
-      case me: UpstreamMessageEvent if me.isInstanceOf[ChannelBuffer] =>
-        val buf = me.asInstanceOf[ChannelBuffer]
+      case me: UpstreamMessageEvent if me.getMessage.isInstanceOf[ChannelBuffer] =>
+        val buf = me.getMessage.asInstanceOf[ChannelBuffer]
         dump(printUp, buf)
       case _ =>
         ()
