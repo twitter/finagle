@@ -57,7 +57,7 @@ object Streaming {
         val delim = Delimiters.lineDelimiter
         val decoder = new DelimiterBasedFrameDecoder(Int.MaxValue, delim(0), delim(1))
         pipeline.addLast("unframer", decoder)
-        pipeline.addLast("codec", new HosebirdCodec)
+        pipeline.addLast("codec", new StreamingCodec)
         pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
           var count = 0
           override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

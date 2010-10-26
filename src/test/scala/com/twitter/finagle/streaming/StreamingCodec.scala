@@ -12,7 +12,7 @@ import com.twitter.silly.Silly
 import java.io.{InputStreamReader, LineNumberReader}
 import java.util.zip.GZIPInputStream
 
-class HosebirdSpecification extends Specification {
+class StreamingSpecification extends Specification {
   def makeChannel(codec: ChannelHandler) = SunkChannel {
     val pipeline = Channels.pipeline()
     pipeline.addLast("codec", codec)
@@ -27,10 +27,10 @@ class HosebirdSpecification extends Specification {
           getClass.getResourceAsStream(sampleDataResourcePath))))
 }
 
-object HosebirdCodecSpec extends HosebirdSpecification {
+object StreamingCodecSpec extends StreamingSpecification {
   "read one item from the JSON input stream" in {
     val line = sampleJSONInputStream.readLine()
-    val ch = makeChannel(new HosebirdCodec)
+    val ch = makeChannel(new StreamingCodec)
     val buf = ChannelBuffers.wrappedBuffer(line.getBytes)
     val chunk = new DefaultHttpChunk(buf)
     ch.upstreamEvents must haveSize(0)

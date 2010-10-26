@@ -4,7 +4,7 @@ import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk
 
-class HosebirdCodec extends SimpleChannelUpstreamHandler {
+class StreamingCodec extends SimpleChannelUpstreamHandler {
   val parser = new StatusParserJackson
   private val UTF_8 = "UTF-8"
 

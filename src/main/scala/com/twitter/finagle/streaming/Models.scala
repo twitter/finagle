@@ -2,32 +2,11 @@ package com.twitter.finagle.streaming
 
 import CachedMessage._
 
-abstract case class HosebirdMessage(state: State)
-class Unknown(state: State) extends HosebirdMessage(state)
-class Status(state: State) extends HosebirdMessage(state)
-class StatusDelete(state: State) extends HosebirdMessage(state)
-class Limit(state: State) extends HosebirdMessage(state)
-class ScrubGeo(state: State) extends HosebirdMessage(state)
-class Social(state: State) extends HosebirdMessage(state)
-class DirectMessage(state: State) extends HosebirdMessage(state)
-
 // Components
 case class Geo(lat: Double, long: Double)
 case class Place(minLat: Double, minLong: Double, maxLat: Double, maxLong: Double)
 case class AnnotationAttribute(label: String, value: String)
 case class Annotation(namespace: String, attributes: Seq[AnnotationAttribute])
-
-object State {
-  def wrap(state: State): HosebirdMessage = state.kind match {
-    case KIND_UNKNOWN =>       new Unknown(state)
-    case KIND_STATUS =>        new Status(state)
-    case KIND_STATUS_DELETE => new StatusDelete(state)
-    case KIND_LIMIT =>         new Limit(state)
-    case KIND_SCRUB_GEO =>     new ScrubGeo(state)
-    case KIND_SOCIAL =>        new Social(state)
-    case KIND_DM =>            new DirectMessage(state)
-  }
-}
 
 object Name {
   def forKind(i: Int) = i match {
@@ -41,9 +20,7 @@ object Name {
   }
 }
 
-
 class State {
-  def wrapped = State.wrap(this)
   var kind = KIND_UNKNOWN
   var userIdOpt: Option[Long] = None
   var retweetUserIdOpt: Option[Long] = None
