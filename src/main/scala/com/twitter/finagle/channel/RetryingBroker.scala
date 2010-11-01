@@ -63,6 +63,8 @@ object ExponentialBackoffRetryingBroker {
   val timer = new HashedWheelTimer()
 }
 
+// TODO: max cap.
+
 class ExponentialBackoffRetryingBroker(val underlying: Broker, initial: Duration, multiplier: Int)
  extends RetryingBrokerBase
 {
