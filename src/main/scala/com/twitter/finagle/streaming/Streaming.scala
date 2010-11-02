@@ -9,7 +9,6 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
   Channels, ChannelPipelineFactory, SimpleChannelUpstreamHandler,
   ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.handler.codec.frame.{DelimiterBasedFrameDecoder, Delimiters}
 
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.handler.codec.http.{
@@ -55,10 +54,7 @@ object Streaming {
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = Channels.pipeline()
-        val delim = Delimiters.lineDelimiter
-        val decoder = new DelimiterBasedFrameDecoder(Int.MaxValue, delim(0), delim(1))
-        pipeline.addLast("unframer", decoder)
-        pipeline.addLast("codec", new StreamingCodec)
+        StreamingCodec.appendOnPipeline(pipeline)
         pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
           var count = 0
           override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
