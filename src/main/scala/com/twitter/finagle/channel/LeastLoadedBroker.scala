@@ -6,7 +6,7 @@ import org.jboss.netty.channel.MessageEvent
 trait LoadedBroker[A <: LoadedBroker[A]] extends Broker with Ordered[A]
 
 class RequestCountingBroker(underlying: Broker)
-  extends Broker with LoadedBroker[RequestCountingBroker]
+  extends LoadedBroker[RequestCountingBroker]
 {
   private val dispatchCount = new AtomicInteger(0)
 
