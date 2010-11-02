@@ -4,6 +4,7 @@ import com.twitter.util.{Duration, Time}
 import com.twitter.util.TimeConversions._
 
 class TimeWindowedCollection[A](bucketCount: Int, bucketDuration: Duration)
+  (implicit val _a: Manifest[A])
   extends Iterable[A]
 {
   // PREMATURE_OPTIMIZATION_TODO:
@@ -14,7 +15,8 @@ class TimeWindowedCollection[A](bucketCount: Int, bucketDuration: Duration)
   //   creating new objects every expiration.
   //   - use serialized!
 
-  protected def newInstance: A
+  protected def newInstance: A =
+    _a.erasure.newInstance.asInstanceOf[A]
 
   @volatile private var buckets = List[Tuple2[Time, A]]()
 
@@ -40,6 +42,7 @@ class TimeWindowedCollection[A](bucketCount: Int, bucketDuration: Duration)
 
   def apply(): A = synchronized {
     val now = Time.now
+
     buckets.headOption match  {
       case Some((timestamp, _)) if now - timestamp >= bucketDuration =>
         prepend(now)
@@ -55,20 +58,22 @@ class TimeWindowedCollection[A](bucketCount: Int, bucketDuration: Duration)
       val bucketDetails = buckets map {
         case (ts, instance) => "%s = %s".format(ts - firstTs, instance)
       }
-      bucketDetails.mkString(", ")
+      bucketDetails.mkString("\n\t", ",\n\t", "")
     }
 
-    "bucket(%d, %s(s)) = [%s]".format(
-      bucketCount, bucketDuration, details getOrElse "")
+    "TimeWindowedCollection[%s](%d buckets of %s sec) = [%s]".format(
+      _a.erasure.getName, bucketCount, bucketDuration, details getOrElse "")
   }
 
   def timeSpan = {
     val now = Time.now
     (buckets.lastOption map { case (ts, _) => ts } getOrElse(now), now + bucketDuration)
   }
-  
+
   // TODO: check that this is threadsafe. i believe it is (because we
   // get the head).
-  def elements = buckets.elements map { case (_, x) => x}
-
+  def iterator = {
+    gc(Time.now)
+    buckets.iterator map { case (_, x) => x }
+  }
 }
