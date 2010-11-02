@@ -69,12 +69,12 @@ object ThriftCodecSpec extends Specification {
     pipeline
   }
 
-  def makeChannel(): SunkChannel = makeChannel(new ThriftCodec)
+  def makeClientChannel(): SunkChannel = makeChannel(new ThriftClientCodec)
   def makeServerChannel(): SunkChannel = makeChannel(new ThriftServerCodec)
 
   "request serialization" should {
     "encode downstream ThriftCall as TMessage" in {
-      val ch = makeChannel
+      val ch = makeClientChannel
       Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("the arg")))
 
       ch.upstreamEvents must haveSize(0)
@@ -137,7 +137,7 @@ object ThriftCodecSpec extends Specification {
     }
 
     "serialize exceptions" in {
-      val ch = makeChannel
+      val ch = makeClientChannel
 
       val exc = new TApplicationException(
         TApplicationException.INTERNAL_ERROR,
@@ -158,7 +158,7 @@ object ThriftCodecSpec extends Specification {
     }
 
     "keep track of sequence #s" in {
-      val ch = makeChannel
+      val ch = makeClientChannel
 
       Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
 
@@ -199,7 +199,7 @@ object ThriftCodecSpec extends Specification {
     }
 
     "handle only one request at a time" in {
-      val ch = makeChannel
+      val ch = makeClientChannel
 
       // Make one call.
       Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
@@ -220,7 +220,7 @@ object ThriftCodecSpec extends Specification {
   "message serializaton" should {
 
     "throw exceptions on unrecognized request types" in {
-      val ch = makeChannel
+      val ch = makeClientChannel
       Channels.write(ch, "grr")
 
       ch.downstreamEvents must haveSize(0)

@@ -34,16 +34,13 @@ object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCall[_
   def add(c: ThriftCall[_,_]): Unit = put(c.method, c)
 }
 
-class ThriftServerCodec extends ThriftCodec {
-  override protected def server = true
-}
+class ThriftServerCodec extends ThriftCodec
+class ThriftClientCodec extends ThriftCodec
 
-
-class ThriftCodec extends SimpleChannelHandler {
+abstract class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
   val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
   var seqid = 0
-  protected def server = false
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
@@ -111,7 +108,7 @@ class ThriftCodec extends SimpleChannelHandler {
           return
         }
 
-        if (server) seqid += 1
+        if (isInstanceOf[ThriftServerCodec]) seqid += 1
 
         if (msg.seqid != seqid) {
           // This means the channel is in an inconsistent state, so we
@@ -125,7 +122,7 @@ class ThriftCodec extends SimpleChannelHandler {
           return
         }
 
-        if (server) {
+        if (isInstanceOf[ThriftServerCodec]) {
           var request: ThriftCall[_,_] = null
           try {
             request = ThriftTypes(msg.name).newInstance

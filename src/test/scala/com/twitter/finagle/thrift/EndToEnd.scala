@@ -84,7 +84,7 @@ object EndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("codec", new ThriftCodec)
+          pipeline.addLast("codec", new ThriftClientCodec)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
@@ -146,7 +146,7 @@ object EndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("codec", new ThriftCodec)
+          pipeline.addLast("codec", new ThriftClientCodec)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
