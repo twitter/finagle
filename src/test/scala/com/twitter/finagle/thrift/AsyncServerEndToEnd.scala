@@ -19,10 +19,7 @@ import com.twitter.silly.Silly
 import com.twitter.finagle.util.Conversions._
 
 object AsyncServerEndToEndSpec extends Specification {
-  // TODO: test with a traditional thrift stack over local loopback
-  // TCP
-
-  "talk silly to each other ... asynchronously" in {
+  "async Thrift server works" in {
     // ** Set up the server.
     ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
 
@@ -81,8 +78,6 @@ object AsyncServerEndToEndSpec extends Specification {
 
     val result = callResults.within(1.second)
     result.isReturn must beTrue
-
-    // TODO: channel teardown (with releaseExternalResources).
 
     result().success must be_==("yehyeh")
   }
