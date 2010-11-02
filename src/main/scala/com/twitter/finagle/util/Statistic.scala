@@ -14,7 +14,7 @@ trait Statistic {
 
   def average: Int = if (count != 0) sum / count else 0
 
-  def add(value: Int): Unit = add(1, value)
+  def add(value: Int): Unit = add(value, 1)
   def add(value: Int, count: Int)
 }
 
@@ -26,7 +26,7 @@ class ScalarStatistic extends Statistic {
   def sum = accumulator
   def count = counter
 
-  def add(count: Int, value: Int) = serializer {
+  def add(value: Int, count: Int) = serializer {
     counter += count
     accumulator += value
   }
@@ -46,8 +46,7 @@ class TimeWindowedStatistic[S <: Statistic](bucketCount: Int, bucketDuration: Du
   def rateInHz = {
     val (begin, end) = collection.timeSpan
     val timeDiff = end - begin
-    println("rateInHz: (%s - %s ) = %s / %s".format(end, begin, count, timeDiff.inSeconds))
-    count / timeDiff.inSeconds.toDouble
+    count / timeDiff.inSeconds
   }
 
   override def toString = collection.toString

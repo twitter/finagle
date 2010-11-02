@@ -15,7 +15,18 @@ object StatisticSpec extends Specification {
       c.sum must be_==(2)
 
       c.add(1, 1000)
-      c.sum must be_==(1002)
+      c.sum must be_==(3)
+      c.count must be_==(1002)
+    }
+
+    "compute averages" in {
+      val c = new ScalarStatistic
+      for (i <- 1 to 100)
+        c.add(i)
+
+      c.count must be_==(100)
+      c.sum must be_==(50 * (1+100))
+      c.average must be_==(50)
     }
   }
 
@@ -25,28 +36,33 @@ object StatisticSpec extends Specification {
     "keep a total sum over its window" in {
       val c = new TimeWindowedStatistic[ScalarStatistic](10, 10.seconds)
       c.sum must be_==(0)
-      c.add(1, 1000)
-      c.sum must be_==(1000)
+      c.add(1, 1)
+      c.sum must be_==(1)
+      c.count must be_==(1)
 
       Time.advance(11.seconds)
       c.add(1)
-      c.sum must be_==(1001)
+      c.sum must be_==(2)
+      c.count must be_==(2)
 
       Time.advance(80.seconds)
       c.add(1)
-      c.sum must be_==(1002)
+      c.sum must be_==(3)
+      c.count must be_==(3)
 
       Time.advance(10.seconds)
       c.sum must be_==(2)
+      c.count must be_==(2)
       c.add(1)
       c.sum must be_==(3)
+      c.count must be_==(3)
     }
 
     "keep a total sum over its window (2)" in {
       val c = new TimeWindowedStatistic[ScalarStatistic](10, 10.seconds)
 
       for (i <- 1 to 100) {
-        c.add(1)
+        c.add(1, 1)
         c.sum must be_==(i)
         Time.advance(1.seconds)
       }
@@ -62,20 +78,13 @@ object StatisticSpec extends Specification {
 
     "compute rate" in {
       val c = new TimeWindowedStatistic(10, 10.seconds)
-      println(1, c)
       c.add(1)
-      println(2, c)
-      c.rateInHz() must be_==(1/10.0)
-      println(3, c)
-      Time.advance(50.seconds)
-      c.add(1)
-      println(4, c)
-      c.rateInHz() must be_==(1)
+      c.rateInHz() must be_==(0)
 
       Time.advance(50.seconds)
       for (i <- 0 until 100) {
         c.rateInHz() must be_==(i)
-        c.add(60)
+        c.add(60, 60)
       }
     }
   }
