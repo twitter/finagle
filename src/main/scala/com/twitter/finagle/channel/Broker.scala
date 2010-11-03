@@ -27,14 +27,14 @@ class ReplyFuture extends DefaultChannelFuture(null, true) {
 
   def getReply = reply
 
-  def whenDone(f: => Unit): ReplyFuture = whenDone0 { () => f }
-  def whenDone0(f: Function0[Unit]) = {
+  def whenDone(f: => Unit): ReplyFuture = whenDone0 { _ => f }
+  def whenDone0(f: ReplyFuture => Unit) = {
     this onSuccessOrFailure {
       getReply match {
         case Reply.More(_, next) =>
           next.whenDone(f)
         case _ =>
-          f()
+          f(this)
       }
     }
     this

@@ -19,14 +19,14 @@ object StatisticSpec extends Specification {
       c.count must be_==(1002)
     }
 
-    "compute averages" in {
+    "compute means" in {
       val c = new ScalarStatistic
       for (i <- 1 to 100)
         c.add(i)
 
       c.count must be_==(100)
       c.sum must be_==(50 * (1+100))
-      c.average must be_==(50)
+      c.mean must be_==(50)
     }
   }
 

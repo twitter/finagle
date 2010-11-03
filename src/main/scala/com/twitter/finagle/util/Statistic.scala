@@ -14,7 +14,7 @@ trait Statistic {
   def sum: Int
   def count: Int
 
-  def average: Int = if (count != 0) sum / count else 0
+  def mean: Int = if (count != 0) sum / count else 0
 
   def add(value: Int): Unit = add(value, 1)
   def add(value: Int, count: Int)

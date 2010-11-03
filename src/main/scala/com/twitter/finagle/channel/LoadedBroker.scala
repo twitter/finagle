@@ -6,9 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.channel.MessageEvent
 
-import com.twitter.util.Time
+import com.twitter.util.{Time, Duration}
 import com.twitter.util.TimeConversions._
-import com.twitter.finagle.util.{TimeWindowedStatistic, ScalarStatistic}
+import com.twitter.finagle.util.{TimeWindowedStatistic, ScalarStatistic, Ok, Error}
+import com.twitter.finagle.util.Conversions._
 
 class TooFewDicksOnTheDanceFloorException extends Exception
 
@@ -20,21 +21,38 @@ trait LoadedBroker[A <: LoadedBroker[A]] extends Broker {
 /**
  * Keeps track of request latencies & counts.
  */
-class StatsLoadedBroker(underlying: Broker) extends LoadedBroker[StatsLoadedBroker]
+class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Duration)
+  extends LoadedBroker[StatsLoadedBroker]
 {
+  // Default: 10-minute window with 10-second buckets.
+  def this(underlying: Broker) = this(underlying, 60, 10.seconds)
+
+  private def makeStat = new TimeWindowedStatistic[ScalarStatistic](bucketCount, bucketDuration)
+
   // 5 minutes, 10 second intervals
-  private val dispatchStats = new TimeWindowedStatistic[ScalarStatistic](60, 10.seconds)
+  private val dispatchStats = makeStat
+  private val latencyStats  = makeStat 
+  private val failureStats  = makeStat 
 
   def dispatch(e: MessageEvent) = {
     val begin = Time.now
     dispatchStats.incr()
 
-    underlying.dispatch(e) whenDone {
-      dispatchStats.add(begin.ago.inMilliseconds.toInt, 0)
+    underlying.dispatch(e) whenDone0 { future =>
+      future {
+        case Ok(_) =>
+          latencyStats.add(begin.ago.inMilliseconds.toInt)
+        case Error(_) =>
+          // TODO: exception hierarchy here to differentiate between
+          // application, connection & other (internal?) exceptions.
+          failureStats.incr()
+      }
     }
   }
 
   def load = dispatchStats.count
+  // Fancy pants:
+  // latencyStats.sum + 2 * latencyStats.mean * failureStats.count
 }
 
 class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker {
