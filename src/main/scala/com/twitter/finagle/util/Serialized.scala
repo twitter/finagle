@@ -3,12 +3,12 @@ package com.twitter.finagle.util
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-class Serialized {
+trait Serialized {
   private val nwaiters = new AtomicInteger(0)
   private val executionQueue = new LinkedBlockingQueue[Function0[Unit]]
 
-  def apply[T](f: T => Unit): T => Unit = { x => this { f(x) } }
-  def apply(f: => Unit) {
+  def serialized[T](f: T => Unit): T => Unit = { x => serialized { f(x) } }
+  def serialized(f: => Unit) {
     executionQueue offer { () => f }
 
     if (nwaiters.getAndIncrement() == 0) {

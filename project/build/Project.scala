@@ -1,7 +1,7 @@
 import sbt._
 
 class Project(info: ProjectInfo) extends DefaultProject(info) {
-  override def compileOrder = CompileOrder.JavaThenScala
+  // override def compileOrder = CompileOrder.JavaThenScala
   override def managedStyle = ManagedStyle.Maven
 
   val nettyRepo = "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"

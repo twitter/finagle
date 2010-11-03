@@ -17,22 +17,21 @@ class BrokeredChannel(
   pipeline: ChannelPipeline,
   sink: ChannelSink)
   extends AbstractChannel(null/* parent */, factory, pipeline, sink)
+  with Serialized
 {
   val config = new DefaultChannelConfig
   private val localAddress = new LocalAddress(LocalAddress.EPHEMERAL)
   @volatile private var broker: Option[Broker] = None
   private var waitingForReply: Option[ReplyFuture] = None
 
-  val serializer = new Serialized
-
-  protected[channel] def realConnect(broker: Broker, future: ChannelFuture) = serializer {
+  protected[channel] def realConnect(broker: Broker, future: ChannelFuture) = serialized {
     this.broker = Some(broker)
     future.setSuccess()
     Channels.fireChannelConnected(this, broker)
     Channels.fireChannelBound(this, broker)
   }
 
-  protected[channel] def realClose(future: ChannelFuture) = serializer {
+  protected[channel] def realClose(future: ChannelFuture) = serialized {
     for (reply <- waitingForReply)
       reply.cancel()
 
@@ -47,13 +46,13 @@ class BrokeredChannel(
     }
   }
 
-  protected[channel] def realWrite(e: MessageEvent): Unit = serializer {
+  protected[channel] def realWrite(e: MessageEvent): Unit = serialized {
     broker match {
       case Some(broker) if !waitingForReply.isDefined =>
         val replyFuture = broker.dispatch(e)
         waitingForReply = Some(replyFuture)
 
-        e.getFuture() { serializer {
+        e.getFuture() { serialized {
           case Ok(_) if this.isOpen =>
             Channels.fireWriteComplete(this, 1)
           case Error(cause) if isOpen =>
@@ -74,7 +73,7 @@ class BrokeredChannel(
   }
 
   def proxyMessages(replyFuture: ReplyFuture): Unit =
-    replyFuture { state => serializer {
+    replyFuture { state => serialized {
       if (!isOpen)  // ignore closed channels.
         return
 

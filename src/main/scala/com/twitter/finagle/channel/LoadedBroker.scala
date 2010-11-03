@@ -31,8 +31,12 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
 
   // 5 minutes, 10 second intervals
   private val dispatchStats = makeStat
-  private val latencyStats  = makeStat 
-  private val failureStats  = makeStat 
+  private val latencyStats  = makeStat
+  private val failureStats  = makeStat
+
+  def dispatchStatsXX: com.twitter.finagle.util.Statistic = dispatchStats
+  // ...
+
 
   def dispatch(e: MessageEvent) = {
     val begin = Time.now
