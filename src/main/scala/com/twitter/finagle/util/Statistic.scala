@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.util.{Duration, Time}
 import com.twitter.util.TimeConversions._
 
+// TODO: do we want a decaying stat?
+
 trait Statistic {
   // Future:  def sumOfSquares: Int
   def sum: Int
@@ -16,6 +18,8 @@ trait Statistic {
 
   def add(value: Int): Unit = add(value, 1)
   def add(value: Int, count: Int)
+
+  def incr(): Unit = add(0, 1)
 }
 
 class ScalarStatistic extends Statistic {
@@ -35,10 +39,10 @@ class ScalarStatistic extends Statistic {
 }
 
 class TimeWindowedStatistic[S <: Statistic](bucketCount: Int, bucketDuration: Duration)
+  (implicit val _s: Manifest[S])
   extends Statistic
 {
-  val collection = new TimeWindowedCollection[ScalarStatistic](bucketCount, bucketDuration)
-
+  val collection = new TimeWindowedCollection[S](bucketCount, bucketDuration)
   def add(count: Int, value: Int) = collection().add(count, value)
   def sum = collection.map(_.sum).sum
   def count = collection.map(_.count).sum

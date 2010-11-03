@@ -10,6 +10,8 @@ import org.jboss.netty.channel.{
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
+class CancelledConnectionException extends Exception
+
 trait ConnectingChannelBroker extends Broker {
   def getChannel: ChannelFuture
   def putChannel(channel: Channel)
@@ -30,7 +32,8 @@ trait ConnectingChannelBroker extends Broker {
       case Error(cause) =>
         replyFuture.setFailure(cause)
 
-      case Cancelled => ()
+      case Cancelled =>
+        replyFuture.setFailure(new CancelledConnectionException)
     }
 
     replyFuture

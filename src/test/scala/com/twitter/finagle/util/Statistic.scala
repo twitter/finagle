@@ -77,7 +77,7 @@ object StatisticSpec extends Specification {
     }
 
     "compute rate" in {
-      val c = new TimeWindowedStatistic(10, 10.seconds)
+      val c = new TimeWindowedStatistic[ScalarStatistic](10, 10.seconds)
       c.add(1)
       c.rateInHz() must be_==(0)
 
