@@ -11,5 +11,9 @@ class BootstrapBroker(bootstrap: ClientBootstrap) extends ConnectingChannelBroke
     throw new IllegalArgumentException("bootstrap remoteAddress is required")
 
   def getChannel = bootstrap.connect()
-  def putChannel(channel: Channel) = Channels.close(channel)
+  def putChannel(channel: Channel) = close(channel)
+
+  private[channel] def close(channel: Channel) {
+    Channels.close(channel)
+  }
 }
