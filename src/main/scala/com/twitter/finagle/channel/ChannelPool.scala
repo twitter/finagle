@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 class ChannelPool(clientBootstrap: ClientBootstrap) {
   private val queue = new ConcurrentLinkedQueue[Channel]
-  
+
   def reserve() = {
     var channel: Channel = null
     do {
