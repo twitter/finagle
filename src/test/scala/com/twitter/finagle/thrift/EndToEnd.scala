@@ -34,7 +34,7 @@ object PickRandomPort {
   def apply(): Int = {
     val retries = 5
     for (i <- 0 until retries) {
-      val port = (math.abs(rng.nextInt) % 65000) + 1024
+      val port = (math.abs(rng.nextInt) % 64510) + 1024
       val address = new InetSocketAddress(InetAddress.getLocalHost, port)
       val sock = new Socket
       try {
