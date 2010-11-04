@@ -74,16 +74,16 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker
     // TODO: test this & other edge cases
     if (totalSum <= 0.0f)
       return ReplyFuture.failed(new TooFewDicksOnTheDanceFloorException)
-
     val pick = rng.nextFloat()
 
     var cumulativeWeight = 0.0
-    for ((balancer, weight) <- snapshot) {
+    for ((endpoint, weight) <- snapshot) {
       val normalizedWeight = weight / totalSum
       cumulativeWeight += normalizedWeight
-      if (pick < cumulativeWeight) return balancer.dispatch(e)
+      if (pick < cumulativeWeight)
+        return endpoint.dispatch(e)
     }
 
-    ReplyFuture.failed(new TooFewDicksOnTheDanceFloorException)
+    null // Impossible
   }
 }
