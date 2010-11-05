@@ -41,13 +41,12 @@ trait ConnectingChannelBroker extends Broker {
 
   protected def connectChannel(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) {
     val handler = new ChannelConnectingHandler(replyFuture, to)
-    to.getPipeline.addLast("handler", handler)
+    to.getPipeline.addLast("connectionHandler", handler)
     Channels.write(to, e.getMessage).proxyTo(e.getFuture)
   }
 
   private class ChannelConnectingHandler(
-    firstReplyFuture: ReplyFuture,
-    to: Channel)
+    firstReplyFuture: ReplyFuture, to: Channel)
     extends SimpleChannelUpstreamHandler
   {
     var replyFuture = firstReplyFuture
@@ -59,8 +58,8 @@ trait ConnectingChannelBroker extends Broker {
           replyFuture.setReply(Reply.More(message, next))
           replyFuture = next
         case _ =>
-          replyFuture.setReply(Reply.Done(e.getMessage))
           to.getPipeline.remove(this)
+          replyFuture.setReply(Reply.Done(e.getMessage))
       }
     }
 
