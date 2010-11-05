@@ -116,5 +116,19 @@ object SampleSpec extends Specification {
       n1.count must be_==(1)
       n1.mean must be_==(123)
     }
+
+    "print a nice tree" in {
+      for (i <- 0 until 100; n <- Seq(n11, n12, n21, n22))
+        n.add(i)
+
+      tree.toString must be_==(
+        """root [count=400, sum=19800, mean=49]
+          |_n1 [count=200, sum=9900, mean=49]
+          |__n11 [count=100, sum=4950, mean=49]
+          |__n12 [count=100, sum=4950, mean=49]
+          |_n2 [count=200, sum=9900, mean=49]
+          |__n21 [count=100, sum=4950, mean=49]
+          |__n22 [count=100, sum=4950, mean=49]""" stripMargin)
+    }
   }
 }

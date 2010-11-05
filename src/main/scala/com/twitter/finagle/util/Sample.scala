@@ -14,6 +14,8 @@ trait Sample {
   def sum: Int
   def count: Int
   def mean: Int = if (count != 0) sum / count else 0
+
+  override def toString = "[count=%d, sum=%d, mean=%d]".format(count, sum, mean)
 }
 
 trait AddableSample extends Sample {
@@ -33,8 +35,6 @@ class ScalarSample extends AddableSample with Serialized {
     counter += count
     accumulator += value
   }
-
-  override def toString = "(Count: %s, Sum: %s)".format(count, sum)
 }
 
 trait AggregateSample extends Sample {
@@ -65,7 +65,19 @@ class TimeWindowedSample[S <: AddableSample](bucketCount: Int, bucketDuration: D
 }
 
 sealed abstract class SampleTree extends AggregateSample
-case class SampleNode(name: String, underlying: Seq[SampleTree]) extends SampleTree
-case class SampleLeaf(name: String, sample: Sample) extends SampleTree {
+
+case class SampleNode(name: String, underlying: Seq[SampleTree])
+  extends SampleTree
+{
+  override def toString = {
+    val lines = underlying flatMap (_.toString.split("\n")) map ("_" + _) mkString "\n"
+    "%s %s".format(name, super.toString) + "\n" + lines
+  }
+}
+
+case class SampleLeaf(name: String, sample: Sample)
+  extends SampleTree
+{
   val underlying = Seq(sample)
+  override def toString = "%s %s".format(name, super.toString)
 }
