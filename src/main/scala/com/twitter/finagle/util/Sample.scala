@@ -64,6 +64,8 @@ class TimeWindowedSample[S <: AddableSample](bucketCount: Int, bucketDuration: D
   override def toString = underlying.toString
 }
 
+// TODO: aggregate per *LEAF name*
+
 sealed abstract class SampleTree extends AggregateSample
 
 case class SampleNode(name: String, underlying: Seq[SampleTree])
