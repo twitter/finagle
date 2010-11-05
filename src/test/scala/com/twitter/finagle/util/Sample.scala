@@ -5,10 +5,10 @@ import org.specs.Specification
 import com.twitter.util.Time
 import com.twitter.util.TimeConversions._
 
-object StatisticSpec extends Specification {
-  "scalar statistics" should {
+object SampleSpec extends Specification {
+  "scalar samples" should {
     "count!" in {
-      val c = new ScalarStatistic
+      val c = new ScalarSample
       c.sum must be_==(0)
       c.add(1)
       c.add(1)
@@ -20,7 +20,7 @@ object StatisticSpec extends Specification {
     }
 
     "compute means" in {
-      val c = new ScalarStatistic
+      val c = new ScalarSample
       for (i <- 1 to 100)
         c.add(i)
 
@@ -34,7 +34,7 @@ object StatisticSpec extends Specification {
     Time.freeze()
 
     "keep a total sum over its window" in {
-      val c = new TimeWindowedStatistic[ScalarStatistic](10, 10.seconds)
+      val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
       c.sum must be_==(0)
       c.add(1, 1)
       c.sum must be_==(1)
@@ -59,7 +59,7 @@ object StatisticSpec extends Specification {
     }
 
     "keep a total sum over its window (2)" in {
-      val c = new TimeWindowedStatistic[ScalarStatistic](10, 10.seconds)
+      val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
 
       for (i <- 1 to 100) {
         c.add(1, 1)
@@ -77,7 +77,7 @@ object StatisticSpec extends Specification {
     }
 
     "compute rate" in {
-      val c = new TimeWindowedStatistic[ScalarStatistic](10, 10.seconds)
+      val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
       c.add(1)
       c.rateInHz() must be_==(0)
 
@@ -86,6 +86,35 @@ object StatisticSpec extends Specification {
         c.rateInHz() must be_==(i)
         c.add(60, 60)
       }
+    }
+  }
+
+  "sample trees" should {
+    val n11 = new ScalarSample
+    val n12 = new ScalarSample
+    val n21 = new ScalarSample
+    val n22 = new ScalarSample
+
+    val tree = SampleNode(
+      "root", Seq(
+        SampleNode("n1", Seq(SampleLeaf("n11", n11), SampleLeaf("n12", n12))),
+        SampleNode("n2", Seq(SampleLeaf("n21", n21), SampleLeaf("n22", n22)))
+      )
+    )
+
+    "aggregate up the tree" in {
+      tree.count must be_==(0)
+      n11.add(123)
+      tree.count must be_==(1)
+      tree.mean  must be_==(123)
+
+      n21.add(123*2)
+      tree.count must be_==(2)
+      tree.mean  must be_==((123 * 3) / 2)
+
+      val SampleNode(_, Seq(n1, _)) = tree
+      n1.count must be_==(1)
+      n1.mean must be_==(123)
     }
   }
 }
