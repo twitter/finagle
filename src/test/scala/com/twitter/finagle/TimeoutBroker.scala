@@ -40,7 +40,7 @@ object TimeoutBrokerSpec extends Specification with Mockito {
       val replyFuture = timeoutBroker.dispatch(event)
       timer.theTask must beSomething
       val Some(theTask) = timer.theTask
-      
+
       replyFuture.isDone must beFalse
       theTask.run(timeout)
       replyFuture.isDone must beTrue
@@ -49,7 +49,7 @@ object TimeoutBrokerSpec extends Specification with Mockito {
     }
 
     "cancel when succeeded" in {
-      val replyFuture = timeoutBroker.dispatch(event)      
+      val replyFuture = timeoutBroker.dispatch(event)
       timer.theTask must beSomething
       replyFuture.setSuccess()
       there was one(timeout).cancel()
