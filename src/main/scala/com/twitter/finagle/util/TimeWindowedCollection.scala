@@ -32,7 +32,7 @@ class TimeWindowedCollection[A](bucketCount: Int, bucketDuration: Duration)
       buckets = buckets.slice(0, index)
   }
 
-  private def prepend(now: Time) = synchronized {
+  private[util] def prepend(now: Time) = synchronized {
     gc(now)
 
     val instance = newInstance
@@ -61,8 +61,8 @@ class TimeWindowedCollection[A](bucketCount: Int, bucketDuration: Duration)
       bucketDetails.mkString("\n\t", ",\n\t", "")
     }
 
-    "TimeWindowedCollection[%s](%d buckets of %s sec) = [%s]".format(
-      _a.erasure.getName, bucketCount, bucketDuration, details getOrElse "")
+    "TimeWindowedCollection[%s](%d buckets of %s sec, spanning %s) = [%s]".format(
+      _a.erasure.getName, bucketCount, bucketDuration, details getOrElse "", timeSpan)
   }
 
   def timeSpan = {
