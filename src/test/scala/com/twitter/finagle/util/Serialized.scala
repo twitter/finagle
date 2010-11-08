@@ -1,52 +1,44 @@
 package com.twitter.finagle.util
 
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.CountDownLatch
 
 import org.specs.Specification
 
 object SerializedSpec extends Specification with Serialized {
   "Serialized" should {
-    "serialize computations" in {
-      @volatile var count = 0
+    "runs blocks, one at a time, in the order received" in {
+      val t1CallsSerializedFirst = new CountDownLatch(1)
+      val t1FinishesWork = new CountDownLatch(1)
+      val orderOfExecution = new collection.mutable.ListBuffer[Thread]
 
-      def normalIncr {
-        count += 1
-      }
-
-      def serialIncr {
-        serialized { normalIncr() }
-      }
-
-      def alive(ts: Seq[Thread]): Boolean = ts.count(_.isAlive) > 0
-      def waitFor(f: Function0[Boolean]) {
-        while (f()) Thread.`yield`
-      }
-
-      def performManyParallel(incrFn: => Unit): Boolean = {
-        for (i <- 1 to 100) {
-          count = 0
-          var started = new AtomicInteger(0)
-          val mutators = for (i <- 1 to 100) yield new Thread {
-            override def run {
-              started.getAndIncrement()
-              incrFn()
-            }
+      val t1 = new Thread {
+        override def run {
+          serialized {
+            t1CallsSerializedFirst.countDown()
+            t1FinishesWork.await()
+            orderOfExecution += this
+            ()
           }
-          mutators.foreach(_.start)
-          while (started.get < 100 && mutators.count(_.isAlive) > 0) Thread.sleep(10)
-          if (count != 100) return false
         }
-
-        true
       }
 
-      "computations are unordered sans serializer" in {
-        performManyParallel(normalIncr) must beFalse
+      val t2 = new Thread {
+        override def run {
+          t1CallsSerializedFirst.await()
+          serialized {
+            orderOfExecution += this
+            ()
+          }
+          t1FinishesWork.countDown()
+        }
       }
 
-      "computations are ordered with serializer" in {
-        performManyParallel(serialIncr) must beTrue
-      }
+      t1.start()
+      t2.start()
+      t1.join()
+      t2.join()
+
+      orderOfExecution.toList mustEqual List(t1, t2)
     }
   }
 }
