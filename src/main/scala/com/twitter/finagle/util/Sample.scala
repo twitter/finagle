@@ -64,22 +64,67 @@ class TimeWindowedSample[S <: AddableSample](bucketCount: Int, bucketDuration: D
   override def toString = underlying.toString
 }
 
-// TODO: aggregate per *LEAF name*
+// There's also nothing to prevent samples of different kinds of be
+// added together here..
 
-sealed abstract class SampleTree extends AggregateSample
+// A sample tree is per *name*.  thus, leafs do not have names also?
+// Or they do.
 
-case class SampleNode(name: String, underlying: Seq[SampleTree])
-  extends SampleTree
+sealed abstract class SampleTree extends AggregateSample {
+  val name: String
+  def merge(other: SampleTree): SampleTree
+}
+
+case class SampleNode(name: String, underlying: Seq[SampleTree]) extends SampleTree
 {
+  // Trees must have the same shape?
+  def merge(other: SampleTree) =
+    other match {
+      case SampleNode(otherName, otherUnderlying) if name == otherName =>
+        // For the same name.
+         
+        val ourNames   = Map() ++ (underlying      map { n => (n.name -> n) })
+        val theirNames = Map() ++ (otherUnderlying map { n => (n.name -> n) })
+         
+        val shared =
+          ourNames.keySet intersect theirNames.keySet map { name =>
+            ourNames(name) merge theirNames(name)
+          }
+        val onlyOurs   = ourNames.keySet   -- theirNames.keySet map { ourNames(_) }
+        val onlyTheirs = theirNames.keySet -- ourNames.keySet   map { theirNames(_) }
+
+        SampleNode(name, (shared ++ onlyOurs ++ onlyTheirs) toSeq)
+
+      // XXX - shape divergence!
+
+      case SampleLeaf(otherName, sample) if name == otherName =>
+        // XXX incorrect.  what we have here is a "side aggregate"
+        SampleNode(name, Seq(this, other))
+
+      case other: SampleTree =>
+        SampleNode("XXX", Seq(this, other))
+    }
+
   override def toString = {
     val lines = underlying flatMap (_.toString.split("\n")) map ("_" + _) mkString "\n"
     "%s %s".format(name, super.toString) + "\n" + lines
   }
 }
 
-case class SampleLeaf(name: String, sample: Sample)
-  extends SampleTree
+case class SampleLeaf(name: String, sample: Sample) extends SampleTree
 {
   val underlying = Seq(sample)
   override def toString = "%s %s".format(name, super.toString)
+
+  def merge(other: SampleTree) = {
+    other match {
+      case SampleLeaf(otherName, otherSample) if name == otherName =>
+        SampleLeaf(name, new AggregateSample { val underlying = Seq(sample, otherSample) })
+
+      // Shape divergence!
+      case _ =>
+        throw new IllegalArgumentException("shape divergence!")
+    }
+  }
 }
+

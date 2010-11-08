@@ -24,8 +24,9 @@ trait ConnectingChannelBroker extends Broker {
         putChannel(channel)
 
       case Ok(channel) =>
-        connectChannel(channel, e, replyFuture)
-        replyFuture whenDone {
+        // TODO: indicate failure to the pool here, or have it
+        // determine that?
+        connectChannel(channel, e, replyFuture) onSuccessOrFailure {
           putChannel(channel)
         }
 
@@ -39,17 +40,24 @@ trait ConnectingChannelBroker extends Broker {
     replyFuture
   }
 
-  protected def connectChannel(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) {
-    val handler = new ChannelConnectingHandler(replyFuture, to)
+  protected def connectChannel(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) = {
+    val doneFuture = Channels.future(to)
+    val handler = new ChannelConnectingHandler(replyFuture, doneFuture, to)
     to.getPipeline.addLast("connectionHandler", handler)
     Channels.write(to, e.getMessage).proxyTo(e.getFuture)
+    doneFuture
   }
 
   private class ChannelConnectingHandler(
-    firstReplyFuture: ReplyFuture, to: Channel)
+    firstReplyFuture: ReplyFuture, doneFuture: ChannelFuture, to: Channel)
     extends SimpleChannelUpstreamHandler
   {
     var replyFuture = firstReplyFuture
+
+    def done() {
+      to.getPipeline.remove(this)
+      doneFuture.setSuccess()
+    }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
       e match {
@@ -58,8 +66,8 @@ trait ConnectingChannelBroker extends Broker {
           replyFuture.setReply(Reply.More(message, next))
           replyFuture = next
         case _ =>
-          to.getPipeline.remove(this)
           replyFuture.setReply(Reply.Done(e.getMessage))
+          done()
       }
     }
 
@@ -67,10 +75,12 @@ trait ConnectingChannelBroker extends Broker {
     // on errors. (This is probably the only sane policy).
     override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
       replyFuture.setFailure(new ClosedChannelException)
+      done()
     }
 
     override def exceptionCaught(ctx: ChannelHandlerContext, exc: ExceptionEvent) {
       replyFuture.setFailure(exc.getCause)
+      done()
     }
   }
 }

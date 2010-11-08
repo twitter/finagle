@@ -1,9 +1,7 @@
 package com.twitter.finagle.http
 
-import org.jboss.netty.channel.{
-  SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
-import org.jboss.netty.handler.codec.http.{
-  HttpChunkTrailer, HttpResponse, HttpChunk}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.channel.PartialUpstreamMessageEvent
 

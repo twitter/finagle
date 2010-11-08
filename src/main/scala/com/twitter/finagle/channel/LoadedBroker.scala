@@ -42,10 +42,12 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
   private val latencyStats  = makeStat
   private val failureStats  = makeStat
 
+  // TODO: some sort of uniform interface here to simply export a
+  // tree?
   val samples = Seq(
-    SampleLeaf("count",   dispatchStats),
-    SampleLeaf("latency", latencyStats),
-    SampleLeaf("failure", failureStats)
+    "count"   -> dispatchStats,
+    "latency" -> latencyStats,
+    "failure" -> failureStats
   )
 
   def dispatch(e: MessageEvent) = {
