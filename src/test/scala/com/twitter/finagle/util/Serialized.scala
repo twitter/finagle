@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import java.util.concurrent.{CountDownLatch, CyclicBarrier}
+import java.util.concurrent.CountDownLatch
 
 import org.specs.Specification
 
