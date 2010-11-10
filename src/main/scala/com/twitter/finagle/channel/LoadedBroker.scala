@@ -48,7 +48,6 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
     new ConcurrentHashMap[String, TimeWindowedSample[ScalarSample]]
 
   def roots = Seq(
-    SampleLeaf("count", dispatchStats),
     SampleLeaf("latency", latencyStats),
     SampleNode("failure", exceptionStats map ((SampleLeaf(_, _)).tupled) toSeq)
   )
