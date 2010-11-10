@@ -10,7 +10,9 @@ class PoolingBrokerSpec extends Specification with Mockito {
   "PoolingBroker" should {
     val someMessage = mock[Object]
     val reservedPipeline = Channels.pipeline()
-    reservedPipeline.addLast("silenceWarnings", new SimpleChannelUpstreamHandler)
+    // Leaky: when we use a BrokerClientBootstrap, we get this for
+    // free.
+    reservedPipeline.addLast("brokerAdapter", new BrokerAdapter)
     val reservedChannel = new BrokeredChannelFactory().newChannel(reservedPipeline)
 
     val pool = mock[ChannelPool]

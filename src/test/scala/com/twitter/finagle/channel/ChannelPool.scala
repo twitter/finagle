@@ -10,7 +10,7 @@ import org.specs.mock.Mockito
 
 object ChannelPoolSpec extends Specification with Mockito {
   "ChannelPool" should {
-      val bs = mock[ClientBootstrap]
+      val bs = mock[BrokerClientBootstrap]
       val cp = new ChannelPool(bs)
       val f1 = mock[ChannelFuture]
       val c1 = mock[Channel]

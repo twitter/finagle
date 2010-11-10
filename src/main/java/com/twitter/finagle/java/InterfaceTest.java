@@ -31,7 +31,7 @@ class InterfaceTest {
             Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
 
-    final ClientBootstrap clientBootstrap = new ClientBootstrap(channelFactory);
+    final BrokerClientBootstrap clientBootstrap = new BrokerClientBootstrap(channelFactory);
     clientBootstrap.setPipelineFactory(
         new ChannelPipelineFactory() {
           @Override

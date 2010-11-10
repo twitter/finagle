@@ -1,6 +1,7 @@
 package com.twitter.finagle.channel
 
 import scala.util.Random
+import scala.collection.mutable.HashMap
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -9,7 +10,7 @@ import org.jboss.netty.channel.MessageEvent
 import com.twitter.util.{Time, Duration}
 import com.twitter.util.TimeConversions._
 import com.twitter.finagle.util.{
-  TimeWindowedSample, ScalarSample, Ok, Error, SampleLeaf}
+  TimeWindowedSample, ScalarSample, Ok, Error, SampleLeaf, SampleNode}
 
 import com.twitter.finagle.util.Conversions._
 
@@ -42,13 +43,27 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
   private val latencyStats  = makeStat
   private val failureStats  = makeStat
 
+  private val exceptionStats =
+    new HashMap[String, TimeWindowedSample[ScalarSample]] {
+      override def default(key: String) = makeStat
+    }
+
   // TODO: some sort of uniform interface here to simply export a
   // tree?
-  val samples = Seq(
-    "count"   -> dispatchStats,
-    "latency" -> latencyStats,
-    "failure" -> failureStats
+  def roots = Seq(
+    SampleLeaf("count", dispatchStats),
+    SampleLeaf("latency", latencyStats),
+    SampleNode("failure", exceptionStats map ((SampleLeaf(_, _)).tupled) toSeq)
   )
+
+  def samples = {
+    println("SAMPLES ~~ " + exceptionStats.keys)
+    Seq(
+      "count"   -> dispatchStats,
+      "latency" -> latencyStats,
+      "failure" -> failureStats
+    ) ++ (exceptionStats map { case (name, sample) => ("exc_%s".format(name) -> sample) })
+  }
 
   def dispatch(e: MessageEvent) = {
     val begin = Time.now
@@ -58,10 +73,12 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
       future {
         case Ok(_) =>
           latencyStats.add(begin.ago.inMilliseconds.toInt)
-        case Error(_) =>
+        case Error(e) =>
           // TODO: exception hierarchy here to differentiate between
           // application, connection & other (internal?) exceptions.
-          failureStats.incr()
+          val s = exceptionStats(e.getClass.getName)
+          s.add(begin.ago.inMilliseconds.toInt)
+          exceptionStats(e.getClass.getName) = s
       }
     }
   }
