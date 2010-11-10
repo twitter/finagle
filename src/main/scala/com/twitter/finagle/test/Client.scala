@@ -41,43 +41,42 @@ object ClientTest {
   }
 
   def main(args: Array[String]) {
-    (new Builder("localhost:10000,localhost:10001", Http)).connectionTimeout(100, TimeUnit.MILLISECONDS).requestTimeout(1000, TimeUnit.MILLISECONDS).build()
+    val broker = Builder()
+                  .hosts("localhost:1000,localhost:1001")
+                  .codec(Http)
+                  .connectionTimeout(100, TimeUnit.MILLISECONDS)
+                  .requestTimeout(1000, TimeUnit.MILLISECONDS)
+                  .build()
 
-    val endpoints = 0 until 10 map { off => ("localhost", 10000 + off) }
-    val bootstraps = endpoints map (makeBootstrap _).tupled
-    val brokers = bootstraps map (
-      (new ChannelPool(_))                               andThen
-      (new PoolingBroker(_))                             andThen
-      (new TimeoutBroker(_, 100, TimeUnit.MILLISECONDS)) andThen
-      (new StatsLoadedBroker(_)))
+    // def rewrite(label: String, tree: SampleTree): SampleTree =
+    //   tree match {
+    //     case SampleNode(name, children) =>
+    //       SampleNode(name, children map (rewrite(label, _)))
+    //     case SampleLeaf(name, sample) =>
+    //       SampleNode(name, Seq(SampleLeaf(label, sample)))
+    //   }
 
-    def rewrite(label: String, tree: SampleTree): SampleTree =
-      tree match {
-        case SampleNode(name, children) =>
-          SampleNode(name, children map (rewrite(label, _)))
-        case SampleLeaf(name, sample) =>
-          SampleNode(name, Seq(SampleLeaf(label, sample)))
-      }
+    // def printStats() {
+    //   val roots = for {
+    //     (broker, (host, port)) <- brokers zip endpoints
+    //     root <- broker.roots
+    //   } yield {
+    //     // Rewrite it so that the host:port is included as well, for
+    //     // rollup.  (We keep this at the leafs).
+    //     rewrite("%s:%d".format(host, port), root)
+    //   }
 
-    def printStats() {
-      val roots = for {
-        (broker, (host, port)) <- brokers zip endpoints
-        root <- broker.roots
-      } yield {
-        // Rewrite it so that the host:port is included as well, for
-        // rollup.  (We keep this at the leafs).
-        rewrite("%s:%d".format(host, port), root)
-      }
+    //   for ((_, roots) <- roots groupBy (_.name)) {
+    //     val combined = roots.reduceLeft(_.merge(_))
+    //     println(combined)
+    //   }
+    // }
 
-      for ((_, roots) <- roots groupBy (_.name)) {
-        val combined = roots.reduceLeft(_.merge(_))
-        println(combined)
-      }
-    }
+    // val loadBalanced = new LoadBalancedBroker(brokers)
 
-    val loadBalanced = new LoadBalancedBroker(brokers)
+    def printStats() {}
 
-    val client = new Client[HttpRequest, HttpResponse](loadBalanced)
+    val client = new Client[HttpRequest, HttpResponse](broker)
 
     for (_ <- 0 until 100)
       makeRequest(client, printStats)
@@ -90,7 +89,7 @@ object ClientTest {
       case _ =>
         if (count.incrementAndGet() % 100 == 0)
           printer()
-  
+
         makeRequest(client, printer)
     }
   }
