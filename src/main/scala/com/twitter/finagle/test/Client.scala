@@ -13,8 +13,11 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel._
+import com.twitter.finagle.client.Client
 
-object Client {
+import com.twitter.util.{Return, Throw}
+
+object ClientTest {
   val channelFactory =
     new NioClientSocketChannelFactory(
       Executors.newCachedThreadPool(),
@@ -31,7 +34,7 @@ object Client {
     }
 
   def makeBootstrap(host: String, port: Int) = {
-    val bs = new ClientBootstrap(channelFactory)
+    val bs = new BrokerClientBootstrap(channelFactory)
     bs.setPipelineFactory(theCodecChannelPipelineFactory)
     bs.setOption("remoteAddress", new InetSocketAddress(host, port))
     bs
@@ -46,61 +49,47 @@ object Client {
       (new TimeoutBroker(_, 100, TimeUnit.MILLISECONDS)) andThen
       (new StatsLoadedBroker(_)))
 
-    val stats = for {
-      (broker, (host, port)) <- brokers zip endpoints
-      (name, sample) <- broker.samples
-    } yield (name, SampleNode(name, Seq(SampleLeaf("%s:%d".format(host, port), sample))).asInstanceOf[SampleTree])
+    def rewrite(label: String, tree: SampleTree): SampleTree =
+      tree match {
+        case SampleNode(name, children) =>
+          SampleNode(name, children map (rewrite(label, _)))
+        case SampleLeaf(name, sample) =>
+          SampleNode(name, Seq(SampleLeaf(label, sample)))
+      }
 
-    val xx = stats groupBy { case (name, _) => name }
+    def printStats() {
+      val roots = for {
+        (broker, (host, port)) <- brokers zip endpoints
+        root <- broker.roots
+      } yield {
+        // Rewrite it so that the host:port is included as well, for
+        // rollup.  (We keep this at the leafs).
+        rewrite("%s:%d".format(host, port), root)
+      }
 
-    val roots = for {
-      (_, namedTrees) <- stats groupBy { case (name, _) => name }
-    } yield namedTrees.map{case (a, b)=>b}.reduceLeft(_.merge(_))
+      for ((_, roots) <- roots groupBy (_.name)) {
+        val combined = roots.reduceLeft(_.merge(_))
+        println(combined)
+      }
+    }
 
     val loadBalanced = new LoadBalancedBroker(brokers)
 
-    // TODO: Set up stats tree.
+    val client = new Client[HttpRequest, HttpResponse](loadBalanced)
 
-    val count = new AtomicInteger(0)
+    for (_ <- 0 until 100)
+      makeRequest(client, printStats)
+  }
 
-    val brokeredBootstrap = new ClientBootstrap(new BrokeredChannelFactory())
-    brokeredBootstrap.setPipelineFactory(
-      new ChannelPipelineFactory {
-        def getPipeline = {
-          val pipeline = Channels.pipeline()
-          pipeline.addLast(
-            "handler",
-            new SimpleChannelUpstreamHandler {
-              override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-                if (count.incrementAndGet() % 10000 == 0)
-                  roots foreach { root => println(root) }
+  val count = new AtomicInteger(0)
 
-                brokeredBootstrap.connect() {
-                  case Ok(channel) =>
-                    val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-                    Channels.write(channel, request)
-                }
-              }
-
-              override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-                // println("EXC! %s".format(e.getCause))
-                // swallow.
-              }
-
-            }
-          )
-          pipeline
-        }
-      }
-    )
-    brokeredBootstrap.setOption("remoteAddress", loadBalanced)
-
-    for (_ <- 0 until 1000) {
-      brokeredBootstrap.connect() {
-        case Ok(channel) =>
-          val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-          Channels.write(channel, request)
-      }
+  def makeRequest(client: Client[HttpRequest, HttpResponse], printer: () => Unit) {
+    client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")) respond {
+      case _ =>
+        if (count.incrementAndGet() % 100 == 0)
+          printer()
+  
+        makeRequest(client, printer)
     }
   }
 }
