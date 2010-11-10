@@ -13,7 +13,7 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel._
-import com.twitter.finagle.client.Client
+import com.twitter.finagle.client.{Client, Builder, Http}
 
 import com.twitter.util.{Return, Throw}
 
@@ -41,6 +41,8 @@ object ClientTest {
   }
 
   def main(args: Array[String]) {
+    (new Builder("localhost:10000,localhost:10001", Http)).connectionTimeout(100, TimeUnit.MILLISECONDS).requestTimeout(1000, TimeUnit.MILLISECONDS).build()
+
     val endpoints = 0 until 10 map { off => ("localhost", 10000 + off) }
     val bootstraps = endpoints map (makeBootstrap _).tupled
     val brokers = bootstraps map (
