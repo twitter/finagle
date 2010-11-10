@@ -2,8 +2,10 @@ package com.twitter.finagle.channel
 
 import scala.util.Random
 import scala.collection.mutable.HashMap
+import scala.collection.JavaConversions._
 
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.ConcurrentHashMap
 
 import org.jboss.netty.channel.MessageEvent
 
@@ -41,29 +43,15 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
   // 5 minutes, 10 second intervals
   private val dispatchStats = makeStat
   private val latencyStats  = makeStat
-  private val failureStats  = makeStat
 
   private val exceptionStats =
-    new HashMap[String, TimeWindowedSample[ScalarSample]] {
-      override def default(key: String) = makeStat
-    }
+    new ConcurrentHashMap[String, TimeWindowedSample[ScalarSample]]
 
-  // TODO: some sort of uniform interface here to simply export a
-  // tree?
   def roots = Seq(
     SampleLeaf("count", dispatchStats),
     SampleLeaf("latency", latencyStats),
     SampleNode("failure", exceptionStats map ((SampleLeaf(_, _)).tupled) toSeq)
   )
-
-  def samples = {
-    println("SAMPLES ~~ " + exceptionStats.keys)
-    Seq(
-      "count"   -> dispatchStats,
-      "latency" -> latencyStats,
-      "failure" -> failureStats
-    ) ++ (exceptionStats map { case (name, sample) => ("exc_%s".format(name) -> sample) })
-  }
 
   def dispatch(e: MessageEvent) = {
     val begin = Time.now
@@ -76,9 +64,10 @@ class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Du
         case Error(e) =>
           // TODO: exception hierarchy here to differentiate between
           // application, connection & other (internal?) exceptions.
-          val s = exceptionStats(e.getClass.getName)
-          s.add(begin.ago.inMilliseconds.toInt)
-          exceptionStats(e.getClass.getName) = s
+          val name = e.getClass.getName
+          if (!(exceptionStats containsKey name))
+            exceptionStats.putIfAbsent(name, makeStat)
+          exceptionStats(name).add(begin.ago.inMilliseconds.toInt)
       }
     }
   }
