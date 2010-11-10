@@ -78,18 +78,10 @@ case class SampleNode(name: String, underlying: Seq[SampleTree])
   def merge(other: SampleTree) =
     other match {
       case SampleNode(otherName, otherUnderlying) if name == otherName =>
-        val ourNames   = Map() ++ (underlying      map { n => (n.name -> n) })
-        val theirNames = Map() ++ (otherUnderlying map { n => (n.name -> n) })
-
-        val shared =
-          ourNames.keySet intersect theirNames.keySet map { name =>
-            ourNames(name) merge theirNames(name)
-          }
-
-        val onlyOurs   = ourNames.keySet   -- theirNames.keySet map { ourNames(_) }
-        val onlyTheirs = theirNames.keySet -- ourNames.keySet   map { theirNames(_) }
-
-        SampleNode(name, (shared ++ onlyOurs ++ onlyTheirs) toSeq)
+        val sampless =
+          (underlying ++ otherUnderlying) groupBy (_.name) map { case (_, samples) => samples }
+        val merged = sampless map { _.reduceLeft (_.merge(_)) }
+        SampleNode(name, merged toSeq)
 
       case _ =>
         throw new IllegalArgumentException("trees are shape divergent")
