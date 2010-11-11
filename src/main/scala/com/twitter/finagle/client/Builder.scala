@@ -86,19 +86,23 @@ case class Builder(
   _sampleWindow: Builder.Timeout,
   _sampleGranularity: Builder.Timeout,
   _name: Option[String],
-  _hostConnectionLimit: Option[Int])
+  _hostConnectionLimit: Option[Int],
+  _sendBufferSize: Option[Int],
+  _recvBufferSize: Option[Int])
 {
   import Builder._
   def this() = this(
-    None,
-    None,
-    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),
-    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),
-    None,
-    Builder.Timeout(10, TimeUnit.MINUTES),
-    Builder.Timeout(10, TimeUnit.SECONDS),
-    None,
-    None
+    None,                                                   // hosts
+    None,                                                   // codec
+    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
+    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
+    None,                                                   // statsReceiver
+    Builder.Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
+    Builder.Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
+    None,                                                   // name
+    None,                                                   // hostConnectionLimit
+    None,                                                   // sendBufferSize
+    None                                                    // recvBufferSize
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -130,6 +134,9 @@ case class Builder(
   def hostConnectionLimit(value: Int) =
     copy(_hostConnectionLimit = Some(value))
 
+  def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
+
   def build() = {
     val (hosts, codec) = (_hosts, _codec) match {
       case (None, _) =>
@@ -144,10 +151,14 @@ case class Builder(
       val bs = new BrokerClientBootstrap(channelFactory)
       bs.setPipelineFactory(codec.pipelineFactory)
       bs.setOption("remoteAddress", host)
+      bs.setOption("connectTimeoutMillis", _connectionTimeout.duration.inMilliseconds)
+      bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
+      // bs.setOption("soLinger", 0)  (TODO)
+      bs.setOption("reuseAddress", true)
+      _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
+      _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
       bs
      }
-
-    // TODO: request timeout
 
     val channelPool =
       _hostConnectionLimit map { limit =>
