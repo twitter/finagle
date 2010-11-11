@@ -26,27 +26,8 @@ import org.jboss.netty.channel.socket.nio.{
 import com.twitter.util.{Promise, Return, Throw}
 import com.twitter.util.TimeConversions._
 import com.twitter.silly.Silly
-
+import com.twitter.finagle.RandomSocket
 import com.twitter.finagle.util.Conversions._
-
-object PickRandomPort {
-  val rng = new Random
-  def apply(): Int = {
-    val retries = 5
-    for (i <- 0 until retries) {
-      val port = (math.abs(rng.nextInt) % 65000) + 1024
-      val address = new InetSocketAddress(InetAddress.getLocalHost, port)
-      val sock = new Socket
-      try {
-        sock.bind(address)
-      } finally {
-        sock.close()
-      }
-      return port
-    }
-    throw new Exception("Couldn't find an open port")
-  }
-}
 
 object EndToEndSpec extends Specification {
   class SillyImpl extends Silly.Iface {
@@ -108,7 +89,7 @@ object EndToEndSpec extends Specification {
      
       val result = callResults.within(1.second)
       result.isReturn must beTrue
-     
+
       result().success must be_==("yehyeh")
 
       // ** Shutdown
@@ -121,9 +102,8 @@ object EndToEndSpec extends Specification {
 
     "talk silly to an existing server" in {
       // ** Set up a traditional thrift server.
-      val serverPort       = PickRandomPort()
-      val serverAddr       = new InetSocketAddress("localhost", serverPort)
-      val serverSocket     = new TServerSocket(serverPort)
+      val serverAddr       = RandomSocket()
+      val serverSocket     = new TServerSocket(serverAddr.getPort)
       val transportFactory = new TFramedTransport.Factory
       val protocolFactory  = new TBinaryProtocol.Factory(true, true)
 
@@ -188,7 +168,7 @@ object EndToEndSpec extends Specification {
         new NioServerSocketChannelFactory(
           Executors.newCachedThreadPool(),
           Executors.newCachedThreadPool()))
-      val serverAddress = new InetSocketAddress("localhost", PickRandomPort())
+      val serverAddress = RandomSocket()
 
       serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
         def getPipeline() = {
@@ -197,7 +177,6 @@ object EndToEndSpec extends Specification {
               bloop.reverse
           })
           val processorFactory = new TProcessorFactory(processor)
-     
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
           pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory))

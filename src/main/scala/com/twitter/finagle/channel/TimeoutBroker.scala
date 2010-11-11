@@ -7,7 +7,9 @@ import org.jboss.netty.channel.MessageEvent
 
 object TimedoutRequestException extends Exception
 
-class TimeoutBroker(timer: Timer, underlying: Broker, duration: Long, unit: TimeUnit) {
+class TimeoutBroker(timer: Timer, underlying: Broker, duration: Long, unit: TimeUnit)
+  extends Broker
+{
   def this(underlying: Broker, duration: Long, unit: TimeUnit) =
     this(Broker.timer, underlying, duration, unit)
 

@@ -18,7 +18,7 @@ object Reply {
 }
 
 class ReplyFuture extends DefaultChannelFuture(null, true) {
-  @volatile var reply: Reply = null
+  @volatile private var reply: Reply = null
 
   def setReply(r: Reply) {
     reply = r

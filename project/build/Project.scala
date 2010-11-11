@@ -9,8 +9,11 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
 
   val codehausRepo = "codehaus.org" at "http://repository.codehaus.org/"
 
-  val netty = "org.jboss.netty" % "netty" % "3.2.2.Final" withSources()
-  val util = "com.twitter" %% "util" % "1.2-SNAPSHOT"
+
+  val netty = "org.jboss.netty" % "netty" % "3.2.2.Final"
+
+  val ostrich = "com.twitter" %% "ostrich" % "2.2.10"
+  val util = "com.twitter" %% "util" % "1.2.3"
 
   val mockito = "org.mockito" % "mockito-all" % "1.8.5" % "test" withSources()
   val specs = "org.scala-tools.testing" %% "specs" % "1.6.5" % "test" withSources()
@@ -18,4 +21,5 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val thrift = "thrift" % "libthrift" % "0.2.0"
 
   val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.6.1" withSources()
+
 }

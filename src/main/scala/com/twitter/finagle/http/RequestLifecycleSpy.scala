@@ -1,19 +1,18 @@
 package com.twitter.finagle.http
 
-import org.jboss.netty.channel.{
-  SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.handler.codec.http.{
-  HttpChunkTrailer, HttpResponse, HttpChunk}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.channel.PartialUpstreamMessageEvent
 
-object RequestLifecycleSpy extends SimpleChannelUpstreamHandler {
+private[http] trait RequestLifecycleSpyBehavior <: SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val upstreamMessage = 
+    val upstreamMessage =
       e.getMessage match {
-        case response: HttpResponse if response.isChunked =>
+        case response: HttpResponse
+        if response.isChunked =>
           PartialUpstreamMessageEvent(e)
-        case _: HttpChunkTrailer => e
+        case c: HttpChunkTrailer => e
         case c: HttpChunk =>
           PartialUpstreamMessageEvent(e)
         case _ => e
@@ -22,3 +21,6 @@ object RequestLifecycleSpy extends SimpleChannelUpstreamHandler {
     super.messageReceived(ctx, upstreamMessage)
   }
 }
+
+object RequestLifecycleSpy extends SimpleChannelUpstreamHandler
+  with RequestLifecycleSpyBehavior

@@ -2,15 +2,14 @@ package com.twitter.finagle.channel
 
 import java.nio.channels.ClosedChannelException
 
-import org.jboss.netty.channel.{
-  Channels, Channel, MessageEvent, SimpleChannelUpstreamHandler,
-  ChannelHandlerContext, ChannelStateEvent, ExceptionEvent,
-  ChannelFuture}
+import org.jboss.netty.bootstrap.ClientBootstrap
+import org.jboss.netty.channel._
 
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
 class CancelledConnectionException extends Exception
+class InvalidPipelineException extends Exception
 
 trait ConnectingChannelBroker extends Broker {
   def getChannel: ChannelFuture
@@ -24,8 +23,9 @@ trait ConnectingChannelBroker extends Broker {
         putChannel(channel)
 
       case Ok(channel) =>
-        connectChannel(channel, e, replyFuture)
-        replyFuture whenDone {
+        // TODO: indicate failure to the pool here, or have it
+        // determine that?
+        connectChannel(channel, e, replyFuture) onSuccessOrFailure {
           putChannel(channel)
         }
 
@@ -39,39 +39,17 @@ trait ConnectingChannelBroker extends Broker {
     replyFuture
   }
 
-  protected def connectChannel(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) {
-    val handler = new ChannelConnectingHandler(replyFuture, to)
-    to.getPipeline.addLast("handler", handler)
-    Channels.write(to, e.getMessage).proxyTo(e.getFuture)
-  }
-
-  private class ChannelConnectingHandler(
-    firstReplyFuture: ReplyFuture,
-    to: Channel)
-    extends SimpleChannelUpstreamHandler
-  {
-    var replyFuture = firstReplyFuture
-
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-      e match {
-        case PartialUpstreamMessageEvent(_, message, _) =>
-          val next = new ReplyFuture
-          replyFuture.setReply(Reply.More(message, next))
-          replyFuture = next
-        case _ =>
-          replyFuture.setReply(Reply.Done(e.getMessage))
-          to.getPipeline.remove(this)
-      }
+  protected def connectChannel(
+    to: Channel, e: MessageEvent,
+    replyFuture: ReplyFuture): ChannelFuture
+  =
+    to.getPipeline.getLast match {
+      case adapter: BrokerAdapter =>
+        adapter.writeAndRegisterReply(to, e, replyFuture)
+      case _ =>
+        val exc = new InvalidPipelineException
+        e.getFuture().setFailure(exc)
+        replyFuture.setFailure(exc)
+        Channels.succeededFuture(to)
     }
-
-    // We rely on the underlying protocol handlers to close channels
-    // on errors. (This is probably the only sane policy).
-    override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-      replyFuture.setFailure(new ClosedChannelException)
-    }
-
-    override def exceptionCaught(ctx: ChannelHandlerContext, exc: ExceptionEvent) {
-      replyFuture.setFailure(exc.getCause)
-    }
-  }
 }

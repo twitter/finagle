@@ -4,9 +4,11 @@ import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{Channels, Channel}
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class ChannelPool(clientBootstrap: ClientBootstrap) {
+// BrokerBootstrap.
+
+class ChannelPool(clientBootstrap: BrokerClientBootstrap) {
   private val queue = new ConcurrentLinkedQueue[Channel]
-  
+
   def reserve() = {
     var channel: Channel = null
     do {
