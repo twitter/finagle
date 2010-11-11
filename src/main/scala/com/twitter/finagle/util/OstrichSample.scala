@@ -2,7 +2,7 @@ package com.twitter.finagle.util
 
 import com.twitter.ostrich.StatsProvider
 
-class OstrichSampleRepository(suffix: String, statsProvider: StatsProvider)
+class OstrichSampleRepository(prefix: String, suffix: String, statsProvider: StatsProvider)
   extends ObservableSampleRepository
 {
   def tails[A](s: Seq[A]): Seq[Seq[A]] = {
@@ -18,10 +18,10 @@ class OstrichSampleRepository(suffix: String, statsProvider: StatsProvider)
   def observeAdd(path: Seq[String], value: Int, count: Int) {
     // TODO: count vs. value.
     tails(path) foreach { path =>
-      statsProvider.addTiming(path mkString "__", count)
+      statsProvider.addTiming(prefix + (path mkString "__"), count)
     }
 
-    statsProvider.addTiming((path mkString "__") + "_" + suffix, count)
+    statsProvider.addTiming(prefix + (path mkString "__") + "_" + suffix, count)
   }
 }
 

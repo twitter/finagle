@@ -27,7 +27,7 @@ object ClientTest extends ostrich.Service {
         .reportTo(Ostrich(ostrich.Stats))
         .sampleWindow(20, TimeUnit.MINUTES)
         .sampleGranularity(30, TimeUnit.SECONDS)
-        .buildClient[HttpRequest, HttpResponse]
+        .buildClient[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)
       makeRequest(client)

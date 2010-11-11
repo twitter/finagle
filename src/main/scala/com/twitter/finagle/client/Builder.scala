@@ -23,7 +23,7 @@ sealed abstract class Codec {
   val pipelineFactory: ChannelPipelineFactory
 }
 
-case object Http extends Codec {
+object Http extends Codec {
   val pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
@@ -35,7 +35,7 @@ case object Http extends Codec {
     }
 }
 
-case object Thrift extends Codec {
+object Thrift extends Codec {
   val pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
@@ -78,7 +78,8 @@ case class Builder(
   _requestTimeout: Builder.Timeout,
   _statsReceiver: Option[StatsReceiver],
   _sampleWindow: Builder.Timeout,
-  _sampleGranularity: Builder.Timeout)
+  _sampleGranularity: Builder.Timeout,
+  _name: Option[String])
 {
   import Builder._
   def this() = this(
@@ -88,7 +89,8 @@ case class Builder(
     Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),
     None,
     Builder.Timeout(10, TimeUnit.MINUTES),
-    Builder.Timeout(10, TimeUnit.SECONDS)
+    Builder.Timeout(10, TimeUnit.SECONDS),
+    None
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -114,6 +116,8 @@ case class Builder(
 
   def sampleGranularity(value: Long, unit: TimeUnit) =
     copy(_sampleGranularity = Timeout(value, unit))
+
+  def name(value: String) = copy(_name = Some(value))
 
   // TODO: name.
 
@@ -151,12 +155,14 @@ case class Builder(
     }
     val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)
     val statsMaker = () => new TimeWindowedSample[ScalarSample](numBuckets.toInt, granularity)
+    val namePrefix = _name map ("%s_".format(_)) getOrElse ""
 
     val statsBrokers = _statsReceiver match {
       case Some(Ostrich(provider)) =>
         (timeoutBrokers zip hosts) map { case (broker, host) =>
-          val suffix = "%s:%d".format(host.getHostName, host.getPort)
-          val samples = new OstrichSampleRepository(suffix, provider) { 
+          val prefix = namePrefix
+          val suffix = "_%s:%d".format(host.getHostName, host.getPort)
+          val samples = new OstrichSampleRepository(prefix, suffix, provider) { 
             def makeStats = statsMaker
           }
           new StatsLoadedBroker(broker, samples)
@@ -171,7 +177,7 @@ case class Builder(
     new LoadBalancedBroker(statsBrokers)
   }
 
-  def buildClient[Request, Reply] =
+  def buildClient[Request, Reply]() =
     new Client[HttpRequest, HttpResponse](build())
 }
 
