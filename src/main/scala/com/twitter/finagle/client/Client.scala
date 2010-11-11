@@ -53,5 +53,7 @@ class Client[Req <: AnyRef, Rep <: AnyRef](broker: Broker) {
  
    promise
  }
+
+  def call(request: Req): Future[Rep] = apply(request)
 }
 

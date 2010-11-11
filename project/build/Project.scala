@@ -13,7 +13,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val netty = "org.jboss.netty" % "netty" % "3.2.2.Final"
 
   val ostrich = "com.twitter" %% "ostrich" % "2.2.10"
-  val util = "com.twitter" %% "util" % "1.2.2-SNAPSHOT"
+  val util = "com.twitter" %% "util" % "1.2.3"
 
   val mockito = "org.mockito" % "mockito-all" % "1.8.5" % "test" withSources()
   val specs = "org.scala-tools.testing" %% "specs" % "1.6.5" % "test" withSources()
