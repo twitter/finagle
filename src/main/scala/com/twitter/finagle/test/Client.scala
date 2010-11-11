@@ -22,6 +22,7 @@ object ClientTest extends ostrich.Service {
       Builder()
         .name("http")
         .hosts("localhost:10000,localhost:10001")
+        .hostConnectionLimit(10)
         .codec(Http)
         .connectionTimeout(100, TimeUnit.MILLISECONDS)
         .requestTimeout(1000, TimeUnit.MILLISECONDS)

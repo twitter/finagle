@@ -85,7 +85,8 @@ case class Builder(
   _statsReceiver: Option[StatsReceiver],
   _sampleWindow: Builder.Timeout,
   _sampleGranularity: Builder.Timeout,
-  _name: Option[String])
+  _name: Option[String],
+  _hostConnectionLimit: Option[Int])
 {
   import Builder._
   def this() = this(
@@ -96,6 +97,7 @@ case class Builder(
     None,
     Builder.Timeout(10, TimeUnit.MINUTES),
     Builder.Timeout(10, TimeUnit.SECONDS),
+    None,
     None
   )
 
@@ -125,6 +127,9 @@ case class Builder(
 
   def name(value: String) = copy(_name = Some(value))
 
+  def hostConnectionLimit(value: Int) =
+    copy(_hostConnectionLimit = Some(value))
+
   def build() = {
     val (hosts, codec) = (_hosts, _codec) match {
       case (None, _) =>
@@ -144,10 +149,16 @@ case class Builder(
 
     // TODO: request timeout
 
+    val channelPool =
+      _hostConnectionLimit map { limit =>
+        ((bootstrap: BrokerClientBootstrap) =>
+          (new ConnectionLimitingChannelPool(bootstrap, limit)))
+      } getOrElse ((new ChannelPool(_)))
+
     val sampleRepository = new SampleRepository
     val timeoutBrokers = bootstraps map (
-     (new ChannelPool(_))        andThen
-     (new PoolingBroker(_))      andThen
+     channelPool            andThen
+     (new PoolingBroker(_)) andThen
      (new TimeoutBroker(_, _requestTimeout.value, _requestTimeout.unit)))
 
     // Construct sample stats.
