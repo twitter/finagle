@@ -31,60 +31,64 @@ object SampleSpec extends Specification {
   }
 
   "time windowed counter" should {
-    Time.freeze()
-
     "keep a total sum over its window" in {
-      val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
-      c.sum must be_==(0)
-      c.add(1, 1)
-      c.sum must be_==(1)
-      c.count must be_==(1)
-
-      Time.advance(11.seconds)
-      c.add(1)
-      c.sum must be_==(2)
-      c.count must be_==(2)
-
-      Time.advance(80.seconds)
-      c.add(1)
-      c.sum must be_==(3)
-      c.count must be_==(3)
-
-      Time.advance(10.seconds)
-      c.sum must be_==(2)
-      c.count must be_==(2)
-      c.add(1)
-      c.sum must be_==(3)
-      c.count must be_==(3)
+      Time.withCurrentTimeFrozen { control =>
+        val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
+        c.sum must be_==(0)
+        c.add(1, 1)
+        c.sum must be_==(1)
+        c.count must be_==(1)
+         
+        control.advance(11.seconds)
+        c.add(1)
+        c.sum must be_==(2)
+        c.count must be_==(2)
+         
+        control.advance(80.seconds)
+        c.add(1)
+        c.sum must be_==(3)
+        c.count must be_==(3)
+         
+        control.advance(10.seconds)
+        c.sum must be_==(2)
+        c.count must be_==(2)
+        c.add(1)
+        c.sum must be_==(3)
+        c.count must be_==(3)
+      }
     }
 
     "keep a total sum over its window (2)" in {
-      val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
-
-      for (i <- 1 to 100) {
-        c.add(1, 1)
-        c.sum must be_==(i)
-        Time.advance(1.seconds)
-      }
-
-      c.sum must be_==(100)
-
-      for (i <- 0 until 10) {
-        Time.advance(10.seconds)
-        c.add(10)
+      Time.withCurrentTimeFrozen { control =>
+        val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
+         
+        for (i <- 1 to 100) {
+          c.add(1, 1)
+          c.sum must be_==(i)
+          control.advance(1.seconds)
+        }
+         
         c.sum must be_==(100)
+         
+        for (i <- 0 until 10) {
+          control.advance(10.seconds)
+          c.add(10)
+          c.sum must be_==(100)
+        }
       }
     }
 
     "compute rate" in {
-      val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
-      c.add(1)
-      c.rateInHz() must be_==(0)
-
-      Time.advance(50.seconds)
-      for (i <- 0 until 100) {
-        c.rateInHz() must be_==(i)
-        c.add(60, 60)
+      Time.withCurrentTimeFrozen { control =>
+        val c = new TimeWindowedSample[ScalarSample](10, 10.seconds)
+        c.add(1)
+        c.rateInHz() must be_==(0)
+         
+        control.advance(50.seconds)
+        for (i <- 0 until 100) {
+          c.rateInHz() must be_==(i)
+          c.add(60, 60)
+        }
       }
     }
   }
