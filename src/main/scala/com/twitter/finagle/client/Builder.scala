@@ -10,10 +10,12 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.codec.http._
 
+import com.twitter.ostrich
+
 import com.twitter.finagle.channel._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.thrift.ThriftClientCodec
-import com.twitter.finagle.util.SampleRepository
+import com.twitter.finagle.util.{SampleRepository, OstrichSampleRepository}
 
 sealed abstract class Codec {
   val pipelineFactory: ChannelPipelineFactory
@@ -42,6 +44,9 @@ case object Thrift extends Codec {
     }
 }
 
+sealed abstract class StatsReceiver
+case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver
+
 object Builder {
   def apply() = new Builder
 
@@ -60,8 +65,6 @@ object Builder {
 
 class IncompleteClientSpecification(message: String)
   extends Exception(message)
-
-abstract class StatsReceiver
 
 // We're nice to java.
 case class Builder(
@@ -115,14 +118,33 @@ case class Builder(
      }
 
     val sampleRepository = new SampleRepository
-    val brokers = bootstraps map (
+    val timeoutBrokers = bootstraps map (
      (new ChannelPool(_))        andThen
      (new PoolingBroker(_))      andThen
      (new TimeoutBroker(
        _, _connectionTimeout.value,
-       _connectionTimeout.unit)) andThen
-     (new StatsLoadedBroker(_, sampleRepository)))
+       _connectionTimeout.unit)))
 
-    new LoadBalancedBroker(brokers)
+    // TODO: parameterize the stats.
+
+    val statsBrokers = _statsReceiver match {
+      case Some(Ostrich(provider)) =>
+        (timeoutBrokers zip hosts) map { case (broker, host) =>
+          val samples = new OstrichSampleRepository(
+            "%s:%d".format(host.getHostName, host.getPort), provider)
+          new StatsLoadedBroker(broker, samples)
+        }
+
+      case _ =>
+        timeoutBrokers map { broker =>
+          new StatsLoadedBroker(broker, new SampleRepository)
+        }
+    }
+
+    new LoadBalancedBroker(statsBrokers)
   }
+
+  def buildClient[Request, Reply] =
+    new Client[HttpRequest, HttpResponse](build())
 }
+

@@ -29,7 +29,7 @@ trait AddableSample extends Sample {
 class SampleRepository {
   val map = new ConcurrentHashMap[Seq[String], AddableSample]()
 
-  def apply(path: String*) = {
+  def apply(path: String*): AddableSample = {
     if (!(map containsKey path))
       map.putIfAbsent(path, new TimeWindowedSample[ScalarSample](60, 10.seconds))
 
@@ -37,16 +37,25 @@ class SampleRepository {
   }
 }
 
-class PiggybackAddableSample(val self: AddableSample, pig: AddableSample)
-  extends AddableSample with Proxy
+class AddableSampleProxy(val self: AddableSample) extends AddableSample with Proxy
 {
-  def add(value: Int, count: Int) {
-    self.add(value, count)
-    pig.add(value, count)
-  }
-
+  def add(value: Int, count: Int) = self.add(value, count)
   def sum = self.sum
   def count = self.count
+}
+
+trait ObservableSampleRepository extends SampleRepository {
+  def observeAdd(path: Seq[String], value: Int, count: Int)
+
+  override def apply(path: String*): AddableSample = {
+    val sample = super.apply(path:_*)
+    new AddableSampleProxy(sample) {
+      override def add(value: Int, count: Int) {
+        super.add(value, count)
+        observeAdd(path, value, count)
+      }
+    }
+  }
 }
 
 class ScalarSample extends AddableSample with Serialized {
