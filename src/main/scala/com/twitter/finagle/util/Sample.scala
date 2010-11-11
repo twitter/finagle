@@ -28,10 +28,11 @@ trait AddableSample extends Sample {
 
 class SampleRepository {
   val map = new ConcurrentHashMap[Seq[String], AddableSample]()
+  def makeStat = new TimeWindowedSample[ScalarSample](60, 10.seconds)
 
   def apply(path: String*): AddableSample = {
     if (!(map containsKey path))
-      map.putIfAbsent(path, new TimeWindowedSample[ScalarSample](60, 10.seconds))
+      map.putIfAbsent(path, makeStat)
 
     map(path)
   }

@@ -11,11 +11,13 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.ostrich
+import com.twitter.util.TimeConversions._
+import com.twitter.util.Duration
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.thrift.ThriftClientCodec
-import com.twitter.finagle.util.{SampleRepository, OstrichSampleRepository}
+import com.twitter.finagle.util._
 
 sealed abstract class Codec {
   val pipelineFactory: ChannelPipelineFactory
@@ -55,7 +57,9 @@ object Builder {
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
 
-  case class Timeout(value: Long, unit: TimeUnit)
+  case class Timeout(value: Long, unit: TimeUnit) {
+    def duration = Duration.fromTimeUnit(value, unit)
+  }
 
   def parseHosts(hosts: String): java.util.List[InetSocketAddress] = {
     val hostPorts = hosts split Array(' ', ',') filter (_ != "") map (_.split(":"))
@@ -72,7 +76,9 @@ case class Builder(
   _codec: Option[Codec],
   _connectionTimeout: Builder.Timeout,
   _requestTimeout: Builder.Timeout,
-  _statsReceiver: Option[StatsReceiver])
+  _statsReceiver: Option[StatsReceiver],
+  _sampleWindow: Builder.Timeout,
+  _sampleGranularity: Builder.Timeout)
 {
   import Builder._
   def this() = this(
@@ -80,7 +86,10 @@ case class Builder(
     None,
     Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),
     Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),
-    None)
+    None,
+    Builder.Timeout(10, TimeUnit.MINUTES),
+    Builder.Timeout(10, TimeUnit.SECONDS)
+  )
 
   def hosts(hostnamePortCombinations: String) =
     copy(_hosts = Some(Builder.parseHosts(hostnamePortCombinations)))
@@ -99,6 +108,14 @@ case class Builder(
 
   def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
+
+  def sampleWindow(value: Long, unit: TimeUnit) =
+    copy(_sampleWindow = Timeout(value, unit))
+
+  def sampleGranularity(value: Long, unit: TimeUnit) =
+    copy(_sampleGranularity = Timeout(value, unit))
+
+  // TODO: name.
 
   def build() = {
     val (hosts, codec) = (_hosts, _codec) match {
@@ -121,17 +138,27 @@ case class Builder(
     val timeoutBrokers = bootstraps map (
      (new ChannelPool(_))        andThen
      (new PoolingBroker(_))      andThen
-     (new TimeoutBroker(
-       _, _connectionTimeout.value,
-       _connectionTimeout.unit)))
+     (new TimeoutBroker(_, _connectionTimeout.value, _connectionTimeout.unit)))
+
+    // Construct sample stats.
+    val granularity = _sampleGranularity.duration
+    val window      = _sampleWindow.duration
+    if (window < granularity) {
+      throw new IncompleteClientSpecification(
+        "window smaller than granularity!")
+    }
+    val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)
+    val statsMaker = () => new TimeWindowedSample[ScalarSample](numBuckets.toInt, granularity)
 
     // TODO: parameterize the stats.
 
     val statsBrokers = _statsReceiver match {
       case Some(Ostrich(provider)) =>
         (timeoutBrokers zip hosts) map { case (broker, host) =>
-          val samples = new OstrichSampleRepository(
-            "%s:%d".format(host.getHostName, host.getPort), provider)
+          val suffix = "%s:%d".format(host.getHostName, host.getPort)
+          val samples = new OstrichSampleRepository(suffix, provider) { 
+            def makeStats = statsMaker
+          }
           new StatsLoadedBroker(broker, samples)
         }
 
