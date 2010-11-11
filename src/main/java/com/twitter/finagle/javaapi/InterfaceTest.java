@@ -15,7 +15,7 @@ class InterfaceTest {
       Builder.get()
         .hosts("localhost:10000,localhost:10001")
         .codec(Codec.http())
-        .build();
+        .buildClient();
 
     Future<HttpResponse> response =
       client.call(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"));
