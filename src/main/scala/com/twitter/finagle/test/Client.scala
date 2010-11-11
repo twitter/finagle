@@ -20,6 +20,7 @@ object ClientTest extends ostrich.Service {
 
     val client =
       Builder()
+        .name("http")
         .hosts("localhost:10000,localhost:10001")
         .codec(Http)
         .connectionTimeout(100, TimeUnit.MILLISECONDS)
