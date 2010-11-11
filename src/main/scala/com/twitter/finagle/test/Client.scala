@@ -41,12 +41,13 @@ object ClientTest {
   }
 
   def main(args: Array[String]) {
-    val broker = Builder()
-                  .hosts("localhost:1000,localhost:1001")
-                  .codec(Http)
-                  .connectionTimeout(100, TimeUnit.MILLISECONDS)
-                  .requestTimeout(1000, TimeUnit.MILLISECONDS)
-                  .build()
+    val broker =
+      Builder()
+        .hosts("localhost:1000,localhost:1001")
+        .codec(Http)
+        .connectionTimeout(100, TimeUnit.MILLISECONDS)
+        .requestTimeout(1000, TimeUnit.MILLISECONDS)
+        .build()
 
     // def rewrite(label: String, tree: SampleTree): SampleTree =
     //   tree match {

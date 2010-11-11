@@ -24,15 +24,14 @@ trait AddableSample extends Sample {
   def incr(): Unit = add(0, 1)
 }
 
-class PiggybackAddableSample(
-  self: AddableSample,
-  pig: AddableSample)
+class PiggybackAddableSample(self: AddableSample, pig: AddableSample)
   extends AddableSample with Proxy
 {
   def add(value: Int, count: Int) {
     self.add(value, count)
     pig.add(value, count)
   }
+
   def sum = self.sum
   def count = self.count
 }
