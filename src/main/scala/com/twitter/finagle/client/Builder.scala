@@ -134,11 +134,13 @@ case class Builder(
       bs
      }
 
+    // TODO: request timeout
+
     val sampleRepository = new SampleRepository
     val timeoutBrokers = bootstraps map (
      (new ChannelPool(_))        andThen
      (new PoolingBroker(_))      andThen
-     (new TimeoutBroker(_, _connectionTimeout.value, _connectionTimeout.unit)))
+     (new TimeoutBroker(_, _requestTimeout.value, _requestTimeout.unit)))
 
     // Construct sample stats.
     val granularity = _sampleGranularity.duration
@@ -149,8 +151,6 @@ case class Builder(
     }
     val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)
     val statsMaker = () => new TimeWindowedSample[ScalarSample](numBuckets.toInt, granularity)
-
-    // TODO: parameterize the stats.
 
     val statsBrokers = _statsReceiver match {
       case Some(Ostrich(provider)) =>
