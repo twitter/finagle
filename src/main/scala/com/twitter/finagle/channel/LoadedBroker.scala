@@ -11,9 +11,7 @@ import org.jboss.netty.channel.MessageEvent
 
 import com.twitter.util.{Time, Duration}
 import com.twitter.util.TimeConversions._
-import com.twitter.finagle.util.{
-  TimeWindowedSample, ScalarSample, Ok, Error, SampleLeaf, SampleNode}
-
+import com.twitter.finagle.util._
 import com.twitter.finagle.util.Conversions._
 
 class TooFewDicksOnTheDanceFloorException extends Exception
@@ -31,47 +29,29 @@ trait LoadedBroker[A <: LoadedBroker[A]] extends Broker {
 /**
  * Keeps track of request latencies & counts.
  */
-class StatsLoadedBroker(underlying: Broker, bucketCount: Int, bucketDuration: Duration)
+class StatsLoadedBroker(underlying: Broker, samples: SampleRepository)
   extends LoadedBroker[StatsLoadedBroker]
 {
-  // Default: 10-minute window with 10-second buckets.
-  def this(underlying: Broker) = this(underlying, 60, 10.seconds)
-
-  private def makeStat =
-    new TimeWindowedSample[ScalarSample](bucketCount, bucketDuration)
-
-  // 5 minutes, 10 second intervals
-  private val dispatchStats = makeStat
-  private val latencyStats  = makeStat
-
-  private val exceptionStats =
-    new ConcurrentHashMap[String, TimeWindowedSample[ScalarSample]]
-
-  def roots = Seq(
-    SampleLeaf("latency", latencyStats),
-    SampleNode("failure", exceptionStats map ((SampleLeaf(_, _)).tupled) toSeq)
-  )
+  val dispatchSample = samples("dispatch")
+  val latencySample  = samples("latency")
 
   def dispatch(e: MessageEvent) = {
     val begin = Time.now
-    dispatchStats.incr()
+    dispatchSample.incr()
 
     underlying.dispatch(e) whenDone0 { future =>
       future {
         case Ok(_) =>
-          latencyStats.add(begin.ago.inMilliseconds.toInt)
+          latencySample.add(begin.ago.inMilliseconds.toInt)
         case Error(e) =>
           // TODO: exception hierarchy here to differentiate between
           // application, connection & other (internal?) exceptions.
-          val name = e.getClass.getName
-          if (!(exceptionStats containsKey name))
-            exceptionStats.putIfAbsent(name, makeStat)
-          exceptionStats(name).add(begin.ago.inMilliseconds.toInt)
+          samples("exception", e.getClass.getName).add(begin.ago.inMilliseconds.toInt)
       }
     }
   }
 
-  def load = dispatchStats.count
+  def load = dispatchSample.count
   // Fancy pants:
   // latencyStats.sum + 2 * latencyStats.mean * failureStats.count
 }

@@ -1,8 +1,10 @@
 package com.twitter.finagle.util
 
 import scala.annotation.tailrec
+import scala.collection.JavaConversions._
 
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.{Duration, Time}
 import com.twitter.util.TimeConversions._
@@ -24,7 +26,18 @@ trait AddableSample extends Sample {
   def incr(): Unit = add(0, 1)
 }
 
-class PiggybackAddableSample(self: AddableSample, pig: AddableSample)
+class SampleRepository {
+  val map = new ConcurrentHashMap[Seq[String], AddableSample]()
+
+  def apply(path: String*) = {
+    if (!(map containsKey path))
+      map.putIfAbsent(path, new TimeWindowedSample[ScalarSample](60, 10.seconds))
+
+    map(path)
+  }
+}
+
+class PiggybackAddableSample(val self: AddableSample, pig: AddableSample)
   extends AddableSample with Proxy
 {
   def add(value: Int, count: Int) {

@@ -13,6 +13,7 @@ import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.thrift.ThriftClientCodec
+import com.twitter.finagle.util.SampleRepository
 
 sealed abstract class Codec {
   val pipelineFactory: ChannelPipelineFactory
@@ -113,13 +114,14 @@ case class Builder(
       bs
      }
 
+    val sampleRepository = new SampleRepository
     val brokers = bootstraps map (
      (new ChannelPool(_))        andThen
      (new PoolingBroker(_))      andThen
      (new TimeoutBroker(
        _, _connectionTimeout.value,
        _connectionTimeout.unit)) andThen
-     (new StatsLoadedBroker(_)))
+     (new StatsLoadedBroker(_, sampleRepository)))
 
     new LoadBalancedBroker(brokers)
   }

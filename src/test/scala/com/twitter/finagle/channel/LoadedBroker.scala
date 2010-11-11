@@ -6,6 +6,8 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
 
+import com.twitter.finagle.util.SampleRepository
+
 object LoadedBrokerSpec extends Specification with Mockito {
   class FakeLoadedBroker extends LoadedBroker[FakeLoadedBroker] {
     def load = 0
@@ -21,8 +23,8 @@ object LoadedBrokerSpec extends Specification with Mockito {
       val broker2 = mock[Broker]
       broker2.dispatch(messageEvent) returns ReplyFuture.success("2")
 
-      val rcBroker1 = new StatsLoadedBroker(broker1)
-      val rcBroker2 = new StatsLoadedBroker(broker2)
+      val rcBroker1 = new StatsLoadedBroker(broker1, new SampleRepository)
+      val rcBroker2 = new StatsLoadedBroker(broker2, new SampleRepository)
 
       (0 until 3) foreach { _ => rcBroker1.dispatch(messageEvent) }
       (0 until 1) foreach { _ => rcBroker2.dispatch(messageEvent) }
