@@ -188,7 +188,7 @@ case class Builder(
         (timeoutBrokers zip hosts) map { case (broker, host) =>
           val prefix = namePrefix
           val suffix = "_%s:%d".format(host.getHostName, host.getPort)
-          val samples = new OstrichSampleRepository(prefix, suffix, provider) { 
+          val samples = new OstrichSampleRepository(prefix, suffix, provider) {
             def makeStats = statsMaker
           }
           new StatsLoadedBroker(broker, samples)

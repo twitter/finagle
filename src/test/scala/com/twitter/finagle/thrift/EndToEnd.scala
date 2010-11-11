@@ -45,8 +45,8 @@ object EndToEndSpec extends Specification {
       serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
         def getPipeline() = {
           val processor = new Silly.Processor(new Silly.Iface {
-            def bleep(bloop: String): String =
-              bloop.reverse
+            def bleep(request: String): String =
+              request.reverse
           })
           val processorFactory = new TProcessorFactory(processor)
      
@@ -81,8 +81,8 @@ object EndToEndSpec extends Specification {
       val serverChannel = serverBootstrap.bind(addr)
       for (ch <- clientBootstrap.connect(addr)) {
         val thriftCall =
-          ThriftCall[Silly.bleep_args, Silly.bleep_result](
-            "bleep", new Silly.bleep_args("heyhey"))
+          new ThriftCall[Silly.bleep_args, Silly.bleep_result](
+            "bleep", new Silly.bleep_args("heyhey"), classOf[Silly.bleep_result])
 
         Channels.write(ch, thriftCall)
       }
@@ -133,7 +133,7 @@ object EndToEndSpec extends Specification {
               Channels.close(ctx.getChannel)
             }
           })
-     
+
           pipeline
         }
       })
@@ -147,7 +147,7 @@ object EndToEndSpec extends Specification {
 
       for (ch <- clientBootstrap.connect(serverAddr)) {
         val thriftCall = new ThriftCall[Silly.bleep_args, Silly.bleep_result](
-          "bleep", new Silly.bleep_args("foobar"))
+          "bleep", new Silly.bleep_args("foobar"), classOf[Silly.bleep_result])
 
         Channels.write(ch, thriftCall)
       }

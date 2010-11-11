@@ -2,7 +2,6 @@ package com.twitter.finagle.thrift
 
 import java.util.concurrent.atomic.AtomicReference
 import java.lang.reflect.{Method, ParameterizedType, Proxy}
-import scala.reflect.Manifest
 
 import org.apache.thrift.{TBase, TApplicationException}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocol}
@@ -19,19 +18,75 @@ import ChannelBufferConversions._
  * channel. The method name & argument thrift structure (POJO) is
  * given.
  */
-case class ThriftCall[T <: TBase[_], R <: TBase[_]]
-(method: String, args: T)
-(implicit val tman: Manifest[T], implicit val rman: Manifest[R]) {
-  def newResponseInstance: R = rman.erasure.newInstance.asInstanceOf[R]
-  def newArgInstance: T = tman.erasure.newInstance.asInstanceOf[T]
-  def newInstance: ThriftCall[T,R] = new ThriftCall[T,R](method, newArgInstance)
+
+/*
+ * Factory
+ * Instance as decoder
+ */
+
+class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
+  val method: String,
+  argClass: Class[A],
+  replyClass: Class[R])
+{
+  private[this] def newArgInstance() = argClass.newInstance
+  def newInstance() = new ThriftCall(method, newArgInstance(), replyClass)
+}
+
+class ThriftCall[A <: TBase[_], R <: TBase[_]](
+  method: String,
+  args: A,
+  replyClass: Class[R])
+{
+  def readRequestArgs(iprot: TProtocol) {
+    args.read(iprot)
+    iprot.readMessageEnd()
+  }
+
+  def writeRequest(seqid: Int, oprot: TProtocol) {
+    oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
+    args.write(oprot)
+    oprot.writeMessageEnd()
+  }
+
+  def writeReply(seqid: Int, oprot: TProtocol, reply: TBase[_]) {
+    // Write server replies
+    oprot.writeMessageBegin(new TMessage(method, TMessageType.REPLY, seqid))
+    reply.write(oprot)
+    oprot.writeMessageEnd()
+  }
+
+  def readResponse(iprot: TProtocol) = {
+    // Read client responses
+    val result = replyClass.newInstance()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    result
+  }
+
+  def newReply() = replyClass.newInstance()
+
+  def reply(reply: R) =
+    new ThriftReply[R](reply, this)
+
+  def arguments: A = args.asInstanceOf[A]
 }
 
 case class ThriftReply[R <: TBase[_]]
-(response: R, call: ThriftCall[_ <: TBase[_],_ <: TBase[_]])
+(response: R, call: ThriftCall[_ <: TBase[_], _ <: TBase[_]])
 
-object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCall[_,_]] {
-  def add(c: ThriftCall[_,_]): Unit = put(c.method, c)
+object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCallFactory[_, _]] {
+  def add(c: ThriftCallFactory[_, _]): Unit = put(c.method, c)
+  override def apply(method: String) = {
+    try {
+      super.apply(method)
+    } catch {
+      case e: java.util.NoSuchElementException =>
+        throw new TApplicationException(
+          TApplicationException.UNKNOWN_METHOD,
+          "unknown method '%s'".format(method))
+    }
+  }
 }
 
 class ThriftServerCodec extends ThriftCodec
@@ -39,7 +94,7 @@ class ThriftClientCodec extends ThriftCodec
 
 abstract class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
-  val currentCall = new AtomicReference[ThriftCall[_, _ <: TBase[_]]]
+  val currentCall = new AtomicReference[ThriftCall[_, _]]
   var seqid = 0
 
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
@@ -51,7 +106,8 @@ abstract class ThriftCodec extends SimpleChannelHandler {
     val e = c.asInstanceOf[MessageEvent]
 
     e.getMessage match {
-      case thisCall@ThriftCall(method, args) =>
+      case thisCall: ThriftCall[_, _] =>
+        // Dispatching requests as a client
         if (!currentCall.compareAndSet(null, thisCall)) {
           // TODO: is this the right ("netty") way of propagating
           // individual failures?  do we also want to throw it up the
@@ -66,18 +122,15 @@ abstract class ThriftCodec extends SimpleChannelHandler {
         val oprot = protocolFactory.getProtocol(writeBuffer)
 
         seqid += 1
-        oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
-        args.write(oprot)
-        oprot.writeMessageEnd()
+        thisCall.writeRequest(seqid, oprot)
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
 
       case thisReply@ThriftReply(response, call) =>
+        // Writing replies as a server
         val writeBuffer = ChannelBuffers.dynamicBuffer()
         val oprot = protocolFactory.getProtocol(writeBuffer)
 
-        oprot.writeMessageBegin(new TMessage(call.method, TMessageType.REPLY, seqid))
-        response.write(oprot)
-        oprot.writeMessageEnd()
+        call.writeReply(seqid, oprot, thisReply.response)
         Channels.write(ctx, c.getFuture, writeBuffer, e.getRemoteAddress)
 
       case _ =>
@@ -123,26 +176,21 @@ abstract class ThriftCodec extends SimpleChannelHandler {
         }
 
         if (isInstanceOf[ThriftServerCodec]) {
-          var request: ThriftCall[_,_] = null
-          try {
-            request = ThriftTypes(msg.name).newInstance
+          // Receiving requests as a server
+          var request = try {
+            ThriftTypes(msg.name).newInstance()
           } catch {
-            case e: java.util.NoSuchElementException =>
-              val exc = new TApplicationException(
-                TApplicationException.UNKNOWN_METHOD,
-                "unknown method '%s'".format(msg.name))
+            case exc: Throwable =>
               Channels.fireExceptionCaught(ctx, exc)
               Channels.close(ctx, Channels.future(ctx.getChannel))
-             return
+              return
           }
-          request.args.asInstanceOf[TBase[_]].read(iprot)
-          iprot.readMessageEnd()
+          request.readRequestArgs(iprot)
 
           Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
         } else {
-          val result = currentCall.get().newResponseInstance
-          result.read(iprot)
-          iprot.readMessageEnd()
+          // Receiving replies as a client
+          val result = currentCall.get().readResponse(iprot)
 
           // Done with the current call cycle: we can now accept another
           // request.

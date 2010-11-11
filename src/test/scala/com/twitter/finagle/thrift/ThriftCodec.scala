@@ -75,7 +75,7 @@ object ThriftCodecSpec extends Specification {
   "request serialization" should {
     "encode downstream ThriftCall as TMessage" in {
       val ch = makeClientChannel
-      Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("the arg")))
+      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("the arg"), classOf[Silly.bleep_result]))
 
       ch.upstreamEvents must haveSize(0)
       ch.downstreamEvents must haveSize(1)
@@ -97,7 +97,8 @@ object ThriftCodecSpec extends Specification {
       args.request must be_==("the arg")
     }
 
-    ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
+    ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
+      "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
 
     "decode upstream TMessage to ThriftCall" in {
       val request = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("spondee"))
@@ -145,7 +146,7 @@ object ThriftCodecSpec extends Specification {
 
       // We need to write a call to the channel to set the
       // ``currentCall''
-      Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("the arg")))
+      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("the arg"), classOf[Silly.bleep_result]))
 
       // Reply
       Channels.fireMessageReceived(
@@ -160,7 +161,7 @@ object ThriftCodecSpec extends Specification {
     "keep track of sequence #s" in {
       val ch = makeClientChannel
 
-      Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
+      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
 
       ch.upstreamEvents must beEmpty
       ch.downstreamEvents must haveSize(1)
@@ -202,11 +203,11 @@ object ThriftCodecSpec extends Specification {
       val ch = makeClientChannel
 
       // Make one call.
-      Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
+      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
       ch.downstreamEvents must haveSize(1)
 
       // Try another before replying.
-      val f = Channels.write(ch, ThriftCall("testMethod", new Silly.bleep_args("some arg")))
+      val f = Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
       ch.downstreamEvents must haveSize(1)
       ch.upstreamEvents must haveSize(1)
       ch.upstreamEvents(0) must matchExceptionEvent(
