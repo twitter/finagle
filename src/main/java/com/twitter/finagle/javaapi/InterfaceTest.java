@@ -12,23 +12,23 @@ import com.twitter.util.*;
 class InterfaceTest {
   public static void main(String args[]) {
     Client<HttpRequest, HttpResponse> client =
-      Builder.apply()
+      Builder.get()
         .hosts("localhost:10000,localhost:10001")
-        .codec(Http$.MODULE$)
-        .buildClient();
+        .codec(Codec.http())
+        .build();
 
     Future<HttpResponse> response =
       client.call(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"));
 
     response.addEventListener(
-     new FutureEventListener<HttpResponse>() {
-       public void onSuccess(HttpResponse response) {
-         System.out.println("received response: " + response);
-       }
-    
-       public void onFailure(Throwable cause) {
-         System.out.println("failed with cause: " + cause);
-       }
-     });
+      new FutureEventListener<HttpResponse>() {
+        public void onSuccess(HttpResponse response) {
+          System.out.println("received response: " + response);
+        }
+
+        public void onFailure(Throwable cause) {
+          System.out.println("failed with cause: " + cause);
+        }
+      });
   }
 }

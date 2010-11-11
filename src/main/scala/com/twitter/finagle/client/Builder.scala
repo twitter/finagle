@@ -46,11 +46,17 @@ object Thrift extends Codec {
     }
 }
 
+object Codec {
+  val http = Http
+  val thrift = Thrift
+}
+
 sealed abstract class StatsReceiver
 case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver
 
 object Builder {
   def apply() = new Builder
+  def get() = apply()
 
   val channelFactory =
     new NioClientSocketChannelFactory(
@@ -118,8 +124,6 @@ case class Builder(
     copy(_sampleGranularity = Timeout(value, unit))
 
   def name(value: String) = copy(_name = Some(value))
-
-  // TODO: name.
 
   def build() = {
     val (hosts, codec) = (_hosts, _codec) match {
