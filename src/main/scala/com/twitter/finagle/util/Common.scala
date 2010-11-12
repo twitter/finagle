@@ -1,4 +1,4 @@
-package com.twitter.finagle
+package com.twitter.finagle.util
 
 import java.util.concurrent.TimeUnit
 
@@ -12,7 +12,7 @@ abstract class Codec {
   val pipelineFactory: ChannelPipelineFactory
 }
 
-sealed abstract class StatsReceiver
+abstract class StatsReceiver
 case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver
 
 class IncompleteConfiguration(message: String)
