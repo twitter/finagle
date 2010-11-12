@@ -20,53 +20,55 @@ trait Sample {
   override def toString = "[count=%d, sum=%d, mean=%d]".format(count, sum, mean)
 }
 
-trait AddableSample extends Sample {
+trait AddableSample[+S <: AddableSample[S]] extends Sample {
   def add(value: Int): Unit = add(value, 1)
   def add(value: Int, count: Int)
   def incr(): Unit = add(0, 1)
 }
 
-class SampleRepository {
-  val map = new ConcurrentHashMap[Seq[String], AddableSample]()
-  def makeStat = new TimeWindowedSample[ScalarSample](60, 10.seconds)
-
-  def apply(path: String*): AddableSample = {
-    if (!(map containsKey path))
-      map.putIfAbsent(path, makeStat)
-
-    map(path)
-  }
+trait SampleRepository[+S <: Sample] {
+  def apply(path: String*): S
 }
 
-class AddableSampleProxy(val self: AddableSample) extends AddableSample with Proxy
+trait LazilyCreatingSampleRepository[S <: Sample] extends SampleRepository[S] {
+  private val map = new ConcurrentHashMap[Seq[String], S]()
+
+  def makeStat: S
+  def apply(path: String*): S = map getOrElseUpdate(path, makeStat)
+}
+
+
+trait ObservableSampleRepository[S <: AddableSample[S]]
+  extends LazilyCreatingSampleRepository[AddableSample[S]]
+{
+  def observeAdd(path: Seq[String], value: Int, count: Int)
+
+  override def apply(path: String*): AddableSample[S] =
+    new AddableSampleProxy[S](super.apply(path:_*)) {
+      override def add(value: Int, count: Int) {
+        super.add(value, count)
+        observeAdd(path, value, count)
+      }
+    }
+}
+
+class AddableSampleProxy[+S <: AddableSample[S]](
+  val self: AddableSample[S])
+  extends AddableSample[S] with Proxy
 {
   def add(value: Int, count: Int) = self.add(value, count)
   def sum = self.sum
   def count = self.count
 }
 
-trait ObservableSampleRepository extends SampleRepository {
-  def observeAdd(path: Seq[String], value: Int, count: Int)
-
-  override def apply(path: String*): AddableSample = {
-    val sample = super.apply(path:_*)
-    new AddableSampleProxy(sample) {
-      override def add(value: Int, count: Int) {
-        super.add(value, count)
-        observeAdd(path, value, count)
-      }
-    }
-  }
-}
-
-class ScalarSample extends AddableSample with Serialized {
+class ScalarSample extends AddableSample[ScalarSample] {
   @volatile private var counter = 0
   @volatile private var accumulator = 0
 
   def sum = accumulator
   def count = counter
 
-  def add(value: Int, count: Int) = serialized {
+  def add(value: Int, count: Int) = synchronized {
     counter += count
     accumulator += value
   }
@@ -79,13 +81,15 @@ trait AggregateSample extends Sample {
   def count = underlying.map(_.count).sum
 }
 
-class TimeWindowedSample[S <: AddableSample](bucketCount: Int, bucketDuration: Duration)
+class TimeWindowedSample[S <: AddableSample[S]](bucketCount: Int, bucketDuration: Duration)
   (implicit val _s: Manifest[S])
-  extends AggregateSample with AddableSample
+  extends /*AggregateSample with*/ AddableSample[TimeWindowedSample[S]]
 {
   protected val underlying = new TimeWindowedCollection[S](bucketCount, bucketDuration)
+  def sum   = underlying.map(_.sum).sum
+  def count = underlying.map(_.count).sum
 
-  def add(count: Int, value: Int) = underlying().add(count, value)
+  def add(value: Int, count: Int) = underlying().add(value, count)
 
   def rateInHz = {
     val (begin, end) = underlying.timeSpan
@@ -98,8 +102,6 @@ class TimeWindowedSample[S <: AddableSample](bucketCount: Int, bucketDuration: D
 
   override def toString = underlying.toString
 }
-
-
 
 sealed abstract class SampleTree extends AggregateSample {
   val name: String

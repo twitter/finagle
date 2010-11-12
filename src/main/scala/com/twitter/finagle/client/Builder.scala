@@ -88,7 +88,8 @@ case class Builder(
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
-  _recvBufferSize: Option[Int])
+  _recvBufferSize: Option[Int],
+  _exportLoadsToOstrich: Boolean)
 {
   import Builder._
   def this() = this(
@@ -102,7 +103,8 @@ case class Builder(
     None,                                                   // name
     None,                                                   // hostConnectionLimit
     None,                                                   // sendBufferSize
-    None                                                    // recvBufferSize
+    None,                                                   // recvBufferSize
+    false                                                   // exportLoadsToOstrich
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -137,6 +139,8 @@ case class Builder(
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
+  def exportLoadsToOstrich() = copy(_exportLoadsToOstrich = true)
+
   def build() = {
     val (hosts, codec) = (_hosts, _codec) match {
       case (None, _) =>
@@ -166,7 +170,6 @@ case class Builder(
           (new ConnectionLimitingChannelPool(bootstrap, limit)))
       } getOrElse ((new ChannelPool(_)))
 
-    val sampleRepository = new SampleRepository
     val timeoutBrokers = bootstraps map (
      channelPool            andThen
      (new PoolingBroker(_)) andThen
@@ -188,16 +191,36 @@ case class Builder(
         (timeoutBrokers zip hosts) map { case (broker, host) =>
           val prefix = namePrefix
           val suffix = "_%s:%d".format(host.getHostName, host.getPort)
-          val samples = new OstrichSampleRepository(prefix, suffix, provider) {
-            def makeStats = statsMaker
-          }
+          val samples =
+            new OstrichSampleRepository[TimeWindowedSample[ScalarSample]](
+              prefix, suffix, provider)
+            {
+              override def makeStat = statsMaker()
+            }
+
           new StatsLoadedBroker(broker, samples)
         }
 
       case _ =>
         timeoutBrokers map { broker =>
-          new StatsLoadedBroker(broker, new SampleRepository)
+          // TODO: stats maker shoudl be universal it's independent of
+          // the reporting type.
+          new StatsLoadedBroker(
+            broker,
+            new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
+              override def makeStat = statsMaker()
+            }
+          )
         }
+    }
+
+    if (_exportLoadsToOstrich) {
+      // Set up gauges for exporting weights.
+      (statsBrokers zip hosts) foreach { case (broker, host) =>
+        val hostString = "%s:%d".format(host.getHostName, host.getPort)
+        ostrich.Stats.makeGauge(hostString + "_load")   { broker.load   }
+        ostrich.Stats.makeGauge(hostString + "_weight") { broker.weight }
+      }
     }
 
     new LoadBalancedBroker(statsBrokers)

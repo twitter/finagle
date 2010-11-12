@@ -29,8 +29,9 @@ object ClientTest extends ostrich.Service {
         .connectionTimeout(100, TimeUnit.MILLISECONDS)
         .requestTimeout(1000, TimeUnit.MILLISECONDS)
         .reportTo(Ostrich(ostrich.Stats))
-        .sampleWindow(20, TimeUnit.MINUTES)
-        .sampleGranularity(30, TimeUnit.SECONDS)
+        .exportLoadsToOstrich()
+        .sampleWindow(10, TimeUnit.SECONDS)
+        .sampleGranularity(1, TimeUnit.SECONDS)
         .buildClient[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)

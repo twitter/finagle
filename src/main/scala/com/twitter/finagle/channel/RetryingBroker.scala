@@ -51,7 +51,7 @@ class RetryingBroker(val underlying: Broker, tries: Int) extends RetryingBrokerB
     if (triesLeft > 0)
       Channels.succeededFuture(channel)
     else
-      Channels.failedFuture(channel, new Exception)
+      Channels.failedFuture(channel, new RetryFailureException)
   }
 }
 

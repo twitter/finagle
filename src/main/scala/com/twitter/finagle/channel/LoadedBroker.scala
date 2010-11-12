@@ -27,7 +27,9 @@ trait LoadedBroker[A <: LoadedBroker[A]] extends Broker {
 /**
  * Keeps track of request latencies & counts.
  */
-class StatsLoadedBroker(underlying: Broker, samples: SampleRepository)
+class StatsLoadedBroker(
+  underlying: Broker,
+  samples: SampleRepository[T forSome { type T <: AddableSample[T] }])
   extends LoadedBroker[StatsLoadedBroker]
 {
   val dispatchSample = samples("dispatch")
@@ -52,6 +54,43 @@ class StatsLoadedBroker(underlying: Broker, samples: SampleRepository)
   def load = dispatchSample.count
   // Fancy pants:
   // latencyStats.sum + 2 * latencyStats.mean * failureStats.count
+}
+
+class FailureAccruingStatsLoadedBroker(
+  underlying: StatsLoadedBroker,
+  samples: SampleRepository[TimeWindowedSample[T forSome { type T <: AddableSample[T] }]])
+  extends LoadedBroker[FailureAccruingStatsLoadedBroker]
+{
+  val failureSample = samples("error")
+  val successSample = samples("success")
+
+  def load = underlying.load
+
+  override def weight =  {
+    val success = successSample.count
+    val failure = failureSample.count
+    val sum = success + failure
+
+    // TODO: do we decay this decision beyond relying on the stats
+    // that are passed in?
+
+    if (sum <= 0)
+      underlying.weight
+    else
+      (success / (success + failure)) * underlying.weight
+  }
+
+  def dispatch(e: MessageEvent) = {
+    // TODO: discriminate request errors vs. connection errors, etc.?
+    underlying.dispatch(e) whenDone0 { future =>
+      future {
+        case Ok(_)     => successSample.incr()
+        case Error(_)  => failureSample.incr()
+        case Cancelled => ()
+      }
+    }
+  }
+ 
 }
 
 class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker {
