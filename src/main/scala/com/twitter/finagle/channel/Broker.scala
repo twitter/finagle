@@ -56,7 +56,7 @@ object ReplyFuture {
 }
 
 trait Broker extends SocketAddress {
-  def dispatch(e: MessageEvent): ReplyFuture
+  def dispatch(request: MessageEvent): ReplyFuture
 }
 
 object Broker {

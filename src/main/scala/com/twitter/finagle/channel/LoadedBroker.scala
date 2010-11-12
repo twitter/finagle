@@ -14,8 +14,6 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Conversions._
 
-class TooFewDicksOnTheDanceFloorException extends Exception
-
 /**
  * This is F-bounded to ensure that we have a homogenous set of
  * LoadedBrokers in a given load balancer. We need this so that their
@@ -66,7 +64,7 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker
 
   def dispatch(e: MessageEvent): ReplyFuture = {
     val snapshot = endpoints map { e => (e, e.weight) }
-    val totalSum = snapshot.foldLeft(0.0f) { case (a, (_, weight)) => a + (weight) }
+    val totalSum = snapshot.foldLeft(0.0f) { case (a, (_, weight)) => a + weight }
 
     // TODO: test this & other edge cases
     if (totalSum <= 0.0f)
