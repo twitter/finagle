@@ -47,6 +47,7 @@ class StatsLoadedBroker(
           // TODO: exception hierarchy here to differentiate between
           // application, connection & other (internal?) exceptions.
           samples("exception", e.getClass.getName).add(begin.ago.inMilliseconds.toInt)
+        case Cancelled => /*ignore*/ ()
       }
     }
   }
