@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift
 
+import java.util.NoSuchElementException
 import java.util.concurrent.atomic.AtomicReference
 import java.lang.reflect.{Method, ParameterizedType, Proxy}
 
@@ -7,19 +8,11 @@ import org.apache.thrift.{TBase, TApplicationException}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocol}
 
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.jboss.netty.channel.{
-  SimpleChannelHandler, ChannelHandlerContext,
-  MessageEvent, ChannelEvent, Channels}
+import org.jboss.netty.channel._
 
 import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
 
 import ChannelBufferConversions._
-
-/**
- * The ThriftCall object represents a thrift dispatch on the
- * channel. The method name & argument thrift structure (POJO) is
- * given.
- */
 
 class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
   val method: String,
@@ -30,6 +23,11 @@ class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
   def newInstance() = new ThriftCall(method, newArgInstance(), replyClass)
 }
 
+/**
+ * The ThriftCall object represents a thrift dispatch on the
+ * channel. The method name & argument thrift structure (POJO) is
+ * given.
+ */
 class ThriftCall[A <: TBase[_], R <: TBase[_]](
   method: String,
   args: A,
@@ -61,24 +59,37 @@ class ThriftCall[A <: TBase[_], R <: TBase[_]](
     result
   }
 
+  /**
+   * Produce a new reply instance.
+   */
   def newReply() = replyClass.newInstance()
 
+  /**
+   * Wrap a ReplyClass in a ThriftReply.
+   */
   def reply(reply: R) =
     new ThriftReply[R](reply, this)
 
+  /**
+   * Read the argument list
+   */
   def arguments: A = args.asInstanceOf[A]
 }
 
-case class ThriftReply[R <: TBase[_]]
-(response: R, call: ThriftCall[_ <: TBase[_], _ <: TBase[_]])
+case class ThriftReply[R <: TBase[_]](
+  response: R,
+  call: ThriftCall[_ <: TBase[_], _ <: TBase[_]])
 
-object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCallFactory[_, _]] {
+object ThriftTypes
+  extends scala.collection.mutable.HashMap[String, ThriftCallFactory[_, _]]
+{
   def add(c: ThriftCallFactory[_, _]): Unit = put(c.method, c)
+
   override def apply(method: String) = {
     try {
       super.apply(method)
     } catch {
-      case e: java.util.NoSuchElementException =>
+      case e: NoSuchElementException =>
         throw new TApplicationException(
           TApplicationException.UNKNOWN_METHOD,
           "unknown method '%s'".format(method))
@@ -87,9 +98,9 @@ object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCallFa
 }
 
 abstract class ThriftCodec extends SimpleChannelHandler {
-  val protocolFactory = new TBinaryProtocol.Factory(true, true)
-  val currentCall = new AtomicReference[ThriftCall[_, _]]
-  var seqid = 0
+  protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
+  protected val currentCall = new AtomicReference[ThriftCall[_, _]]
+  protected var seqid = 0
 }
 
 
@@ -97,7 +108,7 @@ class UnrecognizedResponseException extends Exception
 
 class ThriftServerCodec extends ThriftCodec {
   /**
-   * Writes replies.
+   * Writes replies to clients.
    */
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
@@ -118,9 +129,8 @@ class ThriftServerCodec extends ThriftCodec {
     }
   }
 
-
   /**
-   * Receives requests.
+   * Receives requests from clients.
    */
   override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
@@ -169,7 +179,7 @@ class ThriftServerCodec extends ThriftCodec {
 
 class ThriftClientCodec extends ThriftCodec {
   /**
-   * Sends requests.
+   * Sends requests to servers.
    */
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
@@ -198,7 +208,7 @@ class ThriftClientCodec extends ThriftCodec {
   }
 
   /**
-   * Receives replies.
+   * Receives replies from servers.
    */
   override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
