@@ -14,8 +14,6 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Conversions._
 
-class TooFewDicksOnTheDanceFloorException extends Exception
-
 /**
  * This is F-bounded to ensure that we have a homogenous set of
  * LoadedBrokers in a given load balancer. We need this so that their

@@ -5,8 +5,6 @@ import java.util.concurrent.TimeUnit
 import org.jboss.netty.util.{TimerTask, Timeout, Timer}
 import org.jboss.netty.channel.MessageEvent
 
-object TimedoutRequestException extends Exception
-
 class TimeoutBroker(timer: Timer, underlying: Broker, duration: Long, unit: TimeUnit)
   extends Broker
 {
@@ -18,7 +16,7 @@ class TimeoutBroker(timer: Timer, underlying: Broker, duration: Long, unit: Time
     val timeout = timer.newTimeout(new TimerTask {
       def run(timeout: Timeout) {
         if (!timeout.isCancelled())
-          future.setFailure(TimedoutRequestException)
+          future.setFailure(new TimedoutRequestException)
       }
     }, duration, unit)
 
