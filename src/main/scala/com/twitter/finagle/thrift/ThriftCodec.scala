@@ -14,15 +14,6 @@ import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
 
 import ChannelBufferConversions._
 
-class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
-  val method: String,
-  argClass: Class[A],
-  replyClass: Class[R])
-{
-  private[this] def newArgInstance() = argClass.newInstance
-  def newInstance() = new ThriftCall(method, newArgInstance(), replyClass)
-}
-
 /**
  * The ThriftCall object represents a thrift dispatch on the
  * channel. The method name & argument thrift structure (POJO) is
@@ -76,10 +67,26 @@ class ThriftCall[A <: TBase[_], R <: TBase[_]](
   def arguments: A = args.asInstanceOf[A]
 }
 
+/**
+ * Encapsulates the result of a call to a Thrift service.
+ */
 case class ThriftReply[R <: TBase[_]](
   response: R,
   call: ThriftCall[_ <: TBase[_], _ <: TBase[_]])
 
+class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
+  val method: String,
+  argClass: Class[A],
+  replyClass: Class[R])
+{
+  private[this] def newArgInstance() = argClass.newInstance
+  def newInstance() = new ThriftCall(method, newArgInstance(), replyClass)
+}
+
+/**
+ * A registry for Thrift types. Register ThriftCallFactory instances encapsulating
+ * the types to be decoded by the ThriftServerCodec with this singleton.
+ */
 object ThriftTypes
   extends scala.collection.mutable.HashMap[String, ThriftCallFactory[_, _]]
 {
