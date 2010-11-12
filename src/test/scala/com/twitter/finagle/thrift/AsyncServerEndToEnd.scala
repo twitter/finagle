@@ -37,7 +37,6 @@ object AsyncServerEndToEndSpec extends Specification {
               e.getMessage match {
                 case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result] =>
                   val response = bleep.newReply
-                  println("Got bleep message. Args: %s".format(bleep.arguments))
                   response.setSuccess(bleep.arguments.request.reverse)
                   Channels.write(ctx.getChannel, bleep.reply(response))
                 case _ =>
@@ -60,7 +59,6 @@ object AsyncServerEndToEndSpec extends Specification {
           pipeline.addLast("codec", new ThriftClientCodec)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-              println("Got result: %s".format(e))
               callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
             }
           })
