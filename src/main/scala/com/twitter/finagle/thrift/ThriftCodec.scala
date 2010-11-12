@@ -19,11 +19,6 @@ import ChannelBufferConversions._
  * given.
  */
 
-/*
- * Factory
- * Instance as decoder
- */
-
 class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
   val method: String,
   argClass: Class[A],
@@ -38,29 +33,29 @@ class ThriftCall[A <: TBase[_], R <: TBase[_]](
   args: A,
   replyClass: Class[R])
 {
-  def readRequestArgs(iprot: TProtocol) {
-    args.read(iprot)
-    iprot.readMessageEnd()
+  private[thrift] def readRequestArgs(p: TProtocol) {
+    args.read(p)
+    p.readMessageEnd()
   }
 
-  def writeRequest(seqid: Int, oprot: TProtocol) {
-    oprot.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
-    args.write(oprot)
-    oprot.writeMessageEnd()
+  private[thrift] def writeRequest(seqid: Int, p: TProtocol) {
+    p.writeMessageBegin(new TMessage(method, TMessageType.CALL, seqid))
+    args.write(p)
+    p.writeMessageEnd()
   }
 
-  def writeReply(seqid: Int, oprot: TProtocol, reply: TBase[_]) {
+  private[thrift] def writeReply(seqid: Int, p: TProtocol, reply: TBase[_]) {
     // Write server replies
-    oprot.writeMessageBegin(new TMessage(method, TMessageType.REPLY, seqid))
-    reply.write(oprot)
-    oprot.writeMessageEnd()
+    p.writeMessageBegin(new TMessage(method, TMessageType.REPLY, seqid))
+    reply.write(p)
+    p.writeMessageEnd()
   }
 
-  def readResponse(iprot: TProtocol) = {
+  private[thrift] def readResponse(p: TProtocol) = {
     // Read client responses
     val result = replyClass.newInstance()
-    result.read(iprot)
-    iprot.readMessageEnd()
+    result.read(p)
+    p.readMessageEnd()
     result
   }
 
@@ -91,6 +86,7 @@ object ThriftTypes extends scala.collection.mutable.HashMap[String, ThriftCallFa
 
 class ThriftServerCodec extends ThriftCodec
 class ThriftClientCodec extends ThriftCodec
+
 
 abstract class ThriftCodec extends SimpleChannelHandler {
   val protocolFactory = new TBinaryProtocol.Factory(true, true)
