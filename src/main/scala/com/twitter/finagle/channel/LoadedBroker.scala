@@ -66,7 +66,7 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker
 
   def dispatch(e: MessageEvent): ReplyFuture = {
     val snapshot = endpoints map { e => (e, e.weight) }
-    val totalSum = snapshot.foldLeft(0.0f) { case (a, (_, weight)) => a + (weight) }
+    val totalSum = snapshot.foldLeft(0.0f) { case (a, (_, weight)) => a + weight }
 
     // TODO: test this & other edge cases
     if (totalSum <= 0.0f)
