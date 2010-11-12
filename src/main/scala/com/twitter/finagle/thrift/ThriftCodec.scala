@@ -11,6 +11,8 @@ import org.jboss.netty.channel.{
   SimpleChannelHandler, ChannelHandlerContext,
   MessageEvent, ChannelEvent, Channels}
 
+import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
+
 import ChannelBufferConversions._
 
 /**
@@ -91,7 +93,6 @@ abstract class ThriftCodec extends SimpleChannelHandler {
 }
 
 
-class RequestConcurrencyException extends Exception
 class UnrecognizedResponseException extends Exception
 
 class ThriftServerCodec extends ThriftCodec {
@@ -180,7 +181,7 @@ class ThriftClientCodec extends ThriftCodec {
     m getMessage match {
       case call: ThriftCall[_, _] =>
         if (!currentCall.compareAndSet(null, call)) {
-          val exc = new RequestConcurrencyException
+          val exc = new TooManyDicksOnTheDanceFloorException
           Channels.fireExceptionCaught(ctx, exc)
           c.getFuture.setFailure(exc)
           return
