@@ -11,6 +11,7 @@ import org.apache.thrift.protocol.{
   TProtocol, TBinaryProtocol, TMessage, TMessageType}
 
 import com.twitter.finagle.SunkChannel
+import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
 import com.twitter.silly.Silly
 
 import ChannelBufferConversions._
@@ -210,7 +211,7 @@ object ThriftCodecSpec extends Specification {
       val f = Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
       ch.downstreamEvents must haveSize(1)
       ch.upstreamEvents must haveSize(1)
-      ch.upstreamEvents(0) must matchExceptionEvent(new RequestConcurrencyException)
+      ch.upstreamEvents(0) must matchExceptionEvent(new TooManyDicksOnTheDanceFloorException)
 
       // The future also fails:
       f.isSuccess must beFalse
