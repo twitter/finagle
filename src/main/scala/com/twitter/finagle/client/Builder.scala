@@ -18,10 +18,7 @@ import com.twitter.finagle.channel._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.thrift.ThriftClientCodec
 import com.twitter.finagle.util._
-
-sealed abstract class Codec {
-  val pipelineFactory: ChannelPipelineFactory
-}
+import com.twitter.finagle._
 
 object Http extends Codec {
   val pipelineFactory =
@@ -51,9 +48,6 @@ object Codec {
   val thrift = Thrift
 }
 
-sealed abstract class StatsReceiver
-case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver
-
 object Builder {
   def apply() = new Builder
   def get() = apply()
@@ -63,28 +57,21 @@ object Builder {
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
 
-  case class Timeout(value: Long, unit: TimeUnit) {
-    def duration = Duration.fromTimeUnit(value, unit)
-  }
-
   def parseHosts(hosts: String): java.util.List[InetSocketAddress] = {
     val hostPorts = hosts split Array(' ', ',') filter (_ != "") map (_.split(":"))
     hostPorts map { hp => new InetSocketAddress(hp(0), hp(1).toInt) } toList
   }
 }
 
-class IncompleteClientSpecification(message: String)
-  extends Exception(message)
-
 // We're nice to java.
 case class Builder(
   _hosts: Option[Seq[InetSocketAddress]],
   _codec: Option[Codec],
-  _connectionTimeout: Builder.Timeout,
-  _requestTimeout: Builder.Timeout,
+  _connectionTimeout: Timeout,
+  _requestTimeout: Timeout,
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Builder.Timeout,
-  _sampleGranularity: Builder.Timeout,
+  _sampleWindow: Timeout,
+  _sampleGranularity: Timeout,
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
@@ -94,11 +81,11 @@ case class Builder(
   def this() = this(
     None,                                                   // hosts
     None,                                                   // codec
-    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
-    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
+    Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
+    Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
     None,                                                   // statsReceiver
-    Builder.Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
-    Builder.Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
+    Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
+    Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
     None,                                                   // name
     None,                                                   // hostConnectionLimit
     None,                                                   // sendBufferSize
@@ -140,9 +127,9 @@ case class Builder(
   def build() = {
     val (hosts, codec) = (_hosts, _codec) match {
       case (None, _) =>
-        throw new IncompleteClientSpecification("No hosts were specified")
+        throw new IncompleteConfiguration("No hosts were specified")
       case (_, None) =>
-        throw new IncompleteClientSpecification("No codec was specified")
+        throw new IncompleteConfiguration("No codec was specified")
       case (Some(hosts), Some(codec)) =>
         (hosts, codec)
     }
@@ -176,7 +163,7 @@ case class Builder(
     val granularity = _sampleGranularity.duration
     val window      = _sampleWindow.duration
     if (window < granularity) {
-      throw new IncompleteClientSpecification(
+      throw new IncompleteConfiguration(
         "window smaller than granularity!")
     }
     val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)

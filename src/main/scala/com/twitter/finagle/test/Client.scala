@@ -6,7 +6,8 @@ import org.jboss.netty.handler.codec.http._
 
 import net.lag.configgy.{Configgy, RuntimeEnvironment}
 import com.twitter.ostrich
-import com.twitter.finagle.client.{Client, Builder, Http, Ostrich}
+import com.twitter.finagle._
+import com.twitter.finagle.client.{Client, Builder, Http}
 
 import com.twitter.util.{Return, Throw}
 
