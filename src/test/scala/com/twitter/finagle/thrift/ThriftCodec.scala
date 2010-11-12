@@ -210,8 +210,7 @@ object ThriftCodecSpec extends Specification {
       val f = Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
       ch.downstreamEvents must haveSize(1)
       ch.upstreamEvents must haveSize(1)
-      ch.upstreamEvents(0) must matchExceptionEvent(
-        new Exception("There may be only one outstanding Thrift call at a time"))
+      ch.upstreamEvents(0) must matchExceptionEvent(new RequestConcurrencyException)
 
       // The future also fails:
       f.isSuccess must beFalse
@@ -219,15 +218,13 @@ object ThriftCodecSpec extends Specification {
   }
 
   "message serializaton" should {
-
     "throw exceptions on unrecognized request types" in {
       val ch = makeClientChannel
       Channels.write(ch, "grr")
 
       ch.downstreamEvents must haveSize(0)
       ch.upstreamEvents must haveSize(1)
-      ch.upstreamEvents(0) must matchExceptionEvent(
-        new IllegalArgumentException("Unrecognized request type"))
+      ch.upstreamEvents(0) must matchExceptionEvent(new UnrecognizedResponseException)
     }
   }
 }
