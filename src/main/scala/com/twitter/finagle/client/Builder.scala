@@ -51,8 +51,25 @@ object Codec {
   val thrift = Thrift
 }
 
-sealed abstract class StatsReceiver
-case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver
+trait StatsReceiver {
+  def observer(prefix: String, host: InetSocketAddress): (Seq[String], Int, Int) => Unit
+}
+
+case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver {
+  def observer(prefix: String, host: InetSocketAddress) = {
+    val suffix = "_%s:%d".format(host.getHostName, host.getPort)
+
+    (path: Seq[String], value: Int, count: Int) => {
+      val pathString = path mkString "__"
+      provider.addTiming(prefix + pathString, count)
+      provider.addTiming(prefix + pathString + suffix, count)
+    }
+  }
+}
+
+object Ostrich {
+  def apply(): Ostrich = Ostrich(ostrich.Stats)
+}
 
 object Builder {
   def apply() = new Builder
@@ -98,8 +115,8 @@ case class Builder(
   def this() = this(
     None,                                                   // hosts
     None,                                                   // codec
-    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
-    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
+    Builder.Timeout(Int.MaxValue, TimeUnit.MILLISECONDS),   // connectionTimeout
+    Builder.Timeout(Int.MaxValue, TimeUnit.MILLISECONDS),   // requestTimeout
     None,                                                   // statsReceiver
     Builder.Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
     Builder.Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
@@ -188,20 +205,16 @@ case class Builder(
         "window smaller than granularity!")
     }
 
-    val statsMaker = () => TimeWindowedSample[ScalarSample](window, granularity)
     val prefix = name map ("%s_".format(_)) getOrElse ""
+    val sampleRepository =
+      new ObservableSampleRepository[TimeWindowedSample[ScalarSample]] {
+        override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
+      }
 
-    receiver match {
-      case Some(Ostrich(provider)) =>
-        val suffix = "_%s:%d".format(host.getHostName, host.getPort)
-        new OstrichSampleRepository[TimeWindowedSample[ScalarSample]](prefix, suffix, provider) {
-          override def makeStat = statsMaker()
-        }
-      case _ =>
-        new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
-          override def makeStat = statsMaker()
-        }
-    }
+    for (receiver <- receiver)
+      sampleRepository observeTailsWith receiver.observer(prefix, host)
+
+    sampleRepository
   }
 
   private def failureAccrualBroker(timeout: Timeout)(broker: StatsLoadedBroker) = {

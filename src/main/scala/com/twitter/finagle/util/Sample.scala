@@ -1,6 +1,7 @@
 package com.twitter.finagle.util
 
 import scala.annotation.tailrec
+import scala.collection.mutable.Queue
 import scala.collection.JavaConversions._
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,17 +38,43 @@ trait LazilyCreatingSampleRepository[S <: Sample] extends SampleRepository[S] {
   def apply(path: String*): S = map getOrElseUpdate(path, makeStat)
 }
 
-
 trait ObservableSampleRepository[S <: AddableSample[S]]
   extends LazilyCreatingSampleRepository[AddableSample[S]]
 {
-  def observeAdd(path: Seq[String], value: Int, count: Int)
+  private def tails[A](s: Seq[A]): Seq[Seq[A]] = {
+    s match {
+      case s@Seq(_) =>
+        Seq(s)
+
+      case Seq(hd, tl@_*) =>
+        Seq(Seq(hd)) ++ (tails(tl) map { t => Seq(hd) ++ t })
+    }
+  }
+
+  private type Observer = (Seq[String], Int, Int) => Unit
+  private val observers = new Queue[Observer]
+  private val tailObservers = new Queue[Observer]
+
+  def observeTailsWith(o: (Seq[String], Int, Int) => Unit) = synchronized {
+    tailObservers += o
+  }
+
+  def observeWith(o: (Seq[String], Int, Int) => Unit) = synchronized {
+    observers += o
+  }
 
   override def apply(path: String*): AddableSample[S] =
     new AddableSampleProxy[S](super.apply(path:_*)) {
       override def add(value: Int, count: Int) {
         super.add(value, count)
-        observeAdd(path, value, count)
+
+        ObservableSampleRepository.this.synchronized {
+          for (o <- observers)
+            o(path, value, count)
+
+          for (tail <- tails(path); o <- tailObservers)
+            o(path, value, count)
+        }
       }
     }
 }
