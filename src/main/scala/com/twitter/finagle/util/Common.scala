@@ -2,15 +2,13 @@ package com.twitter.finagle.util
 
 import java.util.concurrent.TimeUnit
 
-import org.jboss.netty.channel.ChannelPipelineFactory
+import org.jboss.netty.channel._
 
 import com.twitter.ostrich
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Duration
 
-abstract class Codec {
-  val pipelineFactory: ChannelPipelineFactory
-}
+import collection.JavaConversions._
 
 abstract class StatsReceiver
 case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver

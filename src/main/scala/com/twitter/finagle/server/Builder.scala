@@ -4,6 +4,7 @@ import java.net.InetSocketAddress
 import java.util.concurrent.{TimeUnit, Executors}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
+import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.channel.socket.nio._
@@ -14,28 +15,24 @@ import com.twitter.finagle.thrift._
 
 import com.twitter.ostrich
 import com.twitter.util.TimeConversions._
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Time}
+
+sealed abstract class Codec {
+  def prependPipeline(pipeline: ChannelPipeline): ChannelPipeline
+}
 
 object Http extends Codec {
-  val pipelineFactory =
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("httpCodec", new HttpServerCodec)
-        pipeline
-      }
-    }
+  def prependPipeline(pipeline: ChannelPipeline) = {
+    pipeline.addFirst("httpCodec", new HttpServerCodec)
+    pipeline
+  }
 }
 
 object Thrift extends Codec {
-  val pipelineFactory =
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftCodec", new ThriftServerCodec)
-        pipeline
-      }
-    }
+  def prependPipeline(pipeline: ChannelPipeline) = {
+    pipeline.addFirst("thriftCodec", new ThriftServerCodec)
+    pipeline
+  }
 }
 
 object Codec {
@@ -48,14 +45,44 @@ object Builder {
   def get() = apply()
 
   val channelFactory =
-    new NioClientSocketChannelFactory(
+    new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
+}
 
+class SampleHandler(samples: SampleRepository) extends SimpleChannelHandler {
+  val dispatchSample = samples("dispatch")
+  val latencySample  = samples("latency")
+
+  case class Timing(requestedAt: Time = Time.now)
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    ctx.getAttachment match {
+      case Timing(requestedAt: Time) =>
+        samples("exception", e.getCause.getClass.getName).add(
+          requestedAt.ago.inMilliseconds.toInt)
+      case _ => ()
+    }
+    super.exceptionCaught(ctx, e)
+  }
+
+  override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
+    dispatchSample.incr()
+    ctx.setAttachment(Timing())
+    super.handleUpstream(ctx, c)
+  }
+
+  override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
+    ctx.getAttachment match {
+      case Timing(requestedAt: Time) =>
+        latencySample.add(requestedAt.ago.inMilliseconds.toInt)
+      case _ => ()
+    }
+    super.handleDownstream(ctx, c)
+  }
 }
 
 case class Builder(
-  _port: Int,
   _codec: Option[Codec],
   _connectionTimeout: Timeout,
   _requestTimeout: Timeout,
@@ -64,12 +91,12 @@ case class Builder(
   _sampleGranularity: Timeout,
   _name: Option[String],
   _sendBufferSize: Option[Int],
-  _recvBufferSize: Option[Int])
+  _recvBufferSize: Option[Int],
+  _pipelineFactory: Option[ChannelPipelineFactory])
 {
   import Builder._
 
   def this() = this(
-    0,                                              // port (default, ephemeral)
     None,                                           // codec
     Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
     Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
@@ -78,7 +105,8 @@ case class Builder(
     Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
     None,                                           // name
     None,                                           // sendBufferSize
-    None                                            // recvBufferSize
+    None,                                           // recvBufferSize
+    None                                            // pipelineFactory
   )
 
   def codec(codec: Codec) =
@@ -104,10 +132,21 @@ case class Builder(
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def build() = {
-    if (!_codec.isDefined) throw new IncompleteConfiguration("No codec was specified")
+  def pipelineFactory(value: ChannelPipelineFactory) =
+    copy(_pipelineFactory = Some(value))
+
+  def build: ServerBootstrap = {
+    val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
+      case (None, _) =>
+        throw new IncompleteConfiguration("No codec was specified")
+      case (_, None) =>
+        throw new IncompleteConfiguration("No pipeline was specified")
+      case (Some(codec), Some(pipeline)) =>
+        (codec, pipeline)
+    }
 
     val bs = new ServerBootstrap(channelFactory)
+
     bs.setOption("tcpNoDelay", true) // XXX: right?
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
@@ -127,14 +166,44 @@ case class Builder(
     val statsMaker = () => new TimeWindowedSample[ScalarSample](numBuckets.toInt, granularity)
     val namePrefix = _name map ("%s_".format(_)) getOrElse ""
 
-//    new LoadBalancedBroker(statsBrokers)
+    val statsHandler = new SampleHandler(sampleRepository)
+
+    bs.setPipelineFactory(new ChannelPipelineFactory {
+      def getPipeline = {
+        val pipeline = pipelineFactory.getPipeline
+        pipeline.addFirst("stats", new SampleHandler(sampleRepository))
+        codec.prependPipeline(pipeline)
+        pipeline
+      }
+    })
+
+    bs
   }
-
-  // def buildClient[Request, Reply]() =
-  //   new Server[HttpRequest, HttpResponse](build())
-
 }
 
-class Server(bootstrap: ServerBootstrap) {
-}
+object Main {
+  def main(args: Array[String]) {
+    println("Demo.")
 
+    class Handler extends SimpleChannelUpstreamHandler {
+      override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+        val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+        response.setHeader("Content-Type", "text/plain")
+        response.setContent(ChannelBuffers.wrappedBuffer("Mission accomplished".getBytes))
+        e.getChannel.write(response).addListener(ChannelFutureListener.CLOSE)
+      }
+    }
+
+    val pf = new ChannelPipelineFactory {
+      def getPipeline = {
+        val pipeline = Channels.pipeline
+        pipeline.addLast("handler", new Handler)
+        pipeline
+      }
+    }
+    val bs = Builder().codec(Http)
+                      .pipelineFactory(pf)
+                      .build
+    bs.bind(new InetSocketAddress(8888))
+  }
+}
