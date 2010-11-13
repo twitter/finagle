@@ -18,7 +18,6 @@ import com.twitter.finagle.channel._
 import com.twitter.finagle.http.RequestLifecycleSpy
 import com.twitter.finagle.thrift.ThriftClientCodec
 import com.twitter.finagle.util._
-import com.twitter.finagle._
 
 sealed abstract class Codec {
   val pipelineFactory: ChannelPipelineFactory
@@ -52,6 +51,9 @@ object Codec {
   val thrift = Thrift
 }
 
+sealed abstract class StatsReceiver
+case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver
+
 object Builder {
   def apply() = new Builder
   def get() = apply()
@@ -60,6 +62,10 @@ object Builder {
     new NioClientSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
+
+  case class Timeout(value: Long, unit: TimeUnit) {
+    def duration = Duration.fromTimeUnit(value, unit)
+  }
 
   def parseHosts(hosts: String): java.util.List[InetSocketAddress] = {
     val hostPorts = hosts split Array(' ', ',') filter (_ != "") map (_.split(":"))
@@ -76,33 +82,33 @@ class IncompleteClientSpecification(message: String)
 case class Builder(
   _hosts: Option[Seq[InetSocketAddress]],
   _codec: Option[Codec],
-  _connectionTimeout: Timeout,
-  _requestTimeout: Timeout,
+  _connectionTimeout: Builder.Timeout,
+  _requestTimeout: Builder.Timeout,
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Timeout,
-  _sampleGranularity: Timeout,
+  _sampleWindow: Builder.Timeout,
+  _sampleGranularity: Builder.Timeout,
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _exportLoadsToOstrich: Boolean,
-  _failureAccrualWindow: Timeout)
+  _failureAccrualWindow: Builder.Timeout)
 {
   import Builder._
   def this() = this(
     None,                                                   // hosts
     None,                                                   // codec
-    Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
-    Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
+    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
+    Builder.Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
     None,                                                   // statsReceiver
-    Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
-    Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
+    Builder.Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
+    Builder.Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
     None,                                                   // name
     None,                                                   // hostConnectionLimit
     None,                                                   // sendBufferSize
     None,                                                   // recvBufferSize
     false,                                                  // exportLoadsToOstrich
-    Timeout(10, TimeUnit.SECONDS)                   // failureAccrualWindow
+    Builder.Timeout(10, TimeUnit.SECONDS)                   // failureAccrualWindow
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -157,7 +163,7 @@ case class Builder(
     bs
   }
 
-  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) =
+  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) = 
     limit match {
       case Some(limit) =>
         new ConnectionLimitingChannelPool(bootstrap, limit)
@@ -178,7 +184,7 @@ case class Builder(
     val window      = sampleWindow.duration
     val granularity = sampleGranularity.duration
     if (window < granularity) {
-      throw new IncompleteConfiguration(
+      throw new IncompleteClientSpecification(
         "window smaller than granularity!")
     }
 
@@ -204,7 +210,7 @@ case class Builder(
     def mk = new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
       override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
     }
-
+    
     new FailureAccruingLoadedBroker(broker, mk)
   }
 
