@@ -211,7 +211,7 @@ case class Builder(
       override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
     }
     
-    new FailureAccruingStatsLoadedBroker(broker, mk)
+    new FailureAccruingLoadedBroker(broker, mk)
   }
 
   def makeBroker(

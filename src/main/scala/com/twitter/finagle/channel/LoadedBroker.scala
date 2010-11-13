@@ -57,13 +57,13 @@ class StatsLoadedBroker(
   // latencyStats.sum + 2 * latencyStats.mean * failureStats.count
 }
 
-class FailureAccruingStatsLoadedBroker(
-  underlying: StatsLoadedBroker,
+class FailureAccruingLoadedBroker(
+  underlying: LoadedBroker[_],
   samples: SampleRepository[TimeWindowedSample[_]])
-  extends LoadedBroker[FailureAccruingStatsLoadedBroker]
+  extends LoadedBroker[FailureAccruingLoadedBroker]
 {
-  val failureSample = samples("error")
   val successSample = samples("success")
+  val failureSample = samples("failure")
 
   def load = underlying.load
 
@@ -78,7 +78,7 @@ class FailureAccruingStatsLoadedBroker(
     if (sum <= 0)
       underlying.weight
     else
-      (success / (success + failure)) * underlying.weight
+      (success.toFloat / (success.toFloat + failure.toFloat)) * underlying.weight
   }
 
   def dispatch(e: MessageEvent) = {
