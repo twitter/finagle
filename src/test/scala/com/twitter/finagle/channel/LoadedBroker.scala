@@ -6,12 +6,16 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
 
-import com.twitter.finagle.util.SampleRepository
+import com.twitter.finagle.util._
 
 object LoadedBrokerSpec extends Specification with Mockito {
   class FakeLoadedBroker extends LoadedBroker[FakeLoadedBroker] {
     def load = 0
     def dispatch(e: MessageEvent) = null
+  }
+
+  class Repo extends LazilyCreatingSampleRepository[ScalarSample] {
+    def makeStat = new ScalarSample
   }
 
   "StatsLoadedBroker" should {
@@ -22,9 +26,9 @@ object LoadedBrokerSpec extends Specification with Mockito {
       broker1.dispatch(messageEvent) returns ReplyFuture.success("1")
       val broker2 = mock[Broker]
       broker2.dispatch(messageEvent) returns ReplyFuture.success("2")
-
-      val rcBroker1 = new StatsLoadedBroker(broker1, new SampleRepository)
-      val rcBroker2 = new StatsLoadedBroker(broker2, new SampleRepository)
+      
+      val rcBroker1 = new StatsLoadedBroker(broker1, new Repo)
+      val rcBroker2 = new StatsLoadedBroker(broker2, new Repo)
 
       (0 until 3) foreach { _ => rcBroker1.dispatch(messageEvent) }
       (0 until 1) foreach { _ => rcBroker2.dispatch(messageEvent) }
@@ -36,6 +40,74 @@ object LoadedBrokerSpec extends Specification with Mockito {
 
       rcBroker1.load must be_==(3)
       rcBroker2.load must be_==(4)
+    }
+  }
+
+  "FailureAccruingLoadedBroker" should {
+    val underlying = mock[LoadedBroker[T forSome { type  T <: LoadedBroker[T] }]]
+
+    type S = TimeWindowedSample[ScalarSample]
+
+    val repo = mock[SampleRepository[S]]
+    val successSample = mock[S]
+    val failureSample = mock[S]
+
+    repo("success") returns successSample
+    repo("failure") returns failureSample
+
+    val broker = new FailureAccruingLoadedBroker(underlying, repo)
+
+    "account for success" in {
+      val e = mock[MessageEvent]
+      val f = new ReplyFuture
+
+      underlying.dispatch(e) returns f
+      broker.dispatch(e) must be_==(f)
+
+      there was no(successSample).incr()
+      there was no(failureSample).incr()
+
+      f.setReply(Reply.Done("yipee!"))
+      there was one(successSample).incr()
+    }
+
+    "account for failure" in {
+      val e = mock[MessageEvent]
+      val f = new ReplyFuture
+
+      underlying.dispatch(e) returns f
+      broker.dispatch(e) must be_==(f)
+
+      f.setFailure(new Exception("doh."))
+
+      there was no(successSample).incr()
+      there was one(failureSample).incr()
+    }
+
+    "take into account failures" in {
+      val e = mock[MessageEvent]
+      val f = new ReplyFuture
+
+      underlying.dispatch(e) returns f
+      broker.dispatch(e) must be_==(f)
+
+      f.setReply(Reply.Done("yipee!"))
+      there was no(failureSample).incr()
+      there was one(successSample).incr()
+    }
+
+    "not modify weights for a healhty client" in {
+      successSample.count returns 1
+      failureSample.count returns 0
+      underlying.weight returns 1.0f
+      broker.weight must be_==(1.0f)
+    }
+
+    "adjust weights for an unhealthy broker" in {
+      successSample.count returns 1
+      failureSample.count returns 1
+      underlying.weight returns 1.0f
+      broker.weight must be_==(0.5f)
     }
   }
 

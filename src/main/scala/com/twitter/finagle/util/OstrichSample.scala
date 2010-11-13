@@ -2,8 +2,10 @@ package com.twitter.finagle.util
 
 import com.twitter.ostrich.StatsProvider
 
-class OstrichSampleRepository(prefix: String, suffix: String, statsProvider: StatsProvider)
-  extends ObservableSampleRepository
+abstract class OstrichSampleRepository[S <: AddableSample[S]](
+  prefix: String, suffix: String,
+  statsProvider: StatsProvider)
+  extends ObservableSampleRepository[AddableSample[S]]
 {
   def tails[A](s: Seq[A]): Seq[Seq[A]] = {
     s match {

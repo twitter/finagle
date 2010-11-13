@@ -67,6 +67,11 @@ object Builder {
   }
 }
 
+class IncompleteClientSpecification(message: String)
+  extends Exception(message)
+
+// TODO: sampleGranularity, sampleWindow <- rename!
+
 // We're nice to java.
 case class Builder(
   _hosts: Option[Seq[InetSocketAddress]],
@@ -79,7 +84,9 @@ case class Builder(
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
-  _recvBufferSize: Option[Int])
+  _recvBufferSize: Option[Int],
+  _exportLoadsToOstrich: Boolean,
+  _failureAccrualWindow: Timeout)
 {
   import Builder._
   def this() = this(
@@ -93,7 +100,9 @@ case class Builder(
     None,                                                   // name
     None,                                                   // hostConnectionLimit
     None,                                                   // sendBufferSize
-    None                                                    // recvBufferSize
+    None,                                                   // recvBufferSize
+    false,                                                  // exportLoadsToOstrich
+    Timeout(10, TimeUnit.SECONDS)                   // failureAccrualWindow
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -128,73 +137,117 @@ case class Builder(
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def build() = {
-    val (hosts, codec) = (_hosts, _codec) match {
-      case (None, _) =>
-        throw new IncompleteConfiguration("No hosts were specified")
-      case (_, None) =>
-        throw new IncompleteConfiguration("No codec was specified")
-      case (Some(hosts), Some(codec)) =>
-        (hosts, codec)
+  def exportLoadsToOstrich() = copy(_exportLoadsToOstrich = true)
+
+  def failureAccrualWindow(value: Long, unit: TimeUnit) =
+    copy(_failureAccrualWindow = Timeout(value, unit))
+
+  // ** BUILDING
+
+  private def bootstrap(codec: Codec)(host: InetSocketAddress) = {
+    val bs = new BrokerClientBootstrap(channelFactory)
+    bs.setPipelineFactory(codec.pipelineFactory)
+    bs.setOption("remoteAddress", host)
+    bs.setOption("connectTimeoutMillis", _connectionTimeout.duration.inMilliseconds)
+    bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
+    // bs.setOption("soLinger", 0)  (TODO)
+    bs.setOption("reuseAddress", true)
+    _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
+    _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
+    bs
+  }
+
+  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) =
+    limit match {
+      case Some(limit) =>
+        new ConnectionLimitingChannelPool(bootstrap, limit)
+      case None =>
+        new ChannelPool(bootstrap)
     }
 
-    val bootstraps = hosts map { host =>
-      val bs = new BrokerClientBootstrap(channelFactory)
-      bs.setPipelineFactory(codec.pipelineFactory)
-      bs.setOption("remoteAddress", host)
-      bs.setOption("connectTimeoutMillis", _connectionTimeout.duration.inMilliseconds)
-      bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
-      // bs.setOption("soLinger", 0)  (TODO)
-      bs.setOption("reuseAddress", true)
-      _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
-      _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
-      bs
-     }
+  private def timeout(timeout: Timeout)(broker: Broker) =
+    new TimeoutBroker(broker, timeout.value, timeout.unit)
 
-    val channelPool =
-      _hostConnectionLimit map { limit =>
-        ((bootstrap: BrokerClientBootstrap) =>
-          (new ConnectionLimitingChannelPool(bootstrap, limit)))
-      } getOrElse ((new ChannelPool(_)))
-
-    val sampleRepository = new SampleRepository
-    val timeoutBrokers = bootstraps map (
-     channelPool            andThen
-     (new PoolingBroker(_)) andThen
-     (new TimeoutBroker(_, _requestTimeout.value, _requestTimeout.unit)))
-
-    // Construct sample stats.
-    val granularity = _sampleGranularity.duration
-    val window      = _sampleWindow.duration
+  private def statsRepositoryForLoadedBroker(
+    host: InetSocketAddress,
+    name: Option[String],
+    receiver: Option[StatsReceiver],
+    sampleWindow: Timeout,
+    sampleGranularity: Timeout) =
+  {
+    val window      = sampleWindow.duration
+    val granularity = sampleGranularity.duration
     if (window < granularity) {
       throw new IncompleteConfiguration(
         "window smaller than granularity!")
     }
-    val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)
-    val statsMaker = () => new TimeWindowedSample[ScalarSample](numBuckets.toInt, granularity)
-    val namePrefix = _name map ("%s_".format(_)) getOrElse ""
 
-    val statsBrokers = _statsReceiver match {
+    val statsMaker = () => TimeWindowedSample[ScalarSample](window, granularity)
+    val prefix = name map ("%s_".format(_)) getOrElse ""
+
+    receiver match {
       case Some(Ostrich(provider)) =>
-        (timeoutBrokers zip hosts) map { case (broker, host) =>
-          val prefix = namePrefix
-          val suffix = "_%s:%d".format(host.getHostName, host.getPort)
-          val samples = new OstrichSampleRepository(prefix, suffix, provider) {
-            def makeStats = statsMaker
-          }
-          new StatsLoadedBroker(broker, samples)
+        val suffix = "_%s:%d".format(host.getHostName, host.getPort)
+        new OstrichSampleRepository[TimeWindowedSample[ScalarSample]](prefix, suffix, provider) {
+          override def makeStat = statsMaker()
         }
-
       case _ =>
-        timeoutBrokers map { broker =>
-          new StatsLoadedBroker(broker, new SampleRepository)
+        new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
+          override def makeStat = statsMaker()
         }
     }
+  }
 
-    new LoadBalancedBroker(statsBrokers)
+  private def failureAccrualBroker(timeout: Timeout)(broker: StatsLoadedBroker) = {
+    val window = timeout.duration
+    val granularity = Seq((window.inMilliseconds / 10).milliseconds, 1.second).max
+    def mk = new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
+      override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
+    }
+
+    new FailureAccruingLoadedBroker(broker, mk)
+  }
+
+  def makeBroker(
+    codec: Codec,
+    statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }])
+  =
+      bootstrap(codec) _                    andThen
+      pool(_hostConnectionLimit) _          andThen
+      (new PoolingBroker(_))                andThen
+      timeout(_requestTimeout) _            andThen
+      (new StatsLoadedBroker(_, statsRepo)) andThen
+        failureAccrualBroker(_failureAccrualWindow) _
+
+  def build(): Broker = {
+    val (hosts, codec) = (_hosts, _codec) match {
+      case (None, _) =>
+        throw new IncompleteClientSpecification("No hosts were specified")
+      case (_, None) =>
+        throw new IncompleteClientSpecification("No codec was specified")
+      case (Some(hosts), Some(codec)) =>
+        (hosts, codec)
+    }
+
+    val brokers = hosts map { host =>
+      val statsRepo = statsRepositoryForLoadedBroker(
+        host, _name, _statsReceiver,
+        _sampleWindow, _sampleGranularity)
+
+      val broker = makeBroker(codec, statsRepo)(host)
+
+      if (_exportLoadsToOstrich) {
+        val hostString = "%s:%d".format(host.getHostName, host.getPort)
+        ostrich.Stats.makeGauge(hostString + "_load")   { broker.load   }
+        ostrich.Stats.makeGauge(hostString + "_weight") { broker.weight }
+      }
+
+      broker
+    }
+
+    new LoadBalancedBroker(brokers)
   }
 
   def buildClient[Request, Reply]() =
     new Client[HttpRequest, HttpResponse](build())
 }
-
