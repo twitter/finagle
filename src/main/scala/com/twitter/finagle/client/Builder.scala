@@ -20,6 +20,10 @@ import com.twitter.finagle.thrift.ThriftClientCodec
 import com.twitter.finagle.util._
 import com.twitter.finagle._
 
+sealed abstract class Codec {
+  val pipelineFactory: ChannelPipelineFactory
+}
+
 object Http extends Codec {
   val pipelineFactory =
     new ChannelPipelineFactory {
