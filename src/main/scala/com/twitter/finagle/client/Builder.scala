@@ -214,6 +214,17 @@ case class Builder(
     new FailureAccruingStatsLoadedBroker(broker, mk)
   }
 
+  def makeBroker(
+    codec: Codec,
+    statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }])
+  =
+      bootstrap(codec) _                    andThen
+      pool(_hostConnectionLimit) _          andThen
+      (new PoolingBroker(_))                andThen
+      timeout(_requestTimeout) _            andThen
+      (new StatsLoadedBroker(_, statsRepo)) andThen
+        failureAccrualBroker(_failureAccrualWindow) _
+
   def build(): Broker = {
     val (hosts, codec) = (_hosts, _codec) match {
       case (None, _) =>
@@ -224,20 +235,12 @@ case class Builder(
         (hosts, codec)
     }
 
-    def makeBroker(statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }]) =
-        bootstrap(codec) _                    andThen
-        pool(_hostConnectionLimit) _          andThen
-        (new PoolingBroker(_))                andThen
-        timeout(_requestTimeout) _            andThen
-        (new StatsLoadedBroker(_, statsRepo)) andThen
-        failureAccrualBroker(_failureAccrualWindow) _
-    
     val brokers = hosts map { host =>
       val statsRepo = statsRepositoryForLoadedBroker(
         host, _name, _statsReceiver,
         _sampleWindow, _sampleGranularity)
 
-      val broker = makeBroker(statsRepo)(host)
+      val broker = makeBroker(codec, statsRepo)(host)
 
       if (_exportLoadsToOstrich) {
         val hostString = "%s:%d".format(host.getHostName, host.getPort)
