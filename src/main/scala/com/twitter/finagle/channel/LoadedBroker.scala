@@ -19,7 +19,7 @@ import com.twitter.finagle.util.Conversions._
  * LoadedBrokers in a given load balancer. We need this so that their
  * load/weights are actually meaningfully comparable.
  */
-trait LoadedBroker[A <: LoadedBroker[A]] extends Broker {
+trait LoadedBroker[+A <: LoadedBroker[A]] extends Broker {
   def load: Int
   def weight: Float = 1.0f / (load.toFloat + 1.0f)
 }
@@ -59,7 +59,7 @@ class StatsLoadedBroker(
 
 class FailureAccruingStatsLoadedBroker(
   underlying: StatsLoadedBroker,
-  samples: SampleRepository[TimeWindowedSample[T forSome { type T <: AddableSample[T] }]])
+  samples: SampleRepository[TimeWindowedSample[_]])
   extends LoadedBroker[FailureAccruingStatsLoadedBroker]
 {
   val failureSample = samples("error")
@@ -67,7 +67,7 @@ class FailureAccruingStatsLoadedBroker(
 
   def load = underlying.load
 
-  override def weight =  {
+  override def weight = {
     val success = successSample.count
     val failure = failureSample.count
     val sum = success + failure

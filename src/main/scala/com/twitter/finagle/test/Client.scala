@@ -21,7 +21,7 @@ object ClientTest extends ostrich.Service {
     val client =
       Builder()
         .name("http")
-        .hosts("localhost:10000,localhost:10001")
+        .hosts("localhost:10000,localhost:10001,localhost:10003")
         .hostConnectionLimit(10)
         .sendBufferSize(1<<20)
         .recvBufferSize(1024)
@@ -32,6 +32,7 @@ object ClientTest extends ostrich.Service {
         .exportLoadsToOstrich()
         .sampleWindow(10, TimeUnit.SECONDS)
         .sampleGranularity(1, TimeUnit.SECONDS)
+        .failureAccrualWindow(10, TimeUnit.SECONDS)
         .buildClient[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)

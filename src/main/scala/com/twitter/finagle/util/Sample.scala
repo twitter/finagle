@@ -83,11 +83,9 @@ trait AggregateSample extends Sample {
 
 class TimeWindowedSample[S <: AddableSample[S]](bucketCount: Int, bucketDuration: Duration)
   (implicit val _s: Manifest[S])
-  extends /*AggregateSample with*/ AddableSample[TimeWindowedSample[S]]
+  extends AggregateSample with AddableSample[TimeWindowedSample[S]]
 {
   protected val underlying = new TimeWindowedCollection[S](bucketCount, bucketDuration)
-  def sum   = underlying.map(_.sum).sum
-  def count = underlying.map(_.count).sum
 
   def add(value: Int, count: Int) = underlying().add(value, count)
 
@@ -101,6 +99,20 @@ class TimeWindowedSample[S <: AddableSample[S]](bucketCount: Int, bucketDuration
   //   def apply(duration: Duration): AggregateSample
 
   override def toString = underlying.toString
+}
+
+object TimeWindowedSample {
+  def apply[S <: AddableSample[S]]
+    (window: Duration, granularity: Duration)
+    (implicit _s: Manifest[S]): TimeWindowedSample[S] =
+  {
+    if (window < granularity)
+      throw new IllegalArgumentException("window smaller than granularity!")
+
+    val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)
+    new TimeWindowedSample[S](numBuckets.toInt, granularity)
+  }
+
 }
 
 sealed abstract class SampleTree extends AggregateSample {
