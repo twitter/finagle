@@ -6,7 +6,8 @@ import org.jboss.netty.handler.codec.http._
 
 import net.lag.configgy.{Configgy, RuntimeEnvironment}
 import com.twitter.ostrich
-import com.twitter.finagle.client.{Client, Builder, Http, Ostrich}
+import com.twitter.finagle.client.Client
+import com.twitter.finagle.builder.{ClientBuilder, Http, Ostrich}
 
 import com.twitter.util.{Return, Throw}
 
@@ -19,7 +20,7 @@ object ClientTest extends ostrich.Service {
     ostrich.ServiceTracker.startAdmin(config, runtime)
 
     val client =
-      Builder()
+      ClientBuilder()
         .name("http")
         .hosts("localhost:10000,localhost:10001,localhost:10003")
         .codec(Http)

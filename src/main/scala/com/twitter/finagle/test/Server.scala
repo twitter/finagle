@@ -6,7 +6,7 @@ import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.finagle.server._
+import com.twitter.finagle.builder._
 
 object Server {
   def main(args: Array[String]) {
@@ -27,9 +27,11 @@ object Server {
         pipeline
       }
     }
-    val bs = Builder().codec(Http)
-                      .pipelineFactory(pf)
-                      .build
+    val bs =
+      ServerBuilder()
+       .codec(Http)
+       .pipelineFactory(pf)
+       .build
 
     val addr = new InetSocketAddress(8888)
     println("HTTP demo running on %s".format(addr))

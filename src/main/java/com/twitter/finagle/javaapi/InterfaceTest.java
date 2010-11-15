@@ -6,15 +6,16 @@ import java.util.concurrent.Executors;
 
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.client.*;
+import com.twitter.finagle.client.Client;
+import com.twitter.finagle.builder.*;
 import com.twitter.util.*;
 
 class InterfaceTest {
   public static void main(String args[]) {
     Client<HttpRequest, HttpResponse> client =
-      Builder.get()
+      ClientBuilder.get()
         .hosts("localhost:10000,localhost:10001")
-        .codec(Codec.http())
+        .codec(Codec4J.http())
         .buildClient();
 
     Future<HttpResponse> response =
