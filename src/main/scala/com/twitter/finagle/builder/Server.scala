@@ -47,17 +47,23 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
   }
  
   override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    dispatchSample.incr()
-    ctx.setAttachment(Timing())
+    if (c.isInstanceOf[MessageEvent]) {
+      dispatchSample.incr()
+      ctx.setAttachment(Timing())
+    }
+
     super.handleUpstream(ctx, c)
   }
  
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    ctx.getAttachment match {
-      case Timing(requestedAt: Time) =>
-        latencySample.add(requestedAt.ago.inMilliseconds.toInt)
-      case _ => ()
+    if (c.isInstanceOf[MessageEvent]) {
+      ctx.getAttachment match {
+        case Timing(requestedAt: Time) =>
+          latencySample.add(requestedAt.ago.inMilliseconds.toInt)
+        case _ => ()
+      }
     }
+
     super.handleDownstream(ctx, c)
   }
 }

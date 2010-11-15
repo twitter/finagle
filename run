@@ -36,5 +36,5 @@ if [ "$DEBUG" = "1" ]; then
 
 fi
 
-export JAVA_OPTS="$JAVA_OPTS -server -Xmx2G -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS"
+export JAVA_OPTS="$JAVA_OPTS -server -Xmx2G -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS -Djava.net.preferIPv4Stack=true"
 exec java $JAVA_OPTS -cp "$root/project/boot/scala-2.8.0/lib/scala-library.jar:$root/target/scala_2.8.0/resources:$root/target/scala_2.8.0/classes:$jars" "$@"
