@@ -11,13 +11,14 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.channel.socket.nio._
  
-import com.twitter.finagle._
-import com.twitter.finagle.util._
-import com.twitter.finagle.thrift._
- 
 import com.twitter.ostrich
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Time}
+
+import com.twitter.finagle._
+import com.twitter.finagle.util._
+import com.twitter.finagle.thrift._
+import com.twitter.finagle.stub.{Stub, StubPipelineFactory}
  
 object ServerBuilder {
   def apply() = new ServerBuilder()
@@ -82,7 +83,7 @@ case class ServerBuilder(
   _bindTo: Option[InetSocketAddress])
 {
   import ServerBuilder._
- 
+
   def this() = this(
     None,                                           // codec
     Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
@@ -123,6 +124,9 @@ case class ServerBuilder(
   def pipelineFactory(value: ChannelPipelineFactory) =
     copy(_pipelineFactory = Some(value))
  
+  def stub[Req <: AnyRef, Rep <: AnyRef](stub: Stub[Req, Rep]) =
+    copy(_pipelineFactory = Some(StubPipelineFactory(stub)))
+
   def bindTo(address: InetSocketAddress) =
     copy(_bindTo = Some(address))
 
@@ -167,10 +171,10 @@ case class ServerBuilder(
 
    val bs = new ServerBootstrap(channelFactory)
  
-    bs.setOption("tcpNoDelay", true) // XXX: right?
+    bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
-    _sendBufferSize foreach { s =>  bs.setOption("sendBufferSize", s) }
+    _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
  
     val statsRepo = statsRepository(

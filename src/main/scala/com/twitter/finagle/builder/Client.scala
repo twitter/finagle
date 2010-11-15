@@ -12,8 +12,8 @@ import com.twitter.ostrich
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
-import com.twitter.finagle.client.Client
 import com.twitter.finagle.util._
+import com.twitter.finagle.stub
 
 object ClientBuilder {
   def apply() = new ClientBuilder
@@ -204,6 +204,6 @@ case class ClientBuilder(
     new LoadBalancedBroker(brokers)
   }
 
-  def buildClient[Request <: AnyRef, Reply <: AnyRef]() =
-    new Client[Request, Reply](build())
+  def buildStub[Request <: AnyRef, Reply <: AnyRef]() =
+    new stub.Client[Request, Reply](build())
 }

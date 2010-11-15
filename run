@@ -18,7 +18,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-jars=$(echo $root/lib_managed/scala_2.8.0/compile/*.jar $root/libs/*.jar | sed 's/ /:/g')
+jars=$(echo $root/lib_managed/compile/*.jar $root/libs/*.jar | sed 's/ /:/g')
 
 # To use YourKit:
 #export JAVA_OPTS=-agentlib:yjpagent
@@ -37,4 +37,4 @@ if [ "$DEBUG" = "1" ]; then
 fi
 
 export JAVA_OPTS="$JAVA_OPTS -server -Xmx2G -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS -Djava.net.preferIPv4Stack=true"
-exec java $JAVA_OPTS -cp "$root/project/boot/scala-2.8.0/lib/scala-library.jar:$root/target/scala_2.8.0/resources:$root/target/scala_2.8.0/classes:$jars" "$@"
+exec java $JAVA_OPTS -cp "$root/project/boot/scala-2.8.1/lib/scala-library.jar:$root/target/resources:$root/target/classes:$jars" "$@"

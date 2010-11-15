@@ -6,8 +6,8 @@ import org.jboss.netty.handler.codec.http._
 
 import net.lag.configgy.{Configgy, RuntimeEnvironment}
 import com.twitter.ostrich
-import com.twitter.finagle.client.Client
 import com.twitter.finagle.builder.{ClientBuilder, Http, Ostrich}
+import com.twitter.finagle.stub.Stub
 
 import com.twitter.util.{Return, Throw}
 
@@ -26,13 +26,13 @@ object ClientTest extends ostrich.Service {
         .codec(Http)
         .exportLoadsToOstrich()
         .reportTo(Ostrich())
-        .buildClient[HttpRequest, HttpResponse]()
+        .buildStub[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)
       makeRequest(client)
   }
 
-  def makeRequest(client: Client[HttpRequest, HttpResponse]) {
+  def makeRequest(client: Stub[HttpRequest, HttpResponse]) {
     client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")) respond {
       case _ =>
         makeRequest(client)

@@ -4,19 +4,21 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.Executors;
 
+import org.jboss.netty.bootstrap.*;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.client.Client;
+import com.twitter.finagle.stub.Stub;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.*;
 
-class InterfaceTest {
+public class ClientTest {
   public static void main(String args[]) {
-    Client<HttpRequest, HttpResponse> client =
+    Stub<HttpRequest, HttpResponse> client =
       ClientBuilder.get()
-        .hosts("localhost:10000,localhost:10001")
+        .hosts("localhost:10000")
         .codec(Codec4J.http())
-        .buildClient();
+        .buildStub();
 
     Future<HttpResponse> response =
       client.call(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"));
