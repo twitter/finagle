@@ -199,30 +199,3 @@ case class Builder(
     bs
   }
 }
-
-object Main {
-  def main(args: Array[String]) {
-    println("Demo.")
-
-    class Handler extends SimpleChannelUpstreamHandler {
-      override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-        val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        response.setHeader("Content-Type", "text/plain")
-        response.setContent(ChannelBuffers.wrappedBuffer("Mission accomplished".getBytes))
-        e.getChannel.write(response).addListener(ChannelFutureListener.CLOSE)
-      }
-    }
-
-    val pf = new ChannelPipelineFactory {
-      def getPipeline = {
-        val pipeline = Channels.pipeline
-        pipeline.addLast("handler", new Handler)
-        pipeline
-      }
-    }
-    val bs = Builder().codec(Http)
-                      .pipelineFactory(pf)
-                      .build
-    bs.bind(new InetSocketAddress(8888))
-  }
-}
