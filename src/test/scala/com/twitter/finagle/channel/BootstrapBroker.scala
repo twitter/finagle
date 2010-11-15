@@ -21,7 +21,7 @@ object BootstrapBrokerSpec extends Specification with Mockito {
       Executors.newCachedThreadPool())
 
     "throw an exception if the bootstrap has no remoteAddress option" in {
-      val bs = new BrokerClientBootstrap
+      val bs = new BrokerClientBootstrap(cf)
       new BootstrapBroker(bs) must throwAn [IllegalArgumentException]
 
       bs.setOption("remoteAddress", address)

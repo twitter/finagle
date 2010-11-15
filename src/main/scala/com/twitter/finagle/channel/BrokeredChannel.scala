@@ -10,8 +10,6 @@ import org.jboss.netty.channel.local.LocalAddress
 import com.twitter.finagle.util.{Ok, Error, Cancelled, Serialized}
 import com.twitter.finagle.util.Conversions._
 
-class TooManyDicksOnTheDanceFloorException extends Exception
-
 class BrokeredChannel(
   factory: BrokeredChannelFactory,
   pipeline: ChannelPipeline,
@@ -74,27 +72,26 @@ class BrokeredChannel(
 
   def proxyMessages(replyFuture: ReplyFuture): Unit =
     replyFuture { state => serialized {
-      if (!isOpen)  // ignore closed channels.
-        return
-
-      state match {
-        case Ok(_) =>
-          replyFuture.getReply match {
-            case Reply.Done(message) =>
-              Channels.fireMessageReceived(this, message)
-              waitingForReply = None
-            case Reply.More(message, next) =>
-              Channels.fireMessageReceived(this, message)
-              waitingForReply = Some(next)
-              proxyMessages(next)
-          }
-
-        case Error(cause) =>
-          Channels.fireExceptionCaught(this, cause)
-          waitingForReply = None
-
-        case Cancelled =>
-          // XXXTODO
+      if (isOpen) {  // ignore closed channels.
+        state match {
+          case Ok(_) =>
+            replyFuture.getReply match {
+              case Reply.Done(message) =>
+                Channels.fireMessageReceived(this, message)
+                waitingForReply = None
+              case Reply.More(message, next) =>
+                Channels.fireMessageReceived(this, message)
+                waitingForReply = Some(next)
+                proxyMessages(next)
+            }
+         
+          case Error(cause) =>
+            Channels.fireExceptionCaught(this, cause)
+            waitingForReply = None
+         
+          case Cancelled =>
+            // XXXTODO
+        }
       }
     }}
 

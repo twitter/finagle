@@ -21,13 +21,10 @@ object ClientTest extends ostrich.Service {
     val client =
       Builder()
         .name("http")
-        .hosts("localhost:10000,localhost:10001")
+        .hosts("localhost:10000,localhost:10001,localhost:10003")
         .codec(Http)
-        .connectionTimeout(100, TimeUnit.MILLISECONDS)
-        .requestTimeout(1000, TimeUnit.MILLISECONDS)
-        .reportTo(Ostrich(ostrich.Stats))
-        .sampleWindow(20, TimeUnit.MINUTES)
-        .sampleGranularity(30, TimeUnit.SECONDS)
+        .exportLoadsToOstrich()
+        .reportTo(Ostrich())
         .buildClient[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)

@@ -8,9 +8,6 @@ import org.jboss.netty.channel._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
-class CancelledConnectionException extends Exception
-class InvalidPipelineException extends Exception
-
 trait ConnectingChannelBroker extends Broker {
   def getChannel: ChannelFuture
   def putChannel(channel: Channel)

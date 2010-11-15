@@ -11,3 +11,6 @@ lib_managed/
 *.iml
 out/
 .ensime
+*~
+*#
+.#*

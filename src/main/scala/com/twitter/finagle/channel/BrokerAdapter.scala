@@ -1,6 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.AtomicReference
 
 import org.jboss.netty.channel._
@@ -55,6 +54,6 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    fail(new ClosedChannelException)
+    fail(new ChannelClosedException)
   }
 }

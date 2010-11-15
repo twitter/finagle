@@ -19,66 +19,69 @@ import com.twitter.silly.Silly
 import com.twitter.finagle.util.Conversions._
 
 object AsyncServerEndToEndSpec extends Specification {
-  "async Thrift server works" in {
-    // ** Set up the server.
-    ThriftTypes.add(ThriftCall[Silly.bleep_args, Silly.bleep_result]("bleep", new Silly.bleep_args()))
+  "async Thrift server" should {
+    "work" in {
+      // ** Set up the server.
 
-    val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
-    serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("framer", new ThriftFrameCodec)
-        pipeline.addLast("codec", new ThriftServerCodec)
-        pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
-          override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-            val msg = e.getMessage.asInstanceOf[ThriftCall[_, _]]
-            msg match {
-              case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result] =>
-                val args = bleep.args.asInstanceOf[Silly.bleep_args]
-                val response = bleep.newResponseInstance
-                response.setSuccess(args.request.reverse)
-                Channels.write(ctx.getChannel, new ThriftReply[Silly.bleep_result](response, bleep))
-              case _ =>
-                throw new IllegalArgumentException
+      ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
+        "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
+
+      val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
+      serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
+        def getPipeline() = {
+          val pipeline = Channels.pipeline()
+          pipeline.addLast("framer", new ThriftFrameCodec)
+          pipeline.addLast("codec", new ThriftServerCodec)
+          pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
+            override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+              e.getMessage match {
+                case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result] =>
+                  val response = bleep.newReply
+                  response.setSuccess(bleep.arguments.request.reverse)
+                  Channels.write(ctx.getChannel, bleep.reply(response))
+                case _ =>
+                  throw new IllegalArgumentException
+              }
             }
-          }
-        })
-        pipeline
+          })
+          pipeline
+        }
+      })
+
+      val callResults = new Promise[Silly.bleep_result]
+
+      // ** Set up the client.
+      val clientBootstrap = new ClientBootstrap(new DefaultLocalClientChannelFactory)
+      clientBootstrap.setPipelineFactory(new ChannelPipelineFactory {
+        def getPipeline() = {
+          val pipeline = Channels.pipeline()
+          pipeline.addLast("framer", new ThriftFrameCodec)
+          pipeline.addLast("codec", new ThriftClientCodec)
+          pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
+            override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+              callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
+            }
+          })
+
+          pipeline
+        }
+      })
+
+      val addr = new LocalAddress("thrift-async")
+      serverBootstrap.bind(addr)
+      for (ch <- clientBootstrap.connect(addr)) {
+        val thriftCall =
+          new ThriftCall[Silly.bleep_args, Silly.bleep_result](
+            "bleep",
+            new Silly.bleep_args("heyhey"),
+            classOf[Silly.bleep_result])
+        Channels.write(ch, thriftCall)
       }
-    })
 
-    val callResults = new Promise[Silly.bleep_result]
+      val result = callResults.within(1.second)
+      result.isReturn must beTrue
 
-    // ** Set up the client.
-    val clientBootstrap = new ClientBootstrap(new DefaultLocalClientChannelFactory)
-    clientBootstrap.setPipelineFactory(new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("framer", new ThriftFrameCodec)
-        pipeline.addLast("codec", new ThriftClientCodec)
-        pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
-          override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-            callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
-          }
-        })
-
-        pipeline
-      }
-    })
-
-    val addr = new LocalAddress("thrift-async")
-    serverBootstrap.bind(addr)
-    for (ch <- clientBootstrap.connect(addr)) {
-      val thriftCall =
-        ThriftCall[Silly.bleep_args, Silly.bleep_result](
-          "bleep", new Silly.bleep_args("heyhey"))
-
-      Channels.write(ch, thriftCall)
+      result().success must be_==("yehyeh")
     }
-
-    val result = callResults.within(1.second)
-    result.isReturn must beTrue
-
-    result().success must be_==("yehyeh")
   }
 }
