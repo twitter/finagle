@@ -50,7 +50,8 @@ object Builder {
       Executors.newCachedThreadPool())
 }
 
-class SampleHandler(samples: SampleRepository) extends SimpleChannelHandler {
+class SampleHandler(samples: SampleRepository[AddableSample[_]])
+  extends SimpleChannelHandler{
   val dispatchSample = samples("dispatch")
   val latencySample  = samples("latency")
 
@@ -135,6 +136,31 @@ case class Builder(
   def pipelineFactory(value: ChannelPipelineFactory) =
     copy(_pipelineFactory = Some(value))
 
+  private def statsRepository(
+    name: Option[String],
+    receiver: Option[StatsReceiver],
+    sampleWindow: Timeout,
+    sampleGranularity: Timeout) =
+  {
+    val window      = sampleWindow.duration
+    val granularity = sampleGranularity.duration
+    if (window < granularity) {
+      throw new IncompleteConfiguration(
+        "window smaller than granularity!")
+    }
+
+    val prefix = name map ("%s_".format(_)) getOrElse ""
+    val sampleRepository =
+      new ObservableSampleRepository[TimeWindowedSample[ScalarSample]] {
+        override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
+      }
+
+    for (receiver <- receiver)
+      sampleRepository observeTailsWith receiver.observer(prefix, host)
+
+    sampleRepository
+  }
+
   def build: ServerBootstrap = {
     val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
       case (None, _) =>
@@ -153,25 +179,14 @@ case class Builder(
     _sendBufferSize foreach { s =>  bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
 
-    val sampleRepository = new SampleRepository
-
-    // Construct sample stats.
-    val granularity = _sampleGranularity.duration
-    val window      = _sampleWindow.duration
-    if (window < granularity) {
-      throw new IncompleteConfiguration(
-        "window smaller than granularity!")
-    }
-    val numBuckets = math.max(1, window.inMilliseconds / granularity.inMilliseconds)
-    val statsMaker = () => new TimeWindowedSample[ScalarSample](numBuckets.toInt, granularity)
-    val namePrefix = _name map ("%s_".format(_)) getOrElse ""
-
-    val statsHandler = new SampleHandler(sampleRepository)
+    val statsRepo = statsRepository(
+      _name, _statsReceiver,
+      _sampleWindow, _sampleGranularity)
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = pipelineFactory.getPipeline
-        pipeline.addFirst("stats", new SampleHandler(sampleRepository))
+        pipeline.addFirst("stats", new SampleHandler(statsRepo))
         codec.prependPipeline(pipeline)
         pipeline
       }

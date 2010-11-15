@@ -25,7 +25,7 @@ object ClientTest extends ostrich.Service {
         .hosts("localhost:10000,localhost:10001,localhost:10003")
         .codec(Http)
         .exportLoadsToOstrich()
-        .reportTo(Ostrich())
+        .reportTo(Ostrich(ostrich.Stats))
         .buildClient[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)
