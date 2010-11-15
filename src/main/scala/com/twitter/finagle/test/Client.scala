@@ -6,8 +6,7 @@ import org.jboss.netty.handler.codec.http._
 
 import net.lag.configgy.{Configgy, RuntimeEnvironment}
 import com.twitter.ostrich
-import com.twitter.finagle.util.Ostrich
-import com.twitter.finagle.client.{Client, Builder, Http}
+import com.twitter.finagle.client.{Client, Builder, Http, Ostrich}
 
 import com.twitter.util.{Return, Throw}
 
@@ -25,7 +24,7 @@ object ClientTest extends ostrich.Service {
         .hosts("localhost:10000,localhost:10001,localhost:10003")
         .codec(Http)
         .exportLoadsToOstrich()
-        .reportTo(Ostrich(ostrich.Stats))
+        .reportTo(Ostrich())
         .buildClient[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)

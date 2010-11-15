@@ -40,6 +40,10 @@ object Codec {
   val thrift = Thrift
 }
 
+trait StatsReceiver {
+  def observer(prefix: String): (Seq[String], Int, Int) => Unit
+}
+
 object Builder {
   def apply() = new Builder()
   def get() = apply()
@@ -52,8 +56,8 @@ object Builder {
 
 class SampleHandler(samples: SampleRepository[AddableSample[_]])
   extends SimpleChannelHandler{
-  val dispatchSample = samples("dispatch")
-  val latencySample  = samples("latency")
+  val dispatchSample: AddableSample[_] = samples("dispatch")
+  val latencySample: AddableSample[_]  = samples("latency")
 
   case class Timing(requestedAt: Time = Time.now)
 
@@ -156,7 +160,7 @@ case class Builder(
       }
 
     for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, host)
+      sampleRepository observeTailsWith receiver.observer(prefix)
 
     sampleRepository
   }
