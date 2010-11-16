@@ -14,7 +14,7 @@ import com.twitter.finagle.stub._
 
 import com.twitter.util.Future
 
-object ServerTest extends ostrich.Service {
+object HttpServer extends ostrich.Service {
   class Handler extends SimpleChannelUpstreamHandler {
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)

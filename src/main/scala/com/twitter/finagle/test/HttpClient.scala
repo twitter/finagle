@@ -11,7 +11,7 @@ import com.twitter.finagle.stub.Stub
 
 import com.twitter.util.{Return, Throw}
 
-object ClientTest extends ostrich.Service {
+object HttpClient extends ostrich.Service {
   def main(args: Array[String]) {
     val runtime = new RuntimeEnvironment(getClass)
     runtime.load(args)
@@ -26,6 +26,7 @@ object ClientTest extends ostrich.Service {
         .codec(Http)
         .exportLoadsToOstrich()
         .reportTo(Ostrich())
+        .retries(100)
         .buildStub[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)
