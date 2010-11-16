@@ -160,14 +160,13 @@ case class ClientBuilder(
     def mk = new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
       override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
     }
-    
+
     new FailureAccruingLoadedBroker(broker, mk)
   }
 
   def makeBroker(
     codec: Codec,
-    statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }])
-  =
+    statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }]) =
       bootstrap(codec) _                    andThen
       pool(_hostConnectionLimit) _          andThen
       (new PoolingBroker(_))                andThen

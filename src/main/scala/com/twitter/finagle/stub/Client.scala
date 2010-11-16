@@ -8,13 +8,6 @@ import com.twitter.finagle.util.Conversions._
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 
-// Currently we simply don't support streaming responses through this
-// interface. This can be tackled in a number of ways:
-//
-//   - a similar continuation-future passing scheme
-//   - create a Future[] subclass (eg. ContinuingFuture) that has the
-//     logical flatMap implementation.
-
 class ReplyIsStreamingException extends Exception
 class CancelledRequestException extends Exception
 class InvalidMessageTypeException extends Exception
