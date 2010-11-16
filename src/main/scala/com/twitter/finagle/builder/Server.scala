@@ -161,7 +161,7 @@ case class ServerBuilder(
     sampleRepository
   }
 
-  def build: Channel = {
+  def build(): Channel = {
     val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
       case (None, _) =>
         throw new IncompleteSpecification("No codec was specified")
