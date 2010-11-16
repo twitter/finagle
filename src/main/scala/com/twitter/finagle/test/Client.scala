@@ -1,22 +1,22 @@
 package com.twitter.finagle.test
 
-import java.util.concurrent.TimeUnit
-
 import org.jboss.netty.handler.codec.http._
 
-import net.lag.configgy.{Configgy, RuntimeEnvironment}
 import com.twitter.ostrich
 import com.twitter.finagle.builder.{ClientBuilder, Http, Ostrich}
 import com.twitter.finagle.stub.Stub
-
-import com.twitter.util.{Return, Throw}
+import com.twitter.ostrich.RuntimeEnvironment
 
 object ClientTest extends ostrich.Service {
   def main(args: Array[String]) {
     val runtime = new RuntimeEnvironment(getClass)
-    runtime.load(args)
-    val config = Configgy.config
     ostrich.ServiceTracker.register(this)
+    val config = new ostrich.Config {
+      def telnetPort = 0
+      def httpBacklog = 0
+      def httpPort = 8889
+      def jmxPackage = None
+    }
     ostrich.ServiceTracker.startAdmin(config, runtime)
 
     val client =
