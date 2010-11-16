@@ -10,6 +10,9 @@ import net.lag.configgy.{Configgy, RuntimeEnvironment}
 
 import com.twitter.ostrich
 import com.twitter.finagle.builder._
+import com.twitter.finagle.stub._
+
+import com.twitter.util.Future
 
 object ServerTest extends ostrich.Service {
   class Handler extends SimpleChannelUpstreamHandler {
@@ -36,16 +39,22 @@ object ServerTest extends ostrich.Service {
         pipeline
       }
     }
-    val bs =
-      ServerBuilder()
-       .codec(Http)
-       .reportTo(Ostrich())
-       .pipelineFactory(pf)
-       .build
 
-    val addr = new InetSocketAddress(8888)
-    println("HTTP demo running on %s".format(addr))
-    bs.bind(addr)
+    val server = new Stub[HttpRequest, HttpResponse] {
+      def call(request: HttpRequest) = Future {
+        val response = new DefaultHttpResponse(
+          HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+        response.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes))
+        response
+      }
+    }
+
+    ServerBuilder()
+     .codec(Http)
+     .reportTo(Ostrich())
+     .stub(server)
+     .bindTo(new InetSocketAddress(10000))
+     .build
   }
 
   def quiesce() = ()
