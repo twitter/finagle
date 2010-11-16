@@ -14,7 +14,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val ostrich      = "com.twitter"          %  "ostrich_2.8.0"    % "2.2.10"
   val util         = "com.twitter"          %  "util"             % "1.2.4"
   val netty        = "org.jboss.netty"      %  "netty"            % "3.2.2.Final"
-  val thrift       = "thrift"               %  "libthrift"        % "0.2.0"
+  val thrift       = "thrift"               %  "libthrift"        % "0.5.0"
   val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.6.1"
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
 
