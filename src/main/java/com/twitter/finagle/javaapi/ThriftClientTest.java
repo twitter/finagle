@@ -6,26 +6,30 @@ import java.util.concurrent.Executors;
 
 import org.jboss.netty.bootstrap.*;
 import org.jboss.netty.channel.*;
-import org.jboss.netty.handler.codec.http.*;
 
 import com.twitter.finagle.stub.Stub;
 import com.twitter.finagle.builder.*;
+import com.twitter.finagle.thrift.*;
 import com.twitter.util.*;
 
-public class HttpClientTest {
+import com.twitter.silly.Silly;
+
+public class ThriftClientTest {
   public static void main(String args[]) {
-    Stub<HttpRequest, HttpResponse> client =
+
+    Stub<ThriftCall<Silly.bleep_args, Silly.bleep_result>, Silly.bleep_result> client =
       ClientBuilder.get()
         .hosts("localhost:10000")
-        .codec(Codec4J.http())
+        .codec(Codec4J.thrift())
         .buildStub();
 
-    Future<HttpResponse> response =
-      client.call(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"));
+    Future<Silly.bleep_result> response =
+      client.call(new ThriftCall("bleep", new Silly.bleep_args(), Silly.bleep_result.class));
+    System.out.println("dispatched call");
 
     response.addEventListener(
-      new FutureEventListener<HttpResponse>() {
-        public void onSuccess(HttpResponse response) {
+      new FutureEventListener<Silly.bleep_result>() {
+        public void onSuccess(Silly.bleep_result response) {
           System.out.println("received response: " + response);
           System.exit(0);
         }

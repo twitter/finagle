@@ -126,6 +126,18 @@ object ThriftCodecSpec extends Specification {
       }
     }
 
+    "the server adopts the client message's sequence number" in {
+      val request1 = TMessage("bleep", TMessageType.CALL, 3, new Silly.bleep_args("sinnlos"))
+      val request2 = TMessage("bleep", TMessageType.CALL, 7, new Silly.bleep_args("koenig"))
+      val ch = makeServerChannel
+      Channels.fireMessageReceived(ch, request1)
+      ch.upstreamEvents must haveSize(1)
+      extractMessage(ch.upstreamEvents(0)) must haveClass[Some[ThriftCall[_,_]]]
+      Channels.fireMessageReceived(ch, request2)
+      ch.upstreamEvents must haveSize(2)
+      extractMessage(ch.upstreamEvents(1)) must haveClass[Some[ThriftCall[_,_]]]
+    }
+
     "multiple calls on the same server increment the sequence #" in {
       val request1 = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("thetabet"))
       val request2 = TMessage("bleep", TMessageType.CALL, 2, new Silly.bleep_args("wheelbarrow"))

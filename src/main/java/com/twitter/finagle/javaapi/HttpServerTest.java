@@ -14,7 +14,7 @@ import com.twitter.finagle.builder.*;
 import com.twitter.util.*;
 
 public class HttpServerTest {
-  public static void main(String args[]) {
+  private static void runServer() {
     Stub<HttpRequest, HttpResponse> stub =
       new Stub<HttpRequest, HttpResponse>() {
         public Future<HttpResponse> call(HttpRequest request) {
@@ -35,5 +35,15 @@ public class HttpServerTest {
       .stub(stub)
       .bindTo(new InetSocketAddress("localhost", 10000))
       .build();
+  }
+
+  public static void main(String args[]) {
+    try {
+      runServer();
+    } catch (Throwable e) {
+      System.err.println("Caught top level exception: " + e);
+      e.printStackTrace();
+      System.exit(-1);
+    }
   }
 }
