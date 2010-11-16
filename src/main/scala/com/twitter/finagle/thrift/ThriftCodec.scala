@@ -4,6 +4,8 @@ import java.util.NoSuchElementException
 import java.util.concurrent.atomic.AtomicReference
 import java.lang.reflect.{Method, ParameterizedType, Proxy}
 
+import scala.reflect.BeanProperty
+
 import org.apache.thrift.{TBase, TApplicationException}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocol}
 
@@ -20,7 +22,7 @@ import ChannelBufferConversions._
  * given.
  */
 class ThriftCall[A <: TBase[_], R <: TBase[_]](
-  method: String,
+  @BeanProperty val method: String,
   args: A,
   replyClass: Class[R])
 {
@@ -120,6 +122,7 @@ class ThriftServerCodec extends ThriftCodec {
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (!c.isInstanceOf[MessageEvent]) {
       super.handleDownstream(ctx, c)
+      return
     }
 
     val m = c.asInstanceOf[MessageEvent]
