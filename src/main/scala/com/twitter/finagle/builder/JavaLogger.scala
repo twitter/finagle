@@ -1,21 +1,19 @@
 package com.twitter.finagle.builder
 
 import java.net.InetSocketAddress
+import java.util.logging.Logger
 
-import com.twitter.ostrich
-
-case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver {
+case class JavaLogger(underlying: Logger) extends StatsReceiver {
   def observer(prefix: String, host: InetSocketAddress) = {
     val suffix = "_%s:%d".format(host.getHostName, host.getPort)
 
     (path: Seq[String], value: Int, count: Int) => {
       val pathString = path mkString "__"
-      provider.addTiming(prefix + pathString, count)
-      provider.addTiming(prefix + pathString + suffix, count)
+      underlying.info(List(prefix, pathString, suffix, count) mkString " ")
     }
   }
 }
 
-object Ostrich {
-  def apply(): Ostrich = Ostrich(ostrich.Stats)
+object JavaLogger {
+  def apply(): JavaLogger = JavaLogger(Logger.getLogger(getClass.getName))
 }

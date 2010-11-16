@@ -20,6 +20,11 @@ object Codec4J {
   val thrift = Thrift
 }
 
+object StatsReporter4J {
+  val ostrich = Ostrich()
+  val logger = JavaLogger()
+}
+
 trait StatsReceiver {
   def observer(prefix: String, host: InetSocketAddress): (Seq[String], Int, Int) => Unit
 }

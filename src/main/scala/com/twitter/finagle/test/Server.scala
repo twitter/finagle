@@ -36,16 +36,16 @@ object ServerTest extends ostrich.Service {
         pipeline
       }
     }
+
+    val addr = new InetSocketAddress(8888)
+    println("HTTP demo running on %s".format(addr))
     val bs =
       ServerBuilder()
        .codec(Http)
        .reportTo(Ostrich())
        .pipelineFactory(pf)
+       .bindTo(addr)
        .build
-
-    val addr = new InetSocketAddress(8888)
-    println("HTTP demo running on %s".format(addr))
-    bs.bind(addr)
   }
 
   def quiesce() = ()

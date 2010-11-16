@@ -22,9 +22,8 @@ object Http extends Codec {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpServerCodec)
-        // TODO:
-        // pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
+        pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
         pipeline
       }
-  }
+    }
 }

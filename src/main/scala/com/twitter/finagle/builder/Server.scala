@@ -16,6 +16,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Time}
 
 import com.twitter.finagle._
+import com.twitter.finagle.channel.PartialUpstreamMessageEvent
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.stub.{Stub, StubPipelineFactory}
@@ -58,10 +59,14 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
  
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (c.isInstanceOf[MessageEvent]) {
-      ctx.getAttachment match {
-        case Timing(requestedAt: Time) =>
+      val e = c.asInstanceOf[MessageEvent]
+      (ctx.getAttachment, e.getMessage) match {
+        case (_, p: PartialUpstreamMessageEvent) =>
+          ()
+        case (Timing(requestedAt: Time), r: HttpResponse)  =>
           latencySample.add(requestedAt.ago.inMilliseconds.toInt)
-        case _ => ()
+        case (_, _) =>
+          () // WTF?
       }
     }
 
@@ -156,7 +161,7 @@ case class ServerBuilder(
     sampleRepository
   }
  
-  def build: ServerBootstrap = {
+  def build: Channel = {
     val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
       case (None, _) =>
         throw new IncompleteSpecification("No codec was specified")
@@ -166,8 +171,6 @@ case class ServerBuilder(
         (codec, pipeline)
     }
  
-   if (_bindTo.isEmpty)
-     throw new IncompleteSpecification("No binding address was given")
 
    val bs = new ServerBootstrap(channelFactory)
  
@@ -196,6 +199,5 @@ case class ServerBuilder(
     })
  
     bs.bind(_bindTo.get)
-    bs
   }
 }
