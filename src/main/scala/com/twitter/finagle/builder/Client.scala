@@ -9,6 +9,7 @@ import java.util.concurrent.{TimeUnit, Executors}
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.ostrich
+import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -46,7 +47,11 @@ case class ClientBuilder(
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _exportLoadsToOstrich: Boolean,
-  _failureAccrualWindow: Timeout)
+  _failureAccrualWindow: Timeout,
+  _retries: Option[Int],
+  _initialBackoff: Option[Duration],
+  _backoffMultiplier: Option[Int]
+)
 {
   import ClientBuilder._
   def this() = this(
@@ -62,7 +67,10 @@ case class ClientBuilder(
     None,                                            // sendBufferSize
     None,                                            // recvBufferSize
     false,                                           // exportLoadsToOstrich
-    Timeout(10, TimeUnit.SECONDS)                    // failureAccrualWindow
+    Timeout(10, TimeUnit.SECONDS),                   // failureAccrualWindow
+    None,
+    None,
+    None
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -94,6 +102,15 @@ case class ClientBuilder(
   def hostConnectionLimit(value: Int) =
     copy(_hostConnectionLimit = Some(value))
 
+  def retries(value: Int) =
+    copy(_retries = Some(value))
+
+  def initialBackoff(value: Duration) =
+    copy(_initialBackoff = Some(value))
+
+  def backoffMultiplier(value: Int) =
+    copy(_backoffMultiplier = Some(value))
+
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
@@ -117,7 +134,7 @@ case class ClientBuilder(
     bs
   }
 
-  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) = 
+  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) =
     limit match {
       case Some(limit) =>
         new ConnectionLimitingChannelPool(bootstrap, limit)
@@ -127,6 +144,16 @@ case class ClientBuilder(
 
   private def timeout(timeout: Timeout)(broker: Broker) =
     new TimeoutBroker(broker, timeout.value, timeout.unit)
+
+  private def retrying(broker: Broker) =
+    (_retries, _initialBackoff, _backoffMultiplier) match {
+      case (Some(retries: Int), None, None) =>
+        new RetryingBroker(broker, retries)
+      case (Some(retries: Int), Some(backoff: Duration), Some(multiplier: Int)) =>
+        new ExponentialBackoffRetryingBroker(broker, backoff, multiplier)
+      case (_, _, _) =>
+        broker
+    }
 
   private def statsRepositoryForLoadedBroker(
     host: InetSocketAddress,
@@ -171,6 +198,7 @@ case class ClientBuilder(
       pool(_hostConnectionLimit) _          andThen
       (new PoolingBroker(_))                andThen
       timeout(_requestTimeout) _            andThen
+      retrying                              andThen
       (new StatsLoadedBroker(_, statsRepo)) andThen
         failureAccrualBroker(_failureAccrualWindow) _
 
