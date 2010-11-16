@@ -13,7 +13,7 @@ import com.twitter.finagle.stub.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.*;
 
-public class ServerTest {
+public class HttpServerTest {
   public static void main(String args[]) {
     Stub<HttpRequest, HttpResponse> stub =
       new Stub<HttpRequest, HttpResponse>() {
