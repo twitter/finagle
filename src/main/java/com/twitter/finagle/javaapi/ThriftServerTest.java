@@ -37,7 +37,7 @@ public class ThriftServerTest {
       }
     };
 
-    Channel c = ServerBuilder
+    ServerBuilder
       .get()
       .codec(Codec4J.thrift())
       .stub(stub)
