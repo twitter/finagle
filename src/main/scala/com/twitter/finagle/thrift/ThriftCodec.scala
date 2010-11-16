@@ -135,7 +135,6 @@ class ThriftServerCodec extends ThriftCodec {
         Channels.write(ctx, c.getFuture, buf, m.getRemoteAddress)
       case _ =>
         Channels.fireExceptionCaught(ctx, new UnrecognizedResponseException)
-
     }
   }
 
@@ -149,7 +148,6 @@ class ThriftServerCodec extends ThriftCodec {
     }
 
     val e = c.asInstanceOf[MessageEvent]
-
     e.getMessage match {
       case buffer: ChannelBuffer =>
         val iprot = protocolFactory.getProtocol(buffer)
@@ -163,18 +161,9 @@ class ThriftServerCodec extends ThriftCodec {
             throw(exc)
           }
 
-          seqid += 1
+          // Adopt the sequence ID from the client.
+          seqid = msg.seqid
 
-          if (msg.seqid != seqid) {
-            // This means the channel is in an inconsistent state, so we
-            // both fire the exception (upstream), and close the channel
-            // (downstream).
-            throw new TApplicationException(
-              TApplicationException.BAD_SEQUENCE_ID,
-              "out of sequence response (got %d expected %d)".format(msg.seqid, seqid))
-          }
-
-          // Receiving requests as a server
           val request = ThriftTypes(msg.name).newInstance()
           request.readRequestArgs(iprot)
           Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
@@ -227,7 +216,6 @@ class ThriftClientCodec extends ThriftCodec {
     }
 
     val e = c.asInstanceOf[MessageEvent]
-
     e.getMessage match {
       case buffer: ChannelBuffer =>
         val iprot = protocolFactory.getProtocol(buffer)
