@@ -11,7 +11,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
   val codehausRepo = "codehaus.org" at "http://repository.codehaus.org/"
 
-  val ostrich      = "com.twitter"          %  "ostrich_2.8.0"    % "2.2.10"
+  val ostrich      = "com.twitter"          %  "ostrich"          % "2.3.0"
   val util         = "com.twitter"          %  "util"             % "1.2.4"
   val netty        = "org.jboss.netty"      %  "netty"            % "3.2.2.Final"
   val thrift       = "thrift"               %  "libthrift"        % "0.2.0"

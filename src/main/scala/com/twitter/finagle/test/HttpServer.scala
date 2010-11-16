@@ -6,13 +6,12 @@ import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
-import net.lag.configgy.{Configgy, RuntimeEnvironment}
-
 import com.twitter.ostrich
 import com.twitter.finagle.builder._
 import com.twitter.finagle.stub._
 
 import com.twitter.util.Future
+import com.twitter.ostrich.RuntimeEnvironment
 
 object HttpServer extends ostrich.Service {
   class Handler extends SimpleChannelUpstreamHandler {
@@ -26,8 +25,13 @@ object HttpServer extends ostrich.Service {
 
   def main(args: Array[String]) {
     val runtime = new RuntimeEnvironment(getClass)
-    runtime.load(args)
-    val config = Configgy.config
+
+    val config = new ostrich.Config {
+      def telnetPort = 0
+      def httpBacklog = 0
+      def httpPort = 8889
+      def jmxPackage = None
+    }
 
     ostrich.ServiceTracker.register(this)
     ostrich.ServiceTracker.startAdmin(config, runtime)
