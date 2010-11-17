@@ -21,7 +21,7 @@ import ChannelBufferConversions._
  * channel. The method name & argument thrift structure (POJO) is
  * given.
  */
-class ThriftCall[A <: TBase[_], R <: TBase[_]](
+class ThriftCall[A <: TBase[_, _], R <: TBase[_, _]](
   @BeanProperty val method: String,
   args: A,
   replyClass: Class[R])
@@ -37,7 +37,7 @@ class ThriftCall[A <: TBase[_], R <: TBase[_]](
     p.writeMessageEnd()
   }
 
-  private[thrift] def writeReply(seqid: Int, p: TProtocol, reply: TBase[_]) {
+  private[thrift] def writeReply(seqid: Int, p: TProtocol, reply: TBase[_, _]) {
     // Write server replies
     p.writeMessageBegin(new TMessage(method, TMessageType.REPLY, seqid))
     reply.write(p)
@@ -72,11 +72,11 @@ class ThriftCall[A <: TBase[_], R <: TBase[_]](
 /**
  * Encapsulates the result of a call to a Thrift service.
  */
-case class ThriftReply[R <: TBase[_]](
+case class ThriftReply[R <: TBase[_, _]](
   response: R,
-  call: ThriftCall[_ <: TBase[_], _ <: TBase[_]])
+  call: ThriftCall[_ <: TBase[_, _], _ <: TBase[_, _]])
 
-class ThriftCallFactory[A <: TBase[_], R <: TBase[_]](
+class ThriftCallFactory[A <: TBase[_, _], R <: TBase[_, _]](
   val method: String,
   argClass: Class[A],
   replyClass: Class[R])
