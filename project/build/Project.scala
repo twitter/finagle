@@ -1,7 +1,11 @@
 import sbt._
+import com.twitter.sbt._
 
-class Project(info: ProjectInfo) extends DefaultProject(info) {
-  // override def compileOrder = CompileOrder.JavaThenScala
+class Project(info: ProjectInfo)
+  extends StandardProject(info)
+  with LibDirClasspath
+{
+  override def compileOrder = CompileOrder.ScalaThenJava
   override def managedStyle = ManagedStyle.Maven
   override def disableCrossPaths = true
 
@@ -22,4 +26,13 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
   val specs    = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
   val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+}
+
+trait LibDirClasspath extends StandardProject {
+  def jarFileFilter: FileFilter = "*.jar"
+  def libClasspath = descendents("lib", jarFileFilter)
+
+  override def compileClasspath = super.compileClasspath +++ libClasspath
+  override def testClasspath = super.testClasspath +++ libClasspath
+  override def runClasspath = super.runClasspath +++ libClasspath
 }
