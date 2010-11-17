@@ -198,7 +198,6 @@ case class ClientBuilder(
       pool(_hostConnectionLimit) _          andThen
       (new PoolingBroker(_))                andThen
       timeout(_requestTimeout) _            andThen
-      retrying                              andThen
       (new StatsLoadedBroker(_, statsRepo)) andThen
         failureAccrualBroker(_failureAccrualWindow) _
 
@@ -228,7 +227,7 @@ case class ClientBuilder(
       broker
     }
 
-    new LoadBalancedBroker(brokers)
+    retrying(new LoadBalancedBroker(brokers))
   }
 
   def buildStub[Request <: AnyRef, Reply <: AnyRef]() =

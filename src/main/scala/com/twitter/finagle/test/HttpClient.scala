@@ -14,7 +14,7 @@ object HttpClient extends ostrich.Service {
     val config = new ostrich.Config {
       def telnetPort = 0
       def httpBacklog = 0
-      def httpPort = 8889
+      def httpPort = 8890
       def jmxPackage = None
     }
     ostrich.ServiceTracker.startAdmin(config, runtime)
@@ -26,7 +26,7 @@ object HttpClient extends ostrich.Service {
         .codec(Http)
         .exportLoadsToOstrich()
         .reportTo(Ostrich())
-        .retries(100)
+        .retries(2)
         .buildStub[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)

@@ -1,5 +1,6 @@
 package com.twitter.finagle.channel
 
+import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.channel.{
@@ -17,6 +18,15 @@ trait RetryingBrokerBase extends Broker {
   def retryFuture(channel: Channel): ChannelFuture
   val underlying: Broker
 
+  class WrappingMessageEvent(channel: Channel, future: ChannelFuture, message: AnyRef, remoteAddress: SocketAddress)
+    extends MessageEvent
+  {
+    override def getRemoteAddress = remoteAddress
+    override def getFuture = future
+    override def getMessage = message
+    override def getChannel = channel
+  }
+
   def dispatch(e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
     val interceptErrors = Channels.future(e.getChannel)
@@ -25,6 +35,7 @@ trait RetryingBrokerBase extends Broker {
         incomingFuture.setSuccess()
       case Error(cause) =>
         // TODO: distinguish between *retriable* cause and non?
+        println("Received an error: %s".format(cause))
         retryFuture(e.getChannel) {
           case Ok(_) => dispatch(e)
           case _ => incomingFuture.setFailure(cause)
@@ -34,7 +45,7 @@ trait RetryingBrokerBase extends Broker {
         incomingFuture.cancel()
     }
 
-    val errorInterceptingMessageEvent = new DownstreamMessageEvent(
+    val errorInterceptingMessageEvent = new WrappingMessageEvent(
       e.getChannel,
       interceptErrors,
       e.getMessage,
@@ -74,7 +85,7 @@ class ExponentialBackoffRetryingBroker(val underlying: Broker, initial: Duration
 
   def retryFuture(channel: Channel) = {
     val future = Channels.future(channel)
-    
+
     timer.newTimeout(new TimerTask {
       def run(to: Timeout) {
         ExponentialBackoffRetryingBroker.this.delay *= multiplier
