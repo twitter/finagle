@@ -26,6 +26,11 @@ object AsyncServerEndToEndSpec extends Specification {
       ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
         "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
 
+      // define(new Object {
+      //   def bleep(success: String, reply: Future<String>) {
+      //   }
+      // })
+
       val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
       serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
         def getPipeline() = {
@@ -35,7 +40,8 @@ object AsyncServerEndToEndSpec extends Specification {
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               e.getMessage match {
-                case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result] =>
+                case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result]
+                if bleep.method.equals("bleep") =>
                   val response = bleep.newReply
                   response.setSuccess(bleep.arguments.request.reverse)
                   Channels.write(ctx.getChannel, bleep.reply(response))
