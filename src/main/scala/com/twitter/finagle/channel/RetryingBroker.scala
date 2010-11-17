@@ -35,7 +35,6 @@ trait RetryingBrokerBase extends Broker {
         incomingFuture.setSuccess()
       case Error(cause) =>
         // TODO: distinguish between *retriable* cause and non?
-        println("Received an error: %s".format(cause))
         retryFuture(e.getChannel) {
           case Ok(_) => dispatch(e)
           case _ => incomingFuture.setFailure(cause)
