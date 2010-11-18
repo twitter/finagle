@@ -31,10 +31,14 @@ class Client[Req <: AnyRef, Rep <: AnyRef](broker: Broker)
     replyFuture {
       case Ok(_) =>
         replyFuture.getReply match {
-          case Reply.Done(reply: Rep) =>
-            promise() = Return(reply)
-          case Reply.Done(_) =>
-            promise() = Throw(new InvalidMessageTypeException)
+          case Reply.Done(reply) =>
+            // Inside of a Try()?
+            promise() = Return(reply.asInstanceOf[Rep])
+
+          // case Reply.Done(reply: Rep) =>
+          //   promise() = Return(reply)
+          // case Reply.Done(_) =>
+          //   promise() = Throw(new InvalidMessageTypeException)
           case Reply.More(_, _) =>
             promise() = Throw(new ReplyIsStreamingException)
         }

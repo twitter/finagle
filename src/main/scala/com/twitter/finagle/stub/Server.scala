@@ -11,9 +11,11 @@ object StubPipelineFactory {
     val dispatcher = new SimpleChannelUpstreamHandler {
       override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
         val channel = ctx.getChannel
-        e.getMessage match {
-         case req: Req =>
-           stub(req) respond {
+        val message = e.getMessage
+
+        if (message.isInstanceOf[Req]) {
+          val req = message.asInstanceOf[Req]
+          stub(req) respond {
              case Return(value) =>
                Channels.write(ctx.getChannel, value).close()
 
@@ -21,10 +23,9 @@ object StubPipelineFactory {
                // TODO: log (invalid reply)
                Channels.close(channel)
            }
-
-         case _ =>
-           // TODO: log (invalid request)
-           Channels.close(channel)
+        } else {
+          // TODO: log (invalid request)
+          Channels.close(channel)          
         }
       }
     }

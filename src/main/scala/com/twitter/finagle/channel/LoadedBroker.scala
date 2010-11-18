@@ -29,7 +29,8 @@ trait LoadedBroker[+A <: LoadedBroker[A]] extends Broker {
  */
 class StatsLoadedBroker(
   underlying: Broker,
-  samples: SampleRepository[T forSome { type T <: AddableSample[T] }])
+  samples: SampleRepository[T forSome { type T <: AddableSample[T] }],
+  bias: Float = 1.0f)
   extends LoadedBroker[StatsLoadedBroker]
 {
   val dispatchSample = samples("dispatch")
@@ -52,6 +53,7 @@ class StatsLoadedBroker(
     }
   }
 
+  override def weight = super.weight * bias
   def load = dispatchSample.count
   // Fancy pants:
   // latencyStats.sum + 2 * latencyStats.mean * failureStats.count
