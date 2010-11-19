@@ -64,8 +64,8 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
 }
 
 class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
-  override val upIndicator = "/\\"
-  override val downIndicator = "\\/"
+  override val upIndicator = "^"
+  override val downIndicator = "v"
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     printUp(e.toString)
