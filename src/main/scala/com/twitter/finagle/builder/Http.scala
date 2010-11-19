@@ -5,8 +5,10 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.http.RequestLifecycleSpy
 
-object Http extends Codec {
-  val clientPipelineFactory =
+class Http extends Codec {
+  val foo = 123
+
+  val clientPipelineFactory: ChannelPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -27,3 +29,5 @@ object Http extends Codec {
       }
     }
 }
+
+object Http extends Http

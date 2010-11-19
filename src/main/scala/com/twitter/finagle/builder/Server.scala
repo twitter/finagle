@@ -85,7 +85,8 @@ case class ServerBuilder(
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _pipelineFactory: Option[ChannelPipelineFactory],
-  _bindTo: Option[InetSocketAddress])
+  _bindTo: Option[InetSocketAddress],
+  _debugToConsole: Boolean)
 {
   import ServerBuilder._
 
@@ -100,7 +101,8 @@ case class ServerBuilder(
     None,                                           // sendBufferSize
     None,                                           // recvBufferSize
     None,                                           // pipelineFactory
-    None                                            // bindTo
+    None,                                           // bindTo
+    false                                           // debugToConsole
   )
 
   def codec(codec: Codec) =
@@ -134,6 +136,8 @@ case class ServerBuilder(
 
   def bindTo(address: InetSocketAddress) =
     copy(_bindTo = Some(address))
+
+  def debugToConsole() = copy(_debugToConsole = true)
 
   private def statsRepository(
     name: Option[String],
@@ -187,6 +191,9 @@ case class ServerBuilder(
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
+
+        if (_debugToConsole)
+          ChannelSnooper.addFirst("serverSnooper", pipeline) // XXX: add names
 
         pipeline.addLast("stats", new SampleHandler(statsRepo))
 

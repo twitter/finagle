@@ -6,6 +6,7 @@ import java.net.InetSocketAddress
 import java.util.Collection
 import java.util.concurrent.{TimeUnit, Executors}
 
+import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.ostrich
@@ -50,8 +51,8 @@ case class ClientBuilder(
   _failureAccrualWindow: Timeout,
   _retries: Option[Int],
   _initialBackoff: Option[Duration],
-  _backoffMultiplier: Option[Int]
-)
+  _backoffMultiplier: Option[Int],
+  _debugToConsole: Boolean)
 {
   import ClientBuilder._
   def this() = this(
@@ -70,7 +71,8 @@ case class ClientBuilder(
     Timeout(10, TimeUnit.SECONDS),                   // failureAccrualWindow
     None,
     None,
-    None
+    None,
+    false
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -120,9 +122,18 @@ case class ClientBuilder(
     copy(_failureAccrualWindow = Timeout(value, unit))
 
   // ** BUILDING
+  def debugToConsole() = copy(_debugToConsole = true)
 
   private def bootstrap(codec: Codec)(host: InetSocketAddress) = {
     val bs = new BrokerClientBootstrap(channelFactory)
+    val pf = new ChannelPipelineFactory {
+      override def getPipeline = {
+        val pipeline = codec.clientPipelineFactory.getPipeline
+        if (_debugToConsole)
+          ChannelSnooper.addFirst("clientSnooper", pipeline)
+        pipeline
+      }
+    }
     bs.setPipelineFactory(codec.clientPipelineFactory)
     bs.setOption("remoteAddress", host)
     bs.setOption("connectTimeoutMillis", _connectionTimeout.duration.inMilliseconds)
