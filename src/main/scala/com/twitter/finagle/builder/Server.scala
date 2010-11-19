@@ -4,6 +4,7 @@ import scala.collection.JavaConversions._
 
 import java.net.InetSocketAddress
 import java.util.concurrent.{TimeUnit, Executors}
+import java.util.logging.Logger
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.buffer._
@@ -74,6 +75,9 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
   }
 }
 
+// TODO: common superclass between client & server builders for common
+// concerns.
+
 case class ServerBuilder(
   _codec: Option[Codec],
   _connectionTimeout: Timeout,
@@ -86,7 +90,7 @@ case class ServerBuilder(
   _recvBufferSize: Option[Int],
   _pipelineFactory: Option[ChannelPipelineFactory],
   _bindTo: Option[InetSocketAddress],
-  _debugToConsole: Boolean)
+  _logger: Option[Logger])
 {
   import ServerBuilder._
 
@@ -102,7 +106,7 @@ case class ServerBuilder(
     None,                                           // recvBufferSize
     None,                                           // pipelineFactory
     None,                                           // bindTo
-    false                                           // debugToConsole
+    None                                            // logger
   )
 
   def codec(codec: Codec) =
@@ -137,7 +141,7 @@ case class ServerBuilder(
   def bindTo(address: InetSocketAddress) =
     copy(_bindTo = Some(address))
 
-  def debugToConsole() = copy(_debugToConsole = true)
+  def logger(logger: Logger) = copy(_logger = Some(logger))
 
   private def statsRepository(
     name: Option[String],
@@ -192,8 +196,10 @@ case class ServerBuilder(
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
 
-        if (_debugToConsole)
-          ChannelSnooper.addFirst("serverSnooper", pipeline) // XXX: add names
+        for (logger <- _logger) {
+          pipeline.addFirst(
+            "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
+        }
 
         pipeline.addLast("stats", new SampleHandler(statsRepo))
 

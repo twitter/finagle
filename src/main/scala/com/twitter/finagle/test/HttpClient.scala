@@ -1,5 +1,6 @@
 package com.twitter.finagle.test
 
+import java.util.logging.Logger
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.ostrich
@@ -27,6 +28,7 @@ object HttpClient extends ostrich.Service {
         .exportLoadsToOstrich()
         .reportTo(Ostrich())
         .retries(2)
+        .logger(Logger.getLogger("http"))
         .buildStub[HttpRequest, HttpResponse]()
 
     for (_ <- 0 until 100)

@@ -1,5 +1,16 @@
 #!/bin/bash
 
+function path_append {
+  _var=$1 
+  _path=$2 
+  eval "
+    if [[ -z \"\$$_var\" ]] ; then
+      export $_var=$_path
+    elif ! echo \$$_var | egrep -q \"(^|:)$_path($|:)\" ; then
+      export $_var=\$$_var:$_path
+    fi"
+}
+
 function find_sbt_root {
   while [ ! -d project -a "x$PWD" != "x/" ] ; do
     cd ..
@@ -18,7 +29,22 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-jars=$(echo $root/lib_managed/compile/*.jar $root/libs/*.jar $root/lib/*.jar | sed 's/ /:/g')
+## Set up the classpath-- one for each (sub)project.
+path_append CP $root/project/boot/scala-2.8.1/lib/scala-library.jar
+path_append CP $root/project/boot/scala-2.8.1/lib/scala-compiler.jar
+
+for project in $root; do
+  for jar in $project/lib_managed/compile/*.jar; do
+    path_append CP $jar
+  done
+
+  for lib in $project/lib/*.jar; do
+    path_append CP $jar
+  done
+
+  path_append CP $project/target/resources
+  path_append CP $project/target/classes
+done
 
 # To use YourKit:
 #export JAVA_OPTS=-agentlib:yjpagent
@@ -36,5 +62,5 @@ if [ "$DEBUG" = "1" ]; then
 
 fi
 
-export JAVA_OPTS="$JAVA_OPTS -server -Xmx2G -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS -Djava.net.preferIPv4Stack=true"
-exec java $JAVA_OPTS -cp "$root/project/boot/scala-2.8.1/lib/scala-library.jar:$root/target/resources:$root/target/classes:$jars" "$@"
+export JAVA_OPTS="$JAVA_OPTS -server -Xmx2G -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS"
+exec java $JAVA_OPTS -cp $CP "$@"

@@ -4,6 +4,7 @@ import collection.JavaConversions._
 
 import java.net.InetSocketAddress
 import java.util.Collection
+import java.util.logging.Logger
 import java.util.concurrent.{TimeUnit, Executors}
 
 import org.jboss.netty.channel._
@@ -52,7 +53,7 @@ case class ClientBuilder(
   _retries: Option[Int],
   _initialBackoff: Option[Duration],
   _backoffMultiplier: Option[Int],
-  _debugToConsole: Boolean)
+  _logger: Option[Logger])
 {
   import ClientBuilder._
   def this() = this(
@@ -69,10 +70,10 @@ case class ClientBuilder(
     None,                                            // recvBufferSize
     false,                                           // exportLoadsToOstrich
     Timeout(10, TimeUnit.SECONDS),                   // failureAccrualWindow
-    None,
-    None,
-    None,
-    false
+    None,                                            // retries
+    None,                                            // initialBackoff
+    None,                                            // backoffMultiplier
+    None                                             // logger
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -122,19 +123,23 @@ case class ClientBuilder(
     copy(_failureAccrualWindow = Timeout(value, unit))
 
   // ** BUILDING
-  def debugToConsole() = copy(_debugToConsole = true)
+  def logger(logger: Logger) = copy(_logger = Some(logger))
 
   private def bootstrap(codec: Codec)(host: InetSocketAddress) = {
     val bs = new BrokerClientBootstrap(channelFactory)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.clientPipelineFactory.getPipeline
-        if (_debugToConsole)
-          ChannelSnooper.addFirst("clientSnooper", pipeline)
+        for (logger <- _logger) {
+          pipeline.addFirst(
+            "channelSnooper",
+            ChannelSnooper(_name getOrElse "client")(logger.info))
+        }
+
         pipeline
       }
     }
-    bs.setPipelineFactory(codec.clientPipelineFactory)
+    bs.setPipelineFactory(pf)
     bs.setOption("remoteAddress", host)
     bs.setOption("connectTimeoutMillis", _connectionTimeout.duration.inMilliseconds)
     bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?

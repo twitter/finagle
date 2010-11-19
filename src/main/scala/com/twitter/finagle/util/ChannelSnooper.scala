@@ -2,6 +2,7 @@ package com.twitter.finagle.util
 
 import java.io.PrintStream
 import java.nio.charset.Charset
+import java.util.logging.Logger
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
@@ -9,16 +10,19 @@ import org.jboss.netty.buffer.ChannelBuffer
 trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandler {
   val name: String
 
-  val printer: String => Unit = {
-    (new PrintStream(System.out, true, "UTF-8")).println _
+  def printer(message: String) {
+    (new PrintStream(System.out, true, "UTF-8")).println(message)
   }
 
   def print(indicator: String, message: String) {
     printer("%10s %s %s".format(name, indicator, message))
   }
 
-  def printUp(message: String)   = print("↑", message)
-  def printDown(message: String) = print("↓", message)
+  val upIndicator = "↑"
+  val downIndicator = "↓"
+
+  def printUp(message: String)   = print(upIndicator, message)
+  def printDown(message: String) = print(downIndicator, message)
 }
 
 class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
@@ -60,6 +64,9 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
 }
 
 class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
+  override val upIndicator = "/\\"
+  override val downIndicator = "\\/"
+
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     printUp(e.toString)
     ctx.sendUpstream(e)
@@ -71,9 +78,12 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
   }
 }
 
-// One with byte.
-
 object ChannelSnooper {
+  def apply(name: String)(thePrinter: String => Unit) =
+    new SimpleChannelSnooper(name) {
+      override def printer(message: String) = thePrinter(message)
+    }
+
   def addLast(name: String, p: ChannelPipeline) =
     p.addLast("snooper-%s".format(name), new SimpleChannelSnooper(name))
 
