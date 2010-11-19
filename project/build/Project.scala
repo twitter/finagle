@@ -5,6 +5,30 @@ class Project(info: ProjectInfo)
   extends StandardProject(info)
   with LibDirClasspath
 {
+  // ** Project inlining
+  import collection.mutable.{HashSet, ListBuffer}
+  import scala.collection.jcl
+  val environment = jcl.Map(System.getenv())
+  val inlinedLibraryDependencies = new HashSet[ModuleID]()
+  val inlinedSubprojects = new ListBuffer[(String, sbt.Project)]()
+
+  override def libraryDependencies = {
+    super.libraryDependencies ++ inlinedLibraryDependencies
+  }
+
+  override def subProjects = {
+    Map() ++ super.subProjects ++ inlinedSubprojects
+  }
+
+  def inline(m: ModuleID) = {
+    val path = Path.fromFile("../" + m.name)
+    if (environment.get("SBT_TWITTER").isDefined && path.isDirectory)
+      inlinedSubprojects += (m.name -> project(path))
+    else
+      inlinedLibraryDependencies += m
+  }
+  // ~~ Project inlining
+
   override def compileOrder = CompileOrder.ScalaThenJava
   override def managedStyle = ManagedStyle.Maven
   override def disableCrossPaths = true
@@ -15,12 +39,14 @@ class Project(info: ProjectInfo)
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
   val codehausRepo = "codehaus.org" at "http://repository.codehaus.org/"
 
-  val ostrich      = "com.twitter"          %  "ostrich"          % "2.3.0"
-  val util         = "com.twitter"          %  "util"             % "1.2.4"
   val netty        = "org.jboss.netty"      %  "netty"            % "3.2.2.Final"
   val thrift       = "thrift"               %  "libthrift"        % "0.5.0"
   val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.6.1"
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
+
+  // com.twitter deps:
+  inline("com.twitter" % "ostrich" % "2.3.0")
+  inline("com.twitter" % "util"    % "1.2.4")
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
