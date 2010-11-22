@@ -34,17 +34,14 @@ object ThriftCodecSpec extends Specification {
       }
   }
 
-  case class haveType[T <: AnyRef]() extends Matcher[AnyRef]() {
+  case class withType[T <: AnyRef](f: T => Boolean)()
+    extends Matcher[AnyRef]()
+  {
     def apply(obj: => AnyRef) =
-      (obj.isInstanceOf[T], "is correct type", "has incorrect type %s".format(obj.getClass))
-  }
-
-  case class withType[T <: AnyRef](f: T => Boolean) extends Matcher[AnyRef]() {
-    def apply(obj: => AnyRef) =
-      obj match {
-        case t: T =>
-          (f(t), "passed test", "failed test")
-        case _ =>
+      try {
+        (f(obj.asInstanceOf[T]), "passed test", "failed test")
+      } catch {
+        case _: ClassCastException =>
           (false, "", "has incorrect type")
       }
   }
@@ -81,9 +78,7 @@ object ThriftCodecSpec extends Specification {
       ch.upstreamEvents must haveSize(0)
       ch.downstreamEvents must haveSize(1)
 
-      ch.downstreamEvents(0) must haveType[MessageEvent]
       val m = ch.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-      m must haveType[ChannelBuffer]
       val buf = m.asInstanceOf[ChannelBuffer]
 
       val iprot = new TBinaryProtocol(buf, true, true)
@@ -178,12 +173,9 @@ object ThriftCodecSpec extends Specification {
 
       ch.upstreamEvents must beEmpty
       ch.downstreamEvents must haveSize(1)
-      ch.downstreamEvents(0) must haveType[MessageEvent]
-      val buf = {
-        val m = ch.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-        m must haveType[ChannelBuffer]
-        m.asInstanceOf[ChannelBuffer]
-      }
+      ch.downstreamEvents(0) must haveClass[DownstreamMessageEvent]
+      val e = ch.downstreamEvents(0).asInstanceOf[MessageEvent]
+      val buf = e.getMessage().asInstanceOf[ChannelBuffer]
 
       val iprot = new TBinaryProtocol(buf, true, true)
       val msg = iprot.readMessageBegin()
