@@ -13,8 +13,9 @@ object StubPipelineFactory {
         val channel = ctx.getChannel
         val message = e.getMessage
 
-        if (message.isInstanceOf[Req]) {
+        try {
           val req = message.asInstanceOf[Req]
+
           stub(req) respond {
              case Return(value) =>
                Channels.write(ctx.getChannel, value).close()
@@ -23,9 +24,9 @@ object StubPipelineFactory {
                // TODO: log (invalid reply)
                Channels.close(channel)
            }
-        } else {
-          // TODO: log (invalid request)
-          Channels.close(channel)          
+        } catch {
+          case e: ClassCastException =>
+            Channels.close(channel)
         }
       }
     }
