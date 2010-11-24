@@ -1,4 +1,4 @@
-package com.twitter.finagle.stub
+package com.twitter.finagle.service
 
 import org.jboss.netty.channel.{Channels, MessageEvent}
 
@@ -12,10 +12,10 @@ class ReplyIsStreamingException extends Exception
 class CancelledRequestException extends Exception
 class InvalidMessageTypeException extends Exception
 
-class Client[Req <: AnyRef, Rep <: AnyRef](broker: Broker)
-  extends Stub[Req, Rep]
+class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
+  extends Service[Req, Rep]
 {
-  def call(request: Req): Future[Rep] = {
+  def apply(request: Req): Future[Rep] = {
     val messageEvent = new MessageEvent {
       val future = Channels.future(null)
 

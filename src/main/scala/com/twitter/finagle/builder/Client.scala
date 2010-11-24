@@ -16,7 +16,7 @@ import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
-import com.twitter.finagle.stub
+import com.twitter.finagle.service
 
 object ClientBuilder {
   def apply() = new ClientBuilder
@@ -246,6 +246,6 @@ case class ClientBuilder(
     retrying(new LoadBalancedBroker(brokers))
   }
 
-  def buildStub[Request <: AnyRef, Reply <: AnyRef]() =
-    new stub.Client[Request, Reply](build())
+  def buildService[Request <: AnyRef, Reply <: AnyRef]() =
+    new service.Client[Request, Reply](build())
 }

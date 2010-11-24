@@ -20,7 +20,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.channel.PartialUpstreamMessageEvent
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.stub.{Stub, StubPipelineFactory}
+import com.twitter.finagle.service.{Service, ServicePipelineFactory}
 
 object ServerBuilder {
   def apply() = new ServerBuilder()
@@ -135,8 +135,8 @@ case class ServerBuilder(
   def pipelineFactory(value: ChannelPipelineFactory) =
     copy(_pipelineFactory = Some(value))
 
-  def stub[Req <: AnyRef, Rep <: AnyRef](stub: Stub[Req, Rep]) =
-    copy(_pipelineFactory = Some(StubPipelineFactory(stub)))
+  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
+    copy(_pipelineFactory = Some(ServicePipelineFactory(service)))
 
   def bindTo(address: InetSocketAddress) =
     copy(_bindTo = Some(address))
