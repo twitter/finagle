@@ -14,8 +14,6 @@ import org.jboss.netty.channel._
 
 import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
 
-import ChannelBufferConversions._
-
 /**
  * The ThriftCall object represents a thrift dispatch on the
  * channel. The method name & argument thrift structure (POJO) is
@@ -130,7 +128,8 @@ class ThriftServerCodec extends ThriftCodec {
       case reply@ThriftReply(response, call) =>
         // Writing replies as a server
         val buf = ChannelBuffers.dynamicBuffer()
-        val oprot = protocolFactory.getProtocol(buf)
+        val transport = new ChannelBufferTransport(buf)
+        val oprot = protocolFactory.getProtocol(transport)
         call.writeReply(seqid, oprot, response)
         Channels.write(ctx, c.getFuture, buf, m.getRemoteAddress)
       case _ =>
@@ -141,32 +140,14 @@ class ThriftServerCodec extends ThriftCodec {
   /**
    * Receives requests from clients.
    */
-  override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (!c.isInstanceOf[MessageEvent]) {
-      super.handleUpstream(ctx, c)
-      return
-    }
-
-    val e = c.asInstanceOf[MessageEvent]
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
       case buffer: ChannelBuffer =>
-        val iprot = protocolFactory.getProtocol(buffer)
-        val msg = iprot.readMessageBegin()
+        val transport = new ChannelBufferTransport(buffer)
+        val iprot = protocolFactory.getProtocol(transport)
 
         try {
-          if (msg.`type` == TMessageType.EXCEPTION) {
-            val exc = TApplicationException.read(iprot)
-            iprot.readMessageEnd()
-            currentCall.set(null)
-            throw(exc)
-          }
-
-          // Adopt the sequence ID from the client.
-          seqid = msg.seqid
-
-          val request = ThriftTypes(msg.name).newInstance()
-          request.readRequestArgs(iprot)
-          Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
+          readThriftMessage(ctx, e, iprot)
         } catch {
           case exc: Throwable =>
             Channels.fireExceptionCaught(ctx, exc)
@@ -174,7 +155,54 @@ class ThriftServerCodec extends ThriftCodec {
         }
     }
   }
+
+  def readThriftMessage(ctx: ChannelHandlerContext, e: MessageEvent, iprot: TProtocol) {
+    val msg = iprot.readMessageBegin()
+
+    if (msg.`type` == TMessageType.EXCEPTION) {
+      val exc = TApplicationException.read(iprot)
+      iprot.readMessageEnd()
+      currentCall.set(null)
+      throw(exc)
+    }
+
+    // Adopt the sequence ID from the client.
+    seqid = msg.seqid
+
+    val request = ThriftTypes(msg.name).newInstance()
+    request.readRequestArgs(iprot)
+    Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
+  }
 }
+
+class ThriftUnframedServerCodec extends ThriftServerCodec {
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    e.getMessage match {
+      case buffer: ChannelBuffer =>
+        /* Attempt to read as-if the full frame has been received.  NotEnoughBytesException
+         * is raise if there aren't enough bytes.  This is wasteful if the client
+         * doesn't send the full frame.  Most implementations do and most requests are
+         * small.
+         */
+        buffer.markReaderIndex()
+
+        val transport = new SafeChannelBufferTransport(buffer)
+        val iprot = protocolFactory.getProtocol(transport)
+
+        try {
+          readThriftMessage(ctx, e, iprot)
+        } catch {
+          case exc: NotEnoughBytesException =>
+            // Not enough bytes.  Try ga
+            buffer.resetReaderIndex()
+          case exc: Throwable =>
+            Channels.fireExceptionCaught(ctx, exc)
+            Channels.close(ctx, Channels.future(ctx.getChannel))
+        }
+    }
+  }
+}
+
 
 class ThriftClientCodec extends ThriftCodec {
   /**
@@ -197,7 +225,8 @@ class ThriftClientCodec extends ThriftCodec {
         }
 
         val buf = ChannelBuffers.dynamicBuffer()
-        val p = protocolFactory.getProtocol(buf)
+        val transport = new ChannelBufferTransport(buf)
+        val p = protocolFactory.getProtocol(transport)
         seqid += 1
         call.writeRequest(seqid, p)
         Channels.write(ctx, c.getFuture, buf, m.getRemoteAddress)
@@ -218,7 +247,8 @@ class ThriftClientCodec extends ThriftCodec {
     val e = c.asInstanceOf[MessageEvent]
     e.getMessage match {
       case buffer: ChannelBuffer =>
-        val iprot = protocolFactory.getProtocol(buffer)
+        val transport = new ChannelBufferTransport(buffer)
+        val iprot = protocolFactory.getProtocol(transport)
         val msg = iprot.readMessageBegin()
 
         if (msg.`type` == TMessageType.EXCEPTION) {
@@ -254,6 +284,5 @@ class ThriftClientCodec extends ThriftCodec {
         Channels.fireExceptionCaught(ctx, new UnrecognizedResponseException)
     }
   }
-
 }
 

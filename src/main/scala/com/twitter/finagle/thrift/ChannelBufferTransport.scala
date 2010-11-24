@@ -20,6 +20,18 @@ class ChannelBufferTransport(underlying: ChannelBuffer) extends TTransport {
   }
 }
 
+class NotEnoughBytesException extends Exception
+
+class SafeChannelBufferTransport(underlying: ChannelBuffer)
+extends ChannelBufferTransport(underlying) {
+  override def read(buffer: Array[Byte], offset: Int, length: Int): Int = {
+    val bytesRead = super.read(buffer, offset, length)
+    if (bytesRead != length)
+      throw new NotEnoughBytesException
+    bytesRead
+  }
+}
+
 class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer)
 extends TTransport {
   override def isOpen = true
