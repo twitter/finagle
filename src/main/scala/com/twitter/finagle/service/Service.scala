@@ -17,16 +17,22 @@ abstract class Service[-Req <: AnyRef, +Rep <: AnyRef] extends (Req => Future[Re
   }
 }
 
-// A filter is a service transform.
-abstract class Filter[Req, Rep, Req1, Rep1]
-  extends ((Req, Service[Req1, Rep]) => Future[Rep1])
+// A filter is a service transform [Req -> (Req1 -> Rep1) -> Rep].
+abstract class Filter[-Req <: AnyRef, +Rep <: AnyRef, Req1 <: AnyRef, Rep1 <: AnyRef]
+  extends ((Req, Service[Req1, Rep1]) => Future[Rep])
 {
-  // def apply(request: Request, service: Service[Req1, Rep]): Future[Rep1]
+  def apply(request: Req, service: Service[Req1, Rep1]): Future[Rep]
 
-  def andThen(next: Filter[Req1, Rep]): Filter[Req, Rep1] =
-    new Filter[Req, Rep1] {
-      def apply(request: Req, service: Service[Req1, Rep]) = {
-        Filter.this.
+  def andThen[Req2 <: AnyRef, Rep2 <: AnyRef](next: Filter[Req1, Rep1, Req2, Rep2]) =
+    new Filter[Req, Rep, Req2, Rep2] {
+      def apply(request: Req, service: Service[Req2, Rep2]) = {
+        Filter.this.apply(request, new Service[Req1, Rep1] {
+          def apply(request: Req1): Future[Rep1] = next(request, service)
+        })
       }
     }
+
+  def andThen(service: Service[Req1, Rep1]) = new Service[Req, Rep] {
+    def apply(request: Req) = Filter.this.apply(request, service)
+  }
 }
