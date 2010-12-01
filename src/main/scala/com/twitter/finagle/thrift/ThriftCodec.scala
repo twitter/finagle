@@ -11,8 +11,8 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TPro
 
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
-
-import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
+import org.jboss.netty.handler.codec.replay.{ReplayingDecoder, VoidEnum}
 
 /**
  * The ThriftCall object represents a thrift dispatch on the
@@ -22,8 +22,13 @@ import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
 class ThriftCall[A <: TBase[_, _], R <: TBase[_, _]](
   @BeanProperty val method: String,
   args: A,
-  replyClass: Class[R])
+  replyClass: Class[R],
+  val seqid: Int)
 {
+  // Constructor without seqno for Java
+  def this(@BeanProperty method: String, args: A, replyClass: Class[R]) =
+    this(method, args, replyClass, -1)
+
   private[thrift] def readRequestArgs(p: TProtocol) {
     args.read(p)
     p.readMessageEnd()
@@ -80,7 +85,8 @@ class ThriftCallFactory[A <: TBase[_, _], R <: TBase[_, _]](
   replyClass: Class[R])
 {
   private[this] def newArgInstance() = argClass.newInstance
-  def newInstance() = new ThriftCall(method, newArgInstance(), replyClass)
+  def newInstance(seqid: Int = -1):ThriftCall[A, R] = new ThriftCall(method, newArgInstance(), replyClass, seqid)
+  def newInstance():ThriftCall[A, R] = new ThriftCall(method, newArgInstance(), replyClass, -1)
 }
 
 /**
@@ -104,185 +110,158 @@ object ThriftTypes
   }
 }
 
-abstract class ThriftCodec extends SimpleChannelHandler {
+class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
   protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
-  protected val currentCall = new AtomicReference[ThriftCall[_, _]]
-  protected var seqid = 0
-}
 
-
-class UnrecognizedResponseException extends Exception
-
-class ThriftServerCodec extends ThriftCodec {
-  /**
-   * Writes replies to clients.
-   */
-  override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (!c.isInstanceOf[MessageEvent]) {
-      super.handleDownstream(ctx, c)
-      return
-    }
-
-    val m = c.asInstanceOf[MessageEvent]
-    m getMessage match {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
+    e.getMessage match {
       case reply@ThriftReply(response, call) =>
-        // Writing replies as a server
-        val buf = ChannelBuffers.dynamicBuffer()
-        val transport = new ChannelBufferTransport(buf)
-        val oprot = protocolFactory.getProtocol(transport)
-        call.writeReply(seqid, oprot, response)
-        Channels.write(ctx, c.getFuture, buf, m.getRemoteAddress)
-      case _ =>
-        Channels.fireExceptionCaught(ctx, new UnrecognizedResponseException)
-    }
-  }
-
-  /**
-   * Receives requests from clients.
-   */
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    e.getMessage match {
-      case buffer: ChannelBuffer =>
+        val buffer = ChannelBuffers.dynamicBuffer()
         val transport = new ChannelBufferTransport(buffer)
-        val iprot = protocolFactory.getProtocol(transport)
+        val protocol = protocolFactory.getProtocol(transport)
+        call.writeReply(call.seqid, protocol, response)
+        Channels.write(ctx, Channels.succeededFuture(e.getChannel()), buffer, e.getRemoteAddress)
+      case _ =>
+        Channels.fireExceptionCaught(ctx, new IllegalArgumentException)
+    }
+}
 
+trait ThriftServerDecoderHelper {
+  protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
+
+  def decodeThriftCall(ctx: ChannelHandlerContext, channel: Channel,
+                       buffer: ChannelBuffer):Object = {
+    val transport = new ChannelBufferTransport(buffer)
+    val protocol = protocolFactory.getProtocol(transport)
+
+    val message = protocol.readMessageBegin()
+
+    message.`type` match {
+      case TMessageType.CALL =>
         try {
-          readThriftMessage(ctx, e, iprot)
+          val factory = ThriftTypes(message.name)
+          val request = factory.newInstance(message.seqid)
+          request.readRequestArgs(protocol)
+          // ^ calls protocol.readMessageEnd
+          request.asInstanceOf[AnyRef]
         } catch {
-          case exc: Throwable =>
-            Channels.fireExceptionCaught(ctx, exc)
+          case e: TApplicationException =>
+            // Unknown method - close the channel. Ideally we'd send
+            // TApplicationException.UNKNOWN_METHOD, but we don't have the
+            // remoteAddress to send it to because we don't have the original
+            // MessageEvent.
             Channels.close(ctx, Channels.future(ctx.getChannel))
+            null
         }
+      case _ =>
+        // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
+        // but Java Thrift doesn't use it.
+        null
     }
-  }
-
-  def readThriftMessage(ctx: ChannelHandlerContext, e: MessageEvent, iprot: TProtocol) {
-    val msg = iprot.readMessageBegin()
-
-    if (msg.`type` == TMessageType.EXCEPTION) {
-      val exc = TApplicationException.read(iprot)
-      iprot.readMessageEnd()
-      currentCall.set(null)
-      throw(exc)
-    }
-
-    // Adopt the sequence ID from the client.
-    seqid = msg.seqid
-
-    val request = ThriftTypes(msg.name).newInstance()
-    request.readRequestArgs(iprot)
-    Channels.fireMessageReceived(ctx, request, e.getRemoteAddress)
   }
 }
 
-class ThriftUnframedServerCodec extends ThriftServerCodec {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+/**
+ * Thrift framed server decoder assumes messages are framed, so should be used
+ * with the ThriftFrameCodec.
+ */
+class ThriftFramedServerDecoder extends OneToOneDecoder with ThriftServerDecoderHelper {
+  override def decode(ctx: ChannelHandlerContext, channel: Channel, m: Object):Object =
+    m match {
+      case buffer:ChannelBuffer => decodeThriftCall(ctx, channel, buffer)
+      case _                    => m
+    }
+}
+
+/**
+ * Thrift unframed server decoder doesn't assume messages are framed.
+ *
+ * The implementation repeated attempts to parse data until it succeeds.
+ * This is fine for small requests from well-behaved clients, but will
+ * impose a performance penality for large requests or requests from
+ * misbehaved clients (e.g., sending one byte at a time).
+ */
+class ThriftUnframedServerDecoder extends ReplayingDecoder[VoidEnum]
+with ThriftServerDecoderHelper {
+  override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer,
+                      state: VoidEnum) =
+    decodeThriftCall(ctx, channel, buffer)
+}
+
+class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
+  protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
+  protected var seqid = 0
+
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
-      case buffer: ChannelBuffer =>
-        /* Attempt to read as-if the full frame has been received.  NotEnoughBytesException
-         * is raise if there aren't enough bytes.  This is wasteful if the client
-         * doesn't send the full frame.  Most implementations do and most requests are
-         * small.
-         */
-        buffer.markReaderIndex()
-
-        val transport = new SafeChannelBufferTransport(buffer)
-        val iprot = protocolFactory.getProtocol(transport)
-
-        try {
-          readThriftMessage(ctx, e, iprot)
-        } catch {
-          case exc: NotEnoughBytesException =>
-            // Not enough bytes.  Try ga
-            buffer.resetReaderIndex()
-          case exc: Throwable =>
-            Channels.fireExceptionCaught(ctx, exc)
-            Channels.close(ctx, Channels.future(ctx.getChannel))
-        }
-    }
-  }
-}
-
-
-class ThriftClientCodec extends ThriftCodec {
-  /**
-   * Sends requests to servers.
-   */
-  override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (!c.isInstanceOf[MessageEvent]) {
-      super.handleDownstream(ctx, c)
-      return
-    }
-
-    val m = c.asInstanceOf[MessageEvent]
-    m getMessage match {
       case call: ThriftCall[_, _] =>
-        if (!currentCall.compareAndSet(null, call)) {
-          val exc = new TooManyDicksOnTheDanceFloorException
-          Channels.fireExceptionCaught(ctx, exc)
-          c.getFuture.setFailure(exc)
-          return
-        }
-
-        val buf = ChannelBuffers.dynamicBuffer()
-        val transport = new ChannelBufferTransport(buf)
-        val p = protocolFactory.getProtocol(transport)
-        seqid += 1
-        call.writeRequest(seqid, p)
-        Channels.write(ctx, c.getFuture, buf, m.getRemoteAddress)
-      case _ =>
-        Channels.fireExceptionCaught(ctx, new UnrecognizedResponseException)
-    }
-  }
-
-  /**
-   * Receives replies from servers.
-   */
-  override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (!c.isInstanceOf[MessageEvent]) {
-      super.handleUpstream(ctx, c)
-      return
-    }
-
-    val e = c.asInstanceOf[MessageEvent]
-    e.getMessage match {
-      case buffer: ChannelBuffer =>
+        val buffer = ChannelBuffers.dynamicBuffer()
         val transport = new ChannelBufferTransport(buffer)
-        val iprot = protocolFactory.getProtocol(transport)
-        val msg = iprot.readMessageBegin()
-
-        if (msg.`type` == TMessageType.EXCEPTION) {
-          val exc = TApplicationException.read(iprot)
-          iprot.readMessageEnd()
-          Channels.fireExceptionCaught(ctx, exc)
-          currentCall.set(null)
-          return
-        }
-
-        if (msg.seqid != seqid) {
-          // This means the channel is in an inconsistent state, so we
-          // both fire the exception (upstream), and close the channel
-          // (downstream).
-          val exc = new TApplicationException(
-            TApplicationException.BAD_SEQUENCE_ID,
-            "out of sequence response (got %d expected %d)".format(msg.seqid, seqid))
-          Channels.fireExceptionCaught(ctx, exc)
-          Channels.close(ctx, Channels.future(ctx.getChannel))
-          return
-        }
-
-        // Receiving replies as a client
-        val result = currentCall.get().readResponse(iprot)
-
-        // Done with the current call cycle: we can now accept another
-        // request.
-        currentCall.set(null)
-
-        Channels.fireMessageReceived(ctx, result, e.getRemoteAddress)
-
+        val protocol = protocolFactory.getProtocol(transport)
+        seqid += 1
+        call.writeRequest(seqid, protocol)
+        Channels.write(ctx, Channels.succeededFuture(e.getChannel()), buffer, e.getRemoteAddress)
       case _ =>
-        Channels.fireExceptionCaught(ctx, new UnrecognizedResponseException)
+        Channels.fireExceptionCaught(ctx, new IllegalArgumentException)
+    }
+}
+
+trait ThriftClientDecoderHelper {
+  protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
+
+  def decodeThriftReply(ctx: ChannelHandlerContext, channel: Channel,
+                          buffer: ChannelBuffer):Object = {
+    val transport = new ChannelBufferTransport(buffer)
+    val protocol = protocolFactory.getProtocol(transport)
+    val message = protocol.readMessageBegin()
+
+    message.`type` match {
+      case TMessageType.EXCEPTION =>
+        // Create an event for any TApplicationExceptions.  Though these are
+        // usually protocol-level errors, so there's not much the client can do.
+        val exception = TApplicationException.read(protocol)
+        protocol.readMessageEnd()
+        Channels.fireExceptionCaught(ctx, exception)
+        null
+      case TMessageType.REPLY =>
+        val call = ThriftTypes(message.name).newInstance()
+        // ^ may throw TApplicationException, though server would be misbehaving
+        // if it did.
+        val reply = call.readResponse(protocol)
+        // ^ calls protocol.readMessageEnd
+        reply.asInstanceOf[AnyRef] // Note reply may not be a success
+      case _ =>
+        // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
+        // but the Java Thrift implementation doesn't use it.
+        null
     }
   }
 }
 
+/**
+ * Thrift framed client decoder assumes messages are framed, so should be used
+ * with the ThriftFrameCodec.
+ */
+class ThriftFramedClientDecoder extends OneToOneDecoder with ThriftClientDecoderHelper {
+  override def decode(ctx: ChannelHandlerContext, channel: Channel, m: Object):Object =
+    m match {
+      case buffer:ChannelBuffer => decodeThriftReply(ctx, channel, buffer)
+      case _                    => m
+    }
+}
+
+
+/**
+ * Thrift unframed client decoder doesn't assume messages are framed.
+ *
+ * The implementation repeated attempts to parse data until it succeeds.
+ * This is fine for small responses from well-behaved servers, but will
+ * impose a performance penality for large responses or responses from
+ * misbehaved servers (e.g., sending one byte at a time).
+ */
+class ThriftUnframedClientDecoder extends ReplayingDecoder[VoidEnum]
+with ThriftClientDecoderHelper {
+  override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer,
+                      state: VoidEnum) =
+    decodeThriftReply(ctx, channel, buffer)
+}
