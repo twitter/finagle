@@ -1,9 +1,13 @@
 package com.twitter.finagle.builder
 
+import javax.net.ssl.SSLEngine
+
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.ssl.SslHandler
 
-import com.twitter.finagle.http.RequestLifecycleSpy
+import com.twitter.finagle.http.{RequestLifecycleSpy, Ssl}
+
 
 class Http extends Codec {
   val clientPipelineFactory: ChannelPipelineFactory =
@@ -11,7 +15,7 @@ class Http extends Codec {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpClientCodec())
-        pipeline.addLast("httpDechunker",  new HttpChunkAggregator(10<<20))
+        pipeline.addLast("httpDechunker", new HttpChunkAggregator(10<<20))
         pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
         pipeline
       }
@@ -20,7 +24,8 @@ class Http extends Codec {
   val serverPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
-        val compressionLevel = 6 // 0-9, 6 being the default in Netty
+        val compressionLevel = 3 // 0-9, 6 being the default in Netty
+
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpServerCodec)
         pipeline.addLast("compressor", new HttpContentCompressor(compressionLevel))

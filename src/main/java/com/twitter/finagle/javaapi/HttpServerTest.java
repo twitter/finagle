@@ -29,9 +29,10 @@ public class HttpServerTest {
           HttpResponse httpResponse = new DefaultHttpResponse(
             HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
-          int nBytes = 1024 * 20;
+          int nBytes = 1024 * 2;
           httpResponse.setContent(new SlicedChannelBuffer(cb, 0, nBytes));
           httpResponse.setHeader("Content-Length", nBytes);
+          httpResponse.setHeader("Connection", "close");
 
           Promise<HttpResponse> future = new Promise<HttpResponse>();
           future.update(new Return<HttpResponse>(httpResponse));
