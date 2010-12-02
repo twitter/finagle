@@ -9,227 +9,307 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.apache.thrift.{TBase, TApplicationException}
 import org.apache.thrift.protocol.{
   TProtocol, TBinaryProtocol, TMessage, TMessageType}
+import org.apache.thrift.transport.TTransportException
 
 import com.twitter.finagle.SunkChannel
 import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
 import com.twitter.silly.Silly
 
-import ChannelBufferConversions._
-
 object ThriftCodecSpec extends Specification {
-  case class matchExceptionEvent(exc: Throwable) extends Matcher[ChannelEvent]() {
-    def apply(event: => ChannelEvent) =
-      event match {
-        case excEvent: ExceptionEvent =>
-          val cause = excEvent.getCause
-          if (cause.getClass != exc.getClass)
-            (false, "", "wrong exception class %s".format(excEvent.getCause.getClass))
-          else if (cause.getMessage != exc.getMessage)
-            (false, "", "wrong exception message %s".format(cause.getMessage))
-          else
-            (true, "throws the right exception", "")
-
-        case _ =>
-          (false, "", "not an exception event")
-      }
+  def thriftToBuffer(method: String, `type`: Byte, seqid: Int,
+      message: { def write(p: TProtocol) }): ChannelBuffer = {
+    val buffer = ChannelBuffers.dynamicBuffer()
+    val transport = new ChannelBufferTransport(buffer)
+    val protocol = new TBinaryProtocol(transport, true, true)
+    protocol.writeMessageBegin(new TMessage(method, `type`, seqid))
+    message.write(protocol)
+    protocol.writeMessageEnd()
+    buffer
   }
 
-  case class withType[T <: AnyRef](f: T => Boolean)()
-    extends Matcher[AnyRef]()
-  {
-    def apply(obj: => AnyRef) =
-      try {
-        (f(obj.asInstanceOf[T]), "passed test", "failed test")
-      } catch {
-        case _: ClassCastException =>
-          (false, "", "has incorrect type")
-      }
-  }
-
-  object TMessage {
-    def apply(
-      method: String, `type`: Byte, seqid: Int,
-      message: { def write(p: TProtocol) }): ChannelBuffer =
-    {
-      val buf = ChannelBuffers.dynamicBuffer()
-      val oprot = new TBinaryProtocol(buf, true, true)
-      oprot.writeMessageBegin(new TMessage(method, `type`, seqid))
-      message.write(oprot)
-      oprot.writeMessageEnd()
-      buf
-    }
-  }
-
-
-  def makeChannel(codec: SimpleChannelHandler) = SunkChannel {
+  def makeChannel(codec: ChannelHandler) = SunkChannel {
     val pipeline = Channels.pipeline()
     pipeline.addLast("codec", codec)
     pipeline
   }
 
-  def makeClientChannel(): SunkChannel = makeChannel(new ThriftClientCodec)
-  def makeServerChannel(): SunkChannel = makeChannel(new ThriftServerCodec)
+  ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
+    "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
 
-  "request serialization" should {
-    "encode downstream ThriftCall as TMessage" in {
-      val ch = makeClientChannel
-      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("the arg"), classOf[Silly.bleep_result]))
+  "thrift server encoder" should {
+    "encode replys" in {
+      val call = new ThriftCall("testMethod", new Silly.bleep_args("arg"), classOf[Silly.bleep_result], 23)
+      val reply = call.newReply
+      reply.setSuccess("result")
 
-      ch.upstreamEvents must haveSize(0)
-      ch.downstreamEvents must haveSize(1)
+      val channel = makeChannel(new ThriftServerEncoder)
+      Channels.write(channel, call.reply(reply))
 
-      val m = ch.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-      val buf = m.asInstanceOf[ChannelBuffer]
+      channel.upstreamEvents must haveSize(0)
+      channel.downstreamEvents must haveSize(1)
 
-      val iprot = new TBinaryProtocol(buf, true, true)
-      val msg = iprot.readMessageBegin()
+      val message   = channel.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+      val buffer    = message.asInstanceOf[ChannelBuffer]
+      val transport = new ChannelBufferTransport(buffer)
+      val protocol  = new TBinaryProtocol(transport, true, true)
 
-      msg.`type` must be_==(TMessageType.CALL)
-      msg.name must be_==("testMethod")
+      val tmessage = protocol.readMessageBegin()
+      tmessage.`type` must be_==(TMessageType.REPLY)
+      tmessage.name   must be_==("testMethod")
+      tmessage.seqid  must be_==(23)
 
-      val args = new Silly.bleep_args()
-      args.read(iprot)
-
-      args.request must be_==("the arg")
-    }
-
-    ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
-      "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
-
-    "decode upstream TMessage to ThriftCall" in {
-      val request = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("spondee"))
-      val ch = makeServerChannel
-      Channels.fireMessageReceived(ch, request)
-      val m = ch.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-      val c = m.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
-      m mustNot beNull
-
-      "throws an exception with no corresponding ThriftCall registered" in {
-        val badRequest = TMessage("bloop", TMessageType.CALL, 2, new Silly.bleep_args())
-        Channels.fireMessageReceived(ch, badRequest)
-        val e = ch.upstreamEvents(1).asInstanceOf[DefaultExceptionEvent]
-        val cause = e.getCause.asInstanceOf[TApplicationException]
-        cause.getType mustEqual TApplicationException.UNKNOWN_METHOD
-      }
-    }
-
-    def extractMessage(event: AnyRef): Option[MessageEvent] = {
-      event match {
-        case me: MessageEvent => Some(me)
-        case ex: DefaultExceptionEvent =>
-          throw new Exception("Got exception instead of MessageEvent: %s".format(ex.getCause))
-      }
-    }
-
-    "the server adopts the client message's sequence number" in {
-      val request1 = TMessage("bleep", TMessageType.CALL, 3, new Silly.bleep_args("sinnlos"))
-      val request2 = TMessage("bleep", TMessageType.CALL, 7, new Silly.bleep_args("koenig"))
-      val ch = makeServerChannel
-      Channels.fireMessageReceived(ch, request1)
-      ch.upstreamEvents must haveSize(1)
-      extractMessage(ch.upstreamEvents(0)) must haveClass[Some[ThriftCall[_,_]]]
-      Channels.fireMessageReceived(ch, request2)
-      ch.upstreamEvents must haveSize(2)
-      extractMessage(ch.upstreamEvents(1)) must haveClass[Some[ThriftCall[_,_]]]
-    }
-
-    "multiple calls on the same server increment the sequence #" in {
-      val request1 = TMessage("bleep", TMessageType.CALL, 1, new Silly.bleep_args("thetabet"))
-      val request2 = TMessage("bleep", TMessageType.CALL, 2, new Silly.bleep_args("wheelbarrow"))
-      val ch = makeServerChannel
-      Channels.fireMessageReceived(ch, request1)
-      ch.upstreamEvents must haveSize(1)
-      extractMessage(ch.upstreamEvents(0)) must haveClass[Some[ThriftCall[_,_]]]
-      Channels.fireMessageReceived(ch, request2)
-      ch.upstreamEvents must haveSize(2)
-      extractMessage(ch.upstreamEvents(1)) must haveClass[Some[ThriftCall[_,_]]]
-    }
-
-    "serialize exceptions" in {
-      val ch = makeClientChannel
-
-      val exc = new TApplicationException(
-        TApplicationException.INTERNAL_ERROR,
-        "arbitary exception")
-
-      // We need to write a call to the channel to set the
-      // ``currentCall''
-      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("the arg"), classOf[Silly.bleep_result]))
-
-      // Reply
-      Channels.fireMessageReceived(
-        ch, TMessage("testMethod", TMessageType.EXCEPTION, 1, exc))
-
-      ch.downstreamEvents must haveSize(1)
-      ch.upstreamEvents must haveSize(1)
-
-      ch.upstreamEvents(0) must matchExceptionEvent(exc)
-    }
-
-    "keep track of sequence #s" in {
-      val ch = makeClientChannel
-
-      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
-
-      ch.upstreamEvents must beEmpty
-      ch.downstreamEvents must haveSize(1)
-      ch.downstreamEvents(0) must haveClass[DownstreamMessageEvent]
-      val e = ch.downstreamEvents(0).asInstanceOf[MessageEvent]
-      val buf = e.getMessage().asInstanceOf[ChannelBuffer]
-
-      val iprot = new TBinaryProtocol(buf, true, true)
-      val msg = iprot.readMessageBegin()
-
-      msg.`type` must be_==(TMessageType.CALL)
-      msg.name must be_==("testMethod")
-      msg.seqid must be_==(1)  // Just established.
-
-      // Ok. Make an invalid reply.
-      val reply = TMessage(
-        "testMethod", TMessageType.REPLY, 2,
-        new Silly.bleep_result("grr"))
-      Channels.fireMessageReceived(ch, reply)
-
-      ch.upstreamEvents must haveSize(1)
-      ch.upstreamEvents(0) must matchExceptionEvent(
-        new TApplicationException(
-          TApplicationException.BAD_SEQUENCE_ID,
-          "out of sequence response (got 2 expected 1)"))
-
-      // Additionally, the channel is closed by the codec.
-      ch.downstreamEvents must haveSize(2)
-      ch.downstreamEvents(1) must withType[ChannelStateEvent] { cse =>
-        (cse.getState == ChannelState.OPEN) &&
-        (cse.getValue eq java.lang.Boolean.FALSE)
-      }
-    }
-
-    "handle only one request at a time" in {
-      val ch = makeClientChannel
-
-      // Make one call.
-      Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
-      ch.downstreamEvents must haveSize(1)
-
-      // Try another before replying.
-      val f = Channels.write(ch, new ThriftCall("testMethod", new Silly.bleep_args("some arg"), classOf[Silly.bleep_result]))
-      ch.downstreamEvents must haveSize(1)
-      ch.upstreamEvents must haveSize(1)
-      ch.upstreamEvents(0) must matchExceptionEvent(new TooManyDicksOnTheDanceFloorException)
-
-      // The future also fails:
-      f.isSuccess must beFalse
+      val result = new Silly.bleep_result()
+      result.read(protocol)
+      result.isSetSuccess must beTrue
+      result.success must be_==("result")
     }
   }
 
-  "message serializaton" should {
-    "throw exceptions on unrecognized request types" in {
-      val ch = makeClientChannel
-      Channels.write(ch, "grr")
+  "thrift server framed decoder" should {
+    "decode calls" in {
+      // receive call and decode
+      val buffer = thriftToBuffer("bleep", TMessageType.CALL, 23, new Silly.bleep_args("args"))
+      val channel = makeChannel(new ThriftFramedServerDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
 
-      ch.downstreamEvents must haveSize(0)
-      ch.upstreamEvents must haveSize(1)
-      ch.upstreamEvents(0) must matchExceptionEvent(new UnrecognizedResponseException)
+      // verify decode
+      val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+      val call = message.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
+      call mustNot beNull
+
+      call.method            must be_==("bleep")
+      call.seqid             must be_==(23)
+      call.arguments.request must be_==("args")
+    }
+
+    "return exceptions for non-call message types" in {
+      val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_args("args"))
+      val channel = makeChannel(new ThriftFramedServerDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      val m = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
+      m must haveClass[TApplicationException]
+      val ex = m.asInstanceOf[TApplicationException]
+      ex.getType mustEqual TApplicationException.INVALID_MESSAGE_TYPE
+    }
+
+    "return appropraite exceptions on missing methods" in {
+      // receive call and decode
+      val buffer = thriftToBuffer("unknown", TMessageType.CALL, 23, new Silly.bleep_args("args"))
+      val channel = makeChannel(new ThriftFramedServerDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.downstreamEvents must haveSize(0)
+      channel.upstreamEvents must haveSize(1)
+
+      val m = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
+      m must haveClass[TApplicationException]
+      val ex = m.asInstanceOf[TApplicationException]
+      ex.getType mustEqual TApplicationException.UNKNOWN_METHOD
+    }
+
+    "fail to decode truncated calls" in {
+      val buffer = thriftToBuffer("bleep", TMessageType.CALL, 23, new Silly.bleep_args("args"))
+
+      Range(0, buffer.readableBytes - 1).foreach { numBytes =>
+        // receive truncated call
+        val channel = makeChannel(new ThriftFramedServerDecoder)
+        val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
+        Channels.fireMessageReceived(channel, truncatedBuffer)
+
+        // TTransportException should be thrown
+        channel.upstreamEvents must haveSize(1)
+        channel.downstreamEvents must haveSize(0)
+        val event = channel.upstreamEvents(0).asInstanceOf[ExceptionEvent]
+        event.getCause must haveClass[TTransportException]
+      }
+    }
+  }
+
+  "thrift server unframed decoder" should {
+    "decode calls" in {
+      // receive call and decode
+      val buffer = thriftToBuffer("bleep", TMessageType.CALL, 23, new Silly.bleep_args("args"))
+      val channel = makeChannel(new ThriftUnframedServerDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+
+      // verify decode
+      val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+      val thriftCall = message.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
+      thriftCall mustNot beNull
+
+      thriftCall.method            must be_==("bleep")
+      thriftCall.seqid             must be_==(23)
+      thriftCall.arguments.request must be_==("args")
+    }
+
+    "decode calls broken in two" in {
+      val buffer = thriftToBuffer("bleep", TMessageType.CALL, 23, new Silly.bleep_args("args"))
+
+      Range(0, buffer.readableBytes - 1).foreach { numBytes =>
+        // receive partial call
+        val channel = makeChannel(new ThriftUnframedServerDecoder)
+        val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
+        Channels.fireMessageReceived(channel, truncatedBuffer)
+
+        // event should be ignored
+        channel.upstreamEvents must haveSize(0)
+        channel.downstreamEvents must haveSize(0)
+
+        // receive remainder of call
+        truncatedBuffer.writeBytes(buffer, buffer.readerIndex + numBytes,
+                                   buffer.readableBytes - numBytes)
+        Channels.fireMessageReceived(channel, truncatedBuffer)
+
+        // call should be received
+        channel.upstreamEvents must haveSize(1)
+        channel.downstreamEvents must haveSize(0)
+        val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+        val thriftCall = message.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
+        thriftCall mustNot beNull
+        thriftCall.method must be_==("bleep")
+      }
+    }
+  }
+
+  "thrift client encoder" should {
+    "encode calls" in {
+      val call = new ThriftCall("testMethod", new Silly.bleep_args("arg"), classOf[Silly.bleep_result])
+      val channel = makeChannel(new ThriftClientEncoder)
+      Channels.write(channel, call)
+
+      channel.upstreamEvents must haveSize(0)
+      channel.downstreamEvents must haveSize(1)
+
+      val message   = channel.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+      val buffer    = message.asInstanceOf[ChannelBuffer]
+      val transport = new ChannelBufferTransport(buffer)
+      val protocol  = new TBinaryProtocol(transport, true, true)
+
+      val tmessage = protocol.readMessageBegin()
+      tmessage.`type` must be_==(TMessageType.CALL)
+      tmessage.name   must be_==("testMethod")
+      tmessage.seqid  must be_==(1)
+
+      val args = new Silly.bleep_args()
+      args.read(protocol)
+      args.request must be_==("arg")
+    }
+  }
+
+  "thrift client framed decoder" should {
+    "decode replys" in {
+      // receive reply and decode
+      val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
+      val channel = makeChannel(new ThriftFramedClientDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+
+      // verify decode
+      val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+      val result = message.asInstanceOf[Silly.bleep_result]
+      result mustNot beNull
+      result.isSetSuccess must beTrue
+      result.success must be_==("result")
+    }
+
+    "decode exceptions" in {
+      // receive exception and decode
+      val buffer = thriftToBuffer("bleep", TMessageType.EXCEPTION, 23,
+        new TApplicationException(TApplicationException.UNKNOWN_METHOD, "message"))
+      val channel = makeChannel(new ThriftFramedClientDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+
+      // TApplicationException should be thrown
+      val event = channel.upstreamEvents(0).asInstanceOf[DefaultExceptionEvent]
+      val cause = event.getCause.asInstanceOf[TApplicationException]
+      cause.getType    mustEqual TApplicationException.UNKNOWN_METHOD
+      cause.getMessage mustEqual "message"
+    }
+
+    "send invalid message type exceptions for unsupported message types" in {
+      val invalid_message_type = 99.toByte
+      val buffer = thriftToBuffer("bleep", invalid_message_type, 23,
+        new TApplicationException(TApplicationException.UNKNOWN_METHOD, "message"))
+      val channel = makeChannel(new ThriftFramedClientDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+
+      // TApplicationException should be thrown
+      val event = channel.upstreamEvents(0).asInstanceOf[DefaultExceptionEvent]
+      val cause = event.getCause.asInstanceOf[TApplicationException]
+      cause.getType    mustEqual TApplicationException.INVALID_MESSAGE_TYPE
+    }
+
+    "fail on truncated replys" in {
+      val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
+
+      Range(0, buffer.readableBytes - 1).foreach { numBytes =>
+        // receive truncated call
+        val channel = makeChannel(new ThriftFramedClientDecoder)
+        val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
+        Channels.fireMessageReceived(channel, truncatedBuffer)
+
+        // TTransportException should be thrown
+        channel.upstreamEvents must haveSize(1)
+        channel.downstreamEvents must haveSize(0)
+        val event = channel.upstreamEvents(0).asInstanceOf[ExceptionEvent]
+        event.getCause must haveClass[TTransportException]
+      }
+    }
+  }
+
+  "thrift client unframed decoder" should {
+    "decode replys" in {
+      // receive reply and decode
+      val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
+      val channel = makeChannel(new ThriftUnframedClientDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+
+      // verify decode
+      val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+      val result = message.asInstanceOf[Silly.bleep_result]
+      result mustNot beNull
+      result.isSetSuccess must beTrue
+      result.success must be_==("result")
+    }
+
+    "decode replys broken in two" in {
+      val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
+
+      Range(0, buffer.readableBytes - 1).foreach { numBytes =>
+        // receive partial call
+        val channel = makeChannel(new ThriftUnframedClientDecoder)
+        val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
+        Channels.fireMessageReceived(channel, truncatedBuffer)
+
+        // event should be ignored
+        channel.upstreamEvents must haveSize(0)
+        channel.downstreamEvents must haveSize(0)
+
+        // receive remainder of call
+        truncatedBuffer.writeBytes(buffer, buffer.readerIndex + numBytes,
+                                   buffer.readableBytes - numBytes)
+        Channels.fireMessageReceived(channel, truncatedBuffer)
+
+        // call should be received
+        channel.upstreamEvents must haveSize(1)
+        channel.downstreamEvents must haveSize(0)
+        val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
+        val result = message.asInstanceOf[Silly.bleep_result]
+        result mustNot beNull
+        result.isSetSuccess must beTrue
+        result.success must be_==("result")
+      }
     }
   }
 }

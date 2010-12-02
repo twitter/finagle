@@ -31,7 +31,8 @@ object AsyncServerEndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("codec", new ThriftServerCodec)
+          pipeline.addLast("decode", new ThriftFramedServerDecoder)
+          pipeline.addLast("encode", new ThriftServerEncoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               e.getMessage match {
@@ -57,7 +58,8 @@ object AsyncServerEndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("codec", new ThriftClientCodec)
+          pipeline.addLast("decode", new ThriftFramedClientDecoder)
+          pipeline.addLast("encode", new ThriftClientEncoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
@@ -69,7 +71,7 @@ object AsyncServerEndToEndSpec extends Specification {
       })
 
       val addr = new LocalAddress("thrift-async")
-      serverBootstrap.bind(addr)
+      val serverChannel = serverBootstrap.bind(addr)
       for (ch <- clientBootstrap.connect(addr)) {
         val thriftCall =
           new ThriftCall[Silly.bleep_args, Silly.bleep_result](
@@ -83,6 +85,9 @@ object AsyncServerEndToEndSpec extends Specification {
       result.isReturn must beTrue
 
       result().success must be_==("yehyeh")
+
+      serverChannel.close().awaitUninterruptibly()
+      serverBootstrap.getFactory.releaseExternalResources()
     }
   }
 }
