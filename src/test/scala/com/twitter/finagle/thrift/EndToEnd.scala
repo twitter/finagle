@@ -40,6 +40,9 @@ object EndToEndSpec extends Specification {
 
   "client & server" should {
     "talk silly to each other" in {
+      ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
+        "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
+
       // ** Set up the server.
       val serverBootstrap = new ServerBootstrap(new DefaultLocalServerChannelFactory())
       serverBootstrap.setPipelineFactory(new ChannelPipelineFactory {
@@ -49,34 +52,35 @@ object EndToEndSpec extends Specification {
               request.reverse
           })
           val processorFactory = new TProcessorFactory(processor)
-     
+
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
           pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory))
           pipeline
         }
       })
-     
+
       val callResults = new Promise[Silly.bleep_result]
-     
+
       // ** Set up the client.
       val clientBootstrap = new ClientBootstrap(new DefaultLocalClientChannelFactory)
       clientBootstrap.setPipelineFactory(new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("codec", new ThriftClientCodec)
+          pipeline.addLast("encoder", new ThriftClientEncoder)
+          pipeline.addLast("decoder", new ThriftFramedClientDecoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
               Channels.close(ctx.getChannel)
             }
           })
-     
+
           pipeline
         }
       })
-      
+
       val addr = new LocalAddress("thrift")
       val serverChannel = serverBootstrap.bind(addr)
       for (ch <- clientBootstrap.connect(addr)) {
@@ -86,7 +90,7 @@ object EndToEndSpec extends Specification {
 
         Channels.write(ch, thriftCall)
       }
-     
+
       val result = callResults.within(1.second)
       result.isReturn must beTrue
 
@@ -101,6 +105,9 @@ object EndToEndSpec extends Specification {
   "client" should {
 
     "talk silly to an existing server" in {
+      ThriftTypes.add(new ThriftCallFactory[Silly.bleep_args, Silly.bleep_result](
+        "bleep", classOf[Silly.bleep_args], classOf[Silly.bleep_result]))
+
       // ** Set up a traditional thrift server.
       val serverAddr       = RandomSocket()
       val serverSocket     = new TServerSocket(serverAddr.getPort)
@@ -126,7 +133,8 @@ object EndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("codec", new ThriftClientCodec)
+          pipeline.addLast("encoder", new ThriftClientEncoder)
+          pipeline.addLast("decoder", new ThriftFramedClientDecoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
@@ -202,4 +210,3 @@ object EndToEndSpec extends Specification {
     }
   }
 }
-

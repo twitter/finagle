@@ -9,7 +9,8 @@ object Thrift extends Codec {
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftCodec", new ThriftClientCodec)
+        pipeline.addLast("thriftClientEncoder", new ThriftClientEncoder)
+        pipeline.addLast("thriftFramedClientDecoder", new ThriftFramedClientDecoder)
         pipeline
       }
     }
@@ -18,7 +19,8 @@ object Thrift extends Codec {
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftCodec", new ThriftServerCodec)
+        pipeline.addLast("thriftServerEncoder", new ThriftServerEncoder)
+        pipeline.addLast("thriftFramedServerDecoder", new ThriftFramedServerDecoder)
         pipeline
       }
     }
