@@ -148,18 +148,12 @@ trait ThriftServerDecoderHelper {
           request.readRequestArgs(protocol)
           request.asInstanceOf[AnyRef]
         } catch {
-          case e: TApplicationException =>
-            // Unknown method - close the channel. Ideally we'd send
-            // TApplicationException.UNKNOWN_METHOD, but we don't have the
-            // remoteAddress to send it to because we don't have the original
-            // MessageEvent.
-            Channels.close(ctx, Channels.future(ctx.getChannel))
-            null
+          // Pass through invalid message exceptions, etc.
+          case e: TApplicationException => e
         }
       case _ =>
-        // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
-        // but Java Thrift doesn't use it.
-        null
+        // Message types other than CALL are invalid here.
+        new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE)
     }
   }
 }
@@ -231,8 +225,8 @@ trait ThriftClientDecoderHelper {
         val reply = call.readResponse(protocol)
         reply.asInstanceOf[AnyRef] // Note reply may not be a success
       case _ =>
-        // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
-        // but the Java Thrift implementation doesn't use it.
+        val exception = new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE)
+        Channels.fireExceptionCaught(ctx, exception)
         null
     }
   }
