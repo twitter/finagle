@@ -185,7 +185,12 @@ class ThriftUnframedServerDecoder extends ReplayingDecoder[VoidEnum]
 with ThriftServerDecoderHelper {
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer,
                       state: VoidEnum) =
-    decodeThriftCall(ctx, channel, buffer)
+    // Thrift incorrectly assumes a read of zero bytes is an error, so treat
+    // empty buffers as no-ops.  This only happens with the ReplayingDecoder.
+    if (buffer.readable)
+      decodeThriftCall(ctx, channel, buffer)
+    else
+      null
 }
 
 class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
@@ -263,5 +268,10 @@ class ThriftUnframedClientDecoder extends ReplayingDecoder[VoidEnum]
 with ThriftClientDecoderHelper {
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer,
                       state: VoidEnum) =
-    decodeThriftReply(ctx, channel, buffer)
+    // Thrift incorrectly assumes a read of zero bytes is an error, so treat
+    // empty buffers as no-ops.  This only happens with the ReplayingDecoder.
+    if (buffer.readable)
+      decodeThriftReply(ctx, channel, buffer)
+    else
+      null
 }
