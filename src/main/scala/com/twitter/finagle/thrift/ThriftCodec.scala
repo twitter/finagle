@@ -123,7 +123,6 @@ class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
         val buffer = ChannelBuffers.dynamicBuffer()
         val transport = new ChannelBufferTransport(buffer)
         val protocol = protocolFactory.getProtocol(transport)
-        // FIXME: is it correct to write a response with the same seqid?
         call.writeReply(call.seqid, protocol, response)
         Channels.write(ctx, Channels.succeededFuture(e.getChannel()), buffer, e.getRemoteAddress)
       case _ =>
