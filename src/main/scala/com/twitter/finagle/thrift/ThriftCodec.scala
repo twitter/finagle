@@ -85,8 +85,12 @@ class ThriftCallFactory[A <: TBase[_, _], R <: TBase[_, _]](
   replyClass: Class[R])
 {
   private[this] def newArgInstance() = argClass.newInstance
-  def newInstance(seqid: Int = -1):ThriftCall[A, R] = new ThriftCall(method, newArgInstance(), replyClass, seqid)
-  def newInstance():ThriftCall[A, R] = new ThriftCall(method, newArgInstance(), replyClass, -1)
+
+  def newInstance(seqid: Int = -1):ThriftCall[A, R] =
+    new ThriftCall(method, newArgInstance(), replyClass, seqid)
+
+  def newInstance():ThriftCall[A, R] =
+    new ThriftCall(method, newArgInstance(), replyClass, -1)
 }
 
 /**
@@ -119,6 +123,7 @@ class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
         val buffer = ChannelBuffers.dynamicBuffer()
         val transport = new ChannelBufferTransport(buffer)
         val protocol = protocolFactory.getProtocol(transport)
+        // FIXME: is it correct to write a response with the same seqid?
         call.writeReply(call.seqid, protocol, response)
         Channels.write(ctx, Channels.succeededFuture(e.getChannel()), buffer, e.getRemoteAddress)
       case _ =>
@@ -142,7 +147,6 @@ trait ThriftServerDecoderHelper {
           val factory = ThriftTypes(message.name)
           val request = factory.newInstance(message.seqid)
           request.readRequestArgs(protocol)
-          // ^ calls protocol.readMessageEnd
           request.asInstanceOf[AnyRef]
         } catch {
           case e: TApplicationException =>
@@ -225,10 +229,7 @@ trait ThriftClientDecoderHelper {
         null
       case TMessageType.REPLY =>
         val call = ThriftTypes(message.name).newInstance()
-        // ^ may throw TApplicationException, though server would be misbehaving
-        // if it did.
         val reply = call.readResponse(protocol)
-        // ^ calls protocol.readMessageEnd
         reply.asInstanceOf[AnyRef] // Note reply may not be a success
       case _ =>
         // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
