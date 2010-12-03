@@ -4,31 +4,8 @@ import com.twitter.sbt._
 class Project(info: ProjectInfo)
   extends StandardProject(info)
   with LibDirClasspath
+  with InlineDependencies
 {
-  // ** Project inlining
-  import collection.mutable.{HashSet, ListBuffer}
-  import scala.collection.jcl
-  val environment = jcl.Map(System.getenv())
-  val inlinedLibraryDependencies = new HashSet[ModuleID]()
-  val inlinedSubprojects = new ListBuffer[(String, sbt.Project)]()
-
-  override def libraryDependencies = {
-    super.libraryDependencies ++ inlinedLibraryDependencies
-  }
-
-  override def subProjects = {
-    Map() ++ super.subProjects ++ inlinedSubprojects
-  }
-
-  def inline(m: ModuleID) = {
-    val path = Path.fromFile("../" + m.name)
-    if (environment.get("SBT_TWITTER").isDefined && path.isDirectory)
-      inlinedSubprojects += (m.name -> project(path))
-    else
-      inlinedLibraryDependencies += m
-  }
-  // ~~ Project inlining
-
   override def compileOrder = CompileOrder.ScalaThenJava
   override def managedStyle = ManagedStyle.Maven
   override def disableCrossPaths = true
