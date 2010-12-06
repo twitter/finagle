@@ -23,7 +23,7 @@ class ThriftCall[A <: TBase[_, _], R <: TBase[_, _]](
   @BeanProperty val method: String,
   args: A,
   replyClass: Class[R],
-  val seqid: Int)
+  var seqid: Int)
 {
   // Constructor without seqno for Java
   def this(@BeanProperty method: String, args: A, replyClass: Class[R]) =
@@ -204,6 +204,7 @@ class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
         val transport = new ChannelBufferTransport(buffer)
         val protocol = protocolFactory.getProtocol(transport)
         seqid += 1
+        call.seqid = seqid
         call.writeRequest(seqid, protocol)
         Channels.write(ctx, Channels.succeededFuture(e.getChannel()), buffer, e.getRemoteAddress)
       case _ =>
