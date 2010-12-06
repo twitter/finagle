@@ -223,6 +223,7 @@ case class ServerBuilder(
         for (ctx <- _tls) {
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(false)
+          sslEngine.setEnableSessionCreation(true)
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
