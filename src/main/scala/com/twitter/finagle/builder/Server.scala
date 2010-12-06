@@ -5,11 +5,13 @@ import scala.collection.JavaConversions._
 import java.net.InetSocketAddress
 import java.util.concurrent.{TimeUnit, Executors}
 import java.util.logging.Logger
+import javax.net.ssl.{KeyManager, SSLContext}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.ostrich
@@ -90,7 +92,9 @@ case class ServerBuilder(
   _recvBufferSize: Option[Int],
   _pipelineFactory: Option[ChannelPipelineFactory],
   _bindTo: Option[InetSocketAddress],
-  _logger: Option[Logger])
+  _logger: Option[Logger],
+  _tls: Option[SSLContext],
+  _startTls: Boolean)
 {
   import ServerBuilder._
 
@@ -106,7 +110,9 @@ case class ServerBuilder(
     None,                                           // recvBufferSize
     None,                                           // pipelineFactory
     None,                                           // bindTo
-    None                                            // logger
+    None,                                           // logger
+    None,                                           // tls
+    false                                           // startTls
   )
 
   def codec(codec: Codec) =
@@ -142,6 +148,12 @@ case class ServerBuilder(
     copy(_bindTo = Some(address))
 
   def logger(logger: Logger) = copy(_logger = Some(logger))
+
+  def tls(path: String, password: String) =
+    copy(_tls = Option(Ssl(path, password)))
+
+  def startTls(value: Boolean) =
+    copy(_startTls = true)
 
   private def statsRepository(
     name: Option[String],
@@ -199,6 +211,13 @@ case class ServerBuilder(
         for (logger <- _logger) {
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
+        }
+
+        // SSL comes first so that ChannelSnooper gets plaintext
+        for (ctx <- _tls) {
+          val sslEngine = ctx.createSSLEngine()
+          sslEngine.setUseClientMode(false)
+          pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
         pipeline.addLast("stats", new SampleHandler(statsRepo))
