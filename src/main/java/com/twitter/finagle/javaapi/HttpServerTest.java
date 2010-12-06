@@ -15,10 +15,10 @@ import com.twitter.finagle.builder.*;
 import com.twitter.util.*;
 
 public class HttpServerTest {
-  private byte[] buf = new byte[10<<20];
-  private ChannelBuffer cb = ChannelBuffers.wrappedBuffer(buf);
+  private static byte[] buf = new byte[10<<20];
+  private static ChannelBuffer cb = ChannelBuffers.wrappedBuffer(buf);
 
-  HttpServerTest() {
+  static {
     Arrays.fill(buf, (byte)'.');
   }
 
@@ -47,6 +47,8 @@ public class HttpServerTest {
       .codec(Codec4J.http())
       .service(service)
       .bindTo(addr)
+      .tls("keystore.jks", "password")
+      .compressionLevel(6)
       .build();
   }
 
