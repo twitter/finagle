@@ -85,8 +85,12 @@ class ThriftCallFactory[A <: TBase[_, _], R <: TBase[_, _]](
   replyClass: Class[R])
 {
   private[this] def newArgInstance() = argClass.newInstance
-  def newInstance(seqid: Int = -1):ThriftCall[A, R] = new ThriftCall(method, newArgInstance(), replyClass, seqid)
-  def newInstance():ThriftCall[A, R] = new ThriftCall(method, newArgInstance(), replyClass, -1)
+
+  def newInstance(seqid: Int = -1):ThriftCall[A, R] =
+    new ThriftCall(method, newArgInstance(), replyClass, seqid)
+
+  def newInstance():ThriftCall[A, R] =
+    new ThriftCall(method, newArgInstance(), replyClass, -1)
 }
 
 /**
@@ -142,21 +146,14 @@ trait ThriftServerDecoderHelper {
           val factory = ThriftTypes(message.name)
           val request = factory.newInstance(message.seqid)
           request.readRequestArgs(protocol)
-          // ^ calls protocol.readMessageEnd
           request.asInstanceOf[AnyRef]
         } catch {
-          case e: TApplicationException =>
-            // Unknown method - close the channel. Ideally we'd send
-            // TApplicationException.UNKNOWN_METHOD, but we don't have the
-            // remoteAddress to send it to because we don't have the original
-            // MessageEvent.
-            Channels.close(ctx, Channels.future(ctx.getChannel))
-            null
+          // Pass through invalid message exceptions, etc.
+          case e: TApplicationException => e
         }
       case _ =>
-        // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
-        // but Java Thrift doesn't use it.
-        null
+        // Message types other than CALL are invalid here.
+        new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE)
     }
   }
 }
@@ -231,14 +228,11 @@ trait ThriftClientDecoderHelper {
         null
       case TMessageType.REPLY =>
         val call = ThriftTypes(message.name).newInstance()
-        // ^ may throw TApplicationException, though server would be misbehaving
-        // if it did.
         val reply = call.readResponse(protocol)
-        // ^ calls protocol.readMessageEnd
         reply.asInstanceOf[AnyRef] // Note reply may not be a success
       case _ =>
-        // Discard.  There is a TApplicationException INVALID_MESSAGE_TYPE type,
-        // but the Java Thrift implementation doesn't use it.
+        val exception = new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE)
+        Channels.fireExceptionCaught(ctx, exception)
         null
     }
   }

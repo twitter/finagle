@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.*;
 import org.jboss.netty.channel.*;
 
-import com.twitter.finagle.stub.Stub;
+import com.twitter.finagle.service.Service;
 import com.twitter.finagle.builder.*;
 import com.twitter.finagle.thrift.*;
 import com.twitter.util.*;
@@ -17,14 +17,14 @@ import com.twitter.silly.Silly;
 public class ThriftClientTest {
   public static void main(String args[]) {
 
-    Stub<ThriftCall<Silly.bleep_args, Silly.bleep_result>, Silly.bleep_result> client =
+    Service<ThriftCall<Silly.bleep_args, Silly.bleep_result>, Silly.bleep_result> client =
       ClientBuilder.get()
         .hosts("localhost:10000")
         .codec(Codec4J.thrift())
-        .buildStub();
+        .buildService();
 
     Future<Silly.bleep_result> response =
-      client.call(new ThriftCall("bleep", new Silly.bleep_args(), Silly.bleep_result.class));
+      client.apply(new ThriftCall("bleep", new Silly.bleep_args(), Silly.bleep_result.class));
     System.out.println("dispatched call");
 
     response.addEventListener(

@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.stub.*;
+import com.twitter.finagle.service.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.finagle.thrift.*;
 import com.twitter.util.*;
@@ -21,10 +21,10 @@ public class ThriftServerTest {
     ThriftTypes.add(new ThriftCallFactory<Silly.bleep_args, Silly.bleep_result>
                     ("bleep", Silly.bleep_args.class, Silly.bleep_result.class));
 
-    Stub<ThriftCall, ThriftReply> stub =
-      new Stub<ThriftCall, ThriftReply>() {
+    Service<ThriftCall, ThriftReply> service =
+      new Service<ThriftCall, ThriftReply>() {
       @Override
-      public Future<ThriftReply> call(ThriftCall call) {
+      public Future<ThriftReply> apply(ThriftCall call) {
         Promise<ThriftReply> future = new Promise<ThriftReply>();
 
         if (call.getMethod().equals("bleep")) {
@@ -40,7 +40,7 @@ public class ThriftServerTest {
     ServerBuilder
       .get()
       .codec(Codec4J.thrift())
-      .stub(stub)
+      .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))
       .build();
   }

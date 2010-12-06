@@ -4,31 +4,8 @@ import com.twitter.sbt._
 class Project(info: ProjectInfo)
   extends StandardProject(info)
   with LibDirClasspath
+  with InlineDependencies
 {
-  // ** Project inlining
-  import collection.mutable.{HashSet, ListBuffer}
-  import scala.collection.jcl
-  val environment = jcl.Map(System.getenv())
-  val inlinedLibraryDependencies = new HashSet[ModuleID]()
-  val inlinedSubprojects = new ListBuffer[(String, sbt.Project)]()
-
-  override def libraryDependencies = {
-    super.libraryDependencies ++ inlinedLibraryDependencies
-  }
-
-  override def subProjects = {
-    Map() ++ super.subProjects ++ inlinedSubprojects
-  }
-
-  def inline(m: ModuleID) = {
-    val path = Path.fromFile("../" + m.name)
-    if (environment.get("SBT_TWITTER").isDefined && path.isDirectory)
-      inlinedSubprojects += (m.name -> project(path))
-    else
-      inlinedLibraryDependencies += m
-  }
-  // ~~ Project inlining
-
   override def compileOrder = CompileOrder.ScalaThenJava
   override def managedStyle = ManagedStyle.Maven
   override def disableCrossPaths = true
@@ -51,7 +28,7 @@ class Project(info: ProjectInfo)
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
   val specs    = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
-  val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+  // val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
 }
 
 trait LibDirClasspath extends StandardProject {

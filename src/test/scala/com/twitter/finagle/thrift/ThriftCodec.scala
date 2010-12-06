@@ -84,18 +84,29 @@ object ThriftCodecSpec extends Specification {
       call.arguments.request must be_==("args")
     }
 
-    "close connection on unknown calls" in {
+    "return exceptions for non-call message types" in {
+      val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_args("args"))
+      val channel = makeChannel(new ThriftFramedServerDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      val m = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
+      m must haveClass[TApplicationException]
+      val ex = m.asInstanceOf[TApplicationException]
+      ex.getType mustEqual TApplicationException.INVALID_MESSAGE_TYPE
+    }
+
+    "return appropraite exceptions on missing methods" in {
       // receive call and decode
       val buffer = thriftToBuffer("unknown", TMessageType.CALL, 23, new Silly.bleep_args("args"))
       val channel = makeChannel(new ThriftFramedServerDecoder)
       Channels.fireMessageReceived(channel, buffer)
-      channel.upstreamEvents must haveSize(0)
-      channel.downstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+      channel.upstreamEvents must haveSize(1)
 
-      // TApplicationException should be thrown
-      val event = channel.downstreamEvents(0).asInstanceOf[ChannelStateEvent]
-      event.getState must be_==(ChannelState.OPEN)
-      event.getValue must beFalse
+      val m = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
+      m must haveClass[TApplicationException]
+      val ex = m.asInstanceOf[TApplicationException]
+      ex.getType mustEqual TApplicationException.UNKNOWN_METHOD
     }
 
     "fail to decode truncated calls" in {
@@ -220,6 +231,21 @@ object ThriftCodecSpec extends Specification {
       val cause = event.getCause.asInstanceOf[TApplicationException]
       cause.getType    mustEqual TApplicationException.UNKNOWN_METHOD
       cause.getMessage mustEqual "message"
+    }
+
+    "send invalid message type exceptions for unsupported message types" in {
+      val invalid_message_type = 99.toByte
+      val buffer = thriftToBuffer("bleep", invalid_message_type, 23,
+        new TApplicationException(TApplicationException.UNKNOWN_METHOD, "message"))
+      val channel = makeChannel(new ThriftFramedClientDecoder)
+      Channels.fireMessageReceived(channel, buffer)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+
+      // TApplicationException should be thrown
+      val event = channel.upstreamEvents(0).asInstanceOf[DefaultExceptionEvent]
+      val cause = event.getCause.asInstanceOf[TApplicationException]
+      cause.getType    mustEqual TApplicationException.INVALID_MESSAGE_TYPE
     }
 
     "fail on truncated replys" in {
