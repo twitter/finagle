@@ -94,7 +94,8 @@ case class ServerBuilder(
   _bindTo: Option[InetSocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
-  _startTls: Boolean)
+  _startTls: Boolean,
+  _compressionLevel: Int)
 {
   import ServerBuilder._
 
@@ -112,7 +113,8 @@ case class ServerBuilder(
     None,                                           // bindTo
     None,                                           // logger
     None,                                           // tls
-    false                                           // startTls
+    false,                                          // startTls
+    0                                               // compressionLevel
   )
 
   def codec(codec: Codec) =
@@ -154,6 +156,9 @@ case class ServerBuilder(
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
+
+  def compressionLevel(value: Int) =
+    copy(_compressionLevel = value)
 
   private def statsRepository(
     name: Option[String],
@@ -213,6 +218,7 @@ case class ServerBuilder(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
         }
 
+
         // SSL comes first so that ChannelSnooper gets plaintext
         for (ctx <- _tls) {
           val sslEngine = ctx.createSSLEngine()
@@ -224,6 +230,12 @@ case class ServerBuilder(
 
         for ((name, handler) <- pipelineFactory.getPipeline.toMap)
           pipeline.addLast(name, handler)
+
+        if (_compressionLevel > 0 && codec == Http) {
+          pipeline.addAfter("lifecycleSpy",
+                            "compressor",
+                            new HttpContentCompressor(_compressionLevel))
+        }
 
         pipeline
       }
