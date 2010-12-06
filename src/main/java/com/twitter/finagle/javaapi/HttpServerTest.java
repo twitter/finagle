@@ -10,7 +10,7 @@ import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.stub.*;
+import com.twitter.finagle.service.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.*;
 
@@ -22,10 +22,10 @@ public class HttpServerTest {
     Arrays.fill(buf, (byte)'.');
   }
 
-  private void runServer() {
-    Stub<HttpRequest, HttpResponse> stub =
-      new Stub<HttpRequest, HttpResponse>() {
-        public Future<HttpResponse> call(HttpRequest request) {
+  private static void runServer() {
+    Service<HttpRequest, HttpResponse> service =
+      new Service<HttpRequest, HttpResponse>() {
+        public Future<HttpResponse> apply(HttpRequest request) {
           HttpResponse httpResponse = new DefaultHttpResponse(
             HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
@@ -45,7 +45,7 @@ public class HttpServerTest {
     ServerBuilder
       .get()
       .codec(Codec4J.http())
-      .stub(stub)
+      .service(service)
       .bindTo(addr)
       .build();
   }

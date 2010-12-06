@@ -28,7 +28,7 @@ class Project(info: ProjectInfo)
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
   val specs    = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
-  val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+  // val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
 }
 
 trait LibDirClasspath extends StandardProject {

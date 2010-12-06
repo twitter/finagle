@@ -1,4 +1,4 @@
-package com.twitter.finagle.stub
+package com.twitter.finagle.service
 
 import org.jboss.netty.channel._
 
@@ -6,8 +6,8 @@ import com.twitter.util.{Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
 
-object StubPipelineFactory {
-  def apply[Req <: AnyRef, Rep <: AnyRef](stub: Stub[Req, Rep]) = {
+object ServicePipelineFactory {
+  def apply[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) = {
     val dispatcher = new SimpleChannelUpstreamHandler {
       override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
         val channel = ctx.getChannel
@@ -15,8 +15,7 @@ object StubPipelineFactory {
 
         try {
           val req = message.asInstanceOf[Req]
-
-          stub(req) respond {
+          service(req) respond {
              case Return(value) =>
                Channels.write(ctx.getChannel, value)
                        .addListener(ChannelFutureListener.CLOSE)
@@ -35,7 +34,7 @@ object StubPipelineFactory {
     new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = Channels.pipeline()
-        pipeline.addLast("stubDispatcher", dispatcher)
+        pipeline.addLast("serviceDispatcher", dispatcher)
         pipeline
       }
     }
