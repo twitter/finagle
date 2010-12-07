@@ -1,11 +1,9 @@
 package com.twitter.finagle.builder
 
-
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.ssl.SslHandler
 
-import com.twitter.finagle.http.{RequestLifecycleSpy}
+import com.twitter.finagle.http.RequestLifecycleSpy
 
 class Http extends Codec {
   val clientPipelineFactory: ChannelPipelineFactory =
@@ -13,7 +11,7 @@ class Http extends Codec {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpClientCodec())
-        pipeline.addLast("httpDechunker", new HttpChunkAggregator(10<<20))
+        pipeline.addLast("httpDechunker",  new HttpChunkAggregator(10<<20))
         pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
         pipeline
       }
