@@ -22,9 +22,36 @@ object Ssl {
     }
   }
 
+  object Config {
+    type StringPredicate = (String) => (Boolean)
+
+    private[this] def filterCipherSuites(ctx: SSLContext,
+                                         filters: Seq[StringPredicate]) {
+      val params = ctx.getDefaultSSLParameters
+      for (filter <- filters)
+        params.setCipherSuites(params.getCipherSuites().filter(filter))
+    }
+
+    private[this] def disableAnonCipherSuites(ctx: SSLContext) {
+      val excludeDiffieHellmanAnon = ((s:String) => s.indexOf("DH_anon") != -1)
+      filterCipherSuites(ctx, Seq(excludeDiffieHellmanAnon))
+    }
+
+    private[this] def dispreferClientAuth(ctx: SSLContext) {
+      ctx.getDefaultSSLParameters().setWantClientAuth(false)
+      ctx.getDefaultSSLParameters().setNeedClientAuth(false)
+    }
+
+    def apply(ctx: SSLContext) {
+      dispreferClientAuth(ctx)
+      disableAnonCipherSuites(ctx)
+    }
+  }
+
   private[this] def context(protocol: String, kms: Array[KeyManager]) = {
     val ctx = SSLContext.getInstance(protocol)
     ctx.init(kms, null, null) // XXX: specify RNG?
+    Config(ctx)
     ctx
   }
 
