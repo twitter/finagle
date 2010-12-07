@@ -149,11 +149,15 @@ trait ThriftServerDecoderHelper {
           request.asInstanceOf[AnyRef]
         } catch {
           // Pass through invalid message exceptions, etc.
-          case e: TApplicationException => e
+          case e: TApplicationException =>
+            Channels.fireExceptionCaught(ctx, e)
+            null
         }
       case _ =>
         // Message types other than CALL are invalid here.
-        new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE)
+          Channels.fireExceptionCaught(ctx,
+            new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE))
+          null
     }
   }
 }
