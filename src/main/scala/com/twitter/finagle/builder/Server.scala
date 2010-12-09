@@ -91,7 +91,7 @@ case class ServerBuilder(
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _pipelineFactory: Option[ChannelPipelineFactory],
-  _bindTo: Option[InetSocketAddress],
+  _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
   _startTls: Boolean,
