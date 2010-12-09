@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import scala.collection.JavaConversions._
 
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.concurrent.{TimeUnit, Executors}
 import java.util.logging.Logger
 import javax.net.ssl.{KeyManager, SSLContext}
@@ -28,7 +28,7 @@ object ServerBuilder {
   def apply() = new ServerBuilder()
   def get() = apply()
 
-  val channelFactory =
+  val defaultChannelFactory =
     new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
@@ -95,7 +95,8 @@ case class ServerBuilder(
   _logger: Option[Logger],
   _tls: Option[SSLContext],
   _startTls: Boolean,
-  _compressionLevel: Int)
+  _compressionLevel: Int,
+  _channelFactory: Option[ChannelFactory])
 {
   import ServerBuilder._
 
@@ -114,7 +115,8 @@ case class ServerBuilder(
     None,                                           // logger
     None,                                           // tls
     false,                                          // startTls
-    0                                               // compressionLevel
+    0,                                              // compressionLevel
+    None                                            // channelFactory
   )
 
   def codec(codec: Codec) =
@@ -146,8 +148,11 @@ case class ServerBuilder(
   def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
     copy(_pipelineFactory = Some(ServicePipelineFactory(service)))
 
-  def bindTo(address: InetSocketAddress) =
+  def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
+
+  def channelFactory(cf: ChannelFactory) =
+    copy(_channelFactory = Some(cf))
 
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
@@ -165,7 +170,7 @@ case class ServerBuilder(
     receiver: Option[StatsReceiver],
     sampleWindow: Timeout,
     sampleGranularity: Timeout,
-    host: InetSocketAddress) =
+    sockAddr: SocketAddress) =
   {
     val window      = sampleWindow.duration
     val granularity = sampleGranularity.duration
@@ -181,7 +186,7 @@ case class ServerBuilder(
       }
 
     for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, host)
+      sampleRepository observeTailsWith receiver.observer(prefix, sockAddr toString)
 
     sampleRepository
   }
@@ -196,7 +201,7 @@ case class ServerBuilder(
         (codec, pipeline)
     }
 
-   val bs = new ServerBootstrap(channelFactory)
+   val bs = new ServerBootstrap(_channelFactory getOrElse defaultChannelFactory)
 
     bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)

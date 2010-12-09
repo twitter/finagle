@@ -16,7 +16,7 @@ class Project(info: ProjectInfo)
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
   val codehausRepo = "codehaus.org" at "http://repository.codehaus.org/"
 
-  val netty        = "org.jboss.netty"      %  "netty"            % "3.2.2.Final"
+  val netty        = "org.jboss.netty"      %  "netty"            % "3.2.3.Final"
   val thrift       = "thrift"               %  "libthrift"        % "0.5.0"
   val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.5.2"
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()

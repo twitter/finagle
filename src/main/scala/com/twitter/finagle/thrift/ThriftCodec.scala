@@ -23,7 +23,7 @@ class ThriftCall[A <: TBase[_, _], R <: TBase[_, _]](
   @BeanProperty val method: String,
   args: A,
   replyClass: Class[R],
-  val seqid: Int)
+  var seqid: Int)
 {
   // Constructor without seqno for Java
   def this(@BeanProperty method: String, args: A, replyClass: Class[R]) =
@@ -149,11 +149,15 @@ trait ThriftServerDecoderHelper {
           request.asInstanceOf[AnyRef]
         } catch {
           // Pass through invalid message exceptions, etc.
-          case e: TApplicationException => e
+          case e: TApplicationException =>
+            Channels.fireExceptionCaught(ctx, e)
+            null
         }
       case _ =>
         // Message types other than CALL are invalid here.
-        new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE)
+          Channels.fireExceptionCaught(ctx,
+            new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE))
+          null
     }
   }
 }
@@ -182,7 +186,12 @@ class ThriftUnframedServerDecoder extends ReplayingDecoder[VoidEnum]
 with ThriftServerDecoderHelper {
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer,
                       state: VoidEnum) =
-    decodeThriftCall(ctx, channel, buffer)
+    // Thrift incorrectly assumes a read of zero bytes is an error, so treat
+    // empty buffers as no-ops.  This only happens with the ReplayingDecoder.
+    if (buffer.readable)
+      decodeThriftCall(ctx, channel, buffer)
+    else
+      null
 }
 
 class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
@@ -196,6 +205,7 @@ class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
         val transport = new ChannelBufferTransport(buffer)
         val protocol = protocolFactory.getProtocol(transport)
         seqid += 1
+        call.seqid = seqid
         call.writeRequest(seqid, protocol)
         Channels.write(ctx, Channels.succeededFuture(e.getChannel()), buffer, e.getRemoteAddress)
       case _ =>
@@ -257,5 +267,10 @@ class ThriftUnframedClientDecoder extends ReplayingDecoder[VoidEnum]
 with ThriftClientDecoderHelper {
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer,
                       state: VoidEnum) =
-    decodeThriftReply(ctx, channel, buffer)
+    // Thrift incorrectly assumes a read of zero bytes is an error, so treat
+    // empty buffers as no-ops.  This only happens with the ReplayingDecoder.
+    if (buffer.readable)
+      decodeThriftReply(ctx, channel, buffer)
+    else
+      null
 }

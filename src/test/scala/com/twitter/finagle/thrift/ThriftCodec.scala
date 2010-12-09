@@ -84,28 +84,33 @@ object ThriftCodecSpec extends Specification {
       call.arguments.request must be_==("args")
     }
 
-    "return exceptions for non-call message types" in {
+    "fail to decode non-call message types" in {
+      // receive non-call and decode
       val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_args("args"))
       val channel = makeChannel(new ThriftFramedServerDecoder)
       Channels.fireMessageReceived(channel, buffer)
+
+      // verify throws TApplicationException(INVALID_MESSAGE_TYPE)
       channel.upstreamEvents must haveSize(1)
-      val m = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
-      m must haveClass[TApplicationException]
-      val ex = m.asInstanceOf[TApplicationException]
+      channel.downstreamEvents must haveSize(0)
+      val event = channel.upstreamEvents(0).asInstanceOf[ExceptionEvent]
+      event.getCause must haveClass[TApplicationException]
+      val ex = event.getCause.asInstanceOf[TApplicationException]
       ex.getType mustEqual TApplicationException.INVALID_MESSAGE_TYPE
     }
 
-    "return appropraite exceptions on missing methods" in {
-      // receive call and decode
+    "fail to decode unknown method calls" in {
+      // receive call for unknown method and decode
       val buffer = thriftToBuffer("unknown", TMessageType.CALL, 23, new Silly.bleep_args("args"))
       val channel = makeChannel(new ThriftFramedServerDecoder)
       Channels.fireMessageReceived(channel, buffer)
-      channel.downstreamEvents must haveSize(0)
-      channel.upstreamEvents must haveSize(1)
 
-      val m = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage
-      m must haveClass[TApplicationException]
-      val ex = m.asInstanceOf[TApplicationException]
+      // verify throws TApplicationException(UNKNOWN_METHOD)
+      channel.upstreamEvents must haveSize(1)
+      channel.downstreamEvents must haveSize(0)
+      val event = channel.upstreamEvents(0).asInstanceOf[ExceptionEvent]
+      event.getCause must haveClass[TApplicationException]
+      val ex = event.getCause.asInstanceOf[TApplicationException]
       ex.getType mustEqual TApplicationException.UNKNOWN_METHOD
     }
 

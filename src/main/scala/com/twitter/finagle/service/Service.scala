@@ -35,4 +35,11 @@ abstract class Filter[-Req <: AnyRef, +Rep <: AnyRef, Req1 <: AnyRef, Rep1 <: An
   def andThen(service: Service[Req1, Rep1]) = new Service[Req, Rep] {
     def apply(request: Req) = Filter.this.apply(request, service)
   }
+
+  def andThenIf(condAndFilter: (Boolean, Filter[Req1, Rep1, Req1, Rep1])) =
+    condAndFilter match {
+      case (true, filter) => andThen(filter)
+      case (false, _)     => this
+    }
+
 }
