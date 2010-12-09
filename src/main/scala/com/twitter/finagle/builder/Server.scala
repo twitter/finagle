@@ -95,7 +95,6 @@ case class ServerBuilder(
   _logger: Option[Logger],
   _tls: Option[SSLContext],
   _startTls: Boolean,
-  _compressionLevel: Int,
   _channelFactory: Option[ChannelFactory])
 {
   import ServerBuilder._
@@ -115,7 +114,6 @@ case class ServerBuilder(
     None,                                           // logger
     None,                                           // tls
     false,                                          // startTls
-    0,                                              // compressionLevel
     None                                            // channelFactory
   )
 
@@ -161,9 +159,6 @@ case class ServerBuilder(
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
-
-  def compressionLevel(value: Int) =
-    copy(_compressionLevel = value)
 
   private def statsRepository(
     name: Option[String],
@@ -236,12 +231,6 @@ case class ServerBuilder(
 
         for ((name, handler) <- pipelineFactory.getPipeline.toMap)
           pipeline.addLast(name, handler)
-
-        if (_compressionLevel > 0 && codec == Http) {
-          pipeline.addAfter("lifecycleSpy",
-                            "compressor",
-                            new HttpContentCompressor(_compressionLevel))
-        }
 
         pipeline
       }

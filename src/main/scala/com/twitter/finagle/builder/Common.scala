@@ -17,6 +17,7 @@ trait Codec {
 // Java convenience.
 object Codec4J {
   val http = Http
+  val httpWithCompression = HttpWithCompression
   val thrift = Thrift
 }
 
