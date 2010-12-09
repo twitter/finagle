@@ -17,7 +17,8 @@ object ServicePipelineFactory {
           val req = message.asInstanceOf[Req]
           service(req) respond {
              case Return(value) =>
-               Channels.write(ctx.getChannel, value).close()
+               Channels.write(ctx.getChannel, value)
+                       .addListener(ChannelFutureListener.CLOSE)
 
              case Throw(_) =>
                // TODO: log (invalid reply)

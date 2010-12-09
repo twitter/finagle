@@ -5,11 +5,13 @@ import scala.collection.JavaConversions._
 import java.net.SocketAddress
 import java.util.concurrent.{TimeUnit, Executors}
 import java.util.logging.Logger
+import javax.net.ssl.{KeyManager, SSLContext}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.ostrich
@@ -91,6 +93,9 @@ case class ServerBuilder(
   _pipelineFactory: Option[ChannelPipelineFactory],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
+  _tls: Option[SSLContext],
+  _startTls: Boolean,
+  _compressionLevel: Int,
   _channelFactory: Option[ChannelFactory])
 {
   import ServerBuilder._
@@ -108,6 +113,9 @@ case class ServerBuilder(
     None,                                           // pipelineFactory
     None,                                           // bindTo
     None,                                           // logger
+    None,                                           // tls
+    false,                                          // startTls
+    0,                                              // compressionLevel
     None                                            // channelFactory
   )
 
@@ -147,6 +155,15 @@ case class ServerBuilder(
     copy(_channelFactory = Some(cf))
 
   def logger(logger: Logger) = copy(_logger = Some(logger))
+
+  def tls(path: String, password: String) =
+    copy(_tls = Option(Ssl(path, password)))
+
+  def startTls(value: Boolean) =
+    copy(_startTls = true)
+
+  def compressionLevel(value: Int) =
+    copy(_compressionLevel = value)
 
   private def statsRepository(
     name: Option[String],
@@ -206,10 +223,25 @@ case class ServerBuilder(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
         }
 
+
+        // SSL comes first so that ChannelSnooper gets plaintext
+        for (ctx <- _tls) {
+          val sslEngine = ctx.createSSLEngine()
+          sslEngine.setUseClientMode(false)
+          sslEngine.setEnableSessionCreation(true)
+          pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
+        }
+
         pipeline.addLast("stats", new SampleHandler(statsRepo))
 
         for ((name, handler) <- pipelineFactory.getPipeline.toMap)
           pipeline.addLast(name, handler)
+
+        if (_compressionLevel > 0 && codec == Http) {
+          pipeline.addAfter("lifecycleSpy",
+                            "compressor",
+                            new HttpContentCompressor(_compressionLevel))
+        }
 
         pipeline
       }
