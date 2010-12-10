@@ -8,8 +8,8 @@ import com.twitter.finagle.util.Conversions._
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 
-class ReplyIsStreamingException extends Exception
-class CancelledRequestException extends Exception
+class ReplyIsStreamingException   extends Exception
+class CancelledRequestException   extends Exception
 class InvalidMessageTypeException extends Exception
 
 class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)

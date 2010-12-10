@@ -28,15 +28,16 @@ trait LoadedBroker[+A <: LoadedBroker[A]] extends Broker {
  * Keeps track of request latencies & counts.
  */
 class StatsLoadedBroker(
-  underlying: Broker,
-  samples: SampleRepository[T forSome { type T <: AddableSample[T] }],
-  bias: Float = 1.0f)
+    val underlying: Broker,
+    samples: SampleRepository[T forSome { type T <: AddableSample[T] }],
+    bias: Float = 1.0f)
   extends LoadedBroker[StatsLoadedBroker]
+  with WrappingBroker
 {
   val dispatchSample = samples("dispatch")
   val latencySample  = samples("latency")
 
-  def dispatch(e: MessageEvent) = {
+  override def dispatch(e: MessageEvent) = {
     val begin = Time.now
     dispatchSample.incr()
 
@@ -60,9 +61,10 @@ class StatsLoadedBroker(
 }
 
 class FailureAccruingLoadedBroker(
-  underlying: LoadedBroker[_],
-  samples: SampleRepository[TimeWindowedSample[_]])
+    val underlying: LoadedBroker[_],
+    samples: SampleRepository[TimeWindowedSample[_]])
   extends LoadedBroker[FailureAccruingLoadedBroker]
+  with WrappingBroker
 {
   val successSample = samples("success")
   val failureSample = samples("failure")
@@ -83,7 +85,7 @@ class FailureAccruingLoadedBroker(
       (success.toFloat / (success.toFloat + failure.toFloat)) * underlying.weight
   }
 
-  def dispatch(e: MessageEvent) = {
+  override def dispatch(e: MessageEvent) = {
     // TODO: discriminate request errors vs. connection errors, etc.?
     underlying.dispatch(e) whenDone0 { future =>
       future {
@@ -93,12 +95,12 @@ class FailureAccruingLoadedBroker(
       }
     }
   }
- 
 }
 
 class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker {
   implicit val ordering: Ordering[A] = Ordering.by(_.load)
   def dispatch(e: MessageEvent) = endpoints.min.dispatch(e)
+  override def isAvailable = endpoints.find(_.isAvailable) isDefined
 }
 
 class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker {
@@ -123,4 +125,6 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker
 
     null // Impossible
   }
+
+  override def isAvailable = endpoints.find(_.isAvailable) isDefined
 }

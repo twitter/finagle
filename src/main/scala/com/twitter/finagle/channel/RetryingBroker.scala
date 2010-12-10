@@ -14,7 +14,7 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Duration
 
-trait RetryingBrokerBase extends Broker {
+trait RetryingBrokerBase extends WrappingBroker {
   def retryFuture(channel: Channel): ChannelFuture
   val underlying: Broker
 
@@ -31,7 +31,7 @@ trait RetryingBrokerBase extends Broker {
     override def getChannel = channel
   }
 
-  def dispatch(e: MessageEvent): ReplyFuture = {
+  override def dispatch(e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
     val interceptErrors = Channels.future(e.getChannel)
     interceptErrors {

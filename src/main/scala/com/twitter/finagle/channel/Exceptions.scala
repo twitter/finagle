@@ -4,7 +4,7 @@ package com.twitter.finagle.channel
 class RequestException          extends Exception
 class TimedoutRequestException  extends RequestException
 class RetryFailureException     extends RequestException
-class CancelledRequestException extends Exception
+class CancelledRequestException extends RequestException
 
 // Channel exceptions are failures on the channels themselves.
 class ChannelException                      extends Exception
