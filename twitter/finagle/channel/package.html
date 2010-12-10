@@ -1,0 +1,604 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.channel</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>channel</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">channel</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ApiException">
+      <a id="ApiException:ApiException"></a>
+      <h4 class="signature"><a href="ApiException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ApiException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ApplicationException">
+      <a id="ApplicationException:ApplicationException"></a>
+      <h4 class="signature"><a href="ApplicationException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ApplicationException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.BootstrapBroker">
+      <a id="BootstrapBroker:BootstrapBroker"></a>
+      <h4 class="signature"><a href="BootstrapBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BootstrapBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with ConnectingChannelBroker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.channel.Broker">
+      <a id="Broker:Broker"></a>
+      <h4 class="signature"><a href="Broker.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Broker</span>
+        
+        
+        <span class="result"> extends SocketAddress</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.BrokerAdapter">
+      <a id="BrokerAdapter:BrokerAdapter"></a>
+      <h4 class="signature"><a href="BrokerAdapter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BrokerAdapter</span>
+        
+        
+        <span class="result"> extends SimpleChannelUpstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.BrokerClientBootstrap">
+      <a id="BrokerClientBootstrap:BrokerClientBootstrap"></a>
+      <h4 class="signature"><a href="BrokerClientBootstrap.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BrokerClientBootstrap</span>
+        
+        
+        <span class="result"> extends ClientBootstrap</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.BrokeredChannel">
+      <a id="BrokeredChannel:BrokeredChannel"></a>
+      <h4 class="signature"><a href="BrokeredChannel.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BrokeredChannel</span>
+        
+        
+        <span class="result"> extends AbstractChannel with Serialized</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.BrokeredChannelFactory">
+      <a id="BrokeredChannelFactory:BrokeredChannelFactory"></a>
+      <h4 class="signature"><a href="BrokeredChannelFactory.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BrokeredChannelFactory</span>
+        
+        
+        <span class="result"> extends ChannelFactory</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.BrokeredChannelSink">
+      <a id="BrokeredChannelSink:BrokeredChannelSink"></a>
+      <h4 class="signature"><a href="BrokeredChannelSink.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BrokeredChannelSink</span>
+        
+        
+        <span class="result"> extends AbstractChannelSink</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.CancelledRequestException">
+      <a id="CancelledRequestException:CancelledRequestException"></a>
+      <h4 class="signature"><a href="CancelledRequestException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">CancelledRequestException</span>
+        
+        
+        <span class="result"> extends RequestException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelClosedException">
+      <a id="ChannelClosedException:ChannelClosedException"></a>
+      <h4 class="signature"><a href="ChannelClosedException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelClosedException</span>
+        
+        
+        <span class="result"> extends ChannelException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelException">
+      <a id="ChannelException:ChannelException"></a>
+      <h4 class="signature"><a href="ChannelException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelPool">
+      <a id="ChannelPool:ChannelPool"></a>
+      <h4 class="signature"><a href="ChannelPool.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelPool</span>
+        
+        
+        <span class="result"> extends Serialized</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.channel.ConnectingChannelBroker">
+      <a id="ConnectingChannelBroker:ConnectingChannelBroker"></a>
+      <h4 class="signature"><a href="ConnectingChannelBroker.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ConnectingChannelBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with Broker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ConnectionFailedException">
+      <a id="ConnectionFailedException:ConnectionFailedException"></a>
+      <h4 class="signature"><a href="ConnectionFailedException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ConnectionFailedException</span>
+        
+        
+        <span class="result"> extends ChannelException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ConnectionLimitingChannelPool">
+      <a id="ConnectionLimitingChannelPool:ConnectionLimitingChannelPool"></a>
+      <h4 class="signature"><a href="ConnectionLimitingChannelPool.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ConnectionLimitingChannelPool</span>
+        
+        
+        <span class="result"> extends ChannelPool</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ExponentialBackoffRetryingBroker">
+      <a id="ExponentialBackoffRetryingBroker:ExponentialBackoffRetryingBroker"></a>
+      <h4 class="signature"><a href="ExponentialBackoffRetryingBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ExponentialBackoffRetryingBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with RetryingBrokerBase</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.FailureAccruingLoadedBroker">
+      <a id="FailureAccruingLoadedBroker:FailureAccruingLoadedBroker"></a>
+      <h4 class="signature"><a href="FailureAccruingLoadedBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">FailureAccruingLoadedBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with LoadedBroker[FailureAccruingLoadedBroker] with WrappingBroker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.InvalidPipelineException">
+      <a id="InvalidPipelineException:InvalidPipelineException"></a>
+      <h4 class="signature"><a href="InvalidPipelineException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">InvalidPipelineException</span>
+        
+        
+        <span class="result"> extends ApiException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.LeastLoadedBroker">
+      <a id="LeastLoadedBroker:LeastLoadedBroker[A]"></a>
+      <h4 class="signature"><a href="LeastLoadedBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">LeastLoadedBroker</span>
+        <span class="tparams">[<span name="A">A &lt;: LoadedBroker[A]</span>]</span>
+        
+        <span class="result"> extends SocketAddress with Broker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.LoadBalancedBroker">
+      <a id="LoadBalancedBroker:LoadBalancedBroker[A]"></a>
+      <h4 class="signature"><a href="LoadBalancedBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">LoadBalancedBroker</span>
+        <span class="tparams">[<span name="A">A &lt;: LoadedBroker[A]</span>]</span>
+        
+        <span class="result"> extends SocketAddress with Broker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.channel.LoadedBroker">
+      <a id="LoadedBroker:LoadedBroker[A]"></a>
+      <h4 class="signature"><a href="LoadedBroker.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LoadedBroker</span>
+        <span class="tparams">[<span name="A">+A &lt;: LoadedBroker[A]</span>]</span>
+        
+        <span class="result"> extends SocketAddress with Broker</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">This is F-bounded to ensure that we have a homogenous set of
+LoadedBrokers in a given load balancer.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.NotYetConnectedException">
+      <a id="NotYetConnectedException:NotYetConnectedException"></a>
+      <h4 class="signature"><a href="NotYetConnectedException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NotYetConnectedException</span>
+        
+        
+        <span class="result"> extends ApiException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.PartialUpstreamMessageEvent">
+      <a id="PartialUpstreamMessageEvent:PartialUpstreamMessageEvent"></a>
+      <h4 class="signature"><a href="PartialUpstreamMessageEvent.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">PartialUpstreamMessageEvent</span>
+        
+        <span class="params">(<span name="channel">channel: Channel</span>, <span name="message">message: AnyRef</span>, <span name="remoteAddress">remoteAddress: SocketAddress</span>)</span>
+        <span class="result"> extends UpstreamMessageEvent with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.PoolingBroker">
+      <a id="PoolingBroker:PoolingBroker"></a>
+      <h4 class="signature"><a href="PoolingBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">PoolingBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with ConnectingChannelBroker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.QueueingChannelHandler">
+      <a id="QueueingChannelHandler:QueueingChannelHandler"></a>
+      <h4 class="signature"><a href="QueueingChannelHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">QueueingChannelHandler</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.channel.Reply">
+      <a id="Reply:Reply"></a>
+      <h4 class="signature"><a href="Reply.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Reply</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ReplyFuture">
+      <a id="ReplyFuture:ReplyFuture"></a>
+      <h4 class="signature"><a href="ReplyFuture.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ReplyFuture</span>
+        
+        
+        <span class="result"> extends DefaultChannelFuture</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.RequestException">
+      <a id="RequestException:RequestException"></a>
+      <h4 class="signature"><a href="RequestException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RequestException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.RetryFailureException">
+      <a id="RetryFailureException:RetryFailureException"></a>
+      <h4 class="signature"><a href="RetryFailureException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RetryFailureException</span>
+        
+        
+        <span class="result"> extends RequestException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.RetryingBroker">
+      <a id="RetryingBroker:RetryingBroker"></a>
+      <h4 class="signature"><a href="RetryingBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RetryingBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with RetryingBrokerBase</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.channel.RetryingBrokerBase">
+      <a id="RetryingBrokerBase:RetryingBrokerBase"></a>
+      <h4 class="signature"><a href="RetryingBrokerBase.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">RetryingBrokerBase</span>
+        
+        
+        <span class="result"> extends SocketAddress with WrappingBroker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.StatsLoadedBroker">
+      <a id="StatsLoadedBroker:StatsLoadedBroker"></a>
+      <h4 class="signature"><a href="StatsLoadedBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">StatsLoadedBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with LoadedBroker[StatsLoadedBroker] with WrappingBroker</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Keeps track of request latencies &amp; counts.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.TimedoutRequestException">
+      <a id="TimedoutRequestException:TimedoutRequestException"></a>
+      <h4 class="signature"><a href="TimedoutRequestException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TimedoutRequestException</span>
+        
+        
+        <span class="result"> extends RequestException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.TimeoutBroker">
+      <a id="TimeoutBroker:TimeoutBroker"></a>
+      <h4 class="signature"><a href="TimeoutBroker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TimeoutBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with WrappingBroker</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.TooFewDicksOnTheDanceFloorException">
+      <a id="TooFewDicksOnTheDanceFloorException:TooFewDicksOnTheDanceFloorException"></a>
+      <h4 class="signature"><a href="TooFewDicksOnTheDanceFloorException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TooFewDicksOnTheDanceFloorException</span>
+        
+        
+        <span class="result"> extends ApiException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException">
+      <a id="TooManyDicksOnTheDanceFloorException:TooManyDicksOnTheDanceFloorException"></a>
+      <h4 class="signature"><a href="TooManyDicksOnTheDanceFloorException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TooManyDicksOnTheDanceFloorException</span>
+        
+        
+        <span class="result"> extends ApiException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.UnknownChannelException">
+      <a id="UnknownChannelException:UnknownChannelException"></a>
+      <h4 class="signature"><a href="UnknownChannelException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">UnknownChannelException</span>
+        
+        
+        <span class="result"> extends ChannelException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.channel.WrappingBroker">
+      <a id="WrappingBroker:WrappingBroker"></a>
+      <h4 class="signature"><a href="WrappingBroker.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">WrappingBroker</span>
+        
+        
+        <span class="result"> extends SocketAddress with Broker</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.Broker">
+      <a id="Broker:Broker"></a>
+      <h4 class="signature"><a href="Broker$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Broker</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ExponentialBackoffRetryingBroker">
+      <a id="ExponentialBackoffRetryingBroker:ExponentialBackoffRetryingBroker"></a>
+      <h4 class="signature"><a href="ExponentialBackoffRetryingBroker$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ExponentialBackoffRetryingBroker</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.PartialUpstreamMessageEvent">
+      <a id="PartialUpstreamMessageEvent:PartialUpstreamMessageEvent"></a>
+      <h4 class="signature"><a href="PartialUpstreamMessageEvent$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">PartialUpstreamMessageEvent</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.Reply">
+      <a id="Reply:Reply"></a>
+      <h4 class="signature"><a href="Reply$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Reply</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ReplyFuture">
+      <a id="ReplyFuture:ReplyFuture"></a>
+      <h4 class="signature"><a href="ReplyFuture$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ReplyFuture</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
