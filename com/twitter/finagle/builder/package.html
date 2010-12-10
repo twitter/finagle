@@ -1,0 +1,310 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.builder</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>builder</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">builder</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder">
+      <a id="ClientBuilder:ClientBuilder"></a>
+      <h4 class="signature"><a href="ClientBuilder.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ClientBuilder</span>
+        
+        <span class="params">(<span name="_hosts">_hosts: Option[Seq[SocketAddress]]</span>, <span name="_codec">_codec: Option[Codec]</span>, <span name="_connectionTimeout">_connectionTimeout: Timeout</span>, <span name="_requestTimeout">_requestTimeout: Timeout</span>, <span name="_statsReceiver">_statsReceiver: Option[StatsReceiver]</span>, <span name="_sampleWindow">_sampleWindow: Timeout</span>, <span name="_sampleGranularity">_sampleGranularity: Timeout</span>, <span name="_name">_name: Option[String]</span>, <span name="_hostConnectionLimit">_hostConnectionLimit: Option[Int]</span>, <span name="_sendBufferSize">_sendBufferSize: Option[Int]</span>, <span name="_recvBufferSize">_recvBufferSize: Option[Int]</span>, <span name="_exportLoadsToOstrich">_exportLoadsToOstrich: Boolean</span>, <span name="_failureAccrualWindow">_failureAccrualWindow: Timeout</span>, <span name="_retries">_retries: Option[Int]</span>, <span name="_initialBackoff">_initialBackoff: Option[Duration]</span>, <span name="_backoffMultiplier">_backoffMultiplier: Option[Int]</span>, <span name="_logger">_logger: Option[Logger]</span>, <span name="_channelFactory">_channelFactory: Option[ChannelFactory]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.builder.Codec">
+      <a id="Codec:Codec"></a>
+      <h4 class="signature"><a href="Codec.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Codec</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Http">
+      <a id="Http:Http"></a>
+      <h4 class="signature"><a href="Http.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Http</span>
+        
+        
+        <span class="result"> extends Codec</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.IncompleteSpecification">
+      <a id="IncompleteSpecification:IncompleteSpecification"></a>
+      <h4 class="signature"><a href="IncompleteSpecification.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">IncompleteSpecification</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.JavaLogger">
+      <a id="JavaLogger:JavaLogger"></a>
+      <h4 class="signature"><a href="JavaLogger.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">JavaLogger</span>
+        
+        <span class="params">(<span name="underlying">underlying: Logger</span>)</span>
+        <span class="result"> extends StatsReceiver with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Ostrich">
+      <a id="Ostrich:Ostrich"></a>
+      <h4 class="signature"><a href="Ostrich.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Ostrich</span>
+        
+        <span class="params">(<span name="provider">provider: StatsProvider</span>)</span>
+        <span class="result"> extends StatsReceiver with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.SampleHandler">
+      <a id="SampleHandler:SampleHandler"></a>
+      <h4 class="signature"><a href="SampleHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SampleHandler</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder">
+      <a id="ServerBuilder:ServerBuilder"></a>
+      <h4 class="signature"><a href="ServerBuilder.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ServerBuilder</span>
+        
+        <span class="params">(<span name="_codec">_codec: Option[Codec]</span>, <span name="_connectionTimeout">_connectionTimeout: Timeout</span>, <span name="_requestTimeout">_requestTimeout: Timeout</span>, <span name="_statsReceiver">_statsReceiver: Option[StatsReceiver]</span>, <span name="_sampleWindow">_sampleWindow: Timeout</span>, <span name="_sampleGranularity">_sampleGranularity: Timeout</span>, <span name="_name">_name: Option[String]</span>, <span name="_sendBufferSize">_sendBufferSize: Option[Int]</span>, <span name="_recvBufferSize">_recvBufferSize: Option[Int]</span>, <span name="_pipelineFactory">_pipelineFactory: Option[ChannelPipelineFactory]</span>, <span name="_bindTo">_bindTo: Option[SocketAddress]</span>, <span name="_logger">_logger: Option[Logger]</span>, <span name="_tls">_tls: Option[SSLContext]</span>, <span name="_startTls">_startTls: Boolean</span>, <span name="_channelFactory">_channelFactory: Option[ChannelFactory]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.builder.StatsReceiver">
+      <a id="StatsReceiver:StatsReceiver"></a>
+      <h4 class="signature"><a href="StatsReceiver.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">StatsReceiver</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Timeout">
+      <a id="Timeout:Timeout"></a>
+      <h4 class="signature"><a href="Timeout.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Timeout</span>
+        
+        <span class="params">(<span name="value">value: Long</span>, <span name="unit">unit: TimeUnit</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder">
+      <a id="ClientBuilder:ClientBuilder"></a>
+      <h4 class="signature"><a href="ClientBuilder$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ClientBuilder</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Codec4J">
+      <a id="Codec4J:Codec4J"></a>
+      <h4 class="signature"><a href="Codec4J$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Codec4J</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Http">
+      <a id="Http:Http"></a>
+      <h4 class="signature"><a href="Http$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Http</span>
+        
+        
+        <span class="result"> extends Http</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.HttpWithCompression">
+      <a id="HttpWithCompression:HttpWithCompression"></a>
+      <h4 class="signature"><a href="HttpWithCompression$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">HttpWithCompression</span>
+        
+        
+        <span class="result"> extends Http</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.JavaLogger">
+      <a id="JavaLogger:JavaLogger"></a>
+      <h4 class="signature"><a href="JavaLogger$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">JavaLogger</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Ostrich">
+      <a id="Ostrich:Ostrich"></a>
+      <h4 class="signature"><a href="Ostrich$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Ostrich</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder">
+      <a id="ServerBuilder:ServerBuilder"></a>
+      <h4 class="signature"><a href="ServerBuilder$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ServerBuilder</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Ssl">
+      <a id="Ssl:Ssl"></a>
+      <h4 class="signature"><a href="Ssl$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Ssl</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.StatsReporter4J">
+      <a id="StatsReporter4J:StatsReporter4J"></a>
+      <h4 class="signature"><a href="StatsReporter4J$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">StatsReporter4J</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Thrift">
+      <a id="Thrift:Thrift"></a>
+      <h4 class="signature"><a href="Thrift$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Thrift</span>
+        
+        
+        <span class="result"> extends Codec</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

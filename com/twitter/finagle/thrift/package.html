@@ -1,0 +1,277 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.thrift</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>thrift</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">thrift</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ChannelBufferTransport">
+      <a id="ChannelBufferTransport:ChannelBufferTransport"></a>
+      <h4 class="signature"><a href="ChannelBufferTransport.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelBufferTransport</span>
+        
+        
+        <span class="result"> extends TTransport</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.DuplexChannelBufferTransport">
+      <a id="DuplexChannelBufferTransport:DuplexChannelBufferTransport"></a>
+      <h4 class="signature"><a href="DuplexChannelBufferTransport.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">DuplexChannelBufferTransport</span>
+        
+        
+        <span class="result"> extends TTransport</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftCall">
+      <a id="ThriftCall:ThriftCall[A, R]"></a>
+      <h4 class="signature"><a href="ThriftCall.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftCall</span>
+        <span class="tparams">[<span name="A">A &lt;: org.apache.thrift.TBase[_, _]</span>, <span name="R">R &lt;: org.apache.thrift.TBase[_, _]</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The ThriftCall object represents a thrift dispatch on the
+channel.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftCallFactory">
+      <a id="ThriftCallFactory:ThriftCallFactory[A, R]"></a>
+      <h4 class="signature"><a href="ThriftCallFactory.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftCallFactory</span>
+        <span class="tparams">[<span name="A">A &lt;: org.apache.thrift.TBase[_, _]</span>, <span name="R">R &lt;: org.apache.thrift.TBase[_, _]</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.thrift.ThriftClientDecoderHelper">
+      <a id="ThriftClientDecoderHelper:ThriftClientDecoderHelper"></a>
+      <h4 class="signature"><a href="ThriftClientDecoderHelper.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ThriftClientDecoderHelper</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientEncoder">
+      <a id="ThriftClientEncoder:ThriftClientEncoder"></a>
+      <h4 class="signature"><a href="ThriftClientEncoder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftClientEncoder</span>
+        
+        
+        <span class="result"> extends SimpleChannelDownstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftFrameCodec">
+      <a id="ThriftFrameCodec:ThriftFrameCodec"></a>
+      <h4 class="signature"><a href="ThriftFrameCodec.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftFrameCodec</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftFramedClientDecoder">
+      <a id="ThriftFramedClientDecoder:ThriftFramedClientDecoder"></a>
+      <h4 class="signature"><a href="ThriftFramedClientDecoder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftFramedClientDecoder</span>
+        
+        
+        <span class="result"> extends OneToOneDecoder with ThriftClientDecoderHelper</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Thrift framed client decoder assumes messages are framed, so should be used
+with the ThriftFrameCodec.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftFramedServerDecoder">
+      <a id="ThriftFramedServerDecoder:ThriftFramedServerDecoder"></a>
+      <h4 class="signature"><a href="ThriftFramedServerDecoder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftFramedServerDecoder</span>
+        
+        
+        <span class="result"> extends OneToOneDecoder with ThriftServerDecoderHelper</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Thrift framed server decoder assumes messages are framed, so should be used
+with the ThriftFrameCodec.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftProcessorHandler">
+      <a id="ThriftProcessorHandler:ThriftProcessorHandler"></a>
+      <h4 class="signature"><a href="ThriftProcessorHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftProcessorHandler</span>
+        
+        
+        <span class="result"> extends SimpleChannelUpstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftReply">
+      <a id="ThriftReply:ThriftReply[R]"></a>
+      <h4 class="signature"><a href="ThriftReply.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ThriftReply</span>
+        <span class="tparams">[<span name="R">R &lt;: org.apache.thrift.TBase[_, _]</span>]</span>
+        <span class="params">(<span name="response">response: R</span>, <span name="call">call: com.twitter.finagle.thrift.ThriftCall[_ &lt;: org.apache.thrift.TBase[_, _], _ &lt;: org.apache.thrift.TBase[_, _]]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Encapsulates the result of a call to a Thrift service.</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.thrift.ThriftServerDecoderHelper">
+      <a id="ThriftServerDecoderHelper:ThriftServerDecoderHelper"></a>
+      <h4 class="signature"><a href="ThriftServerDecoderHelper.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ThriftServerDecoderHelper</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerEncoder">
+      <a id="ThriftServerEncoder:ThriftServerEncoder"></a>
+      <h4 class="signature"><a href="ThriftServerEncoder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftServerEncoder</span>
+        
+        
+        <span class="result"> extends SimpleChannelDownstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftUnframedClientDecoder">
+      <a id="ThriftUnframedClientDecoder:ThriftUnframedClientDecoder"></a>
+      <h4 class="signature"><a href="ThriftUnframedClientDecoder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftUnframedClientDecoder</span>
+        
+        
+        <span class="result"> extends ReplayingDecoder[VoidEnum] with ThriftClientDecoderHelper</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Thrift unframed client decoder doesn't assume messages are framed.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftUnframedServerDecoder">
+      <a id="ThriftUnframedServerDecoder:ThriftUnframedServerDecoder"></a>
+      <h4 class="signature"><a href="ThriftUnframedServerDecoder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftUnframedServerDecoder</span>
+        
+        
+        <span class="result"> extends ReplayingDecoder[VoidEnum] with ThriftServerDecoderHelper</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Thrift unframed server decoder doesn't assume messages are framed.</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ChannelBufferConversions">
+      <a id="ChannelBufferConversions:ChannelBufferConversions"></a>
+      <h4 class="signature"><a href="ChannelBufferConversions$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ChannelBufferConversions</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftTypes">
+      <a id="ThriftTypes:ThriftTypes"></a>
+      <h4 class="signature"><a href="ThriftTypes$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ThriftTypes</span>
+        
+        
+        <span class="result"> extends HashMap[String, com.twitter.finagle.thrift.ThriftCallFactory[_, _]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A registry for Thrift types.</p>
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
