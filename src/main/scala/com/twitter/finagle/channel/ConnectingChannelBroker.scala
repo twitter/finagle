@@ -1,7 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.nio.channels.ClosedChannelException
-
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
@@ -30,16 +28,15 @@ trait ConnectingChannelBroker extends Broker {
         replyFuture.setFailure(cause)
 
       case Cancelled =>
-        replyFuture.setFailure(new CancelledConnectionException)
+        replyFuture.setFailure(new CancelledRequestException)
     }
 
     replyFuture
   }
 
   protected def connectChannel(
-    to: Channel, e: MessageEvent,
-    replyFuture: ReplyFuture): ChannelFuture
-  =
+      to: Channel, e: MessageEvent,
+      replyFuture: ReplyFuture): ChannelFuture =
     to.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
         adapter.writeAndRegisterReply(to, e, replyFuture)

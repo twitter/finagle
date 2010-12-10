@@ -1,22 +1,23 @@
 package com.twitter.finagle.channel
 
-// Request failures
-class RequestException         extends Exception
-class TimedoutRequestException extends RequestException
-class RetryFailureException    extends RequestException
-class ChannelClosedException   extends RequestException
+// Request failures (eg. for request behavior changing brokers.)
+class RequestException          extends Exception
+class TimedoutRequestException  extends RequestException
+class RetryFailureException     extends RequestException
+class CancelledRequestException extends Exception
+
+// Channel exceptions are failures on the channels themselves.
+class ChannelException                      extends Exception
+class ConnectionFailedException             extends ChannelException
+class ChannelClosedException                extends ChannelException
+class UnknownChannelException(e: Throwable) extends ChannelException
 
 // Subclass this for application exceptions
 class ApplicationException extends Exception
 
-class CancelledConnectionException extends Exception
-
 // API misuse errors.
-class DiscoException extends Exception
-class TooManyDicksOnTheDanceFloorException extends DiscoException
-class TooFewDicksOnTheDanceFloorException  extends DiscoException
-class InvalidPipelineException extends Exception
-
-
-// XXXTODO: broker for implementing healthfailure policies.
-// (healthcheckingbroker).  can be layered on top of loadedbroker.
+class ApiException                         extends Exception
+class TooManyDicksOnTheDanceFloorException extends ApiException
+class TooFewDicksOnTheDanceFloorException  extends ApiException
+class InvalidPipelineException             extends ApiException
+class NotYetConnectedException             extends ApiException

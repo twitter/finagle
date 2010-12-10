@@ -5,10 +5,13 @@ class Project(info: ProjectInfo)
   extends StandardProject(info)
   with LibDirClasspath
   with InlineDependencies
+  with SubversionPublisher
 {
   override def compileOrder = CompileOrder.ScalaThenJava
   override def managedStyle = ManagedStyle.Maven
   override def disableCrossPaths = true
+  override def subversionRepository =
+    Some("http://svn.local.twitter.com/maven-public")
 
   val nettyRepo =
     ("repository.jboss.org"

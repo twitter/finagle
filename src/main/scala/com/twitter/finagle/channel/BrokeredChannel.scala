@@ -2,7 +2,6 @@ package com.twitter.finagle.channel
 
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
-import java.nio.channels.NotYetConnectedException
 
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local.LocalAddress
