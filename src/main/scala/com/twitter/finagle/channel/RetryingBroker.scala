@@ -18,7 +18,11 @@ trait RetryingBrokerBase extends Broker {
   def retryFuture(channel: Channel): ChannelFuture
   val underlying: Broker
 
-  class WrappingMessageEvent(channel: Channel, future: ChannelFuture, message: AnyRef, remoteAddress: SocketAddress)
+  class WrappingMessageEvent(
+      channel: Channel,
+      future: ChannelFuture,
+      message: AnyRef,
+      remoteAddress: SocketAddress)
     extends MessageEvent
   {
     override def getRemoteAddress = remoteAddress

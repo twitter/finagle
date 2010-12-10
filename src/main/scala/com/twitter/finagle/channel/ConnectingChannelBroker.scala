@@ -30,16 +30,15 @@ trait ConnectingChannelBroker extends Broker {
         replyFuture.setFailure(cause)
 
       case Cancelled =>
-        replyFuture.setFailure(new CancelledConnectionException)
+        replyFuture.setFailure(new CancelledRequestException)
     }
 
     replyFuture
   }
 
   protected def connectChannel(
-    to: Channel, e: MessageEvent,
-    replyFuture: ReplyFuture): ChannelFuture
-  =
+      to: Channel, e: MessageEvent,
+      replyFuture: ReplyFuture): ChannelFuture =
     to.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
         adapter.writeAndRegisterReply(to, e, replyFuture)

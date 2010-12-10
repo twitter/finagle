@@ -62,7 +62,7 @@ class ConnectionLimitingChannelPool(
             channelFuture.setFailure(cause)
             serialized { connectionsMade -= 1 }
           case Cancelled =>
-            channelFuture.setFailure(new CancelledConnectionException)
+            channelFuture.setFailure(new CancelledRequestException)
             serialized { connectionsMade -= 1 }
         }
       } else {
