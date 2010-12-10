@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.http.RequestLifecycleSpy
 
-class Http(val compressionLevel: Int = 0) extends Codec {
+class Http(compressionLevel: Int = 0) extends Codec {
   val clientPipelineFactory: ChannelPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
@@ -32,6 +32,6 @@ class Http(val compressionLevel: Int = 0) extends Codec {
     }
 }
 
-object Http extends Http
+object Http extends Http(0)
 
 object HttpWithCompression extends Http(6)
