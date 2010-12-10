@@ -16,8 +16,8 @@ class UnknownChannelException(e: Throwable) extends ChannelException
 class ApplicationException extends Exception
 
 // API misuse errors.
-class DiscoException extends Exception
-class TooManyDicksOnTheDanceFloorException extends DiscoException
-class TooFewDicksOnTheDanceFloorException  extends DiscoException
-class InvalidPipelineException extends Exception
-
+class ApiException                         extends Exception
+class TooManyDicksOnTheDanceFloorException extends ApiException
+class TooFewDicksOnTheDanceFloorException  extends ApiException
+class InvalidPipelineException             extends ApiException
+class NotYetConnectedException             extends ApiException

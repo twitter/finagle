@@ -1,7 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.nio.channels.ClosedChannelException
-
 import com.twitter.finagle.util.{Error, Ok, Cancelled}
 import com.twitter.finagle.util.Conversions._
 import org.jboss.netty.channel._

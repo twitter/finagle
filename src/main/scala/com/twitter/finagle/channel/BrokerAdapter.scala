@@ -40,7 +40,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
     doneFuture.setSuccess()
   }
 
-  def fail(cause: Throwable) {
+  def fail(cause: ChannelException) {
     val replyFuture = currentReplyFuture.get
     if (replyFuture eq null)
       return  // TODO: report?

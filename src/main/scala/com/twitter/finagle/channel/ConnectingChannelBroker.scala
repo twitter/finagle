@@ -1,7 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.nio.channels.ClosedChannelException
-
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
