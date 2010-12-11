@@ -41,6 +41,13 @@ object LoadedBrokerSpec extends Specification with Mockito {
       rcBroker1.load must be_==(3)
       rcBroker2.load must be_==(4)
     }
+
+    "be unavailable when the underlying broker is unavailable" in {
+      val broker = mock[Broker]
+      broker.isAvailable returns false
+      val loadedBroker = new StatsLoadedBroker(broker, new Repo)
+      loadedBroker.isAvailable must beFalse
+    }
   }
 
   "FailureAccruingLoadedBroker" should {
@@ -109,6 +116,12 @@ object LoadedBrokerSpec extends Specification with Mockito {
       underlying.weight returns 1.0f
       broker.weight must be_==(0.5f)
     }
+
+    "become unavailable when the success rate is 0" in {
+      successSample.count returns 0
+      failureSample.count returns 1
+      broker.isAvailable must beFalse      
+    }
   }
 
   "LeastLoadedBroker" should {
@@ -166,10 +179,11 @@ object LoadedBrokerSpec extends Specification with Mockito {
       there was one(b0).dispatch(me)
     }
 
-    "when there are no endpoints, returns a failed future" in {
+    "when there are no endpoints, is not available and returns a failed future" in {
       val lb = new LoadBalancedBroker(List.empty)
       val f: ReplyFuture = lb.dispatch(mock[MessageEvent])
-      f.getCause must haveClass[TooFewDicksOnTheDanceFloorException]
+      lb.isAvailable must beFalse
+      f.getCause must haveClass[NoBrokersAvailableException]
     }
   }
 }

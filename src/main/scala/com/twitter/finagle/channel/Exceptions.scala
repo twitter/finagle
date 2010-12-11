@@ -1,10 +1,11 @@
 package com.twitter.finagle.channel
 
 // Request failures (eg. for request behavior changing brokers.)
-class RequestException          extends Exception
-class TimedoutRequestException  extends RequestException
-class RetryFailureException     extends RequestException
-class CancelledRequestException extends RequestException
+class RequestException            extends Exception
+class TimedoutRequestException    extends RequestException
+class RetryFailureException       extends RequestException
+class CancelledRequestException   extends RequestException
+class NoBrokersAvailableException extends RequestException
 
 // Channel exceptions are failures on the channels themselves.
 class ChannelException                      extends Exception

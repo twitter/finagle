@@ -6,7 +6,9 @@ import org.jboss.netty.channel.{Channels, Channel, MessageEvent}
 import com.twitter.finagle.util.{Ok, Error}
 import com.twitter.finagle.util.Conversions._
 
-class BootstrapBroker(bootstrap: BrokerClientBootstrap) extends ConnectingChannelBroker {
+class BootstrapBroker(bootstrap: BrokerClientBootstrap)
+  extends ConnectingChannelBroker
+{
   if (bootstrap.getOption("remoteAddress") eq null)
     throw new IllegalArgumentException("bootstrap remoteAddress is required")
 

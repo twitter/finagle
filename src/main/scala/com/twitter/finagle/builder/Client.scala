@@ -54,7 +54,8 @@ case class ClientBuilder(
   _initialBackoff: Option[Duration],
   _backoffMultiplier: Option[Int],
   _logger: Option[Logger],
-  _channelFactory: Option[ChannelFactory])
+  _channelFactory: Option[ChannelFactory],
+  _proactivelyConnect: Option[Duration])
 {
   import ClientBuilder._
   def this() = this(
@@ -75,7 +76,8 @@ case class ClientBuilder(
     None,                                            // initialBackoff
     None,                                            // backoffMultiplier
     None,                                            // logger
-    None                                             // channelFactory
+    None,                                            // channelFactory
+    None                                             // proactivelyConnect
   )
 
   def hosts(hostnamePortCombinations: String) =
@@ -127,6 +129,9 @@ case class ClientBuilder(
   def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
 
+  def proactivelyConnect(duration: Duration) =
+    copy(_proactivelyConnect = Some(duration))
+
   // ** BUILDING
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
@@ -155,12 +160,13 @@ case class ClientBuilder(
     bs
   }
 
-  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) =
+  private def pool(limit: Option[Int], proactivelyConnect: Option[Duration])
+                  (bootstrap: BrokerClientBootstrap) =
     limit match {
       case Some(limit) =>
-        new ConnectionLimitingChannelPool(bootstrap, limit)
+        new ConnectionLimitingChannelPool(bootstrap, limit, proactivelyConnect)
       case None =>
-        new ChannelPool(bootstrap)
+        new ChannelPool(bootstrap, proactivelyConnect)
     }
 
   private def timeout(timeout: Timeout)(broker: Broker) =
@@ -215,11 +221,11 @@ case class ClientBuilder(
   def makeBroker(
     codec: Codec,
     statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }]) =
-      bootstrap(codec) _                    andThen
-      pool(_hostConnectionLimit) _          andThen
-      (new PoolingBroker(_))                andThen
-      timeout(_requestTimeout) _            andThen
-      (new StatsLoadedBroker(_, statsRepo)) andThen
+      bootstrap(codec) _                                andThen
+      pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
+      (new PoolingBroker(_))                            andThen
+      timeout(_requestTimeout) _                        andThen
+      (new StatsLoadedBroker(_, statsRepo))             andThen
         failureAccrualBroker(_failureAccrualWindow) _
 
   def build(): Broker = {

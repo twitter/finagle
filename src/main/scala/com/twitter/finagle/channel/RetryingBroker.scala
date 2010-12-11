@@ -89,12 +89,10 @@ class ExponentialBackoffRetryingBroker(val underlying: Broker, initial: Duration
   def retryFuture(channel: Channel) = {
     val future = Channels.future(channel)
 
-    timer.newTimeout(new TimerTask {
-      def run(to: Timeout) {
-        ExponentialBackoffRetryingBroker.this.delay *= multiplier
-        future.setSuccess()
-      }
-    }, delay.inMilliseconds, TimeUnit.MILLISECONDS)
+    timer(delay) {
+      ExponentialBackoffRetryingBroker.this.delay *= multiplier
+      future.setSuccess()
+    }
 
     future
   }

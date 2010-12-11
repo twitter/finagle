@@ -21,7 +21,8 @@ import com.twitter.finagle.util.Conversions._
  */
 trait LoadedBroker[+A <: LoadedBroker[A]] extends Broker {
   def load: Int
-  def weight: Float = 1.0f / (load.toFloat + 1.0f)
+  def weight: Float = if (!super.isAvailable) 0.0f else 1.0f / (load.toFloat + 1.0f)
+  override def isAvailable = super.isAvailable && weight > 0.0f
 }
 
 /**
@@ -48,7 +49,8 @@ class StatsLoadedBroker(
         case Error(e) =>
           // TODO: exception hierarchy here to differentiate between
           // application, connection & other (internal?) exceptions.
-          samples("exception", e.getClass.getName).add(begin.ago.inMilliseconds.toInt)
+          samples("exception", e.getClass.getName)
+            .add(begin.ago.inMilliseconds.toInt)
         case Cancelled => /*ignore*/ ()
       }
     }
@@ -97,22 +99,35 @@ class FailureAccruingLoadedBroker(
   }
 }
 
-class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker {
-  implicit val ordering: Ordering[A] = Ordering.by(_.load)
-  def dispatch(e: MessageEvent) = endpoints.min.dispatch(e)
-  override def isAvailable = endpoints.find(_.isAvailable) isDefined
+abstract class LoadBalancingBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
+  extends Broker
+{
+  override def isAvailable = endpoints.find(_.isAvailable).isDefined
 }
 
-class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker {
+class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
+  extends LoadBalancingBroker[A](endpoints)
+{
+  def dispatch(e: MessageEvent) = {
+    val candidates = endpoints.filter(_.weight > 0.0f)
+    if (candidates isEmpty)
+      ReplyFuture.failed(new NoBrokersAvailableException)      
+    else
+      candidates.min(Ordering.by((_: A).load)).dispatch(e)
+  }
+}
+
+class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
+  extends LoadBalancingBroker[A](endpoints)
+{
   val rng = new Random
 
   def dispatch(e: MessageEvent): ReplyFuture = {
     val snapshot = endpoints map { e => (e, e.weight) }
-    val totalSum = snapshot.foldLeft(0.0f) { case (a, (_, weight)) => a + weight }
+    val totalSum = snapshot map { case (_, w) => w } sum
 
-    // TODO: test this & other edge cases
     if (totalSum <= 0.0f)
-      return ReplyFuture.failed(new TooFewDicksOnTheDanceFloorException)
+      return ReplyFuture.failed(new NoBrokersAvailableException)
 
     val pick = rng.nextFloat()
     var cumulativeWeight = 0.0
@@ -123,8 +138,8 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A]) extends Broker
         return endpoint.dispatch(e)
     }
 
-    null // Impossible
+    // The above loop should have returned.
+    ReplyFuture.failed(
+      new InternalError("Impossible load balancing condition"))
   }
-
-  override def isAvailable = endpoints.find(_.isAvailable) isDefined
 }
