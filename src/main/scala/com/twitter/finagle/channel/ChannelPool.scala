@@ -50,7 +50,12 @@ class ChannelPool(
     }
   }
 
-  connectRetryPeriod foreach { period => tryToConnect(period) }
+  connectRetryPeriod match {
+    case Some(period) => tryToConnect(period)
+    case None => _isAvailable = true
+  }
+
+  // connectRetryPeriod foreach { period => tryToConnect(period) }
 
   protected def enqueue(channel: Channel) { channelQueue offer channel }
   protected def dequeue() = {

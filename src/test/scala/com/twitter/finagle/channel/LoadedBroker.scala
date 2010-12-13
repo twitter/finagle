@@ -144,6 +144,26 @@ object LoadedBrokerSpec extends Specification with Mockito {
       leastLoadedBroker.dispatch(request)
       there was one(loadedBroker2).dispatch(request)
     }
+
+
+    "fails when unavailable" in {
+      val b1 = spy(new FakeLoadedBroker)
+      val b2 = spy(new FakeLoadedBroker)
+
+      b1.load returns 0
+      b1.weight returns 0.0f
+
+      b2.load returns 0
+      b2.weight returns 0.0f
+
+      b1.isAvailable must beFalse
+      b2.isAvailable must beFalse
+
+      val b = new LeastLoadedBroker(Seq(b1, b2))
+      val f = b.dispatch(mock[MessageEvent])
+      f.isSuccess must beFalse
+      f.getCause must haveClass[NoBrokersAvailableException]
+    }
   }
 
   "LoadBalancedBroker" should {
@@ -183,6 +203,25 @@ object LoadedBrokerSpec extends Specification with Mockito {
       val lb = new LoadBalancedBroker(List.empty)
       val f: ReplyFuture = lb.dispatch(mock[MessageEvent])
       lb.isAvailable must beFalse
+      f.getCause must haveClass[NoBrokersAvailableException]
+    }
+
+    "fails when unavailable" in {
+      val b1 = spy(new FakeLoadedBroker)
+      val b2 = spy(new FakeLoadedBroker)
+
+      b1.load returns 0
+      b1.weight returns 0.0f
+
+      b2.load returns 0
+      b2.weight returns 0.0f
+
+      b1.isAvailable must beFalse
+      b2.isAvailable must beFalse
+
+      val b = new LoadBalancedBroker(Seq(b1, b2))
+      val f = b.dispatch(mock[MessageEvent])
+      f.isSuccess must beFalse
       f.getCause must haveClass[NoBrokersAvailableException]
     }
   }
