@@ -26,7 +26,7 @@ class Project(info: ProjectInfo)
 
   // com.twitter deps:
   inline("com.twitter" % "ostrich" % "2.3.0")
-  inline("com.twitter" % "util"    % "1.2.5")
+  inline("com.twitter" % "util"    % "1.2.7")
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
