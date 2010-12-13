@@ -40,7 +40,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
     doneFuture.setSuccess()
   }
 
-  def fail(cause: Throwable) {
+  def fail(cause: ChannelException) {
     val replyFuture = currentReplyFuture.get
     if (replyFuture eq null)
       return  // TODO: report?
@@ -50,7 +50,19 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    fail(e.getCause)
+    // Translate the exception to Finagle request
+    val translated =
+      e.getCause match {
+        case _: java.net.ConnectException =>
+          new ConnectionFailedException
+        case _: java.nio.channels.UnresolvedAddressException =>
+          new ConnectionFailedException
+
+        case e =>
+          new UnknownChannelException(e)
+      }
+
+    fail(translated)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {

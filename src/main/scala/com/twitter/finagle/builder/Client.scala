@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import collection.JavaConversions._
 
-import java.net.InetSocketAddress
+import java.net.{SocketAddress, InetSocketAddress}
 import java.util.Collection
 import java.util.logging.Logger
 import java.util.concurrent.{TimeUnit, Executors}
@@ -16,13 +16,13 @@ import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
-import com.twitter.finagle.stub
+import com.twitter.finagle.service
 
 object ClientBuilder {
   def apply() = new ClientBuilder
   def get() = apply()
 
-  val channelFactory =
+  val defaultChannelFactory =
     new NioClientSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
@@ -37,7 +37,7 @@ object ClientBuilder {
 
 // We're nice to java.
 case class ClientBuilder(
-  _hosts: Option[Seq[InetSocketAddress]],
+  _hosts: Option[Seq[SocketAddress]],
   _codec: Option[Codec],
   _connectionTimeout: Timeout,
   _requestTimeout: Timeout,
@@ -53,7 +53,9 @@ case class ClientBuilder(
   _retries: Option[Int],
   _initialBackoff: Option[Duration],
   _backoffMultiplier: Option[Int],
-  _logger: Option[Logger])
+  _logger: Option[Logger],
+  _channelFactory: Option[ChannelFactory],
+  _proactivelyConnect: Option[Duration])
 {
   import ClientBuilder._
   def this() = this(
@@ -73,13 +75,15 @@ case class ClientBuilder(
     None,                                            // retries
     None,                                            // initialBackoff
     None,                                            // backoffMultiplier
-    None                                             // logger
+    None,                                            // logger
+    None,                                            // channelFactory
+    None                                             // proactivelyConnect
   )
 
   def hosts(hostnamePortCombinations: String) =
     copy(_hosts = Some(parseHosts(hostnamePortCombinations)))
 
-  def hosts(addresses: Collection[InetSocketAddress]) =
+  def hosts(addresses: Collection[SocketAddress]) =
     copy(_hosts = Some(addresses toSeq))
 
   def codec(codec: Codec) =
@@ -122,11 +126,17 @@ case class ClientBuilder(
   def failureAccrualWindow(value: Long, unit: TimeUnit) =
     copy(_failureAccrualWindow = Timeout(value, unit))
 
+  def channelFactory(cf: ChannelFactory) =
+    copy(_channelFactory = Some(cf))
+
+  def proactivelyConnect(duration: Duration) =
+    copy(_proactivelyConnect = Some(duration))
+
   // ** BUILDING
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
-  private def bootstrap(codec: Codec)(host: InetSocketAddress) = {
-    val bs = new BrokerClientBootstrap(channelFactory)
+  private def bootstrap(codec: Codec)(host: SocketAddress) = {
+    val bs = new BrokerClientBootstrap(_channelFactory getOrElse defaultChannelFactory)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.clientPipelineFactory.getPipeline
@@ -150,12 +160,13 @@ case class ClientBuilder(
     bs
   }
 
-  private def pool(limit: Option[Int])(bootstrap: BrokerClientBootstrap) =
+  private def pool(limit: Option[Int], proactivelyConnect: Option[Duration])
+                  (bootstrap: BrokerClientBootstrap) =
     limit match {
       case Some(limit) =>
-        new ConnectionLimitingChannelPool(bootstrap, limit)
+        new ConnectionLimitingChannelPool(bootstrap, limit, proactivelyConnect)
       case None =>
-        new ChannelPool(bootstrap)
+        new ChannelPool(bootstrap, proactivelyConnect)
     }
 
   private def timeout(timeout: Timeout)(broker: Broker) =
@@ -172,7 +183,7 @@ case class ClientBuilder(
     }
 
   private def statsRepositoryForLoadedBroker(
-    host: InetSocketAddress,
+    sockAddr: SocketAddress,
     name: Option[String],
     receiver: Option[StatsReceiver],
     sampleWindow: Timeout,
@@ -192,7 +203,7 @@ case class ClientBuilder(
       }
 
     for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, host)
+      sampleRepository observeTailsWith receiver.observer(prefix, sockAddr toString)
 
     sampleRepository
   }
@@ -210,11 +221,11 @@ case class ClientBuilder(
   def makeBroker(
     codec: Codec,
     statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }]) =
-      bootstrap(codec) _                    andThen
-      pool(_hostConnectionLimit) _          andThen
-      (new PoolingBroker(_))                andThen
-      timeout(_requestTimeout) _            andThen
-      (new StatsLoadedBroker(_, statsRepo)) andThen
+      bootstrap(codec) _                                andThen
+      pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
+      (new PoolingBroker(_))                            andThen
+      timeout(_requestTimeout) _                        andThen
+      (new StatsLoadedBroker(_, statsRepo))             andThen
         failureAccrualBroker(_failureAccrualWindow) _
 
   def build(): Broker = {
@@ -235,7 +246,7 @@ case class ClientBuilder(
       val broker = makeBroker(codec, statsRepo)(host)
 
       if (_exportLoadsToOstrich) {
-        val hostString = "%s:%d".format(host.getHostName, host.getPort)
+        val hostString = host.toString
         ostrich.Stats.makeGauge(hostString + "_load")   { broker.load   }
         ostrich.Stats.makeGauge(hostString + "_weight") { broker.weight }
       }
@@ -246,6 +257,6 @@ case class ClientBuilder(
     retrying(new LoadBalancedBroker(brokers))
   }
 
-  def buildStub[Request <: AnyRef, Reply <: AnyRef]() =
-    new stub.Client[Request, Reply](build())
+  def buildService[Request <: AnyRef, Reply <: AnyRef]() =
+    new service.Client[Request, Reply](build())
 }

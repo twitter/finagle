@@ -56,7 +56,25 @@ object ReplyFuture {
 }
 
 trait Broker extends SocketAddress {
+  /**
+   * Dispatches the given request on this broker. A future for the
+   * results of the dispatch is returned.
+   */
   def dispatch(request: MessageEvent): ReplyFuture
+
+  /**
+   * Describes availability of the broker: when false, the broker is
+   * unable to accept requests (and thus any dispatched requests
+   * should fail immediately - though no such guarnatees are made.)
+   */
+  def isAvailable: Boolean = true
+}
+
+trait WrappingBroker extends Broker {
+  val underlying: Broker
+
+  def dispatch(request: MessageEvent) = underlying.dispatch(request)
+  override def isAvailable = underlying.isAvailable
 }
 
 object Broker {

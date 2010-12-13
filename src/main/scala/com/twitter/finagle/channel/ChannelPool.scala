@@ -6,12 +6,51 @@ import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{Channels, Channel}
 import java.util.concurrent.ConcurrentLinkedQueue
 
+import com.twitter.util.{Time, Duration}
+import com.twitter.util.TimeConversions._
+
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 
-class ChannelPool(clientBootstrap: BrokerClientBootstrap) extends Serialized
+class ChannelPool(
+    clientBootstrap: BrokerClientBootstrap,
+    connectRetryPeriod: Option[Duration] = None)
+  extends Serialized
 {
-  private val channelQueue = new ConcurrentLinkedQueue[Channel]
+  @volatile private[this] var _isAvailable = false
+  @volatile private[this] var lastConnectAttempt = Time.never
+
+  private[this] val channelQueue = new ConcurrentLinkedQueue[Channel]
+
+  // > TODO
+  //     On boot, we attempt to connect. We set our availability state
+  //     when successful. Currently we don't maintain such a heartbeat
+  //     except for the initial connection attempt. We may consider
+  //     keeping a core size, being unavailable unless the number of
+  //     connections is strictly positive.
+  def tryToConnect(period: Duration) {
+    val timeSinceLastConnectAttempt = lastConnectAttempt.ago
+
+    if (timeSinceLastConnectAttempt < period) {
+      Broker.timer(period - timeSinceLastConnectAttempt) {
+        tryToConnect(period)
+      }
+    } else {
+      lastConnectAttempt = Time.now
+      reserve() {
+        case Ok(channel) =>
+          release(channel)
+          _isAvailable = true
+        case Cancelled =>
+          tryToConnect(period)
+        case Error(_) => 
+          tryToConnect(period)
+      }
+    }
+  }
+
+  connectRetryPeriod foreach { period => tryToConnect(period) }
+
   protected def enqueue(channel: Channel) { channelQueue offer channel }
   protected def dequeue() = {
     var channel: Channel = null
@@ -33,6 +72,8 @@ class ChannelPool(clientBootstrap: BrokerClientBootstrap) extends Serialized
     if (isHealthy(channel)) enqueue(channel)
   }
 
+  def isAvailable = _isAvailable
+
   protected def make() = clientBootstrap.connect()
   protected def isHealthy(channel: Channel) = channel.isOpen
 
@@ -41,8 +82,9 @@ class ChannelPool(clientBootstrap: BrokerClientBootstrap) extends Serialized
 
 class ConnectionLimitingChannelPool(
   clientBootstrap: BrokerClientBootstrap,
-  connectionLimit: Int)
-  extends ChannelPool(clientBootstrap)
+  connectionLimit: Int,
+  connectRetryPeriod: Option[Duration] = None)
+  extends ChannelPool(clientBootstrap, connectRetryPeriod)
 {
   private var connectionsMade = 0
   private val awaitingChannelQueue = new Queue[LatentChannelFuture]
@@ -62,7 +104,7 @@ class ConnectionLimitingChannelPool(
             channelFuture.setFailure(cause)
             serialized { connectionsMade -= 1 }
           case Cancelled =>
-            channelFuture.setFailure(new CancelledConnectionException)
+            channelFuture.setFailure(new CancelledRequestException)
             serialized { connectionsMade -= 1 }
         }
       } else {

@@ -163,8 +163,3 @@ class RichChannelFuture(val self: ChannelFuture) {
     self.addListener(ChannelFutureListener.CLOSE)
  }
 }
-
-object Conversions {
-  implicit def channelFutureToRichChannelFuture(f: ChannelFuture) =
-    new RichChannelFuture(f)
-}

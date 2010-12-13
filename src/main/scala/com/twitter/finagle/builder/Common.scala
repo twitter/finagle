@@ -17,6 +17,7 @@ trait Codec {
 // Java convenience.
 object Codec4J {
   val http = Http
+  val httpWithCompression = HttpWithCompression
   val thrift = Thrift
 }
 
@@ -26,7 +27,7 @@ object StatsReporter4J {
 }
 
 trait StatsReceiver {
-  def observer(prefix: String, host: InetSocketAddress): (Seq[String], Int, Int) => Unit
+  def observer(prefix: String, label: String): (Seq[String], Int, Int) => Unit
 }
 
 case class Timeout(value: Long, unit: TimeUnit) {

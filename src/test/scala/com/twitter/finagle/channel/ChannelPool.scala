@@ -4,9 +4,11 @@ import java.util.concurrent.Executors
 
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.{Channel, Channels, ChannelFuture}
+import org.jboss.netty.channel.{Channel, Channels, ChannelFuture, DefaultChannelFuture}
 import org.specs.Specification
 import org.specs.mock.Mockito
+
+import com.twitter.util.TimeConversions._
 
 object ChannelPoolSpec extends Specification with Mockito {
   "ChannelPool" should {
@@ -30,6 +32,7 @@ object ChannelPoolSpec extends Specification with Mockito {
       cp.reserve().getChannel mustEqual c1
       bs.connect returns f2
       cp.reserve().getChannel mustEqual c2
+
       there were two(bs).connect()
     }
 
@@ -48,7 +51,30 @@ object ChannelPoolSpec extends Specification with Mockito {
     }
   }
 
-  "ConnectionLimitingChannelPool" should {
+  "ChannelPooling(connecting)" in {
+    val bs = mock[BrokerClientBootstrap]
+    val c1 = mock[Channel]
+    val f1 = new DefaultChannelFuture(c1, false)
+
+    c1.isOpen returns true
+    bs.connect() returns f1
+    val cp = new ChannelPool(bs, Some(10.seconds))
+
+    "a connection attempt should be made at startup" in {
+      there was one(bs).connect()
+    }
+
+    "return the reserved channel on success" in {
+      f1.setSuccess()
+      there was one(bs).connect()
+
+      cp.reserve().getChannel mustEqual c1
+
+      there was one(bs).connect()
+    }
+  }
+
+  "connectionlimitingchannelpool" should {
     val bs = mock[BrokerClientBootstrap]
     val cp = new ConnectionLimitingChannelPool(bs, 10)
     val c1 = mock[Channel]

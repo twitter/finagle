@@ -4,7 +4,6 @@ import org.specs.Specification
 import org.jboss.netty.buffer.ChannelBuffers
 import java.nio.charset.Charset
 import org.specs.mock.Mockito
-import java.nio.channels.NotYetConnectedException
 import java.util.concurrent.TimeUnit
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local.LocalAddress
@@ -22,7 +21,6 @@ object BrokeredChannelSpec extends Specification with Mockito {
         ReplyFuture.success(mock[Object])
       }
     }
-
 
     "before you connect" in {
       "writing throws an exception" in {

@@ -2,14 +2,16 @@ package com.twitter.finagle.builder
 
 import scala.collection.JavaConversions._
 
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.concurrent.{TimeUnit, Executors}
 import java.util.logging.Logger
+import javax.net.ssl.{KeyManager, SSLContext}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.ostrich
@@ -20,13 +22,13 @@ import com.twitter.finagle._
 import com.twitter.finagle.channel.PartialUpstreamMessageEvent
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.stub.{Stub, StubPipelineFactory}
+import com.twitter.finagle.service.{Service, ServicePipelineFactory}
 
 object ServerBuilder {
   def apply() = new ServerBuilder()
   def get() = apply()
 
-  val channelFactory =
+  val defaultChannelFactory =
     new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
@@ -89,8 +91,11 @@ case class ServerBuilder(
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _pipelineFactory: Option[ChannelPipelineFactory],
-  _bindTo: Option[InetSocketAddress],
-  _logger: Option[Logger])
+  _bindTo: Option[SocketAddress],
+  _logger: Option[Logger],
+  _tls: Option[SSLContext],
+  _startTls: Boolean,
+  _channelFactory: Option[ChannelFactory])
 {
   import ServerBuilder._
 
@@ -106,7 +111,10 @@ case class ServerBuilder(
     None,                                           // recvBufferSize
     None,                                           // pipelineFactory
     None,                                           // bindTo
-    None                                            // logger
+    None,                                           // logger
+    None,                                           // tls
+    false,                                          // startTls
+    None                                            // channelFactory
   )
 
   def codec(codec: Codec) =
@@ -135,20 +143,29 @@ case class ServerBuilder(
   def pipelineFactory(value: ChannelPipelineFactory) =
     copy(_pipelineFactory = Some(value))
 
-  def stub[Req <: AnyRef, Rep <: AnyRef](stub: Stub[Req, Rep]) =
-    copy(_pipelineFactory = Some(StubPipelineFactory(stub)))
+  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
+    copy(_pipelineFactory = Some(ServicePipelineFactory(service)))
 
-  def bindTo(address: InetSocketAddress) =
+  def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
 
+  def channelFactory(cf: ChannelFactory) =
+    copy(_channelFactory = Some(cf))
+
   def logger(logger: Logger) = copy(_logger = Some(logger))
+
+  def tls(path: String, password: String) =
+    copy(_tls = Some(Ssl(path, password)))
+
+  def startTls(value: Boolean) =
+    copy(_startTls = true)
 
   private def statsRepository(
     name: Option[String],
     receiver: Option[StatsReceiver],
     sampleWindow: Timeout,
     sampleGranularity: Timeout,
-    host: InetSocketAddress) =
+    sockAddr: SocketAddress) =
   {
     val window      = sampleWindow.duration
     val granularity = sampleGranularity.duration
@@ -164,7 +181,7 @@ case class ServerBuilder(
       }
 
     for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, host)
+      sampleRepository observeTailsWith receiver.observer(prefix, sockAddr toString)
 
     sampleRepository
   }
@@ -179,7 +196,7 @@ case class ServerBuilder(
         (codec, pipeline)
     }
 
-   val bs = new ServerBootstrap(channelFactory)
+   val bs = new ServerBootstrap(_channelFactory getOrElse defaultChannelFactory)
 
     bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)
@@ -199,6 +216,15 @@ case class ServerBuilder(
         for (logger <- _logger) {
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
+        }
+
+
+        // SSL comes first so that ChannelSnooper gets plaintext
+        for (ctx <- _tls) {
+          val sslEngine = ctx.createSSLEngine()
+          sslEngine.setUseClientMode(false)
+          sslEngine.setEnableSessionCreation(true)
+          pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
         pipeline.addLast("stats", new SampleHandler(statsRepo))

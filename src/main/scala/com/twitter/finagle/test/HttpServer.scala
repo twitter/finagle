@@ -8,7 +8,7 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.ostrich
 import com.twitter.finagle.builder._
-import com.twitter.finagle.stub._
+import com.twitter.finagle.service._
 
 import com.twitter.util.Future
 import com.twitter.ostrich.RuntimeEnvironment
@@ -44,8 +44,8 @@ object HttpServer extends ostrich.Service {
       }
     }
 
-    val server = new Stub[HttpRequest, HttpResponse] {
-      def call(request: HttpRequest) = Future {
+    val server = new Service[HttpRequest, HttpResponse] {
+      def apply(request: HttpRequest) = Future {
         val response = new DefaultHttpResponse(
           HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
         response.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes))
@@ -56,7 +56,7 @@ object HttpServer extends ostrich.Service {
     ServerBuilder()
      .codec(Http)
      .reportTo(Ostrich())
-     .stub(server)
+     .service(server)
      .bindTo(new InetSocketAddress(10000))
      .build
   }

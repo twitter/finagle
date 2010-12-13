@@ -14,11 +14,15 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Duration
 
-trait RetryingBrokerBase extends Broker {
+trait RetryingBrokerBase extends WrappingBroker {
   def retryFuture(channel: Channel): ChannelFuture
   val underlying: Broker
 
-  class WrappingMessageEvent(channel: Channel, future: ChannelFuture, message: AnyRef, remoteAddress: SocketAddress)
+  class WrappingMessageEvent(
+      channel: Channel,
+      future: ChannelFuture,
+      message: AnyRef,
+      remoteAddress: SocketAddress)
     extends MessageEvent
   {
     override def getRemoteAddress = remoteAddress
@@ -27,7 +31,7 @@ trait RetryingBrokerBase extends Broker {
     override def getChannel = channel
   }
 
-  def dispatch(e: MessageEvent): ReplyFuture = {
+  override def dispatch(e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
     val interceptErrors = Channels.future(e.getChannel)
     interceptErrors {
@@ -85,12 +89,10 @@ class ExponentialBackoffRetryingBroker(val underlying: Broker, initial: Duration
   def retryFuture(channel: Channel) = {
     val future = Channels.future(channel)
 
-    timer.newTimeout(new TimerTask {
-      def run(to: Timeout) {
-        ExponentialBackoffRetryingBroker.this.delay *= multiplier
-        future.setSuccess()
-      }
-    }, delay.inMilliseconds, TimeUnit.MILLISECONDS)
+    timer(delay) {
+      ExponentialBackoffRetryingBroker.this.delay *= multiplier
+      future.setSuccess()
+    }
 
     future
   }
