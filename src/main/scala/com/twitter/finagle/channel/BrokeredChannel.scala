@@ -5,8 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local.LocalAddress
+import com.twitter.concurrent.Serialized
 
-import com.twitter.finagle.util.{Ok, Error, Cancelled, Serialized}
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
 class BrokeredChannel(

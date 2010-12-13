@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import com.twitter.util.{Time, Duration}
 import com.twitter.util.TimeConversions._
+import com.twitter.concurrent.Serialized
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
