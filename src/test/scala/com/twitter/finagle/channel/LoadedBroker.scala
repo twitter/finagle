@@ -53,7 +53,6 @@ object LoadedBrokerSpec extends Specification with Mockito {
       val broker = mock[Broker]
       broker.isAvailable returns false
       val loadedBroker = new StatsLoadedBroker(broker, new Repo)
-      loadedBroker.isSuperAvailable must beFalse
       loadedBroker.weight must be_==(0.0)
     }
   }
