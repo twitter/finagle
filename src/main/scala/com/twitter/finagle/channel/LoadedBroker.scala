@@ -22,7 +22,7 @@ import com.twitter.finagle.util.Conversions._
 trait LoadedBroker[+A <: LoadedBroker[A]] extends Broker {
   def load: Int
   def weight: Float = if (!super.isAvailable) 0.0f else 1.0f / (load.toFloat + 1.0f)
-  override def isAvailable = super.isAvailable && weight > 0.0f
+  override def isAvailable = weight > 0.0f
 }
 
 /**
@@ -32,8 +32,8 @@ class StatsLoadedBroker(
     val underlying: Broker,
     samples: SampleRepository[T forSome { type T <: AddableSample[T] }],
     bias: Float = 1.0f)
-  extends LoadedBroker[StatsLoadedBroker]
-  with WrappingBroker
+  extends WrappingBroker
+  with LoadedBroker[StatsLoadedBroker]
 {
   val dispatchSample = samples("dispatch")
   val latencySample  = samples("latency")
@@ -65,8 +65,8 @@ class StatsLoadedBroker(
 class FailureAccruingLoadedBroker(
     val underlying: LoadedBroker[_],
     samples: SampleRepository[TimeWindowedSample[_]])
-  extends LoadedBroker[FailureAccruingLoadedBroker]
-  with WrappingBroker
+  extends WrappingBroker
+  with LoadedBroker[FailureAccruingLoadedBroker]
 {
   val successSample = samples("success")
   val failureSample = samples("failure")
@@ -111,7 +111,7 @@ class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
   def dispatch(e: MessageEvent) = {
     val candidates = endpoints.filter(_.weight > 0.0f)
     if (candidates isEmpty)
-      ReplyFuture.failed(new NoBrokersAvailableException)      
+      ReplyFuture.failed(new NoBrokersAvailableException)
     else
       candidates.min(Ordering.by((_: A).load)).dispatch(e)
   }

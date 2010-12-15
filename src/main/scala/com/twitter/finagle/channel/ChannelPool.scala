@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import com.twitter.util.{Time, Duration}
 import com.twitter.util.TimeConversions._
+import com.twitter.concurrent.Serialized
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
@@ -28,6 +29,12 @@ class ChannelPool(
   //     except for the initial connection attempt. We may consider
   //     keeping a core size, being unavailable unless the number of
   //     connections is strictly positive.
+  //
+  //     We may also consider backing off the connection retries.
+  //     Note that this connection level health checking is unecessary
+  //     if there exists more generic application level health checks,
+  //     as an application would decidedly be unhealthy on connection
+  //     failure.
   def tryToConnect(period: Duration) {
     val timeSinceLastConnectAttempt = lastConnectAttempt.ago
 
@@ -49,7 +56,10 @@ class ChannelPool(
     }
   }
 
-  connectRetryPeriod foreach { period => tryToConnect(period) }
+  connectRetryPeriod match {
+    case Some(period) => tryToConnect(period)
+    case None => _isAvailable = true
+  }
 
   protected def enqueue(channel: Channel) { channelQueue offer channel }
   protected def dequeue() = {

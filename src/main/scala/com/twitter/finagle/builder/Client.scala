@@ -247,8 +247,9 @@ case class ClientBuilder(
 
       if (_exportLoadsToOstrich) {
         val hostString = host.toString
-        ostrich.Stats.makeGauge(hostString + "_load")   { broker.load   }
-        ostrich.Stats.makeGauge(hostString + "_weight") { broker.weight }
+        ostrich.Stats.makeGauge(hostString + "_load")      { broker.load   }
+        ostrich.Stats.makeGauge(hostString + "_weight")    { broker.weight }
+        ostrich.Stats.makeGauge(hostString + "_available") { if (broker.isAvailable) 1 else 0 }
       }
 
       broker

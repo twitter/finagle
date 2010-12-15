@@ -33,7 +33,7 @@ fi
 path_append CP $root/project/boot/scala-2.8.1/lib/scala-library.jar
 path_append CP $root/project/boot/scala-2.8.1/lib/scala-compiler.jar
 
-for project in $root; do
+for project in $root ../ostrich ../util; do
   for jar in $project/lib_managed/compile/*.jar; do
     path_append CP $jar
   done

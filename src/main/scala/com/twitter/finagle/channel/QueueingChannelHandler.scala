@@ -1,10 +1,11 @@
 package com.twitter.finagle.channel
 
-import com.twitter.finagle.util.Serialized
 import org.jboss.netty.channel._
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.Queue
 import scala._
+
+import com.twitter.concurrent.Serialized
 
 private case class Job(ctx: ChannelHandlerContext, e: MessageEvent) extends Serialized {
   @volatile private var _isAlive = true
@@ -87,3 +88,5 @@ class QueueingChannelHandler(concurrencyLevel: Int, queue: Queue[Job]) extends S
     Option(job)
   }
 }
+
+
