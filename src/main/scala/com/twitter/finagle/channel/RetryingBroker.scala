@@ -36,6 +36,10 @@ trait RetryingBrokerBase extends WrappingBroker {
   // on from a protocol point of view.  currently "retriable" events
   // are ones in which the write fails. does this cover all applicable
   // cases where there is a lingering closed server socket?
+  //
+  // We should also examine whether the underlying NIO server will in
+  // actuality report a failed read when the socket has been closed
+  // prior the the read attempt.
 
   override def dispatch(e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
