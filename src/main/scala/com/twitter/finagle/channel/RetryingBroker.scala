@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.channel.{
   Channels, Channel, DownstreamMessageEvent,
-  MessageEvent, ChannelFuture}
+  MessageEvent, ChannelFuture, DefaultChannelFuture}
 import org.jboss.netty.util.{HashedWheelTimer, TimerTask, Timeout}
 
 import com.twitter.finagle.util.{Cancelled, Error, Ok}
@@ -31,9 +31,16 @@ trait RetryingBrokerBase extends WrappingBroker {
     override def getChannel = channel
   }
 
+  // TODO: should we treat the case where a server closes the
+  // connection immediately as retriable? it's not clear what's going
+  // on from a protocol point of view.  currently "retriable" events
+  // are ones in which the write fails. does this cover all applicable
+  // cases where there is a lingering closed server socket?
+
   override def dispatch(e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
     val interceptErrors = Channels.future(e.getChannel)
+
     interceptErrors {
       case Ok(channel) =>
         incomingFuture.setSuccess()
@@ -62,10 +69,13 @@ class RetryingBroker(val underlying: Broker, tries: Int) extends RetryingBrokerB
   @volatile var triesLeft = tries
   def retryFuture(channel: Channel) = {
     triesLeft -= 1
+    val future = new DefaultChannelFuture(channel, false)
     if (triesLeft > 0)
-      Channels.succeededFuture(channel)
+      future.setSuccess()
     else
-      Channels.failedFuture(channel, new RetryFailureException)
+      future.setFailure(new RetryFailureException)
+
+    future
   }
 }
 
