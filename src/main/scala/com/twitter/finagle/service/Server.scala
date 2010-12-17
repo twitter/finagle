@@ -23,7 +23,6 @@ object ServicePipelineFactory {
           service(req) respond {
              case Return(value) =>
                Channels.write(ctx.getChannel, value)
-                       .addListener(ChannelFutureListener.CLOSE)
 
              case Throw(_) =>
                // TODO: log (invalid reply)
