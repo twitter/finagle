@@ -31,7 +31,7 @@ object AsyncServerEndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("decode", new ThriftFramedServerDecoder)
+          pipeline.addLast("decode", new ThriftServerDecoder)
           pipeline.addLast("encode", new ThriftServerEncoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -58,7 +58,7 @@ object AsyncServerEndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("decode", new ThriftFramedClientDecoder)
+          pipeline.addLast("decode", new ThriftClientDecoder)
           pipeline.addLast("encode", new ThriftClientEncoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
