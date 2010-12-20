@@ -26,7 +26,7 @@ class Project(info: ProjectInfo)
 
   // com.twitter deps:
   inline("com.twitter" % "ostrich" % "2.3.4-SNAPSHOT")
-  inline("com.twitter" % "util"    % "1.2.8")
+  inline("com.twitter" % "util"    % "1.3.2")
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
@@ -38,7 +38,6 @@ trait LibDirClasspath extends StandardProject {
   def jarFileFilter: FileFilter = "*.jar"
   def libClasspath = descendents("lib", jarFileFilter)
 
-  override def compileClasspath = super.compileClasspath +++ libClasspath
-  override def testClasspath = super.testClasspath +++ libClasspath
-  override def runClasspath = super.runClasspath +++ libClasspath
+	override def fullUnmanagedClasspath(config: Configuration) =
+    super.fullUnmanagedClasspath(config) +++ libClasspath
 }
