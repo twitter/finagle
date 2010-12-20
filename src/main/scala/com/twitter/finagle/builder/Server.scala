@@ -23,6 +23,8 @@ import channel.{Job, QueueingChannelHandler, PartialUpstreamMessageEvent}
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
+import org.jboss.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
+import org.jboss.netty.util.HashedWheelTimer
 
 object ServerBuilder {
   def apply() = new ServerBuilder()
@@ -84,6 +86,7 @@ case class ServerBuilder(
   _codec: Option[Codec],
   _connectionTimeout: Timeout,
   _requestTimeout: Timeout,
+  _responseTimeout: Timeout,
   _statsReceiver: Option[StatsReceiver],
   _sampleWindow: Timeout,
   _sampleGranularity: Timeout,
@@ -103,8 +106,9 @@ case class ServerBuilder(
 
   def this() = this(
     None,                                           // codec
-    Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // connectionTimeout
-    Timeout(Long.MaxValue, TimeUnit.MILLISECONDS),  // requestTimeout
+    Timeout.Eternity,                               // connectionTimeout
+    Timeout.Eternity,                               // requestTimeout
+    Timeout.Eternity,                               // responseTimeout
     None,                                           // statsReceiver
     Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
     Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
@@ -222,6 +226,20 @@ case class ServerBuilder(
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
+
+        if (_requestTimeout != Some(Timeout.Eternity) || _responseTimeout != Some(Timeout.Eternity)) {
+          val timer = new HashedWheelTimer
+
+          if (_requestTimeout != Some(Timeout.Eternity)) {
+            pipeline.addFirst("requestTimeout",
+              new ReadTimeoutHandler(timer, _requestTimeout.value, _responseTimeout.unit))
+          }
+
+          if (_responseTimeout != Some(Timeout.Eternity)) {
+            pipeline.addFirst("responseTimeout",
+              new WriteTimeoutHandler(timer, _responseTimeout.value, _responseTimeout.unit))
+          }
+        }
 
         for (maxConcurrentRequests <- _maxConcurrentRequests) {
           val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
