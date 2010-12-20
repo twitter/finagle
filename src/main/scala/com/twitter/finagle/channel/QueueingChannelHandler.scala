@@ -7,7 +7,7 @@ import scala._
 
 import com.twitter.concurrent.Serialized
 
-private case class Job(ctx: ChannelHandlerContext, e: MessageEvent) extends Serialized {
+private[finagle] case class Job(ctx: ChannelHandlerContext, e: MessageEvent) extends Serialized {
   @volatile private var _isAlive = true
   @volatile private var _isStarted = false
 

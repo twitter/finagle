@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
 import scala.collection.JavaConversions._
 
 import java.net.SocketAddress
-import java.util.concurrent.{TimeUnit, Executors}
+import java.util.concurrent.{TimeUnit, Executors, LinkedBlockingQueue}
 import java.util.logging.Logger
 import javax.net.ssl.{KeyManager, SSLContext}
 
@@ -19,7 +19,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Time}
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.PartialUpstreamMessageEvent
+import channel.{Job, QueueingChannelHandler, PartialUpstreamMessageEvent}
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
@@ -95,7 +95,9 @@ case class ServerBuilder(
   _logger: Option[Logger],
   _tls: Option[SSLContext],
   _startTls: Boolean,
-  _channelFactory: Option[ChannelFactory])
+  _channelFactory: Option[ChannelFactory],
+  _maxConcurrentRequests: Option[Int],
+  _maxQueueDepth: Option[Int])
 {
   import ServerBuilder._
 
@@ -114,7 +116,9 @@ case class ServerBuilder(
     None,                                           // logger
     None,                                           // tls
     false,                                          // startTls
-    None                                            // channelFactory
+    None,                                           // channelFactory
+    None,                                           // maxConcurrentRequests
+    None                                            // maxQueueDepth
   )
 
   def codec(codec: Codec) =
@@ -159,6 +163,12 @@ case class ServerBuilder(
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
+
+  def maxConcurrentRequests(max: Int) =
+    copy(_maxConcurrentRequests = Some(max))
+
+  def maxQueueDepth(max: Int) =
+    copy(_maxQueueDepth = Some(max))
 
   private def statsRepository(
     name: Option[String],
@@ -213,11 +223,16 @@ case class ServerBuilder(
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
 
+        for (maxConcurrentRequests <- _maxConcurrentRequests) {
+          val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
+          val queue = new LinkedBlockingQueue[Job](maxQueueDepth)
+          pipeline.addFirst("queue", new QueueingChannelHandler(maxConcurrentRequests, queue))
+        }
+
         for (logger <- _logger) {
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
         }
-
 
         // SSL comes first so that ChannelSnooper gets plaintext
         for (ctx <- _tls) {
