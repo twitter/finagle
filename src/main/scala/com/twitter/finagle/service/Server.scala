@@ -19,13 +19,16 @@ object ServicePipelineFactory {
         val message = e.getMessage
 
         try {
+          if (!message.isInstanceOf[Req])
+            throw new IllegalArgumentException(
+              "Invalid reply: '%s'".format(message.getClass))
           val req = message.asInstanceOf[Req]
           service(req) respond {
              case Return(value) =>
                Channels.write(ctx.getChannel, value)
 
-             case Throw(_) =>
-               // TODO: log (invalid reply)
+             case Throw(e: Throwable) =>
+               log.log(Level.WARNING, e.getMessage, e)
                Channels.close(channel)
            }
         } catch {

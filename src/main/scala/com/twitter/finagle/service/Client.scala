@@ -32,8 +32,10 @@ class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
       case Ok(_) =>
         replyFuture.getReply match {
           case Reply.Done(reply) =>
-            // Inside of a Try()?
-            promise() = Return(reply.asInstanceOf[Rep])
+            if (reply.isInstanceOf[Rep])
+              promise() = Return(reply.asInstanceOf[Rep])
+            else
+              promise() = Throw(new InvalidMessageTypeException)
 
           // case Reply.Done(reply: Rep) =>
           //   promise() = Return(reply)

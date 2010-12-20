@@ -2,15 +2,9 @@ package com.twitter.finagle.thrift
 
 import org.specs.Specification
 
-import org.apache.thrift.TProcessorFactory
-
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
-import org.jboss.netty.channel.{
-  Channels, ChannelPipelineFactory, SimpleChannelUpstreamHandler,
-  ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.channel.local.{
-  DefaultLocalServerChannelFactory, DefaultLocalClientChannelFactory,
-  LocalAddress}
+import org.jboss.netty.channel._
+import org.jboss.netty.channel.local._
 
 import com.twitter.util.{Promise, Return, Throw}
 import com.twitter.util.TimeConversions._

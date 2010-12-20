@@ -7,6 +7,8 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.replay.{ReplayingDecoder, VoidEnum}
 
+import java.util.logging.{Logger, Level}
+
 /*
  * Translate ThriftReplys to wire representation
  */
@@ -30,7 +32,8 @@ class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
  * Translate wire representation to ThriftCalls
  */
 class ThriftServerDecoder extends ReplayingDecoder[VoidEnum] {
-  protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
+  private[this] val logger = Logger.getLogger(getClass.getName)
+  private[this] val protocolFactory = new TBinaryProtocol.Factory(true, true)
 
   def decodeThriftCall(ctx: ChannelHandlerContext, channel: Channel,
                        buffer: ChannelBuffer):Object = {
@@ -49,18 +52,11 @@ class ThriftServerDecoder extends ReplayingDecoder[VoidEnum] {
         } catch {
           // Pass through invalid message exceptions, etc.
           case e: TApplicationException =>
-            // XXX: Debug logging
-            println("Casting in decodeThriftCall: %s".format(e))
-            e.printStackTrace()
+            logger.log(Level.FINE, e.getMessage, e)
             null
         }
       case _ =>
-        println("Non-call received in decodeThriftCall")
-        // // Message types other than CALL are invalid here.
-        // println("2222222222222222")
-        // // We can't fire this exception since we're in a ReplayingDecoder
-        // Channels.fireExceptionCaught(ctx,
-        //   new TApplicationException(TApplicationException.INVALID_MESSAGE_TYPE))
+        // We can't respond with an error because we're in a replaying codec.
         null
     }
   }
