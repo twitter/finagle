@@ -223,22 +223,22 @@ case class ServerBuilder(
       _sampleWindow, _sampleGranularity,
       _bindTo.get)
 
+    val timer = if (_requestTimeout != Timeout.Eternity || _responseTimeout != Timeout.Eternity) {
+      Some(new HashedWheelTimer)
+    } else None
+
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
 
-        if (_requestTimeout != Some(Timeout.Eternity) || _responseTimeout != Some(Timeout.Eternity)) {
-          val timer = new HashedWheelTimer
+        if (_requestTimeout != Timeout.Eternity) {
+          pipeline.addFirst("requestTimeout",
+            new ReadTimeoutHandler(timer.get, _requestTimeout.value, _responseTimeout.unit))
+        }
 
-          if (_requestTimeout != Some(Timeout.Eternity)) {
-            pipeline.addFirst("requestTimeout",
-              new ReadTimeoutHandler(timer, _requestTimeout.value, _responseTimeout.unit))
-          }
-
-          if (_responseTimeout != Some(Timeout.Eternity)) {
-            pipeline.addFirst("responseTimeout",
-              new WriteTimeoutHandler(timer, _responseTimeout.value, _responseTimeout.unit))
-          }
+        if (_responseTimeout != Timeout.Eternity) {
+          pipeline.addFirst("responseTimeout",
+            new WriteTimeoutHandler(timer.get, _responseTimeout.value, _responseTimeout.unit))
         }
 
         for (maxConcurrentRequests <- _maxConcurrentRequests) {
