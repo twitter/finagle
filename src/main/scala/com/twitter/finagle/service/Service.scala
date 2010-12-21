@@ -18,7 +18,7 @@ abstract class Service[-Req <: AnyRef, +Rep <: AnyRef] extends (Req => Future[Re
 }
 
 // A filter is a service transform [Req -> (Req1 -> Rep1) -> Rep].
-abstract class Filter[-Req <: AnyRef, +Rep <: AnyRef, Req1 <: AnyRef, Rep1 <: AnyRef]
+abstract class Filter[-Req <: AnyRef, +Rep <: AnyRef, +Req1 <: AnyRef, -Rep1 <: AnyRef]
   extends ((Req, Service[Req1, Rep1]) => Future[Rep])
 {
   def apply(request: Req, service: Service[Req1, Rep1]): Future[Rep]
@@ -36,7 +36,7 @@ abstract class Filter[-Req <: AnyRef, +Rep <: AnyRef, Req1 <: AnyRef, Rep1 <: An
     def apply(request: Req) = Filter.this.apply(request, service)
   }
 
-  def andThenIf(condAndFilter: (Boolean, Filter[Req1, Rep1, Req1, Rep1])) =
+  def andThenIf[Req2 >: Req1 <: AnyRef, Rep2 <: Rep1](condAndFilter: (Boolean, Filter[Req1, Rep1, Req2, Rep2])) =
     condAndFilter match {
       case (true, filter) => andThen(filter)
       case (false, _)     => this
