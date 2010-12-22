@@ -131,8 +131,14 @@ case class ServerBuilder(
   def connectionTimeout(value: Long, unit: TimeUnit) =
     copy(_connectionTimeout = Timeout(value, unit))
 
+  def connectionTimeout(duration: Duration) =
+    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
+
   def requestTimeout(value: Long, unit: TimeUnit) =
     copy(_requestTimeout = Timeout(value, unit))
+
+  def requestTimeout(duration: Duration) =
+    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
   def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
@@ -142,6 +148,9 @@ case class ServerBuilder(
 
   def sampleGranularity(value: Long, unit: TimeUnit) =
     copy(_sampleGranularity = Timeout(value, unit))
+
+  def sampleGranularity(duration: Duration) =
+    copy(_sampleGranularity = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
   def name(value: String) = copy(_name = Some(value))
 

@@ -86,14 +86,23 @@ case class ClientBuilder(
   def hosts(addresses: Collection[SocketAddress]) =
     copy(_hosts = Some(addresses toSeq))
 
+  def hosts(addresses: Iterable[SocketAddress]) =
+    copy(_hosts = Some(addresses toSeq))
+
   def codec(codec: Codec) =
     copy(_codec = Some(codec))
 
   def connectionTimeout(value: Long, unit: TimeUnit) =
     copy(_connectionTimeout = Timeout(value, unit))
 
+  def connectionTimeout(duration: Duration) =
+    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
+
   def requestTimeout(value: Long, unit: TimeUnit) =
     copy(_requestTimeout = Timeout(value, unit))
+
+  def requestTimeout(duration: Duration) =
+    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
   def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
