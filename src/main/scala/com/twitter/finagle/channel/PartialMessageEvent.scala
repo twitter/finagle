@@ -2,11 +2,11 @@ package com.twitter.finagle.channel
 
 import java.net.SocketAddress
 
-import org.jboss.netty.channel.{Channel, UpstreamMessageEvent, MessageEvent}
+import org.jboss.netty.channel._
 
 // Represents a partial message.
 case class PartialUpstreamMessageEvent(
-  channel: Channel, message: AnyRef, remoteAddress: SocketAddress)
+    channel: Channel, message: AnyRef, remoteAddress: SocketAddress)
   extends UpstreamMessageEvent(channel, message, remoteAddress)
 
 object PartialUpstreamMessageEvent {

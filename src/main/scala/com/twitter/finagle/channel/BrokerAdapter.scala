@@ -19,8 +19,15 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
     doneFuture
   }
 
+  // XXX: is there a race condition here between receiving messages &
+  // etc?  should we serialize all the events?
+  // (SerializedChannelUpstreamHandler)....  that way we know we are
+  // only receiving one event at a time.
+  //
+  // At a minimum, change the currentReplyFuture back.
+
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val replyFuture = currentReplyFuture.get()
+    val replyFuture = currentReplyFuture.getAndSet(null)
     if (replyFuture eq null)
       return  // TODO: log/change health?
 
@@ -28,7 +35,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
       case PartialUpstreamMessageEvent(_, message, _) =>
         val next = new ReplyFuture
         replyFuture.setReply(Reply.More(message, next))
-        assert(currentReplyFuture.compareAndSet(replyFuture, next))
+        assert(currentReplyFuture.compareAndSet(null, next))
       case _ =>
         replyFuture.setReply(Reply.Done(e.getMessage))
         done()

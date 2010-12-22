@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.finagle.http.RequestLifecycleSpy
+import com.twitter.finagle.http._
 
 class Http(compressionLevel: Int = 0) extends Codec {
   val clientPipelineFactory: ChannelPipelineFactory =
@@ -23,15 +23,21 @@ class Http(compressionLevel: Int = 0) extends Codec {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpServerCodec)
-        if (compressionLevel > 0)
-          pipeline.addLast("httpCompressor",
-                           new HttpContentCompressor(compressionLevel))
+        if (compressionLevel > 0) {
+          pipeline.addLast(
+            "httpCompressor",
+            new HttpContentCompressor(compressionLevel))
+        }
         pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
+
+        pipeline.addLast(
+          "connectionLifecycleManager",
+          new HttpServerConnectionLifecycleManager)
+
         pipeline
       }
     }
 }
 
 object Http extends Http(0)
-
 object HttpWithCompression extends Http(6)
