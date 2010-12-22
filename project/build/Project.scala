@@ -4,8 +4,8 @@ import com.twitter.sbt._
 class Project(info: ProjectInfo)
   extends StandardProject(info)
   with LibDirClasspath
-  with InlineDependencies
   with SubversionPublisher
+  with AdhocInlines
 {
   override def compileOrder = CompileOrder.ScalaThenJava
   override def managedStyle = ManagedStyle.Maven
@@ -25,8 +25,8 @@ class Project(info: ProjectInfo)
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
 
   // com.twitter deps:
-  inline("com.twitter" % "ostrich" % "2.3.4-SNAPSHOT")
-  inline("com.twitter" % "util"    % "1.3.2")
+  val ostrich = "com.twitter" % "ostrich" % "2.3.4-SNAPSHOT"
+  val util    = "com.twitter" % "util"    % "1.3.2"
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
