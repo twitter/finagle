@@ -25,8 +25,8 @@ class Project(info: ProjectInfo)
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
 
   // com.twitter deps:
-  val ostrich = "com.twitter" % "ostrich" % "2.3.4-SNAPSHOT"
-  val util    = "com.twitter" % "util"    % "1.3.3-SNAPSHOT"
+  val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+  val util    = "com.twitter" % "util"    % "1.3.3"
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
