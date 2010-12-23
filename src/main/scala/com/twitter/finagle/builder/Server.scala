@@ -47,7 +47,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
     ctx.getAttachment match {
       case Timing(requestedAt: Time) =>
         samples("exception", e.getCause.getClass.getName).add(
-          requestedAt.ago.inMilliseconds.toInt)
+          requestedAt.since.inMilliseconds.toInt)
       case _ => ()
     }
     super.exceptionCaught(ctx, e)
@@ -69,7 +69,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
         case (_, p: PartialUpstreamMessageEvent) =>
           ()
         case (Timing(requestedAt: Time), r: HttpResponse)  =>
-          latencySample.add(requestedAt.ago.inMilliseconds.toInt)
+          latencySample.add(requestedAt.since.inMilliseconds.toInt)
         case (_, _) =>
           () // WTF?
       }
