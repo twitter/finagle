@@ -80,69 +80,69 @@ case class ClientBuilder(
     None                                             // proactivelyConnect
   )
 
-  def hosts(hostnamePortCombinations: String) =
+  def hosts(hostnamePortCombinations: String): ClientBuilder =
     copy(_hosts = Some(parseHosts(hostnamePortCombinations)))
 
-  def hosts(addresses: Collection[SocketAddress]) =
+  def hosts(addresses: Collection[SocketAddress]): ClientBuilder =
     copy(_hosts = Some(addresses toSeq))
 
-  def hosts(addresses: Iterable[SocketAddress]) =
+  def hosts(addresses: Iterable[SocketAddress]): ClientBuilder =
     copy(_hosts = Some(addresses toSeq))
 
-  def codec(codec: Codec) =
+  def codec(codec: Codec): ClientBuilder =
     copy(_codec = Some(codec))
 
-  def connectionTimeout(value: Long, unit: TimeUnit) =
+  def connectionTimeout(value: Long, unit: TimeUnit): ClientBuilder =
     copy(_connectionTimeout = Timeout(value, unit))
 
-  def connectionTimeout(duration: Duration) =
+  def connectionTimeout(duration: Duration): ClientBuilder =
     copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
-  def requestTimeout(value: Long, unit: TimeUnit) =
+  def requestTimeout(value: Long, unit: TimeUnit): ClientBuilder =
     copy(_requestTimeout = Timeout(value, unit))
 
-  def requestTimeout(duration: Duration) =
+  def requestTimeout(duration: Duration): ClientBuilder =
     copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
-  def reportTo(receiver: StatsReceiver) =
+  def reportTo(receiver: StatsReceiver): ClientBuilder =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(value: Long, unit: TimeUnit) =
+  def sampleWindow(value: Long, unit: TimeUnit): ClientBuilder =
     copy(_sampleWindow = Timeout(value, unit))
 
-  def sampleGranularity(value: Long, unit: TimeUnit) =
+  def sampleGranularity(value: Long, unit: TimeUnit): ClientBuilder =
     copy(_sampleGranularity = Timeout(value, unit))
 
-  def name(value: String) = copy(_name = Some(value))
+  def name(value: String): ClientBuilder = copy(_name = Some(value))
 
-  def hostConnectionLimit(value: Int) =
+  def hostConnectionLimit(value: Int): ClientBuilder =
     copy(_hostConnectionLimit = Some(value))
 
-  def retries(value: Int) =
+  def retries(value: Int): ClientBuilder =
     copy(_retries = Some(value))
 
-  def initialBackoff(value: Duration) =
+  def initialBackoff(value: Duration): ClientBuilder =
     copy(_initialBackoff = Some(value))
 
-  def backoffMultiplier(value: Int) =
+  def backoffMultiplier(value: Int): ClientBuilder =
     copy(_backoffMultiplier = Some(value))
 
-  def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
-  def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
+  def sendBufferSize(value: Int): ClientBuilder = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int): ClientBuilder = copy(_recvBufferSize = Some(value))
 
-  def exportLoadsToOstrich() = copy(_exportLoadsToOstrich = true)
+  def exportLoadsToOstrich(): ClientBuilder = copy(_exportLoadsToOstrich = true)
 
-  def failureAccrualWindow(value: Long, unit: TimeUnit) =
+  def failureAccrualWindow(value: Long, unit: TimeUnit): ClientBuilder =
     copy(_failureAccrualWindow = Timeout(value, unit))
 
-  def channelFactory(cf: ChannelFactory) =
+  def channelFactory(cf: ChannelFactory): ClientBuilder =
     copy(_channelFactory = Some(cf))
 
-  def proactivelyConnect(duration: Duration) =
+  def proactivelyConnect(duration: Duration): ClientBuilder =
     copy(_proactivelyConnect = Some(duration))
 
   // ** BUILDING
-  def logger(logger: Logger) = copy(_logger = Some(logger))
+  def logger(logger: Logger): ClientBuilder = copy(_logger = Some(logger))
 
   private def bootstrap(codec: Codec)(host: SocketAddress) = {
     val bs = new BrokerClientBootstrap(_channelFactory getOrElse defaultChannelFactory)

@@ -19,7 +19,7 @@ class ChannelPool(
   extends Serialized
 {
   @volatile private[this] var _isAvailable = false
-  @volatile private[this] var lastConnectAttempt = Time.never
+  @volatile private[this] var lastConnectAttempt = Time.epoch
 
   private[this] val channelQueue = new ConcurrentLinkedQueue[Channel]
 
@@ -36,7 +36,7 @@ class ChannelPool(
   //     as an application would decidedly be unhealthy on connection
   //     failure.
   def tryToConnect(period: Duration) {
-    val timeSinceLastConnectAttempt = lastConnectAttempt.ago
+    val timeSinceLastConnectAttempt = Duration.since(lastConnectAttempt)
 
     if (timeSinceLastConnectAttempt < period) {
       Broker.timer(period - timeSinceLastConnectAttempt) {
@@ -50,7 +50,7 @@ class ChannelPool(
           _isAvailable = true
         case Cancelled =>
           tryToConnect(period)
-        case Error(_) => 
+        case Error(_) =>
           tryToConnect(period)
       }
     }

@@ -34,7 +34,7 @@ public class ThriftServerTest {
           return future;
         }
 
-        return future;
+        throw new IllegalArgumentException("Method: " + call.getMethod() + " is unsupported!");
       }
     };
 

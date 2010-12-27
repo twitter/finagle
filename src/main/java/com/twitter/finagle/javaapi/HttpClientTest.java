@@ -5,6 +5,7 @@ import org.jboss.netty.handler.codec.http.*;
 import com.twitter.finagle.service.Service;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.Future;
+import com.twitter.util.FutureEventListener;
 import com.twitter.util.*;
 
 public class HttpClientTest {
@@ -16,8 +17,9 @@ public class HttpClientTest {
         .codec(Codec4J.Http)
         .buildService();
 
-    Future<HttpResponse> response =
-      client.apply(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"));
+    HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+
+    Future<HttpResponse> response = client.apply(request);
 
     response.addEventListener(
       new FutureEventListener<HttpResponse>() {

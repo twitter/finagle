@@ -19,8 +19,8 @@ public class ThriftClientTest {
 
     Service<ThriftCall<Silly.bleep_args, Silly.bleep_result>, Silly.bleep_result> client =
       ClientBuilder.get()
-        .hosts("localhost:10000")
         .codec(Codec4J.Thrift)
+        .hosts("localhost:10000")
         .buildService();
 
     Future<Silly.bleep_result> response =

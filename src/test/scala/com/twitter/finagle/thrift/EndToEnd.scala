@@ -30,11 +30,6 @@ import com.twitter.finagle.RandomSocket
 import com.twitter.finagle.util.Conversions._
 
 object EndToEndSpec extends Specification {
-  class SillyImpl extends Silly.Iface {
-    def bleep(bloop: String): String =
-      bloop.reverse
-  }
-
   // TODO: test with a traditional thrift stack over local loopback
   // TCP
 
