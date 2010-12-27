@@ -12,7 +12,7 @@ import org.apache.thrift.protocol.{
 import org.apache.thrift.transport.TTransportException
 
 import com.twitter.finagle.SunkChannel
-import com.twitter.finagle.channel.TooManyDicksOnTheDanceFloorException
+import com.twitter.finagle.channel.TooManyConcurrentRequestsException
 import com.twitter.silly.Silly
 
 object ThriftCodecSpec extends Specification {

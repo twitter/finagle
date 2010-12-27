@@ -61,7 +61,7 @@ class BrokeredChannel(
         proxyMessages(replyFuture)
 
       case Some(_) if waitingForReply.isDefined =>
-        Channels.fireExceptionCaught(this, new TooManyDicksOnTheDanceFloorException)
+        Channels.fireExceptionCaught(this, new TooManyConcurrentRequestsException)
 
       case _ =>
         e.getFuture.setFailure(new NotYetConnectedException)
@@ -84,11 +84,11 @@ class BrokeredChannel(
                 waitingForReply = Some(next)
                 proxyMessages(next)
             }
-         
+
           case Error(cause) =>
             Channels.fireExceptionCaught(this, cause)
             waitingForReply = None
-         
+
           case Cancelled =>
             // XXXTODO
         }
