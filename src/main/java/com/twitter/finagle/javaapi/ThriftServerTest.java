@@ -12,6 +12,7 @@ import org.jboss.netty.handler.codec.http.*;
 import com.twitter.finagle.service.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.finagle.thrift.*;
+import com.twitter.util.Future;
 import com.twitter.util.*;
 
 import com.twitter.silly.Silly;
@@ -23,14 +24,14 @@ public class ThriftServerTest {
 
     Service<ThriftCall, ThriftReply> service =
       new Service<ThriftCall, ThriftReply>() {
+
       @Override
       public Future<ThriftReply> apply(ThriftCall call) {
-        Promise<ThriftReply> future = new Promise<ThriftReply>();
-
         if (call.getMethod().equals("bleep")) {
           Silly.bleep_result result = (Silly.bleep_result)call.newReply();
           result.setSuccess("bleepety bleep");
-          future.update(new Return<ThriftReply>(call.reply(result)));
+          Future<ThriftReply> future = Future.value(call.reply(result));
+          return future;
         }
 
         return future;
@@ -39,7 +40,7 @@ public class ThriftServerTest {
 
     ServerBuilder
       .get()
-      .codec(Codec4J.thrift())
+      .codec(Codec4J.Thrift)
       .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))
       .build();

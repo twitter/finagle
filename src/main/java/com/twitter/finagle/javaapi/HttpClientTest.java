@@ -1,23 +1,19 @@
 package com.twitter.finagle.javaapi;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.concurrent.Executors;
-
-import org.jboss.netty.bootstrap.*;
-import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
 import com.twitter.finagle.service.Service;
 import com.twitter.finagle.builder.*;
+import com.twitter.util.Future;
 import com.twitter.util.*;
 
 public class HttpClientTest {
   public static void main(String args[]) {
     Service<HttpRequest, HttpResponse> client =
-      ClientBuilder.get()
+      ClientBuilder
+        .get()
         .hosts("localhost:10000")
-        .codec(Codec4J.http())
+        .codec(Codec4J.Http)
         .buildService();
 
     Future<HttpResponse> response =

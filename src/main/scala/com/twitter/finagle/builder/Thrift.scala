@@ -5,6 +5,8 @@ import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import com.twitter.finagle.thrift._
 
 object Thrift extends Codec {
+  val instance = this
+
   val clientPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {

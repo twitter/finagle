@@ -14,13 +14,6 @@ trait Codec {
   val serverPipelineFactory: ChannelPipelineFactory
 }
 
-// Java convenience.
-object Codec4J {
-  val http = Http
-  val httpWithCompression = HttpWithCompression
-  val thrift = Thrift
-}
-
 object StatsReporter4J {
   val ostrich = Ostrich()
   val logger = JavaLogger()
