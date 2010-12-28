@@ -55,7 +55,7 @@ object EndToEndSpec extends Specification {
         }
       })
 
-      val callResults = new Promise[Silly.bleep_result]
+      val callResults = new Promise[ThriftReply[Silly.bleep_result]]
 
       // ** Set up the client.
       val clientBootstrap = new ClientBootstrap(new DefaultLocalClientChannelFactory)
@@ -67,7 +67,7 @@ object EndToEndSpec extends Specification {
           pipeline.addLast("decoder", new ThriftClientDecoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-              callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
+              callResults() = Return(e.getMessage.asInstanceOf[ThriftReply[Silly.bleep_result]])
               Channels.close(ctx.getChannel)
             }
           })
@@ -89,7 +89,7 @@ object EndToEndSpec extends Specification {
       val result = callResults.within(1.second)
       result.isReturn must beTrue
 
-      result().success must be_==("yehyeh")
+      result().response.success must be_==("yehyeh")
 
       // ** Shutdown
       serverChannel.close().awaitUninterruptibly()
@@ -117,7 +117,7 @@ object EndToEndSpec extends Specification {
         processor, serverSocket,
         transportFactory, protocolFactory)
 
-      val callResults = new Promise[Silly.bleep_result]
+      val callResults = new Promise[ThriftReply[Silly.bleep_result]]
 
       val cf = new NioClientSocketChannelFactory(
         Executors.newCachedThreadPool(),
@@ -132,7 +132,7 @@ object EndToEndSpec extends Specification {
           pipeline.addLast("decoder", new ThriftClientDecoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-              callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
+              callResults() = Return(e.getMessage.asInstanceOf[ThriftReply[Silly.bleep_result]])
               Channels.close(ctx.getChannel)
             }
           })
@@ -158,7 +158,7 @@ object EndToEndSpec extends Specification {
       val result = callResults.within(1.second)
       result.isReturn must beTrue
 
-      result().success must be_==("raboof")
+      result().response.success must be_==("raboof")
 
       thriftServer.stop()
       serverThread.join()

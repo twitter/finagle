@@ -54,8 +54,9 @@ class ThriftClientDecoder extends ReplayingDecoder[VoidEnum] {
         null
       case TMessageType.REPLY =>
         val call = ThriftTypes(message.name).newInstance()
-        val reply = call.readResponse(protocol)
-        reply.asInstanceOf[AnyRef] // Note reply may not be a success
+        val result = call.readResponse(protocol)
+        val reply = call.reply(result.asInstanceOf[AnyRef])
+        reply
       case _ =>
         Channels.fireExceptionCaught(ctx, new TApplicationException(
           TApplicationException.INVALID_MESSAGE_TYPE))

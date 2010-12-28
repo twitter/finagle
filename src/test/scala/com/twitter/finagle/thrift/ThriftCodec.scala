@@ -149,10 +149,9 @@ object ThriftCodecSpec extends Specification {
 
       // verify decode
       val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-      val result = message.asInstanceOf[Silly.bleep_result]
+      val result = message.asInstanceOf[ThriftReply[Silly.bleep_result]]
       result mustNot beNull
-      result.isSetSuccess must beTrue
-      result.success must be_==("result")
+      result.response.success must be_==("result")
     }
 
     "decode replys broken in two" in {
@@ -177,10 +176,10 @@ object ThriftCodecSpec extends Specification {
         channel.upstreamEvents must haveSize(1)
         channel.downstreamEvents must haveSize(0)
         val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-        val result = message.asInstanceOf[Silly.bleep_result]
+        val result = message.asInstanceOf[ThriftReply[Silly.bleep_result]]
         result mustNot beNull
-        result.isSetSuccess must beTrue
-        result.success must be_==("result")
+        // result.re must beTrue
+        result.response.success must be_==("result")
       }
     }
 

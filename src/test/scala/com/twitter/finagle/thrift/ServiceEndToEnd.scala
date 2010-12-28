@@ -63,8 +63,8 @@ object ServiceEndToEndSpec extends Specification {
 
       val result = promise.within(1.second)
       result.isReturn must beTrue
-      val reply = result().asInstanceOf[Silly.bleep_result]
-      reply.success mustEqual "olleh"
+      val reply = result().asInstanceOf[ThriftReply[Silly.bleep_result]]
+      reply().response.success mustEqual "olleh"
 
       server.close().awaitUninterruptibly()
     }
