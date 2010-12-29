@@ -10,6 +10,8 @@ import org.jboss.netty.channel.*;
 import com.twitter.finagle.service.Service;
 import com.twitter.finagle.builder.*;
 import com.twitter.finagle.thrift.*;
+import com.twitter.util.Future;
+import com.twitter.util.FutureEventListener;
 import com.twitter.util.*;
 
 import com.twitter.silly.Silly;
