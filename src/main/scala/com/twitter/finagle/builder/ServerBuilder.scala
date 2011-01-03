@@ -84,9 +84,6 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
 
 case class ServerBuilder(
   _codec: Option[Codec],
-  _connectionTimeout: Timeout,
-  _requestTimeout: Timeout,
-  _responseTimeout: Timeout,
   _statsReceiver: Option[StatsReceiver],
   _sampleWindow: Timeout,
   _sampleGranularity: Timeout,
@@ -106,9 +103,6 @@ case class ServerBuilder(
 
   def this() = this(
     None,                                           // codec
-    Timeout.Eternity,                               // connectionTimeout
-    Timeout.Eternity,                               // requestTimeout
-    Timeout.Eternity,                               // responseTimeout
     None,                                           // statsReceiver
     Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
     Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
@@ -127,18 +121,6 @@ case class ServerBuilder(
 
   def codec(codec: Codec): ServerBuilder =
     copy(_codec = Some(codec))
-
-  def connectionTimeout(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_connectionTimeout = Timeout(value, unit))
-
-  def connectionTimeout(duration: Duration): ServerBuilder =
-    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
-
-  def requestTimeout(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_requestTimeout = Timeout(value, unit))
-
-  def requestTimeout(duration: Duration): ServerBuilder =
-    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
   def reportTo(receiver: StatsReceiver): ServerBuilder =
     copy(_statsReceiver = Some(receiver))
@@ -197,6 +179,8 @@ case class ServerBuilder(
         "window smaller than granularity!")
     }
 
+    // .
+
     val prefix = name map ("%s_".format(_)) getOrElse ""
     val sampleRepository =
       new ObservableSampleRepository[TimeWindowedSample[ScalarSample]] {
@@ -232,23 +216,9 @@ case class ServerBuilder(
       _sampleWindow, _sampleGranularity,
       _bindTo.get)
 
-    val timer = if (_requestTimeout != Timeout.Eternity || _responseTimeout != Timeout.Eternity) {
-      Some(new HashedWheelTimer)
-    } else None
-
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
-
-        if (_requestTimeout != Timeout.Eternity) {
-          pipeline.addFirst("requestTimeout",
-            new ReadTimeoutHandler(timer.get, _requestTimeout.value, _responseTimeout.unit))
-        }
-
-        if (_responseTimeout != Timeout.Eternity) {
-          pipeline.addFirst("responseTimeout",
-            new WriteTimeoutHandler(timer.get, _responseTimeout.value, _responseTimeout.unit))
-        }
 
         for (maxConcurrentRequests <- _maxConcurrentRequests) {
           val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
