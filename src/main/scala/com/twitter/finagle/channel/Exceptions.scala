@@ -18,7 +18,6 @@ class ApplicationException extends Exception
 
 // API misuse errors.
 class ApiException                         extends Exception
-class TooManyDicksOnTheDanceFloorException extends ApiException
-class TooFewDicksOnTheDanceFloorException  extends ApiException
+class TooManyConcurrentRequestsException   extends ApiException
 class InvalidPipelineException             extends ApiException
 class NotYetConnectedException             extends ApiException

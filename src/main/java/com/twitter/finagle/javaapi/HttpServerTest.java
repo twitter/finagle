@@ -11,6 +11,7 @@ import org.jboss.netty.handler.codec.http.*;
 
 import com.twitter.finagle.service.*;
 import com.twitter.finagle.builder.*;
+import com.twitter.util.Future;
 import com.twitter.util.*;
 
 public class HttpServerTest {
@@ -23,15 +24,14 @@ public class HttpServerTest {
           // Respond right away.
           httpResponse.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes()));
 
-          Promise<HttpResponse> future = new Promise<HttpResponse>();
-          future.update(new Return<HttpResponse>(httpResponse));
+          Future<HttpResponse> future = Future.value(httpResponse);
           return future;
         }
       };
 
     ServerBuilder
       .get()
-      .codec(Codec4J.http())
+      .codec(Codec4J.Http)
       .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))
       .build();

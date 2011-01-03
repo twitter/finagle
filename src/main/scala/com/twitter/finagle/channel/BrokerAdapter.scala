@@ -12,7 +12,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
 
   def writeAndRegisterReply(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) = {
     if (!currentReplyFuture.compareAndSet(null, replyFuture))
-      throw new TooManyDicksOnTheDanceFloorException
+      throw new TooManyConcurrentRequestsException
 
     doneFuture = Channels.future(e.getChannel)
     Channels.write(to, e.getMessage).proxyTo(e.getFuture)

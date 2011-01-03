@@ -47,7 +47,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
     ctx.getAttachment match {
       case Timing(requestedAt: Time) =>
         samples("exception", e.getCause.getClass.getName).add(
-          requestedAt.ago.inMilliseconds.toInt)
+          requestedAt.inMilliseconds.toInt)
       case _ => ()
     }
     super.exceptionCaught(ctx, e)
@@ -69,7 +69,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
         case (_, p: PartialUpstreamMessageEvent) =>
           ()
         case (Timing(requestedAt: Time), r: HttpResponse)  =>
-          latencySample.add(requestedAt.ago.inMilliseconds.toInt)
+          latencySample.add(requestedAt.inMilliseconds.toInt)
         case (_, _) =>
           () // WTF?
       }
@@ -125,62 +125,62 @@ case class ServerBuilder(
     None                                            // maxQueueDepth
   )
 
-  def codec(codec: Codec) =
+  def codec(codec: Codec): ServerBuilder =
     copy(_codec = Some(codec))
 
-  def connectionTimeout(value: Long, unit: TimeUnit) =
+  def connectionTimeout(value: Long, unit: TimeUnit): ServerBuilder =
     copy(_connectionTimeout = Timeout(value, unit))
 
-  def connectionTimeout(duration: Duration) =
+  def connectionTimeout(duration: Duration): ServerBuilder =
     copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
-  def requestTimeout(value: Long, unit: TimeUnit) =
+  def requestTimeout(value: Long, unit: TimeUnit): ServerBuilder =
     copy(_requestTimeout = Timeout(value, unit))
 
-  def requestTimeout(duration: Duration) =
+  def requestTimeout(duration: Duration): ServerBuilder =
     copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
-  def reportTo(receiver: StatsReceiver) =
+  def reportTo(receiver: StatsReceiver): ServerBuilder =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(value: Long, unit: TimeUnit) =
+  def sampleWindow(value: Long, unit: TimeUnit): ServerBuilder =
     copy(_sampleWindow = Timeout(value, unit))
 
-  def sampleGranularity(value: Long, unit: TimeUnit) =
+  def sampleGranularity(value: Long, unit: TimeUnit): ServerBuilder =
     copy(_sampleGranularity = Timeout(value, unit))
 
-  def sampleGranularity(duration: Duration) =
+  def sampleGranularity(duration: Duration): ServerBuilder =
     copy(_sampleGranularity = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
 
-  def name(value: String) = copy(_name = Some(value))
+  def name(value: String): ServerBuilder = copy(_name = Some(value))
 
-  def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
-  def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
+  def sendBufferSize(value: Int): ServerBuilder = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int): ServerBuilder = copy(_recvBufferSize = Some(value))
 
-  def pipelineFactory(value: ChannelPipelineFactory) =
+  def pipelineFactory(value: ChannelPipelineFactory): ServerBuilder =
     copy(_pipelineFactory = Some(value))
 
-  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
+  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]): ServerBuilder =
     copy(_pipelineFactory = Some(ServicePipelineFactory(service)))
 
-  def bindTo(address: SocketAddress) =
+  def bindTo(address: SocketAddress): ServerBuilder =
     copy(_bindTo = Some(address))
 
-  def channelFactory(cf: ChannelFactory) =
+  def channelFactory(cf: ChannelFactory): ServerBuilder =
     copy(_channelFactory = Some(cf))
 
-  def logger(logger: Logger) = copy(_logger = Some(logger))
+  def logger(logger: Logger): ServerBuilder = copy(_logger = Some(logger))
 
-  def tls(path: String, password: String) =
+  def tls(path: String, password: String): ServerBuilder =
     copy(_tls = Some(Ssl(path, password)))
 
-  def startTls(value: Boolean) =
+  def startTls(value: Boolean): ServerBuilder =
     copy(_startTls = true)
 
-  def maxConcurrentRequests(max: Int) =
+  def maxConcurrentRequests(max: Int): ServerBuilder =
     copy(_maxConcurrentRequests = Some(max))
 
-  def maxQueueDepth(max: Int) =
+  def maxQueueDepth(max: Int): ServerBuilder =
     copy(_maxQueueDepth = Some(max))
 
   private def statsRepository(

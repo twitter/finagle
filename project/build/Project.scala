@@ -26,7 +26,7 @@ class Project(info: ProjectInfo)
 
   // com.twitter deps:
   val ostrich = "com.twitter" % "ostrich" % "2.3.4"
-  val util    = "com.twitter" % "util"    % "1.3.3"
+  val util    = "com.twitter" % "util"    % "1.4.4-SNAPSHOT"
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()

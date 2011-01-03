@@ -15,6 +15,8 @@ abstract class Service[-Req <: AnyRef, +Rep <: AnyRef] extends (Req => Future[Re
   def map[Req1 <: AnyRef](f: (Req1) => (Req)) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
   }
+
+  def apply(request: Req): Future[Rep]
 }
 
 // A filter is a service transform [Req -> (Req1 -> Rep1) -> Rep].

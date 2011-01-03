@@ -37,7 +37,7 @@ object ServerBuilderSpec extends Specification {
         client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "go/slow"))(aReallyLongTime) must throwA[ChannelClosedException]
       }
 
-      duration mustEqual 1.second
+      duration.moreOrLessEquals(1.second, 1.second) mustBe true
 
       server.close().awaitUninterruptibly()
     }

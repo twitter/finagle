@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.util.Conversions._
 
 /**
- * Deal with HTTP connection lifecycle wrt. keepalives, etc.
+ * Deal with Http connection lifecycle wrt. keepalives, etc.
  *
  * See: http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html
  */
