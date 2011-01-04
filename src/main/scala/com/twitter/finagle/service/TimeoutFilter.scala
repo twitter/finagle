@@ -1,7 +1,5 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.TimeUnit
-
 import org.jboss.netty.util.Timer
 
 import com.twitter.util.{Future, Promise, Duration, Throw}
@@ -17,9 +15,6 @@ class TimeoutFilter[Req <: AnyRef, Rep <: AnyRef](
   timer: Timer, timeout: Duration)
   extends Filter[Req, Rep, Req, Rep]
 {
-  def this(timer: Timer, timeout: Long, unit: TimeUnit) =
-    this(timer, Duration.fromTimeUnit(timeout, unit))
-
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val result = new Promise[Rep]
 

@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
 import scala.collection.JavaConversions._
 
 import java.net.SocketAddress
-import java.util.concurrent.{TimeUnit, Executors, LinkedBlockingQueue}
+import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import java.util.logging.Logger
 import javax.net.ssl.{KeyManager, SSLContext}
 
@@ -23,7 +23,6 @@ import channel.{Job, QueueingChannelHandler, PartialUpstreamMessageEvent}
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
-import org.jboss.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 import org.jboss.netty.util.HashedWheelTimer
 
 object ServerBuilder {
@@ -85,8 +84,8 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
 case class ServerBuilder(
   _codec: Option[Codec],
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Timeout,
-  _sampleGranularity: Timeout,
+  _sampleWindow: Duration,
+  _sampleGranularity: Duration,
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
@@ -102,21 +101,21 @@ case class ServerBuilder(
   import ServerBuilder._
 
   def this() = this(
-    None,                                           // codec
-    None,                                           // statsReceiver
-    Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
-    Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
-    None,                                           // name
-    None,                                           // sendBufferSize
-    None,                                           // recvBufferSize
-    None,                                           // pipelineFactory
-    None,                                           // bindTo
-    None,                                           // logger
-    None,                                           // tls
-    false,                                          // startTls
-    None,                                           // channelFactory
-    None,                                           // maxConcurrentRequests
-    None                                            // maxQueueDepth
+    None,        // codec
+    None,        // statsReceiver
+    10.minutes,  // sampleWindow
+    10.seconds,  // sampleGranularity
+    None,        // name
+    None,        // sendBufferSize
+    None,        // recvBufferSize
+    None,        // pipelineFactory
+    None,        // bindTo
+    None,        // logger
+    None,        // tls
+    false,       // startTls
+    None,        // channelFactory
+    None,        // maxConcurrentRequests
+    None         // maxQueueDepth
   )
 
   def codec(codec: Codec): ServerBuilder =
@@ -125,14 +124,11 @@ case class ServerBuilder(
   def reportTo(receiver: StatsReceiver): ServerBuilder =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_sampleWindow = Timeout(value, unit))
+  def sampleWindow(window: Duration): ServerBuilder =
+    copy(_sampleWindow = window)
 
-  def sampleGranularity(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_sampleGranularity = Timeout(value, unit))
-
-  def sampleGranularity(duration: Duration): ServerBuilder =
-    copy(_sampleGranularity = Timeout(duration.inMillis, TimeUnit.MILLISECONDS))
+  def sampleGranularity(window: Duration): ServerBuilder =
+    copy(_sampleGranularity = window)
 
   def name(value: String): ServerBuilder = copy(_name = Some(value))
 
@@ -168,12 +164,10 @@ case class ServerBuilder(
   private def statsRepository(
     name: Option[String],
     receiver: Option[StatsReceiver],
-    sampleWindow: Timeout,
-    sampleGranularity: Timeout,
+    window: Duration,
+    granularity: Duration,
     sockAddr: SocketAddress) =
   {
-    val window      = sampleWindow.duration
-    val granularity = sampleGranularity.duration
     if (window < granularity) {
       throw new IncompleteSpecification(
         "window smaller than granularity!")

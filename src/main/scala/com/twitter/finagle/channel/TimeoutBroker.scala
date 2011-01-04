@@ -1,7 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.TimeUnit
-
 import org.jboss.netty.util.{TimerTask, Timeout, Timer}
 import org.jboss.netty.channel.MessageEvent
 
@@ -9,19 +7,19 @@ import com.twitter.util.Duration
 
 import com.twitter.finagle.util.Conversions._
 
-class TimeoutBroker(timer: Timer, val underlying: Broker, duration: Long, unit: TimeUnit)
+class TimeoutBroker(timer: Timer, val underlying: Broker, timeout: Duration)
   extends WrappingBroker
 {
-  def this(underlying: Broker, duration: Long, unit: TimeUnit) =
-    this(Broker.timer, underlying, duration, unit)
+  def this(underlying: Broker, timeout: Duration) =
+    this(Broker.timer, underlying, timeout)
 
   override def dispatch(e: MessageEvent) = {
     val future = underlying.dispatch(e)
-    val timeout =
-      timer(duration, unit) {
+    val timeoutHandle =
+      timer(timeout) {
         future.setFailure(new TimedoutRequestException)
       }
 
-    future whenDone { timeout.cancel() }
+    future whenDone { timeoutHandle.cancel() }
   }
 }

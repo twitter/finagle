@@ -5,7 +5,7 @@ import collection.JavaConversions._
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.Collection
 import java.util.logging.Logger
-import java.util.concurrent.{TimeUnit, Executors}
+import java.util.concurrent.Executors
 
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
@@ -39,17 +39,17 @@ object ClientBuilder {
 case class ClientBuilder(
   _hosts: Option[Seq[SocketAddress]],
   _codec: Option[Codec],
-  _connectionTimeout: Timeout,
-  _requestTimeout: Timeout,
+  _connectionTimeout: Duration,
+  _requestTimeout: Duration,
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Timeout,
-  _sampleGranularity: Timeout,
+  _sampleWindow: Duration,
+  _sampleGranularity: Duration,
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _exportLoadsToOstrich: Boolean,
-  _failureAccrualWindow: Timeout,
+  _failureAccrualWindow: Duration,
   _retries: Option[Int],
   _initialBackoff: Option[Duration],
   _backoffMultiplier: Option[Int],
@@ -59,25 +59,25 @@ case class ClientBuilder(
 {
   import ClientBuilder._
   def this() = this(
-    None,                                            // hosts
-    None,                                            // codec
-    Timeout(Int.MaxValue, TimeUnit.MILLISECONDS),    // connectionTimeout
-    Timeout(Int.MaxValue, TimeUnit.MILLISECONDS),    // requestTimeout
-    None,                                            // statsReceiver
-    Timeout(10, TimeUnit.MINUTES),                   // sampleWindow
-    Timeout(10, TimeUnit.SECONDS),                   // sampleGranularity
-    None,                                            // name
-    None,                                            // hostConnectionLimit
-    None,                                            // sendBufferSize
-    None,                                            // recvBufferSize
-    false,                                           // exportLoadsToOstrich
-    Timeout(10, TimeUnit.SECONDS),                   // failureAccrualWindow
-    None,                                            // retries
-    None,                                            // initialBackoff
-    None,                                            // backoffMultiplier
-    None,                                            // logger
-    None,                                            // channelFactory
-    None                                             // proactivelyConnect
+    None,                // hosts
+    None,                // codec
+    Duration.MaxValue,   // connectionTimeout
+    Duration.MaxValue,   // requestTimeout
+    None,                // statsReceiver
+    10.minutes,          // sampleWindow
+    10.seconds,          // sampleGranularity
+    None,                // name
+    None,                // hostConnectionLimit
+    None,                // sendBufferSize
+    None,                // recvBufferSize
+    false,               // exportLoadsToOstrich
+    10.seconds,          // failureAccrualWindow
+    None,                // retries
+    None,                // initialBackoff
+    None,                // backoffMultiplier
+    None,                // logger
+    None,                // channelFactory
+    None                 // proactivelyConnect
   )
 
   def hosts(hostnamePortCombinations: String): ClientBuilder =
@@ -92,26 +92,20 @@ case class ClientBuilder(
   def codec(codec: Codec): ClientBuilder =
     copy(_codec = Some(codec))
 
-  def connectionTimeout(value: Long, unit: TimeUnit): ClientBuilder =
-    copy(_connectionTimeout = Timeout(value, unit))
-
   def connectionTimeout(duration: Duration): ClientBuilder =
-    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MILLISECONDS))
-
-  def requestTimeout(value: Long, unit: TimeUnit): ClientBuilder =
-    copy(_requestTimeout = Timeout(value, unit))
+    copy(_connectionTimeout = duration)
 
   def requestTimeout(duration: Duration): ClientBuilder =
-    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MILLISECONDS))
+    copy(_requestTimeout = duration)
 
   def reportTo(receiver: StatsReceiver): ClientBuilder =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(value: Long, unit: TimeUnit): ClientBuilder =
-    copy(_sampleWindow = Timeout(value, unit))
+  def sampleWindow(window: Duration): ClientBuilder =
+    copy(_sampleWindow = window)
 
-  def sampleGranularity(value: Long, unit: TimeUnit): ClientBuilder =
-    copy(_sampleGranularity = Timeout(value, unit))
+  def sampleGranularity(granularity: Duration): ClientBuilder =
+    copy(_sampleGranularity = granularity)
 
   def name(value: String): ClientBuilder = copy(_name = Some(value))
 
@@ -132,8 +126,8 @@ case class ClientBuilder(
 
   def exportLoadsToOstrich(): ClientBuilder = copy(_exportLoadsToOstrich = true)
 
-  def failureAccrualWindow(value: Long, unit: TimeUnit): ClientBuilder =
-    copy(_failureAccrualWindow = Timeout(value, unit))
+  def failureAccrualWindow(window: Duration): ClientBuilder =
+    copy(_failureAccrualWindow = window)
 
   def channelFactory(cf: ChannelFactory): ClientBuilder =
     copy(_channelFactory = Some(cf))
@@ -160,7 +154,7 @@ case class ClientBuilder(
     }
     bs.setPipelineFactory(pf)
     bs.setOption("remoteAddress", host)
-    bs.setOption("connectTimeoutMillis", _connectionTimeout.duration.inMilliseconds)
+    bs.setOption("connectTimeoutMillis", _connectionTimeout.inMilliseconds)
     bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
     // bs.setOption("soLinger", 0)  (TODO)
     bs.setOption("reuseAddress", true)
@@ -178,8 +172,8 @@ case class ClientBuilder(
         new ChannelPool(bootstrap, proactivelyConnect)
     }
 
-  private def timeout(timeout: Timeout)(broker: Broker) =
-    new TimeoutBroker(broker, timeout.value, timeout.unit)
+  private def timeout(timeout: Duration)(broker: Broker) =
+    new TimeoutBroker(broker, timeout)
 
   private def retrying(broker: Broker) =
     (_retries, _initialBackoff, _backoffMultiplier) match {
@@ -195,11 +189,9 @@ case class ClientBuilder(
     sockAddr: SocketAddress,
     name: Option[String],
     receiver: Option[StatsReceiver],
-    sampleWindow: Timeout,
-    sampleGranularity: Timeout) =
+    window: Duration,
+    granularity: Duration) =
   {
-    val window      = sampleWindow.duration
-    val granularity = sampleGranularity.duration
     if (window < granularity) {
       throw new IncompleteSpecification(
         "window smaller than granularity!")
@@ -217,8 +209,7 @@ case class ClientBuilder(
     sampleRepository
   }
 
-  private def failureAccrualBroker(timeout: Timeout)(broker: StatsLoadedBroker) = {
-    val window = timeout.duration
+  private def failureAccrualBroker(window: Duration)(broker: StatsLoadedBroker) = {
     val granularity = Seq((window.inMilliseconds / 10).milliseconds, 1.second).max
     def mk = new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
       override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
