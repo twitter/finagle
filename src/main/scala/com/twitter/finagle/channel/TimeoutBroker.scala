@@ -18,7 +18,7 @@ class TimeoutBroker(timer: Timer, val underlying: Broker, duration: Long, unit: 
   override def dispatch(e: MessageEvent) = {
     val future = underlying.dispatch(e)
     val timeout =
-      timer(Duration.fromTimeUnit(duration, unit)) {
+      timer(duration, unit) {
         future.setFailure(new TimedoutRequestException)
       }
 
