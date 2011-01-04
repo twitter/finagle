@@ -132,7 +132,7 @@ case class ServerBuilder(
     copy(_sampleGranularity = Timeout(value, unit))
 
   def sampleGranularity(duration: Duration): ServerBuilder =
-    copy(_sampleGranularity = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
+    copy(_sampleGranularity = Timeout(duration.inMillis, TimeUnit.MILLISECONDS))
 
   def name(value: String): ServerBuilder = copy(_name = Some(value))
 
