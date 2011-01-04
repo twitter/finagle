@@ -44,7 +44,7 @@ object AsyncServerEndToEndSpec extends Specification {
         }
       })
 
-      val callResults = new Promise[Silly.bleep_result]
+      val callResults = new Promise[ThriftReply[Silly.bleep_result]]
 
       // ** Set up the client.
       val clientBootstrap = new ClientBootstrap(new DefaultLocalClientChannelFactory)
@@ -56,7 +56,7 @@ object AsyncServerEndToEndSpec extends Specification {
           pipeline.addLast("encode", new ThriftClientEncoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-              callResults() = Return(e.getMessage.asInstanceOf[Silly.bleep_result])
+              callResults() = Return(e.getMessage.asInstanceOf[ThriftReply[Silly.bleep_result]])
             }
           })
 
@@ -78,7 +78,7 @@ object AsyncServerEndToEndSpec extends Specification {
       val result = callResults.within(1.second)
       result.isReturn must beTrue
 
-      result().success must be_==("yehyeh")
+      result().response.success must be_==("yehyeh")
 
       serverChannel.close().awaitUninterruptibly()
       serverBootstrap.getFactory.releaseExternalResources()

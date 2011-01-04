@@ -40,7 +40,7 @@ object DuplexChannelBufferTransportSpec extends Specification with Mockito {
     val t = new DuplexChannelBufferTransport(in, out)
     val bb = "hello".getBytes
 
-    "writes to the output ChannelBuffe" in {
+    "writes to the output ChannelBuffer" in {
       t.write(bb, 0, 1)
       there was one(out).writeBytes(bb, 0, 1)
 
