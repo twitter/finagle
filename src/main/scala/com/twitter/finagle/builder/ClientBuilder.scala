@@ -96,13 +96,13 @@ case class ClientBuilder(
     copy(_connectionTimeout = Timeout(value, unit))
 
   def connectionTimeout(duration: Duration): ClientBuilder =
-    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
+    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MILLISECONDS))
 
   def requestTimeout(value: Long, unit: TimeUnit): ClientBuilder =
     copy(_requestTimeout = Timeout(value, unit))
 
   def requestTimeout(duration: Duration): ClientBuilder =
-    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
+    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MILLISECONDS))
 
   def reportTo(receiver: StatsReceiver): ClientBuilder =
     copy(_statsReceiver = Some(receiver))
