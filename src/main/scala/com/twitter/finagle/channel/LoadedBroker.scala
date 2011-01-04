@@ -45,12 +45,12 @@ class StatsLoadedBroker(
     underlying.dispatch(e) whenDone0 { future =>
       future {
         case Ok(_) =>
-          latencySample.add(Duration.since(begin).inMilliseconds.toInt)
+          latencySample.add(begin.untilNow.inMilliseconds.toInt)
         case Error(e) =>
           // TODO: exception hierarchy here to differentiate between
           // application, connection & other (internal?) exceptions.
           samples("exception", e.getClass.getName)
-            .add(Duration.since(begin).inMilliseconds.toInt)
+            .add(begin.untilNow.inMilliseconds.toInt)
         case Cancelled => /*ignore*/ ()
       }
     }

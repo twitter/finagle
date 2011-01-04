@@ -36,7 +36,7 @@ class ChannelPool(
   //     as an application would decidedly be unhealthy on connection
   //     failure.
   def tryToConnect(period: Duration) {
-    val timeSinceLastConnectAttempt = Duration.since(lastConnectAttempt)
+    val timeSinceLastConnectAttempt = lastConnectAttempt.untilNow
 
     if (timeSinceLastConnectAttempt < period) {
       Broker.timer(period - timeSinceLastConnectAttempt) {
