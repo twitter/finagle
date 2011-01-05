@@ -65,6 +65,8 @@ object LoadBalancerIntegrationSpec extends Specification {
       val client = ClientBuilder()
         .codec(Http)
         .hosts(servers map(_.addr))
+        .retries(2)
+        .requestTimeout(10.milliseconds)
         .buildService[HttpRequest, HttpResponse]
 
       runTest(client) {
@@ -80,6 +82,7 @@ object LoadBalancerIntegrationSpec extends Specification {
         .codec(Http)
         .hosts(servers map(_.addr))
         .requestTimeout(10.milliseconds)
+        .retries(2)
         .buildService[HttpRequest, HttpResponse]
 
       runTest(client) {
@@ -94,6 +97,7 @@ object LoadBalancerIntegrationSpec extends Specification {
       val client = ClientBuilder()
         .codec(Http)
         .hosts(servers map(_.addr))
+        .retries(2)
         .requestTimeout(10.milliseconds)
         .buildService[HttpRequest, HttpResponse]
 

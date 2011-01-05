@@ -28,6 +28,11 @@ class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
     val replyFuture = broker.dispatch(messageEvent)
     val promise = new Promise[Rep]
 
+    messageEvent.getFuture() {
+      case Error(cause) => promise() = Throw(cause)
+      case _ => /* ignore */
+    }
+
     replyFuture {
       case Ok(_) =>
         replyFuture.getReply match {

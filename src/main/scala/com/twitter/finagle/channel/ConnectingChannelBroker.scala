@@ -25,10 +25,11 @@ trait ConnectingChannelBroker extends Broker {
         }
 
       case Error(cause) =>
-        replyFuture.setFailure(cause)
+        // TODO: gauge availability this way?
+        e.getFuture.setFailure(cause)
 
       case Cancelled =>
-        replyFuture.setFailure(new CancelledRequestException)
+        e.getFuture.setFailure(new CancelledRequestException)
     }
 
     replyFuture

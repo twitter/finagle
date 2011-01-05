@@ -62,6 +62,7 @@ object ServiceEndToEndSpec extends Specification {
       client(call) respond { r => promise() = r }
 
       val result = promise.within(1.second)
+
       result.isReturn must beTrue
       val reply = result().asInstanceOf[Silly.bleep_result]
       reply.success mustEqual "olleh"

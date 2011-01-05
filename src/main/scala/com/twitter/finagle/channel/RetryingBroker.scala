@@ -17,6 +17,8 @@ trait RetryingBrokerBase extends WrappingBroker {
   def retryFuture(channel: Channel): ChannelFuture
   val underlying: Broker
 
+  protected def reset() {}
+
   class WrappingMessageEvent(
       channel: Channel,
       future: ChannelFuture,
@@ -41,6 +43,11 @@ trait RetryingBrokerBase extends WrappingBroker {
   // prior the the read attempt.
 
   override def dispatch(e: MessageEvent): ReplyFuture = {
+    reset()
+    doDispatch(e)
+  }
+
+  private[this] def doDispatch(e: MessageEvent): ReplyFuture = {
     val incomingFuture = e.getFuture
     val interceptErrors = Channels.future(e.getChannel)
 
@@ -50,7 +57,7 @@ trait RetryingBrokerBase extends WrappingBroker {
       case Error(cause) =>
         // TODO: distinguish between *retriable* cause and non?
         retryFuture(e.getChannel) {
-          case Ok(_) => dispatch(e)
+          case Ok(_) => doDispatch(e)
           case _ => incomingFuture.setFailure(cause)
         }
 
@@ -70,6 +77,11 @@ trait RetryingBrokerBase extends WrappingBroker {
 
 class RetryingBroker(val underlying: Broker, tries: Int) extends RetryingBrokerBase {
   @volatile var triesLeft = tries
+
+  override def reset() {
+    triesLeft = tries
+  }
+
   def retryFuture(channel: Channel) = {
     triesLeft -= 1
     val future = new DefaultChannelFuture(channel, false)
@@ -98,6 +110,10 @@ class ExponentialBackoffRetryingBroker(val underlying: Broker, initial: Duration
   import ExponentialBackoffRetryingBroker._
 
   @volatile var delay = initial
+
+  override def reset() {
+    delay = initial
+  }
 
   def retryFuture(channel: Channel) = {
     val future = Channels.future(channel)

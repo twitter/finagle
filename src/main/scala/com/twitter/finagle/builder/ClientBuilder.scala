@@ -82,7 +82,7 @@ case class ClientBuilder(
     None,                // backoffMultiplier
     None,                // logger
     None,                // channelFactory
-    Some(10.seconds)     // proactivelyConnect
+    None                 // proactivelyConnect
   )
 
   def hosts(hostnamePortCombinations: String): ClientBuilder =
