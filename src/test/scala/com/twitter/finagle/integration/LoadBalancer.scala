@@ -30,13 +30,6 @@ object LoadBalancerIntegrationSpec extends Specification {
     // TODO: parallelize these; measure throughput.
 
     doAfter {
-      println("> STATS")
-      val succ = stats.getCounter("success")().toDouble
-      val fail = stats.getCounter("fail")().toDouble
-      println("> success rate: %.2f".format(100.0 * succ / (succ + fail)))
-
-      prettyPrintStats(stats)
-
       servers.zipWithIndex foreach { case (server, which) =>
         server.stop()
         println("> SERVER[%d]".format(which))
@@ -59,6 +52,13 @@ object LoadBalancerIntegrationSpec extends Specification {
             stats.incr("fail")
         }
       }
+
+      println("> STATS")
+      val succ = stats.getCounter("success")().toDouble
+      val fail = stats.getCounter("fail")().toDouble
+      println("> success rate: %.2f".format(100.0 * succ / (succ + fail)))
+
+      prettyPrintStats(stats)
     }
 
     "balance[1]" in {

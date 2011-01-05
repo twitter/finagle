@@ -35,7 +35,12 @@ object ClientBuilder {
 
 // TODO: sampleGranularity, sampleWindow <- rename!
 
-// We're nice to java.
+/**
+ * A word about the default values:
+ *
+ *   o connectionTimeout: optimized for within a datanceter
+ *   o by default, no request timeout
+ */
 case class ClientBuilder(
   _hosts: Option[Seq[SocketAddress]],
   _codec: Option[Codec],
@@ -61,7 +66,7 @@ case class ClientBuilder(
   def this() = this(
     None,                // hosts
     None,                // codec
-    Duration.MaxValue,   // connectionTimeout
+    10.milliseconds,     // connectionTimeout
     Duration.MaxValue,   // requestTimeout
     None,                // statsReceiver
     10.minutes,          // sampleWindow
@@ -77,7 +82,7 @@ case class ClientBuilder(
     None,                // backoffMultiplier
     None,                // logger
     None,                // channelFactory
-    None                 // proactivelyConnect
+    Some(10.seconds)     // proactivelyConnect
   )
 
   def hosts(hostnamePortCombinations: String): ClientBuilder =
