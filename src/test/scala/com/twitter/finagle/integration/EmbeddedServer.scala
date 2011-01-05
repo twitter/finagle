@@ -3,7 +3,7 @@ package com.twitter.finagle.integration
 import scala.collection.JavaConversions._
 
 import java.net.SocketAddress
-import java.util.concurrent.Executors
+import java.util.concurrent.{Executors, TimeUnit}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
@@ -11,14 +11,19 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.util.HashedWheelTimer
 
+import com.twitter.util.Duration
+import com.twitter.conversions.time._
 import com.twitter.ostrich.StatsCollection
 
+import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.RandomSocket
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
   val executor = Executors.newCachedThreadPool()
+  val timer = new HashedWheelTimer(10, TimeUnit.MILLISECONDS)
 }
 
 class EmbeddedServer(val addr: SocketAddress) {
@@ -30,6 +35,7 @@ class EmbeddedServer(val addr: SocketAddress) {
   // Server state:
   private[this] var isApplicationNonresponsive = false
   private[this] var isConnectionNonresponsive = false
+  private[this] var latency = 0.seconds
 
   private[this] val channels = new DefaultChannelGroup
 
@@ -63,6 +69,16 @@ class EmbeddedServer(val addr: SocketAddress) {
         }
 
       })
+
+      pipeline.addLast("latency", new SimpleChannelDownstreamHandler {
+        override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+          if (latency != 0.seconds)
+            timer(latency) { super.writeRequested(ctx, e) }
+          else
+            super.writeRequested(ctx, e)
+        }
+      })
+
       pipeline.addLast("dots", new SimpleChannelUpstreamHandler {
         override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
           val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -97,6 +113,12 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   def becomeConnectionNonresponsive() {
     isConnectionNonresponsive = true
-    channels foreach { channel => channel.setReadable(false) }
+    channels foreach { _.setReadable(false) }
   }
+
+  def setLatency(latency: Duration) {
+    this.latency = latency
+  }
+
+  // TODO: turn responsiveness back on.
 }

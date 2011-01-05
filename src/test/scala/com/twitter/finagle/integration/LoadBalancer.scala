@@ -1,24 +1,11 @@
 package com.twitter.finagle.integration
 
-import java.net.SocketAddress
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
-
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConversions._
-
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel._
-import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.handler.codec.http._
 
 import org.specs.Specification
 
 import com.twitter.conversions.time._
 import com.twitter.util.{Return, Throw}
-import com.twitter.killdeer.{Cdf, DotsHandler}
 
 import com.twitter.ostrich.{StatsCollection, StatsProvider}
 
@@ -36,10 +23,18 @@ object LoadBalancerIntegrationSpec extends Specification {
     val servers = (0 until 3).toArray map(_ => EmbeddedServer())
     val stats = new StatsCollection
 
+    servers foreach { server =>
+      // server.setLatency(10.milliseconds)
+    }
+
     // TODO: parallelize these; measure throughput.
 
     doAfter {
-      println("> stats")
+      println("> STATS")
+      val succ = stats.getCounter("success")().toDouble
+      val fail = stats.getCounter("fail")().toDouble
+      println("> success rate: %.2f".format(100.0 * succ / (succ + fail)))
+
       prettyPrintStats(stats)
 
       servers.zipWithIndex foreach { case (server, which) =>
@@ -50,7 +45,7 @@ object LoadBalancerIntegrationSpec extends Specification {
     }
 
     def runTest[A](client: Service[HttpRequest, HttpResponse])(f: PartialFunction[Int, Unit]) {
-      0 until 1000 foreach { i =>
+      0 until 10000 foreach { i =>
         if (f.isDefinedAt(i))
           f(i)
 
@@ -99,6 +94,7 @@ object LoadBalancerIntegrationSpec extends Specification {
       val client = ClientBuilder()
         .codec(Http)
         .hosts(servers map(_.addr))
+        .requestTimeout(10.milliseconds)
         .buildService[HttpRequest, HttpResponse]
 
       runTest(client) {
