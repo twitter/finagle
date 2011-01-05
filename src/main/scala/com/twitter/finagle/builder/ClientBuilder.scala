@@ -237,6 +237,8 @@ case class ClientBuilder(
     val (hosts, codec) = (_hosts, _codec) match {
       case (None, _) =>
         throw new IncompleteSpecification("No hosts were specified")
+      case (Some(hosts), _) if hosts.length == 0 =>
+        throw new IncompleteSpecification("Empty host list was specified")
       case (_, None) =>
         throw new IncompleteSpecification("No codec was specified")
       case (Some(hosts), Some(codec)) =>
