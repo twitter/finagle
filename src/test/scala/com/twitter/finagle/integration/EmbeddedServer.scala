@@ -82,7 +82,7 @@ class EmbeddedServer(val addr: SocketAddress) {
     if (serverChannel.isOpen)
       serverChannel.close().awaitUninterruptibly()
 
-    channels.close.awaitUninterruptibly()
+    channels.close().awaitUninterruptibly()
     channels.clear()
   }
 
