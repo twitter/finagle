@@ -29,32 +29,34 @@ class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
     val promise = new Promise[Rep]
 
     messageEvent.getFuture() {
-      case Error(cause) => promise() = Throw(cause)
+      case Error(cause) => promise.updateIfEmpty(Throw(cause))
       case _ => /* ignore */
     }
 
     replyFuture {
       case Ok(_) =>
-        replyFuture.getReply match {
+        val result = replyFuture.getReply match {
           case Reply.Done(reply) =>
             if (reply.isInstanceOf[Rep])
-              promise() = Return(reply.asInstanceOf[Rep])
+              Return(reply.asInstanceOf[Rep])
             else
-              promise() = Throw(new InvalidMessageTypeException)
+              Throw(new InvalidMessageTypeException)
 
           // case Reply.Done(reply: Rep) =>
           //   promise() = Return(reply)
           // case Reply.Done(_) =>
           //   promise() = Throw(new InvalidMessageTypeException)
           case Reply.More(_, _) =>
-            promise() = Throw(new ReplyIsStreamingException)
+            Throw(new ReplyIsStreamingException)
         }
 
+        promise.updateIfEmpty(result)
+
       case Error(cause) =>
-        promise() = Throw(cause)
+        promise.updateIfEmpty(Throw(cause))
 
       case _ =>
-        promise() = Throw(new CancelledRequestException)
+        promise.updateIfEmpty(Throw(new CancelledRequestException))
     }
 
     promise
