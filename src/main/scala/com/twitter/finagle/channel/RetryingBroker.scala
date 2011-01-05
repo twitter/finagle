@@ -1,7 +1,6 @@
 package com.twitter.finagle.channel
 
 import java.net.SocketAddress
-import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.channel.{
   Channels, Channel, DownstreamMessageEvent,

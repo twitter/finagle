@@ -21,12 +21,12 @@ class Project(info: ProjectInfo)
 
   val netty        = "org.jboss.netty"      %  "netty"            % "3.2.3.Final"
   val thrift       = "thrift"               %  "libthrift"        % "0.5.0"
-  val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.5.2"
+  val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
 
   // com.twitter deps:
   val ostrich = "com.twitter" % "ostrich" % "2.3.4"
-  val util    = "com.twitter" % "util"    % "1.4.4-SNAPSHOT"
+  val util    = "com.twitter" % "util"    % "1.4.4"
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()

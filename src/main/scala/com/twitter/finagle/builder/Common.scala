@@ -1,6 +1,5 @@
 package com.twitter.finagle.builder
 
-import java.util.concurrent.TimeUnit
 import java.net.InetSocketAddress
 
 import org.jboss.netty.channel.ChannelPipelineFactory
@@ -21,12 +20,4 @@ object StatsReporter4J {
 
 trait StatsReceiver {
   def observer(prefix: String, label: String): (Seq[String], Int, Int) => Unit
-}
-
-object Timeout {
-  val Eternity = Timeout(Long.MaxValue, TimeUnit.MILLISECONDS)
-}
-
-case class Timeout(value: Long, unit: TimeUnit) {
-  def duration = Duration.fromTimeUnit(value, unit)
 }

@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
 import scala.collection.JavaConversions._
 
 import java.net.SocketAddress
-import java.util.concurrent.{TimeUnit, Executors, LinkedBlockingQueue}
+import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import java.util.logging.Logger
 import javax.net.ssl.{KeyManager, SSLContext}
 
@@ -23,7 +23,6 @@ import channel.{Job, QueueingChannelHandler, PartialUpstreamMessageEvent}
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
-import org.jboss.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 import org.jboss.netty.util.HashedWheelTimer
 
 object ServerBuilder {
@@ -47,7 +46,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
     ctx.getAttachment match {
       case Timing(requestedAt: Time) =>
         samples("exception", e.getCause.getClass.getName).add(
-          requestedAt.inMilliseconds.toInt)
+          requestedAt.untilNow.inMilliseconds.toInt)
       case _ => ()
     }
     super.exceptionCaught(ctx, e)
@@ -69,7 +68,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
         case (_, p: PartialUpstreamMessageEvent) =>
           ()
         case (Timing(requestedAt: Time), r: HttpResponse)  =>
-          latencySample.add(requestedAt.inMilliseconds.toInt)
+          latencySample.add(requestedAt.untilNow.inMilliseconds.toInt)
         case (_, _) =>
           () // WTF?
       }
@@ -84,12 +83,9 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
 
 case class ServerBuilder(
   _codec: Option[Codec],
-  _connectionTimeout: Timeout,
-  _requestTimeout: Timeout,
-  _responseTimeout: Timeout,
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Timeout,
-  _sampleGranularity: Timeout,
+  _sampleWindow: Duration,
+  _sampleGranularity: Duration,
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
@@ -105,52 +101,34 @@ case class ServerBuilder(
   import ServerBuilder._
 
   def this() = this(
-    None,                                           // codec
-    Timeout.Eternity,                               // connectionTimeout
-    Timeout.Eternity,                               // requestTimeout
-    Timeout.Eternity,                               // responseTimeout
-    None,                                           // statsReceiver
-    Timeout(10, TimeUnit.MINUTES),                  // sampleWindow
-    Timeout(10, TimeUnit.SECONDS),                  // sampleGranularity
-    None,                                           // name
-    None,                                           // sendBufferSize
-    None,                                           // recvBufferSize
-    None,                                           // pipelineFactory
-    None,                                           // bindTo
-    None,                                           // logger
-    None,                                           // tls
-    false,                                          // startTls
-    None,                                           // channelFactory
-    None,                                           // maxConcurrentRequests
-    None                                            // maxQueueDepth
+    None,        // codec
+    None,        // statsReceiver
+    10.minutes,  // sampleWindow
+    10.seconds,  // sampleGranularity
+    None,        // name
+    None,        // sendBufferSize
+    None,        // recvBufferSize
+    None,        // pipelineFactory
+    None,        // bindTo
+    None,        // logger
+    None,        // tls
+    false,       // startTls
+    None,        // channelFactory
+    None,        // maxConcurrentRequests
+    None         // maxQueueDepth
   )
 
   def codec(codec: Codec): ServerBuilder =
     copy(_codec = Some(codec))
 
-  def connectionTimeout(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_connectionTimeout = Timeout(value, unit))
-
-  def connectionTimeout(duration: Duration): ServerBuilder =
-    copy(_connectionTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
-
-  def requestTimeout(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_requestTimeout = Timeout(value, unit))
-
-  def requestTimeout(duration: Duration): ServerBuilder =
-    copy(_requestTimeout = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
-
   def reportTo(receiver: StatsReceiver): ServerBuilder =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_sampleWindow = Timeout(value, unit))
+  def sampleWindow(window: Duration): ServerBuilder =
+    copy(_sampleWindow = window)
 
-  def sampleGranularity(value: Long, unit: TimeUnit): ServerBuilder =
-    copy(_sampleGranularity = Timeout(value, unit))
-
-  def sampleGranularity(duration: Duration): ServerBuilder =
-    copy(_sampleGranularity = Timeout(duration.inMillis, TimeUnit.MICROSECONDS))
+  def sampleGranularity(window: Duration): ServerBuilder =
+    copy(_sampleGranularity = window)
 
   def name(value: String): ServerBuilder = copy(_name = Some(value))
 
@@ -186,16 +164,16 @@ case class ServerBuilder(
   private def statsRepository(
     name: Option[String],
     receiver: Option[StatsReceiver],
-    sampleWindow: Timeout,
-    sampleGranularity: Timeout,
+    window: Duration,
+    granularity: Duration,
     sockAddr: SocketAddress) =
   {
-    val window      = sampleWindow.duration
-    val granularity = sampleGranularity.duration
     if (window < granularity) {
       throw new IncompleteSpecification(
         "window smaller than granularity!")
     }
+
+    // .
 
     val prefix = name map ("%s_".format(_)) getOrElse ""
     val sampleRepository =
@@ -232,23 +210,9 @@ case class ServerBuilder(
       _sampleWindow, _sampleGranularity,
       _bindTo.get)
 
-    val timer = if (_requestTimeout != Timeout.Eternity || _responseTimeout != Timeout.Eternity) {
-      Some(new HashedWheelTimer)
-    } else None
-
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
-
-        if (_requestTimeout != Timeout.Eternity) {
-          pipeline.addFirst("requestTimeout",
-            new ReadTimeoutHandler(timer.get, _requestTimeout.value, _responseTimeout.unit))
-        }
-
-        if (_responseTimeout != Timeout.Eternity) {
-          pipeline.addFirst("responseTimeout",
-            new WriteTimeoutHandler(timer.get, _responseTimeout.value, _responseTimeout.unit))
-        }
 
         for (maxConcurrentRequests <- _maxConcurrentRequests) {
           val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
