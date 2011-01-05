@@ -21,7 +21,7 @@ class Project(info: ProjectInfo)
 
   val netty        = "org.jboss.netty"      %  "netty"            % "3.2.3.Final"
   val thrift       = "thrift"               %  "libthrift"        % "0.5.0"
-  val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.5.2"
+  val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
   val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
 
   // com.twitter deps:
@@ -31,7 +31,17 @@ class Project(info: ProjectInfo)
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
   val specs    = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
-  // val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+  val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+
+  val integrationTestSuffix = "IntegrationSpec"
+
+  lazy val integrationTestOptions: Seq[TestOption] =
+    TestListeners(testListeners) :: TestFilter(_ endsWith integrationTestSuffix) :: Nil
+
+  lazy val integrationTest = defaultTestTask(integrationTestOptions)
+
+  override def testOptions =
+    super.testOptions ++ Seq(TestFilter(name => !(name endsWith integrationTestSuffix)))
 }
 
 trait LibDirClasspath extends StandardProject {

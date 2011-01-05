@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import org.specs.Specification
 import org.specs.mock.Mockito
-import org.mockito.ArgumentCaptor
+import org.mockito.{ArgumentCaptor, Matchers}
 
 import org.jboss.netty.util.{Timer, TimerTask, Timeout}
 
@@ -17,10 +17,16 @@ object TimerSpec extends Specification with Mockito {
     val timeout = mock[Timeout]
 
     val taskCaptor = ArgumentCaptor.forClass(classOf[TimerTask])
-    timer.newTimeout(taskCaptor.capture, ==(10000), ==(TimeUnit.MILLISECONDS)) returns timeout
+    timer.newTimeout(
+      taskCaptor.capture,
+      Matchers.eq(10000L),
+      Matchers.eq(TimeUnit.MILLISECONDS)) returns timeout
     var wasInvoked = false
     richTimer(10.seconds) { wasInvoked = true }
-    there was one(timer).newTimeout(any[TimerTask], ==(10000), ==(TimeUnit.MILLISECONDS))
+    there was one(timer).newTimeout(
+      any[TimerTask],
+      Matchers.eq(10000L),
+      Matchers.eq(TimeUnit.MILLISECONDS))
     val timeoutTask = taskCaptor.getValue
     wasInvoked must beFalse
 
