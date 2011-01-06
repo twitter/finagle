@@ -3,6 +3,8 @@ package com.twitter.finagle.channel
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
+import com.twitter.util.{Promise, Future, Throw}
+
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
@@ -10,41 +12,40 @@ trait ConnectingChannelBroker extends Broker {
   def getChannel: ChannelFuture
   def putChannel(channel: Channel)
 
-  def dispatch(e: MessageEvent) = {
-    val replyFuture = new ReplyFuture
+  def apply(request: AnyRef) = {
+    val replyFuture = new Promise[AnyRef]
 
     getChannel {
-      case Ok(channel) if replyFuture.isCancelled =>
-        putChannel(channel)
-
       case Ok(channel) =>
-        // TODO: indicate failure to the pool here, or have it
-        // determine that?
-        connectChannel(channel, e, replyFuture) onSuccessOrFailure {
+        connectChannel(channel, request, replyFuture)
+        replyFuture respond { _ =>
+          // Note: The pool checks the health of the channel. The
+          // ConnectingChannelBroker is responsible for the *request*
+          // lifecycle, while the underlying pool handles the
+          // *channel* lifecycle.
           putChannel(channel)
         }
 
       case Error(cause) =>
-        // TODO: gauge availability this way?
-        e.getFuture.setFailure(cause)
+        // This is always a write failure.
+        replyFuture() = Throw(new WriteException(cause))
 
       case Cancelled =>
-        e.getFuture.setFailure(new CancelledRequestException)
+        // This should never happen?  No code can currently cancel
+        // these futures.
+        replyFuture() = Throw(new CancelledRequestException)
     }
 
     replyFuture
   }
 
-  protected def connectChannel(
-      to: Channel, e: MessageEvent,
-      replyFuture: ReplyFuture): ChannelFuture =
+  private[this] def connectChannel(to: Channel, message: AnyRef, replyFuture: Promise[AnyRef]) {
     to.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
-        adapter.writeAndRegisterReply(to, e, replyFuture)
+        adapter.writeAndRegisterReply(to, message, replyFuture)
       case _ =>
-        val exc = new InvalidPipelineException
-        e.getFuture().setFailure(exc)
-        replyFuture.setFailure(exc)
-        Channels.succeededFuture(to)
+        replyFuture.updateIfEmpty(Throw(new InvalidPipelineException))
     }
+  }
 }
+

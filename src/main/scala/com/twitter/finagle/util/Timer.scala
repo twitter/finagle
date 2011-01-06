@@ -4,7 +4,19 @@ import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.util.{Timer, TimerTask, Timeout}
 
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Try, Promise}
+
+object TimerFuture {
+  import Conversions._
+
+  def apply[A](timer: Timer, after: Duration, tryValue: => Try[A]) = {
+    val future = new Promise[A]
+    timer(after) {
+      future() = tryValue
+    }
+    future
+  }
+}
 
 class RichTimer(val self: Timer) {
   def apply(after: Duration)(f: => Unit): Timeout = {

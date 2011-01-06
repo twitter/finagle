@@ -13,7 +13,7 @@ class Http(compressionLevel: Int = 0) extends Codec {
         pipeline.addLast("httpCodec", new HttpClientCodec())
         pipeline.addLast("httpDechunker",  new HttpChunkAggregator(10<<20))
         pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
-        pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
+        // pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
         pipeline
       }
     }
@@ -28,7 +28,7 @@ class Http(compressionLevel: Int = 0) extends Codec {
             "httpCompressor",
             new HttpContentCompressor(compressionLevel))
         }
-        pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
+        // pipeline.addLast("lifecycleSpy", RequestLifecycleSpy)
 
         pipeline.addLast(
           "connectionLifecycleManager",

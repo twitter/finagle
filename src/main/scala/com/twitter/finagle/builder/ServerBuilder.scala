@@ -19,7 +19,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Time}
 
 import com.twitter.finagle._
-import channel.{Job, QueueingChannelHandler, PartialUpstreamMessageEvent}
+import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
@@ -65,8 +65,6 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
     if (c.isInstanceOf[MessageEvent]) {
       val e = c.asInstanceOf[MessageEvent]
       (ctx.getAttachment, e.getMessage) match {
-        case (_, p: PartialUpstreamMessageEvent) =>
-          ()
         case (Timing(requestedAt: Time), r: HttpResponse)  =>
           latencySample.add(requestedAt.untilNow.inMilliseconds.toInt)
         case (_, _) =>

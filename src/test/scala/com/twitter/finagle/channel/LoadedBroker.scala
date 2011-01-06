@@ -6,12 +6,17 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
 
+import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.util._
 
 object LoadedBrokerSpec extends Specification with Mockito {
+  class FakeBroker(reply: Future[AnyRef]) extends Broker {
+    def apply(request: AnyRef) = reply
+  }
+
   class FakeLoadedBroker extends LoadedBroker[FakeLoadedBroker] {
     def load = 0
-    def dispatch(e: MessageEvent) = null
+    def apply(request: AnyRef) = null
   }
 
   class Repo extends LazilyCreatingSampleRepository[ScalarSample] {
@@ -20,23 +25,21 @@ object LoadedBrokerSpec extends Specification with Mockito {
 
   "StatsLoadedBroker" should {
     "increment on dispatch" in {
-      val messageEvent = mock[MessageEvent]
+      val messageEvent = mock[Object]
 
-      val broker1 = mock[Broker]
-      broker1.dispatch(messageEvent) returns ReplyFuture.success("1")
-      val broker2 = mock[Broker]
-      broker2.dispatch(messageEvent) returns ReplyFuture.success("2")
-      
+      val broker1 = new FakeBroker(Future("1"))
+      val broker2 = new FakeBroker(Future("2"))
+
       val rcBroker1 = new StatsLoadedBroker(broker1, new Repo)
       val rcBroker2 = new StatsLoadedBroker(broker2, new Repo)
 
-      (0 until 3) foreach { _ => rcBroker1.dispatch(messageEvent) }
-      (0 until 1) foreach { _ => rcBroker2.dispatch(messageEvent) }
+      (0 until 3) foreach { _ => rcBroker1(messageEvent) }
+      (0 until 1) foreach { _ => rcBroker2(messageEvent) }
 
       rcBroker1.load must be_==(3)
       rcBroker2.load must be_==(1)
 
-      (0 until 3) foreach { _ => rcBroker2.dispatch(messageEvent) }
+      (0 until 3) foreach { _ => rcBroker2(messageEvent) }
 
       rcBroker1.load must be_==(3)
       rcBroker2.load must be_==(4)
@@ -58,7 +61,20 @@ object LoadedBrokerSpec extends Specification with Mockito {
   }
 
   "FailureAccruingLoadedBroker" should {
-    val underlying = mock[LoadedBroker[T forSome { type  T <: LoadedBroker[T] }]]
+    class FakeLoadedBroker extends LoadedBroker[FakeLoadedBroker] {
+      var theWeight = 0.0f
+      var theLoad = 0
+      var future: Future[AnyRef] = null
+
+      def apply(request: AnyRef) = future
+
+      def load = theLoad
+      override def weight = theWeight
+    }
+    
+    val underlying = new FakeLoadedBroker
+
+    // val underlying = mock[LoadedBroker[T forSome { type  T <: LoadedBroker[T] }]]
 
     type S = TimeWindowedSample[ScalarSample]
 
@@ -72,40 +88,40 @@ object LoadedBrokerSpec extends Specification with Mockito {
     val broker = new FailureAccruingLoadedBroker(underlying, repo)
 
     "account for success" in {
-      val e = mock[MessageEvent]
-      val f = new ReplyFuture
+      val e = mock[Object]
+      val f = new Promise[Object]
 
-      underlying.dispatch(e) returns f
-      broker.dispatch(e) must be_==(f)
+      underlying.future = f
+      broker(e) must be_==(f)
 
       there was no(successSample).incr()
       there was no(failureSample).incr()
 
-      f.setReply(Reply.Done("yipee!"))
+      f() = Return("yipee!")
       there was one(successSample).incr()
     }
 
     "account for failure" in {
-      val e = mock[MessageEvent]
-      val f = new ReplyFuture
+      val e = mock[Object]
+      val f = new Promise[String]
 
-      underlying.dispatch(e) returns f
-      broker.dispatch(e) must be_==(f)
+      underlying.future = f
+      broker(e) must be_==(f)
 
-      f.setFailure(new Exception("doh."))
+      f() = Throw(new Exception("doh."))
 
       there was no(successSample).incr()
       there was one(failureSample).incr()
     }
 
     "take into account failures" in {
-      val e = mock[MessageEvent]
-      val f = new ReplyFuture
+      val e = mock[Object]
+      val f = new Promise[String]
 
-      underlying.dispatch(e) returns f
-      broker.dispatch(e) must be_==(f)
+      underlying.future = f
+      broker(e) must be_==(f)
 
-      f.setReply(Reply.Done("yipee!"))
+      f() = Return("yipee!")
       there was no(failureSample).incr()
       there was one(successSample).incr()
     }
@@ -113,14 +129,14 @@ object LoadedBrokerSpec extends Specification with Mockito {
     "not modify weights for a healhty client" in {
       successSample.count returns 1
       failureSample.count returns 0
-      underlying.weight returns 1.0f
+      underlying.theWeight = 1.0f
       broker.weight must be_==(1.0f)
     }
 
     "adjust weights for an unhealthy broker" in {
       successSample.count returns 1
       failureSample.count returns 1
-      underlying.weight returns 1.0f
+      underlying.theWeight = 1.0f
       broker.weight must be_==(0.5f)
     }
 
@@ -132,7 +148,7 @@ object LoadedBrokerSpec extends Specification with Mockito {
   }
 
   "LeastLoadedBroker" should {
-    val request = mock[MessageEvent]
+    val request = mock[Object]
 
     "dispatch to the least loaded" in {
       val loadedBroker1 = spy(new FakeLoadedBroker)
@@ -143,13 +159,13 @@ object LoadedBrokerSpec extends Specification with Mockito {
       loadedBroker1.load returns 1
       loadedBroker2.load returns 2
 
-      leastLoadedBroker.dispatch(request)
-      there was one(loadedBroker1).dispatch(request)
+      leastLoadedBroker(request)
+      there was one(loadedBroker1)(request)
 
       loadedBroker1.load returns 3
 
-      leastLoadedBroker.dispatch(request)
-      there was one(loadedBroker2).dispatch(request)
+      leastLoadedBroker(request)
+      there was one(loadedBroker2)(request)
     }
 
 
@@ -167,9 +183,9 @@ object LoadedBrokerSpec extends Specification with Mockito {
       b2.isAvailable must beFalse
 
       val b = new LeastLoadedBroker(Seq(b1, b2))
-      val f = b.dispatch(mock[MessageEvent])
-      f.isSuccess must beFalse
-      f.getCause must haveClass[NoBrokersAvailableException]
+      val f = b(mock[Object])
+      f.isThrow must beTrue
+      f() must throwA(new NoBrokersAvailableException)
     }
   }
 
@@ -178,7 +194,7 @@ object LoadedBrokerSpec extends Specification with Mockito {
       val b0 = spy(new FakeLoadedBroker)
       val b1 = spy(new FakeLoadedBroker)
       val theRng = mock[Random]
-      val messageEvent = mock[MessageEvent]
+      val messageEvent = mock[Object]
 
       val lb = new LoadBalancedBroker(List(b0, b1)) {
         override val rng = theRng
@@ -190,27 +206,27 @@ object LoadedBrokerSpec extends Specification with Mockito {
 
       for (i <- 1 to 10) {
         if (i > 5) theRng.nextFloat returns 0.7f
-        lb.dispatch(messageEvent)
+        lb(messageEvent)
       }
 
-      there were atLeast(5)(b0).dispatch(messageEvent)
-      there were atLeast(5)(b1).dispatch(messageEvent)
+      there were atLeast(5)(b0)(messageEvent)
+      there were atLeast(5)(b1)(messageEvent)
     }
 
     "always picks" in {
       val b0 = spy(new FakeLoadedBroker)
       val lb = new LoadBalancedBroker(List(b0))
-      val me = mock[MessageEvent]
+      val me = mock[Object]
       b0.load returns 1
-      val f: ReplyFuture = lb.dispatch(me)
-      there was one(b0).dispatch(me)
+      val f = lb(me)
+      there was one(b0)(me)
     }
 
     "when there are no endpoints, is not available and returns a failed future" in {
       val lb = new LoadBalancedBroker(List.empty)
-      val f: ReplyFuture = lb.dispatch(mock[MessageEvent])
+      val f = lb(mock[Object])
       lb.isAvailable must beFalse
-      f.getCause must haveClass[NoBrokersAvailableException]
+      f() must throwA(new NoBrokersAvailableException)
     }
 
     "fails when unavailable" in {
@@ -227,9 +243,8 @@ object LoadedBrokerSpec extends Specification with Mockito {
       b2.isAvailable must beFalse
 
       val b = new LoadBalancedBroker(Seq(b1, b2))
-      val f = b.dispatch(mock[MessageEvent])
-      f.isSuccess must beFalse
-      f.getCause must haveClass[NoBrokersAvailableException]
+      val f = b(mock[Object])
+      f() must throwA(new NoBrokersAvailableException)
     }
   }
 }

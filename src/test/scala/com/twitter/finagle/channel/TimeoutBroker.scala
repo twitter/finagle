@@ -9,13 +9,20 @@ import org.mockito.Matchers
 import org.jboss.netty.util.{Timer, Timeout, TimerTask}
 import org.jboss.netty.channel.{MessageEvent, Channels}
 
+import com.twitter.util.{Future, Promise, Return, Throw}
+
 import com.twitter.conversions.time._
 
 object TimeoutBrokerSpec extends Specification with Mockito {
   "TimeoutBroker" should {
+    class FakeBroker(reply: Future[AnyRef]) extends Broker {
+      def apply(request: AnyRef) = reply
+    }
+
     val timer = mock[Timer]
     val timeout = mock[Timeout]
-    val b = mock[Broker]
+    val replyFuture = spy(new Promise[AnyRef])
+    val b = new FakeBroker(replyFuture)
     val e = mock[MessageEvent]
     var timerTask: TimerTask = null
 
@@ -27,46 +34,39 @@ object TimeoutBrokerSpec extends Specification with Mockito {
           timeout
       }
 
-    val f = spy(new ReplyFuture)
-    b.dispatch(e) returns f
-
     val tob = new TimeoutBroker(timer, b, 100.milliseconds)
 
-    tob.dispatch(e)
-    there was one(b).dispatch(e)
-    f.isDone must beFalse
+    val f = tob(e)
     timerTask must notBeNull
 
     "time out after specfied time" in {
       // Emulate the actual timeout.
       timerTask.run(timeout)
 
-      f.isDone must beTrue
-      f.isSuccess must beFalse
-      f.getCause must haveClass[TimedoutRequestException]
+      f.isDefined must beTrue
+      f.isReturn must beFalse
+      f() must throwA(new TimedoutRequestException)
     }
 
     "cancel timeout if the request completes in time" in {
       // Emulate succesfull completion.
-      f.setSuccess()
+      replyFuture() = Return("yay")
       there was one(timeout).cancel()
       timeout.isCancelled() returns true
 
       // Timeout fires.
       timerTask.run(timeout)
-      there was no(f).setFailure(Matchers.any[Throwable])
     }
 
     "cancel timeout if the request fails in time" in {
       // Emulate failed completion.
       val exc = new Exception
-      f.setFailure(exc)
+      replyFuture() = Throw(exc)
       there was one(timeout).cancel()
       timeout.isCancelled() returns true
 
       // Timeout fires.
       timerTask.run(timeout)
-      there was one(f).setFailure(exc)
     }
   }
 }

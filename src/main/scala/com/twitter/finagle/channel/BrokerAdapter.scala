@@ -4,75 +4,68 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.jboss.netty.channel._
 
+import com.twitter.finagle.util.Error
 import com.twitter.finagle.util.Conversions._
 
+import com.twitter.util.{Future, Promise, Return, Throw, Try}
+
 class BrokerAdapter extends SimpleChannelUpstreamHandler {
-  val currentReplyFuture = new AtomicReference[ReplyFuture](null)
-  @volatile var doneFuture: ChannelFuture = null
+  @volatile private[this] var replyFuture: Promise[AnyRef] = null
 
-  def writeAndRegisterReply(to: Channel, e: MessageEvent, replyFuture: ReplyFuture) = {
-    if (!currentReplyFuture.compareAndSet(null, replyFuture))
-      throw new TooManyConcurrentRequestsException
-
-    doneFuture = Channels.future(e.getChannel)
-    Channels.write(to, e.getMessage).proxyTo(e.getFuture)
-    doneFuture
-  }
-
-  // XXX: is there a race condition here between receiving messages &
-  // etc?  should we serialize all the events?
-  // (SerializedChannelUpstreamHandler)....  that way we know we are
-  // only receiving one event at a time.
-  //
-  // At a minimum, change the currentReplyFuture back.
-
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val replyFuture = currentReplyFuture.getAndSet(null)
-    if (replyFuture eq null)
-      return  // TODO: log/change health?
-
-    e match {
-      case PartialUpstreamMessageEvent(_, message, _) =>
-        val next = new ReplyFuture
-        replyFuture.setReply(Reply.More(message, next))
-        assert(currentReplyFuture.compareAndSet(null, next))
-      case _ =>
-        replyFuture.setReply(Reply.Done(e.getMessage))
-        done()
+  def writeAndRegisterReply(to: Channel, message: AnyRef, replyFuture: Promise[AnyRef]) {
+    if (this.replyFuture ne null) {
+      done(Throw(new TooManyConcurrentRequestsException))
+    } else {
+      this.replyFuture = replyFuture
+      Channels.write(to, message) {
+        case Error(cause) =>
+          // Always close on error.
+          fail(to, new WriteException(cause))
+        case _ => ()
+      }
     }
   }
 
-  def done() {
-    currentReplyFuture.set(null)
-    doneFuture.setSuccess()
-  }
+  // TODO: should we provide any event serialization here?
 
-  def fail(cause: ChannelException) {
-    val replyFuture = currentReplyFuture.get
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     if (replyFuture eq null)
-      return  // TODO: report?
-
-    replyFuture.setFailure(cause)
-    done()
+      fail(ctx.getChannel, new SpuriousMessageException)
+    else
+      done(Return(e.getMessage))
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    // Translate the exception to Finagle request
     val translated =
       e.getCause match {
-        case _: java.net.ConnectException =>
-          new ConnectionFailedException
-        case _: java.nio.channels.UnresolvedAddressException =>
-          new ConnectionFailedException
+          case _: java.net.ConnectException =>
+            new ConnectionFailedException
+          case _: java.nio.channels.UnresolvedAddressException =>
+            new ConnectionFailedException
+          case e =>
+            new UnknownChannelException(e)
+        }
 
-        case e =>
-          new UnknownChannelException(e)
-      }
-
-    fail(translated)
+    // Always close on error.
+    fail(ctx.getChannel, translated)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    fail(new ChannelClosedException)
+    done(Throw(new ChannelClosedException))
+  }
+
+  private[this] def fail(ch: Channel, cause: ChannelException) {
+    // We always close the channel on failure, and mark ourselves
+    // unhealthy.
+    ChannelHealth.markUnhealthy(ch)
+    Channels.close(ch)
+    done(Throw(cause))
+  }
+
+  private[this] def done(answer: Try[AnyRef]) {
+    if (replyFuture ne null) {
+      replyFuture.updateIfEmpty(answer)
+      replyFuture = null
+    }
   }
 }

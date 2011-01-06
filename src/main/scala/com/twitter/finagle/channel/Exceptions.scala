@@ -11,6 +11,8 @@ class NoBrokersAvailableException extends RequestException
 class ChannelException                      extends Exception
 class ConnectionFailedException             extends ChannelException
 class ChannelClosedException                extends ChannelException
+class WriteException(e: Throwable)          extends ChannelException
+class SpuriousMessageException              extends ChannelException
 class UnknownChannelException(e: Throwable) extends ChannelException
 
 // Subclass this for application exceptions

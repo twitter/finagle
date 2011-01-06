@@ -4,43 +4,38 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
 
+import com.twitter.util.Future
+
 class RetryingBrokerSpec extends Specification with Mockito {
-  class MyException extends Exception
+  class MyException extends WriteException(new Exception)
 
   "RetryingBroker" should {
     val exception = new MyException
     var invocations = 0
     val tries = 3
     val someMessage = mock[Object]
-    val pipeline = Channels.pipeline()
-    pipeline.addLast("silenceWarnings", new SimpleChannelUpstreamHandler {
-      override def exceptionCaught(ctx: ChannelHandlerContext, exc: ExceptionEvent) {}
-    })
-    val brokeredChannel = new BrokeredChannelFactory().newChannel(pipeline)
+    val someReply = mock[Object]
 
     "when it never succeeds" in {
       val underlying = new Broker {
-        def dispatch(e: MessageEvent) = {
+        def apply(request: AnyRef) = {
           invocations += 1
-          e.getFuture.setFailure(exception)
-          ReplyFuture.failed(exception)
+          Future.exception(exception)
         }
       }
-      brokeredChannel.connect(new RetryingBroker(underlying, tries))
+      val retryingBroker = RetryingBroker.tries(underlying, tries)
 
       "retries up to $tries times" in {
-        val writeFuture = Channels.write(brokeredChannel, someMessage)
-        writeFuture.await()
-        writeFuture.getCause must haveClass[MyException]
+        val f = retryingBroker(someMessage)
+
+        f() must throwA(exception)
         invocations mustEqual 3
       }
 
       "apply retries on each new request" in {
         for (_ <- 0 until 3) {
           invocations = 0
-          val f = Channels.write(brokeredChannel, someMessage)
-          f.await()
-          f.getCause must haveClass[MyException]
+          retryingBroker(someMessage)() must throwA(exception)
           invocations mustEqual 3
         }
       }
@@ -48,35 +43,44 @@ class RetryingBrokerSpec extends Specification with Mockito {
 
     "when it eventually succeeds" in {
       val underlying = new Broker {
-        def dispatch(e: MessageEvent) = {
+        def apply(request: AnyRef) = {
           invocations += 1
-          val future = e.getFuture
           if (invocations < 3) {
-            future.setFailure(exception)
-            ReplyFuture.failed(exception)
+            Future.exception(exception)
           } else {
-            future.setSuccess()
-            ReplyFuture.success(someMessage)
+            Future.value(someReply)
           }
         }
       }
-      brokeredChannel.connect(new RetryingBroker(underlying, tries))
+      val retryingBroker = RetryingBroker.tries(underlying, tries)
 
       "retries until it succeeds" in {
-        val writeFuture = Channels.write(brokeredChannel, someMessage)
-        writeFuture.await()
-        writeFuture.isSuccess mustBe true
+        retryingBroker(someMessage)() must be_==(someReply)
         invocations mustEqual 3
       }
 
       "apply retries on each new request" in {
         for (_ <- 0 until 3) {
           invocations = 0
-          val f = Channels.write(brokeredChannel, someMessage)
-          f.await()
-          f.isSuccess must beTrue
+          retryingBroker(someMessage)() must be_==(someReply)
           invocations mustEqual 3
         }
+      }
+    }
+
+    "when it fails with a non-WriteException exception" in {
+      val regularException = new Exception
+      val underlying = new Broker {
+        def apply(request: AnyRef) = {
+          invocations += 1
+          Future.exception(regularException)
+        }
+      }
+      val retryingBroker = RetryingBroker.tries(underlying, tries)
+
+      "never retry" in {
+        retryingBroker(someMessage)() must throwA(regularException)
+        invocations must be_==(1)
       }
     }
   }

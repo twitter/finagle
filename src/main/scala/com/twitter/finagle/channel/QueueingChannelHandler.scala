@@ -21,7 +21,9 @@ private[finagle] case class Job(ctx: ChannelHandlerContext, e: MessageEvent) ext
   def markDead() { _isAlive = false }
 }
 
-class QueueingChannelHandler(concurrencyLevel: Int, queue: Queue[Job]) extends SimpleChannelHandler {
+class QueueingChannelHandler(concurrencyLevel: Int, queue: Queue[Job])
+  extends SimpleChannelHandler
+{
   private val outstandingRequests = new AtomicInteger(0)
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -33,14 +35,9 @@ class QueueingChannelHandler(concurrencyLevel: Int, queue: Queue[Job]) extends S
 
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    e match {
-      case e: PartialUpstreamMessageEvent =>
-        super.writeRequested(ctx, e)
-      case _ =>
-        outstandingRequests.getAndDecrement()
-        super.writeRequested(ctx, e)
-        performNextJob()
-    }
+    outstandingRequests.getAndDecrement()
+    super.writeRequested(ctx, e)
+    performNextJob()
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {

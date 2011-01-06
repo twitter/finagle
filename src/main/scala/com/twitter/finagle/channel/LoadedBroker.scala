@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import org.jboss.netty.channel.MessageEvent
 
-import com.twitter.util.{Time, Duration}
+import com.twitter.util.{Time, Duration, Return, Throw, Future}
 import com.twitter.util.TimeConversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Conversions._
@@ -38,22 +38,23 @@ class StatsLoadedBroker(
   val dispatchSample = samples("dispatch")
   val latencySample  = samples("latency")
 
-  override def dispatch(e: MessageEvent) = {
+  override def apply(request: AnyRef) = {
     val begin = Time.now
     dispatchSample.incr()
 
-    underlying.dispatch(e) whenDone0 { future =>
-      future {
-        case Ok(_) =>
-          latencySample.add(begin.untilNow.inMilliseconds.toInt)
-        case Error(e) =>
-          // TODO: exception hierarchy here to differentiate between
-          // application, connection & other (internal?) exceptions.
-          samples("exception", e.getClass.getName)
-            .add(begin.untilNow.inMilliseconds.toInt)
-        case Cancelled => /*ignore*/ ()
-      }
+    val f = underlying(request)
+
+    f respond {
+      case Return(_) =>
+        latencySample.add(begin.untilNow.inMilliseconds.toInt)
+      case Throw(e) =>
+        // TODO: exception hierarchy here to differentiate between
+        // application, connection & other (internal?) exceptions.
+        samples("exception", e.getClass.getName)
+          .add(begin.untilNow.inMilliseconds.toInt)
     }
+
+    f
   }
 
   override def weight = super.weight * bias
@@ -87,15 +88,15 @@ class FailureAccruingLoadedBroker(
       (success.toFloat / (success.toFloat + failure.toFloat)) * underlying.weight
   }
 
-  override def dispatch(e: MessageEvent) = {
+  override def apply(request: AnyRef) = {
     // TODO: discriminate request errors vs. connection errors, etc.?
-    underlying.dispatch(e) whenDone0 { future =>
-      future {
-        case Ok(_)     => successSample.incr()
-        case Error(_)  => failureSample.incr()
-        case Cancelled => ()
-      }
+    val f = underlying(request)
+    f respond {
+      case Return(_) => successSample.incr()
+      case Throw(_) => failureSample.incr()
     }
+
+    f
   }
 }
 
@@ -108,12 +109,12 @@ abstract class LoadBalancingBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
 class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
   extends LoadBalancingBroker[A](endpoints)
 {
-  def dispatch(e: MessageEvent) = {
+  def apply(request: AnyRef) = {
     val candidates = endpoints.filter(_.weight > 0.0f)
     if (candidates isEmpty)
-      ReplyFuture.failed(new NoBrokersAvailableException)
+      Future.exception(new NoBrokersAvailableException)
     else
-      candidates.min(Ordering.by((_: A).load)).dispatch(e)
+      candidates.min(Ordering.by((_: A).load))(request)
   }
 }
 
@@ -122,12 +123,12 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
 {
   val rng = new Random
 
-  def dispatch(e: MessageEvent): ReplyFuture = {
+  def apply(request: AnyRef): Future[AnyRef] = {
     val snapshot = endpoints map { e => (e, e.weight) }
     val totalSum = snapshot map { case (_, w) => w } sum
 
     if (totalSum <= 0.0f)
-      return ReplyFuture.failed(new NoBrokersAvailableException)
+      return Future.exception(new NoBrokersAvailableException)
 
     val pick = rng.nextFloat()
     var cumulativeWeight = 0.0
@@ -135,11 +136,11 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
       val normalizedWeight = weight / totalSum
       cumulativeWeight += normalizedWeight
       if (pick < cumulativeWeight)
-        return endpoint.dispatch(e)
+        return endpoint(request)
     }
 
     // The above loop should have returned.
-    ReplyFuture.failed(
+    Future.exception(
       new InternalError("Impossible load balancing condition"))
   }
 }

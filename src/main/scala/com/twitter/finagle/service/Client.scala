@@ -15,51 +15,12 @@ class InvalidMessageTypeException extends Exception
 class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
   extends Service[Req, Rep]
 {
-  def apply(request: Req): Future[Rep] = {
-    val messageEvent = new MessageEvent {
-      val future = Channels.future(null)
-
-      def getMessage       = request
-      def getFuture        = future
-      def getRemoteAddress = null
-      def getChannel       = null
+  def apply(request: Req): Future[Rep] =
+    broker(request) flatMap { reply =>
+      if (reply.isInstanceOf[Rep])
+        Return(reply.asInstanceOf[Rep])
+      else
+        Throw(new InvalidMessageTypeException)
     }
-
-    val replyFuture = broker.dispatch(messageEvent)
-    val promise = new Promise[Rep]
-
-    messageEvent.getFuture() {
-      case Error(cause) => promise.updateIfEmpty(Throw(cause))
-      case _ => /* ignore */
-    }
-
-    replyFuture {
-      case Ok(_) =>
-        val result = replyFuture.getReply match {
-          case Reply.Done(reply) =>
-            if (reply.isInstanceOf[Rep])
-              Return(reply.asInstanceOf[Rep])
-            else
-              Throw(new InvalidMessageTypeException)
-
-          // case Reply.Done(reply: Rep) =>
-          //   promise() = Return(reply)
-          // case Reply.Done(_) =>
-          //   promise() = Throw(new InvalidMessageTypeException)
-          case Reply.More(_, _) =>
-            Throw(new ReplyIsStreamingException)
-        }
-
-        promise.updateIfEmpty(result)
-
-      case Error(cause) =>
-        promise.updateIfEmpty(Throw(cause))
-
-      case _ =>
-        promise.updateIfEmpty(Throw(new CancelledRequestException))
-    }
-
-    promise
-  }
 }
 

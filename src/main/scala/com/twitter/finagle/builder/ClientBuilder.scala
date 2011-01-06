@@ -183,9 +183,9 @@ case class ClientBuilder(
   private def retrying(broker: Broker) =
     (_retries, _initialBackoff, _backoffMultiplier) match {
       case (Some(retries: Int), None, None) =>
-        new RetryingBroker(broker, retries)
+        RetryingBroker.tries(broker, retries)
       case (Some(retries: Int), Some(backoff: Duration), Some(multiplier: Int)) =>
-        new ExponentialBackoffRetryingBroker(broker, backoff, multiplier)
+        RetryingBroker.exponential(broker, backoff, multiplier)
       case (_, _, _) =>
         broker
     }

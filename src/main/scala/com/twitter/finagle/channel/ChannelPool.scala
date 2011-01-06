@@ -85,7 +85,8 @@ class ChannelPool(
   def isAvailable = _isAvailable
 
   protected def make() = clientBootstrap.connect()
-  protected def isHealthy(channel: Channel) = channel.isOpen
+  protected def isHealthy(channel: Channel) =
+    ChannelHealth.isHealthy(channel) && channel.isOpen
 
   override def toString = "pool:%x".format(hashCode)
 }

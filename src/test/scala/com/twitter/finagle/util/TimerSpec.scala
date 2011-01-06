@@ -8,6 +8,7 @@ import org.mockito.{ArgumentCaptor, Matchers}
 
 import org.jboss.netty.util.{Timer, TimerTask, Timeout}
 
+import com.twitter.util.{Throw, Future, Promise, Return}
 import com.twitter.conversions.time._
 
 object TimerSpec extends Specification with Mockito {
@@ -15,12 +16,12 @@ object TimerSpec extends Specification with Mockito {
     val timer = mock[Timer]
     val richTimer = new RichTimer(timer)
     val timeout = mock[Timeout]
-
     val taskCaptor = ArgumentCaptor.forClass(classOf[TimerTask])
     timer.newTimeout(
       taskCaptor.capture,
       Matchers.eq(10000L),
       Matchers.eq(TimeUnit.MILLISECONDS)) returns timeout
+
     var wasInvoked = false
     richTimer(10.seconds) { wasInvoked = true }
     there was one(timer).newTimeout(
@@ -41,5 +42,40 @@ object TimerSpec extends Specification with Mockito {
       timeoutTask.run(timeout)
       wasInvoked must beFalse
     }
+  }
+
+  "TimerFuture" should {
+    val timer = mock[Timer]
+    val richTimer = new RichTimer(timer)
+    val timeout = mock[Timeout]
+    val taskCaptor = ArgumentCaptor.forClass(classOf[TimerTask])
+    timer.newTimeout(
+      taskCaptor.capture,
+      Matchers.eq(10000L),
+      Matchers.eq(TimeUnit.MILLISECONDS)) returns timeout
+    val timerFuture = TimerFuture[Unit](timer, 10.seconds, Throw(new Exception))
+
+    there was one(timer).newTimeout(
+      any[TimerTask],
+      Matchers.eq(10000L),
+      Matchers.eq(TimeUnit.MILLISECONDS))
+
+    val timeoutTask = taskCaptor.getValue
+
+    timerFuture.isDefined must beFalse
+
+    "be satisfied when the timer is" in {
+      timeoutTask.run(timeout)
+      timerFuture() must throwA(new Exception)
+    }
+
+    "compose with Future.select" in {
+      val future = new Promise[Unit]
+      val selected = Future.select(future, timerFuture)
+      selected.isDefined must beFalse
+      future() = Return(())
+      selected() must be_==(())
+    }
+
   }
 }

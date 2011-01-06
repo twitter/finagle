@@ -3,8 +3,9 @@ package com.twitter.finagle.channel
 import org.jboss.netty.util.{TimerTask, Timeout, Timer}
 import org.jboss.netty.channel.MessageEvent
 
-import com.twitter.util.Duration
+import com.twitter.util.{Future, Duration, Promise, Return, Throw}
 
+import com.twitter.finagle.util.TimerFuture
 import com.twitter.finagle.util.Conversions._
 
 class TimeoutBroker(timer: Timer, val underlying: Broker, timeout: Duration)
@@ -13,13 +14,13 @@ class TimeoutBroker(timer: Timer, val underlying: Broker, timeout: Duration)
   def this(underlying: Broker, timeout: Duration) =
     this(Broker.timer, underlying, timeout)
 
-  override def dispatch(e: MessageEvent) = {
-    val future = underlying.dispatch(e)
-    val timeoutHandle =
-      timer(timeout) {
-        future.setFailure(new TimedoutRequestException)
-      }
+  // TODO: expire the timer?  this shoudl be Future.timeout.
+  //
+  // Future.timeout(Try[A]) ... (in our rich future library.)
+  //
+  // YES.. cancel.  constructing the exceptions is expensive.
 
-    future whenDone { timeoutHandle.cancel() }
-  }
+  override def apply(req: AnyRef) =
+    underlying(req).timeout(
+      timer, timeout, Throw(new TimedoutRequestException))
 }
