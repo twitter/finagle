@@ -1,57 +1,50 @@
 package com.twitter.finagle.util
 
+import java.util.concurrent.TimeUnit
+
 import org.specs.Specification
+import org.specs.mock.Mockito
+import org.mockito.{ArgumentCaptor, Matchers}
 
-import org.jboss.netty.channel.{Channels, ChannelFuture}
+import org.jboss.netty.util.{Timer, Timeout, TimerTask}
 
-import Conversions._
+import com.twitter.conversions.time._
+import com.twitter.util.{Promise, Throw, Return}
 
-object FutureSpec extends Specification {
-  "joining" should {
-    "return when all futures are satisfied" in {
-      val f0 = Channels.future(null)
-      val f1 = Channels.future(null)
+object FutureSpec extends Specification with Mockito {
+  "Future.timeout" should {
+    val timer = mock[Timer]
+    val richTimer = new RichTimer(timer)
+    val timeout = mock[Timeout]
+    val taskCaptor = ArgumentCaptor.forClass(classOf[TimerTask])
+    timer.newTimeout(
+      taskCaptor.capture,
+      Matchers.eq(10000L),
+      Matchers.eq(TimeUnit.MILLISECONDS)) returns timeout
 
-      val joined = f0 joinWith f1
+    val promise = new Promise[Unit]
+    val f = new RichFuture(promise)
+      .timeout(timer, 10.seconds, Throw(new Exception("timed out")))
+    there was one(timer).newTimeout(
+      any[TimerTask], Matchers.eq(10000L), Matchers.eq(TimeUnit.MILLISECONDS))
+    val timerTask = taskCaptor.getValue
 
-      joined.isDone must beFalse
-      f0.setSuccess()
-      joined.isDone must beFalse
-      f1.setSuccess()
-      joined.isDone must beTrue
-      joined.isSuccess must beTrue
+    "on success: propagate & cancel the timer" in {
+      f.isDefined must beFalse
+      promise() = Return(())
+      f() must be_==(())
+      there was one(timeout).cancel()
     }
 
-    "return an error if the first future errored out" in {
-      val f0 = Channels.future(null)
-      val f1 = Channels.future(null)
+    "on failure: propagate" in {
+      f.isDefined must beFalse
+      timerTask.run(timeout)
+      f() must throwA(new Exception("timed out"))
 
-      val joined = f0 joinWith f1
-
-      joined.isDone must beFalse
-      val exc = new Exception
-      f0.setFailure(exc)
-      joined.isDone must beFalse
-      f1.setSuccess()
-      joined.isDone must beTrue
-      joined.isSuccess must beFalse
-      joined.getCause must be_==(exc)
+      // Make sure that setting the promise afterwards doesn't do
+      // anything crazy:
+      promise() = Return(())
     }
 
-    "return an error if the second future errored out" in {
-      val f0 = Channels.future(null)
-      val f1 = Channels.future(null)
-
-      val joined = f0 joinWith f1
-
-      joined.isDone must beFalse
-      val exc = new Exception
-      f0.setSuccess()
-      joined.isDone must beFalse
-      f1.setFailure(exc)
-      joined.isDone must beTrue
-      joined.isSuccess must beFalse
-      joined.getCause must be_==(exc)
-    }
-  }
+  } 
 }

@@ -6,9 +6,6 @@ import com.twitter.util.{Duration, Future, Promise, Try}
 
 import Conversions._
 
-// XXX TEST THIS
-
-
 class RichFuture[A](val self: Future[A]) {
   def timeout(timer: Timer, howlong: Duration, orElse: => Try[A]) = {
     val promise = new Promise[A]
