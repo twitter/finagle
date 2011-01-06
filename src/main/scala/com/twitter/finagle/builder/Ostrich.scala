@@ -9,9 +9,10 @@ case class Ostrich(provider: ostrich.StatsProvider) extends StatsReceiver {
     val suffix = "_%s".format(label)
 
     (path: Seq[String], value: Int, count: Int) => {
+      // Enforce count == 1?
       val pathString = path mkString "__"
-      provider.addTiming(prefix + pathString, count)
-      provider.addTiming(prefix + pathString + suffix, count)
+      provider.addTiming(prefix + pathString, value)
+      provider.addTiming(prefix + pathString + suffix, value)
     }
   }
 }
