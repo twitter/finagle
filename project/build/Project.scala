@@ -26,12 +26,12 @@ class Project(info: ProjectInfo)
 
   // com.twitter deps:
   val ostrich = "com.twitter" % "ostrich" % "2.3.4"
-  val util    = "com.twitter" % "util"    % "1.4.4"
+  val util    = "com.twitter" % "util"    % "1.4.8"
 
   // ** test-only
   val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
   val specs    = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
-  val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+  // val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
 
   val integrationTestSuffix = "IntegrationSpec"
 
