@@ -1,10 +1,15 @@
 package com.twitter.finagle.thrift
 
 import org.apache.thrift.transport.TTransport
-
 import org.jboss.netty.buffer.ChannelBuffer
 
-class ChannelBufferTransport(underlying: ChannelBuffer) extends TTransport {
+/**
+ * Adapts a single Netty ChannelBuffer to a Thrift TTransport
+ *
+ * @param  underlying  a netty channelBuffer
+ *
+ */
+class ChannelBufferToTransport(underlying: ChannelBuffer) extends TTransport {
   override def isOpen = true
   override def open() {}
   override def close() {}
@@ -20,8 +25,14 @@ class ChannelBufferTransport(underlying: ChannelBuffer) extends TTransport {
   }
 }
 
-class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer)
-extends TTransport {
+/**
+ * Adapts input and output Netty ChannelBuffers to a Thrift TTransport
+ *
+ * @param  input   a netty channelBuffer to be read from
+ * @param  output  a netty channelBuffer to write to
+ *
+ */
+class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer) extends TTransport {
   override def isOpen = true
   override def open() {}
   override def close() {}
@@ -37,9 +48,4 @@ extends TTransport {
     output.writeBytes(buffer, offset, length)
   }
 
-}
-
-object ChannelBufferConversions {
-  implicit def channelBufferToChannelBufferTransport(buf: ChannelBuffer) =
-    new ChannelBufferTransport(buf)
 }

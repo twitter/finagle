@@ -7,9 +7,9 @@ import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object ChannelBufferTransportSpec extends Specification with Mockito {
-  "ChannelBufferTransport" should {
+  "ChannelBufferToTransport" should {
     val buf = mock[ChannelBuffer]
-    val t = new ChannelBufferTransport(buf)
+    val t = new ChannelBufferToTransport(buf)
     val bb = "hello".getBytes
 
     "writing bytes to the underlying ChannelBuffer" in {

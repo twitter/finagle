@@ -18,7 +18,7 @@ class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
     e.getMessage match {
       case call: ThriftCall[_, _] =>
         val buffer = ChannelBuffers.dynamicBuffer()
-        val transport = new ChannelBufferTransport(buffer)
+        val transport = new ChannelBufferToTransport(buffer)
         val protocol = protocolFactory.getProtocol(transport)
         seqid += 1
         call.seqid = seqid
@@ -40,7 +40,7 @@ class ThriftClientDecoder extends ReplayingDecoder[VoidEnum] {
   def decodeThriftReply(ctx: ChannelHandlerContext,
                         channel: Channel,
                         buffer: ChannelBuffer): Object = {
-    val transport = new ChannelBufferTransport(buffer)
+    val transport = new ChannelBufferToTransport(buffer)
     val protocol = protocolFactory.getProtocol(transport)
     val message = protocol.readMessageBegin()
 

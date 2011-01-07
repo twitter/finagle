@@ -19,7 +19,7 @@ object ThriftCodecSpec extends Specification {
   def thriftToBuffer(method: String, `type`: Byte, seqid: Int,
       message: { def write(p: TProtocol) }): ChannelBuffer = {
     val buffer = ChannelBuffers.dynamicBuffer()
-    val transport = new ChannelBufferTransport(buffer)
+    val transport = new ChannelBufferToTransport(buffer)
     val protocol = new TBinaryProtocol(transport, true, true)
     protocol.writeMessageBegin(new TMessage(method, `type`, seqid))
     message.write(protocol)
@@ -50,7 +50,7 @@ object ThriftCodecSpec extends Specification {
 
       val message   = channel.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
       val buffer    = message.asInstanceOf[ChannelBuffer]
-      val transport = new ChannelBufferTransport(buffer)
+      val transport = new ChannelBufferToTransport(buffer)
       val protocol  = new TBinaryProtocol(transport, true, true)
 
       val tmessage = protocol.readMessageBegin()
@@ -124,7 +124,7 @@ object ThriftCodecSpec extends Specification {
 
       val message   = channel.downstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
       val buffer    = message.asInstanceOf[ChannelBuffer]
-      val transport = new ChannelBufferTransport(buffer)
+      val transport = new ChannelBufferToTransport(buffer)
       val protocol  = new TBinaryProtocol(transport, true, true)
 
       val tmessage = protocol.readMessageBegin()

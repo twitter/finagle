@@ -6,7 +6,7 @@ import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
 
-import com.twitter.util.{Promise, Return, Throw}
+import com.twitter.util.{Promise, Return}
 import com.twitter.util.TimeConversions._
 import com.twitter.silly.Silly
 
