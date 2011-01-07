@@ -14,12 +14,6 @@ class TimeoutBroker(timer: Timer, val underlying: Broker, timeout: Duration)
   def this(underlying: Broker, timeout: Duration) =
     this(Broker.timer, underlying, timeout)
 
-  // TODO: expire the timer?  this shoudl be Future.timeout.
-  //
-  // Future.timeout(Try[A]) ... (in our rich future library.)
-  //
-  // YES.. cancel.  constructing the exceptions is expensive.
-
   override def apply(req: AnyRef) =
     underlying(req).timeout(
       timer, timeout, Throw(new TimedoutRequestException))
