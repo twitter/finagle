@@ -19,9 +19,8 @@ object ServicePipelineFactory {
         val message = e.getMessage
 
         try {
-          if (!message.isInstanceOf[Req])
-            throw new IllegalArgumentException(
-              "Invalid reply: '%s'".format(message.getClass))
+          // for an invalid type, the exception would be caught by the
+          // SimpleChannelUpstreamHandler.
           val req = message.asInstanceOf[Req]
           service(req) respond {
              case Return(value) =>

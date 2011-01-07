@@ -3,9 +3,9 @@ import com.twitter.sbt._
 
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
-  with AdhocInlines
 {
   // override def parallelExecution = true
+  override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
 
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
 
@@ -19,7 +19,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class CoreProject(info: ProjectInfo)
     extends StandardProject(info)
-    with SubversionPublisher with IntegrationSpecs
+    with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     override def compileOrder = CompileOrder.ScalaThenJava
 
@@ -36,7 +36,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class ThriftProject(info: ProjectInfo)
     extends StandardProject(info)
-    with SubversionPublisher with LibDirClasspath
+    with SubversionPublisher with LibDirClasspath with AdhocInlines
   {
     override def compileOrder = CompileOrder.ScalaThenJava
 
@@ -46,7 +46,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class OstrichProject(info: ProjectInfo)
     extends StandardProject(info)
-    with SubversionPublisher
+    with SubversionPublisher with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }

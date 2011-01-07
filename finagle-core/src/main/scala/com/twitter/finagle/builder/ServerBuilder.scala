@@ -63,11 +63,13 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
   override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
     if (c.isInstanceOf[MessageEvent]) {
       val e = c.asInstanceOf[MessageEvent]
-      (ctx.getAttachment, e.getMessage) match {
-        case (Timing(requestedAt: Time), r: HttpResponse)  =>
+      ctx.getAttachment match {
+        case Timing(requestedAt) =>
           latencySample.add(requestedAt.untilNow.inMilliseconds.toInt)
-        case (_, _) =>
-          () // WTF?
+          ctx.setAttachment(null)
+        case _ =>
+          // Can this happen?
+          ()
       }
     }
 
