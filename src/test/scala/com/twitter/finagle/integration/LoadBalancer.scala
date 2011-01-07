@@ -61,7 +61,7 @@ object LoadBalancerIntegrationSpec extends Specification {
       prettyPrintStats(stats)
     }
 
-    "balance[1]" in {
+    "balance: server goes offline" in {
       val client = ClientBuilder()
         .codec(Http)
         .hosts(servers map(_.addr))
@@ -77,7 +77,7 @@ object LoadBalancerIntegrationSpec extends Specification {
       true must beTrue
     }
 
-    "balance[2]" in {
+    "balance: application becomes nonresponsive" in {
       val client = ClientBuilder()
         .codec(Http)
         .hosts(servers map(_.addr))
@@ -93,7 +93,7 @@ object LoadBalancerIntegrationSpec extends Specification {
       true must beTrue
     }
 
-    "balance[3]" in {
+    "balance: connection becomes nonresponsive" in {
       val client = ClientBuilder()
         .codec(Http)
         .hosts(servers map(_.addr))
@@ -104,6 +104,22 @@ object LoadBalancerIntegrationSpec extends Specification {
       runTest(client) {
         case 100 =>
           servers(1).becomeConnectionNonresponsive()
+      }
+
+      true must beTrue
+    }
+
+    "balance: server has protocol error" in {
+      val client = ClientBuilder()
+        .codec(Http)
+        .hosts(servers map(_.addr))
+        .retries(2)
+        .requestTimeout(10.milliseconds)
+        .buildService[HttpRequest, HttpResponse]
+
+      runTest(client) {
+        case 100 =>
+          servers(1).becomeBelligerent()
       }
 
       true must beTrue

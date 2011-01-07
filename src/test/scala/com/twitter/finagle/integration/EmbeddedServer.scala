@@ -9,6 +9,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
+import org.jboss.netty.buffer._
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.HashedWheelTimer
@@ -35,6 +36,7 @@ class EmbeddedServer(val addr: SocketAddress) {
   // Server state:
   private[this] var isApplicationNonresponsive = false
   private[this] var isConnectionNonresponsive = false
+  private[this] var isBelligerent = false
   private[this] var latency = 0.seconds
 
   private[this] val channels = new DefaultChannelGroup
@@ -45,6 +47,22 @@ class EmbeddedServer(val addr: SocketAddress) {
   bootstrap.setPipelineFactory(new ChannelPipelineFactory {
     def getPipeline = {
       val pipeline = Channels.pipeline()
+      pipeline.addLast("transposer", new SimpleChannelDownstreamHandler {
+        override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+          if (!isBelligerent)
+            return super.writeRequested(ctx, e)
+
+          // Garble the message a bit.
+          val buffer = e.getMessage.asInstanceOf[ChannelBuffer]
+          val bytes = new Array[Byte](buffer.readableBytes)
+          buffer.getBytes(0, bytes)
+          val transposed = bytes map { byte => (byte + 1) toByte }
+          val transposedBuffer = ChannelBuffers.wrappedBuffer(transposed)
+
+          Channels.write(ctx, e.getFuture, transposedBuffer)
+        }
+      })
+
       pipeline.addLast("decoder", new HttpRequestDecoder)
       pipeline.addLast("encoder", new HttpResponseEncoder)
       pipeline.addLast("logger", new SimpleChannelHandler {
@@ -82,8 +100,8 @@ class EmbeddedServer(val addr: SocketAddress) {
       pipeline.addLast("dots", new SimpleChannelUpstreamHandler {
         override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
           val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-          response.setHeader("Content-Length", "1")
-          response.setContent(ChannelBuffers.wrappedBuffer(".".getBytes))
+          response.setContent(ChannelBuffers.wrappedBuffer("..........".getBytes))
+          response.setHeader("Content-Length", "10")
           if (!isApplicationNonresponsive)
             ctx.getChannel.write(response)
         }
@@ -114,6 +132,10 @@ class EmbeddedServer(val addr: SocketAddress) {
   def becomeConnectionNonresponsive() {
     isConnectionNonresponsive = true
     channels foreach { _.setReadable(false) }
+  }
+
+  def becomeBelligerent() {
+    isBelligerent = true
   }
 
   def setLatency(latency: Duration) {

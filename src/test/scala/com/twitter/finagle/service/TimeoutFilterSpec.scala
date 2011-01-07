@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import org.specs.Specification
 import org.specs.mock.Mockito
-import org.mockito.ArgumentCaptor
+import org.mockito.{ArgumentCaptor, Matchers}
 
 import org.jboss.netty.util.{Timer, TimerTask, Timeout}
 
@@ -24,7 +24,10 @@ object TimeoutFilterSpec extends Specification with Mockito {
     val responseFuture = new Promise[AnyRef]
     val response = mock[Object]
     val taskCaptor = ArgumentCaptor.forClass(classOf[TimerTask])
-    timer.newTimeout(taskCaptor.capture, ==(timeoutValue), ==(timeoutUnit)) returns timeout
+    timer.newTimeout(
+      taskCaptor.capture,
+      Matchers.eq(timeoutValue),
+      Matchers.eq(timeoutUnit)) returns timeout
     service(request) returns responseFuture
     val timeoutFilter = new TimeoutFilter[AnyRef, AnyRef](timer, duration)
     val future = timeoutFilter(request, service)
