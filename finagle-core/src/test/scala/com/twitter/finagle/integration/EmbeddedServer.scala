@@ -14,12 +14,11 @@ import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.HashedWheelTimer
 
-import com.twitter.util.Duration
 import com.twitter.conversions.time._
 import com.twitter.ostrich.StatsCollection
 
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.RandomSocket
+import com.twitter.util.{RandomSocket, Duration}
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
@@ -75,7 +74,7 @@ class EmbeddedServer(val addr: SocketAddress) {
         override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
           if (isConnectionNonresponsive)
             ctx.getChannel.setReadable(false)
-          
+
           channels.add(ctx.getChannel)
           stats.incr("opened")
           super.channelClosed(ctx, e)

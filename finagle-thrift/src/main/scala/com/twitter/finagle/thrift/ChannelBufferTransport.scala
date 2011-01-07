@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import org.apache.thrift.transport.TTransport
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 class ChannelBufferTransport(underlying: ChannelBuffer) extends TTransport {
   override def isOpen = true

@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
-import org.apache.thrift.{TBase, TApplicationException}
-import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocol, TBinaryProtocol}
+import org.apache.thrift.TApplicationException
+import org.apache.thrift.protocol.{TMessageType, TBinaryProtocol}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._

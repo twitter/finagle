@@ -1,22 +1,13 @@
 package com.twitter.finagle.javaapi;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.concurrent.Executors;
 
-import org.apache.thrift.TBase;
-import org.jboss.netty.bootstrap.*;
-import org.jboss.netty.buffer.*;
-import org.jboss.netty.channel.*;
-import org.jboss.netty.handler.codec.http.*;
-
-import com.twitter.finagle.service.*;
-import com.twitter.finagle.builder.*;
+import com.twitter.finagle.builder.ServerBuilder;
+import com.twitter.finagle.service.Service;
 import com.twitter.finagle.thrift.*;
-import com.twitter.util.Future;
-import com.twitter.util.*;
-
 import com.twitter.silly.Silly;
+import com.twitter.util.Future;
+
+import java.net.InetSocketAddress;
 
 public class ThriftServerTest {
   public static void runServer() {

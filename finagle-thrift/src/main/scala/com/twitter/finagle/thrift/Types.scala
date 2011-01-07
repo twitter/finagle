@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import scala.reflect.BeanProperty
 
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocol}
-import org.apache.thrift.{TFieldIdEnum, TBase, TApplicationException}
+import org.apache.thrift.{TBase, TApplicationException}
 
 /**
  * The ThriftCall object represents a thrift dispatch on the

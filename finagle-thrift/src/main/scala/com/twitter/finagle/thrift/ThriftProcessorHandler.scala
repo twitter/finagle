@@ -1,11 +1,9 @@
 package com.twitter.finagle.thrift
 
-import org.jboss.netty.channel.{
-  Channels, SimpleChannelUpstreamHandler,
-  MessageEvent, ChannelHandlerContext}
+import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-import org.apache.thrift.{TProcessor, TProcessorFactory}
+import org.apache.thrift.TProcessorFactory
 import org.apache.thrift.protocol.TBinaryProtocol
 
 class ThriftProcessorHandler(processorFactory: TProcessorFactory)
