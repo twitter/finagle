@@ -26,7 +26,7 @@ import org.jboss.netty.channel.socket.nio.{
 import com.twitter.util.{Promise, Return, Throw}
 import com.twitter.util.TimeConversions._
 import com.twitter.silly.Silly
-import com.twitter.finagle.RandomSocket
+import com.twitter.util.RandomSocket
 import com.twitter.finagle.util.Conversions._
 
 object EndToEndSpec extends Specification {

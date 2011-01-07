@@ -9,7 +9,7 @@ import org.apache.thrift.TBase
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
 
-import com.twitter.finagle.RandomSocket
+import com.twitter.util.RandomSocket
 import com.twitter.finagle.builder._
 import com.twitter.finagle.service._
 
