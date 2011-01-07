@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 
 import java.util.concurrent.ConcurrentHashMap
 
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
 
 // TODO: do we want a decaying stat?
