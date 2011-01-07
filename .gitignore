@@ -16,3 +16,4 @@ out/
 .#*
 .ivyjars
 .idea
+.DS_Store
