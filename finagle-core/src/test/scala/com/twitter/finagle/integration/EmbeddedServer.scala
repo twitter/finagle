@@ -14,10 +14,10 @@ import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.HashedWheelTimer
 
 import com.twitter.conversions.time._
-import com.twitter.ostrich.StatsCollection
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.util.{RandomSocket, Duration}
+import com.twitter.ostrich.StatsCollection
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
@@ -47,8 +47,10 @@ class EmbeddedServer(val addr: SocketAddress) {
       val pipeline = Channels.pipeline()
       pipeline.addLast("transposer", new SimpleChannelDownstreamHandler {
         override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-          if (!isBelligerent)
-            return super.writeRequested(ctx, e)
+          if (!isBelligerent) {
+            super.writeRequested(ctx, e)
+            return
+          }
 
           // Garble the message a bit.
           val buffer = e.getMessage.asInstanceOf[ChannelBuffer]

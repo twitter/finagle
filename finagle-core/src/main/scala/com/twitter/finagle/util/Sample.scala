@@ -1,10 +1,8 @@
 package com.twitter.finagle.util
 
-import scala.annotation.tailrec
 import scala.collection.mutable.Queue
 import scala.collection.JavaConversions._
 
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.{Duration, Time}
