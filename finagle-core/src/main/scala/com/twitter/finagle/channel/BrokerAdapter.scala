@@ -26,8 +26,6 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
     }
   }
 
-  // TODO: should we provide any event serialization here?
-
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     if (replyFuture eq null)
       fail(ctx.getChannel, new SpuriousMessageException)
@@ -51,14 +49,14 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    done(Throw(new ChannelClosedException))
+    fail(ctx.getChannel, new ChannelClosedException)
   }
 
   private[this] def fail(ch: Channel, cause: ChannelException) {
-    // We always close the channel on failure, and mark ourselves
-    // unhealthy.
-    ChannelHealth.markUnhealthy(ch)
-    Channels.close(ch)
+    // We always close the channel on failure.  This effectively
+    // invalidates the channel.
+    if (ch.isOpen)
+      Channels.close(ch)
     done(Throw(cause))
   }
 
