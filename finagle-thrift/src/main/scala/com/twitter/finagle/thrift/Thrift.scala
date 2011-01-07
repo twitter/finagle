@@ -4,7 +4,15 @@ import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 
 import com.twitter.finagle.builder.Codec
 
-class Thrift extends Codec {
+class ThriftWithWrappedReplies extends Thrift with WrappedReplies
+
+trait WrappedReplies extends Thrift {
+  override val wrapReplies = true
+}
+
+class Thrift extends Codec
+{
+  val wrapReplies = false
   val instance = this
 
   val clientPipelineFactory =
@@ -13,7 +21,7 @@ class Thrift extends Codec {
         val pipeline = Channels.pipeline()
         pipeline.addLast("thriftFrameCodec",    new ThriftFrameCodec)
         pipeline.addLast("thriftClientEncoder", new ThriftClientEncoder)
-        pipeline.addLast("thriftClientDecoder", new ThriftClientDecoder)
+        pipeline.addLast("thriftClientDecoder", new ThriftClientDecoder(wrapReplies))
         pipeline
       }
     }

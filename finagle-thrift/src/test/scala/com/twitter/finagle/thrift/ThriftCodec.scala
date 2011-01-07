@@ -142,17 +142,16 @@ object ThriftCodecSpec extends Specification {
     "decode replys" in {
       // receive reply and decode
       val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
-      val channel = makeChannel(new ThriftClientDecoder)
+      val channel = makeChannel(new ThriftClientDecoder(true))
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)
 
       // verify decode
       val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-      val result = message.asInstanceOf[Silly.bleep_result]
+      val result = message.asInstanceOf[ThriftReply[Silly.bleep_result]]
       result mustNot beNull
-      result.isSetSuccess must beTrue
-      result.success must be_==("result")
+      result.response.success must be_==("result")
     }
 
     "decode replys broken in two" in {
@@ -160,7 +159,7 @@ object ThriftCodecSpec extends Specification {
 
       Range(0, buffer.readableBytes - 1).foreach { numBytes =>
         // receive partial call
-        val channel = makeChannel(new ThriftClientDecoder)
+        val channel = makeChannel(new ThriftClientDecoder(true))
         val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
         Channels.fireMessageReceived(channel, truncatedBuffer)
 
@@ -177,10 +176,9 @@ object ThriftCodecSpec extends Specification {
         channel.upstreamEvents must haveSize(1)
         channel.downstreamEvents must haveSize(0)
         val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
-        val result = message.asInstanceOf[Silly.bleep_result]
+        val result = message.asInstanceOf[ThriftReply[Silly.bleep_result]]
         result mustNot beNull
-        result.isSetSuccess must beTrue
-        result.success must be_==("result")
+        result.response.success must be_==("result")
       }
     }
 
@@ -188,7 +186,7 @@ object ThriftCodecSpec extends Specification {
       // receive exception and decode
       val buffer = thriftToBuffer("bleep", TMessageType.EXCEPTION, 23,
         new TApplicationException(TApplicationException.UNKNOWN_METHOD, "message"))
-      val channel = makeChannel(new ThriftClientDecoder)
+      val channel = makeChannel(new ThriftClientDecoder(true))
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)
