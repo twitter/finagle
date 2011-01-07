@@ -21,7 +21,6 @@ import com.twitter.util.{Duration, Time}
 import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
-import com.twitter.finagle.thrift._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
 import org.jboss.netty.util.HashedWheelTimer
 
