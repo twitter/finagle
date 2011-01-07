@@ -7,7 +7,6 @@ import java.util.concurrent.{Executors, TimeUnit}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel.group.DefaultChannelGroup

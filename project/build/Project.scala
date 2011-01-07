@@ -17,7 +17,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 //  val kestrelProject   = project("finagle-kestrel",   "finagle-kestrel",   new KestrelProject(_))
 //  val hosebirdProject  = project("finagle-hosebird",  "finagle-hosebird",  new HosebirdProject(_))
 
-  class CoreProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher {
+  class CoreProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher with IntegrationSpecs {
     override def compileOrder = CompileOrder.ScalaThenJava
 
     val nettyRepo = "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
@@ -28,6 +28,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val specs     = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
 
     val ostrich   = "com.twitter" % "ostrich" % "2.3.4"
+
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher with LibDirClasspath {
