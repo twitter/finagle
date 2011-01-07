@@ -4,7 +4,7 @@ import com.twitter.sbt._
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
 {
-  // override def parallelExecution = true
+//  override def parallelExecution = true
   override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
 
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
