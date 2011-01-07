@@ -6,7 +6,7 @@ import com.twitter.finagle.channel._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 
-import com.twitter.util.{Future, Promise, Return, Throw}
+import com.twitter.util.{Future, Promise, Try}
 
 class ReplyIsStreamingException   extends Exception
 class CancelledRequestException   extends Exception
@@ -16,11 +16,6 @@ class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
   extends Service[Req, Rep]
 {
   def apply(request: Req): Future[Rep] =
-    broker(request) flatMap { reply =>
-      if (reply.isInstanceOf[Rep])
-        Return(reply.asInstanceOf[Rep])
-      else
-        Throw(new InvalidMessageTypeException)
-    }
+    broker(request) flatMap { reply => Try(reply.asInstanceOf[Rep]) }
 }
 
