@@ -85,16 +85,15 @@ class ChannelPool(
   def isAvailable = _isAvailable
 
   protected def make() = clientBootstrap.connect()
-  protected def isHealthy(channel: Channel) =
-    ChannelHealth.isHealthy(channel) && channel.isOpen
+  protected def isHealthy(channel: Channel) = channel.isOpen
 
   override def toString = "pool:%x".format(hashCode)
 }
 
 class ConnectionLimitingChannelPool(
-  clientBootstrap: BrokerClientBootstrap,
-  connectionLimit: Int,
-  connectRetryPeriod: Option[Duration] = None)
+    clientBootstrap: BrokerClientBootstrap,
+    connectionLimit: Int,
+    connectRetryPeriod: Option[Duration] = None)
   extends ChannelPool(clientBootstrap, connectRetryPeriod)
 {
   private var connectionsMade = 0
