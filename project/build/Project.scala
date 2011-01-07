@@ -5,7 +5,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
   with AdhocInlines
 {
-//  override def parallelExecution = true
+  // override def parallelExecution = true
 
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
 
@@ -17,10 +17,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 //  val kestrelProject   = project("finagle-kestrel",   "finagle-kestrel",   new KestrelProject(_))
 //  val hosebirdProject  = project("finagle-hosebird",  "finagle-hosebird",  new HosebirdProject(_))
 
-  class CoreProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher with IntegrationSpecs {
+  class CoreProject(info: ProjectInfo)
+    extends StandardProject(info)
+    with SubversionPublisher with IntegrationSpecs
+  {
     override def compileOrder = CompileOrder.ScalaThenJava
 
-    val nettyRepo = "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
+    val nettyRepo =
+      "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
     val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
     val util      = "com.twitter"          %  "util"      % "1.4.8"
 
@@ -28,17 +32,22 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val specs     = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
 
     val ostrich   = "com.twitter" % "ostrich" % "2.3.4"
-
   }
 
-  class ThriftProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher with LibDirClasspath {
+  class ThriftProject(info: ProjectInfo)
+    extends StandardProject(info)
+    with SubversionPublisher with LibDirClasspath
+  {
     override def compileOrder = CompileOrder.ScalaThenJava
 
     val thrift    = "thrift"               %  "libthrift"        % "0.5.0"
     val slf4jNop  = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
   }
 
-  class OstrichProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher {
-    val ostrich   = "com.twitter" % "ostrich" % "2.3.4"
+  class OstrichProject(info: ProjectInfo)
+    extends StandardProject(info)
+    with SubversionPublisher
+  {
+    val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
 }
