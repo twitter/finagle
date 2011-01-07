@@ -44,13 +44,13 @@ object ServiceEndToEndSpec extends Specification {
 
       val sillyService = new SillyService()
       val server = ServerBuilder()
-        .codec(Thrift)
+        .codec(new Thrift)
         .service(sillyService)
         .bindTo(addr)
         .build()
 
       val client = ClientBuilder()
-        .codec(Thrift)
+        .codec(new Thrift)
         .hosts(Seq(addr))
         .buildService[ThriftCall[_ <:TBase[_, _],_ <: TBase[_, _]], ThriftReply[_]]
 

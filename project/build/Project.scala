@@ -1,53 +1,43 @@
 import sbt._
 import com.twitter.sbt._
 
-class Project(info: ProjectInfo)
-  extends StandardProject(info)
-  with LibDirClasspath
+class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
   with AdhocInlines
 {
-  override def compileOrder = CompileOrder.ScalaThenJava
-  override def managedStyle = ManagedStyle.Maven
-  override def disableCrossPaths = true
-  override def subversionRepository =
-    Some("http://svn.local.twitter.com/maven-public")
+//  override def parallelExecution = true
 
-  val nettyRepo =
-    ("repository.jboss.org"
-     at "http://repository.jboss.org/nexus/content/groups/public/")
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
-  val codehausRepo = "codehaus.org" at "http://repository.codehaus.org/"
 
-  val netty        = "org.jboss.netty"      %  "netty"            % "3.2.3.Final"
-  val thrift       = "thrift"               %  "libthrift"        % "0.5.0"
-  val slf4jNop     = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
-  val jackson      = "org.codehaus.jackson" %  "jackson-core-asl" % "1.6.1" withSources()
+  val coreProject      = project("finagle-core",      "finagle-core",        new CoreProject(_))
+  val ostrichProject   = project("finagle-ostrich",   "finagle-ostrich",     new OstrichProject(_), coreProject)
+  val thriftProject    = project("finagle-thrift",    "finagle-thrift",      new ThriftProject(_), coreProject)
+//  val httpProject      = project("finagle-http",      "finagle-http",      new HttpProject(_))
+//  val memcachedProject = project("finagle-memcached", "finagle-memcached", new MemcachedProject(_))
+//  val kestrelProject   = project("finagle-kestrel",   "finagle-kestrel",   new KestrelProject(_))
+//  val hosebirdProject  = project("finagle-hosebird",  "finagle-hosebird",  new HosebirdProject(_))
 
-  // com.twitter deps:
-  val ostrich = "com.twitter" % "ostrich" % "2.3.4"
-  val util    = "com.twitter" % "util"    % "1.4.8"
+  class CoreProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher {
+    override def compileOrder = CompileOrder.ScalaThenJava
 
-  // ** test-only
-  val mockito  = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
-  val specs    = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
-  // val killdeer = "com.twitter"             %  "killdeer"    % "0.5.1" % "test"
+    val nettyRepo = "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
+    val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
+    val util      = "com.twitter"          %  "util"      % "1.4.8"
 
-  val integrationTestSuffix = "IntegrationSpec"
+    val mockito   = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
+    val specs     = "org.scala-tools.testing" %  "specs_2.8.0" % "1.6.5" % "test" withSources()
 
-  lazy val integrationTestOptions: Seq[TestOption] =
-    TestListeners(testListeners) :: TestFilter(_ endsWith integrationTestSuffix) :: Nil
+    val ostrich   = "com.twitter" % "ostrich" % "2.3.4"
+  }
 
-  lazy val integrationTest = defaultTestTask(integrationTestOptions)
+  class ThriftProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher with LibDirClasspath {
+    override def compileOrder = CompileOrder.ScalaThenJava
 
-  override def testOptions =
-    super.testOptions ++ Seq(TestFilter(name => !(name endsWith integrationTestSuffix)))
-}
+    val thrift    = "thrift"               %  "libthrift"        % "0.5.0"
+    val slf4jNop  = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
+  }
 
-trait LibDirClasspath extends StandardProject {
-  def jarFileFilter: FileFilter = "*.jar"
-  def libClasspath = descendents("lib", jarFileFilter)
-
-	override def fullUnmanagedClasspath(config: Configuration) =
-    super.fullUnmanagedClasspath(config) +++ libClasspath
+  class OstrichProject(info: ProjectInfo) extends StandardProject(info) with SubversionPublisher {
+    val ostrich   = "com.twitter" % "ostrich" % "2.3.4"
+  }
 }

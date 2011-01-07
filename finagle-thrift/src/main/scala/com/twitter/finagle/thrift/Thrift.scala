@@ -1,10 +1,10 @@
-package com.twitter.finagle.builder
+package com.twitter.finagle.thrift
 
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 
-import com.twitter.finagle.thrift._
+import com.twitter.finagle.builder.Codec
 
-object Thrift extends Codec {
+class Thrift extends Codec {
   val instance = this
 
   val clientPipelineFactory =

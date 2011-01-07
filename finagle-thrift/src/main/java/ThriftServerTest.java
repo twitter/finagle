@@ -42,7 +42,7 @@ public class ThriftServerTest {
 
     ServerBuilder
       .get()
-      .codec(Codec4J.Thrift)
+      .codec(new Thrift())
       .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))
       .build();
