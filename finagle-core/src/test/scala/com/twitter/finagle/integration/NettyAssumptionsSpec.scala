@@ -5,11 +5,12 @@ import org.specs.Specification
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
-import com.twitter.util.{Promise, Return}
-
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Ok
+
+import com.twitter.util.CountDownLatch
+import com.twitter.conversions.time._
 
 /**
  * Here we test a number of assumptions we are making of Netty. This
@@ -38,19 +39,19 @@ object NettyAssumptionsSpec extends Specification {
       })
       bootstrap.setPipeline(pipeline)
 
-      val latch = new Promise[Unit]
+      val latch = new CountDownLatch(1)
 
       bootstrap.connect(server.addr) {
         case Ok(channel) =>
           channel.isOpen must beTrue
           Channels.close(channel)
           channel.isOpen must beFalse
-          latch() = Return(())
+          latch.countDown()
         case _ =>
           throw new Exception("Failed to connect to the expected socket.")
       }
 
-      latch()
+      latch.await(1.second) must beTrue
     }
   }
 }

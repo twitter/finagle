@@ -5,16 +5,13 @@ import scala.collection.JavaConversions._
 import java.net.SocketAddress
 import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import java.util.logging.Logger
-import javax.net.ssl.{KeyManager, SSLContext}
+import javax.net.ssl.SSLContext
 
 import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
-import com.twitter.ostrich
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Time}
 
@@ -22,7 +19,7 @@ import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
-import org.jboss.netty.util.HashedWheelTimer
+import stats.StatsReceiver
 
 object ServerBuilder {
   def apply() = new ServerBuilder()

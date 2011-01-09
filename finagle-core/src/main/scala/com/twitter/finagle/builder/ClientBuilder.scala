@@ -10,13 +10,13 @@ import java.util.concurrent.Executors
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 
-import com.twitter.ostrich
 import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.service
+import com.twitter.finagle.stats.StatsReceiver
 
 object ClientBuilder {
   def apply() = new ClientBuilder
@@ -53,7 +53,6 @@ case class ClientBuilder(
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _exportLoadsToOstrich: Boolean,
   _failureAccrualWindow: Duration,
   _retries: Option[Int],
   _initialBackoff: Option[Duration],
@@ -75,7 +74,6 @@ case class ClientBuilder(
     None,                // hostConnectionLimit
     None,                // sendBufferSize
     None,                // recvBufferSize
-    false,               // exportLoadsToOstrich
     10.seconds,          // failureAccrualWindow
     None,                // retries
     None,                // initialBackoff
@@ -128,8 +126,6 @@ case class ClientBuilder(
 
   def sendBufferSize(value: Int): ClientBuilder = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int): ClientBuilder = copy(_recvBufferSize = Some(value))
-
-  def exportLoadsToOstrich(): ClientBuilder = copy(_exportLoadsToOstrich = true)
 
   def failureAccrualWindow(window: Duration): ClientBuilder =
     copy(_failureAccrualWindow = window)
@@ -252,11 +248,11 @@ case class ClientBuilder(
 
       val broker = makeBroker(codec, statsRepo)(host)
 
-      if (_exportLoadsToOstrich) {
+      _statsReceiver.foreach { statsReceiver =>
         val hostString = host.toString
-        ostrich.Stats.makeGauge(hostString + "_load")      { broker.load   }
-        ostrich.Stats.makeGauge(hostString + "_weight")    { broker.weight }
-        ostrich.Stats.makeGauge(hostString + "_available") { if (broker.isAvailable) 1 else 0 }
+        statsReceiver.makeGauge(hostString + "_load", broker.load)
+        statsReceiver.makeGauge(hostString + "_weight", broker.weight)
+        statsReceiver.makeGauge(hostString + "_available", if (broker.isAvailable) 1 else 0)
       }
 
       broker

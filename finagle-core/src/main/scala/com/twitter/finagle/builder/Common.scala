@@ -13,11 +13,6 @@ trait Codec {
   val serverPipelineFactory: ChannelPipelineFactory
 }
 
-object StatsReporter4J {
-  val ostrich = Ostrich()
-  val logger = JavaLogger()
-}
 
-trait StatsReceiver {
-  def observer(prefix: String, label: String): (Seq[String], Int, Int) => Unit
-}
+
+

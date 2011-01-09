@@ -1,15 +1,9 @@
 package com.twitter.finagle.channel
 
 import scala.util.Random
-import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._
 
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.ConcurrentHashMap
-
-import org.jboss.netty.channel.MessageEvent
-
-import com.twitter.util.{Time, Duration, Return, Throw, Future}
+import com.twitter.util.{Time, Return, Throw, Future}
 import com.twitter.util.TimeConversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Conversions._

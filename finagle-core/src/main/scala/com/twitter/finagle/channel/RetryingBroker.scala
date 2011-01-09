@@ -1,13 +1,8 @@
 package com.twitter.finagle.channel
 
 import java.net.SocketAddress
-
-import org.jboss.netty.util.{HashedWheelTimer, TimerTask, Timeout}
-
-import com.twitter.finagle.util.{Cancelled, Error, Ok, TimerFuture}
+import org.jboss.netty.util.HashedWheelTimer
 import com.twitter.finagle.util.Conversions._
-
-import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Future, Promise, Throw, Return}
 
 object RetryingBroker {
@@ -62,7 +57,7 @@ class NumTriesRetryStrategy(numTries: Int) extends RetryStrategy {
     // number of tries need to be bumped by one.
     if (numTries > 1)
       Future.value(new NumTriesRetryStrategy(numTries - 1))
-    else 
+    else
       Future.exception(new Exception)
   }
 }
@@ -79,7 +74,7 @@ class ExponentialBackoffRetryStrategy(delay: Duration, multiplier: Int)
 
   def apply() = {
     val future = new Promise[RetryStrategy]
-    
+
     timer(delay) {
       future() = Return(
         new ExponentialBackoffRetryStrategy(delay * multiplier, multiplier))
