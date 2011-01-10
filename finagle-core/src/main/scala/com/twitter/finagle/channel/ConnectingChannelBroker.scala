@@ -39,10 +39,13 @@ trait ConnectingChannelBroker extends Broker {
     replyFuture
   }
 
-  private[this] def connectChannel(to: Channel, message: AnyRef, replyFuture: Promise[AnyRef]) {
-    to.getPipeline.getLast match {
+  private[this] def connectChannel(
+      channel: Channel,
+      message: AnyRef,
+      replyFuture: Promise[AnyRef]) {
+    channel.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
-        adapter.writeAndRegisterReply(to, message, replyFuture)
+        adapter.writeAndRegisterReply(channel, message, replyFuture)
       case _ =>
         replyFuture.updateIfEmpty(Throw(new InvalidPipelineException))
     }

@@ -12,15 +12,19 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try}
 class BrokerAdapter extends SimpleChannelUpstreamHandler {
   @volatile private[this] var replyFuture: Promise[AnyRef] = null
 
-  def writeAndRegisterReply(to: Channel, message: AnyRef, replyFuture: Promise[AnyRef]) {
-    if (this.replyFuture ne null) {
-      done(Throw(new TooManyConcurrentRequestsException))
+  def writeAndRegisterReply(channel: Channel, message: AnyRef,
+                            incomingReplyFuture: Promise[AnyRef]) {
+    // If there is an outstanding request, something up the stack has
+    // fucked up. We currently just fail this request immediately, and
+    // let the current request complete.
+    if (replyFuture ne null) {
+      incomingReplyFuture.updateIfEmpty(Throw(new TooManyConcurrentRequestsException))
     } else {
-      this.replyFuture = replyFuture
-      Channels.write(to, message) {
+      replyFuture = incomingReplyFuture
+      Channels.write(channel, message) {
         case Error(cause) =>
           // Always close on error.
-          fail(to, new WriteException(cause))
+          fail(channel, new WriteException(cause))
         case _ => ()
       }
     }
@@ -62,8 +66,13 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
 
   private[this] def done(answer: Try[AnyRef]) {
     if (replyFuture ne null) {
-      replyFuture.updateIfEmpty(answer)
+      // The order of operations here is important: the callback from
+      // the future could invoke another request immediately, and
+      // since the stack upstream knows we're done when the reply
+      // future has been satisfied, it may reuse us immediately.
+      val currentReplyFuture = replyFuture
       replyFuture = null
+      currentReplyFuture.updateIfEmpty(answer)
     }
   }
 }
