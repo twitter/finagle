@@ -8,19 +8,35 @@ import com.twitter.finagle.util.Conversions._
 case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
   val timer = new HashedWheelTimer()
 
-  def observer(prefix: String, label: String) = {
-    val suffix = "_%s".format(label)
-
-    (path: Seq[String], value: Int, count: Int) => {
-      val pathString = path mkString "__"
-      logger.info(List(prefix, pathString, suffix, count) mkString " ")
+  private[this] class Counter(description: Seq[(String, String)]) extends OCounter {
+    def incr(delta: Int) {
+      logger.info("%s incr %d".format(formatDescription(description), delta))
     }
+
+    val sum = 0
   }
 
-  def makeGauge(name: String, f: => Float) {
+  private[this] class Gauge(description: Seq[(String, String)]) extends OGauge {
+    def measure(value: Float) {
+      logger.info("%s measure %f".format(formatDescription(description), value))
+    }
+
+    val summary = Summary(0.0f, 0)
+  }
+
+  def gauge(description: (String, String)*): OGauge = new Gauge(description)
+  def counter(description: (String, String)*): OCounter = new Counter(description)
+
+  def mkGauge(name: Seq[(String, String)], f: => Float) {
     timer(10.seconds) {
       logger.info("%s %2f".format(name, f))
     }
+  }
+
+  private[this] def formatDescription(description: Seq[(String, String)]) = {
+    description.map { case (key, value) =>
+      "%s_%s".format(key, value)
+    }.mkString("__")
   }
 }
 

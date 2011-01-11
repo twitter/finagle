@@ -10,13 +10,13 @@ import java.util.concurrent.Executors
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, JavaTimer}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.service
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsRepository, TimeWindowedStatsRepository, StatsReceiver}
 
 object ClientBuilder {
   def apply() = new ClientBuilder
@@ -47,13 +47,12 @@ case class ClientBuilder(
   _connectionTimeout: Duration,
   _requestTimeout: Duration,
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Duration,
-  _sampleGranularity: Duration,
+  _loadStatistics: (Int, Duration),
+  _failureAccrualStatistics: (Int, Duration),
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _failureAccrualWindow: Duration,
   _retries: Option[Int],
   _initialBackoff: Option[Duration],
   _backoffMultiplier: Option[Int],
@@ -68,13 +67,12 @@ case class ClientBuilder(
     10.milliseconds,     // connectionTimeout
     Duration.MaxValue,   // requestTimeout
     None,                // statsReceiver
-    10.minutes,          // sampleWindow
-    10.seconds,          // sampleGranularity
+    (60, 10.seconds),    // loadStatistics
+    (10, 1.second),      // failureAccrualStatistics
     None,                // name
     None,                // hostConnectionLimit
     None,                // sendBufferSize
     None,                // recvBufferSize
-    10.seconds,          // failureAccrualWindow
     None,                // retries
     None,                // initialBackoff
     None,                // backoffMultiplier
@@ -104,11 +102,23 @@ case class ClientBuilder(
   def reportTo(receiver: StatsReceiver): ClientBuilder =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(window: Duration): ClientBuilder =
-    copy(_sampleWindow = window)
+  /**
+   * The interval over which to aggregate load statistics.
+   */
+  def loadStatistics(numIntervals: Int, interval: Duration): ClientBuilder = {
+    require(numIntervals >= 1, "Must have at least 1 window to sample statistics over")
 
-  def sampleGranularity(granularity: Duration): ClientBuilder =
-    copy(_sampleGranularity = granularity)
+    copy(_loadStatistics = (numIntervals, interval))
+  }
+
+  /**
+   * The interval over which to aggregate failure accrual statistics.
+   */
+  def failureAccrualStatistics(numIntervals: Int, interval: Duration): ClientBuilder = {
+    require(numIntervals >= 1, "Must have at least 1 window to sample statistics over")
+
+    copy(_failureAccrualStatistics = (numIntervals, interval))
+  }
 
   def name(value: String): ClientBuilder = copy(_name = Some(value))
 
@@ -126,9 +136,6 @@ case class ClientBuilder(
 
   def sendBufferSize(value: Int): ClientBuilder = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int): ClientBuilder = copy(_recvBufferSize = Some(value))
-
-  def failureAccrualWindow(window: Duration): ClientBuilder =
-    copy(_failureAccrualWindow = window)
 
   def channelFactory(cf: ChannelFactory): ClientBuilder =
     copy(_channelFactory = Some(cf))
@@ -186,48 +193,16 @@ case class ClientBuilder(
         broker
     }
 
-  private def statsRepositoryForLoadedBroker(
-    sockAddr: SocketAddress,
-    name: Option[String],
-    receiver: Option[StatsReceiver],
-    window: Duration,
-    granularity: Duration) =
-  {
-    if (window < granularity) {
-      throw new IncompleteSpecification(
-        "window smaller than granularity!")
-    }
-
-    val prefix = name map ("%s_".format(_)) getOrElse ""
-    val sampleRepository =
-      new ObservableSampleRepository[TimeWindowedSample[ScalarSample]] {
-        override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
-      }
-
-    for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, sockAddr toString)
-
-    sampleRepository
-  }
-
-  private def failureAccrualBroker(window: Duration)(broker: StatsLoadedBroker) = {
-    val granularity = Seq((window.inMilliseconds / 10).milliseconds, 1.second).max
-    def mk = new LazilyCreatingSampleRepository[TimeWindowedSample[ScalarSample]] {
-      override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
-    }
-
-    new FailureAccruingLoadedBroker(broker, mk)
-  }
-
   def makeBroker(
     codec: Codec,
-    statsRepo: SampleRepository[T forSome { type T <: AddableSample[T] }]) =
+    loadStatsRepository: StatsRepository,
+    failureAccruingStatsRepo: StatsRepository) =
       bootstrap(codec) _                                andThen
       pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
       (new PoolingBroker(_))                            andThen
       timeout(_requestTimeout) _                        andThen
-      (new StatsLoadedBroker(_, statsRepo))             andThen
-        failureAccrualBroker(_failureAccrualWindow) _
+      (new StatsLoadedBroker(_, loadStatsRepository))   andThen
+      (new FailureAccruingLoadedBroker(_, failureAccruingStatsRepo))
 
   def build(): Broker = {
     val (hosts, codec) = (_hosts, _codec) match {
@@ -241,18 +216,26 @@ case class ClientBuilder(
         (hosts, codec)
     }
 
+    val timer = new JavaTimer
     val brokers = hosts map { host =>
-      val statsRepo = statsRepositoryForLoadedBroker(
-        host, _name, _statsReceiver,
-        _sampleWindow, _sampleGranularity)
+      val statsRepository = {
+        val statsRepository = new TimeWindowedStatsRepository(
+          _loadStatistics._1, _loadStatistics._2, timer)
+        statsRepository.scope(
+          "service" -> _name.getOrElse(""),
+          "host" -> host.toString)
+      }
 
-      val broker = makeBroker(codec, statsRepo)(host)
+      val failureAccruingStatsRepo = {
+        new TimeWindowedStatsRepository(_failureAccrualStatistics._1, _failureAccrualStatistics._2)
+      }
+      val broker = makeBroker(codec, statsRepository, failureAccruingStatsRepo)(host)
 
       _statsReceiver.foreach { statsReceiver =>
         val hostString = host.toString
-        statsReceiver.makeGauge(hostString + "_load", broker.load)
-        statsReceiver.makeGauge(hostString + "_weight", broker.weight)
-        statsReceiver.makeGauge(hostString + "_available", if (broker.isAvailable) 1 else 0)
+        statsReceiver.mkGauge("host" -> hostString, "load" -> "broker", broker.load)
+        statsReceiver.mkGauge("host" -> hostString, "weight" -> "broker", broker.weight)
+        statsReceiver.mkGauge("host" -> hostString, "available" -> "broker", if (broker.isAvailable) 1 else 0)
       }
 
       broker

@@ -7,6 +7,7 @@ import com.twitter.util.{Time, Return, Throw, Future}
 import com.twitter.util.TimeConversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.stats.StatsRepository
 
 /**
  * This is F-bounded to ensure that we have a homogenous set of
@@ -23,54 +24,53 @@ trait LoadedBroker[+A <: LoadedBroker[A]] extends Broker {
  * Keeps track of request latencies & counts.
  */
 class StatsLoadedBroker(
-    val underlying: Broker,
-    samples: SampleRepository[T forSome { type T <: AddableSample[T] }],
+    protected val underlying: Broker,
+    statsRepository: StatsRepository,
     bias: Float = 1.0f)
   extends WrappingBroker
   with LoadedBroker[StatsLoadedBroker]
 {
-  val dispatchSample = samples("dispatch")
-  val latencySample  = samples("latency")
+  private[this] val dispatchStat = statsRepository.counter("dispatches" -> "broker")
+  private[this] val latencyStat  = statsRepository.gauge("latency" -> "broker")
 
   override def apply(request: AnyRef) = {
     val begin = Time.now
-    dispatchSample.incr()
+    dispatchStat.incr()
 
     val f = underlying(request)
 
     f respond {
       case Return(_) =>
-        latencySample.add(begin.untilNow.inMilliseconds.toInt)
+        latencyStat.measure(begin.untilNow.inMilliseconds.toInt)
       case Throw(e) =>
         // TODO: exception hierarchy here to differentiate between
         // application, connection & other (internal?) exceptions.
-        samples("exception", e.getClass.getName)
-          .add(begin.untilNow.inMilliseconds.toInt)
+        statsRepository.counter("exception" -> e.getClass.getName).incr()
     }
 
     f
   }
 
   override def weight = super.weight * bias
-  def load = dispatchSample.count
+  def load = dispatchStat.sum
   // Fancy pants:
   // latencyStats.sum + 2 * latencyStats.mean * failureStats.count
 }
 
 class FailureAccruingLoadedBroker(
-    val underlying: LoadedBroker[_],
-    samples: SampleRepository[TimeWindowedSample[_]])
+    protected val underlying: LoadedBroker[_],
+    statsRepository: StatsRepository)
   extends WrappingBroker
   with LoadedBroker[FailureAccruingLoadedBroker]
 {
-  val successSample = samples("success")
-  val failureSample = samples("failure")
+  private[this] val successStat = statsRepository.counter("success" -> "broker")
+  private[this] val failureStat = statsRepository.counter("failure" -> "broker")
 
   def load = underlying.load
 
   override def weight = {
-    val success = successSample.count
-    val failure = failureSample.count
+    val success = successStat.sum
+    val failure = failureStat.sum
     val sum = success + failure
 
     // TODO: do we decay this decision beyond relying on the stats
@@ -86,8 +86,8 @@ class FailureAccruingLoadedBroker(
     // TODO: discriminate request errors vs. connection errors, etc.?
     val f = underlying(request)
     f respond {
-      case Return(_) => successSample.incr()
-      case Throw(_) => failureSample.incr()
+      case Return(_) => successStat.incr()
+      case Throw(_) => failureStat.incr()
     }
 
     f

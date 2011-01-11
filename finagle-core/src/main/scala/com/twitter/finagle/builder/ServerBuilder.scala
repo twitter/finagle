@@ -13,13 +13,13 @@ import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.{Time, JavaTimer}
 
 import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
 import com.twitter.finagle.service.{Service, ServicePipelineFactory}
-import stats.StatsReceiver
+import stats.{StatsRepository, StatsReceiver}
 
 object ServerBuilder {
   def apply() = new ServerBuilder()
@@ -31,18 +31,17 @@ object ServerBuilder {
       Executors.newCachedThreadPool())
 }
 
-class SampleHandler(samples: SampleRepository[AddableSample[_]])
-  extends SimpleChannelHandler{
-  val dispatchSample: AddableSample[_] = samples("dispatch")
-  val latencySample: AddableSample[_]  = samples("latency")
+class SampleHandler(statsReceiver: StatsReceiver)
+  extends SimpleChannelHandler {
+  private[this] val dispatchSample = statsReceiver.counter("dispatches" -> "service")
+  private[this] val latencySample  = statsReceiver.gauge("latency" -> "service")
 
   case class Timing(requestedAt: Time = Time.now)
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     ctx.getAttachment match {
       case Timing(requestedAt: Time) =>
-        samples("exception", e.getCause.getClass.getName).add(
-          requestedAt.untilNow.inMilliseconds.toInt)
+        statsReceiver.counter("exception" -> e.getCause.getClass.getName).incr()
       case _ => ()
     }
     super.exceptionCaught(ctx, e)
@@ -62,7 +61,7 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
       val e = c.asInstanceOf[MessageEvent]
       ctx.getAttachment match {
         case Timing(requestedAt) =>
-          latencySample.add(requestedAt.untilNow.inMilliseconds.toInt)
+          latencySample.measure(requestedAt.untilNow.inMilliseconds.toInt)
           ctx.setAttachment(null)
         case _ =>
           // Can this happen?
@@ -80,8 +79,6 @@ class SampleHandler(samples: SampleRepository[AddableSample[_]])
 case class ServerBuilder(
   _codec: Option[Codec],
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Duration,
-  _sampleGranularity: Duration,
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
@@ -97,21 +94,19 @@ case class ServerBuilder(
   import ServerBuilder._
 
   def this() = this(
-    None,        // codec
-    None,        // statsReceiver
-    10.minutes,  // sampleWindow
-    10.seconds,  // sampleGranularity
-    None,        // name
-    None,        // sendBufferSize
-    None,        // recvBufferSize
-    None,        // pipelineFactory
-    None,        // bindTo
-    None,        // logger
-    None,        // tls
-    false,       // startTls
-    None,        // channelFactory
-    None,        // maxConcurrentRequests
-    None         // maxQueueDepth
+    None,              // codec
+    None,              // statsReceiver
+    None,              // name
+    None,              // sendBufferSize
+    None,              // recvBufferSize
+    None,              // pipelineFactory
+    None,              // bindTo
+    None,              // logger
+    None,              // tls
+    false,             // startTls
+    None,              // channelFactory
+    None,              // maxConcurrentRequests
+    None               // maxQueueDepth
   )
 
   def codec(codec: Codec): ServerBuilder =
@@ -119,12 +114,6 @@ case class ServerBuilder(
 
   def reportTo(receiver: StatsReceiver): ServerBuilder =
     copy(_statsReceiver = Some(receiver))
-
-  def sampleWindow(window: Duration): ServerBuilder =
-    copy(_sampleWindow = window)
-
-  def sampleGranularity(window: Duration): ServerBuilder =
-    copy(_sampleGranularity = window)
 
   def name(value: String): ServerBuilder = copy(_name = Some(value))
 
@@ -157,32 +146,6 @@ case class ServerBuilder(
   def maxQueueDepth(max: Int): ServerBuilder =
     copy(_maxQueueDepth = Some(max))
 
-  private def statsRepository(
-    name: Option[String],
-    receiver: Option[StatsReceiver],
-    window: Duration,
-    granularity: Duration,
-    sockAddr: SocketAddress) =
-  {
-    if (window < granularity) {
-      throw new IncompleteSpecification(
-        "window smaller than granularity!")
-    }
-
-    // .
-
-    val prefix = name map ("%s_".format(_)) getOrElse ""
-    val sampleRepository =
-      new ObservableSampleRepository[TimeWindowedSample[ScalarSample]] {
-        override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
-      }
-
-    for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, sockAddr toString)
-
-    sampleRepository
-  }
-
   def build(): Channel = {
     val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
       case (None, _) =>
@@ -200,11 +163,6 @@ case class ServerBuilder(
     bs.setOption("reuseAddress", true)
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
-
-    val statsRepo = statsRepository(
-      _name, _statsReceiver,
-      _sampleWindow, _sampleGranularity,
-      _bindTo.get)
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
@@ -229,7 +187,9 @@ case class ServerBuilder(
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        pipeline.addLast("stats", new SampleHandler(statsRepo))
+        _statsReceiver foreach { statsReceiver =>
+          pipeline.addLast("stats", new SampleHandler(statsReceiver))
+        }
 
         for ((name, handler) <- pipelineFactory.getPipeline.toMap)
           pipeline.addLast(name, handler)
