@@ -13,13 +13,12 @@ import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Time, JavaTimer}
 
 import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
-import com.twitter.finagle.service.{Service, ServicePipelineFactory}
-import stats.{StatsRepository, StatsReceiver}
+import service.{ServiceToChannelHandler, Service}
+import stats.{StatsReceiver}
 
 object ServerBuilder {
   def apply() = new ServerBuilder()
@@ -31,58 +30,17 @@ object ServerBuilder {
       Executors.newCachedThreadPool())
 }
 
-class SampleHandler(statsReceiver: StatsReceiver)
-  extends SimpleChannelHandler {
-  private[this] val dispatchSample = statsReceiver.counter("dispatches" -> "service")
-  private[this] val latencySample  = statsReceiver.gauge("latency" -> "service")
-
-  case class Timing(requestedAt: Time = Time.now)
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    ctx.getAttachment match {
-      case Timing(requestedAt: Time) =>
-        statsReceiver.counter("exception" -> e.getCause.getClass.getName).incr()
-      case _ => ()
-    }
-    super.exceptionCaught(ctx, e)
-  }
-
-  override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (c.isInstanceOf[MessageEvent]) {
-      dispatchSample.incr()
-      ctx.setAttachment(Timing())
-    }
-
-    super.handleUpstream(ctx, c)
-  }
-
-  override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (c.isInstanceOf[MessageEvent]) {
-      val e = c.asInstanceOf[MessageEvent]
-      ctx.getAttachment match {
-        case Timing(requestedAt) =>
-          latencySample.measure(requestedAt.untilNow.inMilliseconds.toInt)
-          ctx.setAttachment(null)
-        case _ =>
-          // Can this happen?
-          ()
-      }
-    }
-
-    super.handleDownstream(ctx, c)
-  }
-}
-
 // TODO: common superclass between client & server builders for common
 // concerns.
 
-case class ServerBuilder(
+case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
   _codec: Option[Codec],
   _statsReceiver: Option[StatsReceiver],
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _pipelineFactory: Option[ChannelPipelineFactory],
+  _service: Option[Service[Req, Res]],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
@@ -100,6 +58,7 @@ case class ServerBuilder(
     None,              // sendBufferSize
     None,              // recvBufferSize
     None,              // pipelineFactory
+    None,              // service
     None,              // bindTo
     None,              // logger
     None,              // tls
@@ -109,41 +68,41 @@ case class ServerBuilder(
     None               // maxQueueDepth
   )
 
-  def codec(codec: Codec): ServerBuilder =
+  def codec(codec: Codec) =
     copy(_codec = Some(codec))
 
-  def reportTo(receiver: StatsReceiver): ServerBuilder =
+  def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
 
-  def name(value: String): ServerBuilder = copy(_name = Some(value))
+  def name(value: String) = copy(_name = Some(value))
 
-  def sendBufferSize(value: Int): ServerBuilder = copy(_sendBufferSize = Some(value))
-  def recvBufferSize(value: Int): ServerBuilder = copy(_recvBufferSize = Some(value))
+  def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def pipelineFactory(value: ChannelPipelineFactory): ServerBuilder =
+  def pipelineFactory(value: ChannelPipelineFactory) =
     copy(_pipelineFactory = Some(value))
 
-  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]): ServerBuilder =
-    copy(_pipelineFactory = Some(ServicePipelineFactory(service)))
+  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
+    copy(_service = Some(service))
 
-  def bindTo(address: SocketAddress): ServerBuilder =
+  def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
 
-  def channelFactory(cf: ChannelFactory): ServerBuilder =
+  def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
 
-  def logger(logger: Logger): ServerBuilder = copy(_logger = Some(logger))
+  def logger(logger: Logger) = copy(_logger = Some(logger))
 
-  def tls(path: String, password: String): ServerBuilder =
+  def tls(path: String, password: String) =
     copy(_tls = Some(Ssl(path, password)))
 
-  def startTls(value: Boolean): ServerBuilder =
+  def startTls(value: Boolean) =
     copy(_startTls = true)
 
-  def maxConcurrentRequests(max: Int): ServerBuilder =
+  def maxConcurrentRequests(max: Int) =
     copy(_maxConcurrentRequests = Some(max))
 
-  def maxQueueDepth(max: Int): ServerBuilder =
+  def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
 
   def build(): Channel = {
@@ -187,12 +146,16 @@ case class ServerBuilder(
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        _statsReceiver foreach { statsReceiver =>
-          pipeline.addLast("stats", new SampleHandler(statsReceiver))
-        }
+//        _statsReceiver foreach { statsReceiver =>
+//          pipeline.addLast("stats", new SampleHandler(statsReceiver))
+//        }
 
         for ((name, handler) <- pipelineFactory.getPipeline.toMap)
           pipeline.addLast(name, handler)
+
+        _service.foreach { service =>
+          pipeline.addLast("service", new ServiceToChannelHandler(service))
+        }
 
         pipeline
       }

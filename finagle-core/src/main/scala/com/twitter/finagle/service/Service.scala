@@ -5,6 +5,7 @@ import com.twitter.util.Future
 /**
  * A Service is an asynchronous function from Request to Future[Response]. It is the
  * basic unit of an RPC interface.
+ *
  * Currently this interface doesn't support streaming responses.  This
  * can be tackled in a number of ways:
  *

@@ -1,6 +1,5 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
 import com.twitter.util.{Promise, Future, Throw}

@@ -8,6 +8,7 @@ import org.jboss.netty.channel._
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.util._
+import com.twitter.finagle.stats.{ReadableCounter, StatsRepository, SimpleStatsRepository}
 
 object LoadedBrokerSpec extends Specification with Mockito {
   class FakeBroker(reply: Future[AnyRef]) extends Broker {
@@ -19,9 +20,7 @@ object LoadedBrokerSpec extends Specification with Mockito {
     def apply(request: AnyRef) = null
   }
 
-  class Repo extends LazilyCreatingSampleRepository[ScalarSample] {
-    def makeStat = new ScalarSample
-  }
+  val statsRepository = new SimpleStatsRepository
 
   "StatsLoadedBroker" should {
     "increment on dispatch" in {
@@ -30,8 +29,8 @@ object LoadedBrokerSpec extends Specification with Mockito {
       val broker1 = new FakeBroker(Future("1"))
       val broker2 = new FakeBroker(Future("2"))
 
-      val rcBroker1 = new StatsLoadedBroker(broker1, new Repo)
-      val rcBroker2 = new StatsLoadedBroker(broker2, new Repo)
+      val rcBroker1 = new StatsLoadedBroker(broker1, statsRepository)
+      val rcBroker2 = new StatsLoadedBroker(broker2, statsRepository)
 
       (0 until 3) foreach { _ => rcBroker1(messageEvent) }
       (0 until 1) foreach { _ => rcBroker2(messageEvent) }
@@ -48,14 +47,14 @@ object LoadedBrokerSpec extends Specification with Mockito {
     "be unavailable when the underlying broker is unavailable" in {
       val broker = mock[Broker]
       broker.isAvailable returns false
-      val loadedBroker = new StatsLoadedBroker(broker, new Repo)
+      val loadedBroker = new StatsLoadedBroker(broker, statsRepository)
       loadedBroker.isAvailable must beFalse
     }
 
     "have weight = 0.0 when the underlying broker is unavailable" in {
       val broker = mock[Broker]
       broker.isAvailable returns false
-      val loadedBroker = new StatsLoadedBroker(broker, new Repo)
+      val loadedBroker = new StatsLoadedBroker(broker, statsRepository)
       loadedBroker.weight must be_==(0.0)
     }
   }
@@ -71,21 +70,17 @@ object LoadedBrokerSpec extends Specification with Mockito {
       def load = theLoad
       override def weight = theWeight
     }
-    
+
     val underlying = new FakeLoadedBroker
 
-    // val underlying = mock[LoadedBroker[T forSome { type  T <: LoadedBroker[T] }]]
+    val statsRepository = mock[StatsRepository]
+    val broker = new FailureAccruingLoadedBroker(underlying, statsRepository)
 
-    type S = TimeWindowedSample[ScalarSample]
+    val successSample = mock[ReadableCounter]
+    val failureSample = mock[ReadableCounter]
 
-    val repo = mock[SampleRepository[S]]
-    val successSample = mock[S]
-    val failureSample = mock[S]
-
-    repo("success") returns successSample
-    repo("failure") returns failureSample
-
-    val broker = new FailureAccruingLoadedBroker(underlying, repo)
+    statsRepository.counter("success" -> "broker") returns successSample
+    statsRepository.counter("failure" -> "broker") returns failureSample
 
     "account for success" in {
       val e = mock[Object]
@@ -93,6 +88,7 @@ object LoadedBrokerSpec extends Specification with Mockito {
 
       underlying.future = f
       broker(e) must be_==(f)
+
 
       there was no(successSample).incr()
       there was no(failureSample).incr()
@@ -127,23 +123,23 @@ object LoadedBrokerSpec extends Specification with Mockito {
     }
 
     "not modify weights for a healhty client" in {
-      successSample.count returns 1
-      failureSample.count returns 0
+      successSample.sum returns 1
+      failureSample.sum returns 0
       underlying.theWeight = 1.0f
       broker.weight must be_==(1.0f)
     }
 
     "adjust weights for an unhealthy broker" in {
-      successSample.count returns 1
-      failureSample.count returns 1
+      successSample.sum returns 1
+      failureSample.sum returns 1
       underlying.theWeight = 1.0f
       broker.weight must be_==(0.5f)
     }
 
     "become unavailable when the success rate is 0" in {
-      successSample.count returns 0
-      failureSample.count returns 1
-      broker.isAvailable must beFalse      
+      successSample.sum returns 0
+      failureSample.sum returns 1
+      broker.isAvailable must beFalse
     }
   }
 

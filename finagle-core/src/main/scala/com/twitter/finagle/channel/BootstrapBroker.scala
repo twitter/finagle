@@ -1,9 +1,7 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.{Channels, Channel, MessageEvent}
+import org.jboss.netty.channel.{Channels, Channel}
 
-import com.twitter.finagle.util.{Ok, Error}
 import com.twitter.finagle.util.Conversions._
 
 class BootstrapBroker(bootstrap: BrokerClientBootstrap)

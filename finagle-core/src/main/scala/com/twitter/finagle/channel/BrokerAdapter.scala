@@ -1,13 +1,11 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.atomic.AtomicReference
-
 import org.jboss.netty.channel._
 
 import com.twitter.finagle.util.Error
 import com.twitter.finagle.util.Conversions._
 
-import com.twitter.util.{Future, Promise, Return, Throw, Try}
+import com.twitter.util.{Promise, Return, Throw, Try}
 
 class BrokerAdapter extends SimpleChannelUpstreamHandler {
   @volatile private[this] var replyFuture: Promise[AnyRef] = null
@@ -15,7 +13,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
   def writeAndRegisterReply(channel: Channel, message: AnyRef,
                             incomingReplyFuture: Promise[AnyRef]) {
     // If there is an outstanding request, something up the stack has
-    // fucked up. We currently just fail this request immediately, and
+    // messed up. We currently just fail this request immediately, and
     // let the current request complete.
     if (replyFuture ne null) {
       incomingReplyFuture.updateIfEmpty(Throw(new TooManyConcurrentRequestsException))
