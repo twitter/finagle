@@ -57,11 +57,11 @@ trait StatsRepository extends StatsReceiver {
       def gauge(description: (String, String)*) = new super.Gauge {
         private[this] val underlying = self.gauge(prefix ++ description: _*)
 
-        def measure(value: Float) {
-          underlying.measure(value)
+        def measure(value: Float) = underlying.measure(value)
+        def summary = {
+          val snapshot = underlying.summary
+          Summary(snapshot.total, snapshot.count)
         }
-
-        def summary = Summary(underlying.summary.total, underlying.summary.count)
       }
 
       def mkGauge(description: Seq[(String, String)], f: => Float) {
