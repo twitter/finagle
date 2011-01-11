@@ -4,19 +4,18 @@ trait ReadableCounter extends Counter {
   def sum: Int
 }
 
-trait ReadableGauge extends Gauge {
-  /**
-   * An atomic snapshot of summary statistics.
-   */
-  case class Summary(total: Float, count: Int)
+/**
+ * An atomic snapshot of summary statistics.
+ */
+case class Summary(total: Float, count: Int) {
+  val mean = total / count
+}
 
+trait ReadableGauge extends Gauge {
   /**
    * Arithmetic mean
    */
-  def mean = {
-    val snapshot = summary
-    snapshot.total / snapshot.count
-  }
+  def mean = summary.mean
 
   /**
    * Get an atomic snapshot of summary statistics
@@ -53,6 +52,41 @@ trait StatsRepository extends StatsReceiver {
 
       def mkGauge(description: Seq[(String, String)], f: => Float) {
         self.mkGauge(prefix ++ description, f)
+      }
+    }
+  }
+
+  /**
+   * Multiplex measurements to a StatsReceiver
+   */
+  def reportTo(receiver: StatsReceiver) = {
+    val self = this
+    new StatsRepository {
+      def mkGauge(description: Seq[(String, String)], f: => Float) {
+        self.mkGauge(description, f)
+        receiver.mkGauge(description, f)
+      }
+
+      def gauge(description: (String, String)*) = new ReadableGauge {
+        private[this] val underlying = self.gauge(description: _*)
+
+        def measure(value: Float) {
+          underlying.measure(value)
+          receiver.gauge(description: _*).measure(value)
+        }
+
+        def summary = underlying.summary
+      }
+
+      def counter(description: (String, String)*) = new ReadableCounter {
+        private[this] val underlying = self.counter(description: _*)
+
+        def incr(delta: Int) {
+          underlying.incr(delta)
+          receiver.counter(description: _*).incr(delta)
+        }
+
+        def sum = underlying.sum
       }
     }
   }

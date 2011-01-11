@@ -223,9 +223,13 @@ case class ClientBuilder(
       val statsRepository = {
         val statsRepository = new TimeWindowedStatsRepository(
           _loadStatistics._1, _loadStatistics._2, timer)
-        statsRepository.scope(
+        val scoped = statsRepository.scope(
           "service" -> _name.getOrElse(""),
           "host" -> host.toString)
+        if (_statsReceiver.isDefined)
+          scoped.reportTo(_statsReceiver.get)
+        else
+          scoped
       }
 
       val failureAccruingStatsRepo = {
