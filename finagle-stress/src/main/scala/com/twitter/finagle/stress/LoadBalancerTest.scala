@@ -28,28 +28,28 @@ object LoadBalancerTest {
 
   def runSuite(clientBuilder: ClientBuilder) {
     println("testing " + clientBuilder)
-    println("** baseline")
+    println("\n== baseline ==\n")
     new LoadBalancerTest(clientBuilder)({ case _ => }).run()
 
-    println("** 1 server goes offline")
+    println("\n== 1 server goes offline ==\n")
     new LoadBalancerTest(clientBuilder)({
       case (1000, servers) =>
         servers(1).stop()
     }).run()
 
-    println("** 1 application becomes nonresponsive")
+    println("\n== 1 application becomes nonresponsive ==\n")
     new LoadBalancerTest(clientBuilder)({
       case (1000, servers) =>
         servers(1).becomeApplicationNonresponsive()
     }).run()
 
-    println("** 1 connection becomes nonresponsive")
+    println("\n== 1 connection becomes nonresponsive ==\n")
     new LoadBalancerTest(clientBuilder)({
       case (1000, servers) =>
         servers(1).becomeConnectionNonresponsive()
     }).run()
 
-    println("** 1 server has a protocol error")
+    println("\n== 1 server has a protocol error ==\n")
     new LoadBalancerTest(clientBuilder)({
       case (1000, servers) =>
         servers(1).becomeBelligerent()
@@ -168,12 +168,21 @@ class LoadBalancerTest(
       unique.toList.sorted
     }
 
-    allGaugeNames.zipWithIndex.foreach { case (name, index) =>
-      println("> [%02d] = %s".format(index, name))
+    val columnNames = allGaugeNames map { gaugeName =>
+      // Try to substitute a server.
+      val Array(host, name) = gaugeName.split("_")      
+      val serverIndex = servers.findIndexOf { _.addr.toString == host }
+      val shortName = name match {
+        case "available" => "a"
+        case "load"      => "l"
+        case "weight"    => "w"
+        case n           => n
+      }
+
+      "%d/%s".format(serverIndex, shortName)
     }
 
-    val columnLabels = 0 until allGaugeNames.size map { i => "[%02d]".format(i) }
-    println("> %5s %s".format("time", columnLabels map("%8s".format(_)) mkString(" ")))
+    println("> %5s %s".format("time", columnNames map("%-8s".format(_)) mkString(" ")))
 
     gaugeValues foreach { case (requestNum, values) =>
       val columns = allGaugeNames map { values.get(_).map("%.2e".format(_)).getOrElse("n/a") }
