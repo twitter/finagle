@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import org.jboss.netty.channel.{
   SimpleChannelHandler, ChannelEvent, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.{
-  FrameDecoder, LengthFieldBasedFrameDecoder, LengthFieldPrepender}
+  LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
 class ThriftFrameCodec extends SimpleChannelHandler {
   protected[thrift] val decoder = new LengthFieldBasedFrameDecoder(0x7FFFFFFF, 0, 4, 0, 4)
