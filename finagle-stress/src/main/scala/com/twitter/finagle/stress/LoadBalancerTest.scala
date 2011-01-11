@@ -33,25 +33,25 @@ object LoadBalancerTest {
 
     println("\n== 1 server goes offline ==\n")
     new LoadBalancerTest(clientBuilder)({
-      case (1000, servers) =>
+      case (10000, servers) =>
         servers(1).stop()
     }).run()
 
     println("\n== 1 application becomes nonresponsive ==\n")
     new LoadBalancerTest(clientBuilder)({
-      case (1000, servers) =>
+      case (10000, servers) =>
         servers(1).becomeApplicationNonresponsive()
     }).run()
 
     println("\n== 1 connection becomes nonresponsive ==\n")
     new LoadBalancerTest(clientBuilder)({
-      case (1000, servers) =>
+      case (10000, servers) =>
         servers(1).becomeConnectionNonresponsive()
     }).run()
 
     println("\n== 1 server has a protocol error ==\n")
     new LoadBalancerTest(clientBuilder)({
-      case (1000, servers) =>
+      case (10000, servers) =>
         servers(1).becomeBelligerent()
     }).run()
   }
