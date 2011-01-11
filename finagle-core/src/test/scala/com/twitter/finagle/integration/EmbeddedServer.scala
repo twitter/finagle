@@ -22,7 +22,7 @@ import com.twitter.ostrich.StatsCollection
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
   val executor = Executors.newCachedThreadPool()
-  val timer = new HashedWheelTimer(10, TimeUnit.MILLISECONDS)
+  val timer = new HashedWheelTimer(1, TimeUnit.MILLISECONDS)
 }
 
 class EmbeddedServer(val addr: SocketAddress) {
