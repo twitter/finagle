@@ -21,7 +21,7 @@ import com.twitter.ostrich.StatsCollection
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
-  val executor = Executors.newCachedThreadPool()
+  // val executor = Executors.newCachedThreadPool()
   val timer = new HashedWheelTimer(1, TimeUnit.MILLISECONDS)
 }
 
@@ -39,6 +39,7 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   private[this] val channels = new DefaultChannelGroup
 
+  private[this] val executor = Executors.newCachedThreadPool()
   private[this] val bootstrap = new ServerBootstrap(
     new NioServerSocketChannelFactory(executor, executor))
 
@@ -122,6 +123,8 @@ class EmbeddedServer(val addr: SocketAddress) {
 
     channels.close().awaitUninterruptibly()
     channels.clear()
+
+    bootstrap.releaseExternalResources()
   }
 
   def start() {
