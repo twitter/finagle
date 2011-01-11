@@ -1,12 +1,12 @@
 package com.twitter.finagle.stats
 
 import java.util.logging.Logger
-import org.jboss.netty.util.HashedWheelTimer
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.Timer
 
-case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
-  val timer = new HashedWheelTimer()
+class JavaLoggerStatsReceiver(logger: Logger, timer: Timer) extends StatsReceiver {
+  def this(logger: Logger) = this(logger, Timer.default)
 
   def gauge(description: (String, String)*) = new Gauge {
     def measure(value: Float) {
@@ -21,7 +21,7 @@ case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
   }
 
   def mkGauge(name: Seq[(String, String)], f: => Float) {
-    timer(10.seconds) {
+    timer.schedule(10.seconds) {
       logger.info("%s %2f".format(name, f))
     }
   }
@@ -34,5 +34,6 @@ case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
 }
 
 object JavaLoggerStatsReceiver {
-  def apply(): JavaLoggerStatsReceiver = JavaLoggerStatsReceiver(Logger.getLogger(getClass.getName))
+  def apply(): JavaLoggerStatsReceiver =
+    new JavaLoggerStatsReceiver(Logger.getLogger("Finagle"))
 }

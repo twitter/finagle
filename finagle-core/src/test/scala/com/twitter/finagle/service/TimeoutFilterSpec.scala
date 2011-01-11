@@ -1,53 +1,28 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.TimeUnit
-
 import org.specs.Specification
 import org.specs.mock.Mockito
-import org.mockito.{ArgumentCaptor, Matchers}
-
-import org.jboss.netty.util.{Timer, TimerTask, Timeout}
-
-import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.channel.TimedoutRequestException
+import com.twitter.finagle.util.Timer
+import com.twitter.finagle.util.Conversions._
+
+import com.twitter.conversions.time._
+import com.twitter.util.{Try, Promise}
 
 object TimeoutFilterSpec extends Specification with Mockito {
   "TimeoutFilter" should {
-    val timer = mock[Timer]
-    val timeout = mock[Timeout]
-    val duration = 50.milliseconds
-    val (timeoutValue, timeoutUnit) = duration.inTimeUnit
-    val request = mock[Object]
-    val service = mock[Service[AnyRef, AnyRef]]
-    val responseFuture = new Promise[AnyRef]
-    val response = mock[Object]
-    val taskCaptor = ArgumentCaptor.forClass(classOf[TimerTask])
-    timer.newTimeout(
-      taskCaptor.capture,
-      Matchers.eq(timeoutValue),
-      Matchers.eq(timeoutUnit)) returns timeout
-    service(request) returns responseFuture
-    val timeoutFilter = new TimeoutFilter[AnyRef, AnyRef](timer, duration)
-    val future = timeoutFilter(request, service)
+    val timer = Timer.default
+    val alternative = Try(2)
+    val promise = new Promise[Int].timeout(timer, 1.second, alternative)
 
     "cancels the request when the service succeeds" in {
-      responseFuture() = Return(response)
-      there was one(timeout).cancel
-      future() must be_==(response)
+      promise.setValue(1)
+      promise(2.seconds) mustBe 1
     }
 
     "times out a request that is not successful" in {
-      // Time out:
-      val task = taskCaptor.getValue()
-      task.run(timeout)
-
-      future.isDefined must beTrue
-      future.isThrow must beTrue
-
-      val Throw(exc) = future.within(0.seconds)
-      exc must haveClass[TimedoutRequestException]
+      promise(2.seconds) mustBe alternative.get
     }
   }
 }

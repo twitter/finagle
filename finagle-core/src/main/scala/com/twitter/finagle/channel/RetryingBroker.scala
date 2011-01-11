@@ -1,9 +1,9 @@
 package com.twitter.finagle.channel
 
-import java.net.SocketAddress
 import org.jboss.netty.util.HashedWheelTimer
 import com.twitter.finagle.util.Conversions._
-import com.twitter.util.{Duration, Future, Promise, Throw, Return}
+import com.twitter.util._
+import com.twitter.finagle.util.Timer
 
 object RetryingBroker {
   def tries(underlying: Broker, numTries: Int) =
@@ -62,20 +62,16 @@ class NumTriesRetryStrategy(numTries: Int) extends RetryStrategy {
   }
 }
 
-object ExponentialBackoffRetryStrategy {
-  // the default tick is 100ms
-  val timer = new HashedWheelTimer()
-}
-
-class ExponentialBackoffRetryStrategy(delay: Duration, multiplier: Int)
+class ExponentialBackoffRetryStrategy(
+  delay: Duration,
+  multiplier: Int,
+  timer: Timer = Timer.default)
   extends RetryStrategy
 {
-  import ExponentialBackoffRetryStrategy._
-
   def apply() = {
     val future = new Promise[RetryStrategy]
 
-    timer(delay) {
+    timer.schedule(delay) {
       future() = Return(
         new ExponentialBackoffRetryStrategy(delay * multiplier, multiplier))
     }

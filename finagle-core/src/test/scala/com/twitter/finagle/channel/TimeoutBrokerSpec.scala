@@ -7,7 +7,7 @@ import org.specs.mock.Mockito
 import org.mockito.Matchers
 
 import org.jboss.netty.util.{Timer, Timeout, TimerTask}
-import org.jboss.netty.channel.{MessageEvent, Channels}
+import org.jboss.netty.channel.{MessageEvent}
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 
@@ -34,7 +34,7 @@ object TimeoutBrokerSpec extends Specification with Mockito {
           timeout
       }
 
-    val tob = new TimeoutBroker(timer, b, 100.milliseconds)
+    val tob = new TimeoutBroker(b, 100.milliseconds)
 
     val f = tob(e)
     timerTask must notBeNull

@@ -14,8 +14,9 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 
 class ChannelPool(
-    clientBootstrap: BrokerClientBootstrap,
-    connectRetryPeriod: Option[Duration] = None)
+  clientBootstrap: BrokerClientBootstrap,
+  connectRetryPeriod: Option[Duration] = None,
+  timer: Timer = Timer.default)
   extends Serialized
 {
   @volatile private[this] var _isAvailable = false
@@ -39,7 +40,7 @@ class ChannelPool(
     val timeSinceLastConnectAttempt = lastConnectAttempt.untilNow
 
     if (timeSinceLastConnectAttempt < period) {
-      Broker.timer(period - timeSinceLastConnectAttempt) {
+      timer.schedule(period - timeSinceLastConnectAttempt) {
         tryToConnect(period)
       }
     } else {
