@@ -20,6 +20,7 @@ case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
   def makeGauge(name: String, f: => Float) {
     timer(10.seconds) {
       logger.info("%s %2f".format(name, f))
+      makeGauge(name, f)
     }
   }
 }
