@@ -5,14 +5,14 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.concurrent.Serialized
 
 class SimpleStatsRepository extends StatsRepository {
-  class Counter extends super.Counter {
+  private[this] class Counter extends ReadableCounter {
     private[this] val _sum = new AtomicInteger(0)
 
     def incr(delta: Int) { _sum.addAndGet(delta) }
     def sum = _sum.get
   }
 
-  class Gauge extends super.Gauge with Serialized {
+  private[this] class Gauge extends ReadableGauge with Serialized {
     @volatile private[this] var _summary = Summary(0.0f, 0)
 
     def measure(value: Float) {
@@ -33,8 +33,8 @@ class SimpleStatsRepository extends StatsRepository {
     config.compute { _ => new Gauge }
   }
 
-  def counter(path: (String, String)*): Counter = counters(path)
-  def gauge(path: (String, String)*): Gauge = gauges(path)
+  def counter(path: (String, String)*): ReadableCounter = counters(path)
+  def gauge(path: (String, String)*): ReadableGauge = gauges(path)
 
   /**
    * Unsupported for now.

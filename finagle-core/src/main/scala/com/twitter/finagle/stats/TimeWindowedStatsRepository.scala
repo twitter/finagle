@@ -25,7 +25,7 @@ class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: 
     position += 1
   }
 
-  def counter(description: (String, String)*) = new super.Counter {
+  def counter(description: (String, String)*) = new ReadableCounter {
     private[this] def current = currentRepository.counter(description: _*)
 
     def sum = repositories.foldLeft(0) { (total, repository) =>
@@ -35,7 +35,7 @@ class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: 
     def incr(delta: Int) = current.incr(delta)
   }
 
-  def gauge(description: (String, String)*) = new super.Gauge {
+  def gauge(description: (String, String)*) = new ReadableGauge {
     private[this] def current = currentRepository.gauge(description: _*)
 
     def summary = repositories.foldLeft(Summary(0.0f, 0)) { (acc, repository) =>

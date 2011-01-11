@@ -8,13 +8,13 @@ import com.twitter.finagle.util.Conversions._
 case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
   val timer = new HashedWheelTimer()
 
-  def gauge(description: (String, String)*): Gauge = new super.Gauge {
+  def gauge(description: (String, String)*) = new Gauge {
     def measure(value: Float) {
       logger.info("%s measure %f".format(formatDescription(description), value))
     }
   }
 
-  def counter(description: (String, String)*): Counter = new super.Counter {
+  def counter(description: (String, String)*) = new Counter {
     def incr(delta: Int) {
       logger.info("%s incr %d".format(formatDescription(description), delta))
     }
