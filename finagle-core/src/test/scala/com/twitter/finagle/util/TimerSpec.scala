@@ -19,13 +19,13 @@ object TimerSpec extends Specification with Mockito {
     }
 
     "not execute the task until it has timed out" in {
-      latch.await(1.second) must beTrue
+      latch.await(2.seconds) must beTrue
       (end - start).moreOrLessEquals(1.second, 10.milliseconds)
     }
 
     "not execute the task if it has been cancelled" in {
       task.cancel()
-      latch.await(1.second) must beFalse
+      latch.await(2.seconds) must beFalse
     }
   }
 }

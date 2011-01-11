@@ -14,7 +14,7 @@ class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Tim
       def run(to: Timeout) {
         if (!to.isCancelled) f
       }
-    }, when.inMilliseconds, TimeUnit.MILLISECONDS)
+    }, (when - Time.now).inMilliseconds, TimeUnit.MILLISECONDS)
     toTimerTask(timeout)
   }
 
