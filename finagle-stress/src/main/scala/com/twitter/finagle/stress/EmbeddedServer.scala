@@ -21,14 +21,13 @@ import com.twitter.finagle.util.Timer
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
-  val executor = Executors.newCachedThreadPool()
   val timer = Timer.default
 }
 
 class EmbeddedServer(val addr: SocketAddress) {
   import EmbeddedServer._
 
-  // (Publically accessible) stats covering this server.
+  // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
 
   // Server state:
@@ -39,6 +38,7 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   private[this] val channels = new DefaultChannelGroup
 
+  private[this] val executor = Executors.newCachedThreadPool()
   private[this] val bootstrap = new ServerBootstrap(
     new NioServerSocketChannelFactory(executor, executor))
 
@@ -86,6 +86,10 @@ class EmbeddedServer(val addr: SocketAddress) {
           super.messageReceived(ctx, e)
         }
 
+        override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+          stats.incr("exc_%s".format(e.getCause.getClass.getName.split('.').last))
+        }
+
       })
 
       pipeline.addLast("latency", new SimpleChannelDownstreamHandler {
@@ -118,6 +122,8 @@ class EmbeddedServer(val addr: SocketAddress) {
 
     channels.close().awaitUninterruptibly()
     channels.clear()
+
+    bootstrap.releaseExternalResources()
   }
 
   def start() {

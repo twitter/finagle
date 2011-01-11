@@ -23,6 +23,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer) extends StatsReceive
   def mkGauge(name: Seq[(String, String)], f: => Float) {
     timer.schedule(10.seconds) {
       logger.info("%s %2f".format(name, f))
+      makeGauge(name, f)
     }
   }
 

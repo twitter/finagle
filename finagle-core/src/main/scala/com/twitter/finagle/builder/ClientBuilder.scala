@@ -10,7 +10,7 @@ import java.util.concurrent.Executors
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 
-import com.twitter.util.{Duration, JavaTimer}
+import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -80,6 +80,34 @@ case class ClientBuilder(
     None,                // channelFactory
     None                 // proactivelyConnect
   )
+
+  override def toString() = {
+    val options = Seq(
+      "name"                        -> _name,
+      "hosts"                       -> _hosts,
+      "codec"                       -> _codec,
+      "connectionTimeout"           -> Some(_connectionTimeout),
+      "requestTimeout"              -> Some(_requestTimeout),
+      "statsReceiver"               -> _statsReceiver,
+      "loadStatistics"              -> _loadStatistics,
+      "failureAccrualStatistics"    -> Some(_failureAccrualStatistics),
+      "hostConnectionLimit"         -> Some(_hostConnectionLimit),
+      "sendBufferSize"              -> _sendBufferSize,
+      "recvBufferSize"              -> _recvBufferSize,
+      "retries"                     -> _retries,
+      "initialBackoff"              -> _initialBackoff,
+      "backoffMultiplier"           -> _backoffMultiplier,
+      "logger"                      -> _logger,
+      "channelFactory"              -> _channelFactory,
+      "proactivelyConnect"          -> _proactivelyConnect
+    )
+
+    "ClientBuilder(%s)".format(
+      options flatMap {
+        case (k, Some(v)) => Some("%s=%s".format(k, v))
+        case _ => None
+      } mkString(", "))
+  }
 
   def hosts(hostnamePortCombinations: String): ClientBuilder =
     copy(_hosts = Some(parseHosts(hostnamePortCombinations)))
@@ -218,7 +246,7 @@ case class ClientBuilder(
         (hosts, codec)
     }
 
-    val timer = new JavaTimer
+    val timer = Timer.default
     val brokers = hosts map { host =>
       val statsRepository = {
         val statsRepository = new TimeWindowedStatsRepository(

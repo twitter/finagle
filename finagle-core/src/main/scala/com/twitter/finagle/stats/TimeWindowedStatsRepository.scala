@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
-import com.twitter.util.{Timer, Duration, JavaTimer, Time}
+import com.twitter.util.{Duration, Time}
+import com.twitter.finagle.util.Timer
 
 /**
  * A StatsRepository that keeps a rolling set of windows of data. Stats are
@@ -12,7 +13,7 @@ import com.twitter.util.{Timer, Duration, JavaTimer, Time}
  * @param  windows   the number of time windows to keep around
  * @param  timer     a timer to schedule creating and dropping time windows
  */
-class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: Timer = new JavaTimer)
+class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: Timer = Timer.default)
   extends StatsRepository
 {
   @volatile private[this] var position = 0
