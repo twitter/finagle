@@ -29,8 +29,8 @@ object LoadedBrokerSpec extends Specification with Mockito {
       val broker1 = new FakeBroker(Future("1"))
       val broker2 = new FakeBroker(Future("2"))
 
-      val rcBroker1 = new StatsLoadedBroker(broker1, statsRepository)
-      val rcBroker2 = new StatsLoadedBroker(broker2, statsRepository)
+      val rcBroker1 = new StatsLoadedBroker(broker1, statsRepository.scope("broker" -> "1"))
+      val rcBroker2 = new StatsLoadedBroker(broker2, statsRepository.scope("broker" -> "2"))
 
       (0 until 3) foreach { _ => rcBroker1(messageEvent) }
       (0 until 1) foreach { _ => rcBroker2(messageEvent) }
