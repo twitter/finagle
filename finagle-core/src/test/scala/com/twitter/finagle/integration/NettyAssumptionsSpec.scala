@@ -1,15 +1,18 @@
 package com.twitter.finagle.integration
 
+import java.util.concurrent.Executors
+
 import org.specs.Specification
 
-import org.jboss.netty.bootstrap.ClientBootstrap
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
 import org.jboss.netty.channel._
 
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Ok
 
-import com.twitter.util.CountDownLatch
+import com.twitter.util.{CountDownLatch, RandomSocket}
 import com.twitter.conversions.time._
 
 /**
@@ -22,8 +25,28 @@ import com.twitter.conversions.time._
  * *are* making of Netty :-)
  */
 object NettyAssumptionsSpec extends Specification {
+  private[this] val executor = Executors.newCachedThreadPool()
+  def makeServer() = {
+    val bootstrap = new ServerBootstrap(
+      new NioServerSocketChannelFactory(executor, executor))
+    bootstrap.setPipelineFactory(new ChannelPipelineFactory {
+      def getPipeline = {
+        val pipeline = Channels.pipeline()
+        pipeline.addLast("stfu", new SimpleChannelUpstreamHandler {
+          override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+            /* nothing */
+          }
+        })
+        pipeline
+      }
+    })
+    bootstrap.bind(RandomSocket())
+  }
+
   "Channel.close()" should {
-    val server = EmbeddedServer()
+    val ch = makeServer()
+    val addr = ch.getLocalAddress()
+    doAfter { ch.close().awaitUninterruptibly() }
 
     // This test, like any involving timing, is of course fraught with
     // races.
@@ -41,7 +64,7 @@ object NettyAssumptionsSpec extends Specification {
 
       val latch = new CountDownLatch(1)
 
-      bootstrap.connect(server.addr) {
+      bootstrap.connect(addr) {
         case Ok(channel) =>
           channel.isOpen must beTrue
           Channels.close(channel)

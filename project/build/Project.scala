@@ -9,16 +9,30 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
 
-  val coreProject      = project("finagle-core",      "finagle-core",        new CoreProject(_))
-  val ostrichProject   = project("finagle-ostrich",   "finagle-ostrich",     new OstrichProject(_), coreProject)
-  val thriftProject    = project("finagle-thrift",    "finagle-thrift",      new ThriftProject(_), coreProject)
-//  val httpProject      = project("finagle-http",      "finagle-http",      new HttpProject(_))
-//  val memcachedProject = project("finagle-memcached", "finagle-memcached", new MemcachedProject(_))
-//  val kestrelProject   = project("finagle-kestrel",   "finagle-kestrel",   new KestrelProject(_))
-//  val hosebirdProject  = project("finagle-hosebird",  "finagle-hosebird",  new HosebirdProject(_))
+  // finagle-core contains the finagle kernel itself, plus builders &
+  // HTTP codecs [HTTP may move to its own project soon]
+  val coreProject = project(
+    "finagle-core", "finagle-core",
+    new CoreProject(_))
+
+  // finagle-ostrich has a StatsReceiver for Ostrich 
+  val ostrichProject = project(
+    "finagle-ostrich",   "finagle-ostrich",
+    new OstrichProject(_), coreProject)
+
+  // finagle-thrift contains thrift codecs
+  val thriftProject = project(
+    "finagle-thrift", "finagle-thrift",
+    new ThriftProject(_), coreProject)
+
+  // finagle-integration has integration test suites & tools for
+  // development.
+  val integrationProject = project(
+    "finagle-integration", "finagle-integration",
+    new IntegrationProject(_), coreProject)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+    with SubversionPublisher with AdhocInlines
   {
     override def compileOrder = CompileOrder.ScalaThenJava
 
@@ -29,7 +43,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
-    val ostrich = "com.twitter"               % "ostrich"     % "2.3.4" % "test"
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
@@ -43,6 +56,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
+  {
+    val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+  }
+
+  class IntegrationProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
