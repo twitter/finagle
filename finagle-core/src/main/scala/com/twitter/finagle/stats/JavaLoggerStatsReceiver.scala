@@ -8,24 +8,17 @@ import com.twitter.finagle.util.Conversions._
 case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
   val timer = new HashedWheelTimer()
 
-  private[this] class Counter(description: Seq[(String, String)]) extends OCounter {
-    def incr(delta: Int) {
-      logger.info("%s incr %d".format(formatDescription(description), delta))
-    }
-
-    val sum = 0
-  }
-
-  private[this] class Gauge(description: Seq[(String, String)]) extends OGauge {
+  def gauge(description: (String, String)*): Gauge = new super.Gauge {
     def measure(value: Float) {
       logger.info("%s measure %f".format(formatDescription(description), value))
     }
-
-    val summary = Summary(0.0f, 0)
   }
 
-  def gauge(description: (String, String)*): OGauge = new Gauge(description)
-  def counter(description: (String, String)*): OCounter = new Counter(description)
+  def counter(description: (String, String)*): Counter = new super.Counter {
+    def incr(delta: Int) {
+      logger.info("%s incr %d".format(formatDescription(description), delta))
+    }
+  }
 
   def mkGauge(name: Seq[(String, String)], f: => Float) {
     timer(10.seconds) {

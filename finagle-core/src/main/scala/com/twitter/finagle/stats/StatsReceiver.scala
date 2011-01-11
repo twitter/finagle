@@ -1,27 +1,27 @@
 package com.twitter.finagle.stats
 
-/**
- * A readable and writeable Counter. Only sums are kept of Counters.
- * An example Counter is "number of requests served".
- */
-trait Counter extends {
-  def incr(delta: Int)
-  def incr() { incr(1) }
-}
-
-/**
- * A readable and writeable Gauge. Gauages are usually continuous
- * values that are measured at moments in time (e.g., the value
- * of a share of Twitter's stock).
- */
-trait Gauge {
-  /**
-   * Record a measurement
-   */
-  def measure(value: Float)
-}
-
 trait StatsReceiver {
+  /**
+   * A readable and writeable Counter. Only sums are kept of Counters.
+   * An example Counter is "number of requests served".
+   */
+  trait Counter extends {
+    def incr(delta: Int)
+    def incr() { incr(1) }
+  }
+
+  /**
+   * A readable and writeable Gauge. Gauages are usually continuous
+   * values that are measured at moments in time (e.g., the value
+   * of a share of Twitter's stock).
+   */
+  trait Gauge {
+    /**
+     * Record a measurement
+     */
+    def measure(value: Float)
+  }
+
   /**
    *  Get a Counter with the description
    */

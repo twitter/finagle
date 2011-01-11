@@ -25,29 +25,27 @@ class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: 
     position += 1
   }
 
-  private[this] class Counter(path: (String, String)*) extends OCounter {
-    private[this] def current = currentRepository.counter(path: _*)
+  def counter(description: (String, String)*) = new super.Counter {
+    private[this] def current = currentRepository.counter(description: _*)
 
     def sum = repositories.foldLeft(0) { (total, repository) =>
-      total + repository.counter(path: _*).sum
+      total + repository.counter(description: _*).sum
     }
 
     def incr(delta: Int) = current.incr(delta)
   }
 
-  private[this] class Gauge(path: (String, String)*) extends OGauge {
-    private[this] def current = currentRepository.gauge(path: _*)
+  def gauge(description: (String, String)*) = new super.Gauge {
+    private[this] def current = currentRepository.gauge(description: _*)
 
     def summary = repositories.foldLeft(Summary(0.0f, 0)) { (acc, repository) =>
-      val summary = repository.gauge(path: _*).summary
+      val summary = repository.gauge(description: _*).summary
       Summary(acc.total + summary.total, acc.count + summary.count)
     }
 
     def measure(value: Float) = current.measure(value)
   }
 
-  def counter(path: (String, String)*): OCounter = new Counter(path: _*)
-  def gauge(path: (String, String)*): OGauge = new Gauge(path: _*)
   def mkGauge(description: Seq[(String, String)], f: => Float) {
     timer.schedule(Time.now, interval)(f)
   }
