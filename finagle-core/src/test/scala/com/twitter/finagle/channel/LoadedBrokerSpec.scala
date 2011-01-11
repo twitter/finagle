@@ -73,14 +73,14 @@ object LoadedBrokerSpec extends Specification with Mockito {
 
     val underlying = new FakeLoadedBroker
 
-    val statsRepository = mock[StatsRepository]
+    val statsRepository = smartMock[StatsRepository]
+
+    val successStat = mock[ReadableCounter]
+    val failureStat = mock[ReadableCounter]
+
+    statsRepository.counter("success" -> "broker") returns successStat
+    statsRepository.counter("failure" -> "broker") returns failureStat
     val broker = new FailureAccruingLoadedBroker(underlying, statsRepository)
-
-    val successSample = mock[ReadableCounter]
-    val failureSample = mock[ReadableCounter]
-
-    statsRepository.counter("success" -> "broker") returns successSample
-    statsRepository.counter("failure" -> "broker") returns failureSample
 
     "account for success" in {
       val e = mock[Object]
@@ -90,11 +90,11 @@ object LoadedBrokerSpec extends Specification with Mockito {
       broker(e) must be_==(f)
 
 
-      there was no(successSample).incr()
-      there was no(failureSample).incr()
+      there was no(successStat).incr()
+      there was no(failureStat).incr()
 
       f() = Return("yipee!")
-      there was one(successSample).incr()
+      there was one(successStat).incr()
     }
 
     "account for failure" in {
@@ -106,8 +106,8 @@ object LoadedBrokerSpec extends Specification with Mockito {
 
       f() = Throw(new Exception("doh."))
 
-      there was no(successSample).incr()
-      there was one(failureSample).incr()
+      there was no(successStat).incr()
+      there was one(failureStat).incr()
     }
 
     "take into account failures" in {
@@ -118,27 +118,27 @@ object LoadedBrokerSpec extends Specification with Mockito {
       broker(e) must be_==(f)
 
       f() = Return("yipee!")
-      there was no(failureSample).incr()
-      there was one(successSample).incr()
+      there was no(failureStat).incr()
+      there was one(successStat).incr()
     }
 
     "not modify weights for a healhty client" in {
-      successSample.sum returns 1
-      failureSample.sum returns 0
+      successStat.sum returns 1
+      failureStat.sum returns 0
       underlying.theWeight = 1.0f
       broker.weight must be_==(1.0f)
     }
 
     "adjust weights for an unhealthy broker" in {
-      successSample.sum returns 1
-      failureSample.sum returns 1
+      successStat.sum returns 1
+      failureStat.sum returns 1
       underlying.theWeight = 1.0f
       broker.weight must be_==(0.5f)
     }
 
     "become unavailable when the success rate is 0" in {
-      successSample.sum returns 0
-      failureSample.sum returns 1
+      successStat.sum returns 0
+      failureStat.sum returns 1
       broker.isAvailable must beFalse
     }
   }

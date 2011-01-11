@@ -181,7 +181,9 @@ case class ClientBuilder(
     }
 
   private def timeout(timeout: Duration)(broker: Broker) =
-    new TimeoutBroker(broker, timeout)
+    if (timeout == Duration.MaxValue)
+      broker
+    else new TimeoutBroker(broker, timeout)
 
   private def retrying(broker: Broker) =
     (_retries, _initialBackoff, _backoffMultiplier) match {

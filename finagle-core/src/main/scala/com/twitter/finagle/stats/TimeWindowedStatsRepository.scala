@@ -16,10 +16,9 @@ class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: 
   extends StatsRepository
 {
   @volatile private[this] var position = 0
-  private[this] def repositories = new Array[StatsRepository](numIntervals)
+  private[this] def repositories = Array.fill(numIntervals)(new SimpleStatsRepository)
   private[this] def currentRepository = repositories(position % numIntervals)
 
-  repositories(0) = new SimpleStatsRepository
   timer.schedule(interval.fromNow, interval) {
     repositories((position + 1) % numIntervals) = new SimpleStatsRepository
     position += 1
