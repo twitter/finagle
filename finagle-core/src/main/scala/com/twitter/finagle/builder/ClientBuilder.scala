@@ -83,6 +83,35 @@ case class ClientBuilder(
     None                 // proactivelyConnect
   )
 
+  override def toString() = {
+    val options = Seq(
+      "name"                 -> _name,
+      "hosts"                -> _hosts,
+      "codec"                -> _codec,
+      "connectionTimeout"    -> Some(_connectionTimeout),
+      "requestTimeout"       -> Some(_requestTimeout),
+      "statsReceiver"        -> _statsReceiver,
+      "sampleWindow"         -> _sampleWindow,
+      "sampleGranularity"    -> _sampleGranularity,
+      "hostConnectionLimit"  -> _hostConnectionLimit,
+      "sendBufferSize"       -> _sendBufferSize,
+      "recvBufferSize"       -> _recvBufferSize,
+      "failureAccrualWindow" -> _failureAccrualWindow,
+      "retries"              -> _retries,
+      "initialBackoff"       -> _initialBackoff,
+      "backoffMultiplier"    -> _backoffMultiplier,
+      "logger"               -> _logger,
+      "channelFactory"       -> _channelFactory,
+      "proactivelyConnect"   -> _proactivelyConnect
+    )
+
+    "ClientBuilder(%s)".format(
+      options flatMap {
+        case (k, Some(v)) => Some("%s=%s".format(k, v))
+        case _ => None
+      } mkString(", "))
+  }
+
   def hosts(hostnamePortCombinations: String): ClientBuilder =
     copy(_hosts = Some(parseHosts(hostnamePortCombinations)))
 
