@@ -28,7 +28,7 @@ object EmbeddedServer {
 class EmbeddedServer(val addr: SocketAddress) {
   import EmbeddedServer._
 
-  // (Publically accessible) stats covering this server.
+  // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
 
   // Server state:
@@ -84,6 +84,10 @@ class EmbeddedServer(val addr: SocketAddress) {
         override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
           stats.incr("requests")
           super.messageReceived(ctx, e)
+        }
+
+        override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+          stats.incr("exc_%s".format(e.getCause.getClass.getName.split('.').last))
         }
 
       })

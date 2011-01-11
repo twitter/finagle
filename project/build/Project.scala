@@ -27,9 +27,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   // finagle-integration has integration test suites & tools for
   // development.
-  val integrationProject = project(
-    "finagle-integration", "finagle-integration",
-    new IntegrationProject(_), coreProject)
+  val stressProject = project(
+    "finagle-stress", "finagle-stress",
+    new StressProject(_), coreProject)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
@@ -60,7 +60,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
 
-  class IntegrationProject(info: ProjectInfo) extends StandardProject(info)
+  class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
