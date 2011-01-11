@@ -42,6 +42,7 @@ object ServiceEndToEndSpec extends Specification {
     val addr = RandomSocket.nextAddress()
 
     val sillyService = new SillyService()
+
     val server = ServerBuilder()
       .codec(new Thrift)
       .service(sillyService)

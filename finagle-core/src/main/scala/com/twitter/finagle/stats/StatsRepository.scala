@@ -8,6 +8,9 @@ trait ReadableCounter extends Counter {
  * An atomic snapshot of summary statistics.
  */
 case class Summary(total: Float, count: Int) {
+  /**
+   * Arithmetic mean
+   */
   val mean = total / count
 }
 

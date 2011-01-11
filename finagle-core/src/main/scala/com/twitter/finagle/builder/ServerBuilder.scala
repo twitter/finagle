@@ -39,7 +39,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _pipelineFactory: Option[ChannelPipelineFactory],
   _service: Option[Service[Req, Res]],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
@@ -57,7 +56,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
     None,              // name
     None,              // sendBufferSize
     None,              // recvBufferSize
-    None,              // pipelineFactory
     None,              // service
     None,              // bindTo
     None,              // logger
@@ -78,9 +76,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
 
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
-
-  def pipelineFactory(value: ChannelPipelineFactory) =
-    copy(_pipelineFactory = Some(value))
 
   def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
     copy(_service = Some(service))
@@ -106,13 +101,8 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
     copy(_maxQueueDepth = Some(max))
 
   def build(): Channel = {
-    val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
-      case (None, _) =>
-        throw new IncompleteSpecification("No codec was specified")
-      case (_, None) =>
-        throw new IncompleteSpecification("No pipeline was specified")
-      case (Some(codec), Some(pipeline)) =>
-        (codec, pipeline)
+    val codec = _codec.getOrElse {
+      throw new IncompleteSpecification("No codec was specified")
     }
 
    val bs = new ServerBootstrap(_channelFactory getOrElse defaultChannelFactory)
@@ -149,9 +139,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
 //        _statsReceiver foreach { statsReceiver =>
 //          pipeline.addLast("stats", new SampleHandler(statsReceiver))
 //        }
-
-        for ((name, handler) <- pipelineFactory.getPipeline.toMap)
-          pipeline.addLast(name, handler)
 
         _service.foreach { service =>
           pipeline.addLast("service", new ServiceToChannelHandler(service))
