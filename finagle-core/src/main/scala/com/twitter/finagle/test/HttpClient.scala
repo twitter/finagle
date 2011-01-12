@@ -9,7 +9,7 @@ import com.twitter.finagle.service.Service
 object HttpClient {
   def main(args: Array[String]) {
     val client =
-      ClientBuilder[HttpRequest, HttpResponse]()
+      ClientBuilder()
         .name("http")
         .hosts("localhost:10000,localhost:10001,localhost:10003")
         .codec(Http)

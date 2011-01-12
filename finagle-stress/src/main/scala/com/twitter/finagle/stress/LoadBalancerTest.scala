@@ -21,7 +21,7 @@ object LoadBalancerTest {
     // Make the type enforced by the *codec*
 
     runSuite(
-      ClientBuilder[HttpRequest, HttpResponse]
+      ClientBuilder()
         .requestTimeout(100.milliseconds)
         .retries(10)
     )
@@ -29,7 +29,7 @@ object LoadBalancerTest {
     // TODO: proper resource releasing, etc.
   }
 
-  def runSuite(clientBuilder: ClientBuilder[HttpRequest, HttpResponse]) {
+  def runSuite(clientBuilder: ClientBuilder[_, _]) {
     println("testing " + clientBuilder)
     println("\n== baseline ==\n")
     new LoadBalancerTest(clientBuilder)({ case _ => }).run()
@@ -61,7 +61,7 @@ object LoadBalancerTest {
 }
 
 class LoadBalancerTest(
-  clientBuilder: ClientBuilder[HttpRequest, HttpResponse],
+  clientBuilder: ClientBuilder[_, _],
   serverLatency: Duration = 0.seconds,
   numRequests: Int = 100000,
   concurrency: Int = 20)(behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit])

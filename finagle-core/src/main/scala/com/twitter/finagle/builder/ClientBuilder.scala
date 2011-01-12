@@ -25,8 +25,8 @@ import com.twitter.finagle.loadbalancer.{
   LeastQueuedStrategy, FailureAccrualStrategy}
 
 object ClientBuilder {
-  def apply[Req, Rep]() = new ClientBuilder[Req, Rep]
-  def get[Req, Rep]() = apply[Req, Rep]()
+  def apply() = new ClientBuilder[Any, Any]
+  def get() = apply()
 
   val defaultChannelFactory =
     new NioClientSocketChannelFactory(
@@ -121,8 +121,7 @@ case class ClientBuilder[Req, Rep](
   def hosts(addresses: Iterable[SocketAddress]): ClientBuilder[Req, Rep] =
     copy(_hosts = Some(addresses toSeq))
 
-  def codec(codec: Codec[Req, Rep]): ClientBuilder[Req, Rep] =
-    // XXX - transform here (!)
+  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]): ClientBuilder[Req1, Rep1] =
     copy(_codec = Some(codec))
 
   def connectionTimeout(duration: Duration): ClientBuilder[Req, Rep] =
