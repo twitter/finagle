@@ -31,6 +31,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-stress", "finagle-stress",
     new StressProject(_), coreProject)
 
+  val aprProject = project(
+    "finagle-apr", "finagle-apr",
+    new AprProject(_), coreProject)
+
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
@@ -64,5 +68,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+  }
+
+  class AprProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+  {
+    // This project uses tomcat-native, download at
+    // http://tomcat.apache.org/download-native.cgi
   }
 }
