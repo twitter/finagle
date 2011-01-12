@@ -8,7 +8,7 @@ class ReplyIsStreamingException   extends Exception
 class CancelledRequestException   extends Exception
 class InvalidMessageTypeException extends Exception
 
-class Client[-Req <: AnyRef, +Rep <: AnyRef](broker: Broker)
+class Client[-Req, +Rep](broker: Service[Any, Any])
   extends Service[Req, Rep]
 {
   def apply(request: Req): Future[Rep] =

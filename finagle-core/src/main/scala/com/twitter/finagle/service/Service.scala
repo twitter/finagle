@@ -16,8 +16,8 @@ import com.twitter.util.Future
  * '''Note:''' this is an abstract class (vs. a trait) to maintain java
  * compatibility.
  */
-abstract class Service[-Req <: AnyRef, +Rep <: AnyRef] extends (Req => Future[Rep]) {
-  def map[Req1 <: AnyRef](f: (Req1) => (Req)) = new Service[Req1, Rep] {
+abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
+  def map[Req1](f: (Req1) => (Req)) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
   }
 
@@ -42,7 +42,7 @@ abstract class Service[-Req <: AnyRef, +Rep <: AnyRef] extends (Req => Future[Re
  * [ThriftIn -> (String  ->  Int) -> ThriftOut]
  *
  */
-abstract class Filter[-ReqIn <: AnyRef, +RepOut <: AnyRef, +ReqOut <: AnyRef, -RepIn <: AnyRef]
+abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
 {
   /**
@@ -62,7 +62,7 @@ abstract class Filter[-ReqIn <: AnyRef, +RepOut <: AnyRef, +ReqOut <: AnyRef, -R
    * @param  next  another filter to follow after this one
    *
    */
-  def andThen[Req2 <: AnyRef, Rep2 <: AnyRef](next: Filter[ReqOut, RepIn, Req2, Rep2]) =
+  def andThen[Req2, Rep2](next: Filter[ReqOut, RepIn, Req2, Rep2]) =
     new Filter[ReqIn, RepOut, Req2, Rep2] {
       def apply(request: ReqIn, service: Service[Req2, Rep2]) = {
         Filter.this.apply(request, new Service[ReqOut, RepIn] {
@@ -90,10 +90,11 @@ abstract class Filter[-ReqIn <: AnyRef, +RepOut <: AnyRef, +ReqOut <: AnyRef, -R
    * @param  condAndFilter  a tuple of boolean and filter.
    *
    */
-  def andThenIf[Req2 >: ReqOut <: AnyRef, Rep2 <: RepIn](condAndFilter: (Boolean, Filter[ReqOut, RepIn, Req2, Rep2])) =
+  def andThenIf[Req2 >: ReqOut, Rep2 <: RepIn](condAndFilter: (Boolean, Filter[ReqOut, RepIn, Req2, Rep2])) =
     condAndFilter match {
       case (true, filter) => andThen(filter)
       case (false, _)     => this
     }
-
 }
+
+abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]

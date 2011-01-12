@@ -20,7 +20,7 @@ object LoadBalancerTest {
   def main(args: Array[String]) {
     runSuite(
       ClientBuilder()
-        .requestTimeout(40.milliseconds)
+        .requestTimeout(100.milliseconds)
         .retries(10)
     )
 

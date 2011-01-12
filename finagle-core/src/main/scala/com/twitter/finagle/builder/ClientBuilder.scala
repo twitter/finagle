@@ -16,7 +16,11 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.service
+import com.twitter.finagle.service.{Service, Filter, RetryingService, TimeoutFilter}
 import com.twitter.finagle.stats.{StatsRepository, TimeWindowedStatsRepository, StatsReceiver}
+import com.twitter.finagle.loadbalancer.{
+  LoadBalancerService, LoadBalancerStrategy,
+  LeastLoadedStrategy, FailureAccrualStrategy}
 
 object ClientBuilder {
   def apply() = new ClientBuilder
@@ -48,17 +52,15 @@ case class ClientBuilder(
   _requestTimeout: Duration,
   _statsReceiver: Option[StatsReceiver],
   _loadStatistics: (Int, Duration),
-  _failureAccrualStatistics: (Int, Duration),
   _name: Option[String],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
-  _initialBackoff: Option[Duration],
-  _backoffMultiplier: Option[Int],
   _logger: Option[Logger],
   _channelFactory: Option[ChannelFactory],
   _proactivelyConnect: Option[Duration])
+  // _loadBalancerStrategy: Option[LoadBalancerStrategy])
 {
   import ClientBuilder._
   def this() = this(
@@ -68,38 +70,33 @@ case class ClientBuilder(
     Duration.MaxValue,   // requestTimeout
     None,                // statsReceiver
     (60, 10.seconds),    // loadStatistics
-    (10, 1.second),      // failureAccrualStatistics
     None,                // name
     None,                // hostConnectionLimit
     None,                // sendBufferSize
     None,                // recvBufferSize
     None,                // retries
-    None,                // initialBackoff
-    None,                // backoffMultiplier
     None,                // logger
     None,                // channelFactory
-    None                 // proactivelyConnect
+    None// ,                // proactivelyConnect
+    //None                 // loadBalancerStrategy
   )
 
   override def toString() = {
     val options = Seq(
-      "name"                        -> _name,
-      "hosts"                       -> _hosts,
-      "codec"                       -> _codec,
-      "connectionTimeout"           -> Some(_connectionTimeout),
-      "requestTimeout"              -> Some(_requestTimeout),
-      "statsReceiver"               -> _statsReceiver,
-      "loadStatistics"              -> _loadStatistics,
-      "failureAccrualStatistics"    -> Some(_failureAccrualStatistics),
-      "hostConnectionLimit"         -> Some(_hostConnectionLimit),
-      "sendBufferSize"              -> _sendBufferSize,
-      "recvBufferSize"              -> _recvBufferSize,
-      "retries"                     -> _retries,
-      "initialBackoff"              -> _initialBackoff,
-      "backoffMultiplier"           -> _backoffMultiplier,
-      "logger"                      -> _logger,
-      "channelFactory"              -> _channelFactory,
-      "proactivelyConnect"          -> _proactivelyConnect
+      "name"                -> _name,
+      "hosts"               -> _hosts,
+      "codec"               -> _codec,
+      "connectionTimeout"   -> Some(_connectionTimeout),
+      "requestTimeout"      -> Some(_requestTimeout),
+      "statsReceiver"       -> _statsReceiver,
+      "loadStatistics"      -> _loadStatistics,
+      "hostConnectionLimit" -> Some(_hostConnectionLimit),
+      "sendBufferSize"      -> _sendBufferSize,
+      "recvBufferSize"      -> _recvBufferSize,
+      "retries"             -> _retries,
+      "logger"              -> _logger,
+      "channelFactory"      -> _channelFactory,
+      "proactivelyConnect"  -> _proactivelyConnect
     )
 
     "ClientBuilder(%s)".format(
@@ -139,15 +136,6 @@ case class ClientBuilder(
     copy(_loadStatistics = (numIntervals, interval))
   }
 
-  /**
-   * The interval over which to aggregate failure accrual statistics.
-   */
-  def failureAccrualStatistics(numIntervals: Int, interval: Duration): ClientBuilder = {
-    require(numIntervals >= 1, "Must have at least 1 window to sample statistics over")
-
-    copy(_failureAccrualStatistics = (numIntervals, interval))
-  }
-
   def name(value: String): ClientBuilder = copy(_name = Some(value))
 
   def hostConnectionLimit(value: Int): ClientBuilder =
@@ -155,12 +143,6 @@ case class ClientBuilder(
 
   def retries(value: Int): ClientBuilder =
     copy(_retries = Some(value))
-
-  def initialBackoff(value: Duration): ClientBuilder =
-    copy(_initialBackoff = Some(value))
-
-  def backoffMultiplier(value: Int): ClientBuilder =
-    copy(_backoffMultiplier = Some(value))
 
   def sendBufferSize(value: Int): ClientBuilder = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int): ClientBuilder = copy(_recvBufferSize = Some(value))
@@ -208,76 +190,46 @@ case class ClientBuilder(
         new ChannelPool(bootstrap, proactivelyConnect)
     }
 
-  private def timeout(timeout: Duration)(broker: Broker) =
-    if (timeout == Duration.MaxValue)
-      broker
-    else new TimeoutBroker(broker, timeout)
+  private def retryingFilter =
+    _retries map { RetryingService.tries[AnyRef, AnyRef](_) }
 
-  private def retrying(broker: Broker) =
-    (_retries, _initialBackoff, _backoffMultiplier) match {
-      case (Some(retries: Int), None, None) =>
-        RetryingBroker.tries(broker, retries)
-      case (Some(retries: Int), Some(backoff: Duration), Some(multiplier: Int)) =>
-        RetryingBroker.exponential(broker, backoff, multiplier)
-      case (_, _, _) =>
-        broker
-    }
+  def makeBroker(codec: Codec) =
+    bootstrap(codec) _                                andThen
+    pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
+    (new PoolingBroker(_))
 
-  def makeBroker(
-    codec: Codec,
-    loadStatsRepository: StatsRepository,
-    failureAccruingStatsRepo: StatsRepository) =
-      bootstrap(codec) _                                andThen
-      pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
-      (new PoolingBroker(_))                            andThen
-      timeout(_requestTimeout) _                        andThen
-      (new StatsLoadedBroker(_, loadStatsRepository))   andThen
-      (new FailureAccruingLoadedBroker(_, failureAccruingStatsRepo))
+  def build(): Service[Any, Any] = {
+    if (!_hosts.isDefined || _hosts.get.isEmpty)
+      throw new IncompleteSpecification("No hosts were specified")
+    if (!_codec.isDefined)
+      throw new IncompleteSpecification("No codec was specified")
+    
+    val hosts = _hosts.get
+    val codec = _codec.get
 
-  def build(): Broker = {
-    val (hosts, codec) = (_hosts, _codec) match {
-      case (None, _) =>
-        throw new IncompleteSpecification("No hosts were specified")
-      case (Some(hosts), _) if hosts.length == 0 =>
-        throw new IncompleteSpecification("Empty host list was specified")
-      case (_, None) =>
-        throw new IncompleteSpecification("No codec was specified")
-      case (Some(hosts), Some(codec)) =>
-        (hosts, codec)
-    }
-
-    val timer = Timer.default
     val brokers = hosts map { host =>
-      val statsRepository = {
-        val statsRepository = new TimeWindowedStatsRepository(
-          _loadStatistics._1, _loadStatistics._2, timer)
-        val scoped = statsRepository.scope(
-          "service" -> _name.getOrElse(""),
-          "host" -> host.toString)
-        if (_statsReceiver.isDefined)
-          scoped.reportTo(_statsReceiver.get)
-        else
-          scoped
-      }
-
-      val failureAccruingStatsRepo = {
-        new TimeWindowedStatsRepository(_failureAccrualStatistics._1, _failureAccrualStatistics._2)
-      }
-      val broker = makeBroker(codec, statsRepository, failureAccruingStatsRepo)(host)
-
-      _statsReceiver.foreach { statsReceiver =>
-        val hostString = host.toString
-        statsReceiver.mkGauge("host" -> hostString, "name" -> "load", broker.load)
-        statsReceiver.mkGauge("host" -> hostString, "name" -> "weight", broker.weight)
-        statsReceiver.mkGauge("host" -> hostString, "name" -> "available", if (broker.isAvailable) 1 else 0)
-      }
-
-      broker
+      // TODO: stats export [observers], internal LB stats.
+      makeBroker(codec)(host)
     }
 
-    retrying(new LoadBalancedBroker(brokers))
+    val timedoutBrokers =
+      if (_requestTimeout < Duration.MaxValue) {
+        val timeoutFilter = new TimeoutFilter[AnyRef, AnyRef](Timer.default, _requestTimeout)
+        brokers map { broker => timeoutFilter andThen broker }
+      } else {
+        brokers
+      }
+
+    val loadBalancerStrategy = // _loadBalancerStrategy getOrElse
+    {
+      val leastLoadedStrategy = new LeastLoadedStrategy[Any, Any]
+      new FailureAccrualStrategy(leastLoadedStrategy, 3, 10.seconds)
+    }
+
+    val loadBalanced = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)
+    retryingFilter map { filter => filter andThen loadBalanced } getOrElse { loadBalanced }
   }
 
-  def buildService[Request <: AnyRef, Reply <: AnyRef]() =
+  def buildService[Request, Reply]() =
     new service.Client[Request, Reply](build())
 }

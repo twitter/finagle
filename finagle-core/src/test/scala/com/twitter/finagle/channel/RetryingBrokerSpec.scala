@@ -6,6 +6,7 @@ import org.jboss.netty.channel._
 
 import com.twitter.util.Future
 
+/* port to retryingfilter
 class RetryingBrokerSpec extends Specification with Mockito {
   class MyException extends WriteException(new Exception)
 
@@ -85,3 +86,4 @@ class RetryingBrokerSpec extends Specification with Mockito {
     }
   }
 }
+*/
