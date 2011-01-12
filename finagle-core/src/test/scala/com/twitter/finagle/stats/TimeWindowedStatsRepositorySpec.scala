@@ -28,6 +28,7 @@ object TimeWindowedStatsRepositorySpec extends Specification {
     "when manipulating current statistics" in {
       "counter" in {
         val counter = timeWindowedStatsRepository.counter("name" -> "foo")
+        counter.sum mustEqual 0
         counter.incr(1)
         counter.incr(1)
         counter.incr(1)
@@ -36,6 +37,7 @@ object TimeWindowedStatsRepositorySpec extends Specification {
 
       "gauge" in {
         val gauge = timeWindowedStatsRepository.gauge("name" -> "foo")
+        gauge.mean.isNaN must beTrue
         gauge.measure(1)
         gauge.measure(2)
         gauge.measure(3)
@@ -71,7 +73,7 @@ object TimeWindowedStatsRepositorySpec extends Specification {
         fakeTimer.tick()
         gauge.mean mustEqual 1.0f
         fakeTimer.tick()
-//        gauge.mean mustEqual NaN
+        gauge.mean.isNaN must beTrue
       }
     }
   }
