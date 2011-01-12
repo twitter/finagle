@@ -7,7 +7,7 @@ import com.twitter.finagle.util.Timer
 import com.twitter.finagle.channel.WriteException
 
 object RetryingService {
-  def tries[Req <: AnyRef, Rep <: AnyRef](numTries: Int) =
+  def tries[Req, Rep](numTries: Int) =
     new RetryingFilter[Req, Rep](new NumTriesRetryStrategy(numTries))
 }
 
@@ -23,7 +23,7 @@ trait RetryStrategy {
  * except to say that the message itself was not delivered. Any other
  * types of retries must be done in the service stack.
  */
-class RetryingFilter[Req <: AnyRef, Rep <: AnyRef](retryStrategy: RetryStrategy)
+class RetryingFilter[Req, Rep](retryStrategy: RetryStrategy)
   extends SimpleFilter[Req, Rep]
 {
   private[this] def dispatch(

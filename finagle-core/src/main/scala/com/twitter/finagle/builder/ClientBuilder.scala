@@ -191,7 +191,7 @@ case class ClientBuilder(
     }
 
   private def retryingFilter =
-    _retries map { RetryingService.tries[AnyRef, AnyRef](_) }
+    _retries map { RetryingService.tries[Any, Any](_) }
 
   def makeBroker(codec: Codec) =
     bootstrap(codec) _                                andThen
@@ -214,7 +214,7 @@ case class ClientBuilder(
 
     val timedoutBrokers =
       if (_requestTimeout < Duration.MaxValue) {
-        val timeoutFilter = new TimeoutFilter[AnyRef, AnyRef](Timer.default, _requestTimeout)
+        val timeoutFilter = new TimeoutFilter[Any, Any](Timer.default, _requestTimeout)
         brokers map { broker => timeoutFilter andThen broker }
       } else {
         brokers

@@ -8,10 +8,10 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.util.{Promise, Return, Throw, Try}
 
 class BrokerAdapter extends SimpleChannelUpstreamHandler {
-  @volatile private[this] var replyFuture: Promise[AnyRef] = null
+  @volatile private[this] var replyFuture: Promise[Any] = null
 
-  def writeAndRegisterReply(channel: Channel, message: AnyRef,
-                            incomingReplyFuture: Promise[AnyRef]) {
+  def writeAndRegisterReply(channel: Channel, message: Any,
+                            incomingReplyFuture: Promise[Any]) {
     // If there is an outstanding request, something up the stack has
     // messed up. We currently just fail this request immediately, and
     // let the current request complete.
@@ -62,7 +62,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
     done(Throw(cause))
   }
 
-  private[this] def done(answer: Try[AnyRef]) {
+  private[this] def done(answer: Try[Any]) {
     if (replyFuture ne null) {
       // The order of operations here is important: the callback from
       // the future could invoke another request immediately, and

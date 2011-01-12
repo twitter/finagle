@@ -33,7 +33,7 @@ class StatsLoadedBroker(
   private[this] val dispatchStat = statsRepository.counter("name" -> "dispatches")
   private[this] val latencyStat  = statsRepository.gauge("name" -> "latency")
 
-  override def apply(request: AnyRef) = {
+  override def apply(request: Any) = {
     val begin = Time.now
     dispatchStat.incr()
 
@@ -82,7 +82,7 @@ class FailureAccruingLoadedBroker(
       (success.toFloat / (success.toFloat + failure.toFloat)) * underlying.weight
   }
 
-  override def apply(request: AnyRef) = {
+  override def apply(request: Any) = {
     // TODO: discriminate request errors vs. connection errors, etc.?
     val f = underlying(request)
     f respond {
@@ -103,7 +103,7 @@ abstract class LoadBalancingBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
 class LeastLoadedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
   extends LoadBalancingBroker[A](endpoints)
 {
-  def apply(request: AnyRef) = {
+  def apply(request: Any) = {
     val candidates = endpoints.filter(_.weight > 0.0f)
     if (candidates isEmpty)
       Future.exception(new NoBrokersAvailableException)
@@ -117,7 +117,7 @@ class LoadBalancedBroker[A <: LoadedBroker[A]](endpoints: Seq[A])
 {
   val rng = new Random
 
-  def apply(request: AnyRef): Future[AnyRef] = {
+  def apply(request: Any): Future[Any] = {
     val snapshot = endpoints map { e => (e, e.weight) }
     val totalSum = snapshot map { case (_, w) => w } sum
 

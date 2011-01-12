@@ -23,7 +23,7 @@ object ServiceMeta {
   def apply[T](default: => T) = new ServiceMeta[T](default)
 }
 
-trait LoadBalancerStrategy[Req <: AnyRef, Rep <: AnyRef] {
+trait LoadBalancerStrategy[Req, Rep] {
   def dispatch(
     request: Req,
     services: Seq[Service[Req, Rep]]): Option[(Service[Req, Rep], Future[Rep])]
@@ -75,7 +75,7 @@ class FailureAccrualStrategy[Req, Rep](
   }
 }
 
-class LeastLoadedStrategy[Req <: AnyRef, Rep <: AnyRef]
+class LeastLoadedStrategy[Req, Rep]
   extends LoadBalancerStrategy[Req, Rep]
 {
   private[this] val loadStat = ServiceMeta[ReadableCounter] {
@@ -98,7 +98,7 @@ class LeastLoadedStrategy[Req <: AnyRef, Rep <: AnyRef]
     }
 }
 
-class LoadBalancerService[-Req <: AnyRef, +Rep <: AnyRef](
+class LoadBalancerService[-Req, +Rep](
   services: Seq[Service[Req, Rep]],
   strategy: LoadBalancerStrategy[Req, Rep])
   extends Service[Req, Rep]

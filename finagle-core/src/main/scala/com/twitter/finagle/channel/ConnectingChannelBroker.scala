@@ -11,8 +11,8 @@ trait ConnectingChannelBroker extends Broker {
   def getChannel: ChannelFuture
   def putChannel(channel: Channel)
 
-  def apply(request: AnyRef) = {
-    val replyFuture = new Promise[AnyRef]
+  def apply(request: Any) = {
+    val replyFuture = new Promise[Any]
 
     getChannel {
       case Ok(channel) =>
@@ -40,8 +40,8 @@ trait ConnectingChannelBroker extends Broker {
 
   private[this] def connectChannel(
       channel: Channel,
-      message: AnyRef,
-      replyFuture: Promise[AnyRef]) {
+      message: Any,
+      replyFuture: Promise[Any]) {
     channel.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
         adapter.writeAndRegisterReply(channel, message, replyFuture)
