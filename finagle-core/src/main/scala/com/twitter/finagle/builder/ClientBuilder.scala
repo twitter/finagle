@@ -20,7 +20,7 @@ import com.twitter.finagle.service.{Service, Filter, RetryingService, TimeoutFil
 import com.twitter.finagle.stats.{StatsRepository, TimeWindowedStatsRepository, StatsReceiver}
 import com.twitter.finagle.loadbalancer.{
   LoadBalancerService, LoadBalancerStrategy,
-  LeastLoadedStrategy, FailureAccrualStrategy}
+  LeastQueuedStrategy, FailureAccrualStrategy}
 
 object ClientBuilder {
   def apply[Req, Rep]() = new ClientBuilder[Req, Rep]
@@ -223,8 +223,8 @@ case class ClientBuilder[Req, Rep](
 
     val loadBalancerStrategy = // _loadBalancerStrategy getOrElse
     {
-      val leastLoadedStrategy = new LeastLoadedStrategy[Req, Rep]
-      new FailureAccrualStrategy(leastLoadedStrategy, 3, 10.seconds)
+      val leastQueuedStrategy = new LeastQueuedStrategy[Req, Rep]
+      new FailureAccrualStrategy(leastQueuedStrategy, 3, 10.seconds)
     }
 
     val loadBalanced = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)

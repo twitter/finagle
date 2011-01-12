@@ -9,18 +9,18 @@ import com.twitter.finagle.service.Service
 import com.twitter.finagle.channel.NoBrokersAvailableException
 import com.twitter.finagle.stats.{ReadableCounter, TimeWindowedStatsRepository}
 
-class ServiceMeta[T](default: => T) extends Iterable[(Service[_, _], T)]  {
-  private[this] val serviceToMeta =
+class ServiceMetadata[T](default: => T) extends Iterable[(Service[_, _], T)]  {
+  private[this] val serviceToMetadata =
     MapMaker[Service[_, _], T] { config => config.weakKeys }
 
   def apply(service: Service[_, _]) =
-    serviceToMeta.getOrElseUpdate(service, default)
+    serviceToMetadata.getOrElseUpdate(service, default)
 
-  def iterator = serviceToMeta.iterator
+  def iterator = serviceToMetadata.iterator
 }
 
-object ServiceMeta {
-  def apply[T](default: => T) = new ServiceMeta[T](default)
+object ServiceMetadata {
+  def apply[T](default: => T) = new ServiceMetadata[T](default)
 }
 
 trait LoadBalancerStrategy[Req, Rep] {
@@ -35,7 +35,7 @@ class FailureAccrualStrategy[Req, Rep](
   markDeadFor: Duration)
   extends LoadBalancerStrategy[Req, Rep]
 {
-  private class FailureMeta {
+  private class FailureMetadata {
     private[this] var failureCount = 0
     private[this] var failedAt = Time.epoch
 
@@ -53,11 +53,11 @@ class FailureAccrualStrategy[Req, Rep](
     }
   }
 
-  private[this] val meta = ServiceMeta[FailureMeta] { new FailureMeta }
+  private[this] val meta = ServiceMetadata[FailureMetadata] { new FailureMetadata }
 
   private[this] val failureCount =
-    new ServiceMeta[AtomicInteger](new AtomicInteger(0))
-  private[this] val failedAt = new ServiceMeta[Time](Time.epoch)
+    new ServiceMetadata[AtomicInteger](new AtomicInteger(0))
+  private[this] val failedAt = new ServiceMetadata[Time](Time.epoch)
 
   // If all nodes are marked bad--mark none of them bad?
 
@@ -75,15 +75,16 @@ class FailureAccrualStrategy[Req, Rep](
   }
 }
 
+// TODO: threadsafety of stats?
 class LeastLoadedStrategy[Req, Rep]
   extends LoadBalancerStrategy[Req, Rep]
 {
-  private[this] val loadStat = ServiceMeta[ReadableCounter] {
+  private[this] val loadStat = ServiceMetadata[ReadableCounter] {
     (new TimeWindowedStatsRepository(10, 1.seconds)).counter()
   }
 
   // TODO: account for recently introduced services.
-  val leastLoadedOrdering = new Ordering[Service[Req, Rep]] {
+  private[this] val leastLoadedOrdering = new Ordering[Service[Req, Rep]] {
     def compare(a: Service[Req, Rep], b: Service[Req, Rep]) =
       loadStat(a).sum - loadStat(b).sum
   }
@@ -96,6 +97,24 @@ class LeastLoadedStrategy[Req, Rep]
       loadStat(selected).incr()
       Some((selected, selected(request)))
     }
+}
+
+class LeastQueuedStrategy[Req, Rep]
+  extends LoadBalancerStrategy[Req, Rep]
+{
+  private[this] val queueStat = ServiceMetadata[AtomicInteger] { new AtomicInteger(0) }
+  private[this] val leastQueuedOrdering: Ordering[(Service[Req, Rep], Int)] =
+    Ordering.by { case (_, queueSize) => queueSize }
+
+  def dispatch(request: Req, services: Seq[Service[Req, Rep]]) = {
+    if (services.isEmpty) {
+      None
+    } else {    
+      val snapshot = services map { service => (service, queueStat(service).get)  }
+      val (selected, _) = snapshot.min(leastQueuedOrdering)
+      Some((selected, selected(request)))
+    }
+  }
 }
 
 class LoadBalancerService[-Req, +Rep](
