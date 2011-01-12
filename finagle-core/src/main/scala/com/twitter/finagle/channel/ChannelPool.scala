@@ -2,7 +2,6 @@ package com.twitter.finagle.channel
 
 import collection.mutable.Queue
 
-import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{Channels, Channel}
 import java.util.concurrent.ConcurrentLinkedQueue
 

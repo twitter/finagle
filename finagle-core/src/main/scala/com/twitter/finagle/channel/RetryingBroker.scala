@@ -71,7 +71,7 @@ class ExponentialBackoffRetryStrategy(
   def apply() = {
     val future = new Promise[RetryStrategy]
 
-    timer.schedule(delay) {
+    timer.schedule(delay.fromNow) {
       future() = Return(
         new ExponentialBackoffRetryStrategy(delay * multiplier, multiplier))
     }

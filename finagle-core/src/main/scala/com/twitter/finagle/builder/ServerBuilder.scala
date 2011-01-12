@@ -17,7 +17,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
-import service.{ServiceToChannelHandler, Service}
+import service.{StatsFilter, ServiceToChannelHandler, Service}
 import stats.{StatsReceiver}
 
 object ServerBuilder {
@@ -136,12 +136,12 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-//        _statsReceiver foreach { statsReceiver =>
-//          pipeline.addLast("stats", new SampleHandler(statsReceiver))
-//        }
-
         _service.foreach { service =>
-          pipeline.addLast("service", new ServiceToChannelHandler(service))
+          val serviceWithStats =
+            if (_statsReceiver.isDefined)
+              new StatsFilter(_statsReceiver.get).andThen(service)
+            else service
+          pipeline.addLast("service", new ServiceToChannelHandler(serviceWithStats))
         }
 
         pipeline
