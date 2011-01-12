@@ -4,7 +4,7 @@ import java.util.logging.Logger
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.builder.{ClientBuilder, Http}
-import com.twitter.finagle.service.Service
+import com.twitter.finagle.Service
 
 object HttpClient {
   def main(args: Array[String]) {

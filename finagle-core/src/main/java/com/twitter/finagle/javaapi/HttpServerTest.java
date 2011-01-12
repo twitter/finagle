@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.service.*;
+import com.twitter.finagle.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.Future;
 import com.twitter.util.*;

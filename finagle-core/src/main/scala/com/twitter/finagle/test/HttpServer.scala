@@ -6,7 +6,7 @@ import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.builder._
-import com.twitter.finagle.service._
+import com.twitter.finagle._
 
 import com.twitter.util.Future
 
@@ -22,10 +22,10 @@ object HttpServer {
     }
 
     ServerBuilder[HttpRequest, HttpResponse]()
-     .codec(Http)
-     .service(server)
-     .bindTo(new InetSocketAddress(10000))
-     .build
+      .codec(Http)
+      .service(server)
+      .bindTo(new InetSocketAddress(10000))
+      .build
   }
 
   def quiesce() = ()

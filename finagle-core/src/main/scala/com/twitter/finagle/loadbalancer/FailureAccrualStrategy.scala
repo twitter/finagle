@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.util.{Time, Duration, Throw, Return}
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.service.Service
+import com.twitter.finagle.Service
 
 /**
  * A simple failure accrual strategy. Given an underlying load

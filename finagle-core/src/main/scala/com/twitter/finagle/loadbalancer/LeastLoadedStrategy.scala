@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.service.Service
+import com.twitter.finagle.Service
 import com.twitter.finagle.stats.{ReadableCounter, TimeWindowedStatsRepository}
 
 

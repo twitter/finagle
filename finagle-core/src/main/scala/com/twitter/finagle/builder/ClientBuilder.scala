@@ -17,8 +17,9 @@ import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
+import com.twitter.finagle.Service
 import com.twitter.finagle.service
-import com.twitter.finagle.service.{Service, Filter, RetryingService, TimeoutFilter}
+import com.twitter.finagle.service.{RetryingService, TimeoutFilter}
 import com.twitter.finagle.stats.{StatsRepository, TimeWindowedStatsRepository, StatsReceiver}
 import com.twitter.finagle.loadbalancer.{
   LoadBalancerService, LoadBalancerStrategy,

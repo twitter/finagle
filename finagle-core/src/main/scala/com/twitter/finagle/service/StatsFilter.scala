@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.util.{Future, Time, Throw}
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.{Service, Filter}
 
 class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   extends Filter[Req, Rep, Req, Rep]

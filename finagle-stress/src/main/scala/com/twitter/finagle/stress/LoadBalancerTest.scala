@@ -11,7 +11,7 @@ import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle.builder.{ClientBuilder, Http}
-import com.twitter.finagle.service.Service
+import com.twitter.finagle.Service
 import com.twitter.finagle.stats.NullStatsRepository
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.util.Conversions._

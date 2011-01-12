@@ -6,6 +6,7 @@ import com.twitter.finagle.util.Timer
 import com.twitter.conversions.time._
 import com.twitter.util.Promise
 import com.twitter.finagle.channel.TimedoutRequestException
+import com.twitter.finagle.Service
 
 object TimeoutFilterSpec extends Specification with Mockito {
   "TimeoutFilter" should {

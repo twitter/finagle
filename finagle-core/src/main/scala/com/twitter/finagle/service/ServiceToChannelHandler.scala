@@ -8,6 +8,7 @@ import org.jboss.netty.channel._
 import com.twitter.util.{Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.Service
 
 class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep])
   extends SimpleChannelUpstreamHandler

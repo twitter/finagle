@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.twitter.finagle.service.Service
+import com.twitter.finagle.Service
 
 /**
  * The "least queued" strategy will dispatch the next request to the

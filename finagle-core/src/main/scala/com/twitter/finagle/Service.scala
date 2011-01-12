@@ -1,4 +1,4 @@
-package com.twitter.finagle.service
+package com.twitter.finagle
 
 import com.twitter.util.Future
 
@@ -34,10 +34,12 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
  *           (*  MyService  *)
  * [ReqIn -> (ReqOut -> RepIn) -> RepOut]
  *
- * For example, you may have a POJO service that takes Strings and parses them as Ints.
- * If you want to expose this as a Network Service via Thrift, it is nice to isolate the
- * protocol handling from the business rules. Hence you might have a Filter that converts
- * back and forth between Thrift structs. Again, your service deals with POJOs:
+ * For example, you may have a POJO service that takes Strings and
+ * parses them as Ints.  If you want to expose this as a Network
+ * Service via Thrift, it is nice to isolate the protocol handling
+ * from the business rules. Hence you might have a Filter that
+ * converts back and forth between Thrift structs. Again, your service
+ * deals with POJOs:
  *
  * [ThriftIn -> (String  ->  Int) -> ThriftOut]
  *
@@ -84,8 +86,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   }
 
   /**
-   * Conditionally propagates requests down the filter chain. This may useful if you are statically
-   * wiring together filter chains based on a configuration file, for instance.
+   * Conditionally propagates requests down the filter chain. This may
+   * useful if you are statically wiring together filter chains based
+   * on a configuration file, for instance.
    *
    * @param  condAndFilter  a tuple of boolean and filter.
    *

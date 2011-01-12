@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.util.MapMaker
 
-import com.twitter.finagle.service.Service
+import com.twitter.finagle.Service
 
 /**
  * A convenience class to keep per-service metadata

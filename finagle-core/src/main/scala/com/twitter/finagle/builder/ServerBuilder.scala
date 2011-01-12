@@ -17,7 +17,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
-import service.{StatsFilter, ServiceToChannelHandler, Service}
+import service.{StatsFilter, ServiceToChannelHandler}
 import stats.{StatsReceiver}
 
 object ServerBuilder {
