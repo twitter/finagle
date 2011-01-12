@@ -61,7 +61,7 @@ object LoadBalancerTest {
 class LoadBalancerTest(
   clientBuilder: ClientBuilder,
   serverLatency: Duration = 0.seconds,
-  numRequests: Int = 10000,
+  numRequests: Int = 100000,
   concurrency: Int = 20)(behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit])
 {
   private[this] val requestNumber = new AtomicInteger(0)

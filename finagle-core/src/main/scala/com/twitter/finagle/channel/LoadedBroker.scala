@@ -63,7 +63,6 @@ class FailureAccruingLoadedBroker(
   extends WrappingBroker
   with LoadedBroker[FailureAccruingLoadedBroker]
 {
-  println(statsRepository)
   private[this] val successStat = statsRepository.counter("name" -> "success")
   private[this] val failureStat = statsRepository.counter("name" -> "failure")
 
@@ -72,9 +71,6 @@ class FailureAccruingLoadedBroker(
   override def weight = {
     val success = successStat.sum
     val failure = failureStat.sum
-    println("failure accrual success and failure")
-    println(success)
-    println(failure)
     val sum = success + failure
 
     // TODO: do we decay this decision beyond relying on the stats
