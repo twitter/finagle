@@ -89,7 +89,7 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   def tls(path: String, password: String) =
-    copy(_tls = Some(Ssl(path, password)))
+    copy(_tls = Some(Ssl.server(path, password)))
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
