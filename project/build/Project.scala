@@ -21,9 +21,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new OstrichProject(_), coreProject)
 
   // finagle-thrift contains thrift codecs
-  val thriftProject = project(
-    "finagle-thrift", "finagle-thrift",
-    new ThriftProject(_), coreProject)
+  //   DISABLE until new thrift.  too messy with new types.
+  // val thriftProject = project(
+  //   "finagle-thrift", "finagle-thrift",
+  //   new ThriftProject(_), coreProject)
 
   // finagle-integration has integration test suites & tools for
   // development.

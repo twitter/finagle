@@ -34,8 +34,7 @@ class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
 /**
  * Translate wire representation to ThriftReply
  */
-class ThriftClientDecoder(val wrapReplies: Boolean)
-  extends ReplayingDecoder[VoidEnum]
+class ThriftClientDecoder extends ReplayingDecoder[VoidEnum]
 {
   protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
 
@@ -57,10 +56,7 @@ class ThriftClientDecoder(val wrapReplies: Boolean)
       case TMessageType.REPLY =>
         val call = ThriftTypes(message.name).newInstance()
         val result = call.readResponse(protocol).asInstanceOf[AnyRef]
-        if (wrapReplies)
-          call.reply(result)
-        else
-          result
+        call.reply(result)
       case _ =>
         Channels.fireExceptionCaught(ctx, new TApplicationException(
           TApplicationException.INVALID_MESSAGE_TYPE))

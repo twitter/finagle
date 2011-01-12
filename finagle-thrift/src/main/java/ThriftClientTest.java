@@ -23,7 +23,7 @@ public class ThriftClientTest {
       ClientBuilder.get()
         .codec(new Thrift())
         .hosts("localhost:10000")
-        .buildService();
+        .build();
 
     Future<Silly.bleep_result> response =
       client.apply(new ThriftCall("bleep", new Silly.bleep_args(), Silly.bleep_result.class));
