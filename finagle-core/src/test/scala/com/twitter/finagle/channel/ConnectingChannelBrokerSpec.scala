@@ -14,7 +14,7 @@ object ConnectingChannelBrokerSpec extends Specification with Mockito {
     val channel = mock[Channel]
     val adapter = mock[BrokerAdapter]
     val message = mock[Object]
-    val replyFutureCaptor = ArgumentCaptor.forClass(classOf[Promise[AnyRef]])
+    val replyFutureCaptor = ArgumentCaptor.forClass(classOf[Promise[Any]])
     channel.getPipeline returns pipeline
     pipeline.getLast returns adapter
 
@@ -24,7 +24,7 @@ object ConnectingChannelBrokerSpec extends Specification with Mockito {
 
     // Mockito can't spy on anonymous classes, so we have to make a
     // proper one.
-    class FakeConnectingChannelBroker extends ConnectingChannelBroker {
+    class FakeConnectingChannelBroker extends ConnectingChannelBroker[Any, Any] {
       def getChannel = channelFuture
       def putChannel(ch: Channel) {}
     }
@@ -36,7 +36,7 @@ object ConnectingChannelBrokerSpec extends Specification with Mockito {
       channelFuture.setFailure(new Exception("wtf"))
       f() must throwA(new WriteException(new Exception("wtf")))
       there was no(adapter).writeAndRegisterReply(
-        Matchers.eq(channel), Matchers.eq(message), any[Promise[AnyRef]])
+        Matchers.eq(channel), Matchers.eq(message), any[Promise[Any]])
       there was no(broker).putChannel(any[Channel])
     }
 
@@ -47,7 +47,6 @@ object ConnectingChannelBrokerSpec extends Specification with Mockito {
 
       there was one(adapter).writeAndRegisterReply(
         Matchers.eq(channel), Matchers.eq(message), replyFutureCaptor.capture)
-      replyFuture must be_==(f)
       there was no(broker).putChannel(any[Channel])
     }
 

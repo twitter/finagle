@@ -168,9 +168,9 @@ case class ClientBuilder[Req, Rep](
   def startTls(value: Boolean) =
     copy(_startTls = true)
 
-  // ** BUILDING
   def logger(logger: Logger): ClientBuilder[Req, Rep] = copy(_logger = Some(logger))
 
+  // ** BUILDING
   private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
     val bs = new BrokerClientBootstrap(_channelFactory getOrElse defaultChannelFactory)
     val pf = new ChannelPipelineFactory {
@@ -192,6 +192,7 @@ case class ClientBuilder[Req, Rep](
         pipeline
       }
     }
+
     bs.setPipelineFactory(pf)
     bs.setOption("remoteAddress", host)
     bs.setOption("connectTimeoutMillis", _connectionTimeout.inMilliseconds)
