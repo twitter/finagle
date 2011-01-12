@@ -90,7 +90,8 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    * @param  condAndFilter  a tuple of boolean and filter.
    *
    */
-  def andThenIf[Req2 >: ReqOut, Rep2 <: RepIn](condAndFilter: (Boolean, Filter[ReqOut, RepIn, Req2, Rep2])) =
+  def andThenIf[Req2 >: ReqOut, Rep2 <: RepIn](
+    condAndFilter: (Boolean, Filter[ReqOut, RepIn, Req2, Rep2])) =
     condAndFilter match {
       case (true, filter) => andThen(filter)
       case (false, _)     => this
