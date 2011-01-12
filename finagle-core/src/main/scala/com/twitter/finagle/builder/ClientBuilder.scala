@@ -267,9 +267,9 @@ case class ClientBuilder(
 
       _statsReceiver.foreach { statsReceiver =>
         val hostString = host.toString
-        statsReceiver.mkGauge("host" -> hostString, "load" -> "broker", broker.load)
-        statsReceiver.mkGauge("host" -> hostString, "weight" -> "broker", broker.weight)
-        statsReceiver.mkGauge("host" -> hostString, "available" -> "broker", if (broker.isAvailable) 1 else 0)
+        statsReceiver.mkGauge("host" -> hostString, "name" -> "load", broker.load)
+        statsReceiver.mkGauge("host" -> hostString, "name" -> "weight", broker.weight)
+        statsReceiver.mkGauge("host" -> hostString, "name" -> "available", if (broker.isAvailable) 1 else 0)
       }
 
       broker

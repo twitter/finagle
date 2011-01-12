@@ -1,4 +1,4 @@
-package com.twitter.finagle.integration
+package com.twitter.finagle.stress
 
 import scala.collection.JavaConversions._
 

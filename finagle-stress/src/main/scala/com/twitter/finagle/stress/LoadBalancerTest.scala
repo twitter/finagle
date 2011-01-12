@@ -1,4 +1,4 @@
-package com.twitter.finagle.integration
+package com.twitter.finagle.stress
 
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
@@ -61,7 +61,7 @@ object LoadBalancerTest {
 class LoadBalancerTest(
   clientBuilder: ClientBuilder,
   serverLatency: Duration = 0.seconds,
-  numRequests: Int = 100000,
+  numRequests: Int = 10000,
   concurrency: Int = 20)(behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit])
 {
   private[this] val requestNumber = new AtomicInteger(0)
@@ -121,18 +121,31 @@ class LoadBalancerTest(
     }
 
     // Capture gauges to report them at the end.
-    val gauges = new HashMap[String, Function0[Float]]
+    val gauges = new HashMap[Seq[(String, String)], Function0[Float]]
     val statsReceiver = new NullStatsRepository {
       override def mkGauge(description: Seq[(String, String)], f: => Float) {
-        val name = description.map(_._2).mkString("_")
-        gauges += name -> (() => f)
+        gauges += description -> (() => f)
       }
     }
 
     def captureGauges() {
       Timer.default.schedule(500.milliseconds) {
         val now = requestNumber.get
-        val values = gauges map { case (k, v) => (k, v()) }
+        val values = gauges map { case (description, v) =>
+          val options = Map(description: _*)
+          val host = options("host")
+          val serverIndex = servers.findIndexOf { _.addr.toString == host }
+          val shortName = options("name") match {
+            case "load" => "l"
+            case "weight" => "w"
+            case "available" => "a"
+            case _ => "u"
+          }
+
+          val name = "%d/%s".format(serverIndex, shortName)
+
+          (name, v())
+        }
         gaugeValues += ((now, Map() ++ values))
       }
     }
@@ -165,24 +178,14 @@ class LoadBalancerTest(
       unique.toList.sorted
     }
 
-    val columnNames = allGaugeNames map { gaugeName =>
-      // Try to substitute a server.
-      val Array(host, name) = gaugeName.split("_")
-      val serverIndex = servers.findIndexOf { _.addr.toString == host }
-      val shortName = name match {
-        case "available" => "a"
-        case "load"      => "l"
-        case "weight"    => "w"
-        case n           => n
-      }
-
-      "%d/%s".format(serverIndex, shortName)
-    }
-
-    println("> %5s %s".format("time", columnNames map("%-8s".format(_)) mkString(" ")))
+    println("> %5s %s".format("time", allGaugeNames map("%-8s".format(_)) mkString(" ")))
 
     gaugeValues foreach { case (requestNum, values) =>
-      val columns = allGaugeNames map { values.get(_).map("%.2e".format(_)).getOrElse("n/a") }
+      val columns = allGaugeNames map { name =>
+        val value = values.get(name)
+        val formatted = value.map("%.2e".format(_)).getOrElse("n/a")
+        formatted
+      }
       println("> %05d %s".format(requestNum, columns.map("%8s".format(_)).mkString(" ")))
     }
 
