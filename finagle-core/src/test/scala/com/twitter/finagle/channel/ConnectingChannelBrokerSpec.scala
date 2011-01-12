@@ -8,6 +8,8 @@ import org.jboss.netty.channel._
 
 import com.twitter.util.{Promise, Return}
 
+import com.twitter.finagle.{InvalidPipelineException, WriteException}
+
 object ConnectingChannelBrokerSpec extends Specification with Mockito {
   "ConnectingChannelBroker" should {
     val pipeline = mock[ChannelPipeline]

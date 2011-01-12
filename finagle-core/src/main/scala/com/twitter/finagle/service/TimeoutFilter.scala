@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.util.{Future, Duration, Throw}
 
-import com.twitter.finagle.channel.TimedoutRequestException
+import com.twitter.finagle.TimedoutRequestException
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.{Filter, Service}

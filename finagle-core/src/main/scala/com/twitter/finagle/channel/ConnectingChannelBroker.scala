@@ -6,7 +6,9 @@ import com.twitter.util.{Promise, Future, Throw, Return}
 
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.Service
+import com.twitter.finagle.{
+  Service, WriteException, CancelledRequestException,
+  ReplyCastException, InvalidPipelineException}
 
 trait ConnectingChannelBroker[Req, Rep] extends Service[Req, Rep] {
   def getChannel: ChannelFuture

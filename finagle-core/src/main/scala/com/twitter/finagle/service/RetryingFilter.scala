@@ -4,7 +4,7 @@ import org.jboss.netty.util.HashedWheelTimer
 import com.twitter.finagle.util.Conversions._
 import com.twitter.util._
 import com.twitter.finagle.util.Timer
-import com.twitter.finagle.channel.WriteException
+import com.twitter.finagle.WriteException
 import com.twitter.finagle.{SimpleFilter, Service}
 
 object RetryingService {
