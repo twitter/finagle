@@ -8,7 +8,7 @@ import com.twitter.util.Duration
 
 class IncompleteSpecification(message: String) extends Exception(message)
 
-trait Codec {
+trait Codec[Req, Rep] {
   val clientPipelineFactory: ChannelPipelineFactory
   val serverPipelineFactory: ChannelPipelineFactory
 }

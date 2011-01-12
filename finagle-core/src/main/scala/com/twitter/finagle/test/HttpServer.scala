@@ -21,7 +21,7 @@ object HttpServer {
       }
     }
 
-    ServerBuilder()
+    ServerBuilder[HttpRequest, HttpResponse]()
      .codec(Http)
      .service(server)
      .bindTo(new InetSocketAddress(10000))

@@ -21,8 +21,8 @@ import service.{StatsFilter, ServiceToChannelHandler, Service}
 import stats.{StatsReceiver}
 
 object ServerBuilder {
-  def apply() = new ServerBuilder()
-  def get() = apply()
+  def apply[Req, Rep]() = new ServerBuilder[Req, Rep]()
+  def get[Req, Rep]() = apply[Req, Rep]()
 
   val defaultChannelFactory =
     new NioServerSocketChannelFactory(
@@ -33,13 +33,13 @@ object ServerBuilder {
 // TODO: common superclass between client & server builders for common
 // concerns.
 
-case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
-  _codec: Option[Codec],
+case class ServerBuilder[Req, Rep](
+  _codec: Option[Codec[Req, Rep]],
   _statsReceiver: Option[StatsReceiver],
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _service: Option[Service[Req, Res]],
+  _service: Option[Service[Req, Rep]],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
@@ -66,7 +66,7 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
     None               // maxQueueDepth
   )
 
-  def codec(codec: Codec) =
+  def codec(codec: Codec[Req, Rep]) =
     copy(_codec = Some(codec))
 
   def reportTo(receiver: StatsReceiver) =
@@ -77,7 +77,7 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
+  def service(service: Service[Req, Rep]) =
     copy(_service = Some(service))
 
   def bindTo(address: SocketAddress) =

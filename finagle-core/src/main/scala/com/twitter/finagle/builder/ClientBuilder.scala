@@ -47,7 +47,7 @@ object ClientBuilder {
  */
 case class ClientBuilder[Req, Rep](
   _hosts: Option[Seq[SocketAddress]],
-  _codec: Option[Codec],
+  _codec: Option[Codec[Req, Rep]],
   _connectionTimeout: Duration,
   _requestTimeout: Duration,
   _statsReceiver: Option[StatsReceiver],
@@ -115,7 +115,8 @@ case class ClientBuilder[Req, Rep](
   def hosts(addresses: Iterable[SocketAddress]): ClientBuilder[Req, Rep] =
     copy(_hosts = Some(addresses toSeq))
 
-  def codec(codec: Codec): ClientBuilder[Req, Rep] =
+  def codec(codec: Codec[Req, Rep]): ClientBuilder[Req, Rep] =
+    // XXX - transform here (!)
     copy(_codec = Some(codec))
 
   def connectionTimeout(duration: Duration): ClientBuilder[Req, Rep] =
@@ -156,7 +157,7 @@ case class ClientBuilder[Req, Rep](
   // ** BUILDING
   def logger(logger: Logger): ClientBuilder[Req, Rep] = copy(_logger = Some(logger))
 
-  private def bootstrap(codec: Codec)(host: SocketAddress) = {
+  private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
     val bs = new BrokerClientBootstrap(_channelFactory getOrElse defaultChannelFactory)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
@@ -193,7 +194,7 @@ case class ClientBuilder[Req, Rep](
   private def retryingFilter =
     _retries map { RetryingService.tries[Req, Rep](_) }
 
-  private def makeBroker(codec: Codec) =
+  private def makeBroker(codec: Codec[Req, Rep]) =
     bootstrap(codec) _                                andThen
     pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
     (new PoolingBroker[Req, Rep](_))

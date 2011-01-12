@@ -149,7 +149,7 @@ class LoadBalancerTest(
           (name, v())
         }
         gaugeValues += ((now, Map() ++ values))
-      }
+       }
     }
 
     val client = clientBuilder

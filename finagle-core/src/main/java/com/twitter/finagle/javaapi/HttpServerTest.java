@@ -29,8 +29,9 @@ public class HttpServerTest {
         }
       };
 
-    ServerBuilder
-      .get()
+    ServerBuilder<HttpRequest, HttpResponse> serverBuilder = ServerBuilder.get();
+    
+    serverBuilder
       .codec(Codec4J.Http)
       .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))

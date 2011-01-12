@@ -9,7 +9,9 @@ import com.twitter.util.{Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
 
-class ServiceToChannelHandler[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) extends SimpleChannelUpstreamHandler {
+class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep])
+  extends SimpleChannelUpstreamHandler
+{
   private[this] val log = Logger.getLogger(getClass.getName)
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

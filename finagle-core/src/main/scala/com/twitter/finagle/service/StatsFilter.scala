@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.util.{Future, Time, Throw}
 import com.twitter.finagle.stats.StatsReceiver
 
-class StatsFilter[Req <: AnyRef, Rep <: AnyRef](statsReceiver: StatsReceiver)
+class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   extends Filter[Req, Rep, Req, Rep]
 {
   private[this] val dispatchSample = statsReceiver.counter("dispatches" -> "service")
