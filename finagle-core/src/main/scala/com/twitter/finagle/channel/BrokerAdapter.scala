@@ -10,8 +10,10 @@ import com.twitter.util.{Promise, Return, Throw, Try}
 class BrokerAdapter extends SimpleChannelUpstreamHandler {
   @volatile private[this] var replyFuture: Promise[Any] = null
 
-  def writeAndRegisterReply(channel: Channel, message: Any,
-                            incomingReplyFuture: Promise[Any]) {
+  def writeAndRegisterReply(
+    channel: Channel, message: Any,
+    incomingReplyFuture: Promise[Any])
+  {
     // If there is an outstanding request, something up the stack has
     // messed up. We currently just fail this request immediately, and
     // let the current request complete.

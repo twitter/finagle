@@ -6,6 +6,7 @@ class TimedoutRequestException    extends RequestException
 class RetryFailureException       extends RequestException
 class CancelledRequestException   extends RequestException
 class NoBrokersAvailableException extends RequestException
+class ReplyCastException          extends RequestException
 
 // Channel exceptions are failures on the channels themselves.
 class ChannelException                      extends Exception

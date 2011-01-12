@@ -18,8 +18,10 @@ import com.twitter.finagle.util.Conversions._
 
 object LoadBalancerTest {
   def main(args: Array[String]) {
+    // Make the type enforced by the *codec*
+
     runSuite(
-      ClientBuilder()
+      ClientBuilder[HttpRequest, HttpResponse]
         .requestTimeout(100.milliseconds)
         .retries(10)
     )
@@ -27,7 +29,7 @@ object LoadBalancerTest {
     // TODO: proper resource releasing, etc.
   }
 
-  def runSuite(clientBuilder: ClientBuilder) {
+  def runSuite(clientBuilder: ClientBuilder[HttpRequest, HttpResponse]) {
     println("testing " + clientBuilder)
     println("\n== baseline ==\n")
     new LoadBalancerTest(clientBuilder)({ case _ => }).run()
@@ -59,7 +61,7 @@ object LoadBalancerTest {
 }
 
 class LoadBalancerTest(
-  clientBuilder: ClientBuilder,
+  clientBuilder: ClientBuilder[HttpRequest, HttpResponse],
   serverLatency: Duration = 0.seconds,
   numRequests: Int = 100000,
   concurrency: Int = 20)(behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit])
@@ -154,7 +156,7 @@ class LoadBalancerTest(
       .codec(Http)
       .hosts(servers map(_.addr))
       .reportTo(statsReceiver)
-      .buildService[HttpRequest, HttpResponse]
+      .build()
 
     val begin = Time.now
     captureGauges()

@@ -9,13 +9,13 @@ import com.twitter.finagle.service.Service
 object HttpClient {
   def main(args: Array[String]) {
     val client =
-      ClientBuilder()
+      ClientBuilder[HttpRequest, HttpResponse]()
         .name("http")
         .hosts("localhost:10000,localhost:10001,localhost:10003")
         .codec(Http)
         .retries(2)
         .logger(Logger.getLogger("http"))
-        .buildService[HttpRequest, HttpResponse]()
+        .build()
 
     for (_ <- 0 until 100)
       makeRequest(client)

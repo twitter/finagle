@@ -10,12 +10,13 @@ import com.twitter.util.*;
 
 public class HttpClientTest {
   public static void main(String args[]) {
+    ClientBuilder<HttpRequest, HttpResponse> clientBuilder =
+        ClientBuilder.get();
     Service<HttpRequest, HttpResponse> client =
-      ClientBuilder
-        .get()
+      clientBuilder
         .hosts("localhost:10000")
         .codec(Codec4J.Http)
-        .buildService();
+        .build();
 
     HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
 

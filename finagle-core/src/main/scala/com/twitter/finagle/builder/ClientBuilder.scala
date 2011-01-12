@@ -23,8 +23,8 @@ import com.twitter.finagle.loadbalancer.{
   LeastLoadedStrategy, FailureAccrualStrategy}
 
 object ClientBuilder {
-  def apply() = new ClientBuilder
-  def get() = apply()
+  def apply[Req, Rep]() = new ClientBuilder[Req, Rep]
+  def get[Req, Rep]() = apply[Req, Rep]()
 
   val defaultChannelFactory =
     new NioClientSocketChannelFactory(
@@ -45,7 +45,7 @@ object ClientBuilder {
  *   o connectionTimeout: optimized for within a datanceter
  *   o by default, no request timeout
  */
-case class ClientBuilder(
+case class ClientBuilder[Req, Rep](
   _hosts: Option[Seq[SocketAddress]],
   _codec: Option[Codec],
   _connectionTimeout: Duration,
@@ -106,55 +106,55 @@ case class ClientBuilder(
       } mkString(", "))
   }
 
-  def hosts(hostnamePortCombinations: String): ClientBuilder =
+  def hosts(hostnamePortCombinations: String): ClientBuilder[Req, Rep] =
     copy(_hosts = Some(parseHosts(hostnamePortCombinations)))
 
-  def hosts(addresses: Collection[SocketAddress]): ClientBuilder =
+  def hosts(addresses: Collection[SocketAddress]): ClientBuilder[Req, Rep] =
     copy(_hosts = Some(addresses toSeq))
 
-  def hosts(addresses: Iterable[SocketAddress]): ClientBuilder =
+  def hosts(addresses: Iterable[SocketAddress]): ClientBuilder[Req, Rep] =
     copy(_hosts = Some(addresses toSeq))
 
-  def codec(codec: Codec): ClientBuilder =
+  def codec(codec: Codec): ClientBuilder[Req, Rep] =
     copy(_codec = Some(codec))
 
-  def connectionTimeout(duration: Duration): ClientBuilder =
+  def connectionTimeout(duration: Duration): ClientBuilder[Req, Rep] =
     copy(_connectionTimeout = duration)
 
-  def requestTimeout(duration: Duration): ClientBuilder =
+  def requestTimeout(duration: Duration): ClientBuilder[Req, Rep] =
     copy(_requestTimeout = duration)
 
-  def reportTo(receiver: StatsReceiver): ClientBuilder =
+  def reportTo(receiver: StatsReceiver): ClientBuilder[Req, Rep] =
     copy(_statsReceiver = Some(receiver))
 
   /**
    * The interval over which to aggregate load statistics.
    */
-  def loadStatistics(numIntervals: Int, interval: Duration): ClientBuilder = {
+  def loadStatistics(numIntervals: Int, interval: Duration): ClientBuilder[Req, Rep] = {
     require(numIntervals >= 1, "Must have at least 1 window to sample statistics over")
 
     copy(_loadStatistics = (numIntervals, interval))
   }
 
-  def name(value: String): ClientBuilder = copy(_name = Some(value))
+  def name(value: String): ClientBuilder[Req, Rep] = copy(_name = Some(value))
 
-  def hostConnectionLimit(value: Int): ClientBuilder =
+  def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep] =
     copy(_hostConnectionLimit = Some(value))
 
-  def retries(value: Int): ClientBuilder =
+  def retries(value: Int): ClientBuilder[Req, Rep] =
     copy(_retries = Some(value))
 
-  def sendBufferSize(value: Int): ClientBuilder = copy(_sendBufferSize = Some(value))
-  def recvBufferSize(value: Int): ClientBuilder = copy(_recvBufferSize = Some(value))
+  def sendBufferSize(value: Int): ClientBuilder[Req, Rep] = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int): ClientBuilder[Req, Rep] = copy(_recvBufferSize = Some(value))
 
-  def channelFactory(cf: ChannelFactory): ClientBuilder =
+  def channelFactory(cf: ChannelFactory): ClientBuilder[Req, Rep] =
     copy(_channelFactory = Some(cf))
 
-  def proactivelyConnect(duration: Duration): ClientBuilder =
+  def proactivelyConnect(duration: Duration): ClientBuilder[Req, Rep] =
     copy(_proactivelyConnect = Some(duration))
 
   // ** BUILDING
-  def logger(logger: Logger): ClientBuilder = copy(_logger = Some(logger))
+  def logger(logger: Logger): ClientBuilder[Req, Rep] = copy(_logger = Some(logger))
 
   private def bootstrap(codec: Codec)(host: SocketAddress) = {
     val bs = new BrokerClientBootstrap(_channelFactory getOrElse defaultChannelFactory)
@@ -191,14 +191,14 @@ case class ClientBuilder(
     }
 
   private def retryingFilter =
-    _retries map { RetryingService.tries[Any, Any](_) }
+    _retries map { RetryingService.tries[Req, Rep](_) }
 
-  def makeBroker(codec: Codec) =
+  private def makeBroker(codec: Codec) =
     bootstrap(codec) _                                andThen
     pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
-    (new PoolingBroker(_))
+    (new PoolingBroker[Req, Rep](_))
 
-  def build(): Service[Any, Any] = {
+  def build(): Service[Req, Rep] = {
     if (!_hosts.isDefined || _hosts.get.isEmpty)
       throw new IncompleteSpecification("No hosts were specified")
     if (!_codec.isDefined)
@@ -214,7 +214,7 @@ case class ClientBuilder(
 
     val timedoutBrokers =
       if (_requestTimeout < Duration.MaxValue) {
-        val timeoutFilter = new TimeoutFilter[Any, Any](Timer.default, _requestTimeout)
+        val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
         brokers map { broker => timeoutFilter andThen broker }
       } else {
         brokers
@@ -222,14 +222,11 @@ case class ClientBuilder(
 
     val loadBalancerStrategy = // _loadBalancerStrategy getOrElse
     {
-      val leastLoadedStrategy = new LeastLoadedStrategy[Any, Any]
+      val leastLoadedStrategy = new LeastLoadedStrategy[Req, Rep]
       new FailureAccrualStrategy(leastLoadedStrategy, 3, 10.seconds)
     }
 
     val loadBalanced = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)
     retryingFilter map { filter => filter andThen loadBalanced } getOrElse { loadBalanced }
   }
-
-  def buildService[Request, Reply]() =
-    new service.Client[Request, Reply](build())
 }

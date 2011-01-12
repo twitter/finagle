@@ -10,6 +10,8 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.util._
 import com.twitter.finagle.stats.{ReadableCounter, StatsRepository, SimpleStatsRepository}
 
+/* TODO: use in service load balancer
+
 object LoadedBrokerSpec extends Specification with Mockito {
   class FakeBroker(reply: Future[AnyRef]) extends Broker {
     def apply(request: AnyRef) = reply
@@ -244,3 +246,4 @@ object LoadedBrokerSpec extends Specification with Mockito {
     }
   }
 }
+*/

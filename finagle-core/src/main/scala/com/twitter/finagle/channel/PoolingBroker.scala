@@ -3,9 +3,9 @@ package com.twitter.finagle.channel
 import com.twitter.finagle.util.Conversions._
 import org.jboss.netty.channel._
 
-class PoolingBroker(channelPool: ChannelPool) extends ConnectingChannelBroker {
-  override def isAvailable = channelPool.isAvailable && super.isAvailable
-
+class PoolingBroker[Req, Rep](channelPool: ChannelPool)
+  extends ConnectingChannelBroker[Req, Rep]
+{
   def getChannel = channelPool.reserve()
   def putChannel(channel: Channel) = channelPool.release(channel)
 }
