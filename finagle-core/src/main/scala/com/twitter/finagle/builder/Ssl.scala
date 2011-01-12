@@ -2,6 +2,7 @@ package com.twitter.finagle.builder
 
 import java.io.{InputStream, File, FileInputStream, IOException}
 import java.security.{KeyStore, Security}
+import java.security.cert.X509Certificate
 import javax.net.ssl._
 
 object Ssl {
@@ -48,21 +49,72 @@ object Ssl {
     }
   }
 
-  private[this] def context(protocol: String, kms: Array[KeyManager]) = {
-    val ctx = SSLContext.getInstance(protocol)
-    ctx.init(kms, null, null) // XXX: specify RNG?
-    Config(ctx)
-    ctx
-  }
-
-  def apply(path: String, password: String): SSLContext = {
+  def server(path: String, password: String): SSLContext = {
     new File(path) match {
       case f: File
       if f.exists && f.canRead =>
-        context(defaultProtocol, Keys.managers(new FileInputStream(f), password))
+        val kms = Keys.managers(new FileInputStream(f), password)
+        val ctx = context()
+        ctx.init(kms, null, null) // XXX: specify RNG?
+        Config(ctx)
+        ctx
       case _ =>
         throw new IOException(
           "Keystore file '%s' does not exist or is not readable".format(path))
     }
   }
+
+  /**
+   * @returns the protocol used to create SSLContext instances
+   */
+  def protocol() = defaultProtocol
+
+  /**
+   * @returns instances of SSLContext, supporting protocol()
+   */
+  def context() = SSLContext.getInstance(protocol())
+
+  /**
+   * Create a client
+   */
+  def client(): SSLContext = {
+    val ctx = context()
+    ctx.init(null, null, null)
+    Config(ctx)
+    ctx
+  }
+
+  /**
+   * Create a client with a trust manager that does not check the validity of certificates
+   */
+  def clientWithoutCertificateValidation(): SSLContext = {
+    val ctx = context()
+    ctx.init(null, trustAllCertificates(), null)
+    Config(ctx)
+    ctx
+  }
+
+  /**
+   * A trust manager that does not validate anything
+   */
+  private[this] class IgnorantTrustManager extends X509TrustManager {
+    def getAcceptedIssuers(): Array[X509Certificate] =
+      null
+
+    def checkClientTrusted(certs: Array[X509Certificate],
+                           authType: String) {
+      // Do nothing.
+    }
+
+    def checkServerTrusted(certs: Array[X509Certificate],
+                           authType: String) {
+      // Do nothing.
+    }
+  }
+
+  /**
+   * @returns a trust manager chain that does not validate certificates
+   */
+  private[this] def trustAllCertificates(): Array[TrustManager] =
+    Array(new IgnorantTrustManager)
 }

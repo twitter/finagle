@@ -6,9 +6,11 @@ import java.net.{SocketAddress, InetSocketAddress}
 import java.util.Collection
 import java.util.logging.Logger
 import java.util.concurrent.Executors
+import javax.net.ssl.SSLContext
 
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
+import org.jboss.netty.handler.ssl._
 
 import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
@@ -59,8 +61,9 @@ case class ClientBuilder[Req, Rep](
   _retries: Option[Int],
   _logger: Option[Logger],
   _channelFactory: Option[ChannelFactory],
-  _proactivelyConnect: Option[Duration])
-  // _loadBalancerStrategy: Option[LoadBalancerStrategy])
+  _proactivelyConnect: Option[Duration],
+  _tls: Option[SSLContext],
+  _startTls: Boolean)
 {
   import ClientBuilder._
   def this() = this(
@@ -77,8 +80,9 @@ case class ClientBuilder[Req, Rep](
     None,                // retries
     None,                // logger
     None,                // channelFactory
-    None// ,                // proactivelyConnect
-    //None                 // loadBalancerStrategy
+    None,                // proactivelyConnect
+    None,                // tls
+    false                // startTls
   )
 
   override def toString() = {
@@ -96,7 +100,9 @@ case class ClientBuilder[Req, Rep](
       "retries"             -> _retries,
       "logger"              -> _logger,
       "channelFactory"      -> _channelFactory,
-      "proactivelyConnect"  -> _proactivelyConnect
+      "proactivelyConnect"  -> _proactivelyConnect,
+      "tls"                 -> _tls,
+      "startTls"            -> _startTls
     )
 
     "ClientBuilder(%s)".format(
@@ -154,6 +160,15 @@ case class ClientBuilder[Req, Rep](
   def proactivelyConnect(duration: Duration): ClientBuilder[Req, Rep] =
     copy(_proactivelyConnect = Some(duration))
 
+  def tls() =
+    copy(_tls = Some(Ssl.client()))
+
+  def tlsWithoutValidation() =
+    copy(_tls = Some(Ssl.clientWithoutCertificateValidation()))
+
+  def startTls(value: Boolean) =
+    copy(_startTls = true)
+
   // ** BUILDING
   def logger(logger: Logger): ClientBuilder[Req, Rep] = copy(_logger = Some(logger))
 
@@ -162,6 +177,13 @@ case class ClientBuilder[Req, Rep](
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.clientPipelineFactory.getPipeline
+        for (ctx <- _tls) {
+          val sslEngine = ctx.createSSLEngine()
+          sslEngine.setUseClientMode(true)
+          // sslEngine.setEnableSessionCreation(true) // XXX - need this?
+          pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
+        }
+
         for (logger <- _logger) {
           pipeline.addFirst(
             "channelSnooper",

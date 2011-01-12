@@ -31,6 +31,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-stress", "finagle-stress",
     new StressProject(_), coreProject)
 
+  val aprProject = project(
+    "finagle-apr", "finagle-apr",
+    new AprProject(_), coreProject)
+
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
@@ -64,5 +68,16 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+  }
+
+  class AprProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+  {
+    // This project uses tomcat-native, download at
+    // http://tomcat.apache.org/download-native.cgi
+
+    val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
+    val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
+    val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
   }
 }
