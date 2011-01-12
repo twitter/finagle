@@ -13,14 +13,19 @@ import com.twitter.finagle.util.Timer
  * @param  windows   the number of time windows to keep around
  * @param  timer     a timer to schedule creating and dropping time windows
  */
-class TimeWindowedStatsRepository(numIntervals: Int, interval: Duration, timer: Timer = Timer.default)
+class TimeWindowedStatsRepository(
+  numIntervals: Int,
+  interval: Duration,
+  timer: com.twitter.util.Timer = Timer.default)
   extends StatsRepository
 {
   @volatile private[this] var position = 0
-  private[this] def repositories = Array.fill(numIntervals)(new SimpleStatsRepository)
-  private[this] def currentRepository = repositories(position % numIntervals)
+  private[this] val repositories = Array.fill(numIntervals)(new SimpleStatsRepository)
+  private[this] def currentRepository = {
+    repositories(position % numIntervals)
+  }
 
-  timer.schedule(interval.fromNow, interval) {
+  timer.schedule(interval) {
     repositories((position + 1) % numIntervals) = new SimpleStatsRepository
     position += 1
   }

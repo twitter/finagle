@@ -30,8 +30,8 @@ class StatsLoadedBroker(
   extends WrappingBroker
   with LoadedBroker[StatsLoadedBroker]
 {
-  private[this] val dispatchStat = statsRepository.counter("dispatches" -> "broker")
-  private[this] val latencyStat  = statsRepository.gauge("latency" -> "broker")
+  private[this] val dispatchStat = statsRepository.counter("name" -> "dispatches")
+  private[this] val latencyStat  = statsRepository.gauge("name" -> "latency")
 
   override def apply(request: AnyRef) = {
     val begin = Time.now
@@ -63,14 +63,18 @@ class FailureAccruingLoadedBroker(
   extends WrappingBroker
   with LoadedBroker[FailureAccruingLoadedBroker]
 {
-  private[this] val successStat = statsRepository.counter("success" -> "broker")
-  private[this] val failureStat = statsRepository.counter("failure" -> "broker")
+  println(statsRepository)
+  private[this] val successStat = statsRepository.counter("name" -> "success")
+  private[this] val failureStat = statsRepository.counter("name" -> "failure")
 
   def load = underlying.load
 
   override def weight = {
     val success = successStat.sum
     val failure = failureStat.sum
+    println("failure accrual success and failure")
+    println(success)
+    println(failure)
     val sum = success + failure
 
     // TODO: do we decay this decision beyond relying on the stats

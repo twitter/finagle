@@ -78,8 +78,8 @@ object LoadedBrokerSpec extends Specification with Mockito {
     val successStat = mock[ReadableCounter]
     val failureStat = mock[ReadableCounter]
 
-    statsRepository.counter("success" -> "broker") returns successStat
-    statsRepository.counter("failure" -> "broker") returns failureStat
+    statsRepository.counter("name" -> "success") returns successStat
+    statsRepository.counter("name" -> "failure") returns failureStat
     val broker = new FailureAccruingLoadedBroker(underlying, statsRepository)
 
     "account for success" in {
