@@ -19,6 +19,8 @@ class FailureAccrualStrategy[Req, Rep](
   markDeadFor: Duration)
   extends LoadBalancerStrategy[Req, Rep]
 {
+  // This will only admit one request after having failed (ie. isDead
+  // is none), but any more & it's re-marked.
   private[this] class FailureMetadata {
     private[this] var failureCount = 0
     private[this] var failedAt = Time.epoch
@@ -27,7 +29,7 @@ class FailureAccrualStrategy[Req, Rep](
 
     def didFail() = synchronized {
       failureCount += 1
-      if (failureCount > numFailures)
+      if (failureCount >= numFailures)
         failedAt = Time.now
     }
 
