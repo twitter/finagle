@@ -36,6 +36,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-apr", "finagle-apr",
     new AprProject(_), coreProject)
 
+  val zookeeperProject = project(
+    "finagle-zookeeper", "finagle-zookeeper",
+    new ZookeeperProject(_), coreProject)
+
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
@@ -72,7 +76,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ZookeeperProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+    with SubversionPublisher with AdhocInlines with LibDirClasspath
   {
     override def ivyXML =
       <dependencies>
@@ -82,8 +86,16 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
       </dependencies>
 
     val privateTwitterRepo = "twitter.com" at "http://svn.local.twitter.com/maven"
+
     val zookeeper = "org.apache.zookeeper" % "zookeeper" % "3.3.1"
-    val serverSet = "com.twitter" % "science-common-zookeeper" % "0.0.4"
+    val serverSet = "com.twitter" % "science-common-zookeeper" % "0.0.3"
+    val thrift = "com.twitter" % "science-common-thrift" % "0.0.3"
+    val io = "com.twitter" % "science-common-io-thrift" % "0.0.2"
+    val net = "com.twitter" % "science-common-net" % "0.0.1"
+    val quantity = "com.twitter" % "science-common-quantity" % "0.0.1"
+    val util = "com.twitter" % "science-common-util" % "0.0.1"
+    val service = "com.twitter" % "science-service-thrift" % "0.0.3"
+    val base = "com.twitter" % "science-common-base" % "0.0.1"
   }
 
   class AprProject(info: ProjectInfo) extends StandardProject(info)

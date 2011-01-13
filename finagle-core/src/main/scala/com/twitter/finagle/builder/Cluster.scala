@@ -12,7 +12,7 @@ import collection.SeqProxy
  * Note that a Cluster can be elastic: members can join or leave at
  * any time.
  */
-trait Cluster extends Seq[SocketAddress] {
+trait Cluster {
   /**
    * Produce a sequence of brokers that changes as servers join and
    * leave the cluster.
@@ -25,9 +25,9 @@ trait Cluster extends Seq[SocketAddress] {
 
 class SocketAddressCluster(underlying: Seq[SocketAddress])
   extends Cluster
-  with SeqProxy[SocketAddress]
 {
-  var self = underlying
+  private[this] var self = underlying
+
   def mkBrokers[Req, Rep](f: (SocketAddress) => ConnectingChannelBroker[Req, Rep]) =
     self map f
 

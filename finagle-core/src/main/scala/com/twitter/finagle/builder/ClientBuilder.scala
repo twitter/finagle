@@ -212,7 +212,7 @@ case class ClientBuilder[Req, Rep](
     (new PoolingBroker[Req, Rep](_))
 
   def build(): Service[Req, Rep] = {
-    if (!_cluster.isDefined || _cluster.get.isEmpty)
+    if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
     if (!_codec.isDefined)
       throw new IncompleteSpecification("No codec was specified")
