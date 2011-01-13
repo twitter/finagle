@@ -19,7 +19,6 @@ public class HttpClientTest {
     HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
 
     Future<HttpResponse> response = client.apply(request);
-
     response.addEventListener(
       new FutureEventListener<HttpResponse>() {
         public void onSuccess(HttpResponse response) {
