@@ -15,9 +15,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-core", "finagle-core",
     new CoreProject(_))
 
-  // finagle-ostrich has a StatsReceiver for Ostrich 
+  // finagle-ostrich has a StatsReceiver for Ostrich
   val ostrichProject = project(
-    "finagle-ostrich",   "finagle-ostrich",
+    "finagle-ostrich", "finagle-ostrich",
     new OstrichProject(_), coreProject)
 
   // finagle-thrift contains thrift codecs
@@ -26,7 +26,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   //   "finagle-thrift", "finagle-thrift",
   //   new ThriftProject(_), coreProject)
 
-  // finagle-integration has integration test suites & tools for
+  // finagle-stress has stress/integration test suites & tools for
   // development.
   val stressProject = project(
     "finagle-stress", "finagle-stress",
@@ -71,13 +71,28 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
 
+  class ZookeeperProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+  {
+    override def ivyXML =
+      <dependencies>
+        <exclude module="jms"/>
+        <exclude module="jmxtools"/>
+        <exclude module="jmxri"/>
+      </dependencies>
+
+    val privateTwitterRepo = "twitter.com" at "http://svn.local.twitter.com/maven"
+    val zookeeper = "org.apache.zookeeper" % "zookeeper" % "3.3.1"
+    val serverSet = "com.twitter" % "science-common-zookeeper" % "0.0.4"
+  }
+
   class AprProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     // This project uses tomcat-native, download at
     // http://tomcat.apache.org/download-native.cgi
 
-    val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
+    val netty     = "org.jboss.netty"         % "netty"       % "3.2.3.Final"
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
   }

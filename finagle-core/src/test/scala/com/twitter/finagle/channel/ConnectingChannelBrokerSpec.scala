@@ -27,6 +27,7 @@ object ConnectingChannelBrokerSpec extends Specification with Mockito {
     class FakeConnectingChannelBroker extends ConnectingChannelBroker[Any, Any] {
       def getChannel = channelFuture
       def putChannel(ch: Channel) {}
+      def close() {}
     }
     val broker = spy(new FakeConnectingChannelBroker)
 

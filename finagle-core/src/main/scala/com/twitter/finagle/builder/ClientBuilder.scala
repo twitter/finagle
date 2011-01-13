@@ -18,11 +18,10 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.Service
-import com.twitter.finagle.service
 import com.twitter.finagle.service.{RetryingService, TimeoutFilter}
-import com.twitter.finagle.stats.{StatsRepository, TimeWindowedStatsRepository, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{
-  LoadBalancerService, LoadBalancerStrategy,
+  LoadBalancerService,
   LeastQueuedStrategy, FailureAccrualStrategy}
 
 object ClientBuilder {
@@ -33,14 +32,7 @@ object ClientBuilder {
     new NioClientSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
-
-  def parseHosts(hosts: String): java.util.List[InetSocketAddress] = {
-    val hostPorts = hosts split Array(' ', ',') filter (_ != "") map (_.split(":"))
-    hostPorts map { hp => new InetSocketAddress(hp(0), hp(1).toInt) } toList
-  }
 }
-
-// TODO: sampleGranularity, sampleWindow <- rename!
 
 /**
  * A word about the default values:
@@ -49,7 +41,7 @@ object ClientBuilder {
  *   o by default, no request timeout
  */
 case class ClientBuilder[Req, Rep](
-  _hosts: Option[Seq[SocketAddress]],
+  _cluster: Option[Cluster],
   _codec: Option[Codec[Req, Rep]],
   _connectionTimeout: Duration,
   _requestTimeout: Duration,
@@ -66,30 +58,29 @@ case class ClientBuilder[Req, Rep](
   _tls: Option[SSLContext],
   _startTls: Boolean)
 {
-  import ClientBuilder._
   def this() = this(
-    None,                // hosts
-    None,                // codec
-    10.milliseconds,     // connectionTimeout
-    Duration.MaxValue,   // requestTimeout
-    None,                // statsReceiver
-    (60, 10.seconds),    // loadStatistics
-    None,                // name
-    None,                // hostConnectionLimit
-    None,                // sendBufferSize
-    None,                // recvBufferSize
-    None,                // retries
-    None,                // logger
-    None,                // channelFactory
-    None,                // proactivelyConnect
-    None,                // tls
-    false                // startTls
+    None,                                        // cluster
+    None,                                        // codec
+    10.milliseconds,                             // connectionTimeout
+    Duration.MaxValue,                           // requestTimeout
+    None,                                        // statsReceiver
+    (60, 10.seconds),                            // loadStatistics
+    Some("client"),                              // name
+    None,                                        // hostConnectionLimit
+    None,                                        // sendBufferSize
+    None,                                        // recvBufferSize
+    None,                                        // retries
+    None,                                        // logger
+    Some(ClientBuilder.defaultChannelFactory),   // channelFactory
+    None,                                        // proactivelyConnect
+    None,                                        // tls
+    false                                        // startTls
   )
 
   override def toString() = {
     val options = Seq(
       "name"                -> _name,
-      "hosts"               -> _hosts,
+      "cluster"             -> _cluster,
       "codec"               -> _codec,
       "connectionTimeout"   -> Some(_connectionTimeout),
       "requestTimeout"      -> Some(_requestTimeout),
@@ -113,51 +104,53 @@ case class ClientBuilder[Req, Rep](
       } mkString(", "))
   }
 
-  def hosts(hostnamePortCombinations: String): ClientBuilder[Req, Rep] =
-    copy(_hosts = Some(parseHosts(hostnamePortCombinations)))
+  def hosts(hostnamePortCombinations: String): ClientBuilder[Req, Rep] = {
+    val addresses = InetSocketAddressUtil.parseHosts(
+      hostnamePortCombinations)
+    hosts(addresses)
+  }
 
-  def hosts(addresses: Collection[SocketAddress]): ClientBuilder[Req, Rep] =
-    copy(_hosts = Some(addresses toSeq))
+  def hosts(addresses: Seq[SocketAddress]): ClientBuilder[Req, Rep] = {
+    val cluster = new SocketAddressCluster(addresses)
+    copy(_cluster = Some(cluster))
+  }
 
-  def hosts(addresses: Iterable[SocketAddress]): ClientBuilder[Req, Rep] =
-    copy(_hosts = Some(addresses toSeq))
-
-  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]): ClientBuilder[Req1, Rep1] =
+  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
     copy(_codec = Some(codec))
 
-  def connectionTimeout(duration: Duration): ClientBuilder[Req, Rep] =
+  def connectionTimeout(duration: Duration) =
     copy(_connectionTimeout = duration)
 
-  def requestTimeout(duration: Duration): ClientBuilder[Req, Rep] =
+  def requestTimeout(duration: Duration) =
     copy(_requestTimeout = duration)
 
-  def reportTo(receiver: StatsReceiver): ClientBuilder[Req, Rep] =
+  def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
 
   /**
    * The interval over which to aggregate load statistics.
    */
-  def loadStatistics(numIntervals: Int, interval: Duration): ClientBuilder[Req, Rep] = {
+  def loadStatistics(numIntervals: Int, interval: Duration) = {
     require(numIntervals >= 1, "Must have at least 1 window to sample statistics over")
 
     copy(_loadStatistics = (numIntervals, interval))
   }
 
-  def name(value: String): ClientBuilder[Req, Rep] = copy(_name = Some(value))
+  def name(value: String) = copy(_name = Some(value))
 
-  def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep] =
+  def hostConnectionLimit(value: Int) =
     copy(_hostConnectionLimit = Some(value))
 
-  def retries(value: Int): ClientBuilder[Req, Rep] =
+  def retries(value: Int) =
     copy(_retries = Some(value))
 
-  def sendBufferSize(value: Int): ClientBuilder[Req, Rep] = copy(_sendBufferSize = Some(value))
-  def recvBufferSize(value: Int): ClientBuilder[Req, Rep] = copy(_recvBufferSize = Some(value))
+  def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def channelFactory(cf: ChannelFactory): ClientBuilder[Req, Rep] =
+  def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
 
-  def proactivelyConnect(duration: Duration): ClientBuilder[Req, Rep] =
+  def proactivelyConnect(duration: Duration) =
     copy(_proactivelyConnect = Some(duration))
 
   def tls() =
@@ -169,11 +162,11 @@ case class ClientBuilder[Req, Rep](
   def startTls(value: Boolean) =
     copy(_startTls = true)
 
-  def logger(logger: Logger): ClientBuilder[Req, Rep] = copy(_logger = Some(logger))
+  def logger(logger: Logger) = copy(_logger = Some(logger))
 
   // ** BUILDING
   private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
-    val bs = new BrokerClientBootstrap(_channelFactory getOrElse defaultChannelFactory)
+    val bs = new BrokerClientBootstrap(_channelFactory.get)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.clientPipelineFactory.getPipeline
@@ -185,9 +178,8 @@ case class ClientBuilder[Req, Rep](
         }
 
         for (logger <- _logger) {
-          pipeline.addFirst(
-            "channelSnooper",
-            ChannelSnooper(_name getOrElse "client")(logger.info))
+          pipeline.addFirst("channelSnooper",
+            ChannelSnooper(_name.get)(logger.info))
         }
 
         pipeline
@@ -214,24 +206,21 @@ case class ClientBuilder[Req, Rep](
         new ChannelPool(bootstrap, proactivelyConnect)
     }
 
-  private def retryingFilter =
-    _retries map { RetryingService.tries[Req, Rep](_) }
-
   private def makeBroker(codec: Codec[Req, Rep]) =
     bootstrap(codec) _                                andThen
     pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
     (new PoolingBroker[Req, Rep](_))
 
   def build(): Service[Req, Rep] = {
-    if (!_hosts.isDefined || _hosts.get.isEmpty)
+    if (!_cluster.isDefined || _cluster.get.isEmpty)
       throw new IncompleteSpecification("No hosts were specified")
     if (!_codec.isDefined)
       throw new IncompleteSpecification("No codec was specified")
-    
-    val hosts = _hosts.get
+
+    val cluster = _cluster.get
     val codec = _codec.get
 
-    val brokers = hosts map { host =>
+    val brokers = cluster mkBrokers { host =>
       // TODO: stats export [observers], internal LB stats.
       makeBroker(codec)(host)
     }
@@ -250,7 +239,11 @@ case class ClientBuilder[Req, Rep](
       new FailureAccrualStrategy(leastQueuedStrategy, 3, 10.seconds)
     }
 
-    val loadBalanced = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)
-    retryingFilter map { filter => filter andThen loadBalanced } getOrElse { loadBalanced }
+    val balanceLoad = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)
+    _retries map { retries =>
+      RetryingService.tries[Req, Rep](retries) andThen balanceLoad
+    } getOrElse {
+      balanceLoad
+    }
   }
 }

@@ -3,11 +3,7 @@ package com.twitter.finagle.channel
 import java.net.{InetSocketAddress}
 import java.util.concurrent.Executors
 
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.{Channel, Channels,
-                                ChannelFuture, ChannelPipeline,
-                                ChannelHandlerContext, ChannelPipelineFactory,
-                                ChannelEvent, SimpleChannelDownstreamHandler}
+import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 
 import org.specs.Specification
@@ -33,7 +29,7 @@ object BootstrapBrokerSpec extends Specification with Mockito {
       val bs = spy(new BrokerClientBootstrap(cf))
       bs.setOption("remoteAddress", address)
       val broker = new BootstrapBroker(bs) {
-        override def close(channel: Channel) {
+        override protected[channel] def close(channel: Channel) {
           channel.close()
         }
       }

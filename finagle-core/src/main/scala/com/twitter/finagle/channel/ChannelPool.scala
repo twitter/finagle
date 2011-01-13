@@ -18,14 +18,15 @@ class ChannelPool(
   timer: Timer = Timer.default)
   extends Serialized
 {
-  @volatile private[this] var _isAvailable = false
-  @volatile private[this] var lastConnectAttempt = Time.epoch
-
   private[this] val channelQueue = new ConcurrentLinkedQueue[Channel]
 
+  connectRetryPeriod match {
+    case Some(period) => tryToConnect(period)
+    case None =>
+  }
+
   // > TODO
-  //     On boot, we attempt to connect. We set our availability state
-  //     when successful. Currently we don't maintain such a heartbeat
+  //     On boot, we attempt to connect. Currently we don't maintain such a heartbeat
   //     except for the initial connection attempt. We may consider
   //     keeping a core size, being unavailable unless the number of
   //     connections is strictly positive.
@@ -35,30 +36,15 @@ class ChannelPool(
   //     if there exists more generic application level health checks,
   //     as an application would decidedly be unhealthy on connection
   //     failure.
-  def tryToConnect(period: Duration) {
-    val timeSinceLastConnectAttempt = lastConnectAttempt.untilNow
-
-    if (timeSinceLastConnectAttempt < period) {
-      timer.schedule(period - timeSinceLastConnectAttempt) {
-        tryToConnect(period)
-      }
-    } else {
-      lastConnectAttempt = Time.now
-      reserve() {
-        case Ok(channel) =>
-          release(channel)
-          _isAvailable = true
-        case Cancelled =>
-          tryToConnect(period)
-        case Error(_) =>
-          tryToConnect(period)
-      }
+  private[this] def tryToConnect(period: Duration) {
+    reserve() {
+      case Ok(channel) =>
+        release(channel)
+      case Cancelled =>
+        timer.schedule(period.fromNow) { tryToConnect(period) }
+      case Error(_) =>
+        timer.schedule(period.fromNow) { tryToConnect(period) }
     }
-  }
-
-  connectRetryPeriod match {
-    case Some(period) => tryToConnect(period)
-    case None => _isAvailable = true
   }
 
   protected def enqueue(channel: Channel) { channelQueue offer channel }
@@ -82,10 +68,10 @@ class ChannelPool(
     if (isHealthy(channel)) enqueue(channel)
   }
 
-  def isAvailable = _isAvailable
-
   protected def make() = clientBootstrap.connect()
   protected def isHealthy(channel: Channel) = channel.isOpen
+
+  def close() {}
 
   override def toString = "pool:%x".format(hashCode)
 }

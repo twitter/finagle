@@ -59,8 +59,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
   private[this] def fail(ch: Channel, cause: ChannelException) {
     // We always close the channel on failure.  This effectively
     // invalidates the channel.
-    if (ch.isOpen)
-      Channels.close(ch)
+    if (ch.isOpen) Channels.close(ch)
     done(Throw(cause))
   }
 

@@ -8,8 +8,7 @@ class BrokerClientBootstrap(channelFactory: ChannelFactory)
 {
   def this() = this(null)
 
-  if (channelFactory ne null)
-    setFactory(channelFactory)
+  if (channelFactory ne null) setFactory(channelFactory)
 
   override def getPipelineFactory = {
     val outerFactory = super.getPipelineFactory
