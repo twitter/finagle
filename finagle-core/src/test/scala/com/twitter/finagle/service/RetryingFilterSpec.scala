@@ -11,7 +11,7 @@ object RetryingFilterSpec extends Specification with Mockito {
   "RetryingFilter" should {
     val strategy = mock[RetryStrategy]
     val strategyPromise = new Promise[RetryStrategy]
-    strategy() returns strategyPromise
+    strategy.nextStrategy returns strategyPromise
     val filter = new RetryingFilter[Int, Int](strategy)
     val service = mock[Service[Int, Int]]
     service(123) returns Future(321)
@@ -20,14 +20,14 @@ object RetryingFilterSpec extends Specification with Mockito {
     "always try once" in {
       retryingService(123)() must be_==(321)
       there was one(service)(123)
-      there was one(strategy)()
+      there was no(strategy).nextStrategy
     }
 
     "when failed with a WriteException, consult the retry strategy" in {
       service(123) returns Future.exception(new WriteException(new Exception))
       val f = retryingService(123)
       there was one(service)(123)
-      there was one(strategy)()
+      there was one(strategy).nextStrategy
       f.isDefined must beFalse
 
       // Next time, it succeeds
@@ -43,7 +43,7 @@ object RetryingFilterSpec extends Specification with Mockito {
       val f = retryingService(123)
       f.isDefined must beFalse
       there was one(service)(123)
-      there was one(strategy)()
+      there was one(strategy).nextStrategy
 
       strategyPromise() = Throw(new Exception("i'm exhausted"))
       f.isDefined must beTrue
@@ -55,7 +55,16 @@ object RetryingFilterSpec extends Specification with Mockito {
       service(123) returns Future.exception(new Exception("WTF!"))
       retryingService(123)() must throwA(new Exception("WTF!"))
       there was one(service)(123)
-      there was one(strategy)()
+      there was no(strategy).nextStrategy
+    }
+  }
+
+  "NumTriesRetryStrategy" should {
+    "immediately yield a new RetryStrategy until it is exhausted" in {
+      val strategy = new NumTriesRetryStrategy(2)
+      val first = strategy.nextStrategy()
+      val second = first.nextStrategy()
+      second.nextStrategy() must throwA(new Exception)
     }
   }
 }
