@@ -19,7 +19,7 @@ import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.Service
 import com.twitter.finagle.service
-import com.twitter.finagle.service.{RetryingService, TimeoutFilter}
+import com.twitter.finagle.service.{RetryingService, TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.{StatsRepository, TimeWindowedStatsRepository, StatsReceiver}
 import com.twitter.finagle.loadbalancer.{
   LoadBalancerService, LoadBalancerStrategy,
@@ -39,8 +39,6 @@ object ClientBuilder {
     hostPorts map { hp => new InetSocketAddress(hp(0), hp(1).toInt) } toList
   }
 }
-
-// TODO: sampleGranularity, sampleWindow <- rename!
 
 /**
  * A word about the default values:
@@ -244,13 +242,21 @@ case class ClientBuilder[Req, Rep](
         brokers
       }
 
-    val loadBalancerStrategy = // _loadBalancerStrategy getOrElse
-    {
+    val statsBrokers = timedoutBrokers.zip(hosts) map { case (broker, host) =>
+      val statsBroker = _statsReceiver map { statsReceiver =>
+        (new StatsFilter(statsReceiver, "host" -> host.toString)) andThen broker
+      }
+
+      statsBroker getOrElse(broker)
+    }
+
+    // TODO: enable passing in a strategy via the builder.
+    val loadBalancerStrategy = {
       val leastQueuedStrategy = new LeastQueuedStrategy[Req, Rep]
       new FailureAccrualStrategy(leastQueuedStrategy, 3, 10.seconds)
     }
 
-    val loadBalanced = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)
+    val loadBalanced = new LoadBalancerService(statsBrokers, loadBalancerStrategy)
     retryingFilter map { filter => filter andThen loadBalanced } getOrElse { loadBalanced }
   }
 }

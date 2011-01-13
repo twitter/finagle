@@ -30,7 +30,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   // development.
   val stressProject = project(
     "finagle-stress", "finagle-stress",
-    new StressProject(_), coreProject)
+    new StressProject(_), coreProject, ostrichProject)
 
   val aprProject = project(
     "finagle-apr", "finagle-apr",

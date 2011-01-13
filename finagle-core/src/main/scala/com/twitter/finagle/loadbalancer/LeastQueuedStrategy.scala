@@ -24,7 +24,7 @@ class LeastQueuedStrategy[Req, Rep]
   def dispatch(request: Req, services: Seq[Service[Req, Rep]]) = {
     if (services.isEmpty) {
       None
-    } else {    
+    } else {
       val service = select(services)
       val qs = queueStat(service)
 

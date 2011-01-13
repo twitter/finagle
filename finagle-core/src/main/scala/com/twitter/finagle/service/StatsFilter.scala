@@ -4,11 +4,15 @@ import com.twitter.util.{Future, Time, Throw}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Service, Filter}
 
-class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
+class StatsFilter[Req, Rep](
+  statsReceiver: StatsReceiver,
+  additionalDescription: (String, String)*)
   extends Filter[Req, Rep, Req, Rep]
 {
-  private[this] val dispatchSample = statsReceiver.counter("dispatches" -> "service")
-  private[this] val latencySample  = statsReceiver.gauge("latency" -> "service")
+  private[this] val dispatchSample = statsReceiver.counter(
+    (additionalDescription ++ Seq("count" -> "dispatches")):_*)
+  private[this] val latencySample = statsReceiver.gauge(
+    (additionalDescription ++ Seq("count" -> "latency")):_*)
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val requestedAt = Time.now
@@ -20,8 +24,8 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
       latencySample.measure(requestedAt.untilNow.inMilliseconds)
       response match {
         case Throw(e) =>
-          statsReceiver.counter("exception" -> e.getCause.getClass.getName).incr()
-        case _ =>
+          statsReceiver.counter("exception" -> e.getClass.getName).incr()
+        case _ => ()
       }
     }
 
