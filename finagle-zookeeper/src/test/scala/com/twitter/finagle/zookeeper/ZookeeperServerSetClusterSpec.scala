@@ -1,23 +1,45 @@
 package com.twitter.finagle.zookeeper
 
 import org.specs.Specification
-import com.twitter.finagle.RandomSocket
 import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
-import com.twitter.common.zookeeper.ZooKeeperClient
 import com.twitter.common.quantity._
 import com.twitter.common.io.FileUtils.createTempDir
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-import com.twitter.finagle.thrift.{ThriftReply, SillyService}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Thrift, ZookeeperPath}
-import com.twitter.finagle.thrift.ThriftCall
-import com.twitter.util.TimeConversions._
-import com.twitter.silly.Silly
-import org.apache.thrift.TBase
+import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
+import com.twitter.finagle.builder.{Codec, ClientBuilder, ServerBuilder}
+import com.twitter.finagle.Service
+import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
+import org.jboss.netty.util.CharsetUtil
+import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
+import com.twitter.util.{Future, RandomSocket}
+import com.twitter.conversions.time._
+import org.jboss.netty.channel._
+
+class StringCodec extends Codec[String, String] {
+  val serverPipelineFactory = new ChannelPipelineFactory {
+    def getPipeline = {
+      val pipeline = Channels.pipeline()
+      pipeline.addLast("line",
+        new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
+      pipeline.addLast("stringDecoder", new StringDecoder(CharsetUtil.UTF_8))
+      pipeline.addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8))
+      pipeline
+    }
+  }
+
+  val clientPipelineFactory = new ChannelPipelineFactory {
+    def getPipeline = {
+      val pipeline = Channels.pipeline()
+      pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
+      pipeline.addLast("stringDecode", new StringDecoder(CharsetUtil.UTF_8))
+      pipeline
+    }
+  }
+}
 
 object ZookeeperServerSetClusterSpec extends Specification {
   "ZookeeperServerSetCluster" should {
     val zookeeperAddress = RandomSocket.nextAddress
-    val zookeeperPath = ZookeeperPath("/twitter/services/silly")
     val serviceAddress = RandomSocket.nextAddress
     var connectionFactory: NIOServerCnxn.Factory = null
     var zookeeperServer: ZooKeeperServer = null
@@ -40,28 +62,29 @@ object ZookeeperServerSetClusterSpec extends Specification {
     }
 
     "register the server with ZooKeeper" in {
-      val sillyService = new SillyService()
+      val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+      val cluster = new ZookeeperServerSetCluster(serverSet)
+
+      val sillyService = new Service[String, String] {
+        def apply(request: String) = {
+          println("hair")
+          Future(request.reverse)
+        }
+      }
       val server = ServerBuilder()
-        .codec(Thrift)
-        .zookeeperHosts(Seq(zookeeperAddress))
-        .zookeeperPath(zookeeperPath)
+        .codec(new StringCodec)
         .service(sillyService)
         .bindTo(serviceAddress)
         .build()
 
+      cluster.join(serviceAddress)
+
       val client = ClientBuilder()
-        .codec(Thrift)
-        .zookeeperHosts(Seq(zookeeperAddress))
-        .hosts(zookeeperPath)
-        .buildService[ThriftCall.AnyCall, ThriftReply[_]]
+        .cluster(cluster)
+        .codec(new StringCodec)
+        .build()
 
-      val call = new ThriftCall(
-        "bleep",
-        new Silly.bleep_args("hello"),
-        classOf[Silly.bleep_result])
-
-      client(call)().asInstanceOf[Silly.bleep_result].success mustEqual "olleh"
-      1 mustEqual 1
+      client("hello\n")(1.seconds) mustEqual "olleh"
     }
   }
 }

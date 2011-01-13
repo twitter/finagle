@@ -111,7 +111,11 @@ case class ClientBuilder[Req, Rep](
   }
 
   def hosts(addresses: Seq[SocketAddress]): ClientBuilder[Req, Rep] = {
-    val cluster = new SocketAddressCluster(addresses)
+    val _cluster = new SocketAddressCluster(addresses)
+    cluster(_cluster)
+  }
+
+  def cluster(cluster: Cluster): ClientBuilder[Req, Rep] = {
     copy(_cluster = Some(cluster))
   }
 

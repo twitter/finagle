@@ -14,7 +14,7 @@ import com.twitter.finagle.builder._
 import com.twitter.finagle.service._
 
 import com.twitter.silly.Silly
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Future, Promise}
 import com.twitter.util.TimeConversions._
 
 object ServiceEndToEndSpec extends Specification {

@@ -7,22 +7,36 @@ import java.util.concurrent.atomic.AtomicReference
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.channel.ConnectingChannelBroker
 import com.google.common.collect.ImmutableSet
+import com.twitter.common.net.pool.DynamicHostSet
+import scala.collection.JavaConversions._
+import com.twitter.thrift.ServiceInstance
+import com.twitter.thrift.Status.ALIVE
 
-//val zookeeperClient = new ZooKeeperClient(
-//-          Amount.of(100, Time.MILLISECONDS),
-//-          _zookeeperHosts.get)
-//-        val serverSet = new ServerSetImpl(zookeeperClient, host.path)
-//-        new ServerSetBrokerPool(serverSet, wrapBrokerWithStats(codec, _))
-
+/**
+ * A Cluster of SocketAddresses that provide a certain service. Cluster
+ * membership is indicated by children Zookeeper node.
+ */
 class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster {
-  def mkBrokers[Req, Rep](f: (SocketAddress) => ConnectingChannelBroker[Req, Rep]) = {
+  def join(address: SocketAddress) {
+    require(address.isInstanceOf[InetSocketAddress])
+
+    serverSet.join(
+      address.asInstanceOf[InetSocketAddress],
+      Map[String, InetSocketAddress](),
+      ALIVE)
+  }
+
+  def mkBrokers[Req, Rep](mkBroker: (SocketAddress) => ConnectingChannelBroker[Req, Rep]) = {
     new SeqProxy[ConnectingChannelBroker[Req, Rep]] {
       @volatile private[this] var underlyingMap =
         Map[SocketAddress, ConnectingChannelBroker[Req, Rep]]()
       def self = underlyingMap.values.toSeq
 
-      // Note: this is a LIFO "queue" of length one. Last-write-wins.
-      @volatile private[this] val queuedChange =
+      /**
+       * LIFO "queue" of length one. Last-write-wins when more than one item
+       * is enqueued.
+       */
+      private[this] val queuedChange =
         new AtomicReference[ImmutableSet[ServiceInstance]](null)
 
       serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
@@ -37,28 +51,39 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster {
         }
       })
 
-      private[this] def performChange(serverSet: ServerSet) {
-        val newSet = serverSet flatMap { serviceInstance =>
-          val endpoint = serviceInstance.getServiceEndpoint
-          val address = new InetSocketAddress(endpoint.getHost, endpoint.getPort)
-
-          if (serviceInstance.getStatus == Status.ALIVE) Some(address)
-          else None
-        }
+      private[this] def performChange(serverSet: ImmutableSet[ServiceInstance]) {
         val oldMap = underlyingMap
-        val oldSet = oldMap.keys.toSet
-        val removed = oldSet &~ newSet
-        val same = oldSet & newSet
-        val added = newSet -- oldMap.keys
+        val newSet = collectIsAlive(serverSet.toSet)
+        val (removed, same, added) = diff(oldMap.keys.toSet, newSet)
 
-        val newMap = Map(added.toSeq map { address =>
+        val addedBrokers = Map(added.toSeq map { address =>
           address -> mkBroker(address)
-        }: _*) ++ oldMap.filter { case (key, value) => same contains key }
+        }: _*)
+        val sameBrokers = oldMap.filter { case (key, value) => same contains key }
+        val newMap = addedBrokers ++ sameBrokers
         underlyingMap = newMap
         removed.foreach { address =>
           oldMap(address).close()
         }
       }
+
+      private[this] def diff[A](oldSet: Set[A], newSet: Set[A]) = {
+        val removed = oldSet &~ newSet
+        val same = oldSet & newSet
+        val added = newSet &~ oldSet
+
+        (removed, same, added)
+      }
+
+      private[this] def collectIsAlive(serverSet: Set[ServiceInstance]) = {
+        val alive = serverSet.filter(_.getStatus == ALIVE)
+        val addresses = serverSet.map { serviceInstance =>
+          val endpoint = serviceInstance.getServiceEndpoint
+          new InetSocketAddress(endpoint.getHost, endpoint.getPort): SocketAddress
+        }
+        addresses
+      }
     }
+
   }
 }
