@@ -15,6 +15,8 @@ class TimeoutFilter[Req, Rep](timer: Timer, timeout: Duration)
   extends Filter[Req, Rep, Req, Rep]
 {
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    service(request).timeout(timer, timeout, Throw(new TimedoutRequestException))
+    service(request).timeout(timer, timeout) {
+      Throw(new TimedoutRequestException)
+    }
   }
 }

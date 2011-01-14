@@ -1,9 +1,7 @@
 package com.twitter.finagle.service
 
-import org.jboss.netty.util.HashedWheelTimer
 import com.twitter.finagle.util.Conversions._
 import com.twitter.util._
-import com.twitter.finagle.util.Timer
 import com.twitter.finagle.WriteException
 import com.twitter.finagle.{SimpleFilter, Service}
 
@@ -33,7 +31,7 @@ class RetryingFilter[Req, Rep](retryStrategy: RetryStrategy)
   {
     service(request) respond {
       // Only write exceptions are retriable.
-      case t@Throw(cause) if cause.isInstanceOf[WriteException] =>
+      case t @ Throw(cause) if cause.isInstanceOf[WriteException] =>
         // Time to retry.
         strategy.nextStrategy respond {
           case Return(nextStrategy) =>
@@ -42,7 +40,7 @@ class RetryingFilter[Req, Rep](retryStrategy: RetryStrategy)
             replyPromise.updateIfEmpty(t)
         }
 
-      case rv@_ => replyPromise.updateIfEmpty(rv)
+      case rv => replyPromise.updateIfEmpty(rv)
     }
   }
 

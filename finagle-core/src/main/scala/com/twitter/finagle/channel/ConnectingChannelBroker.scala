@@ -2,7 +2,7 @@ package com.twitter.finagle.channel
 
 import org.jboss.netty.channel._
 
-import com.twitter.util.{Promise, Future, Throw, Return}
+import com.twitter.util.{Promise, Throw, Return}
 
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
@@ -11,8 +11,9 @@ import com.twitter.finagle.{
   ReplyCastException, InvalidPipelineException}
 
 trait ConnectingChannelBroker[Req, Rep] extends Service[Req, Rep] {
-  def getChannel: ChannelFuture
-  def putChannel(channel: Channel)
+  protected def getChannel: ChannelFuture
+  protected def putChannel(channel: Channel)
+  def close()
 
   def apply(request: Req) = {
     val replyFuture = new Promise[Any]
@@ -50,7 +51,8 @@ trait ConnectingChannelBroker[Req, Rep] extends Service[Req, Rep] {
   private[this] def connectChannel(
       channel: Channel,
       message: Req,
-      replyFuture: Promise[Any]) {
+      replyFuture: Promise[Any])
+  {
     channel.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
         adapter.writeAndRegisterReply(channel, message, replyFuture)

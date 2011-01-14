@@ -15,9 +15,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-core", "finagle-core",
     new CoreProject(_))
 
-  // finagle-ostrich has a StatsReceiver for Ostrich 
+  // finagle-ostrich has a StatsReceiver for Ostrich
   val ostrichProject = project(
-    "finagle-ostrich",   "finagle-ostrich",
+    "finagle-ostrich", "finagle-ostrich",
     new OstrichProject(_), coreProject)
 
   // finagle-thrift contains thrift codecs
@@ -30,7 +30,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-thrift2", "finagle-thrift2",
     new ThriftProject(_), coreProject)
 
-  // finagle-integration has integration test suites & tools for
+  // finagle-stress has stress/integration test suites & tools for
   // development.
   val stressProject = project(
     "finagle-stress", "finagle-stress",
@@ -80,7 +80,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     // This project uses tomcat-native, download at
     // http://tomcat.apache.org/download-native.cgi
 
-    val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
+    val netty     = "org.jboss.netty"         % "netty"       % "3.2.3.Final"
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
   }

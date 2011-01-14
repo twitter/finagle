@@ -50,4 +50,20 @@ trait StatsReceiver {
   def mkGauge(description1: (String, String), description2: (String, String), f: => Float) {
     mkGauge(Seq(description1, description2), f)
   }
+
+  /**
+   * Prepends a prefix description to all descriptions on this StatsRepository
+   */
+  def scope(prefix: (String, String)*) = {
+    val self = this
+    new StatsReceiver {
+      def counter(description: (String, String)*) = self.counter(prefix ++ description: _*)
+
+      def gauge(description: (String, String)*) = self.gauge(prefix ++ description: _*)
+
+      def mkGauge(description: Seq[(String, String)], f: => Float) {
+        self.mkGauge(prefix ++ description, f)
+      }
+    }
+  }
 }
