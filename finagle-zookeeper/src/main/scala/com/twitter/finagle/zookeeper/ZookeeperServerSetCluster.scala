@@ -11,6 +11,7 @@ import com.twitter.common.net.pool.DynamicHostSet
 import scala.collection.JavaConversions._
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
+import com.twitter.finagle.Service
 
 /**
  * A Cluster of SocketAddresses that provide a certain service. Cluster
@@ -26,10 +27,10 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster {
       ALIVE)
   }
 
-  def mkBrokers[Req, Rep](mkBroker: (SocketAddress) => ConnectingChannelBroker[Req, Rep]) = {
-    new SeqProxy[ConnectingChannelBroker[Req, Rep]] {
+  def mkServices[Req, Rep](mkBroker: (SocketAddress) => Service[Req, Rep]) = {
+    new SeqProxy[Service[Req, Rep]] {
       @volatile private[this] var underlyingMap =
-        Map[SocketAddress, ConnectingChannelBroker[Req, Rep]]()
+        Map[SocketAddress, Service[Req, Rep]]()
       def self = underlyingMap.values.toSeq
 
       /**

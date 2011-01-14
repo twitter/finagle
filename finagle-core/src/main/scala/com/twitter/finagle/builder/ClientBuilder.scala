@@ -1,9 +1,6 @@
 package com.twitter.finagle.builder
 
-import collection.JavaConversions._
-
-import java.net.{SocketAddress, InetSocketAddress}
-import java.util.Collection
+import java.net.SocketAddress
 import java.util.logging.Logger
 import java.util.concurrent.Executors
 import javax.net.ssl.SSLContext
@@ -18,7 +15,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.Service
-import com.twitter.finagle.service.{RetryingService, TimeoutFilter}
+import com.twitter.finagle.service.{RetryingService, TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{
   LoadBalancerService,
@@ -28,7 +25,7 @@ object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
-  val defaultChannelFactory =
+  lazy val defaultChannelFactory =
     new NioClientSocketChannelFactory(
       Executors.newCachedThreadPool(),
       Executors.newCachedThreadPool())
@@ -224,30 +221,32 @@ case class ClientBuilder[Req, Rep](
     val cluster = _cluster.get
     val codec = _codec.get
 
-    val brokers = cluster mkBrokers { host =>
+    val brokers = cluster mkServices { host =>
       // TODO: stats export [observers], internal LB stats.
-      makeBroker(codec)(host)
-    }
-
-    val timedoutBrokers =
+      var broker: Service[Req, Rep] = makeBroker(codec)(host)
       if (_requestTimeout < Duration.MaxValue) {
         val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
-        brokers map { broker => timeoutFilter andThen broker }
-      } else {
-        brokers
+        broker = timeoutFilter andThen broker
       }
 
-    val loadBalancerStrategy = // _loadBalancerStrategy getOrElse
-    {
+      if (_statsReceiver.isDefined) {
+        val statsFilter = new StatsFilter[Req, Rep](_statsReceiver.get.scope("host" -> host.toString))
+        broker = statsFilter andThen broker
+      }
+      broker
+    }
+
+    // TODO: enable passing in a strategy via the builder.
+    val loadBalancerStrategy = {
       val leastQueuedStrategy = new LeastQueuedStrategy[Req, Rep]
       new FailureAccrualStrategy(leastQueuedStrategy, 3, 10.seconds)
     }
 
-    val balanceLoad = new LoadBalancerService(timedoutBrokers, loadBalancerStrategy)
-    _retries map { retries =>
-      RetryingService.tries[Req, Rep](retries) andThen balanceLoad
-    } getOrElse {
-      balanceLoad
+    val loadBalanced = new LoadBalancerService(brokers, loadBalancerStrategy)
+    if (_retries.isDefined) {
+      RetryingService.tries[Req, Rep](_retries.get) andThen loadBalanced
+    } else {
+      loadBalanced
     }
   }
 }

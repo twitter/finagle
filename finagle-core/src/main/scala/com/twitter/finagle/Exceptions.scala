@@ -1,4 +1,4 @@
-package com.twitter.finagle.channel
+package com.twitter.finagle
 
 // Request failures (eg. for request behavior changing brokers.)
 class RequestException            extends Exception

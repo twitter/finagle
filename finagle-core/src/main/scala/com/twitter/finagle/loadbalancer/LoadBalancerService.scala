@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.util.Future
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.channel.NoBrokersAvailableException
+import com.twitter.finagle.NoBrokersAvailableException
 
 /**
  * A LoadBalancerStrategy implements a load balancing algorithm. Given

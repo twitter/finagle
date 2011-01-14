@@ -5,7 +5,7 @@ import org.specs.mock.Mockito
 import com.twitter.finagle.util.Timer
 import com.twitter.conversions.time._
 import com.twitter.util.Promise
-import com.twitter.finagle.channel.TimedoutRequestException
+import com.twitter.finagle.TimedoutRequestException
 import com.twitter.finagle.Service
 
 object TimeoutFilterSpec extends Specification with Mockito {

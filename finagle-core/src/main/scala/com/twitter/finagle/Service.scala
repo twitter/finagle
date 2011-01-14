@@ -25,10 +25,15 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
    * This is the method to override/implement to create your own Service.
    */
   def apply(request: Req): Future[Rep]
+
+  /**
+   * Release any external resources. Overriden in subclasses.
+   */
+  def close() {}
 }
 
 /**
- * A Filter acts as a decorator/transformer of a service. It may apply
+ *  A Filter acts as a decorator/transformer of a service. It may apply
  * transformations to the input and output of that service:
  *
  *           (*  MyService  *)

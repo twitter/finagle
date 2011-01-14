@@ -8,5 +8,5 @@ class PoolingBroker[Req, Rep](channelPool: ChannelPool)
 {
   def getChannel = channelPool.reserve()
   def putChannel(channel: Channel) = channelPool.release(channel)
-  def close() { channelPool.close() }
+  override def close() { channelPool.close() }
 }

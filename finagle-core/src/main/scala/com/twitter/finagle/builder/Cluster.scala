@@ -2,7 +2,7 @@ package com.twitter.finagle.builder
 
 import java.net.SocketAddress
 import com.twitter.finagle.channel.ConnectingChannelBroker
-import collection.SeqProxy
+import com.twitter.finagle.Service
 
 /**
  * A collection of SocketAddresses. The intention of this interface
@@ -17,8 +17,8 @@ trait Cluster {
    * Produce a sequence of brokers that changes as servers join and
    * leave the cluster.
    */
-  def mkBrokers[Req, Rep](f: SocketAddress => ConnectingChannelBroker[Req, Rep]):
-    Seq[ConnectingChannelBroker[Req, Rep]]
+  def mkServices[Req, Rep](f: SocketAddress => Service[Req, Rep]):
+    Seq[Service[Req, Rep]]
 
   def join(address: SocketAddress)
 }
@@ -28,7 +28,7 @@ class SocketAddressCluster(underlying: Seq[SocketAddress])
 {
   private[this] var self = underlying
 
-  def mkBrokers[Req, Rep](f: (SocketAddress) => ConnectingChannelBroker[Req, Rep]) =
+  def mkServices[Req, Rep](f: SocketAddress => Service[Req, Rep]) =
     self map f
 
   def join(address: SocketAddress) {

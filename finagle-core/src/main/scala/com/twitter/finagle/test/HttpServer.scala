@@ -25,7 +25,7 @@ object HttpServer {
       .codec(Http)
       .service(server)
       .bindTo(new InetSocketAddress(10000))
-      .build
+      .build()
   }
 
   def quiesce() = ()

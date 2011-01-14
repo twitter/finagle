@@ -12,7 +12,9 @@ object RichFutureSpec extends Specification with Mockito {
     "timeout" in {
       val timer = Timer.default
       val alternative = Try(2)
-      val richFuture = new Promise[Int].timeout(timer, 1.second, alternative)
+      val richFuture = new Promise[Int].timeout(timer, 1.second) {
+        alternative
+      }
 
       "on success: propagate & cancel the timer" in {
         richFuture.setValue(1)

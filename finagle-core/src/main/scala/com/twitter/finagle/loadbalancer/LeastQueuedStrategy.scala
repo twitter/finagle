@@ -15,13 +15,26 @@ class LeastQueuedStrategy[Req, Rep]
   private[this] val leastQueuedOrdering =
     Ordering.by { case (_, queueSize) => queueSize }: Ordering[(Service[Req, Rep], Int)]
 
+  def select(services: Seq[Service[Req, Rep]]) = {
+    val snapshot = services map { service => (service, queueStat(service).get)  }
+    val (selected, _) = snapshot.min(leastQueuedOrdering)
+    selected
+  }
+
   def dispatch(request: Req, services: Seq[Service[Req, Rep]]) = {
     if (services.isEmpty) {
       None
-    } else {    
-      val snapshot = services map { service => (service, queueStat(service).get)  }
-      val (selected, _) = snapshot.min(leastQueuedOrdering)
-      Some((selected, selected(request)))
+    } else {
+      val service = select(services)
+      val qs = queueStat(service)
+
+      // Dispatch the request, and account for it.
+      val replyFuture = service(request)
+
+      qs.incrementAndGet()
+      replyFuture respond { _ => qs.decrementAndGet() }
+
+      Some((service, replyFuture))
     }
   }
 }

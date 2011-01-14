@@ -1,7 +1,11 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.channel._
+import org.jboss.netty.channel.{
+  Channel, Channels, SimpleChannelUpstreamHandler,
+  ChannelHandlerContext, MessageEvent, ExceptionEvent,
+  ChannelStateEvent}
 
+import com.twitter.finagle._
 import com.twitter.finagle.util.Error
 import com.twitter.finagle.util.Conversions._
 

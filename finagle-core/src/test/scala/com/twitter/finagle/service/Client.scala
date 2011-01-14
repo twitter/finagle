@@ -12,7 +12,7 @@ import org.jboss.netty.handler.codec.http._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Throw
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Http}
-import com.twitter.finagle.channel.ChannelClosedException
+import com.twitter.finagle.ChannelClosedException
 
 object ClientSpec extends Specification {
   def withServer(handler: ChannelHandler)(spec: ClientBuilder[HttpRequest, HttpResponse] => Unit) {
