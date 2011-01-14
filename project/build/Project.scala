@@ -26,6 +26,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   //   "finagle-thrift", "finagle-thrift",
   //   new ThriftProject(_), coreProject)
 
+  val thriftProject = project(
+    "finagle-thrift2", "finagle-thrift2",
+    new ThriftProject(_), coreProject)
+
   // finagle-integration has integration test suites & tools for
   // development.
   val stressProject = project(
@@ -53,10 +57,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with LibDirClasspath with AdhocInlines
   {
-    override def compileOrder = CompileOrder.ScalaThenJava
-
-    val thrift    = "thrift"               %  "libthrift"        % "0.5.0"
-    val slf4jNop  = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
+    override def compileOrder = CompileOrder.JavaThenScala
+    val thrift   = "thrift"    %  "libthrift" % "0.5.0"
+    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
   }
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
