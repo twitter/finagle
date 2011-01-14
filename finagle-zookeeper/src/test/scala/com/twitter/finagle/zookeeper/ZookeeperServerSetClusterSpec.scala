@@ -66,10 +66,7 @@ object ZookeeperServerSetClusterSpec extends Specification {
       val cluster = new ZookeeperServerSetCluster(serverSet)
 
       val sillyService = new Service[String, String] {
-        def apply(request: String) = {
-          println("hair")
-          Future(request.reverse)
-        }
+        def apply(request: String) = Future(request.reverse)
       }
       val server = ServerBuilder()
         .codec(new StringCodec)

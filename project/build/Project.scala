@@ -87,10 +87,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     val privateTwitterRepo = "twitter.com" at "http://svn.local.twitter.com/maven"
 
-    val commons   = "commons-lang"         % "commons-lang" % "2.5"
-    val zookeeper = "org.apache.zookeeper" % "zookeeper"    % "3.3.1"
-    val thrift    = "thrift"               %  "libthrift"   % "0.5.0"
-    val slf4jNop  = "org.slf4j"            %  "slf4j-nop"        % "1.5.2" % "provided"
+    val zookeeper  = "org.apache.zookeeper" % "zookeeper"    % "3.3.1"
+    val serverSets = "com.twitter.common"   % "zookeeper"    % "0.0.3"
+    val thrift     = "thrift"               %  "libthrift"        % "0.5.0"
 
   }
 
