@@ -36,10 +36,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-apr", "finagle-apr",
     new AprProject(_), coreProject)
 
-  val zookeeperProject = project(
-    "finagle-zookeeper", "finagle-zookeeper",
-    new ZookeeperProject(_), coreProject)
-
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
@@ -73,24 +69,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
-  }
-
-  class ZookeeperProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines with LibDirClasspath
-  {
-    override def ivyXML =
-      <dependencies>
-        <exclude module="jms"/>
-        <exclude module="jmxtools"/>
-        <exclude module="jmxri"/>
-      </dependencies>
-
-    val privateTwitterRepo = "twitter.com" at "http://svn.local.twitter.com/maven"
-
-    val zookeeper  = "org.apache.zookeeper" % "zookeeper"    % "3.3.1"
-    val serverSets = "com.twitter.common"   % "zookeeper"    % "0.0.3"
-    val thrift     = "thrift"               % "libthrift"    % "0.5.0"
-
   }
 
   class AprProject(info: ProjectInfo) extends StandardProject(info)
