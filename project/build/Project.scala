@@ -89,7 +89,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     val zookeeper  = "org.apache.zookeeper" % "zookeeper"    % "3.3.1"
     val serverSets = "com.twitter.common"   % "zookeeper"    % "0.0.3"
-    val thrift     = "thrift"               %  "libthrift"        % "0.5.0"
+    val thrift     = "thrift"               % "libthrift"    % "0.5.0"
 
   }
 
