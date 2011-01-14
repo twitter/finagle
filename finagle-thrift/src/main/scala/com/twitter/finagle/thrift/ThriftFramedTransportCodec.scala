@@ -5,7 +5,11 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 import com.twitter.finagle.builder.Codec
 
-class Thrift extends Codec[Array[Byte], Array[Byte]] {
+object ThriftFramedTransportCodec {
+  def apply() = new ThriftFramedTransportCodec
+}
+
+class ThriftFramedTransportCodec extends Codec[Array[Byte], Array[Byte]] {
   val clientPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {

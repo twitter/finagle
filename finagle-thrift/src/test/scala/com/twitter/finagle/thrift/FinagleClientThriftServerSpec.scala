@@ -51,7 +51,7 @@ object FinagleClientThriftServerSpec extends Specification {
       // ** Set up the client & query the server.
       val service = ClientBuilder()
         .hosts(Seq(thriftServerAddr))
-        .codec(new Thrift())
+        .codec(ThriftFramedTransportCodec())
         .build()
 
       val client = new Arithmetic.ServiceToClient(service, new TBinaryProtocol.Factory())
