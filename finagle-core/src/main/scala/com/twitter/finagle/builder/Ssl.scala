@@ -58,7 +58,6 @@ object Ssl {
         val kms = Keys.managers(new FileInputStream(f), password)
         val ctx = context(true)
 
-        println("init ctx:")
         try {
           ctx.init(kms, null, null) // XXX: specify RNG?
         } catch {
@@ -67,7 +66,6 @@ object Ssl {
             e.printStackTrace
             throw e
         }
-        println("finished!")
         Config(ctx)
         ctx
       case _ =>
@@ -81,11 +79,8 @@ object Ssl {
    */
   def protocol() = defaultProtocol
 
-  private[this] def harmonyProvider = {
-    val p = new org.apache.harmony.xnet.provider.jsse.JSSEProvider()
-    println("provider instantiated")
-    p
-  }
+  private[this] def harmonyProvider =
+    new org.apache.harmony.xnet.provider.jsse.JSSEProvider()
 
   /**
    * @returns instances of SSLContext, supporting protocol()

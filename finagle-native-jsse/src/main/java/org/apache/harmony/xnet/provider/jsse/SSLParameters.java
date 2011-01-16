@@ -35,12 +35,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 /**
  * The instances of this class encapsulate all the info
  * about enabled cipher suites and protocols,
@@ -89,7 +83,7 @@ public class SSLParameters {
     // Enable all protocols by default
     private String[] enabledProtocols = supportedProtocols;
     private int enabledProtocolsFlags = 7; // TLSv1 & SSLv3 & SSLv2
-    
+
     // if the peer with this parameters tuned to work in client mode
     private boolean client_mode = true;
     // if the peer with this parameters tuned to require client authentication
@@ -100,7 +94,7 @@ public class SSLParameters {
     private boolean enable_session_creation = true;
 
     static ThreadLocal<SSLParameters> threadLocalParams = new ThreadLocal<SSLParameters>();
-    
+
     // Native address of the OpenSSL SSL_CTX struct
     private long SSL_CTX = 0;
 
@@ -109,22 +103,11 @@ public class SSLParameters {
     private static native String[] initialiseDefaults();
 
     static {
-        // XXX- statically link the motherfucker instead of dealing with this shit.
-        // System.out.println("loading crypto");
-        // System.loadLibrary("crypto");
-
-        // System.out.println("loading ssl");
-        // System.loadLibrary("ssl");
-
-        System.out.println("loading hyjsse");
         System.loadLibrary("hyjsse");
-
-        System.out.println("Going to run initialiseDefaults:");
         supportedCipherSuites = initialiseDefaults();
-        System.out.println("FINISHED.");
     }
 
-    private static native long initialiseContext(byte[][] trustCerts, byte[] keyCert, byte[] privateKey);
+    private static native long initialiseContext(String certPath, String keyPath);
 
     /**
      * Creates an instance of SSLParameters.
@@ -134,7 +117,7 @@ public class SSLParameters {
 
     /**
      * Initializes the parameters. Naturally this constructor is used
-     * in SSLContextImpl.engineInit method which dirrectly passes its 
+     * in SSLContextImpl.engineInit method which dirrectly passes its
      * parameters. In other words this constructor holds all
      * the functionality provided by SSLContext.init method.
      * @see SSLContext.init(KeyManager,TrustManager,SecureRandom)
@@ -147,167 +130,18 @@ public class SSLParameters {
         this();
         this.serverSessionContext = serverSessionContext;
         this.clientSessionContext = clientSessionContext;
-    	// try {
-        //     // initialize key manager
-        //     boolean initialize_default = false;
-        //     // It's not described by the spec of SSLContext what should happen 
-        //     // if the arrays of length 0 are specified. This implementation
-        //     // behave as for null arrays (i.e. use installed security providers)
-        //     if ((kms == null) || (kms.length == 0)) {
-        //         if (defaultKeyManager == null) {
-        //             KeyManagerFactory kmf = KeyManagerFactory.getInstance(
-        //                     KeyManagerFactory.getDefaultAlgorithm());
-        //             kmf.init(null, null);
-        //             kms = kmf.getKeyManagers();
-        //             // tell that we are trying to initialize defaultKeyManager
-        //             initialize_default = true;
-        //         } else {
-        //             keyManager = defaultKeyManager;
-        //         }
-        //     }
-        //     if (keyManager == null) { // was not initialized by default
-        //         for (int i = 0; i < kms.length; i++) {
-        //             if (kms[i] instanceof X509KeyManager) {
-        //                 keyManager = (X509KeyManager)kms[i];
-        //                 break;
-        //             }
-        //         }
-        //         if (keyManager == null) {
-        //             throw new KeyManagementException("No X509KeyManager found");
-        //         }
-        //         if (initialize_default) {
-        //             // found keyManager is default key manager
-        //             defaultKeyManager = keyManager;
-        //         }
-        //     }
-            
-        //     // initialize trust manager
-        //     initialize_default = false;
-        //     if ((tms == null) || (tms.length == 0)) {
-        //         if (defaultTrustManager == null) {
-        //             TrustManagerFactory tmf = TrustManagerFactory
-        //                 .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        //             tmf.init((KeyStore)null);
-        //             tms = tmf.getTrustManagers();
-        //             initialize_default = true;
-        //         } else {
-        //             trustManager = defaultTrustManager;
-        //         }
-        //     }
-        //     if (trustManager == null) { // was not initialized by default
-        //         for (int i = 0; i < tms.length; i++) {
-        //             if (tms[i] instanceof X509TrustManager) {
-        //                 trustManager = (X509TrustManager)tms[i];
-        //                 break;
-        //             }
-        //         }
-        //         if (trustManager == null) {
-        //             throw new KeyManagementException("No X509TrustManager found");
-        //         }
-        //         if (initialize_default) {
-        //             // found trustManager is default trust manager
-        //             defaultTrustManager = trustManager;
-        //         }
-        //     }
-        // } catch (NoSuchAlgorithmException e) {
-        //     throw new KeyManagementException(e);
-        // } catch (KeyStoreException e) {
-        //     throw new KeyManagementException(e);
-        // } catch (UnrecoverableKeyException e) {
-        //     throw new KeyManagementException(e);
-        // }
 
         // initialize secure random
-        secureRandom = sr;
+        this.secureRandom = sr;
 
-        // Now setup our OpenSSL SSL_CTX with the various certificates
-        // First iterate through the trust certs storing their ASN1 form
-
-        // X509Certificate[] acceptedIssuers = trustManager.getAcceptedIssuers();
-        // int size = 0;
-        // for (int i=0; i<size; i++) {
-        //     try {
-        //         tempCertsDER[i] = acceptedIssuers[i].getEncoded();
-        //     } catch (CertificateEncodingException e) {
-        //         //TODO how to handle exceptions?
-        //         System.out.println("threw exception");
-        //     }
-        // }
-
-        // String alias = keyManager.chooseClientAlias(new String[] {"RSA", "DSA"}, null, null);
-        // byte[] keyCertDER = null;
-        // byte[] privateKeyDER = null;
-
-        // if (alias != null) {
-        //     certChain = keyManager.getCertificateChain(alias);
-        //     if (certChain.length != 0) {
-        //         try {
-        //             keyCertDER = certChain[0].getEncoded();
-        //         } catch (CertificateEncodingException e) {
-        //             //TODO how to handle exceptions?
-        //             System.out.println("threw exception");
-        //         }
-        //     }
-
-        //     PrivateKey privateKey = keyManager.getPrivateKey(alias);
-        //     if (privateKey != null) {
-        //          privateKeyDER = keyManager.getPrivateKey(alias).getEncoded();
-        //     }
-        // }
-
-        File keyCertFile = new File("/home/wilhelm/Code/finagle/localhost.crt");
-        File privateKeyFile = new File("/home/wilhelm/Code/finagle/localhost.key");
-
-        byte[][] tempCertsDER = new byte[0][];
-        byte[] keyCertDER = getBytesFromFile(keyCertFile);
-        byte[] privateKeyDER = getBytesFromFile(privateKeyFile);
+        // completely different here. we don't translate java keystore bullshit,
+        // but instead initialize the context DER-encoded files.
+        String certPath = "/home/wilhelm/Code/finagle/localhost.crt";
+        String keyPath = "/home/wilhelm/Code/finagle/localhost.key.nopass";
 
         threadLocalParams.set(this);
-        SSL_CTX = initialiseContext(tempCertsDER, keyCertDER, privateKeyDER);
+        SSL_CTX = initialiseContext(certPath, keyPath);
         threadLocalParams.remove();
-    }
-
-  // XXX - jank fest
-  public static byte[] getBytesFromFile(File file) throws RuntimeException {
-        InputStream is = null;
-        byte[] bytes = null;
-
-        try {
-            is = new FileInputStream(file);
-
-            // Get the size of the file
-            long length = file.length();
-
-            if (length > Integer.MAX_VALUE) {
-              throw new IOException("File is too large.");
-            }
-
-            // Create the byte array to hold the data
-            bytes = new byte[(int)length];
-
-            // Read in the bytes
-            int offset = 0;
-            int numRead = 0;
-            while (offset < bytes.length
-                   && (numRead = is.read(bytes, offset, bytes.length-offset)) >= 0) {
-              offset += numRead;
-            }
-
-            // Ensure all the bytes have been read in
-            if (offset < bytes.length) {
-              throw new RuntimeException("Could not completely read file "+file.getName());
-            }
-
-            // Close the input stream and return bytes
-
-            is.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-
-        return bytes;
     }
 
     protected static SSLParameters getDefault() throws KeyManagementException {
@@ -476,7 +310,7 @@ public class SSLParameters {
         } else {
             setClientAuthImpl(SSL_CTX, SSL, NO_CLIENT_AUTH);
         }
-        need_client_auth = need;     
+        need_client_auth = need;
         // reset the want_client_auth setting
         want_client_auth = false;
     }

@@ -31,7 +31,6 @@ import javax.net.ssl.SSLSession;
  * @see javax.net.ssl.SSLEngine class documentation for more information.
  */
 public class SSLEngineImpl extends SSLEngine {
-
     // indicates if peer mode was set
     private boolean peer_mode_was_set = false;
     // indicates if handshake has been started
@@ -65,13 +64,13 @@ public class SSLEngineImpl extends SSLEngine {
     private long SSL;
     // Pointer to the custom struct used for this engine
     private long SSLEngineAddress;
-    
+
     private HandshakeStatus handshakeStatus;
-    
+
     static {
         initImpl();
     }
-    
+
     private static native void initImpl();
     private static native long initSSL(long context);
     private static native long initSSLEngine(long context);
@@ -81,7 +80,7 @@ public class SSLEngineImpl extends SSLEngine {
             long src_address, int src_len, long dst_address, int dst_len);
     private static native SSLEngineResult unwrapImpl(long ssl, long sslEngineAddress,
             long src_address, int src_len, long dst_address, int dst_len);
-    
+
     /**
      * Ctor
      * @param   sslParameters:  SSLParameters
@@ -105,7 +104,7 @@ public class SSLEngineImpl extends SSLEngine {
         SSL = initSSL(sslParameters.getSSLContextAddress());
         SSLEngineAddress = initSSLEngine(SSL);
     }
-    
+
     /**
      * Starts the handshake.
      * @throws  SSLException
@@ -178,7 +177,7 @@ public class SSLEngineImpl extends SSLEngine {
                     close_notify_was_sent = true;
                 }
                 need_alert_wrap = true;
-                throw new SSLException("Inbound is closed before close_notify alert has been received.");                
+                throw new SSLException("Inbound is closed before close_notify alert has been received.");
             }
             closeInboundImpl(SSLEngineAddress);
         } else {
@@ -398,7 +397,7 @@ public class SSLEngineImpl extends SSLEngine {
         }
         return handshakeStatus;
     }
-    
+
     /**
      * This method works according to the specification of implemented class.
      * @see javax.net.ssl.SSLEngine#getSession() method
@@ -470,18 +469,10 @@ public class SSLEngineImpl extends SSLEngine {
         long src_address, dst_address;
         int src_length = src.remaining();
         int dst_length = dsts[0].remaining();
-        System.out.println("Unwrap a " + src_length + " byte buffer.");
-
-        // if (++times > 100) {
-        //   // Throw a fucking exception to see the stack trace.
-        //   throw new RuntimeException("FUCK OFF");
-        // }
 
         if (src.isDirect()) {
-            // System.out.println("unwrap: 1");
             src_address = AddressUtil.getDirectBufferAddress(src) + src.position();
         } else {
-            // System.out.println("unwrap: 2");
             // create a temporary buffer and copy the contents
             src_temp_buffer = ByteBuffer.allocateDirect(src_length);
             src_temp_buffer.put(src.array(), src.position(), src_length);
@@ -490,23 +481,13 @@ public class SSLEngineImpl extends SSLEngine {
         }
 
         if (dsts[0].isDirect()) {
-            // System.out.println("unwrap: 3");
             dst_address = AddressUtil.getDirectBufferAddress(dsts[0]) + dsts[0].position();
         } else {
-            // System.out.println("unwrap: 4");
             dst_temp_buffer = ByteBuffer.allocateDirect(dst_length);
             dst_address = AddressUtil.getDirectBufferAddress(dst_temp_buffer);
         }
 
         SSLEngineResult result = unwrapImpl(SSL, SSLEngineAddress, src_address, src_length, dst_address, dst_length);
-        System.out.println("UNWRAPPED: " + result);
-
-        System.out.println("unwrap src=\n"+src.toString()+"\ndsts:");
-        for(int i = 0; i < dsts.length; ++i) {
-          System.out.println("#"+i+": "+dsts[i].toString());
-        }
-        System.out.println("---");
-
 
         // update the buffers contents and positions
         src.position(src.position() + result.bytesConsumed());
@@ -523,7 +504,6 @@ public class SSLEngineImpl extends SSLEngine {
 
         // update handshake status
         handshakeStatus = result.getHandshakeStatus();
-        log("Handshake status: " + handshakeStatus);
 
         if (handshakeStatus == HandshakeStatus.FINISHED) {
             // If we've just completed the handshake, refresh the data in the SSLSession
@@ -553,10 +533,6 @@ public class SSLEngineImpl extends SSLEngine {
      * documentation for more information
      */
 
-  public void log(String s) {
-    System.out.println(s);
-  }
-
     @Override
     public SSLEngineResult wrap(ByteBuffer[] srcs, int offset,
                             int len, ByteBuffer dst) throws SSLException {
@@ -574,43 +550,35 @@ public class SSLEngineImpl extends SSLEngine {
 
         if (!handshake_started) {
             beginHandshake();
-            log("beginning handshake");
         }
 
         if (need_alert_wrap) {
             need_alert_wrap = false;
         }
-        
+
         // get direct addresses to the buffers
         // only use the first buffer at the moment
         ByteBuffer src_temp_buffer = null, dst_temp_buffer = null;
         long src_address, dst_address;
         int src_length = srcs[0].remaining();
         int dst_length = dst.remaining();
-        System.out.println("Wrap a " + src_length + " byte buffer.");
         if (srcs[0].isDirect()) {
-          // System.out.println("wrap: 1");
             src_address = AddressUtil.getDirectBufferAddress(srcs[0]) + srcs[0].position();
         } else {
             // create a temporary buffer and copy the contents
-          // System.out.println("wrap: 2");
-
             src_temp_buffer = ByteBuffer.allocateDirect(src_length);
             src_temp_buffer.put(srcs[0].array(), srcs[0].position(), src_length);
             src_temp_buffer.rewind();
             src_address = AddressUtil.getDirectBufferAddress(src_temp_buffer);
         }
         if (dst.isDirect()) {
-          // System.out.println("wrap: 3");
             dst_address = AddressUtil.getDirectBufferAddress(dst) + dst.position();
         } else {
-          // System.out.println("wrap: 4");
             dst_temp_buffer = ByteBuffer.allocateDirect(dst_length);
             dst_address = AddressUtil.getDirectBufferAddress(dst_temp_buffer);
         }
 
         SSLEngineResult result = wrapImpl(SSL, SSLEngineAddress, src_address, src_length, dst_address, dst_length);
-        System.out.println("WRAPPED: " + result);
 
         // update the buffers contents and positions
         srcs[0].position(srcs[0].position() + result.bytesConsumed());
@@ -624,14 +592,12 @@ public class SSLEngineImpl extends SSLEngine {
             // adjust position as not all bytes may have been written
             dst.position(position + result.bytesProduced());
         }
-        
+
         // update handshake status
         handshakeStatus = result.getHandshakeStatus();
-        log("Handshake status: " + handshakeStatus);
 
         if (handshakeStatus == HandshakeStatus.FINISHED) {
-          log("handshake finished.");
-            // If we've just completed the handshake, refresh the data in 
+            // If we've just completed the handshake, refresh the data in
             // the SSLSession and set the handshake status to NOT_HANDSHAKING
             session.refreshSessionData(null, sslParameters, SSL);
             handshakeStatus = HandshakeStatus.NOT_HANDSHAKING;
@@ -650,7 +616,6 @@ public class SSLEngineImpl extends SSLEngine {
         isOutboundDone = true;
         isInboundDone = true;
     }
-
 
     private SSLEngineResult.Status getEngineStatus() {
         return (engine_was_closed)

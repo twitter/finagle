@@ -9,16 +9,18 @@ import javax.net.ssl.SSLContext
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
+import org.jboss.netty.handler.ssl.SslHandler
 
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle._
+
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
 import service.{StatsFilter, ServiceToChannelHandler, Service}
 import stats.{StatsReceiver}
+
 
 object ServerBuilder {
   def apply() = new ServerBuilder()
