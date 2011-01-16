@@ -50,10 +50,10 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
         ()
     }
 
-    ctx.sendDownstream(e)    
+    ctx.sendDownstream(e)
   }
 
-  // 67 characters 
+  // 67 characters
   def dump(printer: String => Unit, buf: ChannelBuffer) {
     val rawStr = buf.toString(buf.readerIndex, buf.readableBytes, Charset.forName("UTF-8"))
     val str = rawStr.replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n")
@@ -69,6 +69,9 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     printUp(e.toString)
+    if (e.isInstanceOf[ExceptionEvent])
+      e.asInstanceOf[ExceptionEvent].getCause.printStackTrace()
+
     ctx.sendUpstream(e)
   }
 

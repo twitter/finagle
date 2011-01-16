@@ -9,11 +9,15 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
 
+  val nativeJsseProject = project(
+    "finagle-native-jsse", "finagle-native-jsse",
+    new NativeJsseProject(_))
+
   // finagle-core contains the finagle kernel itself, plus builders &
   // HTTP codecs [HTTP may move to its own project soon]
   val coreProject = project(
     "finagle-core", "finagle-core",
-    new CoreProject(_))
+    new CoreProject(_), nativeJsseProject)
 
   // finagle-ostrich has a StatsReceiver for Ostrich 
   val ostrichProject = project(
@@ -35,6 +39,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-apr", "finagle-apr",
     new AprProject(_), coreProject)
 
+  class NativeJsseProject(info: ProjectInfo) extends StressProject(info)
+    with SubversionPublisher with AdhocInlines
+
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
@@ -47,6 +54,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
+
+    // val nativeJsse = "com.twitter" % "finagle-native-jsse" % "1.0-SNAPSHOT"
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
@@ -71,11 +80,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class AprProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+    with SubversionPublisher with LibDirClasspath with AdhocInlines
   {
     // This project uses tomcat-native, download at
     // http://tomcat.apache.org/download-native.cgi
 
+    val util      = "com.twitter"          %  "util"      % "1.4.10"
     val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()

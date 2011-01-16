@@ -28,9 +28,10 @@ object Ssl {
 
     private[this] def filterCipherSuites(ctx: SSLContext,
                                          filters: Seq[StringPredicate]) {
-      val params = ctx.getDefaultSSLParameters
-      for (filter <- filters)
-        params.setCipherSuites(params.getCipherSuites().filter(filter))
+      // XXX - for hy, we need to do this in the native code.
+      // val params = ctx.getDefaultSSLParameters
+      // for (filter <- filters)
+      //   params.setCipherSuites(params.getCipherSuites().filter(filter))
     }
 
     private[this] def disableAnonCipherSuites(ctx: SSLContext) {
@@ -39,8 +40,9 @@ object Ssl {
     }
 
     private[this] def dispreferClientAuth(ctx: SSLContext) {
-      ctx.getDefaultSSLParameters().setWantClientAuth(false)
-      ctx.getDefaultSSLParameters().setNeedClientAuth(false)
+      // XXX - do we need this shit?
+      // ctx.getDefaultSSLParameters().setWantClientAuth(false)
+      // ctx.getDefaultSSLParameters().setNeedClientAuth(false)
     }
 
     def apply(ctx: SSLContext) {
@@ -54,8 +56,18 @@ object Ssl {
       case f: File
       if f.exists && f.canRead =>
         val kms = Keys.managers(new FileInputStream(f), password)
-        val ctx = context()
-        ctx.init(kms, null, null) // XXX: specify RNG?
+        val ctx = context(true)
+
+        println("init ctx:")
+        try {
+          ctx.init(kms, null, null) // XXX: specify RNG?
+        } catch {
+          case e: Throwable =>
+            println("Caught %s".format(e.getMessage))
+            e.printStackTrace
+            throw e
+        }
+        println("finished!")
         Config(ctx)
         ctx
       case _ =>
@@ -69,16 +81,27 @@ object Ssl {
    */
   def protocol() = defaultProtocol
 
+  private[this] def harmonyProvider = {
+    val p = new org.apache.harmony.xnet.provider.jsse.JSSEProvider()
+    println("provider instantiated")
+    p
+  }
+
   /**
    * @returns instances of SSLContext, supporting protocol()
    */
-  def context() = SSLContext.getInstance(protocol())
+
+  def context(useHarmonyProvider: Boolean) =
+    if (useHarmonyProvider)
+      SSLContext.getInstance(protocol(), harmonyProvider)
+    else
+      SSLContext.getInstance(protocol())
 
   /**
    * Create a client
    */
   def client(): SSLContext = {
-    val ctx = context()
+    val ctx = context(false)
     ctx.init(null, null, null)
     Config(ctx)
     ctx
@@ -88,7 +111,7 @@ object Ssl {
    * Create a client with a trust manager that does not check the validity of certificates
    */
   def clientWithoutCertificateValidation(): SSLContext = {
-    val ctx = context()
+    val ctx = context(false)
     ctx.init(null, trustAllCertificates(), null)
     Config(ctx)
     ctx
@@ -99,7 +122,7 @@ object Ssl {
    */
   private[this] class IgnorantTrustManager extends X509TrustManager {
     def getAcceptedIssuers(): Array[X509Certificate] =
-      null
+      new Array[X509Certificate](0)
 
     def checkClientTrusted(certs: Array[X509Certificate],
                            authType: String) {

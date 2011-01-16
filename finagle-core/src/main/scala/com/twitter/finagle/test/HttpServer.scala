@@ -1,6 +1,7 @@
 package com.twitter.finagle.test
 
 import java.net.InetSocketAddress
+import java.util.Date
 
 import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http._
@@ -14,17 +15,21 @@ object HttpServer {
   def main(args: Array[String]) {
     val server = new Service[HttpRequest, HttpResponse] {
       def apply(request: HttpRequest) = Future {
+        println("HTTPServer got request!!")
         val response = new DefaultHttpResponse(
           HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        response.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes))
+        response.setContent(ChannelBuffers.wrappedBuffer(("Hello from Finagle HTTP server at " + new Date().toString()).getBytes))
         response
       }
     }
 
+    val logger = java.util.logging.Logger.getLogger(getClass.getName)
     ServerBuilder()
      .codec(Http)
      .service(server)
+     .tls("/home/wilhelm/Code/finagle/test.keystore", "secret")
      .bindTo(new InetSocketAddress(10000))
+     .logger(logger)
      .build
   }
 
