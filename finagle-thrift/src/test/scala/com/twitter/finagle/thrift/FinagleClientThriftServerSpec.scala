@@ -2,6 +2,7 @@ package com.twitter.finagle.thrift
 
 import java.net.ServerSocket
 import java.util.logging
+import java.util.concurrent.CyclicBarrier
 
 import org.specs.Specification
 
@@ -16,12 +17,12 @@ import com.twitter.util.{RandomSocket, Promise, Return, Throw}
 import com.twitter.finagle.builder.ClientBuilder
 
 object FinagleClientThriftServerSpec extends Specification {
-  object processor extends Arithmetic.Iface {
-    def add(a: Int, b: Int): Int = a + b
-  }
-
   "finagle client vs. synchronous thrift server" should {
-    "talk to each other" in {
+    def makeServer(f: (Int, Int) => Int) = {
+      val processor = new Arithmetic.Iface {
+        def add(a: Int, b: Int): Int = f(a, b)
+      }
+
       val (thriftServerAddr, thriftServer) = {
         val serverAddr = RandomSocket()
         val socket = new ServerSocket(serverAddr.getPort)
@@ -47,6 +48,14 @@ object FinagleClientThriftServerSpec extends Specification {
         thriftServer.stop()
         thriftServerThread.join()
       }
+    
+      thriftServerAddr
+    }
+
+    "talk to each other" in {
+      // TODO: interleave requests (to test seqids, etc.)
+
+      val thriftServerAddr = makeServer { (a, b) => a + b }
 
       // ** Set up the client & query the server.
       val service = ClientBuilder()
@@ -58,6 +67,27 @@ object FinagleClientThriftServerSpec extends Specification {
 
       val future = client.add(1, 2)
       future() must be_==(3)
+    }
+
+    "talk to multiple servers" in {
+      val NumParties = 10
+      val barrier = new CyclicBarrier(NumParties)
+
+      val addrs = 0 until NumParties map { _ =>
+        makeServer { (a, b) => barrier.await(); a + b }
+      }
+
+      // ** Set up the client & query the server.
+      val service = ClientBuilder()
+        .hosts(addrs)
+        .codec(ThriftFramedTransportCodec())
+        .build()
+
+      val client = new Arithmetic.ServiceToClient(service, new TBinaryProtocol.Factory())
+
+      val futures = 0 until NumParties map { _ => client.add(1, 2) }
+      val resolved = futures map(_())
+      resolved foreach { r => r must be_==(3) }
     }
   }
 }

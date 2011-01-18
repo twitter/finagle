@@ -21,14 +21,5 @@ class ThriftFramedTransportCodec extends Codec[Array[Byte], Array[Byte]] {
       }
     }
 
-  val serverPipelineFactory =
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
-        pipeline.addLast("byteEncoder", new ChannelBufferEncoder)
-        pipeline.addLast("byteDecoder", new ChannelBufferDecoder)
-        pipeline
-      }
-    }
+  val serverPipelineFactory = clientPipelineFactory
 }
