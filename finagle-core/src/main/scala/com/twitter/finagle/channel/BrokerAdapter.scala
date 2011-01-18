@@ -16,7 +16,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
 
   def writeAndRegisterReply(
     channel: Channel, message: Any,
-    incomingReplyFuture: Promise[Any]) = synchronized {
+    incomingReplyFuture: Promise[Any]) {
     // If there is an outstanding request, something up the stack has
     // messed up. We currently just fail this request immediately, and
     // let the current request complete.
@@ -66,7 +66,7 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
     done(Throw(cause))
   }
 
-  private[this] def done(answer: Try[Any]) = synchronized {
+  private[this] def done(answer: Try[Any]) {
     if (replyFuture ne null) {
       // The order of operations here is important: the callback from
       // the future could invoke another request immediately, and
