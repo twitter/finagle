@@ -1,0 +1,4 @@
+This code is largely derived from Apache Harmony's OpenSSL-backed JSSE provider.
+
+To view the original source, see:
+  http://svn.apache.org/viewvc/harmony/enhanced/java/branches/omd/classlib/modules/x-net/
