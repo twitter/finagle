@@ -1,10 +1,6 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.Executors
-
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.{Channel, Channels, ChannelFuture, DefaultChannelFuture}
+import org.jboss.netty.channel.{Channel, Channels, DefaultChannelFuture}
 import org.specs.Specification
 import org.specs.mock.Mockito
 
@@ -20,10 +16,6 @@ object ChannelPoolSpec extends Specification with Mockito {
     val f2 = Channels.succeededFuture(c2)
 
     bs.connect() returns f1
-
-    "without proactive connection establishment, is immediately available" in {
-      cp.isAvailable must beTrue
-    }
 
     "with no Channels, creates a new one and returns it" in {
       val f = cp.reserve()
@@ -68,22 +60,12 @@ object ChannelPoolSpec extends Specification with Mockito {
       there was one(bs).connect()
     }
 
-    "isn't immediately available" in {
-      cp.isAvailable must beFalse
-    }
-
     "return the reserved channel on success" in {
       f1.setSuccess()
       there was one(bs).connect()
       cp.reserve().getChannel mustEqual c1
       there was one(bs).connect()
     }
-
-    "is available on success" in {
-      f1.setSuccess()
-      cp.isAvailable must beTrue
-    }
-
   }
 
   "ConnectionLimitingChannelPool" should {
@@ -123,7 +105,7 @@ object ChannelPoolSpec extends Specification with Mockito {
       }
 
       // (Note: no releases were made.)
-      
+
       bs.connect() returns f1
 
       0 until 10 foreach { i =>

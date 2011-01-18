@@ -13,17 +13,16 @@ import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Time}
 
 import com.twitter.finagle._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
-import com.twitter.finagle.service.{Service, ServicePipelineFactory}
-import stats.StatsReceiver
+import service.{StatsFilter, ServiceToChannelHandler}
+import stats.{StatsReceiver}
 
 object ServerBuilder {
-  def apply() = new ServerBuilder()
-  def get() = apply()
+  def apply[Req, Rep]() = new ServerBuilder[Req, Rep]()
+  def get[Req, Rep]() = apply[Req, Rep]()
 
   val defaultChannelFactory =
     new NioServerSocketChannelFactory(
@@ -31,61 +30,16 @@ object ServerBuilder {
       Executors.newCachedThreadPool())
 }
 
-class SampleHandler(samples: SampleRepository[AddableSample[_]])
-  extends SimpleChannelHandler{
-  val dispatchSample: AddableSample[_] = samples("dispatch")
-  val latencySample: AddableSample[_]  = samples("latency")
-
-  case class Timing(requestedAt: Time = Time.now)
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    ctx.getAttachment match {
-      case Timing(requestedAt: Time) =>
-        samples("exception", e.getCause.getClass.getName).add(
-          requestedAt.untilNow.inMilliseconds.toInt)
-      case _ => ()
-    }
-    super.exceptionCaught(ctx, e)
-  }
-
-  override def handleUpstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (c.isInstanceOf[MessageEvent]) {
-      dispatchSample.incr()
-      ctx.setAttachment(Timing())
-    }
-
-    super.handleUpstream(ctx, c)
-  }
-
-  override def handleDownstream(ctx: ChannelHandlerContext, c: ChannelEvent) {
-    if (c.isInstanceOf[MessageEvent]) {
-      val e = c.asInstanceOf[MessageEvent]
-      ctx.getAttachment match {
-        case Timing(requestedAt) =>
-          latencySample.add(requestedAt.untilNow.inMilliseconds.toInt)
-          ctx.setAttachment(null)
-        case _ =>
-          // Can this happen?
-          ()
-      }
-    }
-
-    super.handleDownstream(ctx, c)
-  }
-}
-
 // TODO: common superclass between client & server builders for common
 // concerns.
 
-case class ServerBuilder(
-  _codec: Option[Codec],
+case class ServerBuilder[Req, Rep](
+  _codec: Option[Codec[Req, Rep]],
   _statsReceiver: Option[StatsReceiver],
-  _sampleWindow: Duration,
-  _sampleGranularity: Duration,
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _pipelineFactory: Option[ChannelPipelineFactory],
+  _service: Option[Service[Req, Rep]],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
@@ -97,100 +51,58 @@ case class ServerBuilder(
   import ServerBuilder._
 
   def this() = this(
-    None,        // codec
-    None,        // statsReceiver
-    10.minutes,  // sampleWindow
-    10.seconds,  // sampleGranularity
-    None,        // name
-    None,        // sendBufferSize
-    None,        // recvBufferSize
-    None,        // pipelineFactory
-    None,        // bindTo
-    None,        // logger
-    None,        // tls
-    false,       // startTls
-    None,        // channelFactory
-    None,        // maxConcurrentRequests
-    None         // maxQueueDepth
+    None,              // codec
+    None,              // statsReceiver
+    None,              // name
+    None,              // sendBufferSize
+    None,              // recvBufferSize
+    None,              // service
+    None,              // bindTo
+    None,              // logger
+    None,              // tls
+    false,             // startTls
+    None,              // channelFactory
+    None,              // maxConcurrentRequests
+    None               // maxQueueDepth
   )
 
-  def codec(codec: Codec): ServerBuilder =
+  def codec(codec: Codec[Req, Rep]) =
     copy(_codec = Some(codec))
 
-  def reportTo(receiver: StatsReceiver): ServerBuilder =
+  def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
 
-  def sampleWindow(window: Duration): ServerBuilder =
-    copy(_sampleWindow = window)
+  def name(value: String) = copy(_name = Some(value))
 
-  def sampleGranularity(window: Duration): ServerBuilder =
-    copy(_sampleGranularity = window)
+  def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
+  def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def name(value: String): ServerBuilder = copy(_name = Some(value))
+  def service(service: Service[Req, Rep]) =
+    copy(_service = Some(service))
 
-  def sendBufferSize(value: Int): ServerBuilder = copy(_sendBufferSize = Some(value))
-  def recvBufferSize(value: Int): ServerBuilder = copy(_recvBufferSize = Some(value))
-
-  def pipelineFactory(value: ChannelPipelineFactory): ServerBuilder =
-    copy(_pipelineFactory = Some(value))
-
-  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]): ServerBuilder =
-    copy(_pipelineFactory = Some(ServicePipelineFactory(service)))
-
-  def bindTo(address: SocketAddress): ServerBuilder =
+  def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
 
-  def channelFactory(cf: ChannelFactory): ServerBuilder =
+  def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
 
-  def logger(logger: Logger): ServerBuilder = copy(_logger = Some(logger))
+  def logger(logger: Logger) = copy(_logger = Some(logger))
 
-  def tls(path: String, password: String): ServerBuilder =
-    copy(_tls = Some(Ssl(path, password)))
+  def tls(path: String, password: String) =
+    copy(_tls = Some(Ssl.server(path, password)))
 
-  def startTls(value: Boolean): ServerBuilder =
+  def startTls(value: Boolean) =
     copy(_startTls = true)
 
-  def maxConcurrentRequests(max: Int): ServerBuilder =
+  def maxConcurrentRequests(max: Int) =
     copy(_maxConcurrentRequests = Some(max))
 
-  def maxQueueDepth(max: Int): ServerBuilder =
+  def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
 
-  private def statsRepository(
-    name: Option[String],
-    receiver: Option[StatsReceiver],
-    window: Duration,
-    granularity: Duration,
-    sockAddr: SocketAddress) =
-  {
-    if (window < granularity) {
-      throw new IncompleteSpecification(
-        "window smaller than granularity!")
-    }
-
-    // .
-
-    val prefix = name map ("%s_".format(_)) getOrElse ""
-    val sampleRepository =
-      new ObservableSampleRepository[TimeWindowedSample[ScalarSample]] {
-        override def makeStat = TimeWindowedSample[ScalarSample](window, granularity)
-      }
-
-    for (receiver <- receiver)
-      sampleRepository observeTailsWith receiver.observer(prefix, sockAddr toString)
-
-    sampleRepository
-  }
-
   def build(): Channel = {
-    val (codec, pipelineFactory) = (_codec, _pipelineFactory) match {
-      case (None, _) =>
-        throw new IncompleteSpecification("No codec was specified")
-      case (_, None) =>
-        throw new IncompleteSpecification("No pipeline was specified")
-      case (Some(codec), Some(pipeline)) =>
-        (codec, pipeline)
+    val codec = _codec.getOrElse {
+      throw new IncompleteSpecification("No codec was specified")
     }
 
    val bs = new ServerBootstrap(_channelFactory getOrElse defaultChannelFactory)
@@ -200,11 +112,6 @@ case class ServerBuilder(
     bs.setOption("reuseAddress", true)
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
-
-    val statsRepo = statsRepository(
-      _name, _statsReceiver,
-      _sampleWindow, _sampleGranularity,
-      _bindTo.get)
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
@@ -229,10 +136,13 @@ case class ServerBuilder(
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        pipeline.addLast("stats", new SampleHandler(statsRepo))
-
-        for ((name, handler) <- pipelineFactory.getPipeline.toMap)
-          pipeline.addLast(name, handler)
+        _service.foreach { service =>
+          val serviceWithStats =
+            if (_statsReceiver.isDefined)
+              new StatsFilter(_statsReceiver.get).andThen(service)
+            else service
+          pipeline.addLast("service", new ServiceToChannelHandler(serviceWithStats))
+        }
 
         pipeline
       }

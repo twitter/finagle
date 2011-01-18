@@ -1,29 +1,39 @@
 package com.twitter.finagle.stats
 
 import java.util.logging.Logger
-import org.jboss.netty.util.HashedWheelTimer
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.Timer
 
-case class JavaLoggerStatsReceiver(logger: Logger) extends StatsReceiver {
-  val timer = new HashedWheelTimer()
+class JavaLoggerStatsReceiver(logger: Logger, timer: Timer) extends StatsReceiver {
+  def this(logger: Logger) = this(logger, Timer.default)
 
-  def observer(prefix: String, label: String) = {
-    val suffix = "_%s".format(label)
-
-    (path: Seq[String], value: Int, count: Int) => {
-      val pathString = path mkString "__"
-      logger.info(List(prefix, pathString, suffix, count) mkString " ")
+  def gauge(description: (String, String)*) = new Gauge {
+    def measure(value: Float) {
+      logger.info("%s measure %f".format(formatDescription(description), value))
     }
   }
 
-  def makeGauge(name: String, f: => Float) {
-    timer(10.seconds) {
+  def counter(description: (String, String)*) = new Counter {
+    def incr(delta: Int) {
+      logger.info("%s incr %d".format(formatDescription(description), delta))
+    }
+  }
+
+  def mkGauge(name: Seq[(String, String)], f: => Float) {
+    timer.schedule(10.seconds) {
       logger.info("%s %2f".format(name, f))
     }
+  }
+
+  private[this] def formatDescription(description: Seq[(String, String)]) = {
+    description.map { case (key, value) =>
+      "%s_%s".format(key, value)
+    }.mkString("__")
   }
 }
 
 object JavaLoggerStatsReceiver {
-  def apply(): JavaLoggerStatsReceiver = JavaLoggerStatsReceiver(Logger.getLogger(getClass.getName))
+  def apply(): JavaLoggerStatsReceiver =
+    new JavaLoggerStatsReceiver(Logger.getLogger("Finagle"))
 }

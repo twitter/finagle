@@ -1,19 +1,22 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
-import com.twitter.util.{Promise, Future, Throw}
+import com.twitter.util.{Promise, Throw, Return}
 
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.{
+  Service, WriteException, CancelledRequestException,
+  ReplyCastException, InvalidPipelineException}
 
-trait ConnectingChannelBroker extends Broker {
-  def getChannel: ChannelFuture
-  def putChannel(channel: Channel)
+trait ConnectingChannelBroker[Req, Rep] extends Service[Req, Rep] {
+  protected def getChannel: ChannelFuture
+  protected def putChannel(channel: Channel)
+  def close()
 
-  def apply(request: AnyRef) = {
-    val replyFuture = new Promise[AnyRef]
+  def apply(request: Req) = {
+    val replyFuture = new Promise[Any]
 
     getChannel {
       case Ok(channel) =>
@@ -36,13 +39,20 @@ trait ConnectingChannelBroker extends Broker {
         replyFuture() = Throw(new CancelledRequestException)
     }
 
-    replyFuture
+    replyFuture flatMap { result =>
+      // TODO: Is this the right place for casting?
+      if (result.isInstanceOf[Rep])
+        Return(result.asInstanceOf[Rep])
+      else
+        Throw(new ReplyCastException)
+    }
   }
 
   private[this] def connectChannel(
       channel: Channel,
-      message: AnyRef,
-      replyFuture: Promise[AnyRef]) {
+      message: Req,
+      replyFuture: Promise[Any])
+  {
     channel.getPipeline.getLast match {
       case adapter: BrokerAdapter =>
         adapter.writeAndRegisterReply(channel, message, replyFuture)

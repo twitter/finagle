@@ -1,21 +1,24 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.atomic.AtomicReference
+import org.jboss.netty.channel.{
+  Channel, Channels, SimpleChannelUpstreamHandler,
+  ChannelHandlerContext, MessageEvent, ExceptionEvent,
+  ChannelStateEvent}
 
-import org.jboss.netty.channel._
-
+import com.twitter.finagle._
 import com.twitter.finagle.util.Error
 import com.twitter.finagle.util.Conversions._
 
-import com.twitter.util.{Future, Promise, Return, Throw, Try}
+import com.twitter.util.{Promise, Return, Throw, Try}
 
 class BrokerAdapter extends SimpleChannelUpstreamHandler {
-  @volatile private[this] var replyFuture: Promise[AnyRef] = null
+  @volatile private[this] var replyFuture: Promise[Any] = null
 
-  def writeAndRegisterReply(channel: Channel, message: AnyRef,
-                            incomingReplyFuture: Promise[AnyRef]) {
+  def writeAndRegisterReply(
+    channel: Channel, message: Any,
+    incomingReplyFuture: Promise[Any]) {
     // If there is an outstanding request, something up the stack has
-    // fucked up. We currently just fail this request immediately, and
+    // messed up. We currently just fail this request immediately, and
     // let the current request complete.
     if (replyFuture ne null) {
       incomingReplyFuture.updateIfEmpty(Throw(new TooManyConcurrentRequestsException))
@@ -59,12 +62,11 @@ class BrokerAdapter extends SimpleChannelUpstreamHandler {
   private[this] def fail(ch: Channel, cause: ChannelException) {
     // We always close the channel on failure.  This effectively
     // invalidates the channel.
-    if (ch.isOpen)
-      Channels.close(ch)
+    if (ch.isOpen) Channels.close(ch)
     done(Throw(cause))
   }
 
-  private[this] def done(answer: Try[AnyRef]) {
+  private[this] def done(answer: Try[Any]) {
     if (replyFuture ne null) {
       // The order of operations here is important: the callback from
       // the future could invoke another request immediately, and

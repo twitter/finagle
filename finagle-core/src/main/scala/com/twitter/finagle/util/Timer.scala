@@ -1,16 +1,34 @@
 package com.twitter.finagle.util
 
 import java.util.concurrent.TimeUnit
-import org.jboss.netty.util.{Timer, TimerTask, Timeout}
-import com.twitter.util.Duration
+import com.twitter.util.{Time, Duration, TimerTask}
+import org.jboss.netty.util.{HashedWheelTimer, Timeout}
 
-class RichTimer(val self: Timer) {
-  def apply(after: Duration)(f: => Unit): Timeout = {
-    self.newTimeout(new TimerTask {
+object Timer {
+  lazy val default = new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
+}
+
+class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Timer {
+  def schedule(when: Time)(f: => Unit): TimerTask = {
+    val timeout = underlying.newTimeout(new org.jboss.netty.util.TimerTask {
       def run(to: Timeout) {
-        if (!to.isCancelled())
-          f
+        if (!to.isCancelled) f
       }
-    }, after.inMilliseconds, TimeUnit.MILLISECONDS)
+    }, (when - Time.now).inMilliseconds, TimeUnit.MILLISECONDS)
+    toTimerTask(timeout)
+  }
+
+  def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = {
+    val task = schedule(when) {
+      f
+      schedule(period)(f)
+    }
+    task
+  }
+
+  def stop() { underlying.stop() }
+
+  private[this] def toTimerTask(task: Timeout) = new TimerTask {
+    def cancel() { task.cancel() }
   }
 }

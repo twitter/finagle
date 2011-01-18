@@ -4,6 +4,8 @@ import org.specs.Specification
 
 import com.twitter.util.{Future, Return, Throw}
 
+import com.twitter.finagle.{Service, Filter}
+
 object ServiceSpec extends Specification {
   "filters" should {
     val intToString =
