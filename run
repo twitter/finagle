@@ -59,8 +59,11 @@ fi
 
 if [ "$DEBUG" = "1" ]; then
   export JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n $JAVA_OPTS"
-
 fi
 
-export JAVA_OPTS="$JAVA_OPTS -server -Xmx2G -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS"
+sbtlocalsh="`dirname $0`/sbtlocal.sh"
+test -f "$sbtlocalsh" && source "$sbtlocalsh"
+
+export JAVA_OPTS="$JAVA_OPTS -Djava.library.path=$JAVA_LIB_PATH -server -Xmx512M -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC $GC_OPTS"
+
 exec java $JAVA_OPTS -cp $CP "$@"

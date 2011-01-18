@@ -103,7 +103,7 @@ public class SSLParameters {
     private static native String[] initialiseDefaults();
 
     static {
-        System.loadLibrary("hyjsse");
+        System.loadLibrary("finaglenative");
         supportedCipherSuites = initialiseDefaults();
     }
 
