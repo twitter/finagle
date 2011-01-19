@@ -4,30 +4,45 @@ import com.twitter.sbt._
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
 {
-//  override def parallelExecution = true
   override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
 
   val twitterRepo  = "twitter.com" at "http://maven.twttr.com/"
 
-  // finagle-core contains the finagle kernel itself, plus builders &
-  // HTTP codecs [HTTP may move to its own project soon]
+  /**
+   * finagle-core contains the finagle kernel itself, plus builders,
+   * HTTP codecs [HTTP may move to its own project soon]
+   */
   val coreProject = project(
     "finagle-core", "finagle-core",
     new CoreProject(_))
 
-  // finagle-ostrich has a StatsReceiver for Ostrich
+  /**
+   * finagle-ostrich implements a StatsReceiver for the Ostrich statistics library
+   */
   val ostrichProject = project(
     "finagle-ostrich", "finagle-ostrich",
     new OstrichProject(_), coreProject)
 
-  // finagle-thrift contains thrift codecs for use with the finagle
-  // thrift service codegen.
+  /**
+   * finagle-thrift contains thrift codecs for use with the finagle
+   * thrift service codegen.
+   */
   val thriftProject = project(
     "finagle-thrift", "finagle-thrift",
     new ThriftProject(_), coreProject)
 
-  // finagle-stress has stress/integration test suites & tools for
-  // development.
+  /**
+   * finagle-memcached contains the memcached codec, ketama, and Java and Scala
+   * friendly clients.
+   */
+  val memcachedProject = project(
+    "finagle-memcached", "finagle-memcached",
+    new MemcachedProject(_), coreProject)
+
+  /**
+   * finagle-stress has stress/integration test suites & tools for
+   * development.
+   */
   val stressProject = project(
     "finagle-stress", "finagle-stress",
     new StressProject(_), coreProject, ostrichProject)
@@ -56,6 +71,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"    %  "libthrift" % "0.5.0"
     val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
+  }
+
+  class MemcachedProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+    val junit = "junit" % "junit" % "3.8.2" % "test"
   }
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
