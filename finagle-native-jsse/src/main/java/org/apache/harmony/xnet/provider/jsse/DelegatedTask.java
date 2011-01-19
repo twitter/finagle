@@ -30,7 +30,7 @@ public class DelegatedTask implements Runnable {
     /*private final HandshakeProtocol handshaker;
     private final PrivilegedExceptionAction<Void> action;
     private final AccessControlContext  context;*/
-    
+
     /**
      * Creates DelegatedTask
      * @param action

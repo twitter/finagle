@@ -19,7 +19,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-core", "finagle-core",
     new CoreProject(_), nativeJsseProject)
 
-  // finagle-ostrich has a StatsReceiver for Ostrich 
+  // finagle-ostrich has a StatsReceiver for Ostrich
   val ostrichProject = project(
     "finagle-ostrich",   "finagle-ostrich",
     new OstrichProject(_), coreProject)
@@ -34,10 +34,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   val stressProject = project(
     "finagle-stress", "finagle-stress",
     new StressProject(_), coreProject)
-
-  val aprProject = project(
-    "finagle-apr", "finagle-apr",
-    new AprProject(_), coreProject)
 
   class NativeJsseProject(info: ProjectInfo) extends StressProject(info)
     with SubversionPublisher with AdhocInlines
@@ -54,8 +50,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
-
-    // val nativeJsse = "com.twitter" % "finagle-native-jsse" % "1.0-SNAPSHOT"
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
