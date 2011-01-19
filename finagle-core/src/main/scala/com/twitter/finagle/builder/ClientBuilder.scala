@@ -8,6 +8,7 @@ import javax.net.ssl.SSLContext
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
+import org.jboss.netty.bootstrap.ClientBootstrap
 
 import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
@@ -167,7 +168,7 @@ case class ClientBuilder[Req, Rep](
 
   // ** BUILDING
   private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
-    val bs = new BrokerClientBootstrap(_channelFactory.get)
+    val bs = new ClientBootstrap(_channelFactory.get)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.clientPipelineFactory.getPipeline
@@ -198,19 +199,16 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
-  private def pool(limit: Option[Int], proactivelyConnect: Option[Duration])
-                  (bootstrap: BrokerClientBootstrap) =
+  private def pool(limit: Option[Int])(bootstrap: ClientBootstrap) =
     limit match {
       case Some(limit) =>
-        new ConnectionLimitingChannelPool(bootstrap, limit, proactivelyConnect)
+        throw new IllegalArgumentException("pool limits not yet supported")
       case None =>
-        new ChannelPool(bootstrap, proactivelyConnect)
+        new PoolingService[Req, Rep](bootstrap)
     }
 
   private def makeBroker(codec: Codec[Req, Rep]) =
-    bootstrap(codec) _                                andThen
-    pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
-    (new PoolingBroker[Req, Rep](_))
+    pool(_hostConnectionLimit) _ compose bootstrap(codec)
 
   def build(): Service[Req, Rep] = {
     if (!_cluster.isDefined)
@@ -230,9 +228,11 @@ case class ClientBuilder[Req, Rep](
       }
 
       if (_statsReceiver.isDefined) {
-        val statsFilter = new StatsFilter[Req, Rep](_statsReceiver.get.scope("host" -> host.toString))
+        val statsFilter = new StatsFilter[Req, Rep](
+          _statsReceiver.get.scope("host" -> host.toString))
         broker = statsFilter andThen broker
       }
+
       broker
     }
 

@@ -16,7 +16,7 @@ import com.twitter.finagle.util.{Ok, Error}
  * channel. It is responsible for requests dispatched to a given
  * (connected) channel during its lifetime.
  */
-class ChannelService[Req, Rep: ClassManifest](channel: Channel)
+class ChannelService[Req, Rep](channel: Channel)
   extends Service[Req, Rep] with Serialized
 {
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
