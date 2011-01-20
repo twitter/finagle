@@ -54,7 +54,7 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   })
 
-  def isAvailable = isHealthy
+  def isAvailable = isHealthy && channel.isOpen
 
   def apply(request: Req) = {
     val replyFuture = new Promise[Rep]

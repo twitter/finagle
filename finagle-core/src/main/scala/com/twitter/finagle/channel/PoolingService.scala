@@ -21,6 +21,7 @@ class PoolingService[Req, Rep](bootstrap: ClientBootstrap)
     do {
       service = channelServices.poll()
     } while ((service ne null) && !service.isAvailable)
+
     service
   }
 

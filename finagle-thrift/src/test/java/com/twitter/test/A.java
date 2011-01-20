@@ -28,28 +28,28 @@ import org.apache.thrift.protocol.*;
 
 import com.twitter.util.Future;
 import com.twitter.util.Function;
+import com.twitter.util.Function2;
 import com.twitter.util.Try;
 import com.twitter.util.Return;
 import com.twitter.util.Throw;
-import com.twitter.finagle.Service;
 
-public class Arithmetic {
+public class A {
 
   public interface Iface {
 
-    public int add(int a, int b) throws TException;
+    public int multiply(int a, int b) throws TException;
 
   }
 
   public interface AsyncIface {
 
-    public void add(int a, int b, AsyncMethodCallback<AsyncClient.add_call> resultHandler) throws TException;
+    public void multiply(int a, int b, AsyncMethodCallback<AsyncClient.multiply_call> resultHandler) throws TException;
 
   }
 
   public interface ServiceIface {
 
-    public Future<Integer> add(int a, int b) throws TException;
+    public Future<Integer> multiply(int a, int b) throws TException;
 
   }
 
@@ -90,16 +90,16 @@ public class Arithmetic {
       return this.oprot_;
     }
 
-    public int add(int a, int b) throws TException
+    public int multiply(int a, int b) throws TException
     {
-      send_add(a, b);
-      return recv_add();
+      send_multiply(a, b);
+      return recv_multiply();
     }
 
-    public void send_add(int a, int b) throws TException
+    public void send_multiply(int a, int b) throws TException
     {
-      oprot_.writeMessageBegin(new TMessage("add", TMessageType.CALL, ++seqid_));
-      add_args args = new add_args();
+      oprot_.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, ++seqid_));
+      multiply_args args = new multiply_args();
       args.setA(a);
       args.setB(b);
       args.write(oprot_);
@@ -107,7 +107,7 @@ public class Arithmetic {
       oprot_.getTransport().flush();
     }
 
-    public int recv_add() throws TException
+    public int recv_multiply() throws TException
     {
       TMessage msg = iprot_.readMessageBegin();
       if (msg.type == TMessageType.EXCEPTION) {
@@ -116,15 +116,15 @@ public class Arithmetic {
         throw x;
       }
       if (msg.seqid != seqid_) {
-        throw new TApplicationException(TApplicationException.BAD_SEQUENCE_ID, "add failed: out of sequence response");
+        throw new TApplicationException(TApplicationException.BAD_SEQUENCE_ID, "multiply failed: out of sequence response");
       }
-      add_result result = new add_result();
+      multiply_result result = new multiply_result();
       result.read(iprot_);
       iprot_.readMessageEnd();
       if (result.isSetSuccess()) {
         return result.success;
       }
-      throw new TApplicationException(TApplicationException.MISSING_RESULT, "add failed: unknown result");
+      throw new TApplicationException(TApplicationException.MISSING_RESULT, "multiply failed: unknown result");
     }
 
   }
@@ -145,28 +145,28 @@ public class Arithmetic {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void add(int a, int b, AsyncMethodCallback<add_call> resultHandler) throws TException {
+    public void multiply(int a, int b, AsyncMethodCallback<multiply_call> resultHandler) throws TException {
       checkReady();
-      add_call method_call = new add_call(a, b, resultHandler, this, protocolFactory, transport);
+      multiply_call method_call = new multiply_call(a, b, resultHandler, this, protocolFactory, transport);
       manager.call(method_call);
     }
 
-    public static class add_call extends TAsyncMethodCall {
+    public static class multiply_call extends TAsyncMethodCall {
       private int a;
       private int b;
-      public add_call(int a, int b, AsyncMethodCallback<add_call> resultHandler, TAsyncClient client, TProtocolFactory protocolFactory, TNonblockingTransport transport) throws TException {
+      public multiply_call(int a, int b, AsyncMethodCallback<multiply_call> resultHandler, TAsyncClient client, TProtocolFactory protocolFactory, TNonblockingTransport transport) throws TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.a = a;
         this.b = b;
       }
 
       public void write_args(TProtocol prot) throws TException {
-      prot.writeMessageBegin(new TMessage("add", TMessageType.CALL, 0));
-      add_args args = new add_args();
-      args.setA(a);
-      args.setB(b);
-      args.write(prot);
-      prot.writeMessageEnd();
+        prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
+        multiply_args args = new multiply_args();
+        args.setA(a);
+        args.setB(b);
+        args.write(prot);
+        prot.writeMessageEnd();
       }
 
       public int getResult() throws TException {
@@ -175,40 +175,41 @@ public class Arithmetic {
         }
         TMemoryInputTransport memoryTransport = new TMemoryInputTransport(getFrameBuffer().array());
         TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
-        return (new Client(prot)).recv_add();
+        return (new Client(prot)).recv_multiply();
       }
     }
 
   }
 
   public static class ServiceToClient implements ServiceIface {
-    private Service<byte[], byte[]> service;
+    private com.twitter.finagle.Service<byte[], byte[]> service;
     private TProtocolFactory protocolFactory;
-    public ServiceToClient(Service<byte[], byte[]> service, TProtocolFactory protocolFactory) {
+    public ServiceToClient(com.twitter.finagle.Service<byte[], byte[]> service, TProtocolFactory protocolFactory) {
       this.service = service;
       this.protocolFactory = protocolFactory;
     }
 
-    public Future<Integer> add(int a, int b) throws TException {
+    public Future<Integer> multiply(int a, int b) throws TException {
       // TODO: size
-      TMemoryBuffer memoryTransport = new TMemoryBuffer(123);
+      TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
       TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-      prot.writeMessageBegin(new TMessage("add", TMessageType.CALL, 0));
-      add_args args = new add_args();
+      prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
+      multiply_args args = new multiply_args();
       args.setA(a);
       args.setB(b);
       args.write(prot);
       prot.writeMessageEnd();
     
 
-      Future<byte[]> done = this.service.apply(memoryTransport.getArray());
+      byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
+      Future<byte[]> done = this.service.apply(buffer);
       return done.flatMap(new Function<byte[], Try<Integer>>() {
         public Future<Integer> apply(byte[] buffer) {
           TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
           TProtocol prot = protocolFactory.getProtocol(memoryTransport);
           try {
-            return Future.value((new Client(prot)).recv_add());
-          } catch (TException e) {
+            return Future.value((new Client(prot)).recv_multiply());
+          } catch (Exception e) {
             return Future.exception(e);
           }
         }
@@ -221,7 +222,7 @@ public class Arithmetic {
     public Processor(Iface iface)
     {
       iface_ = iface;
-      processMap_.put("add", new add());
+      processMap_.put("multiply", new multiply());
     }
 
     protected static interface ProcessFunction {
@@ -249,26 +250,26 @@ public class Arithmetic {
       return true;
     }
 
-    private class add implements ProcessFunction {
+    private class multiply implements ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
-        add_args args = new add_args();
+        multiply_args args = new multiply_args();
         try {
           args.read(iprot);
         } catch (TProtocolException e) {
           iprot.readMessageEnd();
           TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
-          oprot.writeMessageBegin(new TMessage("add", TMessageType.EXCEPTION, seqid));
+          oprot.writeMessageBegin(new TMessage("multiply", TMessageType.EXCEPTION, seqid));
           x.write(oprot);
           oprot.writeMessageEnd();
           oprot.getTransport().flush();
           return;
         }
         iprot.readMessageEnd();
-        add_result result = new add_result();
-        result.success = iface_.add(args.a, args.b);
+        multiply_result result = new multiply_result();
+        result.success = iface_.multiply(args.a, args.b);
         result.setSuccessIsSet(true);
-        oprot.writeMessageBegin(new TMessage("add", TMessageType.REPLY, seqid));
+        oprot.writeMessageBegin(new TMessage("multiply", TMessageType.REPLY, seqid));
         result.write(oprot);
         oprot.writeMessageEnd();
         oprot.getTransport().flush();
@@ -278,8 +279,123 @@ public class Arithmetic {
 
   }
 
-  public static class add_args implements TBase<add_args, add_args._Fields>, java.io.Serializable, Cloneable   {
-    private static final TStruct STRUCT_DESC = new TStruct("add_args");
+  public static class Service extends com.twitter.finagle.Service<byte[], byte[]> {
+    private final ServiceIface iface;
+    private final TProtocolFactory protocolFactory;
+    protected HashMap<String, Function2<TProtocol, Integer, Future<byte[]>>> functionMap = new HashMap<String, Function2<TProtocol, Integer, Future<byte[]>>>();
+    public Service(final ServiceIface iface, final TProtocolFactory protocolFactory) {
+      this.iface = iface;
+      this.protocolFactory = protocolFactory;
+      functionMap.put("multiply", new Function2<TProtocol, Integer, Future<byte[]>>() {
+        public Future<byte[]> apply(final TProtocol iprot, final Integer seqid) {
+          multiply_args args = new multiply_args();
+          try {
+            args.read(iprot);
+          } catch (TProtocolException e) {
+            try {
+              iprot.readMessageEnd();
+              TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
+              TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+              TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
+          
+              oprot.writeMessageBegin(new TMessage("multiply", TMessageType.EXCEPTION, seqid));
+              x.write(oprot);
+              oprot.writeMessageEnd();
+              oprot.getTransport().flush();
+              byte[] buffer = Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length());
+              return Future.value(buffer);
+            } catch (Exception e1) {
+              return Future.exception(e1);
+            }
+          } catch (Exception e) {
+            return Future.exception(e);
+          }
+          
+          try {
+            iprot.readMessageEnd();
+          } catch (Exception e) {
+            return Future.exception(e);
+          }
+          try {
+            return iface.multiply(args.a, args.b).flatMap(new Function<Integer, Try<byte[]>>() {
+              public Future<byte[]> apply(Integer value) {
+                multiply_result result = new multiply_result();
+                result.success = value;
+                result.setSuccessIsSet(true);
+          
+                try {
+                  TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+                  TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
+                   
+                  oprot.writeMessageBegin(new TMessage("multiply", TMessageType.REPLY, seqid));
+                  result.write(oprot);
+                  oprot.writeMessageEnd();
+                   
+                  return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
+                } catch (Exception e) {
+                  return Future.exception(e);
+                }
+              }
+            }).rescue(new Function<Throwable, Try<byte[]>>() {
+              public Try<byte[]> apply(Throwable t) {
+                TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+                TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
+                try {
+                  TApplicationException x = new TApplicationException(TApplicationException.INTERNAL_ERROR, "Internal error processing multiply");
+                  oprot.writeMessageBegin(new TMessage("multiply", TMessageType.EXCEPTION, seqid));
+                  x.write(oprot);
+                  oprot.writeMessageEnd();
+                  oprot.getTransport().flush();
+                  return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
+                } catch (Exception e) {
+                  return Future.exception(e);
+                }
+              }
+            });
+          } catch (Exception e) {
+            return Future.exception(e);
+          }
+        }
+      });
+      
+    }
+    
+    public Future<byte[]> apply(byte[] request) {
+      TTransport inputTransport = new TMemoryInputTransport(request);
+      TProtocol iprot = protocolFactory.getProtocol(inputTransport);
+    
+      TMessage msg;
+      try {
+        msg = iprot.readMessageBegin();
+      } catch (Exception e) {
+        return Future.exception(e);
+      }
+    
+      Function2<TProtocol, Integer, Future<byte[]>> fn = functionMap.get(msg.name);
+      if (fn == null) {
+        try {
+          TProtocolUtil.skip(iprot, TType.STRUCT);
+          iprot.readMessageEnd();
+          TApplicationException x = new TApplicationException(TApplicationException.UNKNOWN_METHOD, "Invalid method name: '"+msg.name+"'");
+          TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+          TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
+          oprot.writeMessageBegin(new TMessage(msg.name, TMessageType.EXCEPTION, msg.seqid));
+          x.write(oprot);
+          oprot.writeMessageEnd();
+          oprot.getTransport().flush();
+          return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
+        } catch (Exception e) {
+          return Future.exception(e);
+        }
+      }
+    
+      return fn.apply(iprot, msg.seqid);
+    }
+
+  }
+
+  public static class multiply_args implements TBase<multiply_args, multiply_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final TStruct STRUCT_DESC = new TStruct("multiply_args");
 
     private static final TField A_FIELD_DESC = new TField("a", TType.I32, (short)1);
     private static final TField B_FIELD_DESC = new TField("b", TType.I32, (short)2);
@@ -361,13 +477,13 @@ public class Arithmetic {
       tmpMap.put(_Fields.B, new FieldMetaData("b", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
-      FieldMetaData.addStructMetaDataMap(add_args.class, metaDataMap);
+      FieldMetaData.addStructMetaDataMap(multiply_args.class, metaDataMap);
     }
 
-    public add_args() {
+    public multiply_args() {
     }
 
-    public add_args(
+    public multiply_args(
       int a,
       int b)
     {
@@ -381,15 +497,15 @@ public class Arithmetic {
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public add_args(add_args other) {
+    public multiply_args(multiply_args other) {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.a = other.a;
       this.b = other.b;
     }
 
-    public add_args deepCopy() {
-      return new add_args(this);
+    public multiply_args deepCopy() {
+      return new multiply_args(this);
     }
 
     @Override
@@ -404,7 +520,7 @@ public class Arithmetic {
       return this.a;
     }
 
-    public add_args setA(int a) {
+    public multiply_args setA(int a) {
       this.a = a;
       setAIsSet(true);
       return this;
@@ -427,7 +543,7 @@ public class Arithmetic {
       return this.b;
     }
 
-    public add_args setB(int b) {
+    public multiply_args setB(int b) {
       this.b = b;
       setBIsSet(true);
       return this;
@@ -498,12 +614,12 @@ public class Arithmetic {
     public boolean equals(Object that) {
       if (that == null)
         return false;
-      if (that instanceof add_args)
-        return this.equals((add_args)that);
+      if (that instanceof multiply_args)
+        return this.equals((multiply_args)that);
       return false;
     }
 
-    public boolean equals(add_args that) {
+    public boolean equals(multiply_args that) {
       if (that == null)
         return false;
 
@@ -533,13 +649,13 @@ public class Arithmetic {
       return 0;
     }
 
-    public int compareTo(add_args other) {
+    public int compareTo(multiply_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      add_args typedOther = (add_args)other;
+      multiply_args typedOther = (multiply_args)other;
 
       lastComparison = Boolean.valueOf(isSetA()).compareTo(typedOther.isSetA());
       if (lastComparison != 0) {
@@ -621,7 +737,7 @@ public class Arithmetic {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("add_args(");
+      StringBuilder sb = new StringBuilder("multiply_args(");
       boolean first = true;
 
       sb.append("a:");
@@ -641,8 +757,8 @@ public class Arithmetic {
 
   }
 
-  public static class add_result implements TBase<add_result, add_result._Fields>, java.io.Serializable, Cloneable   {
-    private static final TStruct STRUCT_DESC = new TStruct("add_result");
+  public static class multiply_result implements TBase<multiply_result, multiply_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final TStruct STRUCT_DESC = new TStruct("multiply_result");
 
     private static final TField SUCCESS_FIELD_DESC = new TField("success", TType.I32, (short)0);
 
@@ -716,13 +832,13 @@ public class Arithmetic {
       tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
-      FieldMetaData.addStructMetaDataMap(add_result.class, metaDataMap);
+      FieldMetaData.addStructMetaDataMap(multiply_result.class, metaDataMap);
     }
 
-    public add_result() {
+    public multiply_result() {
     }
 
-    public add_result(
+    public multiply_result(
       int success)
     {
       this();
@@ -733,14 +849,14 @@ public class Arithmetic {
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public add_result(add_result other) {
+    public multiply_result(multiply_result other) {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.success = other.success;
     }
 
-    public add_result deepCopy() {
-      return new add_result(this);
+    public multiply_result deepCopy() {
+      return new multiply_result(this);
     }
 
     @Override
@@ -753,7 +869,7 @@ public class Arithmetic {
       return this.success;
     }
 
-    public add_result setSuccess(int success) {
+    public multiply_result setSuccess(int success) {
       this.success = success;
       setSuccessIsSet(true);
       return this;
@@ -811,12 +927,12 @@ public class Arithmetic {
     public boolean equals(Object that) {
       if (that == null)
         return false;
-      if (that instanceof add_result)
-        return this.equals((add_result)that);
+      if (that instanceof multiply_result)
+        return this.equals((multiply_result)that);
       return false;
     }
 
-    public boolean equals(add_result that) {
+    public boolean equals(multiply_result that) {
       if (that == null)
         return false;
 
@@ -837,13 +953,13 @@ public class Arithmetic {
       return 0;
     }
 
-    public int compareTo(add_result other) {
+    public int compareTo(multiply_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      add_result typedOther = (add_result)other;
+      multiply_result typedOther = (multiply_result)other;
 
       lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
       if (lastComparison != 0) {
@@ -905,7 +1021,7 @@ public class Arithmetic {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("add_result(");
+      StringBuilder sb = new StringBuilder("multiply_result(");
       boolean first = true;
 
       sb.append("success:");

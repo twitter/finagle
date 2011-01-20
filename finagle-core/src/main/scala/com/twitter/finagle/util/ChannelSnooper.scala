@@ -50,7 +50,7 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
         ()
     }
 
-    ctx.sendDownstream(e)    
+    ctx.sendDownstream(e)
   }
 
   // 67 characters 

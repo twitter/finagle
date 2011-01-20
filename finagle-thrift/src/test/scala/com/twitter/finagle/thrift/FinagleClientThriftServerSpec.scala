@@ -11,16 +11,19 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
 import org.apache.thrift.async.AsyncMethodCallback
 
-import com.twitter.test.Arithmetic
-import com.twitter.util.{RandomSocket, Promise, Return, Throw}
+import com.twitter.test.{B, AnException, SomeStruct}
+import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
 import com.twitter.finagle.builder.ClientBuilder
 
 object FinagleClientThriftServerSpec extends Specification {
   "finagle client vs. synchronous thrift server" should {
     def makeServer(f: (Int, Int) => Int) = {
-      val processor = new Arithmetic.Iface {
+      val processor = new B.Iface {
+        def multiply(a: Int, b: Int): Int = f(a, b)
         def add(a: Int, b: Int): Int = f(a, b)
+        def add_one(a: Int, b: Int) { throw new AnException }
+        def complex_return(someString: String) = new SomeStruct(123, someString)
       }
 
       val (thriftServerAddr, thriftServer) = {
@@ -30,7 +33,7 @@ object FinagleClientThriftServerSpec extends Specification {
         val serverSocketTransport = new TServerSocket(socket)
 
         val server = new TSimpleServer(
-          new Arithmetic.Processor(processor),
+          new B.Processor(processor),
           serverSocketTransport,
           new TFramedTransport.Factory(),
           new TBinaryProtocol.Factory()
@@ -48,7 +51,7 @@ object FinagleClientThriftServerSpec extends Specification {
         thriftServer.stop()
         thriftServerThread.join()
       }
-    
+
       thriftServerAddr
     }
 
@@ -63,10 +66,24 @@ object FinagleClientThriftServerSpec extends Specification {
         .codec(ThriftFramedTransportCodec())
         .build()
 
-      val client = new Arithmetic.ServiceToClient(service, new TBinaryProtocol.Factory())
+      val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
       val future = client.add(1, 2)
       future() must be_==(3)
+    }
+
+    "handle exceptions" in {
+      val thriftServerAddr = makeServer { (a, b) => a + b }
+      
+      // ** Set up the client & query the server.
+      val service = ClientBuilder()
+        .hosts(Seq(thriftServerAddr))
+        .codec(ThriftFramedTransportCodec())
+        .build()
+
+      val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
+
+      client.add_one(1, 2)() must throwA[AnException]
     }
 
     "talk to multiple servers" in {
@@ -83,11 +100,13 @@ object FinagleClientThriftServerSpec extends Specification {
         .codec(ThriftFramedTransportCodec())
         .build()
 
-      val client = new Arithmetic.ServiceToClient(service, new TBinaryProtocol.Factory())
+      val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-      val futures = 0 until NumParties map { _ => client.add(1, 2) }
-      val resolved = futures map(_())
-      resolved foreach { r => r must be_==(3) }
+      {
+        val futures = 0 until NumParties map { _ => client.add(1, 2) }
+        val resolved = futures map(_())
+        resolved foreach { r => r must be_==(3) }
+      }
     }
   }
 }
