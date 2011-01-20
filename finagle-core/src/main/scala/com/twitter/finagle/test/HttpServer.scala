@@ -15,7 +15,6 @@ object HttpServer {
   def main(args: Array[String]) {
     val server = new Service[HttpRequest, HttpResponse] {
       def apply(request: HttpRequest) = Future {
-        println("HTTPServer got request!!")
         val response = new DefaultHttpResponse(
           HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
         response.setContent(ChannelBuffers.wrappedBuffer(("Hello from Finagle HTTP server at " + new Date().toString()).getBytes))
@@ -27,7 +26,6 @@ object HttpServer {
     ServerBuilder()
      .codec(Http)
      .service(server)
-     .tls("/home/wilhelm/Code/finagle/test.keystore", "secret")
      .bindTo(new InetSocketAddress(10000))
      .logger(logger)
      .build

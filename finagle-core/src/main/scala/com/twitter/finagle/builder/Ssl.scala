@@ -56,13 +56,14 @@ object Ssl {
       case f: File
       if f.exists && f.canRead =>
         val kms = Keys.managers(new FileInputStream(f), password)
-        val ctx = context(true)
+        val ctx = serverContext
 
         try {
           ctx.init(kms, null, null) // XXX: specify RNG?
         } catch {
           case e: Throwable =>
-            println("Caught %s".format(e.getMessage))
+            println("Caught exception during SSL context init:")
+            println(e.getMessage)
             e.printStackTrace
             throw e
         }
@@ -79,24 +80,33 @@ object Ssl {
    */
   def protocol() = defaultProtocol
 
-  private[this] def harmonyProvider =
-    new org.apache.harmony.xnet.provider.jsse.JSSEProvider()
+  private[this] def nativeProvider: Option[SSLContext] =
+    try {
+      Some(new org.apache.harmony.xnet.provider.jsse.JSSEProvider)
+    } catch {
+      case _ =>
+        None
+    }
 
-  /**
-   * @returns instances of SSLContext, supporting protocol()
-   */
+  private[this] def context(provider: Option[Provider]) =
+    provider match {
+      case Some(provider: Provider) =>
+        SSLContext.getInstance(protocol(), provider)
+      case _ =>
+        SSLContext.getInstance(protocol())
+    }
 
-  def context(useHarmonyProvider: Boolean) =
-    if (useHarmonyProvider)
-      SSLContext.getInstance(protocol(), harmonyProvider)
-    else
-      SSLContext.getInstance(protocol())
+  private[this] def serverContext =
+    context(nativeProvider)
+
+  private[this] def clientContext =
+    context(None)
 
   /**
    * Create a client
    */
   def client(): SSLContext = {
-    val ctx = context(false)
+    val ctx = clientContext
     ctx.init(null, null, null)
     Config(ctx)
     ctx

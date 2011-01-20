@@ -136,17 +136,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
           sslEngine.setUseClientMode(false)
           sslEngine.setEnableSessionCreation(true)
 
-          // val mon = new Thread {
-          //   while (true) {
-          //     println("   Engine: %s".format(sslEngine))
-          //     println("Handshake: %s".format(sslEngine.getHandshakeStatus))
-          //     println()
-          //     Thread.`yield`()
-          //     Thread.sleep(1000)
-          //   }
-          // } // .run()
-
-
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 

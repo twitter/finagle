@@ -12,9 +12,6 @@ import com.twitter.finagle.service.Service
 import com.twitter.util.{Future, RandomSocket}
 import com.twitter.util.TimeConversions._
 
-class APR {
-}
-
 object SslConfig {
   val pwd = System.getenv("PWD")
   def here(filename: String): String =
@@ -23,7 +20,6 @@ object SslConfig {
   // XXX - clean this shit up
   val serverCert = here("localhost.crt")
   val serverKey: String = here("localhost.key")
-  val serverPassword: String = "secret"
   val serverCiphers = "HIGH:MEDIUM:!aNULL:!eNULL:@STRENGTH:-DHE-RSA-AES128-SHA:-EDH-RSA-DES-CBC3-SHA:-DHE-RSA-AES256-SHA:-DHE-RSA-AES256-SHA"
 }
 
