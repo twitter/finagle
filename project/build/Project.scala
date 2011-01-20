@@ -40,6 +40,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new MemcachedProject(_), coreProject)
 
   /**
+   * finagle-kestrel contains the kestrel codec and Java and Scala
+   * friendly clients.
+   */
+  val kestrelProject = project(
+    "finagle-kestrel", "finagle-kestrel",
+    new KestrelProject(_), coreProject, memcachedProject)
+
+  /**
    * finagle-stress has stress/integration test suites & tools for
    * development.
    */
@@ -79,6 +87,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.ScalaThenJava
     val junit = "junit" % "junit" % "3.8.2" % "test"
   }
+
+  class KestrelProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {  }
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines

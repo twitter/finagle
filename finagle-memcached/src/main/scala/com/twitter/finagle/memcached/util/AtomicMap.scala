@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.util
 
 import scala.collection.mutable
-import mutable.ArrayBuffer
 
 /**
  * Improve concurrency with fine-grained locking. A hash of synchronized hash

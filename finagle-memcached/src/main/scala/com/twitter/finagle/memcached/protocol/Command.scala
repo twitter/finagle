@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 sealed abstract class Command
 
+// FIXME make expiry a duration
 abstract class StorageCommand(key: ChannelBuffer, flags: Int, expiry: Int, value: ChannelBuffer) extends Command
 abstract class ArithmeticCommand(key: ChannelBuffer, delta: Int)                      extends Command
 abstract class RetrievalCommand(keys: Seq[ChannelBuffer])                             extends Command
