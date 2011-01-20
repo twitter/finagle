@@ -14,8 +14,8 @@ object EndToEndSpec extends Specification {
   "Thrift server" should {
     "work end-to-end" in {
       val processor =  new B.ServiceIface {
-        def add(a: Int, b: Int) = Future { a + b }
-        def add_one(a: Int, b: Int) = Future.exception(new AnException)
+        def add(a: Int, b: Int) = Future.exception(new AnException)
+        def add_one(a: Int, b: Int) = Future.void
         def multiply(a: Int, b: Int) = Future { a * b }
         def complex_return(someString: String) = Future {
           new SomeStruct(123, someString)
@@ -41,7 +41,8 @@ object EndToEndSpec extends Specification {
 
       client.complex_return("a string")().arg_two must be_==("a string")
 
-      client.add_one(1, 2)() must throwA[AnException]
+      client.add(1, 2)() must throwA[AnException]
+      client.add_one(1, 2)()  // don't block! 
 
       channel.close().awaitUninterruptibly()
     }

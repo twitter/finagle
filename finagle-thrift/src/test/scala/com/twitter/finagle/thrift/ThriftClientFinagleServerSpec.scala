@@ -15,8 +15,8 @@ import com.twitter.finagle.builder.ServerBuilder
 object ThriftClientFinagleServerSpec extends Specification {
   "thrift client with finagle server" should {
     val processor =  new B.ServiceIface {
-      def add(a: Int, b: Int) = Future { a + b }
-      def add_one(a: Int, b: Int) = Future.exception(new AnException)
+      def add(a: Int, b: Int) = Future.exception(new AnException)
+      def add_one(a: Int, b: Int) = Future.void
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
         new SomeStruct(123, someString)
@@ -42,8 +42,8 @@ object ThriftClientFinagleServerSpec extends Specification {
     }
     transport.open()
 
-    "make successful RPCs" in { client.add(1, 2) must be_==(3) }
-    "propagate exceptions" in { client.add_one(1, 2) must throwA[AnException] }
+    "make successful RPCs" in { client.add_one(1, 2); true must beTrue }
+    "propagate exceptions" in { client.add(1, 2) must throwA[AnException] }
     "handle complex return values" in {
       client.complex_return("a string").arg_two must be_==("a string")
     }
