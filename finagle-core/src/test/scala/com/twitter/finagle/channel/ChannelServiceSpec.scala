@@ -18,6 +18,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     val channel = mock[Channel]
     val sink = mock[ChannelSink]
     channel.getPipeline returns pipeline
+    channel.isOpen returns true
     pipeline.attach(channel, sink)
 
     "installs channel handler" in {
