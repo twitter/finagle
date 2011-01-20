@@ -1,14 +1,13 @@
 package com.twitter.finagle.memcached
 
 import com.twitter.finagle.memcached.protocol._
-import scala.collection.mutable
+import com.twitter.finagle.memcached.protocol.text.Parser
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 import org.jboss.netty.util.CharsetUtil
-import text.Parser
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import util.AtomicMap
-import com.twitter.util.{Future, SynchronizedLruMap}
+import com.twitter.util.Future
 import com.twitter.finagle.Service
 
 /**
