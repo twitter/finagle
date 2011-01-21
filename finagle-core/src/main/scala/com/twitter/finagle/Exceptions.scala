@@ -19,6 +19,9 @@ class WriteException(e: Throwable)          extends ChannelException {
   override def toString = "%s: %s".format(super.toString, e.toString)
 }
 
+// Service layer errors.
+class ServiceException       extends Exception
+class ServiceClosedException extends ServiceException
 
 // Subclass this for application exceptions
 class ApplicationException extends Exception

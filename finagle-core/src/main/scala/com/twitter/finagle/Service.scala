@@ -30,6 +30,12 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
    * Release any external resources. Overriden in subclasses.
    */
   def close() {}
+
+  /**
+   * Determines whether this service is available (can accept requests
+   * with a reasonable likelihood of success.
+   */
+  def isAvailable: Boolean = true
 }
 
 /**
