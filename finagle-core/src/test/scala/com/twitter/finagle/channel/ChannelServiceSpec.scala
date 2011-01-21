@@ -17,8 +17,10 @@ object ChannelServiceSpec extends Specification with Mockito {
     val pipeline = new DefaultChannelPipeline
     val channel = mock[Channel]
     val sink = mock[ChannelSink]
+    val closeFuture = Channels.future(channel)
     channel.getPipeline returns pipeline
     channel.isOpen returns true
+    channel.getCloseFuture returns closeFuture
     pipeline.attach(channel, sink)
 
     "installs channel handler" in {
@@ -71,6 +73,15 @@ object ChannelServiceSpec extends Specification with Mockito {
         future.isDefined must beTrue
         future() must throwA(new UnknownChannelException(new Exception("weird")))
         service.isAvailable must beFalse
+
+        // The channel was also closed.
+        val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
+        there were two(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
+        eventCaptor.getValue must haveClass[DownstreamChannelStateEvent]
+        (eventCaptor.getValue.asInstanceOf[DownstreamChannelStateEvent].getState
+         must be_==(ChannelState.OPEN))
+        (eventCaptor.getValue.asInstanceOf[DownstreamChannelStateEvent].getValue
+         must be_==(java.lang.Boolean.FALSE))
       }
 
       "on channel close" in {
