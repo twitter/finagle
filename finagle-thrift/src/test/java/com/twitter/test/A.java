@@ -316,8 +316,14 @@ public class A {
           } catch (Exception e) {
             return Future.exception(e);
           }
+          Future<Integer> future;
           try {
-            return iface.multiply(args.a, args.b).flatMap(new Function<Integer, Try<byte[]>>() {
+            future = iface.multiply(args.a, args.b);
+          } catch (Exception e) {
+            future = Future.exception(e);
+          }
+          try {
+            return future.flatMap(new Function<Integer, Try<byte[]>>() {
               public Future<byte[]> apply(Integer value) {
                 multiply_result result = new multiply_result();
                 result.success = value;

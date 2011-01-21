@@ -580,8 +580,14 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
+          Future<Integer> future;
           try {
-            return iface.add(args.a, args.b).flatMap(new Function<Integer, Try<byte[]>>() {
+            future = iface.add(args.a, args.b);
+          } catch (Exception e) {
+            future = Future.exception(e);
+          }
+          try {
+            return future.flatMap(new Function<Integer, Try<byte[]>>() {
               public Future<byte[]> apply(Integer value) {
                 add_result result = new add_result();
                 result.success = value;
@@ -663,8 +669,14 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
+          Future<Void> future;
           try {
-            return iface.add_one(args.a, args.b).flatMap(new Function<Void, Try<byte[]>>() {
+            future = iface.add_one(args.a, args.b);
+          } catch (Exception e) {
+            future = Future.exception(e);
+          }
+          try {
+            return future.flatMap(new Function<Void, Try<byte[]>>() {
               public Future<byte[]> apply(Void value) {
                 add_one_result result = new add_one_result();
           
@@ -744,8 +756,14 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
+          Future<SomeStruct> future;
           try {
-            return iface.complex_return(args.some_string).flatMap(new Function<SomeStruct, Try<byte[]>>() {
+            future = iface.complex_return(args.some_string);
+          } catch (Exception e) {
+            future = Future.exception(e);
+          }
+          try {
+            return future.flatMap(new Function<SomeStruct, Try<byte[]>>() {
               public Future<byte[]> apply(SomeStruct value) {
                 complex_return_result result = new complex_return_result();
                 result.success = value;
