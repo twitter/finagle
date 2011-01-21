@@ -53,8 +53,8 @@ class WatermarkPool[A](
   }
 
   private[this] def dispose(item: A) {
-    factory.dispose(item)
     numItems -= 1
+    factory.dispose(item)
   }
 
   @tailrec private[this] def dequeue(): Option[A] = {
