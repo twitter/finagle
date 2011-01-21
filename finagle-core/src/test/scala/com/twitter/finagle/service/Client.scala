@@ -1,7 +1,5 @@
 package com.twitter.finagle.service
 
-import scala.collection.JavaConversions._
-
 import org.specs.Specification
 
 import org.jboss.netty.channel.local._
@@ -11,7 +9,7 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Throw
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Http}
+import com.twitter.finagle.builder.{ClientBuilder, Http}
 import com.twitter.finagle.ChannelClosedException
 
 object ClientSpec extends Specification {

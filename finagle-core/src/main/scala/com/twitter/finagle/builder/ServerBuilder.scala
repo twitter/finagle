@@ -15,10 +15,16 @@ import org.jboss.netty.channel.socket.nio._
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle._
+import com.twitter.finagle.util.Conversions._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
+import com.twitter.util.{Future, Promise, Return}
 import service.{StatsFilter, ServiceToChannelHandler}
 import stats.{StatsReceiver}
+
+trait Server {
+  def close(): Future[Void]
+}
 
 object ServerBuilder {
   def apply[Req, Rep]() = new ServerBuilder[Req, Rep]()
@@ -100,7 +106,7 @@ case class ServerBuilder[Req, Rep](
   def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
 
-  def build(): Channel = {
+  def build(): Server = {
     val codec = _codec.getOrElse {
       throw new IncompleteSpecification("No codec was specified")
     }
@@ -148,6 +154,13 @@ case class ServerBuilder[Req, Rep](
       }
     })
 
-    bs.bind(_bindTo.get)
+    val channel = bs.bind(_bindTo.get)
+    new Server {
+      def close() = {
+        val done = new Promise[Void]
+        channel.close() { case _ => done() = Return(null) }
+        done
+      }
+    }
   }
 }
