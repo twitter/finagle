@@ -44,7 +44,7 @@ object EndToEndSpec extends Specification {
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block! 
 
-      server.close()
+      server.close()()
     }
   }
 }

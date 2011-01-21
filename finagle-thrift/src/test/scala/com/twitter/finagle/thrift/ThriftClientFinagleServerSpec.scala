@@ -31,7 +31,7 @@ object ThriftClientFinagleServerSpec extends Specification {
       .build()
 
     doAfter {
-      server.close()
+      server.close()()
     }
 
     val (client, transport) = {

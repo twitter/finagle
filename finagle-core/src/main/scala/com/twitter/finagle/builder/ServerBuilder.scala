@@ -18,7 +18,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
 import channel.{Job, QueueingChannelHandler}
 import com.twitter.finagle.util._
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Return}
 import service.{StatsFilter, ServiceToChannelHandler}
 import stats.{StatsReceiver}
 
@@ -158,7 +158,7 @@ case class ServerBuilder[Req, Rep](
     new Server {
       def close() = {
         val done = new Promise[Void]
-        channel.close() { case _ => done() = null }
+        channel.close() { case _ => done() = Return(null) }
         done
       }
     }
