@@ -23,7 +23,7 @@ object EndToEndSpec extends Specification {
       }
 
       val serverAddr = RandomSocket()
-      val channel = ServerBuilder()
+      val server = ServerBuilder()
         .codec(ThriftFramedTransportCodec())
         .bindTo(serverAddr)
         .service(new B.Service(processor, new TBinaryProtocol.Factory()))
@@ -44,7 +44,7 @@ object EndToEndSpec extends Specification {
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block! 
 
-      channel.close().awaitUninterruptibly()
+      server.close()
     }
   }
 }

@@ -4,7 +4,7 @@ import org.jboss.netty.channel.Channel
 import com.twitter.util.SynchronizedLruMap
 import org.jboss.netty.buffer.ChannelBuffer
 import util.AtomicMap
-import com.twitter.finagle.builder.ServerBuilder
+import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import protocol.text.Memcached
 
 class Server(address: SocketAddress) {
@@ -27,18 +27,18 @@ class Server(address: SocketAddress) {
       .service(service)
       .bindTo(address)
 
-  private[this] var channel: Option[Channel] = None
+  private[this] var server: Option[BuiltServer] = None
 
   def start() {
-    channel = Some(serverSpec.build())
+    server = Some(serverSpec.build())
   }
 
   def stop() {
-    require(channel.isDefined, "Channel is not open!")
+    require(server.isDefined, "Server is not open!")
 
-    channel.foreach { channel =>
-      channel.close()
-      this.channel = None
+    server.foreach { server =>
+      server.close()
+      this.server = None
     }
   }
 }

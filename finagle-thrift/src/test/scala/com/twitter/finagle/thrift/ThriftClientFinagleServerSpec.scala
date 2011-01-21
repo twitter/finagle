@@ -24,14 +24,14 @@ object ThriftClientFinagleServerSpec extends Specification {
     }
 
     val serverAddr = RandomSocket()
-    val channel = ServerBuilder()
+    val server = ServerBuilder()
       .codec(ThriftFramedTransportCodec())
       .bindTo(serverAddr)
       .service(new B.Service(processor, new TBinaryProtocol.Factory()))
       .build()
 
     doAfter {
-      channel.close().awaitUninterruptibly()
+      server.close()
     }
 
     val (client, transport) = {
