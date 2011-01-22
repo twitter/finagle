@@ -7,26 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.util.{Pool, Future, Promise, Return}
 
-/**
- * A pool facotry manages object lifecycle in a pool. Specifically:
- * creation, destruction & health checking.
- */
-trait PoolFactory[A] {
-  /**
-   * Create a new item. This call cannot block. Instead return an
-   * (asynchronous) Future.
-   */
-  def make(): Future[A]
-
-  /**
-   * The given item has been end-of-life'd.
-   */
-  def dispose(item: A): Unit
-
-  /**
-   * Query the health of the given item.
-   */
-  def isHealthy(item: A): Boolean
+trait DrainablePool[A] extends Pool[A] {
+  def drain(): Unit
 }
 
 /**
@@ -39,9 +21,9 @@ trait PoolFactory[A] {
  * than `highWatermark' items in concurrent existence.
  */
 class WatermarkPool[A](
-    factory: PoolFactory[A],
+    factory: LifecycleFactory[A],
     lowWatermark: Int, highWatermark: Int = Int.MaxValue)
-  extends Pool[A]
+  extends DrainablePool[A]
 {
   private[this] val queue = Queue[A]()
   private[this] val waiters = Queue[Promise[A]]()
@@ -100,5 +82,10 @@ class WatermarkPool[A](
     } else {
       dispose(item)
     }
+  }
+
+  def drain() = synchronized {
+    queue foreach { factory.dispose(_) }
+    queue.clear()
   }
 }

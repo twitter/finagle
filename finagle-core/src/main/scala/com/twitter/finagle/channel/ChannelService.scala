@@ -3,12 +3,14 @@ package com.twitter.finagle.channel
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.LinkedBlockingQueue
 
+import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
 import com.twitter.util.{Future, Promise, Return, Throw, Try}
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.{Ok, Error}
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.{Ok, Error, LifecycleFactory}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
@@ -79,4 +81,27 @@ class ChannelService[Req, Rep](channel: Channel)
   }
 
   override def close() { if (channel.isOpen) Channels.close(channel) }
+}
+
+/**
+ * A factory for ChannelService instances, given a bootstrap.
+ */
+class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
+  extends LifecycleFactory[Service[Req, Rep]]
+{
+  def make() = {
+    val promise = new Promise[ChannelService[Req, Rep]]
+    bootstrap.connect() {
+      case Ok(channel)  => promise() = Return(new ChannelService[Req, Rep](channel))
+      case Error(cause) => promise() = Throw(new WriteException(cause))
+    }
+    promise
+  }
+
+  def dispose(service: Service[Req, Rep]) {
+    service.close()
+  }
+
+  def isHealthy(service: Service[Req, Rep]) =
+    service.isAvailable
 }

@@ -16,7 +16,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.Service
-import com.twitter.finagle.service.{RetryingService, TimeoutFilter, StatsFilter}
+import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{
   LoadBalancerService,
@@ -46,13 +46,13 @@ case class ClientBuilder[Req, Rep](
   _statsReceiver: Option[StatsReceiver],
   _loadStatistics: (Int, Duration),
   _name: Option[String],
+  _hostConnectionCoresize: Option[Int],
   _hostConnectionLimit: Option[Int],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
   _logger: Option[Logger],
   _channelFactory: Option[ChannelFactory],
-  _proactivelyConnect: Option[Duration],
   _tls: Option[SSLContext],
   _startTls: Boolean)
 {
@@ -64,13 +64,13 @@ case class ClientBuilder[Req, Rep](
     None,                                        // statsReceiver
     (60, 10.seconds),                            // loadStatistics
     Some("client"),                              // name
+    None,                                        // hostConnectionCoresize
     None,                                        // hostConnectionLimit
     None,                                        // sendBufferSize
     None,                                        // recvBufferSize
     None,                                        // retries
     None,                                        // logger
     Some(ClientBuilder.defaultChannelFactory),   // channelFactory
-    None,                                        // proactivelyConnect
     None,                                        // tls
     false                                        // startTls
   )
@@ -84,13 +84,13 @@ case class ClientBuilder[Req, Rep](
       "requestTimeout"      -> Some(_requestTimeout),
       "statsReceiver"       -> _statsReceiver,
       "loadStatistics"      -> _loadStatistics,
+      "hostConnectionLimit" -> Some(_hostConnectionCoresize),
       "hostConnectionLimit" -> Some(_hostConnectionLimit),
       "sendBufferSize"      -> _sendBufferSize,
       "recvBufferSize"      -> _recvBufferSize,
       "retries"             -> _retries,
       "logger"              -> _logger,
       "channelFactory"      -> _channelFactory,
-      "proactivelyConnect"  -> _proactivelyConnect,
       "tls"                 -> _tls,
       "startTls"            -> _startTls
     )
@@ -143,6 +143,9 @@ case class ClientBuilder[Req, Rep](
   def hostConnectionLimit(value: Int) =
     copy(_hostConnectionLimit = Some(value))
 
+  def hostConnectionCoresize(value: Int) =
+    copy(_hostConnectionCoresize = Some(value))
+
   def retries(value: Int) =
     copy(_retries = Some(value))
 
@@ -151,9 +154,6 @@ case class ClientBuilder[Req, Rep](
 
   def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
-
-  def proactivelyConnect(duration: Duration) =
-    copy(_proactivelyConnect = Some(duration))
 
   def tls() =
     copy(_tls = Some(Ssl.client()))
@@ -199,16 +199,17 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
-  private def pool(limit: Option[Int])(bootstrap: ClientBootstrap) =
-    limit match {
-      case Some(limit) =>
-        throw new IllegalArgumentException("pool limits not yet supported")
-      case None =>
-        new PoolingService[Req, Rep](bootstrap)
-    }
+  private def pool(bootstrap: ClientBootstrap) = {
+    // Conservative, but probably the only safe thing.
+    val lowWatermark  = _hostConnectionCoresize getOrElse(1)
+    val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
+    val factory = new ChannelServiceFactory[Req, Rep](bootstrap)
+    val pool = new WatermarkPool[Service[Req, Rep]](factory, lowWatermark, highWatermark)
+    new PoolingService[Req, Rep](pool)
+  }
 
   private def makeBroker(codec: Codec[Req, Rep]) =
-    pool(_hostConnectionLimit) _ compose bootstrap(codec)
+    pool _ compose bootstrap(codec)
 
   def build(): Service[Req, Rep] = {
     if (!_cluster.isDefined)
