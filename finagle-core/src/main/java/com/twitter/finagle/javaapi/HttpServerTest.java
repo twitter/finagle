@@ -29,13 +29,10 @@ public class HttpServerTest {
         }
       };
 
-    ServerBuilder<HttpRequest, HttpResponse> serverBuilder = ServerBuilder.get();
-    
-    serverBuilder
+    ServerBuilder.get()
       .codec(Codec4J.Http)
-      .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))
-      .build();
+      .build(service);
   }
 
   public static void main(String args[]) {

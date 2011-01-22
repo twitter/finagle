@@ -24,13 +24,12 @@ class Server(address: SocketAddress) {
     ServerBuilder()
       .name("schmemcached")
       .codec(new Memcached)
-      .service(service)
       .bindTo(address)
 
   private[this] var server: Option[BuiltServer] = None
 
   def start() {
-    server = Some(serverSpec.build())
+    server = Some(serverSpec.build(service))
   }
 
   def stop() {
