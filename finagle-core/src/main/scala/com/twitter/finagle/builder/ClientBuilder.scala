@@ -48,6 +48,7 @@ case class ClientBuilder[Req, Rep](
   _name: Option[String],
   _hostConnectionCoresize: Option[Int],
   _hostConnectionLimit: Option[Int],
+  _hostConnectionIdleTime: Option[Duration],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
@@ -66,6 +67,7 @@ case class ClientBuilder[Req, Rep](
     Some("client"),                              // name
     None,                                        // hostConnectionCoresize
     None,                                        // hostConnectionLimit
+    None,                                        // hostConnectionIdleTime
     None,                                        // sendBufferSize
     None,                                        // recvBufferSize
     None,                                        // retries
@@ -77,22 +79,23 @@ case class ClientBuilder[Req, Rep](
 
   override def toString() = {
     val options = Seq(
-      "name"                -> _name,
-      "cluster"             -> _cluster,
-      "codec"               -> _codec,
-      "connectionTimeout"   -> Some(_connectionTimeout),
-      "requestTimeout"      -> Some(_requestTimeout),
-      "statsReceiver"       -> _statsReceiver,
-      "loadStatistics"      -> _loadStatistics,
-      "hostConnectionLimit" -> Some(_hostConnectionCoresize),
-      "hostConnectionLimit" -> Some(_hostConnectionLimit),
-      "sendBufferSize"      -> _sendBufferSize,
-      "recvBufferSize"      -> _recvBufferSize,
-      "retries"             -> _retries,
-      "logger"              -> _logger,
-      "channelFactory"      -> _channelFactory,
-      "tls"                 -> _tls,
-      "startTls"            -> _startTls
+      "name"                   -> _name,
+      "cluster"                -> _cluster,
+      "codec"                  -> _codec,
+      "connectionTimeout"      -> Some(_connectionTimeout),
+      "requestTimeout"         -> Some(_requestTimeout),
+      "statsReceiver"          -> _statsReceiver,
+      "loadStatistics"         -> _loadStatistics,
+      "hostConnectionLimit"    -> Some(_hostConnectionLimit),
+      "hostConnectionCoresize" -> Some(_hostConnectionCoresize),
+      "hostConnectionIdleTime" -> Some(_hostConnectionIdleTime),
+      "sendBufferSize"         -> _sendBufferSize,
+      "recvBufferSize"         -> _recvBufferSize,
+      "retries"                -> _retries,
+      "logger"                 -> _logger,
+      "channelFactory"         -> _channelFactory,
+      "tls"                    -> _tls,
+      "startTls"               -> _startTls
     )
 
     "ClientBuilder(%s)".format(
@@ -145,6 +148,9 @@ case class ClientBuilder[Req, Rep](
 
   def hostConnectionCoresize(value: Int) =
     copy(_hostConnectionCoresize = Some(value))
+
+  def hostConnectionIdleTime(timeout: Duration) =
+    copy(_hostConnectionIdleTime = Some(timeout))
 
   def retries(value: Int) =
     copy(_retries = Some(value))
@@ -203,7 +209,10 @@ case class ClientBuilder[Req, Rep](
     // Conservative, but probably the only safe thing.
     val lowWatermark  = _hostConnectionCoresize getOrElse(1)
     val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
-    val factory = new ChannelServiceFactory[Req, Rep](bootstrap)
+    val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
+    val factory = new CachingLifecycleFactory(
+      new ChannelServiceFactory[Req, Rep](bootstrap), idleTime)
+
     val pool = new WatermarkPool[Service[Req, Rep]](factory, lowWatermark, highWatermark)
     new PoolingService[Req, Rep](pool)
   }

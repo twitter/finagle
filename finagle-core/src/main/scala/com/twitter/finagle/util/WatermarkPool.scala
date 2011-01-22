@@ -25,8 +25,8 @@ class WatermarkPool[A](
     lowWatermark: Int, highWatermark: Int = Int.MaxValue)
   extends DrainablePool[A]
 {
-  private[this] val queue = Queue[A]()
-  private[this] val waiters = Queue[Promise[A]]()
+  private[this] val queue    = Queue[A]()
+  private[this] val waiters  = Queue[Promise[A]]()
   private[this] var numItems = 0
 
   private[this] def make(): Future[A] = {
