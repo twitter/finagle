@@ -8,7 +8,7 @@ import com.twitter.util.{Future, Promise, Return}
 
 object WatermarkPoolSpec extends Specification with Mockito {
   "WatermarkPool (lowWatermark = 0)" should {
-    val factory = mock[PoolFactory[Int]]
+    val factory = mock[LifecycleFactory[Int]]
     val promise = new Promise[Int]
 
     factory.make() returns promise
@@ -34,7 +34,7 @@ object WatermarkPoolSpec extends Specification with Mockito {
   }
 
   "WatermarkPool (lowWatermark = 1, highWatermark = 1)" should {
-    val factory = mock[PoolFactory[Int]]
+    val factory = mock[LifecycleFactory[Int]]
     factory.make() returns Future.value(1)
     factory.isHealthy(1) returns true
 
@@ -84,7 +84,7 @@ object WatermarkPoolSpec extends Specification with Mockito {
   }
 
   "WatermarkPool (lowWatermark = 100, highWatermark = 1000)" should {
-    val factory = mock[PoolFactory[Int]]
+    val factory = mock[LifecycleFactory[Int]]
     val pool = new WatermarkPool(factory, 100, 1000)
 
     "maintain at all times up to 100 items" in {
