@@ -41,10 +41,12 @@ class CachingLifecycleFactory[A](
 {
   private[this] val deathRow = Queue[(Time, A)]()
 
-  // Every `timeout', clean up deathRow.
-  timer.schedule(timeout) {
+  private[this] def collect(): Unit = synchronized {
     val now = Time.now
-    deathRow.dequeueAll { case (timestamp, _) => timestamp.until(now) > timeout }
+    val dequeued = deathRow dequeueAll { case (timestamp, _) => timestamp.until(now) > timeout }
+    dequeued foreach { case (_, service) => underlying.dispose(service) }
+    if (!deathRow.isEmpty)
+      timer.schedule(timeout.fromNow)(collect)
   }
 
   def make(): Future[A] = synchronized {
@@ -58,10 +60,13 @@ class CachingLifecycleFactory[A](
   }
 
   def dispose(item: A) = synchronized {
-    if (isHealthy(item))
+    if (isHealthy(item)) {
+      if (deathRow.isEmpty)
+        timer.schedule(timeout.fromNow)(collect)
       deathRow += ((Time.now, item))
-    else
+    } else {
       underlying.dispose(item)
+    }
   }
 
   def isHealthy(item: A) = underlying.isHealthy(item)
