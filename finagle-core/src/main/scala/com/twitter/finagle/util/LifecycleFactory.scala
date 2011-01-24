@@ -39,14 +39,19 @@ class CachingLifecycleFactory[A](
     timer: com.twitter.util.Timer = Timer.default)
   extends LifecycleFactory[A]
 {
+  private[this] var isScheduled = false
   private[this] val deathRow = Queue[(Time, A)]()
 
   private[this] def collect(): Unit = synchronized {
     val now = Time.now
-    val dequeued = deathRow dequeueAll { case (timestamp, _) => timestamp.until(now) > timeout }
+    val dequeued = deathRow dequeueAll { case (timestamp, _) => timestamp.until(now) >= timeout }
     dequeued foreach { case (_, service) => underlying.dispose(service) }
-    if (!deathRow.isEmpty)
-      timer.schedule(timeout.fromNow)(collect)
+    if (!deathRow.isEmpty) {
+      // TODO: what happens if an event is scheduled in the past?
+      timer.schedule(deathRow.first._1 + timeout)(collect)
+    } else {
+      isScheduled = false
+    }
   }
 
   def make(): Future[A] = synchronized {
@@ -61,9 +66,11 @@ class CachingLifecycleFactory[A](
 
   def dispose(item: A) = synchronized {
     if (isHealthy(item)) {
-      if (deathRow.isEmpty)
-        timer.schedule(timeout.fromNow)(collect)
       deathRow += ((Time.now, item))
+      if (!isScheduled) {
+        isScheduled = true
+        timer.schedule(timeout.fromNow)(collect)
+      }
     } else {
       underlying.dispose(item)
     }
