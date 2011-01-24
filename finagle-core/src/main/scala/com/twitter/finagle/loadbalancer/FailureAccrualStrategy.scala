@@ -14,9 +14,9 @@ import com.twitter.finagle.Service
  * dispatch until they are again revived.
  */
 class FailureAccrualStrategy[Req, Rep](
-  underlying: LoadBalancerStrategy[Req, Rep],
-  numFailures: Int,
-  markDeadFor: Duration)
+    underlying: LoadBalancerStrategy[Req, Rep],
+    numFailures: Int,
+    markDeadFor: Duration)
   extends LoadBalancerStrategy[Req, Rep]
 {
   // This will only admit one request after having failed (ie. isDead
@@ -44,11 +44,13 @@ class FailureAccrualStrategy[Req, Rep](
     new ServiceMetadata[AtomicInteger](new AtomicInteger(0))
   private[this] val failedAt = new ServiceMetadata[Time](Time.epoch)
 
-  // If all nodes are marked bad--mark none of them bad?
-
   def dispatch(request: Req, services: Seq[Service[Req, Rep]]) = {
-    val filtered = services filter { service => !meta(service).isDead }
-    val result = underlying.dispatch(request, filtered)
+    // Compute the set of live services. If none are alive, we pass
+    // the entire service set down.
+    val alive    = services filter { service => !meta(service).isDead }
+    val filtered = if (alive.isEmpty) services else alive
+    val result   = underlying.dispatch(request, filtered)
+
     result foreach { case (service, resultFuture) =>
       resultFuture respond {
         case Throw(_)  => meta(service).didFail()
