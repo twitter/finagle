@@ -48,7 +48,7 @@ class CachingLifecycleFactory[A](
     dequeued foreach { case (_, service) => underlying.dispose(service) }
     if (!deathRow.isEmpty) {
       // TODO: what happens if an event is scheduled in the past?
-      timer.schedule(deathRow.first._1 + timeout)(collect)
+      timer.schedule(deathRow.head._1 + timeout)(collect)
     } else {
       isScheduled = false
     }

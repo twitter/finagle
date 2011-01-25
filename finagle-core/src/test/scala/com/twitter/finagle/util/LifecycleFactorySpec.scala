@@ -143,7 +143,7 @@ object LifeCycleFactorySpec extends Specification with Mockito {
         }
 
         timer.scheduled must haveSize(1)
-        timer.scheduled.first._1 must be_==(Time.now + 1.second)
+        timer.scheduled.head._1 must be_==(Time.now + 1.second)
 
         // Take it!
         clf.make()() must be_==(o2)
@@ -174,7 +174,7 @@ object LifeCycleFactorySpec extends Specification with Mockito {
         timer.scheduled must haveSize(1)
         there was no(underlying).dispose(obj)
 
-        timer.scheduled.first._1 must be_==(Time.now + 5.seconds)
+        timer.scheduled.head._1 must be_==(Time.now + 5.seconds)
 
         timeControl.advance(1.second)
 
