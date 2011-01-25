@@ -27,8 +27,8 @@ trait Server {
 }
 
 object ServerBuilder {
-  def apply[Req, Rep]() = new ServerBuilder[Req, Rep]()
-  def get[Req, Rep]() = apply[Req, Rep]()
+  def apply() = new ServerBuilder[Any, Any]()
+  def get() = apply()
 
   val defaultChannelFactory =
     new NioServerSocketChannelFactory(
@@ -45,7 +45,6 @@ case class ServerBuilder[Req, Rep](
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _service: Option[Service[Req, Rep]],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
@@ -62,7 +61,6 @@ case class ServerBuilder[Req, Rep](
     None,              // name
     None,              // sendBufferSize
     None,              // recvBufferSize
-    None,              // service
     None,              // bindTo
     None,              // logger
     None,              // tls
@@ -72,7 +70,7 @@ case class ServerBuilder[Req, Rep](
     None               // maxQueueDepth
   )
 
-  def codec(codec: Codec[Req, Rep]) =
+  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
     copy(_codec = Some(codec))
 
   def reportTo(receiver: StatsReceiver) =
@@ -83,8 +81,8 @@ case class ServerBuilder[Req, Rep](
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def service(service: Service[Req, Rep]) =
-    copy(_service = Some(service))
+  // def service(service: Service[Req, Rep]) =
+  //   copy(_service = Some(service))
 
   def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
@@ -106,7 +104,7 @@ case class ServerBuilder[Req, Rep](
   def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
 
-  def build(): Server = {
+  def build(service: Service[Req, Rep]): Server = {
     val codec = _codec.getOrElse {
       throw new IncompleteSpecification("No codec was specified")
     }
@@ -142,13 +140,11 @@ case class ServerBuilder[Req, Rep](
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        _service.foreach { service =>
-          val serviceWithStats =
-            if (_statsReceiver.isDefined)
-              new StatsFilter(_statsReceiver.get).andThen(service)
-            else service
-          pipeline.addLast("service", new ServiceToChannelHandler(serviceWithStats))
-        }
+        val serviceWithStats =
+          if (_statsReceiver.isDefined)
+            new StatsFilter(_statsReceiver.get).andThen(service)
+          else service
+        pipeline.addLast("service", new ServiceToChannelHandler(serviceWithStats))
 
         pipeline
       }

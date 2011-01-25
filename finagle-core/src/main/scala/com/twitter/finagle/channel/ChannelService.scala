@@ -3,13 +3,14 @@ package com.twitter.finagle.channel
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.LinkedBlockingQueue
 
+import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
 import com.twitter.util.{Future, Promise, Return, Throw, Try}
-import com.twitter.concurrent.Serialized
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.{Ok, Error}
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.{Ok, Error, LifecycleFactory}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
@@ -17,20 +18,33 @@ import com.twitter.finagle.util.{Ok, Error}
  * (connected) channel during its lifetime.
  */
 class ChannelService[Req, Rep](channel: Channel)
-  extends Service[Req, Rep] with Serialized
+  extends Service[Req, Rep]
 {
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
   @volatile private[this] var isHealthy = true
 
   private[this] def reply(message: Try[Rep]) {
-    if (message.isThrow)
+    if (message.isThrow) {
+      // We consider any channel with a channel-level failure doomed.
+      // Application exceptions should be encoded by the codec itself,
+      // eg. HTTP encodes erroneous replies by reply status codes,
+      // while protocol parse errors would generate channel
+      // exceptions. After such an exception, the channel is
+      // considered unhealthy.
       isHealthy = false
+    }
 
     val replyFuture = currentReplyFuture.getAndSet(null)
     if (replyFuture ne null)
       replyFuture() = message
     else  // spurious reply!
       isHealthy = false
+
+    if (!isHealthy && channel.isOpen) {
+      // This channel is doomed anyway, so proactively close the
+      // connection.
+      Channels.close(channel)
+    }
   }
 
   // This bridges the 1:1 codec with this service.
@@ -54,7 +68,7 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   })
 
-  def isAvailable = isHealthy && channel.isOpen
+  override def isAvailable = isHealthy && channel.isOpen
 
   def apply(request: Req) = {
     val replyFuture = new Promise[Rep]
@@ -65,4 +79,29 @@ class ChannelService[Req, Rep](channel: Channel)
       Future.exception(new TooManyConcurrentRequestsException)
     }
   }
+
+  override def close() { if (channel.isOpen) Channels.close(channel) }
+}
+
+/**
+ * A factory for ChannelService instances, given a bootstrap.
+ */
+class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
+  extends LifecycleFactory[Service[Req, Rep]]
+{
+  def make() = {
+    val promise = new Promise[ChannelService[Req, Rep]]
+    bootstrap.connect() {
+      case Ok(channel)  => promise() = Return(new ChannelService[Req, Rep](channel))
+      case Error(cause) => promise() = Throw(new WriteException(cause))
+    }
+    promise
+  }
+
+  def dispose(service: Service[Req, Rep]) {
+    service.close()
+  }
+
+  def isHealthy(service: Service[Req, Rep]) =
+    service.isAvailable
 }
