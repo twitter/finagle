@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import com.twitter.util.Time
 
 object Show {
   private[this] val DELIMETER     = "\r\n"   .getBytes
@@ -33,10 +34,10 @@ object Show {
 
   def apply(response: Response) = {
     response match {
-      case Stored         => STORED
-      case NotStored      => NOT_STORED
-      case Deleted        => DELETED
-      case NotFound       => NOT_FOUND
+      case Stored()       => STORED
+      case NotStored()    => NOT_STORED
+      case Deleted()      => DELETED
+      case NotFound()     => NOT_FOUND
       case Number(value)  =>
         val buffer = ChannelBuffers.dynamicBuffer(10)
         buffer.writeBytes(value.toString.getBytes)
@@ -124,7 +125,7 @@ object Show {
   }
 
   @inline private[this] def showStorageCommand(
-    name: Array[Byte], key: ChannelBuffer, flags: Int, expiry: Int, value: ChannelBuffer) = {
+    name: Array[Byte], key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer) = {
     val buffer = ChannelBuffers.dynamicBuffer(50 + value.readableBytes)
     buffer.writeBytes(name)
     buffer.writeBytes(SPACE)
@@ -132,7 +133,7 @@ object Show {
     buffer.writeBytes(SPACE)
     buffer.writeBytes(flags.toString.getBytes)
     buffer.writeBytes(SPACE)
-    buffer.writeBytes(expiry.toString.getBytes)
+    buffer.writeBytes(expiry.inSeconds.toString.getBytes)
     buffer.writeBytes(SPACE)
     buffer.writeBytes(value.readableBytes.toString.getBytes)
     buffer.writeBytes(DELIMETER)

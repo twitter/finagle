@@ -3,9 +3,9 @@ package com.twitter.finagle.memcached.protocol.text.client
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import com.twitter.finagle.memcached.protocol.{Response, MemcachedResponseVocabulary}
-import com.twitter.finagle.memcached.protocol.text.AbstractDecoder
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.protocol.Response
+import com.twitter.finagle.memcached.protocol.text.{ResponseVocabulary, AbstractDecoder}
 
 case class ValueLine(tokens: Seq[ChannelBuffer], buffer: ChannelBuffer)
 
@@ -13,7 +13,7 @@ object Decoder {
   private val END    = "END": ChannelBuffer
 }
 
-class Decoder(parser: MemcachedResponseVocabulary) extends AbstractDecoder[Response] with StateMachine {
+class Decoder[R >: Null <: AnyRef](parser: ResponseVocabulary[R]) extends AbstractDecoder[R] with StateMachine {
   import Decoder._
   case class AwaitingResponse()                                             extends State
   case class AwaitingResponseOrEnd(valuesSoFar: Seq[ValueLine])             extends State
@@ -23,7 +23,7 @@ class Decoder(parser: MemcachedResponseVocabulary) extends AbstractDecoder[Respo
     state = AwaitingResponse()
   }
 
-  def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Response = {
+  def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): R = {
     state match {
       case AwaitingResponse() =>
         decodeLine(buffer, parser.needsData(_)) { tokens =>
@@ -57,17 +57,17 @@ class Decoder(parser: MemcachedResponseVocabulary) extends AbstractDecoder[Respo
     }
   }
 
-  private[this] def awaitData(valuesSoFar: Seq[ValueLine], tokens: Seq[ChannelBuffer], bytesNeeded: Int) = {
+  private[this] def awaitData(valuesSoFar: Seq[ValueLine], tokens: Seq[ChannelBuffer], bytesNeeded: Int): R = {
     state = AwaitingData(valuesSoFar, tokens, bytesNeeded)
-    null
+    needMoreData
   }
 
-  private[this] def awaitResponseOrEnd(valuesSoFar: Seq[ValueLine]) = {
+  private[this] def awaitResponseOrEnd(valuesSoFar: Seq[ValueLine]): R = {
     state = AwaitingResponseOrEnd(valuesSoFar)
-    null
+    needMoreData
   }
 
-  protected val needMoreData: Response = null
+  private[this] val needMoreData = null
 
   private[this] def isEnd(tokens: Seq[ChannelBuffer]) =
     (tokens.length == 1 && tokens.head == END)

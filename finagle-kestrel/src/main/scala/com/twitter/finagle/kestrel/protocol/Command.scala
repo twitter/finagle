@@ -1,12 +1,12 @@
 package com.twitter.finagle.kestrel.protocol
 
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.util.Duration
+import com.twitter.util.{Time, Duration}
 
 sealed abstract class Command
 
-case class Get(queueName: ChannelBuffer, options: collection.Set[GetOption])                              extends Command
-case class Set(queueName: ChannelBuffer, flags: Int, expiry: Duration, value: ChannelBuffer)   extends Command
+case class Get(queueName: ChannelBuffer, options: collection.Set[GetOption])                   extends Command
+case class Set(queueName: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)       extends Command
 
 case class Delete(queueName: ChannelBuffer)                                                    extends Command
 case class Flush(queueName: ChannelBuffer)                                                     extends Command

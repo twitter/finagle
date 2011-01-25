@@ -25,26 +25,26 @@ class Interpreter(Queue: () => BlockingQueue[ChannelBuffer]) {
           Values(Seq(Value(queueName, item)))
       case Set(queueName, flags, expiry, value) =>
         queues(queueName).add(value)
-        Stored
+        Stored()
       case Delete(queueName) =>
         queues.remove(queueName)
-        Deleted
+        Deleted()
       case Flush(queueName) =>
         queues.remove(queueName)
-        Deleted
+        Deleted()
       case FlushAll() =>
         queues.clear()
-        Deleted
+        Deleted()
       case Version() =>
-        NotFound
+        NotFound()
       case ShutDown() =>
-        NotFound
+        NotFound()
       case DumpConfig() =>
-        NotFound
+        NotFound()
       case Stats() =>
-        NotFound
+        NotFound()
       case DumpStats() =>
-        NotFound
+        NotFound()
     }
   }
 }

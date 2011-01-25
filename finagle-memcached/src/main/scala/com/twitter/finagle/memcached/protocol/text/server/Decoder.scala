@@ -3,13 +3,10 @@ package com.twitter.finagle.memcached.protocol.text.server
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.finagle.memcached.protocol.{NonStorageCommand, StorageCommand, ClientError, Command}
-import com.twitter.finagle.memcached.util.ParserUtils
-import com.twitter.finagle.memcached.protocol.text.{MemcachedCommandVocabulary, CommandVocabulary, Show, AbstractDecoder}
+import com.twitter.finagle.memcached.protocol.Command
+import com.twitter.finagle.memcached.protocol.text.{CommandVocabulary, Show, AbstractDecoder}
 
-class Decoder(parser: MemcachedCommandVocabulary) extends AbstractDecoder[Command] with StateMachine {
-  import ParserUtils._
-
+class Decoder[C >: Null <: AnyRef](parser: CommandVocabulary[C]) extends AbstractDecoder[C] with StateMachine {
   case class AwaitingCommand() extends State
   case class AwaitingData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) extends State
 
@@ -22,7 +19,7 @@ class Decoder(parser: MemcachedCommandVocabulary) extends AbstractDecoder[Comman
     super.exceptionCaught(ctx, e)
   }
 
-  def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Command = {
+  def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): C = {
     state match {
       case AwaitingCommand() =>
         decodeLine(buffer, parser.needsData(_)) { tokens =>
@@ -40,5 +37,5 @@ class Decoder(parser: MemcachedCommandVocabulary) extends AbstractDecoder[Comman
     needMoreData
   }
 
-  protected val needMoreData: Command = null
+  private[this] val needMoreData = null
 }

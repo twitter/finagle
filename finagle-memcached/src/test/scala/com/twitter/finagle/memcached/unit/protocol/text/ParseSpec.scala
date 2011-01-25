@@ -4,11 +4,11 @@ import org.specs.Specification
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.client.ValueLine
-import text.MemcachedCommandVocabulary
+import text.CommandVocabulary
 
 class CommandVocabularySpec extends Specification {
   "MemcachedCommandVocabulary" should {
-    val parser = new MemcachedCommandVocabulary
+    val parser = new CommandVocabulary
 
     "needsData" in {
       parser.needsData(Seq("set", "my_key", "0", "2592000", "1")) mustEqual
@@ -26,7 +26,7 @@ class CommandVocabularySpec extends Specification {
   }
 
   "MemcachedResponseVocabulary" should {
-    val parser = new MemcachedResponseVocabulary
+    val parser = new ResponseVocabulary
 
     "needsData" in {
       parser.needsData(Seq("VALUE", "key", "0", "1")) mustEqual
