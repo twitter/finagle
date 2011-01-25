@@ -33,7 +33,6 @@ object InterpreterSpec extends Specification {
     "flushAll" in {
       interpreter(Set("name", 0, 0.seconds, "rawr"))
       interpreter(FlushAll())
-      interpreter(Get("name", collection.Set.empty)) //mustEqual Values(Seq.empty)
       interpreter(Get("name", collection.Set.empty)) mustEqual Values(Seq.empty)
     }
 

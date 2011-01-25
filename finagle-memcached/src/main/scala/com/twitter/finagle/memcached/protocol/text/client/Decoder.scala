@@ -2,24 +2,35 @@ package com.twitter.finagle.memcached.protocol.text.client
 
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
-import com.twitter.finagle.memcached.protocol.ParseResponse.ValueLine
-import com.twitter.finagle.memcached.protocol.{Response, ServerError, ParseResponse}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import com.twitter.finagle.memcached.protocol.text.{Parser, AbstractDecoder}
+import com.twitter.finagle.memcached.protocol.{Response, MemcachedResponseVocabulary}
+import com.twitter.finagle.memcached.protocol.text.AbstractDecoder
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 
-class Decoder extends AbstractDecoder[Response] with StateMachine {
+case class ValueLine(tokens: Seq[ChannelBuffer], buffer: ChannelBuffer)
+
+object Decoder {
+  private val END    = "END": ChannelBuffer
+}
+
+class Decoder(parser: MemcachedResponseVocabulary) extends AbstractDecoder[Response] with StateMachine {
+  import Decoder._
   case class AwaitingResponse()                                             extends State
   case class AwaitingResponseOrEnd(valuesSoFar: Seq[ValueLine])             extends State
   case class AwaitingData(valuesSoFar: Seq[ValueLine], tokens: Seq[ChannelBuffer], bytesNeeded: Int) extends State
 
+  final protected[memcached] def start() {
+    state = AwaitingResponse()
+  }
+
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Response = {
     state match {
       case AwaitingResponse() =>
-        decodeLine(buffer, ParseResponse.needsData(_)) { tokens =>
-          if (ParseResponse.isEnd(tokens)) {
-            ParseResponse.parseValues(Seq())
+        decodeLine(buffer, parser.needsData(_)) { tokens =>
+          if (isEnd(tokens)) {
+            parser.parseValues(Seq())
           } else {
-            ParseResponse(tokens)
+            parser.parseResponse(tokens)
           }
         }
       case AwaitingData(valuesSoFar, tokens, bytesNeeded) =>
@@ -29,15 +40,15 @@ class Decoder extends AbstractDecoder[Response] with StateMachine {
             Seq(ValueLine(tokens, ChannelBuffers.copiedBuffer(data))))
         }
       case AwaitingResponseOrEnd(valuesSoFar) =>
-        decodeLine(buffer, ParseResponse.needsData(_)) { tokens =>
-          if (ParseResponse.isEnd(tokens)) {
-            ParseResponse.parseValues(valuesSoFar)
+        decodeLine(buffer, parser.needsData(_)) { tokens =>
+          if (isEnd(tokens)) {
+            parser.parseValues(valuesSoFar)
           } else needMoreData
         }
     }
   }
 
-  protected def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) = {
+  final protected[memcached] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) = {
     state match {
       case AwaitingResponse() =>
         awaitData(Seq(), tokens, bytesNeeded)
@@ -51,14 +62,13 @@ class Decoder extends AbstractDecoder[Response] with StateMachine {
     null
   }
 
-  protected def start() {
-    state = AwaitingResponse()
-  }
-
   private[this] def awaitResponseOrEnd(valuesSoFar: Seq[ValueLine]) = {
     state = AwaitingResponseOrEnd(valuesSoFar)
     null
   }
 
   protected val needMoreData: Response = null
+
+  private[this] def isEnd(tokens: Seq[ChannelBuffer]) =
+    (tokens.length == 1 && tokens.head == END)
 }

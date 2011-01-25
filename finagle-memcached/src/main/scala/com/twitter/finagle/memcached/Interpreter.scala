@@ -1,20 +1,19 @@
 package com.twitter.finagle.memcached
 
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text.Parser
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import util.AtomicMap
 import com.twitter.util.Future
 import com.twitter.finagle.Service
+import com.twitter.finagle.memcached.util.{ParserUtils, AtomicMap}
 
 /**
  * Evalutes a given Memcached operation and returns the result.
  */
 class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
-  import Parser.DIGITS
+  import ParserUtils._
 
   def apply(command: Command): Response = {
     command match {
