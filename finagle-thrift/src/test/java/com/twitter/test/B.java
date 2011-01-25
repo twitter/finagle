@@ -57,11 +57,11 @@ public class B {
 
   public interface ServiceIface extends A.ServiceIface {
 
-    public Future<Integer> add(int a, int b) throws TException;
+    public Future<Integer> add(int a, int b);
 
-    public Future<Void> add_one(int a, int b) throws TException;
+    public Future<Void> add_one(int a, int b);
 
-    public Future<SomeStruct> complex_return(String some_string) throws TException;
+    public Future<SomeStruct> complex_return(String some_string);
 
   }
 
@@ -327,83 +327,95 @@ public class B {
       this.protocolFactory = protocolFactory;
     }
 
-    public Future<Integer> add(int a, int b) throws TException {
-      // TODO: size
-      TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-      TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-      prot.writeMessageBegin(new TMessage("add", TMessageType.CALL, 0));
-      add_args args = new add_args();
-      args.setA(a);
-      args.setB(b);
-      args.write(prot);
-      prot.writeMessageEnd();
-    
+    public Future<Integer> add(int a, int b) {
+      try {
+        // TODO: size
+        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
+        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        prot.writeMessageBegin(new TMessage("add", TMessageType.CALL, 0));
+        add_args args = new add_args();
+        args.setA(a);
+        args.setB(b);
+        args.write(prot);
+        prot.writeMessageEnd();
+      
 
-      byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-      Future<byte[]> done = this.service.apply(buffer);
-      return done.flatMap(new Function<byte[], Try<Integer>>() {
-        public Future<Integer> apply(byte[] buffer) {
-          TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-          TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-          try {
-            return Future.value((new Client(prot)).recv_add());
-          } catch (Exception e) {
-            return Future.exception(e);
+        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
+        Future<byte[]> done = this.service.apply(buffer);
+        return done.flatMap(new Function<byte[], Try<Integer>>() {
+          public Future<Integer> apply(byte[] buffer) {
+            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
+            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+            try {
+              return Future.value((new Client(prot)).recv_add());
+            } catch (Exception e) {
+              return Future.exception(e);
+            }
           }
-        }
-      });
+        });
+      } catch (TException e) {
+        return Future.exception(e);
+      }
     }
-    public Future<Void> add_one(int a, int b) throws TException {
-      // TODO: size
-      TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-      TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-      prot.writeMessageBegin(new TMessage("add_one", TMessageType.CALL, 0));
-      add_one_args args = new add_one_args();
-      args.setA(a);
-      args.setB(b);
-      args.write(prot);
-      prot.writeMessageEnd();
-    
+    public Future<Void> add_one(int a, int b) {
+      try {
+        // TODO: size
+        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
+        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        prot.writeMessageBegin(new TMessage("add_one", TMessageType.CALL, 0));
+        add_one_args args = new add_one_args();
+        args.setA(a);
+        args.setB(b);
+        args.write(prot);
+        prot.writeMessageEnd();
+      
 
-      byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-      Future<byte[]> done = this.service.apply(buffer);
-      return done.flatMap(new Function<byte[], Try<Void>>() {
-        public Future<Void> apply(byte[] buffer) {
-          TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-          TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-          try {
-            (new Client(prot)).recv_add_one();
-            return Future.value(null);
-          } catch (Exception e) {
-            return Future.exception(e);
+        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
+        Future<byte[]> done = this.service.apply(buffer);
+        return done.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] buffer) {
+            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
+            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+            try {
+              (new Client(prot)).recv_add_one();
+              return Future.value(null);
+            } catch (Exception e) {
+              return Future.exception(e);
+            }
           }
-        }
-      });
+        });
+      } catch (TException e) {
+        return Future.exception(e);
+      }
     }
-    public Future<SomeStruct> complex_return(String some_string) throws TException {
-      // TODO: size
-      TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-      TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-      prot.writeMessageBegin(new TMessage("complex_return", TMessageType.CALL, 0));
-      complex_return_args args = new complex_return_args();
-      args.setSome_string(some_string);
-      args.write(prot);
-      prot.writeMessageEnd();
-    
+    public Future<SomeStruct> complex_return(String some_string) {
+      try {
+        // TODO: size
+        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
+        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        prot.writeMessageBegin(new TMessage("complex_return", TMessageType.CALL, 0));
+        complex_return_args args = new complex_return_args();
+        args.setSome_string(some_string);
+        args.write(prot);
+        prot.writeMessageEnd();
+      
 
-      byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-      Future<byte[]> done = this.service.apply(buffer);
-      return done.flatMap(new Function<byte[], Try<SomeStruct>>() {
-        public Future<SomeStruct> apply(byte[] buffer) {
-          TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-          TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-          try {
-            return Future.value((new Client(prot)).recv_complex_return());
-          } catch (Exception e) {
-            return Future.exception(e);
+        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
+        Future<byte[]> done = this.service.apply(buffer);
+        return done.flatMap(new Function<byte[], Try<SomeStruct>>() {
+          public Future<SomeStruct> apply(byte[] buffer) {
+            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
+            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+            try {
+              return Future.value((new Client(prot)).recv_complex_return());
+            } catch (Exception e) {
+              return Future.exception(e);
+            }
           }
-        }
-      });
+        });
+      } catch (TException e) {
+        return Future.exception(e);
+      }
     }
   }
 

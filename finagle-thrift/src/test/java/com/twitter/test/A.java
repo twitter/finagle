@@ -49,7 +49,7 @@ public class A {
 
   public interface ServiceIface {
 
-    public Future<Integer> multiply(int a, int b) throws TException;
+    public Future<Integer> multiply(int a, int b);
 
   }
 
@@ -189,31 +189,35 @@ public class A {
       this.protocolFactory = protocolFactory;
     }
 
-    public Future<Integer> multiply(int a, int b) throws TException {
-      // TODO: size
-      TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-      TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-      prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
-      multiply_args args = new multiply_args();
-      args.setA(a);
-      args.setB(b);
-      args.write(prot);
-      prot.writeMessageEnd();
-    
+    public Future<Integer> multiply(int a, int b) {
+      try {
+        // TODO: size
+        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
+        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
+        multiply_args args = new multiply_args();
+        args.setA(a);
+        args.setB(b);
+        args.write(prot);
+        prot.writeMessageEnd();
+      
 
-      byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-      Future<byte[]> done = this.service.apply(buffer);
-      return done.flatMap(new Function<byte[], Try<Integer>>() {
-        public Future<Integer> apply(byte[] buffer) {
-          TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-          TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-          try {
-            return Future.value((new Client(prot)).recv_multiply());
-          } catch (Exception e) {
-            return Future.exception(e);
+        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
+        Future<byte[]> done = this.service.apply(buffer);
+        return done.flatMap(new Function<byte[], Try<Integer>>() {
+          public Future<Integer> apply(byte[] buffer) {
+            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
+            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+            try {
+              return Future.value((new Client(prot)).recv_multiply());
+            } catch (Exception e) {
+              return Future.exception(e);
+            }
           }
-        }
-      });
+        });
+      } catch (TException e) {
+        return Future.exception(e);
+      }
     }
   }
 

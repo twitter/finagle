@@ -16,19 +16,19 @@ import com.twitter.util.*;
 public class EndToEndTest {
   private static void runServer() {
     class Processor implements B.ServiceIface {
-      public Future<Integer> add(int a, int b) throws TException {
+      public Future<Integer> add(int a, int b) {
         return Future.value(0);
       }
 
-      public Future<Void> add_one(int a, int b) throws TException {
+      public Future<Void> add_one(int a, int b) {
         return Future.value(null);
       }
 
-      public Future<SomeStruct> complex_return(String some_string) throws TException {
+      public Future<SomeStruct> complex_return(String some_string) {
         return Future.value(new SomeStruct(123, "foobar"));
       }
 
-      public Future<Integer> multiply(int a, int b) throws TException {
+      public Future<Integer> multiply(int a, int b) {
         return Future.value(123);
       }
     }
