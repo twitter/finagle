@@ -5,9 +5,9 @@ import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.protocol.{NonStorageCommand, StorageCommand, ClientError, Command}
 import com.twitter.finagle.memcached.util.ParserUtils
-import com.twitter.finagle.memcached.protocol.text.{ParseCommand, CommandParser, Show, AbstractDecoder}
+import com.twitter.finagle.memcached.protocol.text.{MemcachedCommandVocabulary, CommandVocabulary, Show, AbstractDecoder}
 
-class Decoder(parser: ParseCommand) extends AbstractDecoder[Command] with StateMachine {
+class Decoder(parser: MemcachedCommandVocabulary) extends AbstractDecoder[Command] with StateMachine {
   import ParserUtils._
 
   case class AwaitingCommand() extends State

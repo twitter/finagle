@@ -5,8 +5,8 @@ import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol._
 
 class Memcached extends Codec[Command, Response] {
-  private[this] val responseParser = new ParseResponse
-  private[this] val commandParser = new ParseCommand
+  private[this] val responseParser = new MemcachedResponseVocabulary
+  private[this] val commandParser = new MemcachedCommandVocabulary
 
   val serverPipelineFactory = {
     new ChannelPipelineFactory {

@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.protocol.text.client
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import com.twitter.finagle.memcached.protocol.{Response, ParseResponse}
+import com.twitter.finagle.memcached.protocol.{Response, MemcachedResponseVocabulary}
 import com.twitter.finagle.memcached.protocol.text.AbstractDecoder
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 
@@ -13,7 +13,7 @@ object Decoder {
   private val END    = "END": ChannelBuffer
 }
 
-class Decoder(parser: ParseResponse) extends AbstractDecoder[Response] with StateMachine {
+class Decoder(parser: MemcachedResponseVocabulary) extends AbstractDecoder[Response] with StateMachine {
   import Decoder._
   case class AwaitingResponse()                                             extends State
   case class AwaitingResponseOrEnd(valuesSoFar: Seq[ValueLine])             extends State

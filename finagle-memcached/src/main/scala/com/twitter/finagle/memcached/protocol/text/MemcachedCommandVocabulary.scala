@@ -7,18 +7,18 @@ import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.util.ParserUtils
 
-trait CommandParser[S, C] {
+trait CommandVocabulary[S, C] {
   def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer): S
   def parseNonStorageCommand(tokens: Seq[ChannelBuffer]): C
   def needsData(tokens: Seq[ChannelBuffer]): Option[Int]
 }
 
-object ParseCommand {
+object MemcachedCommandVocabulary {
   private val NOREPLY = copiedBuffer("noreply".getBytes)
 }
 
-class ParseCommand extends CommandParser[StorageCommand, Command] {
-  import ParseCommand._
+class MemcachedCommandVocabulary extends CommandVocabulary[StorageCommand, Command] {
+  import MemcachedCommandVocabulary._
   import ParserUtils._
 
   private[this] val SET     = copiedBuffer("set"    .getBytes)

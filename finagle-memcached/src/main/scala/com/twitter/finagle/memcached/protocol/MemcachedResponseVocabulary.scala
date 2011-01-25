@@ -5,13 +5,21 @@ import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.util.ParserUtils
 
-trait ResponseParser[R, V] {
+/**
+ * A strategy for use in parsing Memcached-like protocols.
+ * This represents the concrete "vocabulary" of the protocol,
+ * i.e., which tokens are storage commands and which aren't.
+ *
+ * Kestrel is a Memcached-like protocol but with a slightly
+ * different vocabulary.
+ */
+trait ResponseVocabulary[R, V] {
   def parseResponse(tokens: Seq[ChannelBuffer]): R
   def parseValues(valueLines: Seq[ValueLine]): V
   def needsData(tokens: Seq[ChannelBuffer]): Option[Int]
 }
 
-object ParseResponse {
+object MemcachedResponseVocabulary {
   private val VALUE      = "VALUE": ChannelBuffer
   private val STORED     = "STORED": ChannelBuffer
   private val NOT_FOUND  = "NOT_FOUND": ChannelBuffer
@@ -19,8 +27,8 @@ object ParseResponse {
   private val DELETED    = "DELETED": ChannelBuffer
 }
 
-class ParseResponse extends ResponseParser[Response, Values] {
-  import ParseResponse._
+class MemcachedResponseVocabulary extends ResponseVocabulary[Response, Values] {
+  import MemcachedResponseVocabulary._
   import ParserUtils._
 
   def parseResponse(tokens: Seq[ChannelBuffer]) = {
@@ -36,7 +44,7 @@ class ParseResponse extends ResponseParser[Response, Values] {
   def parseValues(valueLines: Seq[ValueLine]) = {
     val values = valueLines.map { valueLine =>
       val tokens = valueLine.tokens
-      val cas = if (tokens.length == 4) Some(tokens(4).toInt) else None
+//      val cas = if (tokens.length == 4) Some(tokens(4).toInt) else None
       Value(tokens(1), valueLine.buffer)
     }
     Values(values)
