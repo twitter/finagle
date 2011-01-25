@@ -1,7 +1,6 @@
 package com.twitter.finagle.builder
 
 import java.net.SocketAddress
-import com.twitter.finagle.channel.ConnectingChannelBroker
 import com.twitter.finagle.Service
 
 /**

@@ -8,6 +8,7 @@ import javax.net.ssl.SSLContext
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
+import org.jboss.netty.bootstrap.ClientBootstrap
 
 import com.twitter.util.Duration
 import com.twitter.util.TimeConversions._
@@ -15,7 +16,7 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.Service
-import com.twitter.finagle.service.{RetryingService, TimeoutFilter, StatsFilter}
+import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{
   LoadBalancerService,
@@ -45,13 +46,14 @@ case class ClientBuilder[Req, Rep](
   _statsReceiver: Option[StatsReceiver],
   _loadStatistics: (Int, Duration),
   _name: Option[String],
+  _hostConnectionCoresize: Option[Int],
   _hostConnectionLimit: Option[Int],
+  _hostConnectionIdleTime: Option[Duration],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
   _logger: Option[Logger],
   _channelFactory: Option[ChannelFactory],
-  _proactivelyConnect: Option[Duration],
   _tls: Option[SSLContext],
   _startTls: Boolean)
 {
@@ -63,35 +65,37 @@ case class ClientBuilder[Req, Rep](
     None,                                        // statsReceiver
     (60, 10.seconds),                            // loadStatistics
     Some("client"),                              // name
+    None,                                        // hostConnectionCoresize
     None,                                        // hostConnectionLimit
+    None,                                        // hostConnectionIdleTime
     None,                                        // sendBufferSize
     None,                                        // recvBufferSize
     None,                                        // retries
     None,                                        // logger
     Some(ClientBuilder.defaultChannelFactory),   // channelFactory
-    None,                                        // proactivelyConnect
     None,                                        // tls
     false                                        // startTls
   )
 
   override def toString() = {
     val options = Seq(
-      "name"                -> _name,
-      "cluster"             -> _cluster,
-      "codec"               -> _codec,
-      "connectionTimeout"   -> Some(_connectionTimeout),
-      "requestTimeout"      -> Some(_requestTimeout),
-      "statsReceiver"       -> _statsReceiver,
-      "loadStatistics"      -> _loadStatistics,
-      "hostConnectionLimit" -> Some(_hostConnectionLimit),
-      "sendBufferSize"      -> _sendBufferSize,
-      "recvBufferSize"      -> _recvBufferSize,
-      "retries"             -> _retries,
-      "logger"              -> _logger,
-      "channelFactory"      -> _channelFactory,
-      "proactivelyConnect"  -> _proactivelyConnect,
-      "tls"                 -> _tls,
-      "startTls"            -> _startTls
+      "name"                   -> _name,
+      "cluster"                -> _cluster,
+      "codec"                  -> _codec,
+      "connectionTimeout"      -> Some(_connectionTimeout),
+      "requestTimeout"         -> Some(_requestTimeout),
+      "statsReceiver"          -> _statsReceiver,
+      "loadStatistics"         -> _loadStatistics,
+      "hostConnectionLimit"    -> Some(_hostConnectionLimit),
+      "hostConnectionCoresize" -> Some(_hostConnectionCoresize),
+      "hostConnectionIdleTime" -> Some(_hostConnectionIdleTime),
+      "sendBufferSize"         -> _sendBufferSize,
+      "recvBufferSize"         -> _recvBufferSize,
+      "retries"                -> _retries,
+      "logger"                 -> _logger,
+      "channelFactory"         -> _channelFactory,
+      "tls"                    -> _tls,
+      "startTls"               -> _startTls
     )
 
     "ClientBuilder(%s)".format(
@@ -142,6 +146,12 @@ case class ClientBuilder[Req, Rep](
   def hostConnectionLimit(value: Int) =
     copy(_hostConnectionLimit = Some(value))
 
+  def hostConnectionCoresize(value: Int) =
+    copy(_hostConnectionCoresize = Some(value))
+
+  def hostConnectionIdleTime(timeout: Duration) =
+    copy(_hostConnectionIdleTime = Some(timeout))
+
   def retries(value: Int) =
     copy(_retries = Some(value))
 
@@ -150,9 +160,6 @@ case class ClientBuilder[Req, Rep](
 
   def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
-
-  def proactivelyConnect(duration: Duration) =
-    copy(_proactivelyConnect = Some(duration))
 
   def tls() =
     copy(_tls = Some(Ssl.client()))
@@ -167,7 +174,7 @@ case class ClientBuilder[Req, Rep](
 
   // ** BUILDING
   private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
-    val bs = new BrokerClientBootstrap(_channelFactory.get)
+    val bs = new ClientBootstrap(_channelFactory.get)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.clientPipelineFactory.getPipeline
@@ -198,19 +205,20 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
-  private def pool(limit: Option[Int], proactivelyConnect: Option[Duration])
-                  (bootstrap: BrokerClientBootstrap) =
-    limit match {
-      case Some(limit) =>
-        new ConnectionLimitingChannelPool(bootstrap, limit, proactivelyConnect)
-      case None =>
-        new ChannelPool(bootstrap, proactivelyConnect)
-    }
+  private def pool(bootstrap: ClientBootstrap) = {
+    // Conservative, but probably the only safe thing.
+    val lowWatermark  = _hostConnectionCoresize getOrElse(1)
+    val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
+    val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
+    val factory = new CachingLifecycleFactory(
+      new ChannelServiceFactory[Req, Rep](bootstrap), idleTime)
+
+    val pool = new WatermarkPool[Service[Req, Rep]](factory, lowWatermark, highWatermark)
+    new PoolingService[Req, Rep](pool)
+  }
 
   private def makeBroker(codec: Codec[Req, Rep]) =
-    bootstrap(codec) _                                andThen
-    pool(_hostConnectionLimit, _proactivelyConnect) _ andThen
-    (new PoolingBroker[Req, Rep](_))
+    pool _ compose bootstrap(codec)
 
   def build(): Service[Req, Rep] = {
     if (!_cluster.isDefined)
@@ -230,9 +238,11 @@ case class ClientBuilder[Req, Rep](
       }
 
       if (_statsReceiver.isDefined) {
-        val statsFilter = new StatsFilter[Req, Rep](_statsReceiver.get.scope("host" -> host.toString))
+        val statsFilter = new StatsFilter[Req, Rep](
+          _statsReceiver.get.scope("host" -> host.toString))
         broker = statsFilter andThen broker
       }
+
       broker
     }
 

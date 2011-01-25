@@ -13,11 +13,15 @@ class ChannelException                      extends Exception
 class ConnectionFailedException             extends ChannelException
 class ChannelClosedException                extends ChannelException
 class SpuriousMessageException              extends ChannelException
+class IllegalMessageException               extends ChannelException
 class UnknownChannelException(e: Throwable) extends ChannelException
 class WriteException(e: Throwable)          extends ChannelException {
   override def toString = "%s: %s".format(super.toString, e.toString)
 }
 
+// Service layer errors.
+class ServiceException       extends Exception
+class ServiceClosedException extends ServiceException
 
 // Subclass this for application exceptions
 class ApplicationException extends Exception
