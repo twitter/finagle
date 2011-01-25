@@ -6,15 +6,8 @@ import com.twitter.util.Future
  * A Service is an asynchronous function from Request to Future[Response]. It is the
  * basic unit of an RPC interface.
  *
- * Currently this interface doesn't support streaming responses.  This
- * can be tackled in a number of ways:
- *
- *   - a similar continuation-future passing scheme
- *   - create a Future[] subclass (eg. ContinuingFuture) that has the
- *     logical flatMap implementation.
- *
  * '''Note:''' this is an abstract class (vs. a trait) to maintain java
- * compatibility.
+ * compatibility, as it has implementation as well as interface.
  */
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def map[Req1](f: (Req1) => (Req)) = new Service[Req1, Rep] {

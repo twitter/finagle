@@ -1,36 +1,29 @@
 package com.twitter.finagle.memcached.protocol
 
-import text.Parser
+import text.client.ValueLine
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import org.jboss.netty.util.CharsetUtil
+import com.twitter.finagle.memcached.util.ParserUtils
 
-object ParseResponse extends Parser[Response] {
-  import Parser.DIGITS
+trait ResponseParser[R, V] {
+  def parseResponse(tokens: Seq[ChannelBuffer]): R
+  def parseValues(valueLines: Seq[ValueLine]): V
+  def needsData(tokens: Seq[ChannelBuffer]): Option[Int]
+}
 
-  case class ValueLine(tokens: Seq[ChannelBuffer], buffer: ChannelBuffer) {
-    val toValue = Value(tokens(1), buffer)
-  }
-  private[this] val VALUE      = "VALUE": ChannelBuffer
-  private[this] val STORED     = "STORED": ChannelBuffer
-  private[this] val NOT_FOUND  = "NOT_FOUND": ChannelBuffer
-  private[this] val NOT_STORED = "NOT_STORED": ChannelBuffer
-  private[this] val DELETED    = "DELETED": ChannelBuffer
-  private[this] val END        = "END": ChannelBuffer
+object ParseResponse {
+  private val VALUE      = "VALUE": ChannelBuffer
+  private val STORED     = "STORED": ChannelBuffer
+  private val NOT_FOUND  = "NOT_FOUND": ChannelBuffer
+  private val NOT_STORED = "NOT_STORED": ChannelBuffer
+  private val DELETED    = "DELETED": ChannelBuffer
+}
 
-  def needsData(tokens: Seq[ChannelBuffer]) = {
-    val responseName = tokens.head
-    val args = tokens.tail
-    if (responseName == VALUE) {
-      validateValueResponse(args)
-      Some(args(2).toInt)
-    } else None
-  }
+class ParseResponse extends ResponseParser[Response, Values] {
+  import ParseResponse._
+  import ParserUtils._
 
-  def isEnd(tokens: Seq[ChannelBuffer]) =
-    (tokens.length == 1 && tokens.head == END)
-
-  def apply(tokens: Seq[ChannelBuffer]) = {
+  def parseResponse(tokens: Seq[ChannelBuffer]) = {
     tokens.head match {
       case NOT_FOUND  => NotFound
       case STORED     => Stored
@@ -41,23 +34,28 @@ object ParseResponse extends Parser[Response] {
   }
 
   def parseValues(valueLines: Seq[ValueLine]) = {
-    Values(valueLines.map(_.toValue))
+    val values = valueLines.map { valueLine =>
+      val tokens = valueLine.tokens
+      val cas = if (tokens.length == 4) Some(tokens(4).toInt) else None
+      Value(tokens(1), valueLine.buffer)
+    }
+    Values(values)
   }
 
-  private[this] def validateValueResponse(args: Seq[ChannelBuffer]) = {
+
+  def needsData(tokens: Seq[ChannelBuffer]) = {
+    val responseName = tokens.head
+    val args = tokens.tail
+    if (responseName == VALUE) {
+      validateValueResponse(args)
+      Some(args(2).toInt)
+    } else None
+  }
+
+  private[this] def validateValueResponse(args: Seq[ChannelBuffer]) {
     if (args.length < 3) throw new ServerError("Too few arguments")
     if (args.length > 4) throw new ServerError("Too many arguments")
     if (args.length == 4 && !args(3).matches(DIGITS)) throw new ServerError("CAS must be a number")
     if (!args(2).matches(DIGITS)) throw new ServerError("Bytes must be number")
-
-    val (key, flags, bytes) = (args(0), args(1), args(2))
-    val cas =
-      if (args.length == 4)
-        Some(args(4).toInt)
-      else
-        None
-
-    (key, flags, bytes, cas)
   }
-
 }

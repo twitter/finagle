@@ -5,10 +5,22 @@ import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.util.ParserUtils
 
-object ParseCommand extends Parser[Command] {
-  import Parser.DIGITS
-  private[this] val NOREPLY = copiedBuffer("noreply".getBytes)
+trait CommandParser[S, C] {
+  def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer): S
+  def parseNonStorageCommand(tokens: Seq[ChannelBuffer]): C
+  def needsData(tokens: Seq[ChannelBuffer]): Option[Int]
+}
+
+object ParseCommand {
+  private val NOREPLY = copiedBuffer("noreply".getBytes)
+}
+
+class ParseCommand extends CommandParser[StorageCommand, Command] {
+  import ParseCommand._
+  import ParserUtils._
+
   private[this] val SET     = copiedBuffer("set"    .getBytes)
   private[this] val ADD     = copiedBuffer("add"    .getBytes)
   private[this] val REPLACE = copiedBuffer("replace".getBytes)
@@ -23,16 +35,8 @@ object ParseCommand extends Parser[Command] {
   private[this] val storageCommands = collection.Set(
     SET, ADD, REPLACE, APPEND, PREPEND)
 
-  def needsData(tokens: Seq[ChannelBuffer]) = {
-    val commandName = tokens.head
-    val args = tokens.tail
-    if (storageCommands.contains(commandName)) {
-      validateStorageCommand(args, null)
-      Some(tokens(4).toInt)
-    } else None
-  }
 
-  def apply(tokens: Seq[ChannelBuffer], data: ChannelBuffer): Command = {
+  def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
     val commandName = tokens.head
     val args = tokens.tail
     commandName match {
@@ -45,7 +49,7 @@ object ParseCommand extends Parser[Command] {
     }
   }
 
-  def apply(tokens: Seq[ChannelBuffer]): Command = {
+  def parseNonStorageCommand(tokens: Seq[ChannelBuffer]) = {
     val commandName = tokens.head
     val args = tokens.tail
     commandName match {
@@ -56,6 +60,16 @@ object ParseCommand extends Parser[Command] {
       case DECR    => tupled(Decr)(validateArithmeticCommand(args))
       case _       => throw new NonexistentCommand(commandName.toString)
     }
+  }
+
+  def needsData(tokens: Seq[ChannelBuffer]) = {
+    val commandName = tokens.head
+    val args = tokens.tail
+    if (storageCommands.contains(commandName)) {
+      validateStorageCommand(args, null)
+      val bytesNeeded = tokens(4).toInt
+      Some(bytesNeeded)
+    } else None
   }
 
   private[this] def validateStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
