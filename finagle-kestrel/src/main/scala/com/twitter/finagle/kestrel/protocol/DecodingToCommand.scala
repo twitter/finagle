@@ -5,9 +5,10 @@ import com.twitter.finagle.memcached.protocol.{ClientError, NonexistentCommand}
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import scala.Function.tupled
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.protocol.text.CommandVocabulary
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
+import com.twitter.finagle.memcached.protocol.text.AbstractDecodingToCommand
 
-class KestrelCommandVocabulary extends CommandVocabulary[Command] {
+class DecodingToCommand extends AbstractDecodingToCommand[Command] {
   private[this] val GET         = copiedBuffer("get"        .getBytes)
   private[this] val SET         = copiedBuffer("set"        .getBytes)
   private[this] val DELETE      = copiedBuffer("delete"     .getBytes)

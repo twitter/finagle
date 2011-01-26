@@ -1,11 +1,10 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.memcached.protocol.text.client.ValueLine
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.finagle.memcached.protocol.text.ResponseVocabulary
+import com.twitter.finagle.memcached.protocol.text.{AbstractDecodingToResponse, TokensWithData}
 
-class KestrelResponseVocabulary extends ResponseVocabulary[Response] {
-  import ResponseVocabulary._
+class DecodingToResponse extends AbstractDecodingToResponse[Response] {
+  import AbstractDecodingToResponse._
 
   def parseResponse(tokens: Seq[ChannelBuffer]) = {
     tokens.head match {
@@ -15,10 +14,10 @@ class KestrelResponseVocabulary extends ResponseVocabulary[Response] {
     }
   }
 
-  def parseValues(valueLines: Seq[ValueLine]) = {
+  def parseValues(valueLines: Seq[TokensWithData]) = {
     val values = valueLines.map { valueLine =>
       val tokens = valueLine.tokens
-      Value(tokens(1), valueLine.buffer)
+      Value(tokens(1), valueLine.data)
     }
     Values(values)
   }

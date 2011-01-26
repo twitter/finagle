@@ -3,10 +3,14 @@ package com.twitter.finagle.memcached.protocol.text.server
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.finagle.memcached.protocol.Command
-import com.twitter.finagle.memcached.protocol.text.{CommandVocabulary, Show, AbstractDecoder}
+import com.twitter.finagle.memcached.protocol.text._
+import com.twitter.finagle.memcached.protocol.ClientError
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.util.ParserUtils
 
-class Decoder[C >: Null <: AnyRef](parser: CommandVocabulary[C]) extends AbstractDecoder[C] with StateMachine {
+class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDecoder with StateMachine {
+  import ParserUtils._
+
   case class AwaitingCommand() extends State
   case class AwaitingData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) extends State
 
@@ -19,15 +23,15 @@ class Decoder[C >: Null <: AnyRef](parser: CommandVocabulary[C]) extends Abstrac
     super.exceptionCaught(ctx, e)
   }
 
-  def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): C = {
+  def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Decoding = {
     state match {
       case AwaitingCommand() =>
-        decodeLine(buffer, parser.needsData(_)) { tokens =>
-          parser.parseNonStorageCommand(tokens)
+        decodeLine(buffer, needsData(_)) { tokens =>
+          Tokens(tokens)
         }
       case AwaitingData(tokens, bytesNeeded) =>
         decodeData(bytesNeeded, buffer) { data =>
-          parser.parseStorageCommand(tokens, data)
+          TokensWithData(tokens, data)
         }
     }
   }
@@ -37,5 +41,22 @@ class Decoder[C >: Null <: AnyRef](parser: CommandVocabulary[C]) extends Abstrac
     needMoreData
   }
 
+  private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
+    val commandName = tokens.head
+    val args = tokens.tail
+    if (storageCommands.contains(commandName)) {
+      validateStorageCommand(args)
+      val bytesNeeded = tokens(4).toInt
+      Some(bytesNeeded)
+    } else None
+  }
+
   private[this] val needMoreData = null
+
+  private[this] def validateStorageCommand(tokens: Seq[ChannelBuffer]) = {
+    if (tokens.size < 4) throw new ClientError("Too few arguments")
+    if (tokens.size > 5) throw new ClientError("Too many arguments")
+    if (!tokens(3).matches(DIGITS)) throw new ClientError("Bad frame length")
+  }
+
 }

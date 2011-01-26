@@ -5,7 +5,6 @@ import com.twitter.util.Time
 
 sealed abstract class Command
 
-// FIXME make expiry a duration
 abstract class StorageCommand(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer) extends Command
 abstract class NonStorageCommand                                                      extends Command
 abstract class ArithmeticCommand(key: ChannelBuffer, delta: Int)                      extends NonStorageCommand

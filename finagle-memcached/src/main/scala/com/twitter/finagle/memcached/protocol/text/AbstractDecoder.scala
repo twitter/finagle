@@ -13,7 +13,7 @@ object AbstractDecoder {
   private val SKIP_SPACE = 1
 }
 
-abstract class AbstractDecoder[A >: Null <: AnyRef] extends FrameDecoder {
+abstract class AbstractDecoder extends FrameDecoder {
   import AbstractDecoder._
   import ParserUtils._
 
@@ -28,7 +28,7 @@ abstract class AbstractDecoder[A >: Null <: AnyRef] extends FrameDecoder {
     super.exceptionCaught(ctx, e)
   }
 
-  protected def decodeLine(buffer: ChannelBuffer, needsData: Seq[ChannelBuffer] => Option[Int])(parse: Seq[ChannelBuffer] => A): A = {
+  protected def decodeLine(buffer: ChannelBuffer, needsData: Seq[ChannelBuffer] => Option[Int])(continue: Seq[ChannelBuffer] => Decoding): Decoding = {
     val frameLength = buffer.bytesBefore(ChannelBufferIndexFinder.CRLF)
     if (frameLength < 0) {
       needMoreData
@@ -40,14 +40,15 @@ abstract class AbstractDecoder[A >: Null <: AnyRef] extends FrameDecoder {
       val bytesNeeded = needsData(tokens)
       if (bytesNeeded.isDefined) {
         awaitData(tokens, bytesNeeded.get)
+        needMoreData
       } else {
         start()
-        parse(tokens)
+        continue(tokens)
       }
     }
   }
 
-  protected def decodeData(bytesNeeded: Int, buffer: ChannelBuffer)(parse: (ChannelBuffer) => A): A = {
+  protected def decodeData(bytesNeeded: Int, buffer: ChannelBuffer)(continue: ChannelBuffer => Decoding): Decoding = {
     if (buffer.readableBytes < (bytesNeeded + DELIMETER.capacity))
       needMoreData
     else {
@@ -58,12 +59,12 @@ abstract class AbstractDecoder[A >: Null <: AnyRef] extends FrameDecoder {
       buffer.skipBytes(bytesNeeded + DELIMETER.capacity)
 
       start()
-      parse(ChannelBuffers.copiedBuffer(data))
+      continue(ChannelBuffers.copiedBuffer(data))
     }
   }
 
   private[this] val needMoreData = null
 
   protected[memcached] def start()
-  protected[memcached] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int): A
+  protected[memcached] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int)
 }
