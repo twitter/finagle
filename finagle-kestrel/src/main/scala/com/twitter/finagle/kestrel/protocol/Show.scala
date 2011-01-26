@@ -51,7 +51,7 @@ class CommandToEncoding extends OneToOneEncoder {
       case Set(key, expiry, value) =>
         TokensWithData(Seq(SET, key, ZERO, expiry.inSeconds.toString), value)
       case Get(queueName, options) =>
-        var key = queueName
+        var key = queueName.toString(CharsetUtil.US_ASCII)
         options foreach { option =>
           val optionString = option match {
             case Timeout(timeout) => "t=" + timeout.inSeconds
