@@ -29,7 +29,9 @@ class KestrelCommandVocabulary extends CommandVocabulary[Command] {
     val commandName = tokens.head
     val args = tokens.tail
     commandName match {
-      case SET       => tupled(Set)(validateStorageCommand(args, data))
+      case SET       =>
+        val (name, _, expiry, _) = validateStorageCommand(tokens, data)
+        Set(name, expiry, data)
       case _         => throw new NonexistentCommand(commandName.toString)
     }
   }

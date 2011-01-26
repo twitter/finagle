@@ -7,6 +7,7 @@ import com.twitter.finagle.memcached.protocol._
 import scala.collection.mutable
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.util.AtomicMap
+import com.twitter.util.Time
 
 class InterpreterSpec extends Specification {
   "Interpreter" should {
@@ -17,7 +18,7 @@ class InterpreterSpec extends Specification {
       val key   = "foo"
       val value = "bar"
       interpreter(Delete(key))
-      interpreter(Set(key, 0, 0, value))
+      interpreter(Set(key, 0, Time.epoch, value))
       interpreter(Get(Seq(key))) mustEqual Values(Seq(Value(key, value)))
     }
   }

@@ -4,11 +4,11 @@ import org.specs.Specification
 import com.twitter.finagle.memcached.Server
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.util.RandomSocket
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.util.TimeConversions._
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.util.{Time, RandomSocket}
 
 object InterpreterServiceSpec extends Specification {
   "InterpreterService" should {
@@ -34,7 +34,7 @@ object InterpreterServiceSpec extends Specification {
       val value = "value"
       val result = for {
         _ <- client(Delete(key))
-        _ <- client(Set(key, 0, 0, value))
+        _ <- client(Set(key, 0, Time.epoch, value))
         r <- client(Get(Seq(key)))
       } yield r
       result(1.second) mustEqual Values(Seq(Value(key, value)))

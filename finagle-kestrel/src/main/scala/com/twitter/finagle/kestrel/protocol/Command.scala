@@ -6,7 +6,7 @@ import com.twitter.util.{Time, Duration}
 sealed abstract class Command
 
 case class Get(queueName: ChannelBuffer, options: collection.Set[GetOption])                   extends Command
-case class Set(queueName: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)       extends Command
+case class Set(queueName: ChannelBuffer, expiry: Time, value: ChannelBuffer)                   extends Command
 
 case class Delete(queueName: ChannelBuffer)                                                    extends Command
 case class Flush(queueName: ChannelBuffer)                                                     extends Command

@@ -5,6 +5,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.conversions.time._
 import java.util.concurrent.{TimeUnit, BlockingQueue}
 import com.twitter.util.{Future, MapMaker}
+import com.twitter.finagle.Service
 
 class Interpreter(Queue: () => BlockingQueue[ChannelBuffer]) {
   private[this] val queues = MapMaker[ChannelBuffer, BlockingQueue[ChannelBuffer]] { config =>
@@ -23,7 +24,7 @@ class Interpreter(Queue: () => BlockingQueue[ChannelBuffer]) {
           Values(Seq.empty)
         else
           Values(Seq(Value(queueName, item)))
-      case Set(queueName, flags, expiry, value) =>
+      case Set(queueName, expiry, value) =>
         queues(queueName).add(value)
         Stored()
       case Delete(queueName) =>
@@ -47,4 +48,8 @@ class Interpreter(Queue: () => BlockingQueue[ChannelBuffer]) {
         NotFound()
     }
   }
+}
+
+class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
+  def apply(request: Command) = Future(interpreter(request))
 }

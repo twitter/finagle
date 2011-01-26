@@ -1,13 +1,13 @@
-package com.twitter.finagle.memcached.stress
+package com.twitter.finagle.kestrel.integration
 
-import org.specs.Specification
-import com.twitter.finagle.memcached.Server
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.Service
+import com.twitter.finagle.kestrel.Server
+import org.specs.Specification
+import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Time, RandomSocket}
+import com.twitter.conversions.time._
 
 object InterpreterServiceSpec extends Specification {
   "InterpreterService" should {
@@ -20,7 +20,7 @@ object InterpreterServiceSpec extends Specification {
       server.start()
       client = ClientBuilder()
         .hosts("localhost:" + address.getPort)
-        .codec(new Memcached)
+        .codec(new Kestrel)
         .build()
     }
 
@@ -29,17 +29,14 @@ object InterpreterServiceSpec extends Specification {
     }
 
     "set & get" in {
-      val _key   = "key"
+      val queueName   = "name"
       val value = "value"
-      val start = System.currentTimeMillis
-      (0 until 100) map { i =>
-        val key = _key + i
-        client(Delete(key))()
-        client(Set(key, 0, Time.epoch, value))()
-        client(Get(Seq(key)))() mustEqual Values(Seq(Value(key, value)))
-      }
-      val end = System.currentTimeMillis
-      println("%d ms".format(end - start))
+      val result = for {
+        _ <- client(Flush(queueName))
+        _ <- client(Set(queueName, Time.now, value))
+        r <- client(Get(queueName, collection.Set.empty))
+      } yield r
+      result(1.second) mustEqual Values(Seq(Value(queueName, value)))
     }
   }
 }
