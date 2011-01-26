@@ -1039,23 +1039,23 @@ public class FacebookService {
     public Future<String> getName() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getName", TMessageType.CALL, 0));
-        getName_args args = new getName_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getName", TMessageType.CALL, 0));
+        getName_args __args__ = new getName_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<String>>() {
-          public Future<String> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<String>>() {
+          public Future<String> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getName());
+              return Future.value((new Client(__prot__)).recv_getName());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1068,23 +1068,23 @@ public class FacebookService {
     public Future<String> getVersion() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getVersion", TMessageType.CALL, 0));
-        getVersion_args args = new getVersion_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getVersion", TMessageType.CALL, 0));
+        getVersion_args __args__ = new getVersion_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<String>>() {
-          public Future<String> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<String>>() {
+          public Future<String> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getVersion());
+              return Future.value((new Client(__prot__)).recv_getVersion());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1097,23 +1097,23 @@ public class FacebookService {
     public Future<fb_status> getStatus() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getStatus", TMessageType.CALL, 0));
-        getStatus_args args = new getStatus_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getStatus", TMessageType.CALL, 0));
+        getStatus_args __args__ = new getStatus_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<fb_status>>() {
-          public Future<fb_status> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<fb_status>>() {
+          public Future<fb_status> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getStatus());
+              return Future.value((new Client(__prot__)).recv_getStatus());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1126,23 +1126,23 @@ public class FacebookService {
     public Future<String> getStatusDetails() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getStatusDetails", TMessageType.CALL, 0));
-        getStatusDetails_args args = new getStatusDetails_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getStatusDetails", TMessageType.CALL, 0));
+        getStatusDetails_args __args__ = new getStatusDetails_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<String>>() {
-          public Future<String> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<String>>() {
+          public Future<String> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getStatusDetails());
+              return Future.value((new Client(__prot__)).recv_getStatusDetails());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1155,23 +1155,23 @@ public class FacebookService {
     public Future<Map<String,Long>> getCounters() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getCounters", TMessageType.CALL, 0));
-        getCounters_args args = new getCounters_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getCounters", TMessageType.CALL, 0));
+        getCounters_args __args__ = new getCounters_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Map<String,Long>>>() {
-          public Future<Map<String,Long>> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Map<String,Long>>>() {
+          public Future<Map<String,Long>> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getCounters());
+              return Future.value((new Client(__prot__)).recv_getCounters());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1184,24 +1184,24 @@ public class FacebookService {
     public Future<Long> getCounter(String key) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getCounter", TMessageType.CALL, 0));
-        getCounter_args args = new getCounter_args();
-        args.setKey(key);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getCounter", TMessageType.CALL, 0));
+        getCounter_args __args__ = new getCounter_args();
+        __args__.setKey(key);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Long>>() {
-          public Future<Long> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Long>>() {
+          public Future<Long> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getCounter());
+              return Future.value((new Client(__prot__)).recv_getCounter());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1214,25 +1214,25 @@ public class FacebookService {
     public Future<Void> setOption(String key, String value) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("setOption", TMessageType.CALL, 0));
-        setOption_args args = new setOption_args();
-        args.setKey(key);
-        args.setValue(value);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("setOption", TMessageType.CALL, 0));
+        setOption_args __args__ = new setOption_args();
+        __args__.setKey(key);
+        __args__.setValue(value);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Void>>() {
-          public Future<Void> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              (new Client(prot)).recv_setOption();
+              (new Client(__prot__)).recv_setOption();
               return Future.value(null);
             } catch (Exception e) {
               return Future.exception(e);
@@ -1246,24 +1246,24 @@ public class FacebookService {
     public Future<String> getOption(String key) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getOption", TMessageType.CALL, 0));
-        getOption_args args = new getOption_args();
-        args.setKey(key);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getOption", TMessageType.CALL, 0));
+        getOption_args __args__ = new getOption_args();
+        __args__.setKey(key);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<String>>() {
-          public Future<String> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<String>>() {
+          public Future<String> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getOption());
+              return Future.value((new Client(__prot__)).recv_getOption());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1276,23 +1276,23 @@ public class FacebookService {
     public Future<Map<String,String>> getOptions() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getOptions", TMessageType.CALL, 0));
-        getOptions_args args = new getOptions_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getOptions", TMessageType.CALL, 0));
+        getOptions_args __args__ = new getOptions_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Map<String,String>>>() {
-          public Future<Map<String,String>> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Map<String,String>>>() {
+          public Future<Map<String,String>> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getOptions());
+              return Future.value((new Client(__prot__)).recv_getOptions());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1305,24 +1305,24 @@ public class FacebookService {
     public Future<String> getCpuProfile(int profileDurationInSec) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("getCpuProfile", TMessageType.CALL, 0));
-        getCpuProfile_args args = new getCpuProfile_args();
-        args.setProfileDurationInSec(profileDurationInSec);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("getCpuProfile", TMessageType.CALL, 0));
+        getCpuProfile_args __args__ = new getCpuProfile_args();
+        __args__.setProfileDurationInSec(profileDurationInSec);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<String>>() {
-          public Future<String> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<String>>() {
+          public Future<String> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_getCpuProfile());
+              return Future.value((new Client(__prot__)).recv_getCpuProfile());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1335,23 +1335,23 @@ public class FacebookService {
     public Future<Long> aliveSince() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("aliveSince", TMessageType.CALL, 0));
-        aliveSince_args args = new aliveSince_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("aliveSince", TMessageType.CALL, 0));
+        aliveSince_args __args__ = new aliveSince_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Long>>() {
-          public Future<Long> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Long>>() {
+          public Future<Long> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_aliveSince());
+              return Future.value((new Client(__prot__)).recv_aliveSince());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -1364,21 +1364,21 @@ public class FacebookService {
     public Future<Void> reinitialize() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("reinitialize", TMessageType.CALL, 0));
-        reinitialize_args args = new reinitialize_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("reinitialize", TMessageType.CALL, 0));
+        reinitialize_args __args__ = new reinitialize_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, true);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Void>>() {
-          public Future<Void> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, true);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
               return Future.value(null);
             } catch (Exception e) {
@@ -1393,21 +1393,21 @@ public class FacebookService {
     public Future<Void> shutdown() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("shutdown", TMessageType.CALL, 0));
-        shutdown_args args = new shutdown_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("shutdown", TMessageType.CALL, 0));
+        shutdown_args __args__ = new shutdown_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, true);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Void>>() {
-          public Future<Void> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, true);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
               return Future.value(null);
             } catch (Exception e) {

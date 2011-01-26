@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import org.specs.Specification
 
-import org.apache.thrift.TProcessorFactory
+import org.apache.thrift.{TProcessorFactory, TApplicationException}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
 import org.apache.thrift.transport.{TSocket, TServerSocket, TFramedTransport}
@@ -13,40 +13,40 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
 
+import com.twitter.test.{B, SomeStruct, AnException, F}
 import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.silly.Silly
-import com.twitter.test.{B, SomeStruct, AnException}
 import com.twitter.util.{Future, RandomSocket, Throw, Return, Promise}
 import com.twitter.util.TimeConversions._
 
 object EndToEndSpec extends Specification {
   "Thrift server" should {
-    "work end-to-end" in {
-      val processor =  new B.ServiceIface {
-        def add(a: Int, b: Int) = Future.exception(new AnException)
-        def add_one(a: Int, b: Int) = Future.void
-        def multiply(a: Int, b: Int) = Future { a * b }
-        def complex_return(someString: String) = Future {
-          new SomeStruct(123, someString)
-        }
-        def someway() = Future.void
+    val processor =  new B.ServiceIface {
+      def add(a: Int, b: Int) = Future.exception(new AnException)
+      def add_one(a: Int, b: Int) = Future.void
+      def multiply(a: Int, b: Int) = Future { a * b }
+      def complex_return(someString: String) = Future {
+        new SomeStruct(123, someString)
       }
+      def someway() = Future.void
+    }
 
-      val serverAddr = RandomSocket()
-      val server = ServerBuilder()
-        .codec(ThriftServerFramedCodec())
-        .bindTo(serverAddr)
-        .build(new B.Service(processor, new TBinaryProtocol.Factory()))
+    val serverAddr = RandomSocket()
+    val server = ServerBuilder()
+    .codec(ThriftServerFramedCodec())
+    .bindTo(serverAddr)
+    .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
-      val service = ClientBuilder()
-        .hosts(Seq(serverAddr))
-        .codec(ThriftClientFramedCodec())
-        .build()
+    val service = ClientBuilder()
+    .hosts(Seq(serverAddr))
+    .codec(ThriftClientFramedCodec())
+    .build()
 
-      val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
+    val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
+    "work" in {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
@@ -56,6 +56,15 @@ object EndToEndSpec extends Specification {
       client.add_one(1, 2)()  // don't block! 
 
       client.someway()() must beNull  // don't block!
+
+      server.close()()
+    }
+
+    "handle wrong interface" in {
+      val client = new F.ServiceToClient(service, new TBinaryProtocol.Factory())
+
+      client.another_method(123)() must throwA(
+        new TApplicationException("Invalid method name: 'another_method'"))
 
       server.close()()
     }

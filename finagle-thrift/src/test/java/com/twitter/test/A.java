@@ -193,25 +193,25 @@ public class A {
     public Future<Integer> multiply(int a, int b) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
-        multiply_args args = new multiply_args();
-        args.setA(a);
-        args.setB(b);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
+        multiply_args __args__ = new multiply_args();
+        __args__.setA(a);
+        __args__.setB(b);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Integer>>() {
-          public Future<Integer> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Integer>>() {
+          public Future<Integer> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_multiply());
+              return Future.value((new Client(__prot__)).recv_multiply());
             } catch (Exception e) {
               return Future.exception(e);
             }
