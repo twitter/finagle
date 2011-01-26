@@ -32,6 +32,7 @@ import com.twitter.util.Function2;
 import com.twitter.util.Try;
 import com.twitter.util.Return;
 import com.twitter.util.Throw;
+import com.twitter.finagle.thrift.ThriftClientRequest;
 
 public class SomeStruct implements TBase<SomeStruct, SomeStruct._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("SomeStruct");
