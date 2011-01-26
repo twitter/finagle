@@ -3,13 +3,13 @@ package com.twitter.finagle.memcached
 import _root_.java.util.TreeMap
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.Future
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConversions._
 import com.twitter.finagle.builder.ClientBuilder
 import text.Memcached
 import com.twitter.finagle.{Service, service}
+import com.twitter.util.{Time, Future}
 
 object Client {
   def apply(host: String): Client = Client(
@@ -28,11 +28,11 @@ object Client {
 }
 
 trait Client {
-  def set(key: String, flags: Int, expiry: Int, value: ChannelBuffer):     Future[Response]
-  def add(key: String, flags: Int, expiry: Int, value: ChannelBuffer):     Future[Response]
-  def append(key: String, flags: Int, expiry: Int, value: ChannelBuffer):  Future[Response]
-  def prepend(key: String, flags: Int, expiry: Int, value: ChannelBuffer): Future[Response]
-  def replace(key: String, flags: Int, expiry: Int, value: ChannelBuffer): Future[Response]
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Response]
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Response]
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer):  Future[Response]
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Response]
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Response]
 
   def get(key: String):                           Future[Option[ChannelBuffer]]
   def get(keys: Iterable[String]):                Future[Map[String, ChannelBuffer]]
@@ -42,11 +42,11 @@ trait Client {
   def decr(key: String):                          Future[Int]
   def decr(key: String, delta: Int):              Future[Int]
 
-  def set(key: String, value: ChannelBuffer):     Future[Response] = set(key, 0, 0, value)
-  def add(key: String, value: ChannelBuffer):     Future[Response] = add(key, 0, 0, value)
-  def append(key: String, value: ChannelBuffer):  Future[Response] = append(key, 0, 0, value)
-  def prepend(key: String, value: ChannelBuffer): Future[Response] = prepend(key, 0, 0, value)
-  def replace(key: String, value: ChannelBuffer): Future[Response] = replace(key, 0, 0, value)
+  def set(key: String, value: ChannelBuffer):     Future[Response] = set(key, 0, Time.epoch, value)
+  def add(key: String, value: ChannelBuffer):     Future[Response] = add(key, 0, Time.epoch, value)
+  def append(key: String, value: ChannelBuffer):  Future[Response] = append(key, 0, Time.epoch, value)
+  def prepend(key: String, value: ChannelBuffer): Future[Response] = prepend(key, 0, Time.epoch, value)
+  def replace(key: String, value: ChannelBuffer): Future[Response] = replace(key, 0, Time.epoch, value)
 }
 
 protected class ConnectedClient(underlying: Service[Command, Response]) extends Client {
@@ -69,15 +69,15 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     }
   }
 
-  def set(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Set(key, flags, expiry, value))
-  def add(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Add(key, flags, expiry, value))
-  def append(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Append(key, flags, expiry, value))
-  def prepend(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Prepend(key, flags, expiry, value))
-  def replace(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Replace(key, flags, expiry, value))
 
   def delete(key: String)                        = underlying(Delete(key))
@@ -131,15 +131,15 @@ class PartitionedClient(clients: Seq[Client], hash: String => Long) extends Clie
     }
   }
 
-  def set(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     idx(key).set(key, flags, expiry, value)
-  def add(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     idx(key).add(key, flags, expiry, value)
-  def append(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     idx(key).append(key, flags, expiry, value)
-  def prepend(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     idx(key).prepend(key, flags, expiry, value)
-  def replace(key: String, flags: Int, expiry: Int, value: ChannelBuffer) =
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     idx(key).replace(key, flags, expiry, value)
 
   def delete(key: String)                        = idx(key).delete(key)

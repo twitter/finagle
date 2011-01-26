@@ -20,16 +20,16 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
       case Set(key, flags, expiry, value) =>
         map.lock(key) { data =>
           data(key) = value
-          Stored
+          Stored()
         }
       case Add(key, flags, expiry, value) =>
         map.lock(key) { data =>
           val existing = data.get(key)
           if (existing.isDefined)
-            NotStored
+            NotStored()
           else {
             data(key) = value
-            Stored
+            Stored()
           }
         }
       case Replace(key, flags, expiry, value) =>
@@ -37,9 +37,9 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
           val existing = data.get(key)
           if (existing.isDefined) {
             data(key) = value
-            Stored
+            Stored()
           } else {
-            NotStored
+            NotStored()
           }
         }
       case Append(key, flags, expiry, value) =>
@@ -47,9 +47,9 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
           val existing = data.get(key)
           if (existing.isDefined) {
             data(key) = wrappedBuffer(value, existing.get)
-            Stored
+            Stored()
           } else {
-            NotStored
+            NotStored()
           }
         }
       case Prepend(key, flags, expiry, value) =>
@@ -57,25 +57,27 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
           val existing = data.get(key)
           if (existing.isDefined) {
             data(key) = wrappedBuffer(existing.get, value)
-            Stored
+            Stored()
           } else {
-            NotStored
+            NotStored()
           }
         }
       case Get(keys) =>
         Values(
           keys flatMap { key =>
             map.lock(key) { data =>
-              data.get(key) map(Value(key, _))
+              data.get(key) map { datum =>
+                Value(key, wrappedBuffer(datum))
+              }
             }
           }
         )
       case Delete(key) =>
         map.lock(key) { data =>
           if (data.remove(key).isDefined)
-            Deleted
+            Deleted()
           else
-            NotFound
+            NotFound()
         }
       case Incr(key, delta) =>
         map.lock(key) { data =>
@@ -94,7 +96,7 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
 
             Number(result)
           } else {
-            NotFound
+            NotFound()
           }
         }
       case Decr(key, value) =>

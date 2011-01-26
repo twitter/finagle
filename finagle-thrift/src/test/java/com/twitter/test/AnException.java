@@ -32,6 +32,7 @@ import com.twitter.util.Function2;
 import com.twitter.util.Try;
 import com.twitter.util.Return;
 import com.twitter.util.Throw;
+import com.twitter.finagle.thrift.ThriftClientRequest;
 
 public class AnException extends Exception implements TBase<AnException, AnException._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("AnException");

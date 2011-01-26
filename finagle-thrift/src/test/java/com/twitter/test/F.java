@@ -34,27 +34,27 @@ import com.twitter.util.Return;
 import com.twitter.util.Throw;
 import com.twitter.finagle.thrift.ThriftClientRequest;
 
-public class A {
+public class F {
 
-  public interface Iface {
+  public interface Iface extends com.facebook.fb303.FacebookService.Iface {
 
-    public int multiply(int a, int b) throws TException;
-
-  }
-
-  public interface AsyncIface {
-
-    public void multiply(int a, int b, AsyncMethodCallback<AsyncClient.multiply_call> resultHandler) throws TException;
+    public int another_method(int a) throws TException;
 
   }
 
-  public interface ServiceIface {
+  public interface AsyncIface extends com.facebook.fb303.FacebookService.AsyncIface {
 
-    public Future<Integer> multiply(int a, int b);
+    public void another_method(int a, AsyncMethodCallback<AsyncClient.another_method_call> resultHandler) throws TException;
 
   }
 
-  public static class Client implements TServiceClient, Iface {
+  public interface ServiceIface extends com.facebook.fb303.FacebookService.ServiceIface {
+
+    public Future<Integer> another_method(int a);
+
+  }
+
+  public static class Client extends com.facebook.fb303.FacebookService.Client implements TServiceClient, Iface {
     public static class Factory implements TServiceClientFactory<Client> {
       public Factory() {}
       public Client getClient(TProtocol prot) {
@@ -72,43 +72,26 @@ public class A {
 
     public Client(TProtocol iprot, TProtocol oprot)
     {
-      iprot_ = iprot;
-      oprot_ = oprot;
+      super(iprot, oprot);
     }
 
-    protected TProtocol iprot_;
-    protected TProtocol oprot_;
-
-    protected int seqid_;
-
-    public TProtocol getInputProtocol()
+    public int another_method(int a) throws TException
     {
-      return this.iprot_;
+      send_another_method(a);
+      return recv_another_method();
     }
 
-    public TProtocol getOutputProtocol()
+    public void send_another_method(int a) throws TException
     {
-      return this.oprot_;
-    }
-
-    public int multiply(int a, int b) throws TException
-    {
-      send_multiply(a, b);
-      return recv_multiply();
-    }
-
-    public void send_multiply(int a, int b) throws TException
-    {
-      oprot_.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, ++seqid_));
-      multiply_args args = new multiply_args();
+      oprot_.writeMessageBegin(new TMessage("another_method", TMessageType.CALL, ++seqid_));
+      another_method_args args = new another_method_args();
       args.setA(a);
-      args.setB(b);
       args.write(oprot_);
       oprot_.writeMessageEnd();
       oprot_.getTransport().flush();
     }
 
-    public int recv_multiply() throws TException
+    public int recv_another_method() throws TException
     {
       TMessage msg = iprot_.readMessageBegin();
       if (msg.type == TMessageType.EXCEPTION) {
@@ -117,19 +100,19 @@ public class A {
         throw x;
       }
       if (msg.seqid != seqid_) {
-        throw new TApplicationException(TApplicationException.BAD_SEQUENCE_ID, "multiply failed: out of sequence response");
+        throw new TApplicationException(TApplicationException.BAD_SEQUENCE_ID, "another_method failed: out of sequence response");
       }
-      multiply_result result = new multiply_result();
+      another_method_result result = new another_method_result();
       result.read(iprot_);
       iprot_.readMessageEnd();
       if (result.isSetSuccess()) {
         return result.success;
       }
-      throw new TApplicationException(TApplicationException.MISSING_RESULT, "multiply failed: unknown result");
+      throw new TApplicationException(TApplicationException.MISSING_RESULT, "another_method failed: unknown result");
     }
 
   }
-  public static class AsyncClient extends TAsyncClient implements AsyncIface {
+  public static class AsyncClient extends com.facebook.fb303.FacebookService.AsyncClient implements AsyncIface {
     public static class Factory implements TAsyncClientFactory<AsyncClient> {
       private TAsyncClientManager clientManager;
       private TProtocolFactory protocolFactory;
@@ -146,26 +129,23 @@ public class A {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void multiply(int a, int b, AsyncMethodCallback<multiply_call> resultHandler) throws TException {
+    public void another_method(int a, AsyncMethodCallback<another_method_call> resultHandler) throws TException {
       checkReady();
-      multiply_call method_call = new multiply_call(a, b, resultHandler, this, protocolFactory, transport);
+      another_method_call method_call = new another_method_call(a, resultHandler, this, protocolFactory, transport);
       manager.call(method_call);
     }
 
-    public static class multiply_call extends TAsyncMethodCall {
+    public static class another_method_call extends TAsyncMethodCall {
       private int a;
-      private int b;
-      public multiply_call(int a, int b, AsyncMethodCallback<multiply_call> resultHandler, TAsyncClient client, TProtocolFactory protocolFactory, TNonblockingTransport transport) throws TException {
+      public another_method_call(int a, AsyncMethodCallback<another_method_call> resultHandler, TAsyncClient client, TProtocolFactory protocolFactory, TNonblockingTransport transport) throws TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.a = a;
-        this.b = b;
       }
 
       public void write_args(TProtocol prot) throws TException {
-        prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
-        multiply_args args = new multiply_args();
+        prot.writeMessageBegin(new TMessage("another_method", TMessageType.CALL, 0));
+        another_method_args args = new another_method_args();
         args.setA(a);
-        args.setB(b);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -176,29 +156,29 @@ public class A {
         }
         TMemoryInputTransport memoryTransport = new TMemoryInputTransport(getFrameBuffer().array());
         TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
-        return (new Client(prot)).recv_multiply();
+        return (new Client(prot)).recv_another_method();
       }
     }
 
   }
 
-  public static class ServiceToClient implements ServiceIface {
+  public static class ServiceToClient extends com.facebook.fb303.FacebookService.ServiceToClient {
     private com.twitter.finagle.Service<ThriftClientRequest, byte[]> service;
     private TProtocolFactory protocolFactory;
     public ServiceToClient(com.twitter.finagle.Service<ThriftClientRequest, byte[]> service, TProtocolFactory protocolFactory) {
+      super(service, protocolFactory);
       this.service = service;
       this.protocolFactory = protocolFactory;
     }
 
-    public Future<Integer> multiply(int a, int b) {
+    public Future<Integer> another_method(int a) {
       try {
         // TODO: size
         TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
         TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("multiply", TMessageType.CALL, 0));
-        multiply_args args = new multiply_args();
+        prot.writeMessageBegin(new TMessage("another_method", TMessageType.CALL, 0));
+        another_method_args args = new another_method_args();
         args.setA(a);
-        args.setB(b);
         args.write(prot);
         prot.writeMessageEnd();
       
@@ -211,7 +191,7 @@ public class A {
             TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
             TProtocol prot = protocolFactory.getProtocol(memoryTransport);
             try {
-              return Future.value((new Client(prot)).recv_multiply());
+              return Future.value((new Client(prot)).recv_another_method());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -223,20 +203,16 @@ public class A {
     }
   }
 
-  public static class Processor implements TProcessor {
+  public static class Processor extends com.facebook.fb303.FacebookService.Processor implements TProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class.getName());
     public Processor(Iface iface)
     {
+      super(iface);
       iface_ = iface;
-      processMap_.put("multiply", new multiply());
-    }
-
-    protected static interface ProcessFunction {
-      public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException;
+      processMap_.put("another_method", new another_method());
     }
 
     private Iface iface_;
-    protected final HashMap<String,ProcessFunction> processMap_ = new HashMap<String,ProcessFunction>();
 
     public boolean process(TProtocol iprot, TProtocol oprot) throws TException
     {
@@ -256,26 +232,26 @@ public class A {
       return true;
     }
 
-    private class multiply implements ProcessFunction {
+    private class another_method implements ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
-        multiply_args args = new multiply_args();
+        another_method_args args = new another_method_args();
         try {
           args.read(iprot);
         } catch (TProtocolException e) {
           iprot.readMessageEnd();
           TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
-          oprot.writeMessageBegin(new TMessage("multiply", TMessageType.EXCEPTION, seqid));
+          oprot.writeMessageBegin(new TMessage("another_method", TMessageType.EXCEPTION, seqid));
           x.write(oprot);
           oprot.writeMessageEnd();
           oprot.getTransport().flush();
           return;
         }
         iprot.readMessageEnd();
-        multiply_result result = new multiply_result();
-        result.success = iface_.multiply(args.a, args.b);
+        another_method_result result = new another_method_result();
+        result.success = iface_.another_method(args.a);
         result.setSuccessIsSet(true);
-        oprot.writeMessageBegin(new TMessage("multiply", TMessageType.REPLY, seqid));
+        oprot.writeMessageBegin(new TMessage("another_method", TMessageType.REPLY, seqid));
         result.write(oprot);
         oprot.writeMessageEnd();
         oprot.getTransport().flush();
@@ -285,16 +261,16 @@ public class A {
 
   }
 
-  public static class Service extends com.twitter.finagle.Service<byte[], byte[]> {
+  public static class Service extends com.facebook.fb303.FacebookService.Service {
     private final ServiceIface iface;
     private final TProtocolFactory protocolFactory;
-    protected HashMap<String, Function2<TProtocol, Integer, Future<byte[]>>> functionMap = new HashMap<String, Function2<TProtocol, Integer, Future<byte[]>>>();
     public Service(final ServiceIface iface, final TProtocolFactory protocolFactory) {
+      super(iface, protocolFactory);
       this.iface = iface;
       this.protocolFactory = protocolFactory;
-      functionMap.put("multiply", new Function2<TProtocol, Integer, Future<byte[]>>() {
+      functionMap.put("another_method", new Function2<TProtocol, Integer, Future<byte[]>>() {
         public Future<byte[]> apply(final TProtocol iprot, final Integer seqid) {
-          multiply_args args = new multiply_args();
+          another_method_args args = new another_method_args();
           try {
             args.read(iprot);
           } catch (TProtocolException e) {
@@ -304,7 +280,7 @@ public class A {
               TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
               TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
           
-              oprot.writeMessageBegin(new TMessage("multiply", TMessageType.EXCEPTION, seqid));
+              oprot.writeMessageBegin(new TMessage("another_method", TMessageType.EXCEPTION, seqid));
               x.write(oprot);
               oprot.writeMessageEnd();
               oprot.getTransport().flush();
@@ -324,14 +300,14 @@ public class A {
           }
           Future<Integer> future;
           try {
-            future = iface.multiply(args.a, args.b);
+            future = iface.another_method(args.a);
           } catch (Exception e) {
             future = Future.exception(e);
           }
           try {
             return future.flatMap(new Function<Integer, Try<byte[]>>() {
               public Future<byte[]> apply(Integer value) {
-                multiply_result result = new multiply_result();
+                another_method_result result = new another_method_result();
                 result.success = value;
                 result.setSuccessIsSet(true);
           
@@ -339,7 +315,7 @@ public class A {
                   TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
                   TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
                    
-                  oprot.writeMessageBegin(new TMessage("multiply", TMessageType.REPLY, seqid));
+                  oprot.writeMessageBegin(new TMessage("another_method", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
                    
@@ -353,8 +329,8 @@ public class A {
                 TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
                 TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
                 try {
-                  TApplicationException x = new TApplicationException(TApplicationException.INTERNAL_ERROR, "Internal error processing multiply");
-                  oprot.writeMessageBegin(new TMessage("multiply", TMessageType.EXCEPTION, seqid));
+                  TApplicationException x = new TApplicationException(TApplicationException.INTERNAL_ERROR, "Internal error processing another_method");
+                  oprot.writeMessageBegin(new TMessage("another_method", TMessageType.EXCEPTION, seqid));
                   x.write(oprot);
                   oprot.writeMessageEnd();
                   oprot.getTransport().flush();
@@ -406,19 +382,16 @@ public class A {
 
   }
 
-  public static class multiply_args implements TBase<multiply_args, multiply_args._Fields>, java.io.Serializable, Cloneable   {
-    private static final TStruct STRUCT_DESC = new TStruct("multiply_args");
+  public static class another_method_args implements TBase<another_method_args, another_method_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final TStruct STRUCT_DESC = new TStruct("another_method_args");
 
     private static final TField A_FIELD_DESC = new TField("a", TType.I32, (short)1);
-    private static final TField B_FIELD_DESC = new TField("b", TType.I32, (short)2);
 
     public int a;
-    public int b;
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements TFieldIdEnum {
-      A((short)1, "a"),
-      B((short)2, "b");
+      A((short)1, "a");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -435,8 +408,6 @@ public class A {
         switch(fieldId) {
           case 1: // A
             return A;
-          case 2: // B
-            return B;
           default:
             return null;
         }
@@ -478,61 +449,52 @@ public class A {
 
     // isset id assignments
     private static final int __A_ISSET_ID = 0;
-    private static final int __B_ISSET_ID = 1;
-    private BitSet __isset_bit_vector = new BitSet(2);
+    private BitSet __isset_bit_vector = new BitSet(1);
 
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
-      tmpMap.put(_Fields.B, new FieldMetaData("b", TFieldRequirementType.DEFAULT, 
-          new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
-      FieldMetaData.addStructMetaDataMap(multiply_args.class, metaDataMap);
+      FieldMetaData.addStructMetaDataMap(another_method_args.class, metaDataMap);
     }
 
-    public multiply_args() {
+    public another_method_args() {
     }
 
-    public multiply_args(
-      int a,
-      int b)
+    public another_method_args(
+      int a)
     {
       this();
       this.a = a;
       setAIsSet(true);
-      this.b = b;
-      setBIsSet(true);
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public multiply_args(multiply_args other) {
+    public another_method_args(another_method_args other) {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.a = other.a;
-      this.b = other.b;
     }
 
-    public multiply_args deepCopy() {
-      return new multiply_args(this);
+    public another_method_args deepCopy() {
+      return new another_method_args(this);
     }
 
     @Override
     public void clear() {
       setAIsSet(false);
       this.a = 0;
-      setBIsSet(false);
-      this.b = 0;
     }
 
     public int getA() {
       return this.a;
     }
 
-    public multiply_args setA(int a) {
+    public another_method_args setA(int a) {
       this.a = a;
       setAIsSet(true);
       return this;
@@ -551,29 +513,6 @@ public class A {
       __isset_bit_vector.set(__A_ISSET_ID, value);
     }
 
-    public int getB() {
-      return this.b;
-    }
-
-    public multiply_args setB(int b) {
-      this.b = b;
-      setBIsSet(true);
-      return this;
-    }
-
-    public void unsetB() {
-      __isset_bit_vector.clear(__B_ISSET_ID);
-    }
-
-    /** Returns true if field b is set (has been asigned a value) and false otherwise */
-    public boolean isSetB() {
-      return __isset_bit_vector.get(__B_ISSET_ID);
-    }
-
-    public void setBIsSet(boolean value) {
-      __isset_bit_vector.set(__B_ISSET_ID, value);
-    }
-
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case A:
@@ -584,14 +523,6 @@ public class A {
         }
         break;
 
-      case B:
-        if (value == null) {
-          unsetB();
-        } else {
-          setB((Integer)value);
-        }
-        break;
-
       }
     }
 
@@ -599,9 +530,6 @@ public class A {
       switch (field) {
       case A:
         return new Integer(getA());
-
-      case B:
-        return new Integer(getB());
 
       }
       throw new IllegalStateException();
@@ -616,8 +544,6 @@ public class A {
       switch (field) {
       case A:
         return isSetA();
-      case B:
-        return isSetB();
       }
       throw new IllegalStateException();
     }
@@ -626,12 +552,12 @@ public class A {
     public boolean equals(Object that) {
       if (that == null)
         return false;
-      if (that instanceof multiply_args)
-        return this.equals((multiply_args)that);
+      if (that instanceof another_method_args)
+        return this.equals((another_method_args)that);
       return false;
     }
 
-    public boolean equals(multiply_args that) {
+    public boolean equals(another_method_args that) {
       if (that == null)
         return false;
 
@@ -644,15 +570,6 @@ public class A {
           return false;
       }
 
-      boolean this_present_b = true;
-      boolean that_present_b = true;
-      if (this_present_b || that_present_b) {
-        if (!(this_present_b && that_present_b))
-          return false;
-        if (this.b != that.b)
-          return false;
-      }
-
       return true;
     }
 
@@ -661,13 +578,13 @@ public class A {
       return 0;
     }
 
-    public int compareTo(multiply_args other) {
+    public int compareTo(another_method_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      multiply_args typedOther = (multiply_args)other;
+      another_method_args typedOther = (another_method_args)other;
 
       lastComparison = Boolean.valueOf(isSetA()).compareTo(typedOther.isSetA());
       if (lastComparison != 0) {
@@ -675,16 +592,6 @@ public class A {
       }
       if (isSetA()) {
         lastComparison = TBaseHelper.compareTo(this.a, typedOther.a);
-        if (lastComparison != 0) {
-          return lastComparison;
-        }
-      }
-      lastComparison = Boolean.valueOf(isSetB()).compareTo(typedOther.isSetB());
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-      if (isSetB()) {
-        lastComparison = TBaseHelper.compareTo(this.b, typedOther.b);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -714,14 +621,6 @@ public class A {
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
-          case 2: // B
-            if (field.type == TType.I32) {
-              this.b = iprot.readI32();
-              setBIsSet(true);
-            } else { 
-              TProtocolUtil.skip(iprot, field.type);
-            }
-            break;
           default:
             TProtocolUtil.skip(iprot, field.type);
         }
@@ -740,24 +639,17 @@ public class A {
       oprot.writeFieldBegin(A_FIELD_DESC);
       oprot.writeI32(this.a);
       oprot.writeFieldEnd();
-      oprot.writeFieldBegin(B_FIELD_DESC);
-      oprot.writeI32(this.b);
-      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("multiply_args(");
+      StringBuilder sb = new StringBuilder("another_method_args(");
       boolean first = true;
 
       sb.append("a:");
       sb.append(this.a);
-      first = false;
-      if (!first) sb.append(", ");
-      sb.append("b:");
-      sb.append(this.b);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -769,8 +661,8 @@ public class A {
 
   }
 
-  public static class multiply_result implements TBase<multiply_result, multiply_result._Fields>, java.io.Serializable, Cloneable   {
-    private static final TStruct STRUCT_DESC = new TStruct("multiply_result");
+  public static class another_method_result implements TBase<another_method_result, another_method_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final TStruct STRUCT_DESC = new TStruct("another_method_result");
 
     private static final TField SUCCESS_FIELD_DESC = new TField("success", TType.I32, (short)0);
 
@@ -844,13 +736,13 @@ public class A {
       tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
-      FieldMetaData.addStructMetaDataMap(multiply_result.class, metaDataMap);
+      FieldMetaData.addStructMetaDataMap(another_method_result.class, metaDataMap);
     }
 
-    public multiply_result() {
+    public another_method_result() {
     }
 
-    public multiply_result(
+    public another_method_result(
       int success)
     {
       this();
@@ -861,14 +753,14 @@ public class A {
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public multiply_result(multiply_result other) {
+    public another_method_result(another_method_result other) {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.success = other.success;
     }
 
-    public multiply_result deepCopy() {
-      return new multiply_result(this);
+    public another_method_result deepCopy() {
+      return new another_method_result(this);
     }
 
     @Override
@@ -881,7 +773,7 @@ public class A {
       return this.success;
     }
 
-    public multiply_result setSuccess(int success) {
+    public another_method_result setSuccess(int success) {
       this.success = success;
       setSuccessIsSet(true);
       return this;
@@ -939,12 +831,12 @@ public class A {
     public boolean equals(Object that) {
       if (that == null)
         return false;
-      if (that instanceof multiply_result)
-        return this.equals((multiply_result)that);
+      if (that instanceof another_method_result)
+        return this.equals((another_method_result)that);
       return false;
     }
 
-    public boolean equals(multiply_result that) {
+    public boolean equals(another_method_result that) {
       if (that == null)
         return false;
 
@@ -965,13 +857,13 @@ public class A {
       return 0;
     }
 
-    public int compareTo(multiply_result other) {
+    public int compareTo(another_method_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      multiply_result typedOther = (multiply_result)other;
+      another_method_result typedOther = (another_method_result)other;
 
       lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
       if (lastComparison != 0) {
@@ -1033,7 +925,7 @@ public class A {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("multiply_result(");
+      StringBuilder sb = new StringBuilder("another_method_result(");
       boolean first = true;
 
       sb.append("success:");
