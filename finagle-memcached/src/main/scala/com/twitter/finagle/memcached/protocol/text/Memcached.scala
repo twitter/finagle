@@ -3,18 +3,25 @@ package com.twitter.finagle.memcached.protocol.text
 import com.twitter.finagle.builder.Codec
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol._
+import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 
 class Memcached extends Codec[Command, Response] {
-  private[this] val responseParser = new MemcachedResponseVocabulary
-  private[this] val commandParser = new MemcachedCommandVocabulary
+  private[this] val storageCommands = collection.Set[ChannelBuffer](
+    "set", "add", "replace", "append", "prepend")
 
   val serverPipelineFactory = {
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 
-        pipeline.addLast("encoder", new server.Encoder)
-        pipeline.addLast("decoder", new server.Decoder(commandParser))
+//        pipeline.addLast("exceptionHandler", new ExceptionHandler)
+
+        pipeline.addLast("decoder", new server.Decoder(storageCommands))
+        pipeline.addLast("decoding2command", new DecodingToCommand)
+
+        pipeline.addLast("encoder", new Encoder)
+        pipeline.addLast("response2encoding", new ResponseToEncoding)
         pipeline
       }
     }
@@ -26,8 +33,11 @@ class Memcached extends Codec[Command, Response] {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 
-        pipeline.addLast("decoder", new client.Decoder(responseParser))
-        pipeline.addLast("encoder", new client.Encoder)
+        pipeline.addLast("decoder", new client.Decoder)
+        pipeline.addLast("decoding2response", new DecodingToResponse)
+
+        pipeline.addLast("encoder", new Encoder)
+        pipeline.addLast("command2encoding", new CommandToEncoding)
         pipeline
       }
     }

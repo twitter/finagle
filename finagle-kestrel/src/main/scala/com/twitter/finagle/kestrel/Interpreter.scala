@@ -5,6 +5,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.conversions.time._
 import java.util.concurrent.{TimeUnit, BlockingQueue}
 import com.twitter.util.{Future, MapMaker}
+import com.twitter.finagle.Service
 
 class Interpreter(Queue: () => BlockingQueue[ChannelBuffer]) {
   private[this] val queues = MapMaker[ChannelBuffer, BlockingQueue[ChannelBuffer]] { config =>
@@ -23,28 +24,32 @@ class Interpreter(Queue: () => BlockingQueue[ChannelBuffer]) {
           Values(Seq.empty)
         else
           Values(Seq(Value(queueName, item)))
-      case Set(queueName, flags, expiry, value) =>
+      case Set(queueName, expiry, value) =>
         queues(queueName).add(value)
-        Stored
+        Stored()
       case Delete(queueName) =>
         queues.remove(queueName)
-        Deleted
+        Deleted()
       case Flush(queueName) =>
         queues.remove(queueName)
-        Deleted
+        Deleted()
       case FlushAll() =>
         queues.clear()
-        Deleted
+        Deleted()
       case Version() =>
-        NotFound
+        NotFound()
       case ShutDown() =>
-        NotFound
+        NotFound()
       case DumpConfig() =>
-        NotFound
+        NotFound()
       case Stats() =>
-        NotFound
+        NotFound()
       case DumpStats() =>
-        NotFound
+        NotFound()
     }
   }
+}
+
+class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
+  def apply(request: Command) = Future(interpreter(request))
 }

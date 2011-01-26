@@ -32,6 +32,7 @@ import com.twitter.util.Function2;
 import com.twitter.util.Try;
 import com.twitter.util.Return;
 import com.twitter.util.Throw;
+import com.twitter.finagle.thrift.ThriftClientRequest;
 
 public class B {
 
@@ -43,6 +44,8 @@ public class B {
 
     public SomeStruct complex_return(String some_string) throws TException;
 
+    public void someway() throws TException;
+
   }
 
   public interface AsyncIface extends A.AsyncIface {
@@ -53,6 +56,8 @@ public class B {
 
     public void complex_return(String some_string, AsyncMethodCallback<AsyncClient.complex_return_call> resultHandler) throws TException;
 
+    public void someway(AsyncMethodCallback<AsyncClient.someway_call> resultHandler) throws TException;
+
   }
 
   public interface ServiceIface extends A.ServiceIface {
@@ -62,6 +67,8 @@ public class B {
     public Future<Void> add_one(int a, int b);
 
     public Future<SomeStruct> complex_return(String some_string);
+
+    public Future<Void> someway();
 
   }
 
@@ -199,6 +206,20 @@ public class B {
       throw new TApplicationException(TApplicationException.MISSING_RESULT, "complex_return failed: unknown result");
     }
 
+    public void someway() throws TException
+    {
+      send_someway();
+    }
+
+    public void send_someway() throws TException
+    {
+      oprot_.writeMessageBegin(new TMessage("someway", TMessageType.CALL, ++seqid_));
+      someway_args args = new someway_args();
+      args.write(oprot_);
+      oprot_.writeMessageEnd();
+      oprot_.getTransport().flush();
+    }
+
   }
   public static class AsyncClient extends A.AsyncClient implements AsyncIface {
     public static class Factory implements TAsyncClientFactory<AsyncClient> {
@@ -316,12 +337,39 @@ public class B {
       }
     }
 
+    public void someway(AsyncMethodCallback<someway_call> resultHandler) throws TException {
+      checkReady();
+      someway_call method_call = new someway_call(resultHandler, this, protocolFactory, transport);
+      manager.call(method_call);
+    }
+
+    public static class someway_call extends TAsyncMethodCall {
+      public someway_call(AsyncMethodCallback<someway_call> resultHandler, TAsyncClient client, TProtocolFactory protocolFactory, TNonblockingTransport transport) throws TException {
+        super(client, protocolFactory, transport, resultHandler, true);
+      }
+
+      public void write_args(TProtocol prot) throws TException {
+        prot.writeMessageBegin(new TMessage("someway", TMessageType.CALL, 0));
+        someway_args args = new someway_args();
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public void getResult() throws TException {
+        if (getState() != State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        TMemoryInputTransport memoryTransport = new TMemoryInputTransport(getFrameBuffer().array());
+        TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+      }
+    }
+
   }
 
   public static class ServiceToClient extends A.ServiceToClient {
-    private com.twitter.finagle.Service<byte[], byte[]> service;
+    private com.twitter.finagle.Service<ThriftClientRequest, byte[]> service;
     private TProtocolFactory protocolFactory;
-    public ServiceToClient(com.twitter.finagle.Service<byte[], byte[]> service, TProtocolFactory protocolFactory) {
+    public ServiceToClient(com.twitter.finagle.Service<ThriftClientRequest, byte[]> service, TProtocolFactory protocolFactory) {
       super(service, protocolFactory);
       this.service = service;
       this.protocolFactory = protocolFactory;
@@ -341,7 +389,8 @@ public class B {
       
 
         byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        Future<byte[]> done = this.service.apply(buffer);
+        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
+        Future<byte[]> done = this.service.apply(request);
         return done.flatMap(new Function<byte[], Try<Integer>>() {
           public Future<Integer> apply(byte[] buffer) {
             TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
@@ -371,7 +420,8 @@ public class B {
       
 
         byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        Future<byte[]> done = this.service.apply(buffer);
+        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
+        Future<byte[]> done = this.service.apply(request);
         return done.flatMap(new Function<byte[], Try<Void>>() {
           public Future<Void> apply(byte[] buffer) {
             TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
@@ -401,13 +451,43 @@ public class B {
       
 
         byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        Future<byte[]> done = this.service.apply(buffer);
+        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
+        Future<byte[]> done = this.service.apply(request);
         return done.flatMap(new Function<byte[], Try<SomeStruct>>() {
           public Future<SomeStruct> apply(byte[] buffer) {
             TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
             TProtocol prot = protocolFactory.getProtocol(memoryTransport);
             try {
               return Future.value((new Client(prot)).recv_complex_return());
+            } catch (Exception e) {
+              return Future.exception(e);
+            }
+          }
+        });
+      } catch (TException e) {
+        return Future.exception(e);
+      }
+    }
+    public Future<Void> someway() {
+      try {
+        // TODO: size
+        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
+        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        prot.writeMessageBegin(new TMessage("someway", TMessageType.CALL, 0));
+        someway_args args = new someway_args();
+        args.write(prot);
+        prot.writeMessageEnd();
+      
+
+        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
+        ThriftClientRequest request = new ThriftClientRequest(buffer, true);
+        Future<byte[]> done = this.service.apply(request);
+        return done.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] buffer) {
+            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
+            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+            try {
+              return Future.value(null);
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -428,6 +508,7 @@ public class B {
       processMap_.put("add", new add());
       processMap_.put("add_one", new add_one());
       processMap_.put("complex_return", new complex_return());
+      processMap_.put("someway", new someway());
     }
 
     private Iface iface_;
@@ -551,6 +632,27 @@ public class B {
         oprot.getTransport().flush();
       }
 
+    }
+
+    private class someway implements ProcessFunction {
+      public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
+      {
+        someway_args args = new someway_args();
+        try {
+          args.read(iprot);
+        } catch (TProtocolException e) {
+          iprot.readMessageEnd();
+          TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
+          oprot.writeMessageBegin(new TMessage("someway", TMessageType.EXCEPTION, seqid));
+          x.write(oprot);
+          oprot.writeMessageEnd();
+          oprot.getTransport().flush();
+          return;
+        }
+        iprot.readMessageEnd();
+        iface_.someway();
+        return;
+      }
     }
 
   }
@@ -813,6 +915,50 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
+        }
+      });
+      
+      functionMap.put("someway", new Function2<TProtocol, Integer, Future<byte[]>>() {
+        public Future<byte[]> apply(final TProtocol iprot, final Integer seqid) {
+          someway_args args = new someway_args();
+          try {
+            args.read(iprot);
+          } catch (TProtocolException e) {
+            try {
+              iprot.readMessageEnd();
+              TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
+              TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+              TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
+          
+              oprot.writeMessageBegin(new TMessage("someway", TMessageType.EXCEPTION, seqid));
+              x.write(oprot);
+              oprot.writeMessageEnd();
+              oprot.getTransport().flush();
+              byte[] buffer = Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length());
+              return Future.value(buffer);
+            } catch (Exception e1) {
+              return Future.exception(e1);
+            }
+          } catch (Exception e) {
+            return Future.exception(e);
+          }
+          
+          try {
+            iprot.readMessageEnd();
+          } catch (Exception e) {
+            return Future.exception(e);
+          }
+          Future<Void> future;
+          try {
+            future = iface.someway();
+          } catch (Exception e) {
+            future = Future.exception(e);
+          }
+          return future.map(new Function<Void, byte[]>() {
+            public byte[] apply(Void value) {
+              return new byte[0];
+            }
+          });
         }
       });
       
@@ -2780,6 +2926,192 @@ public class B {
         sb.append(this.success);
       }
       first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
+    }
+
+  }
+
+  public static class someway_args implements TBase<someway_args, someway_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final TStruct STRUCT_DESC = new TStruct("someway_args");
+
+
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements TFieldIdEnum {
+;
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+    public static final Map<_Fields, FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      FieldMetaData.addStructMetaDataMap(someway_args.class, metaDataMap);
+    }
+
+    public someway_args() {
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public someway_args(someway_args other) {
+    }
+
+    public someway_args deepCopy() {
+      return new someway_args(this);
+    }
+
+    @Override
+    public void clear() {
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been asigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof someway_args)
+        return this.equals((someway_args)that);
+      return false;
+    }
+
+    public boolean equals(someway_args that) {
+      if (that == null)
+        return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(someway_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      someway_args typedOther = (someway_args)other;
+
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(TProtocol iprot) throws TException {
+      TField field;
+      iprot.readStructBegin();
+      while (true)
+      {
+        field = iprot.readFieldBegin();
+        if (field.type == TType.STOP) { 
+          break;
+        }
+        switch (field.id) {
+          default:
+            TProtocolUtil.skip(iprot, field.type);
+        }
+        iprot.readFieldEnd();
+      }
+      iprot.readStructEnd();
+
+      // check for required fields of primitive type, which can't be checked in the validate method
+      validate();
+    }
+
+    public void write(TProtocol oprot) throws TException {
+      validate();
+
+      oprot.writeStructBegin(STRUCT_DESC);
+      oprot.writeFieldStop();
+      oprot.writeStructEnd();
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("someway_args(");
+      boolean first = true;
+
       sb.append(")");
       return sb.toString();
     }
