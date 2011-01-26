@@ -6,9 +6,9 @@ import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.buffer.ChannelBuffers
 
 object Encoder {
-  private val SPACE         = " "      .getBytes
-  private val DELIMETER     = "\r\n"   .getBytes
-  private val END           = "END"    .getBytes
+  private val SPACE         = " ".getBytes
+  private val DELIMETER     = "\r\n".getBytes
+  private val END           = "END".getBytes
 }
 
 class Encoder extends OneToOneEncoder {
@@ -44,7 +44,6 @@ class Encoder extends OneToOneEncoder {
           }
           buffer.writeBytes(data.readableBytes.toString.getBytes)
           buffer.writeBytes(DELIMETER)
-//          value.resetReaderIndex() FIXME
           buffer.writeBytes(data)
           buffer.writeBytes(DELIMETER)
         }

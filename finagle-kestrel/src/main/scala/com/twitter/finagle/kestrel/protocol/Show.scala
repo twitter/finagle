@@ -10,12 +10,12 @@ import org.jboss.netty.util.CharsetUtil
 
 
 class ResponseToEncoding extends OneToOneEncoder {
-  private[this] val ZERO          = "0"          : ChannelBuffer
-  private[this] val VALUE         = "VALUE"      : ChannelBuffer
+  private[this] val ZERO          = "0"
+  private[this] val VALUE         = "VALUE"
 
-  private[this] val STORED        = "STORED"     : ChannelBuffer
-  private[this] val NOT_FOUND     = "NOT_FOUND"  : ChannelBuffer
-  private[this] val DELETED       = "DELETED"    : ChannelBuffer
+  private[this] val STORED        = "STORED"
+  private[this] val NOT_FOUND     = "NOT_FOUND"
+  private[this] val DELETED       = "DELETED"
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
     message match {
@@ -33,18 +33,18 @@ class ResponseToEncoding extends OneToOneEncoder {
 }
 
 class CommandToEncoding extends OneToOneEncoder {
-  private[this] val ZERO          = "0": ChannelBuffer
+  private[this] val ZERO          = "0"
 
   private[this] val OPEN          = "open"
   private[this] val CLOSE         = "close"
   private[this] val ABORT         = "abort"
   private[this] val PEEK          = "peek"
 
-  private[this] val GET           = "get"    : ChannelBuffer
-  private[this] val DELETE        = "delete" : ChannelBuffer
-  private[this] val FLUSH         = "flush"  : ChannelBuffer
+  private[this] val GET           = "get"
+  private[this] val DELETE        = "delete"
+  private[this] val FLUSH         = "flush"
 
-  private[this] val SET           = "set"    : ChannelBuffer
+  private[this] val SET           = "set"
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
     message match {
