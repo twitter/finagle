@@ -19,7 +19,6 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    Channels.write(ctx.getChannel, Show(e.getCause))
     super.exceptionCaught(ctx, e)
   }
 

@@ -1,97 +1,72 @@
 package com.twitter.finagle.kestrel.protocol
 
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import com.twitter.finagle.memcached.protocol._
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import com.twitter.util.Time
+import org.jboss.netty.channel._
+import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
+import com.twitter.finagle.kestrel.protocol._
+import org.jboss.netty.util.CharsetUtil
 
-object Show {
-  private[this] val DELIMETER     = "\r\n"   .getBytes
-  private[this] val VALUE         = "VALUE"  .getBytes
-  private[this] val ZERO          = "0"      .getBytes
-  private[this] val SPACE         = " "      .getBytes
-  private[this] val GET           = "get"    .getBytes
-  private[this] val SET           = "set"    .getBytes
-  private[this] val END           = "END"    .getBytes
 
-  private[this] val STORED        = copiedBuffer("STORED".getBytes,       DELIMETER)
-  private[this] val NOT_FOUND     = copiedBuffer("NOT_FOUND".getBytes,    DELIMETER)
-  private[this] val DELETED       = copiedBuffer("DELETED".getBytes,      DELIMETER)
+class ResponseToEncoding extends OneToOneEncoder {
+  private[this] val ZERO          = "0"          : ChannelBuffer
+  private[this] val VALUE         = "VALUE"      : ChannelBuffer
 
-  private[this] val ERROR         = copiedBuffer("ERROR".getBytes,        DELIMETER)
-  private[this] val CLIENT_ERROR  = copiedBuffer("CLIENT_ERROR".getBytes, DELIMETER)
-  private[this] val SERVER_ERROR  = copiedBuffer("SERVER_ERROR".getBytes, DELIMETER)
+  private[this] val STORED        = "STORED"     : ChannelBuffer
+  private[this] val NOT_FOUND     = "NOT_FOUND"  : ChannelBuffer
+  private[this] val DELETED       = "DELETED"    : ChannelBuffer
 
-  def apply(response: Response) = {
-    response match {
-      case Stored()       => STORED
-      case Deleted()      => DELETED
-      case NotFound()     => NOT_FOUND
+  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
+    message match {
+      case Stored()       => Tokens(Seq(STORED))
+      case Deleted()      => Tokens(Seq(DELETED))
+      case NotFound()     => Tokens(Seq(NOT_FOUND))
       case Values(values) =>
         val buffer = ChannelBuffers.dynamicBuffer(100 * values.size)
-        val shown = values map { case Value(key, value) =>
-          buffer.writeBytes(VALUE)
-          buffer.writeBytes(SPACE)
-          buffer.writeBytes(key)
-          buffer.writeBytes(SPACE)
-          buffer.writeBytes(ZERO)
-          buffer.writeBytes(SPACE)
-          buffer.writeBytes(value.readableBytes.toString.getBytes)
-          buffer.writeBytes(DELIMETER)
-          value.resetReaderIndex()
-          buffer.writeBytes(value)
-          buffer.writeBytes(DELIMETER)
+        val tokensWithData = values map { case Value(key, value) =>
+          TokensWithData(Seq(VALUE, key, ZERO), value)
         }
-        buffer.writeBytes(END)
-        buffer.writeBytes(DELIMETER)
-        buffer
+        ValueLines(tokensWithData)
     }
   }
+}
 
-  def apply(command: Command): ChannelBuffer = {
-    command match {
+class CommandToEncoding extends OneToOneEncoder {
+  private[this] val ZERO          = "0": ChannelBuffer
+
+  private[this] val OPEN          = "open"
+  private[this] val CLOSE         = "close"
+  private[this] val ABORT         = "abort"
+  private[this] val PEEK          = "peek"
+
+  private[this] val GET           = "get"    : ChannelBuffer
+  private[this] val DELETE        = "delete" : ChannelBuffer
+  private[this] val FLUSH         = "flush"  : ChannelBuffer
+
+  private[this] val SET           = "set"    : ChannelBuffer
+
+  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
+    message match {
       case Set(key, expiry, value) =>
-        showStorageCommand(SET, key, 0, expiry, value)
-      case Get(key, options) =>
-        val buffer = ChannelBuffers.dynamicBuffer(50)
-        buffer.writeBytes(GET)
-        buffer.writeBytes(SPACE)
-        buffer.writeBytes(key)
-        buffer.writeBytes(SPACE)
-        buffer.writeBytes(DELIMETER)
-        buffer
+        TokensWithData(Seq(SET, key, ZERO, expiry.inSeconds.toString), value)
+      case Get(queueName, options) =>
+        var key = queueName
+        options foreach { option =>
+          val optionString = option match {
+            case Timeout(timeout) => "t=" + timeout.inSeconds
+            case Open() => OPEN
+            case Close() => CLOSE
+            case Abort() => ABORT
+            case Peek() => PEEK
+          }
+          key += "/" + optionString
+        }
+        Tokens(Seq(GET, key))
       case Delete(key) =>
-        val buffer = ChannelBuffers.dynamicBuffer(30)
-        buffer.writeBytes(SPACE)
-        buffer.writeBytes(key)
-        buffer.writeBytes(DELIMETER)
-        buffer
+        Tokens(Seq(DELETE, key))
+      case Flush(key) =>
+        Tokens(Seq(FLUSH, key))
     }
-  }
-
-  def apply(throwable: Throwable) = throwable match {
-    case e: NonexistentCommand => ERROR
-    case e: ClientError        => CLIENT_ERROR
-    case e: ServerError        => SERVER_ERROR
-    case _                     => throw throwable
-  }
-
-  @inline private[this] def showStorageCommand(
-    name: Array[Byte], key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer) = {
-    val buffer = ChannelBuffers.dynamicBuffer(50 + value.readableBytes)
-    buffer.writeBytes(name)
-    buffer.writeBytes(SPACE)
-    buffer.writeBytes(key)
-    buffer.writeBytes(SPACE)
-    buffer.writeBytes(flags.toString.getBytes)
-    buffer.writeBytes(SPACE)
-    buffer.writeBytes(expiry.inSeconds.toString.getBytes)
-    buffer.writeBytes(SPACE)
-    buffer.writeBytes(value.readableBytes.toString.getBytes)
-    buffer.writeBytes(DELIMETER)
-    buffer.writeBytes(value)
-    buffer.writeBytes(DELIMETER)
-    buffer
   }
 }

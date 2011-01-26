@@ -9,6 +9,7 @@ import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.conversions.time._
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
+import org.jboss.netty.util.CharsetUtil
 
 object DecodingToCommand {
   private val NOREPLY = copiedBuffer("noreply".getBytes)
@@ -36,7 +37,7 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
   protected def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer): C
 
   protected def validateStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
-    (tokens.head, tokens(1).toInt, tokens(2).toInt.seconds.fromNow, data)
+    (tokens(0), tokens(1).toInt, tokens(2).toInt.seconds.fromNow, data)
   }
 
   protected def validateDeleteCommand(tokens: Seq[ChannelBuffer]) = {

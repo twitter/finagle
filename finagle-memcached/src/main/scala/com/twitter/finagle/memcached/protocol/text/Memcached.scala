@@ -15,8 +15,13 @@ class Memcached extends Codec[Command, Response] {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 
-        pipeline.addLast("encoder", new server.Encoder)
+//        pipeline.addLast("exceptionHandler", new ExceptionHandler)
+
         pipeline.addLast("decoder", new server.Decoder(storageCommands))
+        pipeline.addLast("decoding2command", new DecodingToCommand)
+
+        pipeline.addLast("encoder", new Encoder)
+        pipeline.addLast("response2encoding", new ResponseToEncoding)
         pipeline
       }
     }
@@ -30,7 +35,9 @@ class Memcached extends Codec[Command, Response] {
 
         pipeline.addLast("decoder", new client.Decoder)
         pipeline.addLast("decoding2response", new DecodingToResponse)
-        pipeline.addLast("encoder", new client.Encoder)
+
+        pipeline.addLast("encoder", new Encoder)
+        pipeline.addLast("command2encoding", new CommandToEncoding)
         pipeline
       }
     }

@@ -66,7 +66,9 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
         Values(
           keys flatMap { key =>
             map.lock(key) { data =>
-              data.get(key) map(Value(key, _))
+              data.get(key) map { datum =>
+                Value(key, wrappedBuffer(datum))
+              }
             }
           }
         )

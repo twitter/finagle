@@ -31,7 +31,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
     val args = tokens.tail
     commandName match {
       case SET       =>
-        val (name, _, expiry, _) = validateStorageCommand(tokens, data)
+        val (name, _, expiry, _) = validateStorageCommand(args, data)
         Set(name, expiry, data)
       case _         => throw new NonexistentCommand(commandName.toString)
     }
