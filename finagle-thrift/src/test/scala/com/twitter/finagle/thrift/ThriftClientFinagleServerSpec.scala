@@ -8,13 +8,14 @@ import org.apache.thrift.protocol.{TProtocol, TBinaryProtocol}
 import org.apache.thrift.transport.{
   TFramedTransport, TSocket, TTransportException, TTransport}
 
-import com.twitter.util.{Future, RandomSocket, Throw, Return}
+import com.twitter.util.{Future, RandomSocket, Throw, Return, Promise}
 import com.twitter.test._
 
 import com.twitter.finagle.builder.ServerBuilder
 
 object ThriftClientFinagleServerSpec extends Specification {
   "thrift client with finagle server" should {
+    var somewayPromise = new Promise[Unit]
     val processor = new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)
       def add_one(a: Int, b: Int) = Future.void
@@ -26,11 +27,15 @@ object ThriftClientFinagleServerSpec extends Specification {
           case _ =>
             Future { new SomeStruct(123, someString) }
         }
+      def someway() = {
+        somewayPromise() = Return(())
+        Future.void
+      }
     }
 
     val serverAddr = RandomSocket()
     val server = ServerBuilder()
-      .codec(ThriftFramedTransportCodec())
+      .codec(ThriftServerFramedCodec())
       .bindTo(serverAddr)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
@@ -60,6 +65,12 @@ object ThriftClientFinagleServerSpec extends Specification {
     "treat processor exceptions as transport exceptions" in {
       client.complex_return("throwAnException") must throwA(
         new TApplicationException("Internal error processing complex_return"))
+    }
+
+    "handle one-way calls" in {
+      somewayPromise.isDefined must beFalse
+      client.someway()                  // just returns(!)
+      somewayPromise() must be_==(())
     }
   }
 }

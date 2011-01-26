@@ -20,17 +20,18 @@ object EndToEndSpec extends Specification {
         def complex_return(someString: String) = Future {
           new SomeStruct(123, someString)
         }
+        def someway() = Future.void
       }
 
       val serverAddr = RandomSocket()
       val server = ServerBuilder()
-        .codec(ThriftFramedTransportCodec())
+        .codec(ThriftServerFramedCodec())
         .bindTo(serverAddr)
         .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
       val service = ClientBuilder()
         .hosts(Seq(serverAddr))
-        .codec(ThriftFramedTransportCodec())
+        .codec(ThriftClientFramedCodec())
         .build()
 
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
@@ -42,6 +43,8 @@ object EndToEndSpec extends Specification {
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block! 
+
+      client.someway()() must beNull  // don't block!
 
       server.close()()
     }
