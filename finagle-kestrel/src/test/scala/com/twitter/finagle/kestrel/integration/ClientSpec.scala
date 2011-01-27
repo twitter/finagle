@@ -15,6 +15,8 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 object ClientSpec extends Specification {
   "ConnectedClient" should {
+    skip("This test requires a Kestrel server to run. Please run manually")
+
     "simple client" in {
       val service = ClientBuilder()
         .hosts("localhost:22133")
@@ -25,7 +27,6 @@ object ClientSpec extends Specification {
       client.delete("foo")()
 
       "set & get" in {
-        skip("yarr")
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
@@ -33,7 +34,6 @@ object ClientSpec extends Specification {
 
       "receive" in {
         "no errors" in {
-          skip("yar")
           val result = new ListBuffer[String]
           client.set("foo", "bar")()
           client.set("foo", "baz")()
