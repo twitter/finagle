@@ -75,7 +75,7 @@ object AsyncServerEndToEndSpec extends Specification {
         Channels.write(ch, thriftCall)
       }
 
-      val result = callResults.within(1.second)
+      val result = callResults.get(1.second)
       result.isReturn must beTrue
 
       result().response.success must be_==("yehyeh")

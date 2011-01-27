@@ -53,7 +53,7 @@ object EndToEndSpec extends Specification {
       client.complex_return("a string")().arg_two must be_==("a string")
 
       client.add(1, 2)() must throwA[AnException]
-      client.add_one(1, 2)()  // don't block! 
+      client.add_one(1, 2)()  // don't block!
 
       client.someway()() must beNull  // don't block!
 
@@ -123,7 +123,7 @@ object EndToEndSpec extends Specification {
         Channels.write(ch, thriftCall)
       }
 
-      val result = callResults.within(1.second)
+      val result = callResults.get(1.second)
       result.isReturn must beTrue
 
       result().response.success must be_==("yehyeh")
@@ -191,7 +191,7 @@ object EndToEndSpec extends Specification {
         Channels.write(ch, thriftCall)
       }
 
-      val result = callResults.within(1.second)
+      val result = callResults.get(1.second)
       result.isReturn must beTrue
 
       result().response.success must be_==("raboof")

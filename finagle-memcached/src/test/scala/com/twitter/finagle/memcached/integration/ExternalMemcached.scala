@@ -2,9 +2,7 @@ package com.twitter.finagle.memcached.integration
 
 import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
-
 import com.twitter.util.RandomSocket
-
 import collection.JavaConversions._
 
 object ExternalMemcached {
