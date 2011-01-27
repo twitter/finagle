@@ -8,7 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConversions._
 import com.twitter.finagle.builder.ClientBuilder
 import text.Memcached
-import com.twitter.finagle.{Service, service}
+import com.twitter.finagle.Service
 import com.twitter.util.{Time, Future}
 
 object Client {

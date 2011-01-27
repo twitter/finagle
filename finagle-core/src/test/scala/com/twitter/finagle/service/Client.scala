@@ -54,7 +54,7 @@ object ClientSpec extends Specification {
       withServer(closingHandler) { clientBuilder =>
         val client = clientBuilder.build()
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future within(1.second)
+        val resolved = future get(1.second)
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]
@@ -67,7 +67,7 @@ object ClientSpec extends Specification {
           .retries(10)
           .build()
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future within(1.second)
+        val resolved = future get(1.second)
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]
