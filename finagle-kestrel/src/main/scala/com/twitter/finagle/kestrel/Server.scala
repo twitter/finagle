@@ -1,16 +1,15 @@
 package com.twitter.finagle.kestrel
 
 import java.net.SocketAddress
-import org.jboss.netty.channel.Channel
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
-import java.util.concurrent.LinkedBlockingQueue
 import protocol.Kestrel
+import java.util.concurrent.LinkedBlockingDeque
 
 class Server(address: SocketAddress) {
 
   private[this] val service = {
-    val interpreter = new Interpreter(() => new LinkedBlockingQueue[ChannelBuffer])
+    val interpreter = new Interpreter(() => new LinkedBlockingDeque[ChannelBuffer])
     new InterpreterService(interpreter)
   }
 
