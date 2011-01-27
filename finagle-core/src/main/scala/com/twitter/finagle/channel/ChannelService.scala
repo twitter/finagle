@@ -87,21 +87,18 @@ class ChannelService[Req, Rep](channel: Channel)
  * A factory for ChannelService instances, given a bootstrap.
  */
 class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
-  extends LifecycleFactory[Service[Req, Rep]]
+  extends LifecycleFactory[ChannelService[Req, Rep]]
 {
   def make() = {
     val promise = new Promise[ChannelService[Req, Rep]]
     bootstrap.connect() {
       case Ok(channel)  => promise() = Return(new ChannelService[Req, Rep](channel))
       case Error(cause) => promise() = Throw(new WriteException(cause))
+      // TODO: cancellation.
     }
     promise
   }
 
-  def dispose(service: Service[Req, Rep]) {
-    service.close()
-  }
-
-  def isHealthy(service: Service[Req, Rep]) =
-    service.isAvailable
+  def dispose(service: ChannelService[Req, Rep]) { service.close() }
+  def isHealthy(service: ChannelService[Req, Rep]) = service.isAvailable
 }

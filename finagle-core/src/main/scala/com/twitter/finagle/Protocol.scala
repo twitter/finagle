@@ -26,8 +26,8 @@ trait Protocol[Req, Rep] {
    * Service[Req, Rep], and so it is free to wrap the underlying
    * ChannelService[Req, Rep] for protocol specific concerns.
    */
-  type PrepareConnection = (ChannelService[Req, Rep]) => Future[Service[Req, Rep]]
+  type PrepareChannel = (ChannelService[Req, Rep]) => Future[_ <: ChannelService[Req, Rep]]
 
   def codec: Codec[Req, Rep]
-  def prepareConnection: PrepareConnection = Future.value(_)
+  def prepareChannel: PrepareChannel = Future.value(_)
 }

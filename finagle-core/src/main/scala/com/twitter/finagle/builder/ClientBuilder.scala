@@ -215,11 +215,19 @@ case class ClientBuilder[Req, Rep](
     val lowWatermark  = _hostConnectionCoresize getOrElse(1)
     val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
     val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
-    val factory = new CachingLifecycleFactory(
-      new ChannelServiceFactory[Req, Rep](bootstrap), idleTime)
 
-    val pool = new WatermarkPool[Service[Req, Rep]](factory, lowWatermark, highWatermark)
-    new PoolingService[Req, Rep](pool)
+    val factory = {
+      val channelService = new ChannelServiceFactory[Req, Rep](bootstrap)
+
+      val preparedChannelService =
+        new PrepareItemLifecycleFactory[ChannelService[Req, Rep]](
+          channelService, _protocol.get.prepareChannel(_))
+
+      new CachingLifecycleFactory(preparedChannelService, idleTime)
+    }
+
+    val pool = new WatermarkPool[ChannelService[Req, Rep]](factory, lowWatermark, highWatermark)
+    new PoolingService[Req, Rep, ChannelService[Req, Rep]](pool)
   }
 
   private def makeBroker(protocol: Protocol[Req, Rep]) =
