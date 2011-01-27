@@ -6,6 +6,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.concurrent.{Channel, Topic}
 
 object Client {
   def apply(raw: Service[Command, Response]): Client = {
@@ -18,17 +19,7 @@ trait Client {
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]]
   def delete(queueName: String): Future[Response]
   def flush(queueName: String): Future[Response]
-  def receive(queueName: String, waitUpTo: Duration = 0.seconds)(f: ChannelBuffer => Unit): Task
-}
-
-class Task {
-  private[this] var _isCancelled = false
-
-  def cancel() {
-    _isCancelled = true
-  }
-
-  def isCancelled = _isCancelled
+  def channel(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer]
 }
 
 protected class ConnectedClient(underlying: Service[Command, Response]) extends Client {
@@ -51,29 +42,30 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     }
   }
 
-  def receive(queueName: String, waitUpTo: Duration = 0.seconds)(f: ChannelBuffer => Unit): Task = {
-    val task = new Task
-    receive0(queueName: String, task, waitUpTo, collection.Set(Open()), f)
-    task
+  def channel(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
+    val channel = new Topic[ChannelBuffer]
+    channel.onReceive {
+      receive(queueName, channel, waitUpTo, collection.Set(Open()))
+    }
+    channel
   }
 
-  private[this] def receive0(queueName: String, task: Task, waitUpTo: Duration, options: collection.Set[GetOption], f: ChannelBuffer => Unit) {
-    if (!task.isCancelled) {
+  private[this] def receive(queueName: String, channel: Topic[ChannelBuffer], waitUpTo: Duration, options: collection.Set[GetOption]) {
+    if (channel.isOpen) {
       underlying(Get(queueName, collection.Set(Timeout(waitUpTo)) ++ options)) respond {
         case Return(Values(Seq(Value(key, item)))) =>
-          val options = collection.mutable.Set[GetOption]()
-          options += Open()
           try {
-            f(item)
-            options += Close()
+            channel.send(item)
+            receive(queueName, channel, waitUpTo, collection.Set(Close(), Open()))
           } catch {
-            case e => options += Abort()
+            case e =>
+              underlying(Get(queueName, collection.Set(Abort())))
+              channel.close()
           }
-          receive0(queueName, task, waitUpTo, options, f)
         case Return(Values(Seq())) =>
-          receive0(queueName, task, waitUpTo, collection.Set(Open()), f)
+          receive(queueName, channel, waitUpTo, collection.Set(Open()))
         case Throw(e) =>
-          // unsure -- FIXME!
+          channel.close()
       }
     }
   }

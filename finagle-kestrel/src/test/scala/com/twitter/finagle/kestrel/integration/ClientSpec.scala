@@ -6,6 +6,12 @@ import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.kestrel.Client
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import collection.mutable.ListBuffer
+import com.twitter.util.CountDownLatch
+import com.twitter.concurrent.Value
+import com.twitter.conversions.time._
+import org.jboss.netty.buffer.ChannelBuffer
+
 
 object ClientSpec extends Specification {
   "ConnectedClient" should {
@@ -18,11 +24,52 @@ object ClientSpec extends Specification {
 
       client.delete("foo")()
 
-
       "set & get" in {
+        skip("yarr")
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      }
+
+      "receive" in {
+        "no errors" in {
+          skip("yar")
+          val result = new ListBuffer[String]
+          client.set("foo", "bar")()
+          client.set("foo", "baz")()
+          client.set("foo", "boing")()
+
+          val channel = client.channel("foo")
+          val latch = new CountDownLatch(3)
+          channel.foreach {
+            case item =>
+              result += item.toString(CharsetUtil.UTF_8)
+              latch.countDown()
+          }
+          latch.await(1.second)
+          channel.close ()
+          result mustEqual List("bar", "baz", "boing")
+        }
+
+        "transactionality in the presence of errors" in {
+          client.set("foo", "bar")()
+
+          var result: ChannelBuffer = null
+          var channel = client.channel("foo")
+          val latch = new CountDownLatch(1)
+          channel.foreach {
+            case item => throw new Exception
+          }
+          channel = client.channel("foo")
+          channel.foreach {
+            case item =>
+              result = item
+              latch.countDown()
+          }
+          latch.await(1.second)
+          channel.close()
+          result.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        }
       }
     }
   }
