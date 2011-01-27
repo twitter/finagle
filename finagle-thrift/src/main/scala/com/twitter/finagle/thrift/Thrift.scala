@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 
-import com.twitter.finagle.builder.Codec
+import com.twitter.finagle.Codec
 
 class Thrift extends Codec[ThriftCall[_, _], ThriftReply[_]]
 {

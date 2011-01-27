@@ -7,7 +7,7 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 
-import com.twitter.finagle.builder.Codec
+import com.twitter.finagle.Codec
 
 class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {

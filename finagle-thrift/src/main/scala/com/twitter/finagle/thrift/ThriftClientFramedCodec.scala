@@ -7,7 +7,7 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
-import com.twitter.finagle.builder.Codec
+import com.twitter.finagle.Codec
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.CancelledRequestException

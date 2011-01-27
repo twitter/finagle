@@ -15,7 +15,7 @@ import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, Codec, Protocol}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{
@@ -40,7 +40,7 @@ object ClientBuilder {
  */
 case class ClientBuilder[Req, Rep](
   _cluster: Option[Cluster],
-  _codec: Option[Codec[Req, Rep]],
+  _protocol: Option[Protocol[Req, Rep]],
   _connectionTimeout: Duration,
   _requestTimeout: Duration,
   _statsReceiver: Option[StatsReceiver],
@@ -59,7 +59,7 @@ case class ClientBuilder[Req, Rep](
 {
   def this() = this(
     None,                                        // cluster
-    None,                                        // codec
+    None,                                        // protocol
     10.milliseconds,                             // connectionTimeout
     Duration.MaxValue,                           // requestTimeout
     None,                                        // statsReceiver
@@ -81,7 +81,7 @@ case class ClientBuilder[Req, Rep](
     val options = Seq(
       "name"                   -> _name,
       "cluster"                -> _cluster,
-      "codec"                  -> _codec,
+      "protocol"               -> _protocol,
       "connectionTimeout"      -> Some(_connectionTimeout),
       "requestTimeout"         -> Some(_requestTimeout),
       "statsReceiver"          -> _statsReceiver,
@@ -120,8 +120,13 @@ case class ClientBuilder[Req, Rep](
     copy(_cluster = Some(cluster))
   }
 
-  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
-    copy(_codec = Some(codec))
+  def protocol[Req1, Rep1](protocol: Protocol[Req1, Rep1]) =
+    copy(_protocol = Some(protocol))
+
+  def codec[Req1, Rep1](_codec: Codec[Req1, Rep1]) =
+    copy(_protocol = Some(new Protocol[Req1, Rep1] {
+      def codec = _codec
+    }))
 
   def connectionTimeout(duration: Duration) =
     copy(_connectionTimeout = duration)
@@ -173,11 +178,11 @@ case class ClientBuilder[Req, Rep](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   // ** BUILDING
-  private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
+  private def bootstrap(protocol: Protocol[Req, Rep])(host: SocketAddress) = {
     val bs = new ClientBootstrap(_channelFactory.get)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
-        val pipeline = codec.clientPipelineFactory.getPipeline
+        val pipeline = protocol.codec.clientPipelineFactory.getPipeline
         for (ctx <- _tls) {
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(true)
@@ -217,21 +222,21 @@ case class ClientBuilder[Req, Rep](
     new PoolingService[Req, Rep](pool)
   }
 
-  private def makeBroker(codec: Codec[Req, Rep]) =
-    pool _ compose bootstrap(codec)
+  private def makeBroker(protocol: Protocol[Req, Rep]) =
+    pool _ compose bootstrap(protocol)
 
   def build(): Service[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
-    if (!_codec.isDefined)
-      throw new IncompleteSpecification("No codec was specified")
+    if (!_protocol.isDefined)
+      throw new IncompleteSpecification("No protocol was specified")
 
     val cluster = _cluster.get
-    val codec = _codec.get
+    val protocol = _protocol.get
 
     val brokers = cluster mkServices { host =>
       // TODO: stats export [observers], internal LB stats.
-      var broker: Service[Req, Rep] = makeBroker(codec)(host)
+      var broker: Service[Req, Rep] = makeBroker(protocol)(host)
       if (_requestTimeout < Duration.MaxValue) {
         val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
         broker = timeoutFilter andThen broker

@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.builder.Codec
+import com.twitter.finagle.Codec
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
