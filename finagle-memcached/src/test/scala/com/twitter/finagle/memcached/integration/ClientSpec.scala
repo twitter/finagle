@@ -1,12 +1,13 @@
 package com.twitter.finagle.memcached.integration
 
 import org.specs.Specification
+
+import org.jboss.netty.util.CharsetUtil
+
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.RandomSocket
-import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.{Server, Client}
 
@@ -14,17 +15,29 @@ object ClientSpec extends Specification {
   "ConnectedClient" should {
     /**
      * Note: This test needs a real Memcached server running on 11211 to work!!
+     *
+     * XXX - This test is ludicrous. Rewrite it to not depend on memcached running.
      */
+
+    doBefore {
+      ExternalMemcached.start()
+    }
+
+    doAfter {
+      ExternalMemcached.stop()
+    }
+
     "simple client" in {
+
+
+      "set & get" in {
       val service = ClientBuilder()
-        .hosts("localhost:11211")
+        .hosts(Seq(ExternalMemcached.address.get))
+        // .hosts("localhost:%d".format(ExternalMemcached.address.get.getPort))
         .codec(new Memcached)
         .build()
       val client = Client(service)
-
       client.delete("foo")()
-
-      "set & get" in {
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
