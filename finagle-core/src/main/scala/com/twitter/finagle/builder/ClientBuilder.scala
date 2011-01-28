@@ -178,7 +178,7 @@ case class ClientBuilder[Req, Rep](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   // ** BUILDING
-  private def bootstrap(protocol: Protocol[Req, Rep])(host: SocketAddress) = {
+  private[this] def bootstrap(protocol: Protocol[Req, Rep])(host: SocketAddress) = {
     val bs = new ClientBootstrap(_channelFactory.get)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
@@ -210,20 +210,17 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
-  private def pool(bootstrap: ClientBootstrap) = {
+  private[this] def pool(bootstrap: ClientBootstrap) = {
     // Conservative, but probably the only safe thing.
     val lowWatermark  = _hostConnectionCoresize getOrElse(1)
     val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
     val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
-    val factory = new CachingLifecycleFactory(
+    val factory       = new CachingLifecycleFactory(
       new ChannelServiceFactory[Req, Rep](bootstrap), idleTime)
 
     val pool = new WatermarkPool[Service[Req, Rep]](factory, lowWatermark, highWatermark)
     new PoolingService[Req, Rep](pool)
   }
-
-  private def makeBroker(protocol: Protocol[Req, Rep]) =
-    pool _ compose bootstrap(protocol)
 
   def build(): Service[Req, Rep] = {
     if (!_cluster.isDefined)
@@ -236,7 +233,7 @@ case class ClientBuilder[Req, Rep](
 
     val brokers = cluster mkServices { host =>
       // TODO: stats export [observers], internal LB stats.
-      var broker: Service[Req, Rep] = makeBroker(protocol)(host)
+      var broker: Service[Req, Rep] = pool(bootstrap(protocol)(host))
       if (_requestTimeout < Duration.MaxValue) {
         val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
         broker = timeoutFilter andThen broker

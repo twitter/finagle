@@ -9,10 +9,15 @@ import com.twitter.finagle.Service
  */
 class ServiceMetadata[T](default: => T) {
   private[this] val serviceToMetadata =
-    MapMaker[Service[_, _], T] { config => config.weakKeys }
+    MapMaker[Service[_, _], T] { config =>
+      config.compute { key =>
+        default
+      }
+      config.weakKeys
+    }
 
   def apply(service: Service[_, _]) =
-    serviceToMetadata.getOrElseUpdate(service, default)
+    serviceToMetadata(service)
 }
 
 object ServiceMetadata {

@@ -8,7 +8,6 @@ import java.util.concurrent.{TimeUnit, BlockingDeque}
 import com.twitter.finagle.Service
 import com.twitter.util.{StateMachine, Future}
 import com.twitter.util.StateMachine.InvalidStateTransition
-import org.jboss.netty.util.CharsetUtil
 
 class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[ChannelBuffer]]) extends StateMachine {
   case class NoTransaction() extends State

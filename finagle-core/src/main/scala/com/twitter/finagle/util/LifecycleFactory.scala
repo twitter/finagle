@@ -18,7 +18,7 @@ trait LifecycleFactory[A] {
   /**
    * The given item has been end-of-life'd.
    */
-  def dispose(item: A): Unit
+  def dispose(item: A)
 
   /**
    * Query the health of the given item.
