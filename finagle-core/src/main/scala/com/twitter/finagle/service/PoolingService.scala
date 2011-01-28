@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.util.Future
 
 import com.twitter.finagle.{Service, ServiceClosedException}
-import com.twitter.finagle.util.DrainablePool
+import com.twitter.finagle.pool.DrainablePool
 
 /**
  * A pool of services.

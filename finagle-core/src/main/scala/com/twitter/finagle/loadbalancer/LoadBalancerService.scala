@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.util.Future
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.pool.DrainablePool
 import com.twitter.finagle.NoBrokersAvailableException
 
 /**
@@ -28,8 +29,8 @@ trait LoadBalancerStrategy[Req, Rep] {
  * strategy in order to dispatch a given request.
  */
 class LoadBalancerService[-Req, +Rep](
-  services: Seq[Service[Req, Rep]],
-  strategy: LoadBalancerStrategy[Req, Rep])
+    services: Seq[Service[Req, Rep]],
+    strategy: LoadBalancerStrategy[Req, Rep])
   extends Service[Req, Rep]
 {
   def apply(request: Req) = {
@@ -39,3 +40,7 @@ class LoadBalancerService[-Req, +Rep](
     }
   }
 }
+
+// class LoadBalancedPool[-Req, +Rep] extends DrainablePool[Service[Req, Rep]] {
+  
+// }

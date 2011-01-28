@@ -1,8 +1,10 @@
-package com.twitter.finagle.util
+package com.twitter.finagle.pool
 
 import collection.mutable.Queue
 
 import com.twitter.util.{Future, Time, Duration}
+
+import com.twitter.finagle.util.Timer
 
 /**
  * Manage object lifecycle [eg. in a pool]. Specifically: creation,

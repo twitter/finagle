@@ -15,6 +15,7 @@ import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
+import com.twitter.finagle.pool._
 import com.twitter.finagle.{Service, Codec, Protocol}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver

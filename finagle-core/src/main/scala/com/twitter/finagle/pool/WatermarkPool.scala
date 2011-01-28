@@ -1,15 +1,11 @@
-package com.twitter.finagle.util
+package com.twitter.finagle.pool
 
 import annotation.tailrec
 import collection.mutable.Queue
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.twitter.util.{Pool, Future, Promise, Return}
-
-trait DrainablePool[A] extends Pool[A] {
-  def drain(): Unit
-}
+import com.twitter.util.{Future, Promise, Return}
 
 /**
  * The watermark pool is an object pool with low & high
@@ -39,6 +35,7 @@ class WatermarkPool[A](
     factory.dispose(item)
   }
 
+  // TODO: fix this bug: we don't dispose unhealthy items here(!)
   @tailrec private[this] def dequeue(): Option[A] = {
     if (queue.isEmpty) {
       None
