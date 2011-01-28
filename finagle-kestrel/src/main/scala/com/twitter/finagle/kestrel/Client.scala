@@ -14,6 +14,9 @@ object Client {
   }
 }
 
+/**
+ * A friendly Kestrel client Interface.
+ */
 trait Client {
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch): Future[Response]
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]]
@@ -22,6 +25,11 @@ trait Client {
   def channel(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer]
 }
 
+/**
+ * A Client representing a single TCP connection to a single server.
+ *
+ * @param  underlying  a Service[Command, Response]. '''Note:''' underlying MUST not use a connection pool or load-balance!
+ */
 protected class ConnectedClient(underlying: Service[Command, Response]) extends Client {
   def flush(queueName: String) = {
     underlying(Flush(queueName))
@@ -31,10 +39,20 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     underlying(Delete(queueName))
   }
 
+  /**
+   * Enqueue an item.
+   *
+   * @param  expiry  how long the item is valid for (Kestrel will delete the item if it isn't dequeued in time.
+   */
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch) = {
     underlying(Set(queueName, expiry, value))
   }
 
+  /**
+   * Dequeue an item.
+   *
+   * @param  waitUpTo  if the queue is empty, indicate to the Kestrel server how long to block the operation, waiting for something to arrive, before returning None
+   */
   def get(queueName: String, waitUpTo: Duration = 0.seconds) = {
     underlying(Get(queueName, collection.Set(Timeout(waitUpTo)))) map {
       case Values(Seq()) => None
@@ -42,6 +60,11 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     }
   }
 
+  /**
+   * Get a channel for the given queue
+   *
+   * @return  A Channel object that you can receive items from as they arrive.
+   */
   def channel(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
     val channel = new Topic[ChannelBuffer]
     channel.onReceive {

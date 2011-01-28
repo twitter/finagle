@@ -86,7 +86,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class KestrelProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
-  {  }
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+  }
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines

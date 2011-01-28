@@ -12,21 +12,35 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Time, Future}
 
 object Client {
+  /**
+   * Construct a client from a single host.
+   *
+   * @param host a String of host:port combination.
+   */
   def apply(host: String): Client = Client(
     ClientBuilder()
       .hosts(host)
       .codec(new Memcached)
       .build())
 
+  /**
+   * Construct a partitioned client from a set of Services.
+   */
   def apply(services: Seq[Service[Command, Response]]): Client = {
     new PartitionedClient(services.map(apply(_)), _.hashCode)
   }
 
+  /**
+   * Construct an unpartitioned client from a single Service.
+   */
   def apply(raw: Service[Command, Response]): Client = {
     new ConnectedClient(raw)
   }
 }
 
+/**
+ * A friendly client to talk to a Memcached server.
+ */
 trait Client {
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Response]
   def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Response]
@@ -34,21 +48,71 @@ trait Client {
   def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Response]
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Response]
 
+  /**
+   * Get a key from the server.
+   */
   def get(key: String):                           Future[Option[ChannelBuffer]]
+
+  /**
+   * Get a set of keys from the server.
+   * @return a Map[String, ChannelBuffer] of all of the keys that the server had.
+   */
   def get(keys: Iterable[String]):                Future[Map[String, ChannelBuffer]]
+
+  /**
+   * Remove a key.
+   */
   def delete(key: String):                        Future[Response]
+
+  /**
+   * Increment a key. Interpret the key as an integer if it is parsable.
+   * This operation has no effect if there is no value there already.
+   * A common idiom is to set(key, ""), incr(key).
+   */
   def incr(key: String):                          Future[Int]
   def incr(key: String, delta: Int):              Future[Int]
+
+  /**
+   * Decrement a key. Interpret the key as an integer if it is parsable.
+   * This operation has no effect if there is no value there already.
+   */
   def decr(key: String):                          Future[Int]
   def decr(key: String, delta: Int):              Future[Int]
 
+  /**
+   * Store a key. Override an existing values.
+   */
   def set(key: String, value: ChannelBuffer):     Future[Response] = set(key, 0, Time.epoch, value)
+
+  /**
+   * Store a key but only if it doesn't already exist on the server.
+   */
   def add(key: String, value: ChannelBuffer):     Future[Response] = add(key, 0, Time.epoch, value)
+
+  /**
+   * Append a set of bytes to the end of an existing key. If the key doesn't
+   * exist, the operation has no effect.
+   */
   def append(key: String, value: ChannelBuffer):  Future[Response] = append(key, 0, Time.epoch, value)
+
+  /**
+   * Prepend a set of bytes to the beginning of an existing key. If the key
+   * doesn't exist, the operation has no effect.
+   */
   def prepend(key: String, value: ChannelBuffer): Future[Response] = prepend(key, 0, Time.epoch, value)
+
+  /**
+   * Replace an item if it exists. If it doesn't exist, the operation has no
+   * effect.
+   */
   def replace(key: String, value: ChannelBuffer): Future[Response] = replace(key, 0, Time.epoch, value)
 }
 
+/**
+ * A Client connected to an individual Memcached server.
+ *
+ * @param  underlying  the underlying Memcached Service.
+ */
 protected class ConnectedClient(underlying: Service[Command, Response]) extends Client {
   def get(key: String) = {
     underlying(Get(Seq(key))) map {
@@ -71,17 +135,23 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Set(key, flags, expiry, value))
+
   def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Add(key, flags, expiry, value))
+
   def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Append(key, flags, expiry, value))
+
   def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Prepend(key, flags, expiry, value))
+
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     underlying(Replace(key, flags, expiry, value))
 
   def delete(key: String)                        = underlying(Delete(key))
+
   def incr(key: String): Future[Int]             = incr(key, 1)
+
   def decr(key: String): Future[Int]             = decr(key, 1)
 
   def incr(key: String, delta: Int): Future[Int] = {
@@ -102,6 +172,12 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
   override def toString = hashCode.toString // FIXME this incompatible with Ketama
 }
 
+/**
+ * A Memcached client that partitions data across multiple servers according to a
+ * consistent hash ring, using the provided hash function.
+ *
+ * @param hash a partitioning function.
+ */
 class PartitionedClient(clients: Seq[Client], hash: String => Long) extends Client {
   require(clients.size > 0, "At least one client must be provided")
 
