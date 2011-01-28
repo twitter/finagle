@@ -5,14 +5,19 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.conversions.time._
 import org.jboss.netty.buffer.ChannelBuffer
-import java.util.concurrent.LinkedBlockingDeque
 import com.twitter.finagle.kestrel.Interpreter
-import com.twitter.util.Time
 import com.twitter.util.StateMachine.InvalidStateTransition
+import com.twitter.util.{MapMaker, Time}
+import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 
 object InterpreterSpec extends Specification {
   "Interpreter" should {
-    val interpreter = new Interpreter(() => new LinkedBlockingDeque[ChannelBuffer])
+    val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
+      config.compute { key =>
+        new LinkedBlockingDeque[ChannelBuffer]
+      }
+    }
+    val interpreter = new Interpreter(queues)
 
     "set & get" in {
       interpreter(Set("name", Time.now, "rawr"))

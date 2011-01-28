@@ -4,13 +4,20 @@ import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import protocol.Kestrel
-import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
+import com.twitter.util.MapMaker
 
 class Server(address: SocketAddress) {
+  private[this] val serviceFactory = {
+    val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
+      config.compute { key =>
+        new LinkedBlockingDeque[ChannelBuffer]
+      }
+    }
 
-  private[this] val service = {
-    val interpreter = new Interpreter(() => new LinkedBlockingDeque[ChannelBuffer])
-    new InterpreterService(interpreter)
+    () => {
+      new InterpreterService(new Interpreter(queues))
+    }
   }
 
   private[this] val serverSpec =
@@ -22,7 +29,7 @@ class Server(address: SocketAddress) {
   private[this] var server: Option[BuiltServer] = None
 
   def start() {
-    server = Some(serverSpec.build(service))
+    server = Some(serverSpec.build(serviceFactory))
   }
 
   def stop() {
