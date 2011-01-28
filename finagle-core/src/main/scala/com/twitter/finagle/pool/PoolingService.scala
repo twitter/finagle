@@ -1,9 +1,8 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.pool
 
 import com.twitter.util.Future
 
 import com.twitter.finagle.{Service, ServiceClosedException}
-import com.twitter.finagle.pool.DrainablePool
 
 /**
  * A pool of services.

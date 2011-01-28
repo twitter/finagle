@@ -1,4 +1,4 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.pool
 
 import org.specs.Specification
 import org.specs.mock.Mockito
@@ -6,7 +6,6 @@ import org.specs.mock.Mockito
 import com.twitter.util.{Future, Promise, Return}
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.util.DrainablePool
 
 object PoolingServiceSpec extends Specification with Mockito {
   "PoolingService" should {

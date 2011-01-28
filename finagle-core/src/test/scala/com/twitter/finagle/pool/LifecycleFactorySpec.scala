@@ -1,4 +1,4 @@
-package com.twitter.finagle.util
+package com.twitter.finagle.pool
 
 import collection.mutable.Queue
 
