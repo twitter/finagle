@@ -78,3 +78,17 @@ class CachingLifecycleFactory[A](
 
   def isHealthy(item: A) = underlying.isHealthy(item)
 }
+
+/**
+ * A wrapper for a function to prepare the item after it leaves the
+ * factory.
+ */
+class PrepareItemLifecycleFactory[A](
+    underlying: LifecycleFactory[A],
+    prepareItem: (A => Future[_ <: A]))
+  extends LifecycleFactory[A]
+{
+  def make() = underlying.make() flatMap { prepareItem(_) }
+  def dispose(item: A) = underlying.dispose(item)
+  def isHealthy(item: A) = underlying.isHealthy(item)
+}

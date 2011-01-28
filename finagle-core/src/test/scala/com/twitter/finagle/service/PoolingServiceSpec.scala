@@ -17,7 +17,7 @@ object PoolingServiceSpec extends Specification with Mockito {
     service(123) returns promise
 
     "give (a) service back to the pool on success" in {
-      val poolingService = new PoolingService[Any, Any](pool)
+      val poolingService = new PoolingService[Any, Any, Service[Any, Any]](pool)
 
       there was no(pool).reserve()
       val f = poolingService(123)

@@ -8,7 +8,7 @@ import com.twitter.finagle.util.DrainablePool
 /**
  * A pool of services.
  */
-class PoolingService[Req, Rep](pool: DrainablePool[Service[Req, Rep]])
+class PoolingService[Req, Rep, S <: Service[Req, Rep]](pool: DrainablePool[S])
   extends Service[Req, Rep]
 {
   private[this] var isOpen = true
