@@ -20,6 +20,5 @@ trait Codec[Req, Rep] {
  */
 trait Protocol[Req, Rep] {
   def codec: Codec[Req, Rep]
-  def prepareChannel(underlying: ChannelService[Req, Rep]) =
-    Future.value(underlying)
+  def prepareChannel(underlying: ChannelService[Req, Rep]) = Future.value(underlying)
 }

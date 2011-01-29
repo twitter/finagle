@@ -24,7 +24,7 @@ class LoadBalancedFactory[Req, Rep](
   def make() = {
     // Make a snapshot of the pools. The passed-in seqs may not be
     // immutable.
-    val snapshot = pools.toArray filter { !_.isAvailable }
+    val snapshot = pools.toArray filter { _.isAvailable }
 
     // TODO: (XXX) include *every* service if none are available.
     

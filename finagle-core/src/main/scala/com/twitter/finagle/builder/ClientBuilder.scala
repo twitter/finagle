@@ -231,9 +231,9 @@ case class ClientBuilder[Req, Rep](
     val highWatermark = _hostConnectionLimit    getOrElse(Int.MaxValue)
     val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
 
-    val channelServiceFactory = new ChannelServiceFactory[Req, Rep](bootstrap)
-
-    // TODO: prepareConnection
+    val channelServiceFactory =
+      new ChannelServiceFactory[Req, Rep](
+        bootstrap, _protocol.get.prepareChannel(_))
 
     val cachingPool = new CachingPool(channelServiceFactory, idleTime)
     new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark)

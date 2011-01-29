@@ -1,5 +1,7 @@
 package com.twitter.finagle.loadbalancer
  
+// check availability filtering!
+
 // TODO:
 //    "fall back to no filtering if everything is marked dead" in {
 //      Time.withCurrentTimeFrozen { timeControl =>

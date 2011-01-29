@@ -53,6 +53,8 @@ object ClientSpec extends Specification {
     "report a closed connection when the server doesn't reply" in {
       withServer(closingHandler) { clientBuilder =>
         val client = clientBuilder.build()
+        // No failures have happened yet.
+        client.isAvailable must beTrue
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
         val resolved = future get(1.second)
         resolved.isThrow must beTrue

@@ -85,14 +85,19 @@ class ChannelService[Req, Rep](channel: Channel)
 /**
  * A factory for ChannelService instances, given a bootstrap.
  */
-class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
+class ChannelServiceFactory[Req, Rep](
+    bootstrap: ClientBootstrap,
+    prepareChannel: ChannelService[Req, Rep] => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep]
 {
   def make() = {
-    val promise = new Promise[ChannelService[Req, Rep]]
+    val promise = new Promise[Service[Req, Rep]]
     bootstrap.connect() {
-      case Ok(channel)  => promise() = Return(new ChannelService[Req, Rep](channel))
-      case Error(cause) => promise() = Throw(new WriteException(cause))
+      case Ok(channel)  =>
+        prepareChannel(new ChannelService[Req, Rep](channel)) respond { promise() = _ }
+
+      case Error(cause) =>
+        promise() = Throw(new WriteException(cause))
       // TODO: cancellation.
     }
 
