@@ -54,4 +54,3 @@ class FailureAccrualFactory[Req, Rep](
 
   override def release() = underlying.release()
 }
-
