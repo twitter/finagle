@@ -11,7 +11,6 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try}
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{Ok, Error}
-import com.twitter.finagle.pool.LifecycleFactory
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
@@ -69,8 +68,6 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   })
 
-  override def isAvailable = isHealthy && channel.isOpen
-
   def apply(request: Req) = {
     val replyFuture = new Promise[Rep]
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
@@ -81,14 +78,15 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   }
 
-  override def close() { if (channel.isOpen) Channels.close(channel) }
+  override def release() { if (channel.isOpen) Channels.close(channel) }
+  override def isAvailable = isHealthy && channel.isOpen
 }
 
 /**
  * A factory for ChannelService instances, given a bootstrap.
  */
 class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
-  extends LifecycleFactory[ChannelService[Req, Rep]]
+  extends ServiceFactory[Req, Rep]
 {
   def make() = {
     val promise = new Promise[ChannelService[Req, Rep]]
@@ -97,9 +95,11 @@ class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
       case Error(cause) => promise() = Throw(new WriteException(cause))
       // TODO: cancellation.
     }
+
     promise
   }
 
-  def dispose(service: ChannelService[Req, Rep]) { service.close() }
-  def isHealthy(service: ChannelService[Req, Rep]) = service.isAvailable
+  override def release() {
+    // XXX RELEASEEXTERNALRESOURCES
+  }
 }

@@ -2,9 +2,9 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.util.WeakMetadata
 import com.twitter.finagle.stats.{ReadableCounter, TimeWindowedStatsRepository}
-
 
 /**
  * The "least loaded" strategy will dispatch the next request to the
@@ -15,22 +15,19 @@ class LeastLoadedStrategy[Req, Rep]
   extends LoadBalancerStrategy[Req, Rep]
 {
   // TODO: threadsafety of stats?
-  private[this] val loadStat = ServiceMetadata[ReadableCounter] {
+  private[this] val loadStat = WeakMetadata[ReadableCounter] {
     (new TimeWindowedStatsRepository(10, 1.seconds)).counter()
   }
 
   // TODO: account for recently introduced services.
-  private[this] val leastLoadedOrdering = new Ordering[Service[Req, Rep]] {
-    def compare(a: Service[Req, Rep], b: Service[Req, Rep]) =
+  private[this] val leastLoadedOrdering = new Ordering[ServiceFactory[Req, Rep]] {
+    def compare(a: ServiceFactory[Req, Rep], b: ServiceFactory[Req, Rep]) =
       loadStat(a).sum - loadStat(b).sum
   }
 
-  def dispatch(request: Req, services: Seq[Service[Req, Rep]]) =
-    if (services.isEmpty) {
-      None
-    } else {
-      val selected = services.min(leastLoadedOrdering)
-      loadStat(selected).incr()
-      Some((selected, selected(request)))
-    }
+  def apply(pools: Seq[ServiceFactory[Req, Rep]]) = {
+    val selected = pools.min(leastLoadedOrdering)
+    loadStat(selected).incr()
+    selected.make()
+  }
 }

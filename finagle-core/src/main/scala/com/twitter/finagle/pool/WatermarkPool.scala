@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.util.{Future, Promise, Return}
 
+import com.twitter.finagle.{Service, ServiceFactory}
+
 /**
  * The watermark pool is an object pool with low & high
  * watermarks. This behaves as follows: the pool will persist up to
@@ -16,73 +18,75 @@ import com.twitter.util.{Future, Promise, Return}
  * items may persist indefinitely, while there are at no times more
  * than `highWatermark' items in concurrent existence.
  */
-class WatermarkPool[A](
-    factory: LifecycleFactory[A],
+class WatermarkPool[Req, Rep](
+    factory: ServiceFactory[Req, Rep],
     lowWatermark: Int, highWatermark: Int = Int.MaxValue)
-  extends DrainablePool[A]
+  extends ServiceFactory[Req, Rep]
 {
-  private[this] val queue    = Queue[A]()
-  private[this] val waiters  = Queue[Promise[A]]()
-  private[this] var numItems = 0
+  private[this] val queue    = Queue[Service[Req, Rep]]()
+  private[this] val waiters  = Queue[Promise[Service[Req, Rep]]]()
+  private[this] var numServices = 0
 
-  private[this] def make(): Future[A] = {
-    numItems += 1
-    factory.make()
-  }
+  private[this] class ServiceWrapper(underlying: Service[Req, Rep])
+    extends Service[Req, Rep]
+  {
+    def apply(request: Req) = underlying(request)
 
-  private[this] def dispose(item: A) {
-    numItems -= 1
-    factory.dispose(item)
-  }
-
-  // TODO: fix this bug: we don't dispose unhealthy items here(!)
-  @tailrec private[this] def dequeue(): Option[A] = {
-    if (queue.isEmpty) {
-      None
-    } else {
-      val item = queue.dequeue()
-      if (!factory.isHealthy(item))
-        dequeue()
-      else
-        Some(item)
+    override def isAvailable = underlying.isAvailable
+    override def release() = WatermarkPool.this.synchronized {
+      if (!isAvailable) {
+        underlying.release()
+        numServices -= 1
+        // If we just disposed of an service, and this bumped us beneath
+        // the high watermark, then we are free to satisfy the first
+        // waiter.
+        if (numServices < highWatermark && !waiters.isEmpty) {
+          val waiter = waiters.dequeue()
+          make() respond { waiter() = _ }
+        }
+      } else if (!waiters.isEmpty) {
+        val waiter = waiters.dequeue()
+        waiter() = Return(this)
+      } else if (numServices <= lowWatermark) {
+        queue += this
+      } else {
+        underlying.release()
+        numServices -= 1
+      }
     }
   }
 
-  def reserve(): Future[A] = synchronized {
+  // TODO: fix this bug: we don't dispose unhealthy services here(!)
+  @tailrec private[this] def dequeue(): Option[Service[Req, Rep]] = {
+    if (queue.isEmpty) {
+      None
+    } else {
+      val service = queue.dequeue()
+      if (!service.isAvailable)
+        dequeue()
+      else
+        Some(service)
+    }
+  }
+
+  def make(): Future[Service[Req, Rep]] = synchronized {
     dequeue() match {
-      case Some(item) =>
-        Future.value(item)
-      case None if numItems < highWatermark =>
-        make()
+      case Some(service) =>
+        Future.value(service)
+      case None if numServices < highWatermark =>
+        numServices += 1
+        factory.make() map { new ServiceWrapper(_) }
       case None =>
-        val promise = new Promise[A]
+        val promise = new Promise[Service[Req, Rep]]
         waiters += promise
         promise
     }
   }
 
-  def release(item: A) = synchronized {
-    if (!factory.isHealthy(item)) {
-      dispose(item)
-      // If we just disposed of an item, and this bumped us beneath
-      // the high watermark, then we are free to satisfy the first
-      // waiter.
-      if (numItems < highWatermark && !waiters.isEmpty) {
-        val waiter = waiters.dequeue()
-        make() respond { value => waiter() = value }
-      }
-    } else if (!waiters.isEmpty) {
-      val waiter = waiters.dequeue()
-      waiter() = Return(item)
-    } else if (numItems <= lowWatermark) {
-      queue += item
-    } else {
-      dispose(item)
-    }
-  }
-
-  def drain() = synchronized {
-    queue foreach { factory.dispose(_) }
+  // TODO: what to do with queued services after release() has been
+  // called.
+  override def release() = synchronized {
+    queue foreach { _.release() }
     queue.clear()
   }
 }

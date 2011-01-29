@@ -16,12 +16,10 @@ import com.twitter.util.TimeConversions._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
 import com.twitter.finagle.pool._
-import com.twitter.finagle.{Service, Codec, Protocol}
+import com.twitter.finagle.{Service, ServiceFactory, Codec, Protocol}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.loadbalancer.{
-  LoadBalancerService,
-  LeastQueuedStrategy, FailureAccrualStrategy}
+import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 
 object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
@@ -211,63 +209,72 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
+  // private[this] def prepareChannel(channelService: ChannelService[Req, Rep]) = {
+  //   if (_requestTimeout < Duration.MaxValue) {
+  //     val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+  //     broker = timeoutFilter andThen broker
+  //   }
+
+  //   if (_statsReceiver.isDefined) {
+  //     val statsFilter = new StatsFilter[Req, Rep](
+  //       _statsReceiver.get.scope("host" -> host.toString))
+  //     broker = statsFilter andThen broker
+  //   }
+
+  //   _protocol.get.prepareChannel(_)
+  // }
+
   private[this] def pool(bootstrap: ClientBootstrap) = {
-    // Conservative, but probably the only safe thing.
+    // These are conservative defaults, but probably the only safe
+    // thing to do.
     val lowWatermark  = _hostConnectionCoresize getOrElse(1)
-    val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
+    val highWatermark = _hostConnectionLimit    getOrElse(Int.MaxValue)
     val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
 
-    val factory = {
-      val channelService = new ChannelServiceFactory[Req, Rep](bootstrap)
+    val channelServiceFactory = new ChannelServiceFactory[Req, Rep](bootstrap)
 
-      val preparedChannelService =
-        new PrepareItemLifecycleFactory[ChannelService[Req, Rep]](
-          channelService, _protocol.get.prepareChannel(_))
+    // TODO: prepareConnection
 
-      new CachingLifecycleFactory(preparedChannelService, idleTime)
-    }
-
-    val pool = new WatermarkPool[ChannelService[Req, Rep]](factory, lowWatermark, highWatermark)
-    new PoolingService[Req, Rep, ChannelService[Req, Rep]](pool)
+    val cachingPool = new CachingPool(channelServiceFactory, idleTime)
+    new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark)
   }
 
-  def build(): Service[Req, Rep] = {
+  private[this] def retryingFilter = _retries map { numRetries =>
+    new RetryingFilter[Req, Rep](new NumTriesRetryStrategy(numRetries))
+  }
+
+  def build(): ServiceFactory[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
     if (!_protocol.isDefined)
       throw new IncompleteSpecification("No protocol was specified")
 
-    val cluster = _cluster.get
+    val cluster  = _cluster.get
     val protocol = _protocol.get
 
-    val brokers = cluster mkServices { host =>
-      // TODO: stats export [observers], internal LB stats.
-      var broker: Service[Req, Rep] = pool(bootstrap(protocol)(host))
-      if (_requestTimeout < Duration.MaxValue) {
-        val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
-        broker = timeoutFilter andThen broker
-      }
+          // // XXX - retries
+          // val filtered =
+          //   if (_requestTimeout < Duration.MaxValue) {
+          //     val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+          //     timeoutFilter andThen service
+          //   } else {
+          //     service
+          //   }
 
-      if (_statsReceiver.isDefined) {
-        val statsFilter = new StatsFilter[Req, Rep](
-          _statsReceiver.get.scope("host" -> host.toString))
-        broker = statsFilter andThen broker
-      }
+    val pools = cluster mapHosts { host => pool(bootstrap(protocol)(host)) }
+    val loadBalanced = new LoadBalancedFactory(pools, new LeastQueuedStrategy[Req, Rep])
 
-      broker
-    }
+    new ServiceFactory[Req, Rep] {
+      override def apply(request: Req) =
+        // Apply retries when needed.
+        make() flatMap { service =>
+          val retrying = retryingFilter map { _ andThen service } getOrElse { service }
+          retrying(request) ensure { service.release() }
+        }
 
-    // TODO: enable passing in a strategy via the builder.
-    val loadBalancerStrategy = {
-      val leastQueuedStrategy = new LeastQueuedStrategy[Req, Rep]
-      new FailureAccrualStrategy(leastQueuedStrategy, 3, 10.seconds)
-    }
-
-    val loadBalanced = new LoadBalancerService(brokers, loadBalancerStrategy)
-    if (_retries.isDefined) {
-      RetryingService.tries[Req, Rep](_retries.get) andThen loadBalanced
-    } else {
-      loadBalanced
+      def make() = loadBalanced.make()
+      override def release() = loadBalanced.release()
+      override def isAvailable = loadBalanced.isAvailable
     }
   }
 }

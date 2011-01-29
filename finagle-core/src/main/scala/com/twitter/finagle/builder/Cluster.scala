@@ -16,8 +16,7 @@ trait Cluster {
    * Produce a sequence of brokers that changes as servers join and
    * leave the cluster.
    */
-  def mkServices[Req, Rep](f: SocketAddress => Service[Req, Rep]):
-    Seq[Service[Req, Rep]]
+  def mapHosts[A](f: SocketAddress => A): Seq[A]
 
   def join(address: SocketAddress)
 }
@@ -27,8 +26,7 @@ class SocketAddressCluster(underlying: Seq[SocketAddress])
 {
   private[this] var self = underlying
 
-  def mkServices[Req, Rep](f: SocketAddress => Service[Req, Rep]) =
-    self map f
+  def mapHosts[A](f: SocketAddress => A) = self map f
 
   def join(address: SocketAddress) {
     self = underlying ++ Seq(address)

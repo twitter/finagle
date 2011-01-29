@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.integration;
 
-import com.twitter.finagle.Service;
+import com.twitter.finagle.*;
 import com.twitter.finagle.memcached.java.Client;
 import com.twitter.finagle.memcached.java.ClientBase;
 import com.twitter.finagle.memcached.protocol.Command;
@@ -17,7 +17,7 @@ public class TestClient extends TestCase {
   }
 
   public void testGetAndSet() {
-    Service<Command, Response> service =
+    ServiceFactory<Command, Response> service =
       ClientBuilder
         .get()
         .hosts("localhost:11211")

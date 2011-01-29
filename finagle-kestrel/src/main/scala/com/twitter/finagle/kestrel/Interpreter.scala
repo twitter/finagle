@@ -78,4 +78,5 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
 
 class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
   def apply(request: Command) = Future(interpreter(request))
+  def release() = ()
 }

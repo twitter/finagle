@@ -12,6 +12,7 @@ import com.twitter.util.Future
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def map[Req1](f: (Req1) => (Req)) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
+    override def release() = Service.this.release()
   }
 
   /**
@@ -20,15 +21,36 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def apply(request: Req): Future[Rep]
 
   /**
-   * Release any external resources. Overriden in subclasses.
+   * Relinquishes the use of this service instance.
    */
-  def close() {}
+  def release() = ()
 
   /**
    * Determines whether this service is available (can accept requests
-   * with a reasonable likelihood of success.
+   * with a reasonable likelihood of success).
    */
   def isAvailable: Boolean = true
+}
+
+abstract class ServiceFactory[Req, Rep] extends Service[Req, Rep] {
+  /**
+   * A one-shot request.  This makes a request to the pool,
+   * relinquishing the use of the underlying service upon the
+   * completion of the request. This frees the implementation to
+   * implement strategies like retrying.
+   */
+  def apply(request: Req) =
+    make() flatMap { service =>
+      service(request) ensure { service.release() }
+    }
+
+  /**
+   * Reserve the use of a given service instance. This pins the
+   * underlying channel and the returned service has exclusive use of
+   * its underlying connection. To relinquish the use of the reserved
+   * Service, the user must call Service.release().
+   */
+  def make(): Future[Service[Req, Rep]]
 }
 
 /**
@@ -73,6 +95,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
       def apply(request: ReqIn, service: Service[Req2, Rep2]) = {
         Filter.this.apply(request, new Service[ReqOut, RepIn] {
           def apply(request: ReqOut): Future[RepIn] = next(request, service)
+          override def release() = service.release()
         })
       }
     }
@@ -87,6 +110,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    */
   def andThen(service: Service[ReqOut, RepIn]) = new Service[ReqIn, RepOut] {
     def apply(request: ReqIn) = Filter.this.apply(request, service)
+    override def release() = service.release()
   }
 
   /**
