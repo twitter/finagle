@@ -96,6 +96,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
         Filter.this.apply(request, new Service[ReqOut, RepIn] {
           def apply(request: ReqOut): Future[RepIn] = next(request, service)
           override def release() = service.release()
+          override def isAvailable = service.isAvailable
         })
       }
     }
@@ -111,6 +112,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   def andThen(service: Service[ReqOut, RepIn]) = new Service[ReqIn, RepOut] {
     def apply(request: ReqIn) = Filter.this.apply(request, service)
     override def release() = service.release()
+    override def isAvailable = service.isAvailable
   }
 
   /**
