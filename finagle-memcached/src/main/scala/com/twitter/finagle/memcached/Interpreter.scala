@@ -109,5 +109,5 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
 
 class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
   def apply(command: Command) = Future(interpreter(command))
-  def release() = ()
+  override def release() = ()
 }
