@@ -32,7 +32,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def isAvailable: Boolean = true
 }
 
-abstract class ServiceFactory[Req, Rep] {
+abstract class ServiceFactory[-Req, +Rep] {
   /**
    * Reserve the use of a given service instance. This pins the
    * underlying channel and the returned service has exclusive use of
@@ -47,6 +47,18 @@ abstract class ServiceFactory[Req, Rep] {
   def close()
 
   def isAvailable: Boolean = true
+}
+
+class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
+  extends Service[Req, Rep]
+{
+  def apply(request: Req) =
+    factory.make() flatMap { service =>
+      service(request) ensure { service.release() }
+    }
+
+  override def release() = factory.close()
+  override def isAvailable = factory.isAvailable
 }
 
 /**
@@ -111,8 +123,12 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     override def isAvailable = service.isAvailable
   }
 
-  // XXX - factory
-  // def andThen(factory: )
+  def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
+    new ServiceFactory[ReqIn, RepOut] {
+      def make() = factory.make() map { Filter.this andThen _ }
+      override def close() = factory.close()
+      override def isAvailable = factory.isAvailable
+    }
 
   /**
    * Conditionally propagates requests down the filter chain. This may

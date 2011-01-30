@@ -17,7 +17,7 @@ public class TestClient extends TestCase {
   }
 
   public void testGetAndSet() {
-    ServiceFactory<Command, Response> service =
+    Service<Command, Response> service =
       ClientBuilder
         .get()
         .hosts("localhost:11211")
