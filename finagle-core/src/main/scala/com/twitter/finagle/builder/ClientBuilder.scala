@@ -241,16 +241,19 @@ case class ClientBuilder[Req, Rep](
       
       var factory: ServiceFactory[Req, Rep] = null
 
+      // TODO: wrap a factory with preparechannel instead of building
+      // it in.  we may want more preparetion (eg. we can push
+      // timeouts down?)
       val bs = buildBootstrap(protocol, host)
       factory = new ChannelServiceFactory[Req, Rep](
         bs, _protocol.get.prepareChannel(_))
 
-      if (_requestTimeout < Duration.MaxValue) {
-        val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
-        factory = timeoutFilter andThen factory
-      }
-
       factory = buildPool(factory)
+
+      if (_requestTimeout < Duration.MaxValue) {
+        val filter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+        factory = filter andThen factory
+      }
 
       if (_statsReceiver.isDefined) {
         val statsFilter = new StatsFilter[Req, Rep](

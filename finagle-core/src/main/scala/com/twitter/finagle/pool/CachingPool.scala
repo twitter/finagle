@@ -21,11 +21,9 @@ class CachingPool[Req, Rep](
   private[this] val deathRow = Queue[(Time, Service[Req, Rep])]()
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
-    extends Service[Req, Rep]
+    extends PoolServiceWrapper[Req, Rep](underlying)
   {
-    def apply(request: Req) = underlying(request)
-
-    override def release() = CachingPool.this.synchronized {
+    def doRelease() = CachingPool.this.synchronized {
       if (underlying.isAvailable) {
         deathRow += ((Time.now, underlying))
         if (!isScheduled) {

@@ -147,3 +147,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 }
 
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
+
+object Filter {
+  def identity[Req, Rep] = new SimpleFilter[Req, Rep] {
+    def apply(request: Req, service: Service[Req, Rep]) = service(request)
+  }
+}

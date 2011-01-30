@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.util.{Future, Promise, Return}
 
 import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.util.FutureLatch
 
 /**
  * The watermark pool is an object pool with low & high
@@ -28,12 +29,9 @@ class WatermarkPool[Req, Rep](
   private[this] var numServices = 0
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
-    extends Service[Req, Rep]
+    extends PoolServiceWrapper[Req, Rep](underlying)
   {
-    def apply(request: Req) = underlying(request)
-
-    override def isAvailable = underlying.isAvailable
-    override def release() = WatermarkPool.this.synchronized {
+    override def doRelease() = WatermarkPool.this.synchronized {
       if (!isAvailable) {
         underlying.release()
         numServices -= 1
