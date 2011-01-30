@@ -36,5 +36,5 @@ class LoadBalancedFactory[Req, Rep](
 
   override def isAvailable = pools.exists(_.isAvailable)
 
-  override def release() = pools foreach { _.release() }
+  override def close() = pools foreach { _.close() }
 }

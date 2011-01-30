@@ -104,7 +104,8 @@ class ChannelServiceFactory[Req, Rep](
     promise
   }
 
-  override def release() {
+  override def close() {
+    // XXX XXX XXX XXXX XXX
     // XXX RELEASEEXTERNALRESOURCES
   }
 }

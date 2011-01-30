@@ -32,18 +32,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def isAvailable: Boolean = true
 }
 
-abstract class ServiceFactory[Req, Rep] extends Service[Req, Rep] {
-  /**
-   * A one-shot request.  This makes a request to the pool,
-   * relinquishing the use of the underlying service upon the
-   * completion of the request. This frees the implementation to
-   * implement strategies like retrying.
-   */
-  def apply(request: Req) =
-    make() flatMap { service =>
-      service(request) ensure { service.release() }
-    }
-
+abstract class ServiceFactory[Req, Rep] {
   /**
    * Reserve the use of a given service instance. This pins the
    * underlying channel and the returned service has exclusive use of
@@ -51,6 +40,13 @@ abstract class ServiceFactory[Req, Rep] extends Service[Req, Rep] {
    * Service, the user must call Service.release().
    */
   def make(): Future[Service[Req, Rep]]
+
+  /**
+   * Close the factory and its underlying resources.
+   */
+  def close()
+
+  def isAvailable: Boolean = true
 }
 
 /**
@@ -114,6 +110,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     override def release() = service.release()
     override def isAvailable = service.isAvailable
   }
+
+  // XXX - factory
+  // def andThen(factory: )
 
   /**
    * Conditionally propagates requests down the filter chain. This may

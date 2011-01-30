@@ -52,5 +52,5 @@ class FailureAccrualFactory[Req, Rep](
   override def isAvailable =
     underlying.isAvailable && synchronized { failedAt.untilNow >= markDeadFor }
 
-  override def release() = underlying.release()
+  override def close() = underlying.close()
 }

@@ -10,7 +10,7 @@ import com.twitter.util.*;
 
 public class HttpClientTest {
   public static void main(String args[]) {
-    ServiceFactory<HttpRequest, HttpResponse> client =
+    Service<HttpRequest, HttpResponse> client =
       ClientBuilder.get()
         .hosts("localhost:10000")
         .codec(Codec4J.Http)

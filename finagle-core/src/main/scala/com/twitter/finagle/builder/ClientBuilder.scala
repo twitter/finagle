@@ -243,7 +243,7 @@ case class ClientBuilder[Req, Rep](
     new RetryingFilter[Req, Rep](new NumTriesRetryStrategy(numRetries))
   }
 
-  def build(): ServiceFactory[Req, Rep] = {
+  def build(): Service[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
     if (!_protocol.isDefined)
@@ -252,29 +252,29 @@ case class ClientBuilder[Req, Rep](
     val cluster  = _cluster.get
     val protocol = _protocol.get
 
-          // // XXX - retries
-          // val filtered =
-          //   if (_requestTimeout < Duration.MaxValue) {
-          //     val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
-          //     timeoutFilter andThen service
-          //   } else {
-          //     service
-          //   }
+    // buildFactory, build.
+
+    // // XXX - retries
+    // val filtered =
+    //   if (_requestTimeout < Duration.MaxValue) {
+    //     val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+    //     timeoutFilter andThen service
+    //   } else {
+    //     service
+    //   }
 
     val pools = cluster mapHosts { host => pool(bootstrap(protocol)(host)) }
-    val loadBalanced = new LoadBalancedFactory(pools, new LeastQueuedStrategy[Req, Rep])
+    val factory = new LoadBalancedFactory(pools, new LeastQueuedStrategy[Req, Rep])
 
-    new ServiceFactory[Req, Rep] {
-      override def apply(request: Req) =
-        // Apply retries when needed.
-        make() flatMap { service =>
+    new Service[Req, Rep] {
+      def apply(request: Req) =
+        factory.make() flatMap { service =>
           val retrying = retryingFilter map { _ andThen service } getOrElse { service }
           retrying(request) ensure { service.release() }
         }
 
-      def make() = loadBalanced.make()
-      override def release() = loadBalanced.release()
-      override def isAvailable = loadBalanced.isAvailable
+      override def release() = factory.close()
+      override def isAvailable = factory.isAvailable
     }
   }
 }

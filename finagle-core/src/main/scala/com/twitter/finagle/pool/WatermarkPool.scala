@@ -85,7 +85,7 @@ class WatermarkPool[Req, Rep](
 
   // TODO: what to do with queued services after release() has been
   // called.
-  override def release() = synchronized {
+  def close() = synchronized {
     queue foreach { _.release() }
     queue.clear()
   }

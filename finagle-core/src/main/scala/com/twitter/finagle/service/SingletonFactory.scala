@@ -24,7 +24,7 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
     Future.value(wrapped)
   }
 
-  override def release() = synchronized {
+  def close() = synchronized {
     if (outstandingInstances == 0)
       service.release()
     else

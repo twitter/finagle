@@ -62,4 +62,9 @@ class CachingPool[Req, Rep](
 
     underlying.make() map { new WrappedService(_) }
   }
+
+  // XXX
+  // TODO: test this.
+  // TODO: should we flush immediately here?
+  def close() = ()
 }
