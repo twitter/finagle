@@ -6,7 +6,7 @@ import org.mockito.Matchers
 
 import com.twitter.util.{Future, Promise, Return}
 
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle._
 
 object WatermarkPoolSpec extends Specification with Mockito {
   "WatermarkPool (lowWatermark = 0)" should {
@@ -160,6 +160,44 @@ object WatermarkPoolSpec extends Specification with Mockito {
       pool.make().isDefined must beFalse
       there was one(service).release()
       there were two(factory).make()
+    }
+  }
+
+  "a closed pool" should {
+    val factory = mock[ServiceFactory[Int, Int]]
+    val pool = new WatermarkPool(factory, 100, 1000)
+    val underlyingService = mock[Service[Int, Int]]
+
+    factory.make() returns Future.value(underlyingService)
+    underlyingService.isAvailable returns true
+    underlyingService(123) returns Future.value(321)
+
+    val serviceFuture = pool.make()
+    serviceFuture.isDefined must beTrue
+    val service = serviceFuture()
+
+    "drain the queue" in {
+      service.release()
+      there was no(underlyingService).release()
+      pool.close()
+      there was one(underlyingService).release()
+    }
+
+    "release services as they become available" in {
+      pool.close()
+      there was no(underlyingService).release()
+      service.release()
+      there was one(underlyingService).release()
+    }
+
+    "deny new requests" in {
+      pool.close()
+      pool.make()() must throwA[ServiceClosedException]
+    }
+
+    "close the underlying factory" in {
+      pool.close()
+      there was one(factory).close()
     }
   }
 }
