@@ -14,7 +14,7 @@ private[pool] abstract class PoolServiceWrapper[Req, Rep](underlying: Service[Re
   }
 
   override def isAvailable = underlying.isAvailable
-  override final def release() = replyLatch.await { doRelease }
+  override final def release() = replyLatch.await { doRelease() }
 
   protected def doRelease()
 }
