@@ -10,7 +10,7 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try}
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error}
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
@@ -98,7 +98,9 @@ class ChannelServiceFactory[Req, Rep](
 
       case Error(cause) =>
         promise() = Throw(new WriteException(cause))
-      // TODO: cancellation.
+
+      case Cancelled =>
+        promise() = Throw(new WriteException(new CancelledConnectionException))
     }
 
     promise

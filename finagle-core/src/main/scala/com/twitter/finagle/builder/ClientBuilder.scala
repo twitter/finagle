@@ -237,8 +237,7 @@ case class ClientBuilder[Req, Rep](
       //   Pool
       //   Stats
       //
-      // Pool & below are host-specific,  
-      
+      // the pool & below are host-specific,
       var factory: ServiceFactory[Req, Rep] = null
 
       // TODO: wrap a factory with preparechannel instead of building

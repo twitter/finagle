@@ -54,16 +54,17 @@ class WatermarkPool[Req, Rep](
     }
   }
 
-  // TODO: fix this bug: we don't dispose unhealthy services here(!)
   @tailrec private[this] def dequeue(): Option[Service[Req, Rep]] = {
     if (queue.isEmpty) {
       None
     } else {
       val service = queue.dequeue()
-      if (!service.isAvailable)
+      if (!service.isAvailable) {
+        service.release()
         dequeue()
-      else
+      } else {
         Some(service)
+      }        
     }
   }
 
@@ -84,7 +85,10 @@ class WatermarkPool[Req, Rep](
   // TODO: what to do with queued services after release() has been
   // called.
   def close() = synchronized {
+    // Drain the pool?
     queue foreach { _.release() }
     queue.clear()
   }
+
+  // TODO: isAvailable
 }

@@ -131,4 +131,35 @@ object WatermarkPoolSpec extends Specification with Mockito {
       }
     }
   }
+
+  "service lifecycle" should {
+    val factory = mock[ServiceFactory[Int, Int]]
+    val service = mock[Service[Int, Int]]
+    val promise = new Promise[Service[Int, Int]]
+    service.isAvailable returns true
+    factory.make() returns promise
+
+    "release unhealthy services that have been queued" in {
+      val pool = new WatermarkPool(factory, 5)
+      promise() = Return(service)
+
+      val f = pool.make()
+      there was one(factory).make()
+      f.isDefined must beTrue
+      f().isAvailable must beTrue
+
+
+      f().release()
+      there was no(service).release()
+
+      factory.make() returns new Promise[Service[Int, Int]]
+      service.isAvailable returns false 
+
+      // The service is now unhealty, so it should be discarded, and a
+      // new one should be made.
+      pool.make().isDefined must beFalse
+      there was one(service).release()
+      there were two(factory).make()
+    }
+  }
 }
