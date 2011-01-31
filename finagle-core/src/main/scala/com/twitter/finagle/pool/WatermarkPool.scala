@@ -5,9 +5,9 @@ import collection.mutable.Queue
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Future, Promise, Return, Throw}
 
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException}
 import com.twitter.finagle.util.FutureLatch
 
 /**
@@ -24,15 +24,19 @@ class WatermarkPool[Req, Rep](
     lowWatermark: Int, highWatermark: Int = Int.MaxValue)
   extends ServiceFactory[Req, Rep]
 {
-  private[this] val queue    = Queue[Service[Req, Rep]]()
-  private[this] val waiters  = Queue[Promise[Service[Req, Rep]]]()
+  private[this] val queue       = Queue[Service[Req, Rep]]()
+  private[this] val waiters     = Queue[Promise[Service[Req, Rep]]]()
   private[this] var numServices = 0
+  private[this] var isOpen      = true
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
     extends PoolServiceWrapper[Req, Rep](underlying)
   {
     override def doRelease() = WatermarkPool.this.synchronized {
-      if (!isAvailable) {
+      if (!isOpen) {
+        underlying.release()
+        numServices -= 1
+      } else if (!isAvailable) {
         underlying.release()
         numServices -= 1
         // If we just disposed of an service, and this bumped us beneath
@@ -69,6 +73,9 @@ class WatermarkPool[Req, Rep](
   }
 
   def make(): Future[Service[Req, Rep]] = synchronized {
+    if (!isOpen)
+      return Future.exception(new ServiceClosedException)
+
     dequeue() match {
       case Some(service) =>
         Future.value(service)
@@ -82,13 +89,22 @@ class WatermarkPool[Req, Rep](
     }
   }
 
-  // TODO: what to do with queued services after release() has been
-  // called.
   def close() = synchronized {
-    // Drain the pool?
+    // Drain the pool.
     queue foreach { _.release() }
     queue.clear()
+
+    // Kill the existing waiters.
+    waiters foreach { _() = Throw(new ServiceClosedException) }
+    waiters.clear()
+
+    // Mark the pool closed, relinquishing completed requests &
+    // denying the issuance of further requests.
+    isOpen = false
+
+    // Close the underlying factory.
+    factory.close()
   }
 
-  // TODO: isAvailable
+  override def isAvailable = isOpen
 }

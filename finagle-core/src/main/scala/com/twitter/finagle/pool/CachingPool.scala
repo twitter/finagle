@@ -4,7 +4,7 @@ import collection.mutable.Queue
 
 import com.twitter.util.{Future, Time, Duration}
 
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException}
 import com.twitter.finagle.util.Timer
 
 /**
@@ -12,19 +12,20 @@ import com.twitter.finagle.util.Timer
  * the given timeout amount of time.
  */
 class CachingPool[Req, Rep](
-    underlying: ServiceFactory[Req, Rep],
+    factory: ServiceFactory[Req, Rep],
     timeout: Duration,
     timer: com.twitter.util.Timer = Timer.default)
   extends ServiceFactory[Req, Rep]
 {
+  private[this] val deathRow    = Queue[(Time, Service[Req, Rep])]()
+  private[this] var isOpen      = true
   private[this] var isScheduled = false
-  private[this] val deathRow = Queue[(Time, Service[Req, Rep])]()
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
     extends PoolServiceWrapper[Req, Rep](underlying)
   {
     def doRelease() = CachingPool.this.synchronized {
-      if (underlying.isAvailable) {
+      if (underlying.isAvailable && isOpen) {
         deathRow += ((Time.now, underlying))
         if (!isScheduled) {
           isScheduled = true
@@ -52,17 +53,26 @@ class CachingPool[Req, Rep](
   }
 
   def make(): Future[Service[Req, Rep]] = synchronized {
+    if (!isOpen)
+      return Future.exception(new ServiceClosedException)
+
     while (!deathRow.isEmpty) {
       val (_, service) = deathRow.dequeue()
       if (service.isAvailable)
         return Future.value(new WrappedService(service))
     }
 
-    underlying.make() map { new WrappedService(_) }
+    factory.make() map { new WrappedService(_) }
   }
 
-  // XXX
-  // TODO: test this.
-  // TODO: should we flush immediately here?
-  def close() = ()
+  def close() = synchronized {
+    deathRow foreach { case (_, service) => service.release() }
+    deathRow.clear()
+
+    isOpen = false
+
+    factory.close()
+  }
+
+  override def isAvailable = isOpen
 }

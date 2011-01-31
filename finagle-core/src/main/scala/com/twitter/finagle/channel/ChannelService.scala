@@ -10,14 +10,14 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try}
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled}
+import com.twitter.finagle.util.{Ok, Error, Cancelled, FutureLatch}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
  * channel. It is responsible for requests dispatched to a given
  * (connected) channel during its lifetime.
  */
-class ChannelService[Req, Rep](channel: Channel)
+class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
@@ -78,7 +78,10 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   }
 
-  override def release() { if (channel.isOpen) Channels.close(channel) }
+  override def release() = {
+    if (channel.isOpen) channel.close()
+    factory.releaseChannel(this)
+  }
   override def isAvailable = isHealthy && channel.isOpen
 }
 
@@ -90,11 +93,18 @@ class ChannelServiceFactory[Req, Rep](
     prepareChannel: ChannelService[Req, Rep] => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep]
 {
+  private[this] val channelLatch = new FutureLatch
+
+  protected[channel] def releaseChannel(channel: ChannelService[Req, Rep]) {
+    channelLatch.decr()
+  }
+
   def make() = {
     val promise = new Promise[Service[Req, Rep]]
     bootstrap.connect() {
       case Ok(channel)  =>
-        prepareChannel(new ChannelService[Req, Rep](channel)) respond { promise() = _ }
+        channelLatch.incr()
+        prepareChannel(new ChannelService[Req, Rep](channel, this)) respond { promise() = _ }
 
       case Error(cause) =>
         promise() = Throw(new WriteException(cause))
@@ -107,7 +117,8 @@ class ChannelServiceFactory[Req, Rep](
   }
 
   override def close() {
-    // XXX XXX XXX XXXX XXX
-    // XXX RELEASEEXTERNALRESOURCES
+    channelLatch await {
+      bootstrap.releaseExternalResources()
+    }
   }
 }

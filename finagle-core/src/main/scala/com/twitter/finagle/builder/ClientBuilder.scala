@@ -21,14 +21,35 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 
+class ReferenceCountedChannelFactory(underlying: ChannelFactory)
+  extends ChannelFactory
+{
+  private[this] var refcount = 0
+
+  def acquire() = synchronized {
+    refcount += 1
+  }
+
+  def newChannel(pipeline: ChannelPipeline) = underlying.newChannel(pipeline)
+
+  // TODO: after releasing external resources, we can still use the
+  // underlying factory?  (ie. it'll create new threads, etc.?)
+  def releaseExternalResources() = synchronized {
+    refcount -= 1
+    if (refcount == 0)
+      underlying.releaseExternalResources()
+  }
+}
+
 object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
   lazy val defaultChannelFactory =
-    new NioClientSocketChannelFactory(
-      Executors.newCachedThreadPool(),
-      Executors.newCachedThreadPool())
+    new ReferenceCountedChannelFactory(
+      new NioClientSocketChannelFactory(
+        Executors.newCachedThreadPool(),
+        Executors.newCachedThreadPool()))
 }
 
 /**
@@ -57,23 +78,23 @@ case class ClientBuilder[Req, Rep](
   _startTls: Boolean)
 {
   def this() = this(
-    None,                                        // cluster
-    None,                                        // protocol
-    10.milliseconds,                             // connectionTimeout
-    Duration.MaxValue,                           // requestTimeout
-    None,                                        // statsReceiver
-    (60, 10.seconds),                            // loadStatistics
-    Some("client"),                              // name
-    None,                                        // hostConnectionCoresize
-    None,                                        // hostConnectionLimit
-    None,                                        // hostConnectionIdleTime
-    None,                                        // sendBufferSize
-    None,                                        // recvBufferSize
-    None,                                        // retries
-    None,                                        // logger
-    Some(ClientBuilder.defaultChannelFactory),   // channelFactory
-    None,                                        // tls
-    false                                        // startTls
+    None,               // cluster
+    None,               // protocol
+    10.milliseconds,    // connectionTimeout
+    Duration.MaxValue,  // requestTimeout
+    None,               // statsReceiver
+    (60, 10.seconds),   // loadStatistics
+    Some("client"),     // name
+    None,               // hostConnectionCoresize
+    None,               // hostConnectionLimit
+    None,               // hostConnectionIdleTime
+    None,               // sendBufferSize
+    None,               // recvBufferSize
+    None,               // retries
+    None,               // logger
+    None,               // channelFactory
+    None,               // tls
+    false               // startTls
   )
 
   override def toString() = {
@@ -162,6 +183,12 @@ case class ClientBuilder[Req, Rep](
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
+  /**
+   * Use the given channel factory instead of the default. Note that
+   * when using a non-default ChannelFactory, finagle can't
+   * meaningfully reference count factory usage, and so the caller is
+   * responsible for calling ``releaseExternalResources()''.
+   */
   def channelFactory(cf: ChannelFactory) =
     copy(_channelFactory = Some(cf))
 
@@ -178,7 +205,14 @@ case class ClientBuilder[Req, Rep](
 
   // ** BUILDING
   private[this] def buildBootstrap(protocol: Protocol[Req, Rep], host: SocketAddress) = {
-    val bs = new ClientBootstrap(_channelFactory.get)
+    val cf = _channelFactory map { cf =>
+      val rcf = new ReferenceCountedChannelFactory(cf)
+      rcf.acquire()  // never releasable
+      rcf
+    } getOrElse ClientBuilder.defaultChannelFactory
+
+    cf.acquire()
+    val bs = new ClientBootstrap(cf)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = protocol.codec.clientPipelineFactory.getPipeline
@@ -233,16 +267,13 @@ case class ClientBuilder[Req, Rep](
       // The per-host stack is as follows:
       //
       //   ChannelService
-      //   Timeout
       //   Pool
+      //   Timeout
       //   Stats
       //
       // the pool & below are host-specific,
       var factory: ServiceFactory[Req, Rep] = null
 
-      // TODO: wrap a factory with preparechannel instead of building
-      // it in.  we may want more preparetion (eg. we can push
-      // timeouts down?)
       val bs = buildBootstrap(protocol, host)
       factory = new ChannelServiceFactory[Req, Rep](
         bs, _protocol.get.prepareChannel(_))
