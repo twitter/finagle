@@ -6,9 +6,10 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
+import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
-import com.twitter.util.{Promise, Return, Throw}
+import com.twitter.util.{Promise, Return, Throw, Future}
 
 import com.twitter.finagle._
 
@@ -118,6 +119,56 @@ object ChannelServiceSpec extends Specification with Mockito {
       val f1 = service("there")
       f1.isDefined must beTrue
       f1() must throwA[TooManyConcurrentRequestsException]
+    }
+
+    "notify the factory upon release" in {
+      val service = new ChannelService[String, String](channel, factory)
+      service.release()
+      there was one(factory).channelReleased(service)
+    }
+  }
+
+  "ChannelServiceFactory" should {
+    val bootstrap = mock[ClientBootstrap]
+    val pipeline = new DefaultChannelPipeline
+    val channel = mock[Channel]
+    channel.getPipeline returns pipeline
+    val channelFuture = Channels.future(channel)
+    bootstrap.connect() returns channelFuture
+
+    val factory = new ChannelServiceFactory[Any, Any](bootstrap, Future.value(_))
+
+    "close the underlying bootstrap on close() with no outstanding requests" in {
+      factory.close()
+      there was one(bootstrap).releaseExternalResources()
+    }
+
+    "close the underlying bootstrap only after all channels are released" in {
+      val f = factory.make()
+      f.isDefined must beFalse
+      channelFuture.setSuccess()
+      f.isDefined must beTrue
+
+      factory.close()
+      there was no(bootstrap).releaseExternalResources()
+
+      f().release()
+      there was one(bootstrap).releaseExternalResources()
+    }
+
+    "propagate bootstrap errors" in {
+      val f = factory.make()
+      f.isDefined must beFalse
+      there was one(bootstrap).connect()
+
+      channelFuture.setFailure(new Exception("oh crap"))
+
+      f.isDefined must beTrue
+      f() must throwA(new WriteException(new Exception("oh crap")))
+
+      // The factory should also be directly closable now.
+      factory.close()
+      there was one(bootstrap).releaseExternalResources()
     }
   }
 }
