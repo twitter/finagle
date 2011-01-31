@@ -1,7 +1,5 @@
 package com.twitter.finagle.service
 
-import scala.collection.JavaConversions._
-
 import org.specs.Specification
 
 import org.jboss.netty.channel.local._
@@ -11,11 +9,11 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Throw
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Http}
-import com.twitter.finagle.channel.ChannelClosedException
+import com.twitter.finagle.builder.{ClientBuilder, Http}
+import com.twitter.finagle.ChannelClosedException
 
 object ClientSpec extends Specification {
-  def withServer(handler: ChannelHandler)(spec: ClientBuilder => Unit) {
+  def withServer(handler: ChannelHandler)(spec: ClientBuilder[HttpRequest, HttpResponse] => Unit) {
     val cf = new DefaultLocalServerChannelFactory()
 
     val bs = new ServerBootstrap(cf)
@@ -54,9 +52,9 @@ object ClientSpec extends Specification {
 
     "report a closed connection when the server doesn't reply" in {
       withServer(closingHandler) { clientBuilder =>
-        val client = clientBuilder.buildService[HttpRequest, HttpResponse]
+        val client = clientBuilder.build()
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future within(1.second)
+        val resolved = future get(1.second)
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]
@@ -67,9 +65,9 @@ object ClientSpec extends Specification {
       withServer(closingHandler) { clientBuilder =>
         val client = clientBuilder
           .retries(10)
-          .buildService[HttpRequest, HttpResponse]
+          .build()
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future within(1.second)
+        val resolved = future get(1.second)
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]

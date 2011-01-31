@@ -5,10 +5,12 @@ import com.twitter.util.{Time, Duration, TimerTask}
 import org.jboss.netty.util.{HashedWheelTimer, Timeout}
 
 object Timer {
-  lazy val default = new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
+  implicit lazy val default =
+    new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
 }
 
-class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Timer {
+class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Timer 
+{
   def schedule(when: Time)(f: => Unit): TimerTask = {
     val timeout = underlying.newTimeout(new org.jboss.netty.util.TimerTask {
       def run(to: Timeout) {

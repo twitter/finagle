@@ -7,7 +7,7 @@ import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.builder._
-import com.twitter.finagle.service._
+import com.twitter.finagle._
 
 import com.twitter.util.Future
 
@@ -24,11 +24,10 @@ object HttpServer {
 
     val logger = java.util.logging.Logger.getLogger(getClass.getName)
     ServerBuilder()
-     .codec(Http)
-     .service(server)
-     .bindTo(new InetSocketAddress(10000))
-     .logger(logger)
-     .build
+      .codec(Http)
+      .bindTo(new InetSocketAddress(10000))
+      .logger(logger)
+      .build(server)
   }
 
   def quiesce() = ()

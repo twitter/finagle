@@ -2,7 +2,7 @@ package com.twitter.finagle.javaapi;
 
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.service.Service;
+import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
@@ -11,16 +11,14 @@ import com.twitter.util.*;
 public class HttpClientTest {
   public static void main(String args[]) {
     Service<HttpRequest, HttpResponse> client =
-      ClientBuilder
-        .get()
+      ClientBuilder.get()
         .hosts("localhost:10000")
         .codec(Codec4J.Http)
-        .buildService();
+        .build();
 
     HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
 
     Future<HttpResponse> response = client.apply(request);
-
     response.addEventListener(
       new FutureEventListener<HttpResponse>() {
         public void onSuccess(HttpResponse response) {

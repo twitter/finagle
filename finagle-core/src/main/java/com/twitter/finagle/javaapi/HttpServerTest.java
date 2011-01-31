@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.service.*;
+import com.twitter.finagle.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.Future;
 import com.twitter.util.*;
@@ -29,12 +29,10 @@ public class HttpServerTest {
         }
       };
 
-    ServerBuilder
-      .get()
+    ServerBuilder.get()
       .codec(Codec4J.Http)
-      .service(service)
       .bindTo(new InetSocketAddress("localhost", 10000))
-      .build();
+      .build(service);
   }
 
   public static void main(String args[]) {

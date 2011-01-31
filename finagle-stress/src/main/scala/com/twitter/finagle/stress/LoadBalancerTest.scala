@@ -6,28 +6,30 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.ostrich.{StatsCollection, StatsProvider}
+import com.twitter.ostrich.{StatsCollection, StatsProvider, Stats}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle.builder.{ClientBuilder, Http}
-import com.twitter.finagle.service.Service
-import com.twitter.finagle.stats.NullStatsRepository
+import com.twitter.finagle.Service
+import com.twitter.finagle.stats.{NullStatsRepository, OstrichStatsReceiver}
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.util.Conversions._
 
 object LoadBalancerTest {
   def main(args: Array[String]) {
+    // Make the type enforced by the *codec*
+
     runSuite(
       ClientBuilder()
-        .requestTimeout(40.milliseconds)
+        .requestTimeout(100.milliseconds)
         .retries(10)
     )
 
     // TODO: proper resource releasing, etc.
   }
 
-  def runSuite(clientBuilder: ClientBuilder) {
+  def runSuite(clientBuilder: ClientBuilder[_, _]) {
     println("testing " + clientBuilder)
     println("\n== baseline ==\n")
     new LoadBalancerTest(clientBuilder)({ case _ => }).run()
@@ -59,7 +61,7 @@ object LoadBalancerTest {
 }
 
 class LoadBalancerTest(
-  clientBuilder: ClientBuilder,
+  clientBuilder: ClientBuilder[_, _],
   serverLatency: Duration = 0.seconds,
   numRequests: Int = 100000,
   concurrency: Int = 20)(behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit])
@@ -122,11 +124,14 @@ class LoadBalancerTest(
 
     // Capture gauges to report them at the end.
     val gauges = new HashMap[Seq[(String, String)], Function0[Float]]
-    val statsReceiver = new NullStatsRepository {
+    val localStatsReceiver = new NullStatsRepository {
       override def mkGauge(description: Seq[(String, String)], f: => Float) {
         gauges += description -> (() => f)
       }
     }
+    // Also report to the main Ostrich stats object.
+    Stats.clearAll()
+    val statsReceiver = localStatsReceiver.reportTo(new OstrichStatsReceiver)
 
     def captureGauges() {
       Timer.default.schedule(500.milliseconds) {
@@ -147,14 +152,14 @@ class LoadBalancerTest(
           (name, v())
         }
         gaugeValues += ((now, Map() ++ values))
-      }
+       }
     }
 
     val client = clientBuilder
       .codec(Http)
       .hosts(servers map(_.addr))
       .reportTo(statsReceiver)
-      .buildService[HttpRequest, HttpResponse]
+      .build()
 
     val begin = Time.now
     captureGauges()
@@ -194,5 +199,8 @@ class LoadBalancerTest(
       println("> SERVER[%d] (%s)".format(which, server.addr))
       prettyPrintStats(server.stats)
     }
+
+    println("> OSTRICH counters")
+    prettyPrintStats(Stats)
   }
 }

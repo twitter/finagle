@@ -44,22 +44,6 @@ trait StatsRepository extends StatsReceiver {
   def gauge(description: (String, String)*): ReadableGauge
 
   /**
-   * Prepends a prefix description to all descriptions on this StatsRepository
-   */
-  def scope(prefix: (String, String)*) = {
-    val self = this
-    new StatsRepository {
-      def counter(description: (String, String)*) = self.counter(prefix ++ description: _*)
-
-      def gauge(description: (String, String)*) = self.gauge(prefix ++ description: _*)
-
-      def mkGauge(description: Seq[(String, String)], f: => Float) {
-        self.mkGauge(prefix ++ description, f)
-      }
-    }
-  }
-
-  /**
    * Multiplex measurements to a StatsReceiver
    */
   def reportTo(receiver: StatsReceiver) = {

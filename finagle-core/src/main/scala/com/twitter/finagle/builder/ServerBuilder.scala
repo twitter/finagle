@@ -15,15 +15,20 @@ import org.jboss.netty.handler.ssl.SslHandler
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle._
+import com.twitter.finagle.util._
+import com.twitter.finagle.util.Conversions._
+import stats.{StatsReceiver}
+import service.{StatsFilter, ServiceToChannelHandler}
+import com.twitter.util.{Future, Promise, Return}
 
 import channel.{Job, QueueingChannelHandler}
-import com.twitter.finagle.util._
-import service.{StatsFilter, ServiceToChannelHandler, Service}
-import stats.{StatsReceiver}
 
+trait Server {
+  def close(): Future[Void]
+}
 
 object ServerBuilder {
-  def apply() = new ServerBuilder()
+  def apply() = new ServerBuilder[Any, Any]()
   def get() = apply()
 
   val defaultChannelFactory =
@@ -35,13 +40,12 @@ object ServerBuilder {
 // TODO: common superclass between client & server builders for common
 // concerns.
 
-case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
-  _codec: Option[Codec],
+case class ServerBuilder[Req, Rep](
+  _codec: Option[Codec[Req, Rep]],
   _statsReceiver: Option[StatsReceiver],
   _name: Option[String],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
-  _service: Option[Service[Req, Res]],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
   _tls: Option[SSLContext],
@@ -58,7 +62,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
     None,              // name
     None,              // sendBufferSize
     None,              // recvBufferSize
-    None,              // service
     None,              // bindTo
     None,              // logger
     None,              // tls
@@ -68,7 +71,7 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
     None               // maxQueueDepth
   )
 
-  def codec(codec: Codec) =
+  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
     copy(_codec = Some(codec))
 
   def reportTo(receiver: StatsReceiver) =
@@ -78,9 +81,6 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
 
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
-
-  def service[Req <: AnyRef, Rep <: AnyRef](service: Service[Req, Rep]) =
-    copy(_service = Some(service))
 
   def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
@@ -102,7 +102,9 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
   def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
 
-  def build(): Channel = {
+  def build(service: Service[Req, Rep]): Server = build(() => service)
+
+  def build(serviceFactory: () => Service[Req, Rep]): Server = {
     val codec = _codec.getOrElse {
       throw new IncompleteSpecification("No codec was specified")
     }
@@ -139,18 +141,22 @@ case class ServerBuilder[Req <: AnyRef, Res <: AnyRef](
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        _service.foreach { service =>
-          val serviceWithStats =
-            if (_statsReceiver.isDefined)
-              new StatsFilter(_statsReceiver.get).andThen(service)
-            else service
-          pipeline.addLast("service", new ServiceToChannelHandler(serviceWithStats))
-        }
+        var service = serviceFactory()
+        if (_statsReceiver.isDefined)
+          service = new StatsFilter(_statsReceiver.get).andThen(service)
+        pipeline.addLast("service", new ServiceToChannelHandler(service))
 
         pipeline
       }
     })
 
-    bs.bind(_bindTo.get)
+    val channel = bs.bind(_bindTo.get)
+    new Server {
+      def close() = {
+        val done = new Promise[Void]
+        channel.close() { case _ => done() = Return(null) }
+        done
+      }
+    }
   }
 }

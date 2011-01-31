@@ -3,9 +3,10 @@ package com.twitter.finagle.builder
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.http._
 
+import com.twitter.finagle.Codec
 import com.twitter.finagle.http._
 
-class Http(compressionLevel: Int = 0) extends Codec {
+class Http(compressionLevel: Int = 0) extends Codec[HttpRequest, HttpResponse] {
   val clientPipelineFactory: ChannelPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {

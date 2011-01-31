@@ -52,7 +52,7 @@ object AsyncServerEndToEndSpec extends Specification {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("decode", new ThriftClientDecoder(true))
+          pipeline.addLast("decode", new ThriftClientDecoder)
           pipeline.addLast("encode", new ThriftClientEncoder)
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -75,7 +75,7 @@ object AsyncServerEndToEndSpec extends Specification {
         Channels.write(ch, thriftCall)
       }
 
-      val result = callResults.within(1.second)
+      val result = callResults.get(1.second)
       result.isReturn must beTrue
 
       result().response.success must be_==("yehyeh")

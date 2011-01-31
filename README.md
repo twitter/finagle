@@ -28,7 +28,7 @@ Finagle includes [ClientBuilder](http://twitter.github.com/finagle/com/twitter/f
         .retries(2) // per-request retries (for timeouts, connection failures)
         .exportLoadsToOstrich() // export host-level load data to ostrich
         .logger(Logger.getLogger("http"))
-        .buildService[HttpRequest, HttpResponse]()
+        .build()
 
 This creates a load balanced HTTP client that balances requests among 3 local endpoints. This client balances load using [LoadBalancedBroker](http://twitter.github.com/finagle/com/twitter/finagle/channel/LoadBalancedBroker.html). If retries are specified (using retries(Int)), those are achieved through the [RetryingBroker](http://twitter.github.com/finagle/com/twitter/finagle/channel/RetryingBroker.html) class, and if initialBackoff and backoffMultiplifer are specified, by [ExponentialBackoffRetryingBroker](http://twitter.github.com/finagle/com/twitter/finagle/channel/ExponentialBackoffRetryingBroker.html).
 

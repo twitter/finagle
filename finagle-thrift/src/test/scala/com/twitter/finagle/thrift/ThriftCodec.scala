@@ -11,8 +11,7 @@ import org.apache.thrift.protocol.{
   TProtocol, TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.TTransportException
 
-import com.twitter.finagle.SunkChannel
-import com.twitter.finagle.channel.TooManyConcurrentRequestsException
+import com.twitter.finagle.{SunkChannel, TooManyConcurrentRequestsException}
 import com.twitter.silly.Silly
 
 object ThriftCodecSpec extends Specification {
@@ -142,7 +141,7 @@ object ThriftCodecSpec extends Specification {
     "decode replys" in {
       // receive reply and decode
       val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
-      val channel = makeChannel(new ThriftClientDecoder(true))
+      val channel = makeChannel(new ThriftClientDecoder())
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)
@@ -159,7 +158,7 @@ object ThriftCodecSpec extends Specification {
 
       Range(0, buffer.readableBytes - 1).foreach { numBytes =>
         // receive partial call
-        val channel = makeChannel(new ThriftClientDecoder(true))
+        val channel = makeChannel(new ThriftClientDecoder())
         val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
         Channels.fireMessageReceived(channel, truncatedBuffer)
 
@@ -186,7 +185,7 @@ object ThriftCodecSpec extends Specification {
       // receive exception and decode
       val buffer = thriftToBuffer("bleep", TMessageType.EXCEPTION, 23,
         new TApplicationException(TApplicationException.UNKNOWN_METHOD, "message"))
-      val channel = makeChannel(new ThriftClientDecoder(true))
+      val channel = makeChannel(new ThriftClientDecoder())
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)

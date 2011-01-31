@@ -10,18 +10,20 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
 
 import com.twitter.util.RandomSocket
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder._
 import com.twitter.finagle.service._
+import com.twitter.finagle.util.Conversions._
 
 import com.twitter.silly.Silly
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Future, Promise, Try}
 import com.twitter.util.TimeConversions._
 
 object ServiceEndToEndSpec extends Specification {
   type AnyCall = ThriftCall[_ <: TBase[_, _], _ <: TBase[_, _]]
 
-  class SillyService extends Service[AnyCall, ThriftReply[_]] {
-    def apply(call: AnyCall) = Future {
+  class SillyService extends Service[ThriftCall[_,_], ThriftReply[_]] {
+    def apply(call: ThriftCall[_,_]) = Future {
       call match {
         case bleep: ThriftCall[Silly.bleep_args, Silly.bleep_result]
         if bleep.method.equals("bleep") =>
@@ -45,16 +47,15 @@ object ServiceEndToEndSpec extends Specification {
 
     val server = ServerBuilder()
       .codec(new Thrift)
-      .service(sillyService)
       .bindTo(addr)
-      .build()
+      .build(sillyService)
 
     "with wrapped replies" in {
       "respond to calls with ThriftReply[Call.response_type]" in {
         val client = ClientBuilder()
-          .codec(new ThriftWithWrappedReplies)
+          .codec(new Thrift)
           .hosts(Seq(addr))
-          .buildService[ThriftCall[_ <:TBase[_, _],_ <: TBase[_, _]], ThriftReply[_]]
+          .build
 
         val promise = new Promise[ThriftReply[_]]
 
@@ -63,37 +64,13 @@ object ServiceEndToEndSpec extends Specification {
                                   classOf[Silly.bleep_result])
         client(call) respond { r => promise() = r }
 
-        val result = promise.within(1.second)
+        val result = promise.get(1.second)
 
         result.isReturn must beTrue
         val reply = result().asInstanceOf[ThriftReply[Silly.bleep_result]]
         reply().response.success mustEqual "olleh"
 
-        server.close().awaitUninterruptibly()
-      }
-    }
-
-    "without wrapped replies" in {
-      "respond to calls with ThriftReply[Call.response_type]" in {
-        val client = ClientBuilder()
-          .codec(new Thrift)
-          .hosts(Seq(addr))
-          .buildService[ThriftCall[_ <:TBase[_, _],_ <: TBase[_, _]], Silly.bleep_result]
-
-        val promise = new Promise[Silly.bleep_result]
-
-        val call = new ThriftCall("bleep",
-                                  new Silly.bleep_args("hello"),
-                                  classOf[Silly.bleep_result])
-        client(call) respond { r => promise() = r }
-
-        val result = promise.within(1.second)
-
-        result.isReturn must beTrue
-        val reply = result().asInstanceOf[Silly.bleep_result]
-        reply().success mustEqual "olleh"
-
-        server.close().awaitUninterruptibly()
+        server.close()()
       }
     }
   }
