@@ -18,6 +18,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     val channel = mock[Channel]
     val sink = mock[ChannelSink]
     val closeFuture = Channels.future(channel)
+    val factory = mock[ChannelServiceFactory[String, String]]
     channel.getPipeline returns pipeline
     channel.isOpen returns true
     channel.getCloseFuture returns closeFuture
@@ -25,12 +26,12 @@ object ChannelServiceSpec extends Specification with Mockito {
 
     "installs channel handler" in {
       pipeline.toMap.keySet must haveSize(0)
-      new ChannelService[Any, Any](channel)
+      new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
       pipeline.toMap.keySet must haveSize(1)
     }
 
     "write requests to the underlying channel" in {
-      val service = new ChannelService[String, String](channel)
+      val service = new ChannelService[String, String](channel, factory)
       val future = service("hello")
       val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
       there was one(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
@@ -40,7 +41,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "receive replies" in {
-      val service = new ChannelService[String, String](channel)
+      val service = new ChannelService[String, String](channel, factory)
       val future = service("hello")
       there was one(sink).eventSunk(Matchers.eq(pipeline), Matchers.any[ChannelEvent])
 
@@ -97,7 +98,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "without a request" in {
-      val service = new ChannelService[String, String](channel)
+      val service = new ChannelService[String, String](channel, factory)
       service.isAvailable must beTrue
 
       "any response is considered spurious" in {
@@ -111,7 +112,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "freak out on concurrent requests" in {
-      val service = new ChannelService[Any, Any](channel)
+      val service = new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
       val f0 = service("hey")
       f0.isDefined must beFalse
       val f1 = service("there")
