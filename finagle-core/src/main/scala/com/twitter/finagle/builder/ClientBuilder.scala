@@ -254,7 +254,7 @@ case class ClientBuilder[Req, Rep](
     new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark)
   }
 
-  def build(): Service[Req, Rep] = {
+  def buildFactory(): ServiceFactory[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
     if (!_protocol.isDefined)
@@ -294,8 +294,11 @@ case class ClientBuilder[Req, Rep](
       factory
     }
 
-    val factory = new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
-    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
+    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
+  }
+
+  def build(): Service[Req, Rep] = {
+    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
 
     // We keep the retrying filter at the very bottom: this allows us
     // to retry across multiple hosts, etc.
