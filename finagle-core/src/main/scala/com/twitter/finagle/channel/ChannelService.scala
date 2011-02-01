@@ -90,7 +90,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
  */
 class ChannelServiceFactory[Req, Rep](
     bootstrap: ClientBootstrap,
-    prepareChannel: ChannelService[Req, Rep] => Future[Service[Req, Rep]])
+    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep]
 {
   private[this] val channelLatch = new FutureLatch

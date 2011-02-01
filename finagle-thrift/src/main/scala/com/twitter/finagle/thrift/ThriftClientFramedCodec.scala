@@ -12,7 +12,7 @@ import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
 
 import com.twitter.util.Future
 
-import com.twitter.finagle.{Codec, Protocol, CancelledRequestException, SimpleFilter, Service}
+import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.ChannelService
@@ -59,42 +59,41 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]] {
     }
 
   val serverPipelineFactory = clientPipelineFactory
-}
 
-class ThriftTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
-{
-  def apply(request: ThriftClientRequest, service: Service[ThriftClientRequest, Array[Byte]]) = {
-    val tracedRequest = ThriftClientRequest(Tracing.encode(request.message), request.oneway)
-    service(tracedRequest)
-  }
-}
-
-class ThriftClientFramedProtocol extends Protocol[ThriftClientRequest, Array[Byte]] {
-  def codec = ThriftClientFramedCodec()
-
-  override def prepareChannel(underlying: ChannelService[ThriftClientRequest, Array[Byte]]) = {
+  override def prepareClientChannel(underlying: Service[ThriftClientRequest, Array[Byte]]) = {
+    // Attempt to upgrade the protocol the first time around by
+    // sending a magic method invocation.
     val memoryBuffer = new TMemoryBuffer(512)
     val protocolFactory = new TBinaryProtocol.Factory()
     val oprot = protocolFactory.getProtocol(memoryBuffer)
-    oprot.writeMessageBegin(new TMessage("__can__twitter__trace__", TMessageType.CALL, 0))
+    oprot.writeMessageBegin(
+      new TMessage(Tracing.CanTraceMethodName, TMessageType.CALL, 0))
     val args = new CanTwitterTrace.can_twitter_trace_args()
     args.write(oprot)
     oprot.writeMessageEnd()
     oprot.getTransport().flush()
  
-    val upgradeRequest = ThriftClientRequest(
-      java.util.Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()),
-      false)
- 
-    underlying(upgradeRequest) map { bytes =>
-      val memoryTransport = new TMemoryInputTransport(bytes)
+    val message = java.util.Arrays.copyOfRange(
+      memoryBuffer.getArray(), 0, memoryBuffer.length())
+    
+    underlying(ThriftClientRequest(message, false)) map { reply =>
+      val memoryTransport = new TMemoryInputTransport(reply)
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val msg = iprot.readMessageBegin()
-      // iprot.readMessageEnd()
       if (msg.`type` == TMessageType.EXCEPTION)
         underlying
       else
-        (new ThriftTracingFilter) andThen underlying
+        (new ThriftClientTracingFilter) andThen underlying
     }
+  }
+}
+
+class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
+{
+  def apply(request: ThriftClientRequest,
+            service: Service[ThriftClientRequest, Array[Byte]]) = {
+    val message = Tracing.encodeHeader(Transaction.get(), request.message)
+    val tracedRequest = ThriftClientRequest(message, request.oneway)
+    service(tracedRequest)
   }
 }

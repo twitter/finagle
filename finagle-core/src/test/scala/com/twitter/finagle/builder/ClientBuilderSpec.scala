@@ -39,12 +39,12 @@ object ClientBuilderSpec extends Specification with Mockito {
     channelFactory.newChannel(channelPipeline) returns channel
 
     "invoke prepareChannel on connection establishment" in {
-      val prepareChannelPromise = new Promise[ChannelService[Int, Float]]
-      var theUnderlyingService: ChannelService[Int, Float] = null
+      val prepareChannelPromise = new Promise[Service[Int, Float]]
+      var theUnderlyingService: Service[Int, Float] = null
 
       val protocol = new Protocol[Int, Float] {
         def codec = _codec
-        override def prepareChannel(underlying: ChannelService[Int, Float]) = {
+        override def prepareChannel(underlying: Service[Int, Float]) = {
           theUnderlyingService = underlying
           prepareChannelPromise
         }

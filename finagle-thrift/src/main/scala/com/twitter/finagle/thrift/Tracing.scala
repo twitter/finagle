@@ -6,34 +6,25 @@ import java.io.{
   ByteArrayOutputStream, ByteArrayInputStream,
   DataOutputStream, DataInputStream}
 
-import com.twitter.util.Local
-
 object Tracing {
-  private[this] val counter = new AtomicInteger(0)
-  val txid = new Local[Int]
+  val CanTraceMethodName = "__can__twitter__trace__v1__"
 
-  def encode(bytes: Array[Byte]) = {
+  def encodeHeader(txid: Long, body: Array[Byte]) = {
     val bos = new ByteArrayOutputStream(8)
     val dos = new DataOutputStream(bos)
 
-    if (!txid().isDefined)
-      txid() = counter.incrementAndGet()
-
-    dos.writeInt(1)
-    dos.writeInt(txid().get)
+    dos.writeLong(txid)
     dos.flush()
 
-    bos.toByteArray ++ bytes
+    bos.toByteArray ++ body
   }
 
-  def decode(bytes: Array[Byte]) = {
-    val bis = new ByteArrayInputStream(bytes)
-    val dis = new DataInputStream(bis)
+  def decodeHeader(bytes: Array[Byte]) = {
+    val bis  = new ByteArrayInputStream(bytes)
+    val dis  = new DataInputStream(bis)
+    val txid = dis.readLong()
 
-    require(dis.readInt() == 1)
-    txid() = dis.readInt()
-
-    bytes drop 8
+    (bytes drop 8, txid)
   }
 }
 

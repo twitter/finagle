@@ -11,7 +11,8 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 
-import com.twitter.finagle.Codec
+import com.twitter.util.Future
+import com.twitter.finagle._
 
 class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
@@ -26,26 +27,31 @@ class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   }
 }
 
-class ThriftServerTracer extends SimpleChannelUpstreamHandler {
-  // Only if we've received an upgrade message, otherwise remove
-  // ourselves from the pipeline.
+object ThriftServerFramedCodec {
+  def apply() = new ThriftServerFramedCodec
+}
 
+class ThriftServerTracingFilter
+  extends SimpleFilter[Array[Byte], Array[Byte]]
+{
+  // Concurrency is not an issue here since we have an instance per
+  // channel, and receive only one request at a time (thrift does no
+  // pipelining). We don't protect against this in the underlying
+  // codec, however.
   private[this] var isUpgraded = false
 
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    require(e.getMessage.isInstanceOf[Array[Byte]])
-    val bytes = e.getMessage.asInstanceOf[Array[Byte]]
+  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     if (isUpgraded) {
-      // Future?
-      Channels.fireMessageReceived(ctx, Tracing.decode(bytes))
-
+      val (body, txid) = Tracing.decodeHeader(request)
+      Transaction.set(txid)
+      service(body)
     } else {
+      // Only try once?
       val protocolFactory = new TBinaryProtocol.Factory()
-      val memoryTransport = new TMemoryInputTransport(bytes)
+      val memoryTransport = new TMemoryInputTransport(request)
       val iprot = protocolFactory.getProtocol(memoryTransport)
-
       val msg = iprot.readMessageBegin()
-      if (msg.`type` == TMessageType.CALL && msg.name == "__can__twitter__trace__") {
+      if (msg.`type` == TMessageType.CALL && msg.name == Tracing.CanTraceMethodName) {
         // upgrade & reply.
         isUpgraded = true
 
@@ -53,21 +59,19 @@ class ThriftServerTracer extends SimpleChannelUpstreamHandler {
         val protocolFactory = new TBinaryProtocol.Factory()
         val oprot = protocolFactory.getProtocol(memoryBuffer)
         oprot.writeMessageBegin(
-          new TMessage("__can__twitter__trace__", TMessageType.REPLY, msg.seqid))
+          new TMessage(Tracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
         oprot.writeMessageEnd()
 
-        val reply = java.util.Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length())
-        Channels.write(ctx, Channels.future(ctx.getChannel), reply)
+        Future.value(
+          java.util.Arrays.copyOfRange(
+            memoryBuffer.getArray(), 0, memoryBuffer.length()))
       } else {
-        super.messageReceived(ctx, e)
+        service(request)
       }
     }
   }
 }
 
-object ThriftServerFramedCodec {
-  def apply() = new ThriftServerFramedCodec
-}
 
 class ThriftServerFramedCodec extends Codec[Array[Byte], Array[Byte]] {
   val clientPipelineFactory =
@@ -77,10 +81,12 @@ class ThriftServerFramedCodec extends Codec[Array[Byte], Array[Byte]] {
         pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
         pipeline.addLast("byteEncoder", new ThriftServerChannelBufferEncoder)
         pipeline.addLast("byteDecoder", new ThriftChannelBufferDecoder)
-        pipeline.addLast("tracer", new ThriftServerTracer)
         pipeline
       }
     }
 
   val serverPipelineFactory = clientPipelineFactory
+
+  override def wrapServerChannel(service: Service[Array[Byte], Array[Byte]]) =
+    (new ThriftServerTracingFilter) andThen service
 }

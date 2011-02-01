@@ -139,7 +139,7 @@ case class ServerBuilder[Req, Rep](
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        var service = serviceFactory()
+        var service = codec.wrapServerChannel(serviceFactory())
         if (_statsReceiver.isDefined)
           service = new StatsFilter(_statsReceiver.get).andThen(service)
         pipeline.addLast("service", new ServiceToChannelHandler(service))

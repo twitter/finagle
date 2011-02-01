@@ -1,7 +1,7 @@
 package com.twitter.finagle.kestrel
 
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.util._
+import com.twitter.util.{Future, Duration, Time, Return, Throw}
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.kestrel.protocol._

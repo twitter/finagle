@@ -14,6 +14,7 @@ import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.test.{B, SomeStruct, AnException, F}
+import com.twitter.finagle.Transaction
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.silly.Silly
@@ -25,10 +26,9 @@ object EndToEndSpec extends Specification {
     val processor =  new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)
       def add_one(a: Int, b: Int) = Future.void
-      def multiply(a: Int, b: Int) = Future { println("IN MULTIPLY"); a * b }
+      def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
-        println("complex_return", Tracing.txid())
-        new SomeStruct(123, someString)
+        new SomeStruct(123, Transaction.get().toString)
       }
       def someway() = Future.void
     }
@@ -41,7 +41,7 @@ object EndToEndSpec extends Specification {
 
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))
-      .protocol(new ThriftClientFramedProtocol)
+      .codec(ThriftClientFramedCodec())
       .build()
 
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
@@ -50,8 +50,7 @@ object EndToEndSpec extends Specification {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
-      Tracing.txid() = 123
-      client.complex_return("a string")().arg_two must be_==("a string")
+      client.complex_return("a string")().arg_two must be_==(Transaction.get().toString)
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block!
