@@ -29,21 +29,42 @@ object EndToEndSpec extends Specification {
         .build()
 
       val channel = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))(1.second)
-      topic.send(ChannelBuffers.wrappedBuffer("1".getBytes))
-      topic.send(ChannelBuffers.wrappedBuffer("2".getBytes))
-      topic.send(ChannelBuffers.wrappedBuffer("3".getBytes))
-      topic.close()
 
-      val latch = new CountDownLatch(1)
-      var result = ""
-      channel.receive {
-        case Value(channelBuffer) =>
+      "writes from the server arrive on the client's channel" in {
+        var result = ""
+        channel.foreach { channelBuffer =>
           result += channelBuffer.toString(Charset.defaultCharset)
-        case End =>
-          latch.countDown()
+        }
+
+        topic.send(ChannelBuffers.wrappedBuffer("1".getBytes))
+        topic.send(ChannelBuffers.wrappedBuffer("2".getBytes))
+        topic.send(ChannelBuffers.wrappedBuffer("3".getBytes))
+
+        topic.close()
+        channel.join()
+
+        result mustEqual "123"
       }
-      latch.within(1.second)
-      result mustEqual "123"
+
+      "writes from the server are queued before the client receives" in {
+        topic.send(ChannelBuffers.wrappedBuffer("1".getBytes))
+        topic.send(ChannelBuffers.wrappedBuffer("2".getBytes))
+        topic.send(ChannelBuffers.wrappedBuffer("3".getBytes))
+
+        var result = ""
+        channel.foreach { channelBuffer =>
+          result += channelBuffer.toString(Charset.defaultCharset)
+        }
+
+        topic.close()
+        channel.join()
+
+        result mustEqual "123"
+      }
+
+      "backpressure" in {
+
+      }
     }
   }
 }
