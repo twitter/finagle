@@ -144,6 +144,16 @@ object Ssl {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val defaultProtocol = "TLS"
 
+  def isNativeProviderAvailable(): Boolean =
+    try {
+      val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider"
+      Class.forName(name)
+      true
+    } catch {
+      case c: ClassNotFoundException =>
+        false
+    }
+
   object DefaultJSSEConfig {
     type StringPredicate = (String) => (Boolean)
 
@@ -164,7 +174,7 @@ object Ssl {
     }
   }
 
-  private[this] object NativeJSSEContextFactory extends ContextFactory {
+  object NativeJSSEContextFactory extends ContextFactory {
     def name() = "Native (Apache Harmony OpenSSL) Provider"
 
     def context(certificatePath: String, keyPath: String) = {
@@ -186,7 +196,7 @@ object Ssl {
     }
   }
 
-  private[this] object DefaultJSSEContextFactory extends ContextFactory {
+  object DefaultJSSEContextFactory extends ContextFactory {
     def name() = "JSSE Default Provider"
 
     def context(certificatePath: String, keyPath: String) = {
@@ -198,12 +208,12 @@ object Ssl {
     }
   }
 
-  private[this] trait ContextFactory {
+  trait ContextFactory {
     def name(): String
     def context(certificatePath: String, keyPath: String): SSLContext
   }
 
-  private[this] val contextFactories: Seq[ContextFactory] =
+  val contextFactories: Seq[ContextFactory] =
     Seq(NativeJSSEContextFactory, DefaultJSSEContextFactory)
 
   class NoSuitableSslProvider(message: String) extends Exception(message: String)
@@ -220,9 +230,7 @@ object Ssl {
     for (factory <- contextFactories)
     if (context == null) {
       try {
-        log.entering(getClass.getName, "server", factory)
         context = factory.context(certificatePath, keyPath)
-        log.exiting(getClass.getName, "server", context)
       } catch {
         case e: Throwable =>
           log.log(Level.WARNING, "Provider '%s' not suitable".format(factory.name()))
@@ -230,14 +238,12 @@ object Ssl {
       }
     }
 
-    if (context != null) {
-      log.info("SSL context initialized: %s".format(context))
+    if (context != null)
       return context
-    } else {
+    else
       throw new NoSuitableSslProvider(
         "No SSL provider was suitable. Tried [%s].".format(
           contextFactories.mkString(", ")))
-    }
   }
 
   /**
