@@ -64,7 +64,6 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]] {
 class ThriftTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
   def apply(request: ThriftClientRequest, service: Service[ThriftClientRequest, Array[Byte]]) = {
-    println("filtering request.")
     val tracedRequest = ThriftClientRequest(Tracing.encode(request.message), request.oneway)
     service(tracedRequest)
   }
@@ -72,6 +71,7 @@ class ThriftTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 
 class ThriftClientFramedProtocol extends Protocol[ThriftClientRequest, Array[Byte]] {
   def codec = ThriftClientFramedCodec()
+
   override def prepareChannel(underlying: ChannelService[ThriftClientRequest, Array[Byte]]) = {
     val memoryBuffer = new TMemoryBuffer(512)
     val protocolFactory = new TBinaryProtocol.Factory()
@@ -93,10 +93,8 @@ class ThriftClientFramedProtocol extends Protocol[ThriftClientRequest, Array[Byt
       // iprot.readMessageEnd()
       if (msg.`type` == TMessageType.EXCEPTION)
         underlying
-      else {
-        println("upgrade SUCCESS.  filtering.")
+      else
         (new ThriftTracingFilter) andThen underlying
-      }
     }
   }
 }

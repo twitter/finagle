@@ -36,8 +36,6 @@ class ThriftServerTracer extends SimpleChannelUpstreamHandler {
     require(e.getMessage.isInstanceOf[Array[Byte]])
     val bytes = e.getMessage.asInstanceOf[Array[Byte]]
     if (isUpgraded) {
-      println("server is upgraded.. setting txids, etc.")
-      
       // Future?
       Channels.fireMessageReceived(ctx, Tracing.decode(bytes))
 
@@ -48,8 +46,6 @@ class ThriftServerTracer extends SimpleChannelUpstreamHandler {
 
       val msg = iprot.readMessageBegin()
       if (msg.`type` == TMessageType.CALL && msg.name == "__can__twitter__trace__") {
-        println("UPGRADING")
-
         // upgrade & reply.
         isUpgraded = true
 
