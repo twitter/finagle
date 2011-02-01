@@ -4,6 +4,7 @@ import java.net.SocketAddress
 
 import org.specs.Specification
 import org.specs.mock.Mockito
+import org.mockito.Matchers
 
 import org.jboss.netty.channel.{
   Channel, ChannelFactory, ChannelPipeline,
@@ -18,6 +19,8 @@ import com.twitter.finagle.channel.ChannelService
 object ClientBuilderSpec extends Specification with Mockito {
   "ClientBuilder" should {
     val _codec = mock[Codec[Int, Float]]
+    (_codec.prepareClientChannel(Matchers.any[Service[Int, Float]])
+     answers { s => Future.value(s.asInstanceOf[Service[Int, Float]]) })
 
     val clientAddress = new SocketAddress {}
 

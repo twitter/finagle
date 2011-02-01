@@ -13,6 +13,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 
 import com.twitter.util.Future
 import com.twitter.finagle._
+import com.twitter.finagle.util.TracingHeader
 
 class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
@@ -42,7 +43,7 @@ class ThriftServerTracingFilter
 
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     if (isUpgraded) {
-      val (body, txid) = Tracing.decodeHeader(request)
+      val (body, txid) = TracingHeader.decode(request)
       Transaction.set(txid)
       service(body)
     } else {

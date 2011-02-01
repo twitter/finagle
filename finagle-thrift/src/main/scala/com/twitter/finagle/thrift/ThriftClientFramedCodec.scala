@@ -13,7 +13,7 @@ import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
 import com.twitter.util.Future
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.{Ok, Error, Cancelled}
+import com.twitter.finagle.util.{Ok, Error, Cancelled, TracingHeader}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.ChannelService
 
@@ -92,7 +92,7 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
 {
   def apply(request: ThriftClientRequest,
             service: Service[ThriftClientRequest, Array[Byte]]) = {
-    val message = Tracing.encodeHeader(Transaction.get(), request.message)
+    val message = TracingHeader.encode(Transaction.get(), request.message)
     val tracedRequest = ThriftClientRequest(message, request.oneway)
     service(tracedRequest)
   }
