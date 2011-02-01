@@ -2,12 +2,15 @@ package com.twitter.finagle.builder
 
 import java.util.logging.Logger
 import java.io._
-import java.security.{KeyFactory, KeyStore, Security, Provider}
+import java.security.{KeyFactory, KeyStore, Security, Provider, PrivateKey}
 import java.security.cert.X509Certificate
 import java.security.cert.{Certificate, CertificateFactory}
 import java.security.spec._
 import javax.net.ssl._
 import java.util.Random
+
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConversions._
 
 /**
  * Store the files necessary to configure an SSL
@@ -36,6 +39,7 @@ object TemporaryDirectory {
       "chmod",
       "0700",
       dir.getAbsolutePath()))
+    process.waitFor()
 
     if (process.exitValue() != 0) {
       if (unixy) {
@@ -66,6 +70,7 @@ object PEMEncodedKeyManager {
 
   private[this] def run(strings: Array[String]) {
     val process = Runtime.getRuntime.exec(strings)
+    process.waitFor()
     if (process.exitValue() != 0)
       throw new ExternalExecutableFailed("Failed to run command (%s)".format(strings.mkString(" ")))
   }
@@ -75,7 +80,7 @@ object PEMEncodedKeyManager {
     val b = new Array[Byte](length)
 
     for (i <- 0 until length) {
-      b(i) = (48 + rng.nextInt(121 - 48)).toByte
+      b(i) = (65 + rng.nextInt(90 - 65)).toByte
     }
 
     b
@@ -98,53 +103,57 @@ object PEMEncodedKeyManager {
     buf.toByteArray
   }
 
-  private[this] def keyManagersForDer(derData: EncodedCertAndKey): Array[KeyManager] = {
-    val alias = new String(secret(8))
-    val password = secret(8).map(_.toChar)
-    val certFactory = CertificateFactory.getInstance("X.509")
-    val certs =
-      certFactory.generateCertificates(
-        new ByteArrayInputStream(derData.cert)).asInstanceOf[Iterable[Certificate]]
-    println("Certificates (alias='%s':".format(alias))
-    for (cert <- certs) {
-      println("  - %s".format(cert))
-    }
-    println("(end certificates)")
-
-    val keyFactory = KeyFactory.getInstance("RSA")
-    val keySpec = new PKCS8EncodedKeySpec(derData.key)
-    val key = keyFactory.generatePrivate(keySpec)
-
-    val store = KeyStore.getInstance("JKS")
-    store.setKeyEntry(alias, key, password, certs.toArray)
-
-    val factory = KeyManagerFactory.getInstance("SunX509")
-    factory.init(store, password)
-    factory.getKeyManagers()
-  }
-
   private[this] def readCertAndKey(config: SslServerConfiguration): EncodedCertAndKey =
     new EncodedCertAndKey(
       readFileToBytes(config.certificatePath),
       readFileToBytes(config.keyPath))
 
-  private[this] def convertFromPemToDer(d: EncodedCertAndKey): EncodedCertAndKey = {
+  private[this] def p12Keystore(d: EncodedCertAndKey): Array[KeyManager] = {
     val path = privatePath()
+    val password = secret(24)
+    val passwordStr = new String(password)
     val fn = new String(secret(12))
-    val pemCertPath = path + File.separator + "%s.cert.pem".format(fn)
-    val pemKeyPath  = path + File.separator + "%s.key.pem".format(fn)
-    val derCertPath = path + File.separator + "%s.cert.der".format(fn)
-    val derKeyPath  = path + File.separator + "%s.key.der".format(fn)
+    val pemPath = path + File.separator + "%s.pem".format(fn)
+    val p12Path = path + File.separator + "%s.p12".format(fn)
+    val jksPath = path + File.separator + "%s.jks".format(fn)
 
-    copy(new ByteArrayInputStream(d.cert), new FileOutputStream(new File(pemCertPath)))
-    copy(new ByteArrayInputStream(d.key), new FileOutputStream(new File(pemKeyPath)))
-    run(Array(
-      "openssl", "x509", "-outform", "der", "-in", pemCertPath, "-out", derCertPath))
-    run(Array(
-      "openssl", "rsa", "-outform", "der", "-in", pemKeyPath, "-out", derKeyPath))
+    val f = new FileOutputStream(new File(pemPath))
+    copy(new ByteArrayInputStream(d.cert), f)
+    copy(new ByteArrayInputStream(d.key), f)
+    f.close()
 
-    val bufs = Seq(derCertPath, derKeyPath).map(readFileToBytes(_))
-    new EncodedCertAndKey(bufs(0), bufs(1))
+    run(Array(
+      "openssl", "pkcs12",
+      "-export",
+      "-password", "pass:%s".format(passwordStr),
+      "-in", pemPath,
+      "-out", p12Path))
+
+    run(Array(
+      "keytool",
+      "-importkeystore",
+      "-srckeystore", p12Path,
+      "-srcstoretype", "PKCS12",
+      "-destkeystore", jksPath,
+      "-trustcacerts",
+      "-srcstorepass", passwordStr,
+      "-keypass", passwordStr,
+      "-storepass", passwordStr))
+
+    val passwordChars = passwordStr.toCharArray
+    val ksInput = new ByteArrayInputStream(readFileToBytes(jksPath))
+
+    // new File(pemPath).delete()
+    // new File(p12Path).delete()
+    // new File(jksPath).delete()
+    Seq(pemPath, p12Path, jksPath).foreach(new File(_).delete())
+    path.delete()
+
+    val ks = KeyStore.getInstance("JKS")
+    val kmf = KeyManagerFactory.getInstance("SunX509")
+    ks.load(ksInput, passwordChars)
+    kmf.init(ks, passwordChars)
+    kmf.getKeyManagers
   }
 
   private[this] def copy(in: InputStream, out: OutputStream): Int = {
@@ -154,7 +163,8 @@ object PEMEncodedKeyManager {
 
     do {
       read = in.read(b)
-      out.write(b, t, read)
+      if (read > 0)
+        out.write(b, t, read)
       t += read
     } while (read > 0)
 
@@ -164,9 +174,7 @@ object PEMEncodedKeyManager {
   }
 
   def apply(config: SslServerConfiguration): Array[KeyManager] =
-    keyManagersForDer(
-      convertFromPemToDer(
-        readCertAndKey(config)))
+    p12Keystore(readCertAndKey(config))
 }
 
 object Ssl {
@@ -224,7 +232,6 @@ object Ssl {
       case _ =>
         val ctx = SSLContext.getInstance(protocol())
         val kms = PEMEncodedKeyManager(new SslServerConfiguration(certificatePath, keyPath))
-        println("java, jms = %s".format(kms))
         ctx.init(kms, null, null)
         Config(ctx)
         ctx
