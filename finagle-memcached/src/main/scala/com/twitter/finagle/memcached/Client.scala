@@ -1,6 +1,9 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.util.TreeMap
+import _root_.java.security.MessageDigest
+import _root_.java.nio.{ByteBuffer, ByteOrder}
+
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.util.CharsetUtil
@@ -27,7 +30,16 @@ object Client {
    * Construct a partitioned client from a set of Services.
    */
   def apply(services: Seq[Service[Command, Response]]): Client = {
-    new PartitionedClient(services.map(apply(_)), _.hashCode)
+    val clients = services.map(apply(_))
+    val hasher = KeyHasher.byName("fnv")
+    val circle = {
+      val circle = new TreeMap[Long, Client]()
+      clients foreach { client =>
+        circle += hasher.hashKey(client.toString) -> client
+      }
+      circle
+    }
+    new PartitionedClient(clients, circle, hasher)
   }
 
   /**
@@ -161,7 +173,6 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     }
   }
 
-
   def decr(key: String, delta: Int): Future[Int] = {
     underlying(Decr(key, delta)) map {
       case Number(value) =>
@@ -174,20 +185,13 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
 
 /**
  * A Memcached client that partitions data across multiple servers according to a
- * consistent hash ring, using the provided hash function.
+ * the provided consistent hash ring and key hasher.
  *
- * @param hash a partitioning function.
+ * @param ring      consistent hash ring
+ * @param keyHasher hash function for hashing keys on the hash ring
  */
-class PartitionedClient(clients: Seq[Client], hash: String => Long) extends Client {
+class PartitionedClient(clients: Seq[Client], ring: TreeMap[Long, Client], keyHasher: KeyHasher) extends Client {
   require(clients.size > 0, "At least one client must be provided")
-
-  private[this] val circle = {
-    val circle = new TreeMap[Long, Client]()
-    clients foreach { client =>
-      circle += hash(client.toString) -> client
-    }
-    circle
-  }
 
   def get(key: String)                    = idx(key).get(key)
   def get(keys: Iterable[String])         = {
@@ -225,9 +229,84 @@ class PartitionedClient(clients: Seq[Client], hash: String => Long) extends Clie
   def decr(key: String, delta: Int)              = idx(key).decr(key, delta)
 
   private[this] def idx(key: String) = {
-    val entry = circle.ceilingEntry(hash(key))
+    val entry = ring.ceilingEntry(keyHasher.hashKey(key))
     val client = if (entry ne null) entry.getValue
-    else circle.firstEntry.getValue
+    else ring.firstEntry.getValue
     client
+  }
+}
+
+case class KetamaClientBuilder(
+  _nodes: Seq[Tuple3[String, Int, Int]],
+  _hashName: Option[String],
+  _clientBuilder: Option[ClientBuilder[Command, Response]]) {
+
+  def this() = this(
+    Nil,  // nodes
+    None, // hashName
+    None  // clientBuilder
+  )
+
+  def nodes(nodes: Seq[Tuple3[String, Int, Int]]): KetamaClientBuilder =
+    copy(_nodes = nodes)
+
+  def nodes(hostPortWeights: String): KetamaClientBuilder =
+    copy(_nodes = parseHostPortWeights(hostPortWeights))
+
+  def hashName(hashName: String): KetamaClientBuilder =
+    copy(_hashName = Some(hashName))
+
+  def clientBuilder(clientBuilder: ClientBuilder[Command, Response]): KetamaClientBuilder =
+    copy(_clientBuilder = Some(clientBuilder))
+
+  def parseHostPortWeights(hostPortWeights: String): Seq[Tuple3[String, Int, Int]] = {
+    val hpws = hostPortWeights split Array(' ', ',') filter (_ != "") map(_.split(":"))
+    hpws map { hpw => (hpw(0), hpw(1).toInt, hpw(2).toInt) } toList
+  }
+
+  private[this] def computeHash(key: String, alignment: Int) = {
+    val hasher = MessageDigest.getInstance("MD5")
+    hasher.update(key.getBytes("utf-8"))
+    val buffer = ByteBuffer.wrap(hasher.digest)
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.position(alignment << 2)
+    buffer.getInt.toLong & 0xffffffffL
+  }
+
+  def build(): PartitionedClient = {
+    val builder = _clientBuilder getOrElse ClientBuilder()
+    val hasher = KeyHasher.byName(_hashName getOrElse "fnv")
+    var continuum = new TreeMap[Long, Client]()
+    var clients: Seq[Client] = Seq()
+
+    val serverCount = _nodes.size
+    val totalWeight = _nodes.foldLeft(0.0) {_+_._3}
+
+    // we use (NUM_REPS * #servers) total points, but allocate them based on server weights.
+    val NUM_REPS = 160
+
+    for ((hostname, port, weight) <- _nodes) {
+      val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      clients = clients :+ client
+
+      val percent = weight.toDouble / totalWeight
+      // the tiny fudge fraction is added to counteract float errors.
+      val itemWeight = (percent * serverCount * (NUM_REPS / 4) + 0.0000000001).toInt
+      for (k <- 0 until itemWeight) {
+        val key = if (port == 11211) {
+          hostname + "-" + k
+        } else {
+          hostname + ":" + port + "-" + k
+        }
+        for (i <- 0 until 4) {
+          continuum += computeHash(key, i) -> client
+        }
+      }
+    }
+
+    assert(continuum.size <= NUM_REPS * serverCount)
+    assert(continuum.size >= NUM_REPS * (serverCount - 1))
+
+    new PartitionedClient(clients, continuum, hasher)
   }
 }
