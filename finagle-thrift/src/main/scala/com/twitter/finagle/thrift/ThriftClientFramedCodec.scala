@@ -7,10 +7,15 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
-import com.twitter.finagle.Codec
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
+import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
+
+import com.twitter.util.Future
+
+import com.twitter.finagle.{Codec, Protocol, CancelledRequestException, SimpleFilter, Service}
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.CancelledRequestException
+import com.twitter.finagle.channel.ChannelService
 
 case class ThriftClientRequest(message: Array[Byte], oneway: Boolean)
 
@@ -54,4 +59,44 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]] {
     }
 
   val serverPipelineFactory = clientPipelineFactory
+}
+
+class ThriftTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
+{
+  def apply(request: ThriftClientRequest, service: Service[ThriftClientRequest, Array[Byte]]) = {
+    println("filtering request.")
+    val tracedRequest = ThriftClientRequest(Tracing.encode(request.message), request.oneway)
+    service(tracedRequest)
+  }
+}
+
+class ThriftClientFramedProtocol extends Protocol[ThriftClientRequest, Array[Byte]] {
+  def codec = ThriftClientFramedCodec()
+  override def prepareChannel(underlying: ChannelService[ThriftClientRequest, Array[Byte]]) = {
+    val memoryBuffer = new TMemoryBuffer(512)
+    val protocolFactory = new TBinaryProtocol.Factory()
+    val oprot = protocolFactory.getProtocol(memoryBuffer)
+    oprot.writeMessageBegin(new TMessage("__can__twitter__trace__", TMessageType.CALL, 0))
+    val args = new CanTwitterTrace.can_twitter_trace_args()
+    args.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.getTransport().flush()
+ 
+    val upgradeRequest = ThriftClientRequest(
+      java.util.Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()),
+      false)
+ 
+    underlying(upgradeRequest) map { bytes =>
+      val memoryTransport = new TMemoryInputTransport(bytes)
+      val iprot = protocolFactory.getProtocol(memoryTransport)
+      val msg = iprot.readMessageBegin()
+      // iprot.readMessageEnd()
+      if (msg.`type` == TMessageType.EXCEPTION)
+        underlying
+      else {
+        println("upgrade SUCCESS.  filtering.")
+        (new ThriftTracingFilter) andThen underlying
+      }
+    }
+  }
 }

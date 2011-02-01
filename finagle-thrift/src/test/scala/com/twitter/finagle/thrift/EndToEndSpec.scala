@@ -26,8 +26,9 @@ object EndToEndSpec extends Specification {
     val processor =  new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)
       def add_one(a: Int, b: Int) = Future.void
-      def multiply(a: Int, b: Int) = Future { a * b }
+      def multiply(a: Int, b: Int) = Future { println("IN MULTIPLY"); a * b }
       def complex_return(someString: String) = Future {
+        println("complex_return", Tracing.txid())
         new SomeStruct(123, someString)
       }
       def someway() = Future.void
@@ -35,14 +36,14 @@ object EndToEndSpec extends Specification {
 
     val serverAddr = RandomSocket()
     val server = ServerBuilder()
-    .codec(ThriftServerFramedCodec())
-    .bindTo(serverAddr)
-    .build(new B.Service(processor, new TBinaryProtocol.Factory()))
+      .codec(ThriftServerFramedCodec())
+      .bindTo(serverAddr)
+      .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     val service = ClientBuilder()
-    .hosts(Seq(serverAddr))
-    .codec(ThriftClientFramedCodec())
-    .build()
+      .hosts(Seq(serverAddr))
+      .protocol(new ThriftClientFramedProtocol)
+      .build()
 
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
@@ -50,6 +51,7 @@ object EndToEndSpec extends Specification {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
+      Tracing.txid() = 123
       client.complex_return("a string")().arg_two must be_==("a string")
 
       client.add(1, 2)() must throwA[AnException]
