@@ -48,6 +48,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new KestrelProject(_), coreProject, memcachedProject)
 
   /**
+   * finagle-stream contains a streaming http codec identical to
+   * Twitter's "firehose".
+   */
+  val streamProject = project(
+    "finagle-stream", "finagle-stream",
+    new StreamProject(_), coreProject)
+
+  /**
    * finagle-stress has stress/integration test suites & tools for
    * development.
    */
@@ -85,6 +93,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class KestrelProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+  }
+
+  class StreamProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
     override def compileOrder = CompileOrder.ScalaThenJava
