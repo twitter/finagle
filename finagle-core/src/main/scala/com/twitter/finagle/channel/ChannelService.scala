@@ -80,7 +80,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
 
   override def release() = {
     if (channel.isOpen) channel.close()
-    factory.releaseChannel(this)
+    factory.channelReleased(this)
   }
   override def isAvailable = isHealthy && channel.isOpen
 }
@@ -95,7 +95,7 @@ class ChannelServiceFactory[Req, Rep](
 {
   private[this] val channelLatch = new FutureLatch
 
-  protected[channel] def releaseChannel(channel: ChannelService[Req, Rep]) {
+  protected[channel] def channelReleased(channel: ChannelService[Req, Rep]) {
     channelLatch.decr()
   }
 

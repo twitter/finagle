@@ -66,10 +66,10 @@ class CachingPool[Req, Rep](
   }
 
   def close() = synchronized {
+    isOpen = false
+
     deathRow foreach { case (_, service) => service.release() }
     deathRow.clear()
-
-    isOpen = false
 
     factory.close()
   }

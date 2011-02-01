@@ -235,5 +235,44 @@ object CachingPoolSpec extends Specification with Mockito {
         timer.scheduled must beEmpty
       }
     }
+
+    "flush the queue on close()" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+        val cachingPool = new CachingPool[Any, Any](underlying, 5.seconds, timer)
+        val underlyingService = mock[Service[Any, Any]]
+        underlyingService(Matchers.any) returns Future.value(obj)
+        underlying.make() returns Future.value(underlyingService)
+        underlyingService.isAvailable returns true
+
+        val service = cachingPool.make()()
+        service.release()
+        there was no(underlyingService).release()
+
+        cachingPool.close()
+        there was one(underlyingService).release()
+      }    
+    }
+
+    "release services as they are released after close()" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+        val cachingPool = new CachingPool[Any, Any](underlying, 5.seconds, timer)
+        val underlyingService = mock[Service[Any, Any]]
+        underlyingService(Matchers.any) returns Future.value(obj)
+        underlying.make() returns Future.value(underlyingService)
+        underlyingService.isAvailable returns true
+
+        val service = cachingPool.make()()
+        cachingPool.close()
+        there was no(underlyingService).release()
+        service.release()
+        there was one(underlyingService).release()
+      }    
+    }
+
+    "close the underlying factory" in {
+      val cachingPool = new CachingPool[Any, Any](underlying, 5.seconds, timer)
+      cachingPool.close()
+      there was one(underlying).close()
+    }
   }
 }

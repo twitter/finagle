@@ -73,7 +73,7 @@ case class ClientBuilder[Req, Rep](
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
   _logger: Option[Logger],
-  _channelFactory: Option[ChannelFactory],
+  _channelFactory: Option[ReferenceCountedChannelFactory],
   _tls: Option[SSLContext],
   _startTls: Boolean)
 {
@@ -189,7 +189,7 @@ case class ClientBuilder[Req, Rep](
    * meaningfully reference count factory usage, and so the caller is
    * responsible for calling ``releaseExternalResources()''.
    */
-  def channelFactory(cf: ChannelFactory) =
+  def channelFactory(cf: ReferenceCountedChannelFactory) =
     copy(_channelFactory = Some(cf))
 
   def tls() =
@@ -205,12 +205,7 @@ case class ClientBuilder[Req, Rep](
 
   // ** BUILDING
   private[this] def buildBootstrap(protocol: Protocol[Req, Rep], host: SocketAddress) = {
-    val cf = _channelFactory map { cf =>
-      val rcf = new ReferenceCountedChannelFactory(cf)
-      rcf.acquire()  // never releasable
-      rcf
-    } getOrElse ClientBuilder.defaultChannelFactory
-
+    val cf = _channelFactory getOrElse ClientBuilder.defaultChannelFactory
     cf.acquire()
     val bs = new ClientBootstrap(cf)
     val pf = new ChannelPipelineFactory {
@@ -294,7 +289,8 @@ case class ClientBuilder[Req, Rep](
       factory
     }
 
-    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
+    new LoadBalancedFactory(
+      hostFactories, new LeastQueuedStrategy[Req, Rep])
   }
 
   def build(): Service[Req, Rep] = {

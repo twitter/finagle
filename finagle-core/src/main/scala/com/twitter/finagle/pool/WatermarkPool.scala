@@ -90,6 +90,13 @@ class WatermarkPool[Req, Rep](
   }
 
   def close() = synchronized {
+    // Mark the pool closed, relinquishing completed requests &
+    // denying the issuance of further requests. The order here is
+    // important: we mark the service unavailable before releasing the
+    // individual channels so that they are actually released in the
+    // wrapper.
+    isOpen = false
+
     // Drain the pool.
     queue foreach { _.release() }
     queue.clear()
@@ -97,10 +104,6 @@ class WatermarkPool[Req, Rep](
     // Kill the existing waiters.
     waiters foreach { _() = Throw(new ServiceClosedException) }
     waiters.clear()
-
-    // Mark the pool closed, relinquishing completed requests &
-    // denying the issuance of further requests.
-    isOpen = false
 
     // Close the underlying factory.
     factory.close()
