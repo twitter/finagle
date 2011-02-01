@@ -14,7 +14,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val coreProject = project(
     "finagle-core", "finagle-core",
-    new CoreProject(_), nativeJsseProject)
+    new CoreProject(_))
 
   /**
    * finagle-ostrich implements a StatsReceiver for the Ostrich statistics library
@@ -48,11 +48,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new KestrelProject(_), coreProject, memcachedProject)
 
   /**
-   * native JSSE implementation wrappers, etc.
+   * finagle-native contains native code aimed to increase platform fluency
+   * and provide capabilities not available in the JVM
    */
-  val nativeJsseProject = project(
-    "finagle-native-jsse", "finagle-native-jsse",
-    new NativeJsseProject(_))
+  val nativeProject = project(
+    "finagle-native", "finagle-native",
+    new NativeJsseProject(_), coreProject)
 
   /**
    * finagle-stress has stress/integration test suites & tools for
@@ -62,13 +63,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-stress", "finagle-stress",
 
     new StressProject(_), coreProject, ostrichProject)
-
-  /**
-   * finagle-native contains native code aimed to increase platform fluency
-   * and provide capabilities not available in the JVM
-   */
-  class NativeJsseProject(info: ProjectInfo) extends StressProject(info)
-    with SubversionPublisher with AdhocInlines
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
@@ -110,6 +104,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
+
+  class NativeJsseProject(info: ProjectInfo) extends StressProject(info)
+    with SubversionPublisher with AdhocInlines
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines

@@ -1,9 +1,13 @@
 package com.twitter.finagle.builder
 
-import java.io.{InputStream, File, FileInputStream, IOException}
-import java.security.{KeyStore, Security}
+import java.util.logging.Logger
+import java.io._
+import java.security.{KeyFactory, KeyStore, Security, Provider}
 import java.security.cert.X509Certificate
+import java.security.cert.{Certificate, CertificateFactory}
+import java.security.spec._
 import javax.net.ssl._
+import java.util.Random
 
 /**
  * Store the files necessary to configure an SSL
@@ -28,20 +32,20 @@ object TemporaryDirectory {
   def readableOnlyByMe(): File = {
     val dir = apply()
 
-    val process = Runtime.getRuntime.exec(
+    val process = Runtime.getRuntime.exec(Array(
       "chmod",
       "0700",
-      dir.getAbsolutePath())
+      dir.getAbsolutePath()))
 
-    if (process.exitStatus() != 0) {
+    if (process.exitValue() != 0) {
       if (unixy) {
         val message = "'chown' failed, could not create a private directory"
-        log.fatal(message)
-        throw new Exception(message))
+        log.severe(message)
+        throw new Exception(message)
       } else {
         // the directory is probably private anyway because temp dirs are
         // user-private on windows.
-        log.warn("'chown' failed, but we're on windows.")
+        log.warning("'chown' failed, but we're on windows.")
       }
     }
 
@@ -62,12 +66,12 @@ object PEMEncodedKeyManager {
 
   private[this] def run(strings: Array[String]) {
     val process = Runtime.getRuntime.exec(strings)
-    if (process.exitStatus() != 0)
+    if (process.exitValue() != 0)
       throw new ExternalExecutableFailed("Failed to run command (%s)".format(strings.mkString(" ")))
   }
 
   private[this] def secret(length: Int): Array[Byte] = {
-    val rng = new Random(System.getCurrentTimeMillis() % hashCode)
+    val rng = new Random(System.currentTimeMillis() % hashCode)
     val b = new Array[Byte](length)
 
     for (i <- 0 until length) {
@@ -78,27 +82,29 @@ object PEMEncodedKeyManager {
   }
 
   private[this] def readFile(f: File): FileInputStream =
-    if (f.length() > 10 << 20)
-      "File (%s) is too big to read (size=%d, max=%d)".format(
-            f.getAbsolutePath(), f.length(), 10 << 20))
+    if (f.length() > (10 << 20))
+      throw new Exception(
+        "File (%s) is too big to read (size=%d, max=%d)".format(
+          f.getAbsolutePath(), f.length(), 10 << 20))
     else
       new FileInputStream(f)
 
   private[this] def readFileToBytes(path: String): Array[Byte] = {
     val f = new File(path)
     val i = readFile(f)
-    val buf = ByteArrayOutputStream(f.length())
+    val buf = new ByteArrayOutputStream(f.length().intValue())
     copy(i, buf)
     i.close
     buf.toByteArray
   }
 
-  private[this] def keyManagersForDerData(derData: EncodedCertAndKey): Array[KeyManager] = {
+  private[this] def keyManagersForDer(derData: EncodedCertAndKey): Array[KeyManager] = {
     val alias = new String(secret(8))
-    val password = new String(secret(8))
-
+    val password = secret(8).map(_.toChar)
     val certFactory = CertificateFactory.getInstance("X.509")
-    val certs = certFactory.generateCertificates(new ByteArrayInputStream(derData.cert))
+    val certs =
+      certFactory.generateCertificates(
+        new ByteArrayInputStream(derData.cert)).asInstanceOf[Iterable[Certificate]]
     println("Certificates (alias='%s':".format(alias))
     for (cert <- certs) {
       println("  - %s".format(cert))
@@ -106,15 +112,15 @@ object PEMEncodedKeyManager {
     println("(end certificates)")
 
     val keyFactory = KeyFactory.getInstance("RSA")
-    val keySpec = new PKCS8EncodedeKeySpec(derData.key)
-    val key = kf.generatePrivate(keySpec)
+    val keySpec = new PKCS8EncodedKeySpec(derData.key)
+    val key = keyFactory.generatePrivate(keySpec)
 
     val store = KeyStore.getInstance("JKS")
-    store.setKeyEntry(alias, key, password, certs)
+    store.setKeyEntry(alias, key, password, certs.toArray)
 
     val factory = KeyManagerFactory.getInstance("SunX509")
-    kmf.init(ks, password)
-    kmf.getKeyManagers()
+    factory.init(store, password)
+    factory.getKeyManagers()
   }
 
   private[this] def readCertAndKey(config: SslServerConfiguration): EncodedCertAndKey =
@@ -122,7 +128,7 @@ object PEMEncodedKeyManager {
       readFileToBytes(config.certificatePath),
       readFileToBytes(config.keyPath))
 
-  private[this] def convertFromPemToDer(d: EncodedCertAndKey): EncodedCertAndKey {
+  private[this] def convertFromPemToDer(d: EncodedCertAndKey): EncodedCertAndKey = {
     val path = privatePath()
     val fn = new String(secret(12))
     val pemCertPath = path + File.separator + "%s.cert.pem".format(fn)
@@ -130,42 +136,28 @@ object PEMEncodedKeyManager {
     val derCertPath = path + File.separator + "%s.cert.der".format(fn)
     val derKeyPath  = path + File.separator + "%s.key.der".format(fn)
 
-    write(pemEncodedData, new FileOuputStream(new File(pemPath)))
-    run("openssl x509 -outform der -in %s -out %s".format(
-      pemCertPath, derCertPath))
-    run("openssl rsa -outform der -in %s -out %s".format(
-      pemKeyPath, derKeyPath))
+    copy(new ByteArrayInputStream(d.cert), new FileOutputStream(new File(pemCertPath)))
+    copy(new ByteArrayInputStream(d.key), new FileOutputStream(new File(pemKeyPath)))
+    run(Array(
+      "openssl", "x509", "-outform", "der", "-in", pemCertPath, "-out", derCertPath))
+    run(Array(
+      "openssl", "rsa", "-outform", "der", "-in", pemKeyPath, "-out", derKeyPath))
 
-    val bufs = Seq(derCertPath, derKeyPath).map { path =>
-      val f = new File(path)
-      if (f.length() > 10 << 20)
-        throw new Exception(
-      val o = new ByteArrayOutputStream(f.length())
-      val i = new FileInputStream(f)
-
-      try {
-        copy(i, o)
-      } finally {
-        i.close()
-        f.delete()
-      }
-
-      o.toByteArray
-    }
-
-    path.delete()
+    val bufs = Seq(derCertPath, derKeyPath).map(readFileToBytes(_))
     new EncodedCertAndKey(bufs(0), bufs(1))
   }
 
-  private[this] copy(in: InputStream, out: OutputStream): Int = {
-    val b: = new Array[Byte](1024 * 4)
-    var read: Int = 0
-    var t: Int = 0
+  private[this] def copy(in: InputStream, out: OutputStream): Int = {
+    val b = new Array[Byte](1024 * 4)
+    var read = 0
+    var t = 0
 
-    while ((read = in.read(b)) > 0) {
+    do {
+      read = in.read(b)
       out.write(b, t, read)
       t += read
-    }
+    } while (read > 0)
+
     out.flush()
 
     t
@@ -200,6 +192,19 @@ object Ssl {
     }
   }
 
+  object Harmony {
+    def provider(): Provider = {
+      val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider"
+      Class.forName(name).newInstance().asInstanceOf[Provider]
+    }
+
+    def keyManager(certificatePath: String, keyPath: String): KeyManager = {
+      val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider.CertAndKeyPathKeyManager"
+      val constructor = Class.forName(name).getConstructor(classOf[String], classOf[String])
+      constructor.newInstance(certificatePath, keyPath).asInstanceOf[KeyManager]
+    }
+  }
+
   /**
    * Get a server context, using the native provider if available.
    * @param certificatePath The path to the PEM encoded certificate file
@@ -208,21 +213,21 @@ object Ssl {
    */
   def server(certificatePath: String, keyPath: String): SSLContext = {
     try {
-      val provider = new org.apache.harmony.xnet.provider.jsse.JSSEProvider
-      val ctx = servercontext(provider)
+      val provider = Harmony.provider()
+      val ctx = SSLContext.getInstance(protocol(), provider)
       val kms =
-        Array(new org.apache.harmony.xnet.provider.jsse.SSLParameters.CertAndKeyPathKeyManager(
-          certificatePath, keyPath))
+        Array(Harmony.keyManager(certificatePath, keyPath))
       println("native, kms = %s".format(kms))
       ctx.init(kms, null, null)
       ctx
     } catch {
-      val ctx = serverContext
-      val kms = PEMEncodedKeyManager(certificatePath, keyPath),
-      println("java, jms = %s".format(kms))
-      ctx.init(kms, null, null)
-      Config(ctx)
-      ctx
+      case _ =>
+        val ctx = SSLContext.getInstance(protocol())
+        val kms = PEMEncodedKeyManager(new SslServerConfiguration(certificatePath, keyPath))
+        println("java, jms = %s".format(kms))
+        ctx.init(kms, null, null)
+        Config(ctx)
+        ctx
     }
   }
 
@@ -231,26 +236,12 @@ object Ssl {
    */
   def protocol() = defaultProtocol
 
-  private[this] def nativeProvider: Option[SSLContext] =
 
   /**
-   * @param provider: optional JSSE provider. If 'None' is specified, the default
-   *                  provider will be used.
-   * @returns an SSLContext
+   * @return an SSLContext provisioned to be a client
    */
-  private[this] def context(provider: Option[Provider]) =
-    provider match {
-      case Some(provider: Provider) =>
-        SSLContext.getInstance(protocol(), provider)
-      case _ =>
-        SSLContext.getInstance(protocol())
-    }
-
-  private[this] def serverContext =
-    context(nativeProvider)
-
   private[this] def clientContext =
-    context(None)
+    SSLContext.getInstance(protocol())
 
   /**
    * Create a client
@@ -266,7 +257,7 @@ object Ssl {
    * Create a client with a trust manager that does not check the validity of certificates
    */
   def clientWithoutCertificateValidation(): SSLContext = {
-    val ctx = context(false)
+    val ctx = clientContext
     ctx.init(null, trustAllCertificates(), null)
     Config(ctx)
     ctx
