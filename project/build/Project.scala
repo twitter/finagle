@@ -53,7 +53,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val nativeProject = project(
     "finagle-native", "finagle-native",
-    new NativeJsseProject(_), coreProject)
+    new NativeProject(_), coreProject)
 
   /**
    * finagle-stress has stress/integration test suites & tools for
@@ -105,8 +105,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
 
-  class NativeJsseProject(info: ProjectInfo) extends StressProject(info)
-    with SubversionPublisher with AdhocInlines
+  class NativeProject(info: ProjectInfo) extends StressProject(info)
+    with SubversionPublisher with AdhocInlines with LibDirClasspath
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines

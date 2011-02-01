@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 import java.io._
 import java.security.{KeyFactory, KeyStore, Security, Provider, PrivateKey}
 import java.security.cert.X509Certificate
@@ -11,6 +11,7 @@ import java.util.Random
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
+import scala.util.control.Breaks._
 
 /**
  * Store the files necessary to configure an SSL
@@ -140,9 +141,10 @@ object PEMEncodedKeyManager {
 }
 
 object Ssl {
-  val defaultProtocol = "TLS"
+  private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val defaultProtocol = "TLS"
 
-  object Config {
+  object DefaultJSSEConfig {
     type StringPredicate = (String) => (Boolean)
 
     private[this] def filterCipherSuites(ctx: SSLContext,
@@ -162,41 +164,79 @@ object Ssl {
     }
   }
 
-  object Harmony {
-    def provider(): Provider = {
+  private[this] object NativeJSSEContextFactory extends ContextFactory {
+    def name() = "Native (Apache Harmony OpenSSL) Provider"
+
+    def context(certificatePath: String, keyPath: String) = {
+      val ctx = SSLContext.getInstance(protocol(), provider())
+      val kms = Array(keyManager(certificatePath, keyPath))
+      ctx.init(kms, null, null)
+      ctx
+    }
+
+    private[this] def provider(): Provider = {
       val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider"
       Class.forName(name).newInstance().asInstanceOf[Provider]
     }
 
-    def keyManager(certificatePath: String, keyPath: String): KeyManager = {
-      val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider.CertAndKeyPathKeyManager"
+    private[this] def keyManager(certificatePath: String, keyPath: String): KeyManager = {
+      val name = "org.apache.harmony.xnet.provider.jsse.CertAndKeyPathKeyManager"
       val constructor = Class.forName(name).getConstructor(classOf[String], classOf[String])
       constructor.newInstance(certificatePath, keyPath).asInstanceOf[KeyManager]
     }
   }
 
+  private[this] object DefaultJSSEContextFactory extends ContextFactory {
+    def name() = "JSSE Default Provider"
+
+    def context(certificatePath: String, keyPath: String) = {
+      val ctx = SSLContext.getInstance(protocol())
+      val kms = PEMEncodedKeyManager(new SslServerConfiguration(certificatePath, keyPath))
+      ctx.init(kms, null, null)
+      Ssl.DefaultJSSEConfig(ctx)
+      ctx
+    }
+  }
+
+  private[this] trait ContextFactory {
+    def name(): String
+    def context(certificatePath: String, keyPath: String): SSLContext
+  }
+
+  private[this] val contextFactories: Seq[ContextFactory] =
+    Seq(NativeJSSEContextFactory, DefaultJSSEContextFactory)
+
+  class NoSuitableSslProvider(message: String) extends Exception(message: String)
   /**
    * Get a server context, using the native provider if available.
    * @param certificatePath The path to the PEM encoded certificate file
    * @param keyPath The path to the PEM encoded key file corresponding to the certificate
+   * @throws a NoSuitableSslProvider if no provider could be initialized
    * @returns an SSLContext
    */
   def server(certificatePath: String, keyPath: String): SSLContext = {
-    try {
-      val provider = Harmony.provider()
-      val ctx = SSLContext.getInstance(protocol(), provider)
-      val kms =
-        Array(Harmony.keyManager(certificatePath, keyPath))
-      println("native, kms = %s".format(kms))
-      ctx.init(kms, null, null)
-      ctx
-    } catch {
-      case _ =>
-        val ctx = SSLContext.getInstance(protocol())
-        val kms = PEMEncodedKeyManager(new SslServerConfiguration(certificatePath, keyPath))
-        ctx.init(kms, null, null)
-        Config(ctx)
-        ctx
+    var context: SSLContext = null
+
+    for (factory <- contextFactories)
+    if (context == null) {
+      try {
+        log.entering(getClass.getName, "server", factory)
+        context = factory.context(certificatePath, keyPath)
+        log.exiting(getClass.getName, "server", context)
+      } catch {
+        case e: Throwable =>
+          log.log(Level.WARNING, "Provider '%s' not suitable".format(factory.name()))
+          log.log(Level.FINE, e.getMessage, e)
+      }
+    }
+
+    if (context != null) {
+      log.info("SSL context initialized: %s".format(context))
+      return context
+    } else {
+      throw new NoSuitableSslProvider(
+        "No SSL provider was suitable. Tried [%s].".format(
+          contextFactories.mkString(", ")))
     }
   }
 
@@ -218,7 +258,7 @@ object Ssl {
   def client(): SSLContext = {
     val ctx = clientContext
     ctx.init(null, null, null)
-    Config(ctx)
+    DefaultJSSEConfig(ctx)
     ctx
   }
 
@@ -228,7 +268,7 @@ object Ssl {
   def clientWithoutCertificateValidation(): SSLContext = {
     val ctx = clientContext
     ctx.init(null, trustAllCertificates(), null)
-    Config(ctx)
+    DefaultJSSEConfig(ctx)
     ctx
   }
 
