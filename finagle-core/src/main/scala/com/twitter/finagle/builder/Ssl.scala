@@ -19,44 +19,6 @@ case class SslServerConfiguration(
   val certificatePath: String,
   val keyPath: String)
 
-object TemporaryDirectory {
-  private[this] val log = Logger.getLogger(getClass.getName)
-  private[this] val unixy: Boolean =
-    System.getProperty("os.name").toLowerCase.indexOf("win") == -1
-
-  def apply(): File = {
-    var tmp = File.createTempFile("temp", "dir")
-    tmp.delete()
-    tmp.mkdir()
-    tmp.deleteOnExit()
-    tmp
-  }
-
-  def readableOnlyByMe(): File = {
-    val dir = apply()
-
-    val process = Runtime.getRuntime.exec(Array(
-      "chmod",
-      "0700",
-      dir.getAbsolutePath()))
-    process.waitFor()
-
-    if (process.exitValue() != 0) {
-      if (unixy) {
-        val message = "'chown' failed, could not create a private directory"
-        log.severe(message)
-        throw new Exception(message)
-      } else {
-        // the directory is probably private anyway because temp dirs are
-        // user-private on windows.
-        log.warning("'chown' failed, but we're on windows.")
-      }
-    }
-
-    dir
-  }
-}
-
 /**
  * Creates KeyManagers for PEM files.
  */
@@ -108,7 +70,7 @@ object PEMEncodedKeyManager {
       readFileToBytes(config.certificatePath),
       readFileToBytes(config.keyPath))
 
-  private[this] def p12Keystore(d: EncodedCertAndKey): Array[KeyManager] = {
+  private[this] def importKeystore(d: EncodedCertAndKey): Array[KeyManager] = {
     val path = privatePath()
     val password = secret(24)
     val passwordStr = new String(password)
@@ -174,7 +136,7 @@ object PEMEncodedKeyManager {
   }
 
   def apply(config: SslServerConfiguration): Array[KeyManager] =
-    p12Keystore(readCertAndKey(config))
+    importKeystore(readCertAndKey(config))
 }
 
 object Ssl {
@@ -293,4 +255,42 @@ object Ssl {
    */
   private[this] def trustAllCertificates(): Array[TrustManager] =
     Array(new IgnorantTrustManager)
+}
+
+object TemporaryDirectory {
+  private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val unixy: Boolean =
+    System.getProperty("os.name").toLowerCase.indexOf("win") == -1
+
+  def apply(): File = {
+    var tmp = File.createTempFile("temp", "dir")
+    tmp.delete()
+    tmp.mkdir()
+    tmp.deleteOnExit()
+    tmp
+  }
+
+  def readableOnlyByMe(): File = {
+    val dir = apply()
+
+    val process = Runtime.getRuntime.exec(Array(
+      "chmod",
+      "0700",
+      dir.getAbsolutePath()))
+    process.waitFor()
+
+    if (process.exitValue() != 0) {
+      if (unixy) {
+        val message = "'chown' failed, could not create a private directory"
+        log.severe(message)
+        throw new Exception(message)
+      } else {
+        // the directory is probably private anyway because temp dirs are
+        // user-private on windows.
+        log.warning("'chown' failed, but we're on windows.")
+      }
+    }
+
+    dir
+  }
 }
