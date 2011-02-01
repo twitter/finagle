@@ -14,11 +14,10 @@ import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.test.{B, SomeStruct, AnException, F}
-import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.silly.Silly
-import com.twitter.util.{Future, RandomSocket, Throw, Return, Promise}
+import com.twitter.util.{Future, RandomSocket, Return, Promise}
 import com.twitter.util.TimeConversions._
 
 object EndToEndSpec extends Specification {
