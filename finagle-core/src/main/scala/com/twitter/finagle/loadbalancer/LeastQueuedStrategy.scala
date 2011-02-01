@@ -2,7 +2,8 @@ package com.twitter.finagle.loadbalancer
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.util.WeakMetadata
 
 /**
  * The "least queued" strategy will dispatch the next request to the
@@ -11,30 +12,29 @@ import com.twitter.finagle.Service
 class LeastQueuedStrategy[Req, Rep]
   extends LoadBalancerStrategy[Req, Rep]
 {
-  private[this] val queueStat = ServiceMetadata[AtomicInteger] { new AtomicInteger(0) }
+  private[this] val queueStat = WeakMetadata[AtomicInteger] { new AtomicInteger(0) }
   private[this] val leastQueuedOrdering =
-    Ordering.by { case (_, queueSize) => queueSize }: Ordering[(Service[Req, Rep], Int)]
+    Ordering.by { case (_, queueSize) => queueSize }: Ordering[(ServiceFactory[Req, Rep], Int)]
 
-  def select(services: Seq[Service[Req, Rep]]) = {
-    val snapshot = services map { service => (service, queueStat(service).get)  }
+  private[this] def leastQueued(pools: Seq[ServiceFactory[Req, Rep]]) = {
+    val snapshot = pools map { pool => (pool, queueStat(pool).get) }
     val (selected, _) = snapshot.min(leastQueuedOrdering)
     selected
   }
 
-  def dispatch(request: Req, services: Seq[Service[Req, Rep]]) = {
-    if (services.isEmpty) {
-      None
-    } else {
-      val service = select(services)
-      val qs = queueStat(service)
+  def apply(pools: Seq[ServiceFactory[Req, Rep]]) = {
+    val pool = leastQueued(pools)
+    val qs = queueStat(pool)
+    qs.incrementAndGet()
 
-      // Dispatch the request, and account for it.
-      val replyFuture = service(request)
-
-      qs.incrementAndGet()
-      replyFuture respond { _ => qs.decrementAndGet() }
-
-      Some((service, replyFuture))
+    pool.make() map { service =>
+      new Service[Req, Rep] {
+        def apply(request: Req) = service(request)
+        override def release() {
+          service.release()
+          qs.decrementAndGet()
+        }
+      }
     }
   }
 }

@@ -10,14 +10,14 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try}
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, LifecycleFactory}
+import com.twitter.finagle.util.{Ok, Error, Cancelled, FutureLatch}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
  * channel. It is responsible for requests dispatched to a given
  * (connected) channel during its lifetime.
  */
-class ChannelService[Req, Rep](channel: Channel)
+class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
@@ -68,8 +68,6 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   })
 
-  override def isAvailable = isHealthy && channel.isOpen
-
   def apply(request: Req) = {
     val replyFuture = new Promise[Rep]
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
@@ -80,25 +78,47 @@ class ChannelService[Req, Rep](channel: Channel)
     }
   }
 
-  override def close() { if (channel.isOpen) Channels.close(channel) }
+  override def release() = {
+    if (channel.isOpen) channel.close()
+    factory.channelReleased(this)
+  }
+  override def isAvailable = isHealthy && channel.isOpen
 }
 
 /**
  * A factory for ChannelService instances, given a bootstrap.
  */
-class ChannelServiceFactory[Req, Rep](bootstrap: ClientBootstrap)
-  extends LifecycleFactory[ChannelService[Req, Rep]]
+class ChannelServiceFactory[Req, Rep](
+    bootstrap: ClientBootstrap,
+    prepareChannel: ChannelService[Req, Rep] => Future[Service[Req, Rep]])
+  extends ServiceFactory[Req, Rep]
 {
+  private[this] val channelLatch = new FutureLatch
+
+  protected[channel] def channelReleased(channel: ChannelService[Req, Rep]) {
+    channelLatch.decr()
+  }
+
   def make() = {
-    val promise = new Promise[ChannelService[Req, Rep]]
+    val promise = new Promise[Service[Req, Rep]]
     bootstrap.connect() {
-      case Ok(channel)  => promise() = Return(new ChannelService[Req, Rep](channel))
-      case Error(cause) => promise() = Throw(new WriteException(cause))
-      // TODO: cancellation.
+      case Ok(channel)  =>
+        channelLatch.incr()
+        prepareChannel(new ChannelService[Req, Rep](channel, this)) respond { promise() = _ }
+
+      case Error(cause) =>
+        promise() = Throw(new WriteException(cause))
+
+      case Cancelled =>
+        promise() = Throw(new WriteException(new CancelledConnectionException))
     }
+
     promise
   }
 
-  def dispose(service: ChannelService[Req, Rep]) { service.close() }
-  def isHealthy(service: ChannelService[Req, Rep]) = service.isAvailable
+  override def close() {
+    channelLatch await {
+      bootstrap.releaseExternalResources()
+    }
+  }
 }

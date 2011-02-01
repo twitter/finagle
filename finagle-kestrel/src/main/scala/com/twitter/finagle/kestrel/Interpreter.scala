@@ -4,7 +4,7 @@ import com.twitter.finagle.kestrel.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers._
 import com.twitter.conversions.time._
-import java.util.concurrent.{TimeUnit, BlockingDeque}
+import _root_.java.util.concurrent.{TimeUnit, BlockingDeque}
 import com.twitter.finagle.Service
 import com.twitter.util.{StateMachine, Future}
 import com.twitter.util.StateMachine.InvalidStateTransition
@@ -78,4 +78,5 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
 
 class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
   def apply(request: Command) = Future(interpreter(request))
+  override def release() = ()
 }

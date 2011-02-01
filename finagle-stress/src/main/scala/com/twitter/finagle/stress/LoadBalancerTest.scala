@@ -31,6 +31,9 @@ object LoadBalancerTest {
 
   def runSuite(clientBuilder: ClientBuilder[_, _]) {
     println("testing " + clientBuilder)
+    println("\n== baseline (warmup) ==\n")
+    new LoadBalancerTest(clientBuilder)({ case _ => }).run()
+
     println("\n== baseline ==\n")
     new LoadBalancerTest(clientBuilder)({ case _ => }).run()
 

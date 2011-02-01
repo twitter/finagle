@@ -1,10 +1,10 @@
 package com.twitter.finagle.kestrel
 
-import java.net.SocketAddress
+import _root_.java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import protocol.Kestrel
-import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
+import _root_.java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 import com.twitter.util.MapMaker
 
 class Server(address: SocketAddress) {

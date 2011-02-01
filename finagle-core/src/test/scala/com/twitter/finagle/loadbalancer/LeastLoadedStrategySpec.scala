@@ -6,6 +6,7 @@ import org.specs.mock.Mockito
 import com.twitter.util.{Future, Time}
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.service.SingletonFactory
 
 object LeastLoadedStrategySpec extends Specification with Mockito {
   class CountingService extends Service[Int, Int] {
@@ -18,14 +19,16 @@ object LeastLoadedStrategySpec extends Specification with Mockito {
   }
 
   "LeastLoadedStrategy" should {
+
     "distribute load evently" in {
       Time.withCurrentTimeFrozen { timeControl => 
-        val services = 0 until 100 map { _ => new CountingService }
+        val pools = 0 until 100 map { _ => new SingletonFactory(new CountingService) }
         val strategy = new LeastLoadedStrategy[Int, Int]
-         
+
         for (iteration <- 1 to 5) {
-          for (_ <- 0 until services.size) {
-            val Some((_, reply)) = strategy.dispatch(1, services)
+          for (_ <- 0 until pools.size) {
+            val service = strategy(pools)()
+            val reply = service(1)
             reply() must be_==(iteration)
           }
         }

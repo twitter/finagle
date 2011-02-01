@@ -8,6 +8,7 @@ import org.specs.mock.Mockito
 import com.twitter.util.{Future, Promise, Return}
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.service.SingletonFactory
 
 object LeastQueuedStrategySpec extends Specification with Mockito {
   class FixedCapacityService[T](requestsPerTick: Int) extends Service[T, T] {
@@ -32,6 +33,7 @@ object LeastQueuedStrategySpec extends Specification with Mockito {
     val s0 = new FixedCapacityService[Int](1)
     val s1 = new FixedCapacityService[Int](10)
     val services = Seq(s0, s1)
+    val pools = services map { new SingletonFactory(_) }
     val strategy = new LeastQueuedStrategy[Int, Int]()
 
     "distribute load according to capacity" in {
@@ -39,7 +41,8 @@ object LeastQueuedStrategySpec extends Specification with Mockito {
         if (i % 10 == 0)
           services foreach { _.tick() }
 
-        strategy.dispatch(123, services)
+        val service = strategy(pools)()
+        service(123) ensure { service.release() }
       }
 
       s0.count + s1.count must be_==(100000)

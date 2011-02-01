@@ -17,8 +17,28 @@ import com.twitter.finagle.channel.ChannelService
 
 object ClientBuilderSpec extends Specification with Mockito {
   "ClientBuilder" should {
+    val _codec = mock[Codec[Int, Float]]
+
+    val clientAddress = new SocketAddress {}
+
+    // Pipeline
+    val clientPipelineFactory = mock[ChannelPipelineFactory]
+    val channelPipeline = mock[ChannelPipeline]
+    clientPipelineFactory.getPipeline returns channelPipeline
+    _codec.clientPipelineFactory returns clientPipelineFactory
+
+    // Channel
+    val channelFactory = mock[ChannelFactory]
+    val refcountedChannelFactory = new ReferenceCountedChannelFactory(channelFactory)
+    val channel = mock[Channel]
+    val connectFuture = Channels.future(channel)
+    val channelConfig = new DefaultChannelConfig
+    channel.getConfig() returns channelConfig
+    channel.connect(clientAddress) returns connectFuture
+    channel.getPipeline returns channelPipeline
+    channelFactory.newChannel(channelPipeline) returns channel
+
     "invoke prepareChannel on connection establishment" in {
-      val _codec = mock[Codec[Int, Float]]
       val prepareChannelPromise = new Promise[ChannelService[Int, Float]]
       var theUnderlyingService: ChannelService[Int, Float] = null
 
@@ -30,27 +50,9 @@ object ClientBuilderSpec extends Specification with Mockito {
         }
       }
 
-      val clientAddress = new SocketAddress {}
-
-      // Pipeline
-      val clientPipelineFactory = mock[ChannelPipelineFactory]
-      val channelPipeline = mock[ChannelPipeline]
-      clientPipelineFactory.getPipeline returns channelPipeline
-      _codec.clientPipelineFactory returns clientPipelineFactory
-
-      // Channel
-      val channelFactory = mock[ChannelFactory]
-      val channel = mock[Channel]
-      val connectFuture = Channels.future(channel)
-      val channelConfig = new DefaultChannelConfig
-      channel.getConfig() returns channelConfig
-      channel.connect(clientAddress) returns connectFuture
-      channel.getPipeline returns channelPipeline
-      channelFactory.newChannel(channelPipeline) returns channel
-
       // Client
       val client = ClientBuilder()
-        .channelFactory(channelFactory)
+        .channelFactory(refcountedChannelFactory)
         .protocol(protocol)
         .hosts(Seq(clientAddress))
         .build()
@@ -69,6 +71,25 @@ object ClientBuilderSpec extends Specification with Mockito {
 
       requestFuture.isDefined must beTrue
       requestFuture() must be_==(321.0f)
+    }
+
+    "releaseExternalResources once all clients are released" in {
+      val client1 = ClientBuilder()
+        .channelFactory(refcountedChannelFactory)
+        .codec(_codec)
+        .hosts(Seq(clientAddress))
+        .build()
+
+      val client2 = ClientBuilder()
+        .channelFactory(refcountedChannelFactory)
+        .codec(_codec)
+        .hosts(Seq(clientAddress))
+        .build()
+
+      client1.release()
+      there was no(channelFactory).releaseExternalResources()
+      client2.release()
+      there was one(channelFactory).releaseExternalResources()
     }
   }
 }

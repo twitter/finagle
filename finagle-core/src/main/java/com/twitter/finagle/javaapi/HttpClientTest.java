@@ -2,7 +2,7 @@ package com.twitter.finagle.javaapi;
 
 import org.jboss.netty.handler.codec.http.*;
 
-import com.twitter.finagle.Service;
+import com.twitter.finagle.*;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;

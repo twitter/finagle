@@ -9,7 +9,8 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Throw
-import com.twitter.finagle.builder.{ClientBuilder, Http}
+import com.twitter.finagle.builder.{
+  ClientBuilder, Http, ReferenceCountedChannelFactory}
 import com.twitter.finagle.ChannelClosedException
 
 object ClientSpec extends Specification {
@@ -30,7 +31,7 @@ object ClientSpec extends Specification {
 
     val builder =
       ClientBuilder()
-        .channelFactory(new DefaultLocalClientChannelFactory)
+        .channelFactory(new ReferenceCountedChannelFactory(new DefaultLocalClientChannelFactory))
         .hosts(Seq(serverAddress))
         .codec(Http)
 
@@ -53,6 +54,8 @@ object ClientSpec extends Specification {
     "report a closed connection when the server doesn't reply" in {
       withServer(closingHandler) { clientBuilder =>
         val client = clientBuilder.build()
+        // No failures have happened yet.
+        client.isAvailable must beTrue
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
         val resolved = future get(1.second)
         resolved.isThrow must beTrue
