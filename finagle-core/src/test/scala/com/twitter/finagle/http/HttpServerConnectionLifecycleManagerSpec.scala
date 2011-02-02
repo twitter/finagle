@@ -23,8 +23,6 @@ object HttpServerConnectionLifecycleManagerSpec extends Specification with Mocki
     val cFuture = new DefaultChannelFuture(c, false)
     me.getChannel returns c
 
-    new DefaultHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.OK)
-
     def makeRequest(version: HttpVersion, headers: (String, String)*) = {
       val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
       headers foreach { case (k, v) =>
