@@ -57,6 +57,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
       val translated = e.getCause match {
         case _: java.net.ConnectException                    => new ConnectionFailedException
         case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
+        case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException
         case e                                               => new UnknownChannelException(e)
       }
 
@@ -90,7 +91,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
  */
 class ChannelServiceFactory[Req, Rep](
     bootstrap: ClientBootstrap,
-    prepareChannel: ChannelService[Req, Rep] => Future[Service[Req, Rep]])
+    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep]
 {
   private[this] val channelLatch = new FutureLatch

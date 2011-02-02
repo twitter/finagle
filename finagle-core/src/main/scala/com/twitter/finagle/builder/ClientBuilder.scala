@@ -249,6 +249,13 @@ case class ClientBuilder[Req, Rep](
     new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark)
   }
 
+  private[this] def prepareChannel(service: Service[Req, Rep]) = {
+    val protocol = _protocol.get
+    // First the codec, then the protocol.
+    protocol.codec.prepareClientChannel(service) flatMap
+      protocol.prepareChannel _ 
+  }
+
   def buildFactory(): ServiceFactory[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
@@ -270,8 +277,7 @@ case class ClientBuilder[Req, Rep](
       var factory: ServiceFactory[Req, Rep] = null
 
       val bs = buildBootstrap(protocol, host)
-      factory = new ChannelServiceFactory[Req, Rep](
-        bs, _protocol.get.prepareChannel(_))
+      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _)
 
       factory = buildPool(factory)
 

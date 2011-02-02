@@ -14,11 +14,11 @@ import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.test.{B, SomeStruct, AnException, F}
-import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
+import com.twitter.finagle.Transaction
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.silly.Silly
-import com.twitter.util.{Future, RandomSocket, Throw, Return, Promise}
+import com.twitter.util.{Future, RandomSocket, Return, Promise}
 import com.twitter.util.TimeConversions._
 
 object EndToEndSpec extends Specification {
@@ -28,21 +28,22 @@ object EndToEndSpec extends Specification {
       def add_one(a: Int, b: Int) = Future.void
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
-        new SomeStruct(123, someString)
+        new SomeStruct(123, "%s %s".format(
+          Transaction().id.toString, new String(Transaction().payload)))
       }
       def someway() = Future.void
     }
 
     val serverAddr = RandomSocket()
     val server = ServerBuilder()
-    .codec(ThriftServerFramedCodec())
-    .bindTo(serverAddr)
-    .build(new B.Service(processor, new TBinaryProtocol.Factory()))
+      .codec(ThriftServerFramedCodec())
+      .bindTo(serverAddr)
+      .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     val service = ClientBuilder()
-    .hosts(Seq(serverAddr))
-    .codec(ThriftClientFramedCodec())
-    .build()
+      .hosts(Seq(serverAddr))
+      .codec(ThriftClientFramedCodec())
+      .build()
 
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
@@ -50,7 +51,8 @@ object EndToEndSpec extends Specification {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
-      client.complex_return("a string")().arg_two must be_==("a string")
+      client.complex_return("a string")().arg_two must be_==(
+        "%s complex_return".format(Transaction().id.toString))
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block!

@@ -56,6 +56,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new NativeProject(_), coreProject)
 
   /**
+   * finagle-stream contains a streaming http codec identical to
+   * Twitter's "firehose".
+   */
+  val streamProject = project(
+    "finagle-stream", "finagle-stream",
+    new StreamProject(_), coreProject)
+
+  /**
    * finagle-stress has stress/integration test suites & tools for
    * development.
    */
@@ -72,7 +80,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val nettyRepo =
       "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
     val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
-    val util      = "com.twitter"          %  "util"      % "1.5.0"
+    val util      = "com.twitter"          %  "util"      % "1.5.2"
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
@@ -94,6 +102,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class KestrelProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+  }
+
+  class StreamProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
     override def compileOrder = CompileOrder.ScalaThenJava
