@@ -28,7 +28,8 @@ object EndToEndSpec extends Specification {
       def add_one(a: Int, b: Int) = Future.void
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
-        new SomeStruct(123, Transaction.get().toString)
+        new SomeStruct(123, "%s %s".format(
+          Transaction().id.toString, new String(Transaction().payload)))
       }
       def someway() = Future.void
     }
@@ -50,7 +51,8 @@ object EndToEndSpec extends Specification {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
-      client.complex_return("a string")().arg_two must be_==(Transaction.get().toString)
+      client.complex_return("a string")().arg_two must be_==(
+        "%s complex_return".format(Transaction().id.toString))
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block!

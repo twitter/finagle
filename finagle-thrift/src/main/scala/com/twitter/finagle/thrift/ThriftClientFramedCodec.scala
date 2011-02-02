@@ -92,7 +92,7 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
 {
   def apply(request: ThriftClientRequest,
             service: Service[ThriftClientRequest, Array[Byte]]) = {
-    val message = TracingHeader.encode(Transaction.get(), request.message)
+    val message = TracingHeader.encode(Transaction().id, request.message)
     val tracedRequest = ThriftClientRequest(message, request.oneway)
     service(tracedRequest)
   }

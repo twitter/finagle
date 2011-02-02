@@ -40,18 +40,26 @@ class ThriftServerTracingFilter
   // pipelining). We don't protect against this in the underlying
   // codec, however.
   private[this] var isUpgraded = false
+  private[this] val protocolFactory = new TBinaryProtocol.Factory()
 
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
+    // What to do on exceptions here?
+
     if (isUpgraded) {
       val (body, txid) = TracingHeader.decode(request)
-      Transaction.set(txid)
+
+      val memoryTransport = new TMemoryInputTransport(body)
+      val iprot = protocolFactory.getProtocol(memoryTransport)
+      val msg = iprot.readMessageBegin()
+
+      Transaction() = Transaction(txid, msg.name.getBytes)
       service(body)
     } else {
-      // Only try once?
-      val protocolFactory = new TBinaryProtocol.Factory()
       val memoryTransport = new TMemoryInputTransport(request)
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val msg = iprot.readMessageBegin()
+
+      // Only try once?
       if (msg.`type` == TMessageType.CALL && msg.name == Tracing.CanTraceMethodName) {
         // upgrade & reply.
         isUpgraded = true

@@ -9,22 +9,24 @@ import scala.util.Random
 
 import com.twitter.util.Local
 
+case class Transaction(id: Long, payload: Array[Byte])
+
 object Transaction {
   private[this] val rng = new Random
-  private[this] val transactionID = new Local[Long]
+  private[this] val current = new Local[Transaction]
 
-  def set(id: Long) {
-    transactionID() = id
+  def update(transaction: Transaction) {
+    current() = transaction
   }
 
-  def get() = {
-    if (!transactionID().isDefined)
+  def apply() = {
+    if (!current().isDefined)
       newTransaction()
 
-    transactionID().get
+    current().get
   }
 
   def newTransaction() {
-    transactionID() = rng.nextLong()
+    current() = Transaction(rng.nextLong(), Array[Byte]())
   }
 }
