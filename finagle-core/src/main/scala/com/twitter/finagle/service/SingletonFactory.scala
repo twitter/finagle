@@ -10,14 +10,12 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
 {
   private[this] var latch = new FutureLatch
 
-  def make() = {
+  def make() = Future {
     latch.incr()
-    val wrapped = new Service[Req, Rep] {
+    new Service[Req, Rep] {
       def apply(request: Req) = service(request)
       override def release() = latch.decr()
     }
-
-    Future.value(wrapped)
   }
 
   def close() = latch.await { service.release() }
