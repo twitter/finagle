@@ -295,8 +295,7 @@ case class ClientBuilder[Req, Rep](
       factory
     }
 
-    new LoadBalancedFactory(
-      hostFactories, new LeastQueuedStrategy[Req, Rep])
+    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
   }
 
   def build(): Service[Req, Rep] = {

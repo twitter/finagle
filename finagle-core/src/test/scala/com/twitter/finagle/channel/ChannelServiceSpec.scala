@@ -36,9 +36,17 @@ object ChannelServiceSpec extends Specification with Mockito {
       val future = service("hello")
       val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
       there was one(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
-      
       eventCaptor.getValue must haveClass[DownstreamMessageEvent]
-      eventCaptor.getValue.asInstanceOf[DownstreamMessageEvent].getMessage must be_==("hello")
+      val messageEvent = eventCaptor.getValue.asInstanceOf[DownstreamMessageEvent]
+      
+      "propagate the correct message" in {
+        messageEvent.getMessage must be_==("hello")
+      }
+
+      "cause write errors if the downstream write fails" in {
+        messageEvent.getFuture.setFailure(new Exception("doh."))
+        future() must throwA(new WriteException(new Exception("doh.")))
+      }
     }
 
     "receive replies" in {
