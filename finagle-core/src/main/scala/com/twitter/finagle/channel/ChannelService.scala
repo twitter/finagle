@@ -57,6 +57,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
       val translated = e.getCause match {
         case _: java.net.ConnectException                    => new ConnectionFailedException
         case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
+        case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException
         case e                                               => new UnknownChannelException(e)
       }
 
