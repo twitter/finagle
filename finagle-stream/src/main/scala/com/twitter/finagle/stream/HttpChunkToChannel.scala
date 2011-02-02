@@ -15,7 +15,6 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler with Serialized {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case message: HttpResponse =>
-      println(message)
       require(message.getStatus == HttpResponseStatus.OK,
         "Error: " + message.getStatus)
       val source = new ChannelSource[ChannelBuffer]
