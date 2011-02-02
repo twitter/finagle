@@ -4,6 +4,7 @@ import java.net.SocketAddress
 
 import org.specs.Specification
 import org.specs.mock.Mockito
+import org.mockito.Matchers
 
 import org.jboss.netty.channel.{
   Channel, ChannelFactory, ChannelPipeline,
@@ -18,6 +19,8 @@ import com.twitter.finagle.channel.ChannelService
 object ClientBuilderSpec extends Specification with Mockito {
   "ClientBuilder" should {
     val _codec = mock[Codec[Int, Float]]
+    (_codec.prepareClientChannel(Matchers.any[Service[Int, Float]])
+     answers { s => Future.value(s.asInstanceOf[Service[Int, Float]]) })
 
     val clientAddress = new SocketAddress {}
 
@@ -39,12 +42,12 @@ object ClientBuilderSpec extends Specification with Mockito {
     channelFactory.newChannel(channelPipeline) returns channel
 
     "invoke prepareChannel on connection establishment" in {
-      val prepareChannelPromise = new Promise[ChannelService[Int, Float]]
-      var theUnderlyingService: ChannelService[Int, Float] = null
+      val prepareChannelPromise = new Promise[Service[Int, Float]]
+      var theUnderlyingService: Service[Int, Float] = null
 
       val protocol = new Protocol[Int, Float] {
         def codec = _codec
-        override def prepareChannel(underlying: ChannelService[Int, Float]) = {
+        override def prepareChannel(underlying: Service[Int, Float]) = {
           theUnderlyingService = underlying
           prepareChannelPromise
         }

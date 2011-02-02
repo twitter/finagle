@@ -20,6 +20,18 @@ class WriteException(e: Throwable)          extends ChannelException {
   override def toString = "%s: %s".format(super.toString, e.toString)
 }
 
+object ChannelException {
+  def apply(cause: Throwable) = {
+    cause match {
+      case exc: ChannelException => exc
+      case _: java.net.ConnectException                    => new ConnectionFailedException
+      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
+      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException
+      case e                                               => new UnknownChannelException(e)
+    }
+  }
+}
+
 // Service layer errors.
 class ServiceException       extends Exception
 class ServiceClosedException extends ServiceException

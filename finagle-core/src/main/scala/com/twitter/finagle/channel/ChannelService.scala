@@ -4,7 +4,10 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.LinkedBlockingQueue
 
 import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel._
+import org.jboss.netty.channel.{
+  ChannelHandlerContext, MessageEvent, Channel, Channels,
+  SimpleChannelUpstreamHandler, ExceptionEvent,
+  ChannelStateEvent}
 
 import com.twitter.util.{Future, Promise, Return, Throw, Try}
 
@@ -53,15 +56,8 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
       reply(Try { e.getMessage.asInstanceOf[Rep] })
     }
 
-    override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) = {
-      val translated = e.getCause match {
-        case _: java.net.ConnectException                    => new ConnectionFailedException
-        case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
-        case e                                               => new UnknownChannelException(e)
-      }
-
-      reply(Throw(translated))
-    }
+    override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) =
+      reply(Throw(ChannelException(e.getCause)))
 
     override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
       reply(Throw(new ChannelClosedException))
@@ -71,7 +67,11 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
   def apply(request: Req) = {
     val replyFuture = new Promise[Rep]
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
-      Channels.write(channel, request)
+      Channels.write(channel, request) {
+        case Error(cause) =>
+          replyFuture.updateIfEmpty(Throw(new WriteException(ChannelException(cause))))
+        case _ => ()
+      }
       replyFuture
     } else {
       Future.exception(new TooManyConcurrentRequestsException)
@@ -90,7 +90,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
  */
 class ChannelServiceFactory[Req, Rep](
     bootstrap: ClientBootstrap,
-    prepareChannel: ChannelService[Req, Rep] => Future[Service[Req, Rep]])
+    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]])
   extends ServiceFactory[Req, Rep]
 {
   private[this] val channelLatch = new FutureLatch
