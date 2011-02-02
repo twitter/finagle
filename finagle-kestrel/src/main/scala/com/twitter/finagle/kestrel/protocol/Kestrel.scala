@@ -1,6 +1,6 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.builder.Codec
+import com.twitter.finagle.Codec
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._

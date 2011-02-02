@@ -39,7 +39,7 @@ object InterpreterServiceSpec extends Specification {
         client(Get(Seq(key)))() mustEqual Values(Seq(Value(key, value)))
       }
       val end = System.currentTimeMillis
-      println("%d ms".format(end - start))
+      // println("%d ms".format(end - start))
     }
   }
 }

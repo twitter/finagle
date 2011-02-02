@@ -72,5 +72,18 @@ object ThriftClientFinagleServerSpec extends Specification {
       client.someway()                  // just returns(!)
       somewayPromise() must be_==(())
     }
+
+    "handle wrong interface" in {
+      val (client, transport) = {
+        val socket = new TSocket(serverAddr.getHostName, serverAddr.getPort, 1000/*ms*/)
+        val transport = new TFramedTransport(socket)
+        val protocol = new TBinaryProtocol(transport)
+        (new F.Client(protocol), transport)
+      }
+      transport.open()
+
+      client.another_method(123) must throwA(
+        new TApplicationException("Invalid method name: 'another_method'"))
+    }
   }
 }

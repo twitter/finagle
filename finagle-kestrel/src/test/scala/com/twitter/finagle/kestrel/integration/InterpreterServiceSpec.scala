@@ -28,15 +28,28 @@ object InterpreterServiceSpec extends Specification {
       server.stop()
     }
 
+    val queueName   = "name"
+    val value = "value"
+
     "set & get" in {
-      val queueName   = "name"
-      val value = "value"
       val result = for {
         _ <- client(Flush(queueName))
         _ <- client(Set(queueName, Time.now, value))
         r <- client(Get(queueName, collection.Set.empty))
       } yield r
       result(1.second) mustEqual Values(Seq(Value(queueName, value)))
+    }
+
+    "transactions" in {
+      "set & get/open & get/abort" in {
+        val result = for {
+          _ <- client(Set(queueName, Time.now, value))
+          _ <- client(Get(queueName, collection.Set(Open())))
+          _ <- client(Get(queueName, collection.Set(Abort())))
+          r <- client(Get(queueName, collection.Set(Open())))
+        } yield r
+        result(1.second) mustEqual Values(Seq(Value(queueName, value)))
+      }
     }
   }
 }

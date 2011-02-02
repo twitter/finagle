@@ -39,7 +39,7 @@ class Decoder extends AbstractDecoder with StateMachine {
         decodeData(bytesNeeded, buffer) { data =>
           awaitResponseOrEnd(
             valuesSoFar ++
-            Seq(TokensWithData(tokens, ChannelBuffers.copiedBuffer(data))))
+            Seq(TokensWithData(tokens, data)))
           needMoreData
         }
       case AwaitingResponseOrEnd(valuesSoFar) =>

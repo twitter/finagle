@@ -61,7 +61,7 @@ class CommandToEncoding extends OneToOneEncoder {
     case Gets(keys) =>
       Tokens(Seq[ChannelBuffer](GET) ++ keys)
     case Incr(key, amount) =>
-      Tokens(Seq(DECR, key, amount.toString))
+      Tokens(Seq(INCR, key, amount.toString))
     case Decr(key, amount) =>
       Tokens(Seq(DECR, key, amount.toString))
     case Delete(key) =>

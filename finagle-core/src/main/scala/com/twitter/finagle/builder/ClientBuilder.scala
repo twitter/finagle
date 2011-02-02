@@ -15,21 +15,41 @@ import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
-import com.twitter.finagle.Service
+import com.twitter.finagle.pool._
+import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.loadbalancer.{
-  LoadBalancerService,
-  LeastQueuedStrategy, FailureAccrualStrategy}
+import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
+
+class ReferenceCountedChannelFactory(underlying: ChannelFactory)
+  extends ChannelFactory
+{
+  private[this] var refcount = 0
+
+  def acquire() = synchronized {
+    refcount += 1
+  }
+
+  def newChannel(pipeline: ChannelPipeline) = underlying.newChannel(pipeline)
+
+  // TODO: after releasing external resources, we can still use the
+  // underlying factory?  (ie. it'll create new threads, etc.?)
+  def releaseExternalResources() = synchronized {
+    refcount -= 1
+    if (refcount == 0)
+      underlying.releaseExternalResources()
+  }
+}
 
 object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
   lazy val defaultChannelFactory =
-    new NioClientSocketChannelFactory(
-      Executors.newCachedThreadPool(),
-      Executors.newCachedThreadPool())
+    new ReferenceCountedChannelFactory(
+      new NioClientSocketChannelFactory(
+        Executors.newCachedThreadPool(),
+        Executors.newCachedThreadPool()))
 }
 
 /**
@@ -40,7 +60,7 @@ object ClientBuilder {
  */
 case class ClientBuilder[Req, Rep](
   _cluster: Option[Cluster],
-  _codec: Option[Codec[Req, Rep]],
+  _protocol: Option[Protocol[Req, Rep]],
   _connectionTimeout: Duration,
   _requestTimeout: Duration,
   _statsReceiver: Option[StatsReceiver],
@@ -53,35 +73,35 @@ case class ClientBuilder[Req, Rep](
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
   _logger: Option[Logger],
-  _channelFactory: Option[ChannelFactory],
+  _channelFactory: Option[ReferenceCountedChannelFactory],
   _tls: Option[SSLContext],
   _startTls: Boolean)
 {
   def this() = this(
-    None,                                        // cluster
-    None,                                        // codec
-    10.milliseconds,                             // connectionTimeout
-    Duration.MaxValue,                           // requestTimeout
-    None,                                        // statsReceiver
-    (60, 10.seconds),                            // loadStatistics
-    Some("client"),                              // name
-    None,                                        // hostConnectionCoresize
-    None,                                        // hostConnectionLimit
-    None,                                        // hostConnectionIdleTime
-    None,                                        // sendBufferSize
-    None,                                        // recvBufferSize
-    None,                                        // retries
-    None,                                        // logger
-    Some(ClientBuilder.defaultChannelFactory),   // channelFactory
-    None,                                        // tls
-    false                                        // startTls
+    None,               // cluster
+    None,               // protocol
+    10.milliseconds,    // connectionTimeout
+    Duration.MaxValue,  // requestTimeout
+    None,               // statsReceiver
+    (60, 10.seconds),   // loadStatistics
+    Some("client"),     // name
+    None,               // hostConnectionCoresize
+    None,               // hostConnectionLimit
+    None,               // hostConnectionIdleTime
+    None,               // sendBufferSize
+    None,               // recvBufferSize
+    None,               // retries
+    None,               // logger
+    None,               // channelFactory
+    None,               // tls
+    false               // startTls
   )
 
   override def toString() = {
     val options = Seq(
       "name"                   -> _name,
       "cluster"                -> _cluster,
-      "codec"                  -> _codec,
+      "protocol"               -> _protocol,
       "connectionTimeout"      -> Some(_connectionTimeout),
       "requestTimeout"         -> Some(_requestTimeout),
       "statsReceiver"          -> _statsReceiver,
@@ -120,8 +140,13 @@ case class ClientBuilder[Req, Rep](
     copy(_cluster = Some(cluster))
   }
 
-  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
-    copy(_codec = Some(codec))
+  def protocol[Req1, Rep1](protocol: Protocol[Req1, Rep1]) =
+    copy(_protocol = Some(protocol))
+
+  def codec[Req1, Rep1](_codec: Codec[Req1, Rep1]) =
+    copy(_protocol = Some(new Protocol[Req1, Rep1] {
+      def codec = _codec
+    }))
 
   def connectionTimeout(duration: Duration) =
     copy(_connectionTimeout = duration)
@@ -158,7 +183,13 @@ case class ClientBuilder[Req, Rep](
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  def channelFactory(cf: ChannelFactory) =
+  /**
+   * Use the given channel factory instead of the default. Note that
+   * when using a non-default ChannelFactory, finagle can't
+   * meaningfully reference count factory usage, and so the caller is
+   * responsible for calling ``releaseExternalResources()''.
+   */
+  def channelFactory(cf: ReferenceCountedChannelFactory) =
     copy(_channelFactory = Some(cf))
 
   def tls() =
@@ -173,11 +204,13 @@ case class ClientBuilder[Req, Rep](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   // ** BUILDING
-  private def bootstrap(codec: Codec[Req, Rep])(host: SocketAddress) = {
-    val bs = new ClientBootstrap(_channelFactory.get)
+  private[this] def buildBootstrap(protocol: Protocol[Req, Rep], host: SocketAddress) = {
+    val cf = _channelFactory getOrElse ClientBuilder.defaultChannelFactory
+    cf.acquire()
+    val bs = new ClientBootstrap(cf)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
-        val pipeline = codec.clientPipelineFactory.getPipeline
+        val pipeline = protocol.codec.clientPipelineFactory.getPipeline
         for (ctx <- _tls) {
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(true)
@@ -205,58 +238,76 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
-  private def pool(bootstrap: ClientBootstrap) = {
-    // Conservative, but probably the only safe thing.
+  private[this] def buildPool(factory: ServiceFactory[Req, Rep]) = {
+    // These are conservative defaults, but probably the only safe
+    // thing to do.
     val lowWatermark  = _hostConnectionCoresize getOrElse(1)
-    val highWatermark = _hostConnectionLimit getOrElse(Int.MaxValue)
+    val highWatermark = _hostConnectionLimit    getOrElse(Int.MaxValue)
     val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
-    val factory = new CachingLifecycleFactory(
-      new ChannelServiceFactory[Req, Rep](bootstrap), idleTime)
 
-    val pool = new WatermarkPool[Service[Req, Rep]](factory, lowWatermark, highWatermark)
-    new PoolingService[Req, Rep](pool)
+    val cachingPool = new CachingPool(factory, idleTime)
+    new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark)
   }
 
-  private def makeBroker(codec: Codec[Req, Rep]) =
-    pool _ compose bootstrap(codec)
+  private[this] def prepareChannel(service: Service[Req, Rep]) = {
+    val protocol = _protocol.get
+    // First the codec, then the protocol.
+    protocol.codec.prepareClientChannel(service) flatMap
+      protocol.prepareChannel _ 
+  }
 
-  def build(): Service[Req, Rep] = {
+  def buildFactory(): ServiceFactory[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
-    if (!_codec.isDefined)
-      throw new IncompleteSpecification("No codec was specified")
+    if (!_protocol.isDefined)
+      throw new IncompleteSpecification("No protocol was specified")
 
-    val cluster = _cluster.get
-    val codec = _codec.get
+    val cluster  = _cluster.get
+    val protocol = _protocol.get
 
-    val brokers = cluster mkServices { host =>
-      // TODO: stats export [observers], internal LB stats.
-      var broker: Service[Req, Rep] = makeBroker(codec)(host)
+    val hostFactories = cluster mapHosts { host =>
+      // The per-host stack is as follows:
+      //
+      //   ChannelService
+      //   Pool
+      //   Timeout
+      //   Stats
+      //
+      // the pool & below are host-specific,
+      var factory: ServiceFactory[Req, Rep] = null
+
+      val bs = buildBootstrap(protocol, host)
+      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _)
+
+      factory = buildPool(factory)
+
       if (_requestTimeout < Duration.MaxValue) {
-        val timeoutFilter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
-        broker = timeoutFilter andThen broker
+        val filter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+        factory = filter andThen factory
       }
 
       if (_statsReceiver.isDefined) {
         val statsFilter = new StatsFilter[Req, Rep](
           _statsReceiver.get.scope("host" -> host.toString))
-        broker = statsFilter andThen broker
+        factory = statsFilter andThen factory
       }
 
-      broker
+      factory
     }
 
-    // TODO: enable passing in a strategy via the builder.
-    val loadBalancerStrategy = {
-      val leastQueuedStrategy = new LeastQueuedStrategy[Req, Rep]
-      new FailureAccrualStrategy(leastQueuedStrategy, 3, 10.seconds)
+    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
+  }
+
+  def build(): Service[Req, Rep] = {
+    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
+
+    // We keep the retrying filter at the very bottom: this allows us
+    // to retry across multiple hosts, etc.
+    _retries map { numRetries =>
+      val filter = new RetryingFilter[Req, Rep](new NumTriesRetryStrategy(numRetries))
+      service = filter andThen service
     }
 
-    val loadBalanced = new LoadBalancerService(brokers, loadBalancerStrategy)
-    if (_retries.isDefined) {
-      RetryingService.tries[Req, Rep](_retries.get) andThen loadBalanced
-    } else {
-      loadBalanced
-    }
+    service
   }
 }

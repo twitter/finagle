@@ -6,9 +6,10 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
+import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 
-import com.twitter.util.{Promise, Return, Throw}
+import com.twitter.util.{Promise, Return, Throw, Future}
 
 import com.twitter.finagle._
 
@@ -18,6 +19,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     val channel = mock[Channel]
     val sink = mock[ChannelSink]
     val closeFuture = Channels.future(channel)
+    val factory = mock[ChannelServiceFactory[String, String]]
     channel.getPipeline returns pipeline
     channel.isOpen returns true
     channel.getCloseFuture returns closeFuture
@@ -25,22 +27,30 @@ object ChannelServiceSpec extends Specification with Mockito {
 
     "installs channel handler" in {
       pipeline.toMap.keySet must haveSize(0)
-      new ChannelService[Any, Any](channel)
+      new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
       pipeline.toMap.keySet must haveSize(1)
     }
 
     "write requests to the underlying channel" in {
-      val service = new ChannelService[String, String](channel)
+      val service = new ChannelService[String, String](channel, factory)
       val future = service("hello")
       val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
       there was one(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
-      
       eventCaptor.getValue must haveClass[DownstreamMessageEvent]
-      eventCaptor.getValue.asInstanceOf[DownstreamMessageEvent].getMessage must be_==("hello")
+      val messageEvent = eventCaptor.getValue.asInstanceOf[DownstreamMessageEvent]
+      
+      "propagate the correct message" in {
+        messageEvent.getMessage must be_==("hello")
+      }
+
+      "cause write errors if the downstream write fails" in {
+        messageEvent.getFuture.setFailure(new Exception("doh."))
+        future() must throwA(new WriteException(new Exception("doh.")))
+      }
     }
 
     "receive replies" in {
-      val service = new ChannelService[String, String](channel)
+      val service = new ChannelService[String, String](channel, factory)
       val future = service("hello")
       there was one(sink).eventSunk(Matchers.eq(pipeline), Matchers.any[ChannelEvent])
 
@@ -97,7 +107,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "without a request" in {
-      val service = new ChannelService[String, String](channel)
+      val service = new ChannelService[String, String](channel, factory)
       service.isAvailable must beTrue
 
       "any response is considered spurious" in {
@@ -111,12 +121,62 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "freak out on concurrent requests" in {
-      val service = new ChannelService[Any, Any](channel)
+      val service = new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
       val f0 = service("hey")
       f0.isDefined must beFalse
       val f1 = service("there")
       f1.isDefined must beTrue
       f1() must throwA[TooManyConcurrentRequestsException]
+    }
+
+    "notify the factory upon release" in {
+      val service = new ChannelService[String, String](channel, factory)
+      service.release()
+      there was one(factory).channelReleased(service)
+    }
+  }
+
+  "ChannelServiceFactory" should {
+    val bootstrap = mock[ClientBootstrap]
+    val pipeline = new DefaultChannelPipeline
+    val channel = mock[Channel]
+    channel.getPipeline returns pipeline
+    val channelFuture = Channels.future(channel)
+    bootstrap.connect() returns channelFuture
+
+    val factory = new ChannelServiceFactory[Any, Any](bootstrap, Future.value(_))
+
+    "close the underlying bootstrap on close() with no outstanding requests" in {
+      factory.close()
+      there was one(bootstrap).releaseExternalResources()
+    }
+
+    "close the underlying bootstrap only after all channels are released" in {
+      val f = factory.make()
+      f.isDefined must beFalse
+      channelFuture.setSuccess()
+      f.isDefined must beTrue
+
+      factory.close()
+      there was no(bootstrap).releaseExternalResources()
+
+      f().release()
+      there was one(bootstrap).releaseExternalResources()
+    }
+
+    "propagate bootstrap errors" in {
+      val f = factory.make()
+      f.isDefined must beFalse
+      there was one(bootstrap).connect()
+
+      channelFuture.setFailure(new Exception("oh crap"))
+
+      f.isDefined must beTrue
+      f() must throwA(new WriteException(new Exception("oh crap")))
+
+      // The factory should also be directly closable now.
+      factory.close()
+      there was one(bootstrap).releaseExternalResources()
     }
   }
 }

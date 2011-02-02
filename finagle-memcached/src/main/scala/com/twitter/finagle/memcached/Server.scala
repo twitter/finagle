@@ -22,7 +22,7 @@ class Server(address: SocketAddress) {
 
   private[this] val serverSpec =
     ServerBuilder()
-      .name("schmemcached")
+      .name("finagle")
       .codec(new Memcached)
       .bindTo(address)
 

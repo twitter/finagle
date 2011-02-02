@@ -378,25 +378,25 @@ public class B {
     public Future<Integer> add(int a, int b) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("add", TMessageType.CALL, 0));
-        add_args args = new add_args();
-        args.setA(a);
-        args.setB(b);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("add", TMessageType.CALL, 0));
+        add_args __args__ = new add_args();
+        __args__.setA(a);
+        __args__.setB(b);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Integer>>() {
-          public Future<Integer> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Integer>>() {
+          public Future<Integer> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_add());
+              return Future.value((new Client(__prot__)).recv_add());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -409,25 +409,25 @@ public class B {
     public Future<Void> add_one(int a, int b) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("add_one", TMessageType.CALL, 0));
-        add_one_args args = new add_one_args();
-        args.setA(a);
-        args.setB(b);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("add_one", TMessageType.CALL, 0));
+        add_one_args __args__ = new add_one_args();
+        __args__.setA(a);
+        __args__.setB(b);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Void>>() {
-          public Future<Void> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              (new Client(prot)).recv_add_one();
+              (new Client(__prot__)).recv_add_one();
               return Future.value(null);
             } catch (Exception e) {
               return Future.exception(e);
@@ -441,24 +441,24 @@ public class B {
     public Future<SomeStruct> complex_return(String some_string) {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("complex_return", TMessageType.CALL, 0));
-        complex_return_args args = new complex_return_args();
-        args.setSome_string(some_string);
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("complex_return", TMessageType.CALL, 0));
+        complex_return_args __args__ = new complex_return_args();
+        __args__.setSome_string(some_string);
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, false);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<SomeStruct>>() {
-          public Future<SomeStruct> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<SomeStruct>>() {
+          public Future<SomeStruct> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
-              return Future.value((new Client(prot)).recv_complex_return());
+              return Future.value((new Client(__prot__)).recv_complex_return());
             } catch (Exception e) {
               return Future.exception(e);
             }
@@ -471,21 +471,21 @@ public class B {
     public Future<Void> someway() {
       try {
         // TODO: size
-        TMemoryBuffer memoryTransport = new TMemoryBuffer(512);
-        TProtocol prot = protocolFactory.getProtocol(memoryTransport);
-        prot.writeMessageBegin(new TMessage("someway", TMessageType.CALL, 0));
-        someway_args args = new someway_args();
-        args.write(prot);
-        prot.writeMessageEnd();
+        TMemoryBuffer __memoryTransport__ = new TMemoryBuffer(512);
+        TProtocol __prot__ = this.protocolFactory.getProtocol(__memoryTransport__);
+        __prot__.writeMessageBegin(new TMessage("someway", TMessageType.CALL, 0));
+        someway_args __args__ = new someway_args();
+        __args__.write(__prot__);
+        __prot__.writeMessageEnd();
       
 
-        byte[] buffer = Arrays.copyOfRange(memoryTransport.getArray(), 0, memoryTransport.length());
-        ThriftClientRequest request = new ThriftClientRequest(buffer, true);
-        Future<byte[]> done = this.service.apply(request);
-        return done.flatMap(new Function<byte[], Try<Void>>() {
-          public Future<Void> apply(byte[] buffer) {
-            TMemoryInputTransport memoryTransport = new TMemoryInputTransport(buffer);
-            TProtocol prot = protocolFactory.getProtocol(memoryTransport);
+        byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
+        ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, true);
+        Future<byte[]> __done__ = this.service.apply(__request__);
+        return __done__.flatMap(new Function<byte[], Try<Void>>() {
+          public Future<Void> apply(byte[] __buffer__) {
+            TMemoryInputTransport __memoryTransport__ = new TMemoryInputTransport(__buffer__);
+            TProtocol __prot__ = ServiceToClient.this.protocolFactory.getProtocol(__memoryTransport__);
             try {
               return Future.value(null);
             } catch (Exception e) {

@@ -81,9 +81,6 @@ case class ServerBuilder[Req, Rep](
   def sendBufferSize(value: Int) = copy(_sendBufferSize = Some(value))
   def recvBufferSize(value: Int) = copy(_recvBufferSize = Some(value))
 
-  // def service(service: Service[Req, Rep]) =
-  //   copy(_service = Some(service))
-
   def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
 
@@ -104,7 +101,9 @@ case class ServerBuilder[Req, Rep](
   def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
 
-  def build(service: Service[Req, Rep]): Server = {
+  def build(service: Service[Req, Rep]): Server = build(() => service)
+
+  def build(serviceFactory: () => Service[Req, Rep]): Server = {
     val codec = _codec.getOrElse {
       throw new IncompleteSpecification("No codec was specified")
     }
@@ -140,11 +139,10 @@ case class ServerBuilder[Req, Rep](
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
-        val serviceWithStats =
-          if (_statsReceiver.isDefined)
-            new StatsFilter(_statsReceiver.get).andThen(service)
-          else service
-        pipeline.addLast("service", new ServiceToChannelHandler(serviceWithStats))
+        var service = codec.wrapServerChannel(serviceFactory())
+        if (_statsReceiver.isDefined)
+          service = new StatsFilter(_statsReceiver.get).andThen(service)
+        pipeline.addLast("service", new ServiceToChannelHandler(service))
 
         pipeline
       }

@@ -12,6 +12,7 @@ import com.twitter.util.Future
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def map[Req1](f: (Req1) => (Req)) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
+    override def release() = Service.this.release()
   }
 
   /**
@@ -20,15 +21,44 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def apply(request: Req): Future[Rep]
 
   /**
-   * Release any external resources. Overriden in subclasses.
+   * Relinquishes the use of this service instance.
    */
-  def close() {}
+  def release() = ()
 
   /**
    * Determines whether this service is available (can accept requests
-   * with a reasonable likelihood of success.
+   * with a reasonable likelihood of success).
    */
   def isAvailable: Boolean = true
+}
+
+abstract class ServiceFactory[-Req, +Rep] {
+  /**
+   * Reserve the use of a given service instance. This pins the
+   * underlying channel and the returned service has exclusive use of
+   * its underlying connection. To relinquish the use of the reserved
+   * Service, the user must call Service.release().
+   */
+  def make(): Future[Service[Req, Rep]]
+
+  /**
+   * Close the factory and its underlying resources.
+   */
+  def close()
+
+  def isAvailable: Boolean = true
+}
+
+class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
+  extends Service[Req, Rep]
+{
+  def apply(request: Req) =
+    factory.make() flatMap { service =>
+      service(request) ensure { service.release() }
+    }
+
+  override def release() = factory.close()
+  override def isAvailable = factory.isAvailable
 }
 
 /**
@@ -73,6 +103,8 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
       def apply(request: ReqIn, service: Service[Req2, Rep2]) = {
         Filter.this.apply(request, new Service[ReqOut, RepIn] {
           def apply(request: ReqOut): Future[RepIn] = next(request, service)
+          override def release() = service.release()
+          override def isAvailable = service.isAvailable
         })
       }
     }
@@ -87,7 +119,16 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    */
   def andThen(service: Service[ReqOut, RepIn]) = new Service[ReqIn, RepOut] {
     def apply(request: ReqIn) = Filter.this.apply(request, service)
+    override def release() = service.release()
+    override def isAvailable = service.isAvailable
   }
+
+  def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
+    new ServiceFactory[ReqIn, RepOut] {
+      def make() = factory.make() map { Filter.this andThen _ }
+      override def close() = factory.close()
+      override def isAvailable = factory.isAvailable
+    }
 
   /**
    * Conditionally propagates requests down the filter chain. This may
@@ -106,3 +147,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 }
 
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
+
+object Filter {
+  def identity[Req, Rep] = new SimpleFilter[Req, Rep] {
+    def apply(request: Req, service: Service[Req, Rep]) = service(request)
+  }
+}
