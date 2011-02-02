@@ -36,6 +36,7 @@ class ChannelToHttpChunk extends SimpleChannelDownstreamHandler {
       channel.closes.respond { _ =>
         val ignoreOutcome = new DefaultChannelFuture(ctx.getChannel, false)
         channelRef.set(null)
+        observerRef.get.dispose()
         observerRef.set(null)
         Channels.write(ctx, ignoreOutcome, new DefaultHttpChunkTrailer)
       }
