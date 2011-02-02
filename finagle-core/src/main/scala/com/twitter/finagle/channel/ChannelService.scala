@@ -72,6 +72,9 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
   def apply(request: Req) = {
     val replyFuture = new Promise[Rep]
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
+      // XXX - listen on this future -- if it's a write failure, then
+      // issue a WriteException -- otherwise, the standard path.
+      
       Channels.write(channel, request)
       replyFuture
     } else {

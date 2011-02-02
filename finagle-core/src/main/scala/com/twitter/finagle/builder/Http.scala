@@ -31,7 +31,7 @@ class Http(compressionLevel: Int = 0) extends Codec[HttpRequest, HttpResponse] {
 
         pipeline.addLast(
           "connectionLifecycleManager",
-          new HttpServerConnectionLifecycleManager)
+          new ServerConnectionManager)
 
         pipeline
       }
