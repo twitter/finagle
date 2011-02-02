@@ -31,6 +31,7 @@ object Hose {
 object Stream2Kestrel extends Specification {
   "Stream Piped to Kestrel" should {
     "make you wet your pants" in {
+      skip("Not yet working")
       val stream = ClientBuilder()
         .codec(new Stream)
         .hosts("stream.twitter.com:80")
@@ -40,8 +41,8 @@ object Stream2Kestrel extends Specification {
         "Authorization" -> "Basic cGl2b3Q0OnBpdm90czJwYW5kYXM=")
       val kestrel = Kestrel("localhost:22133")
 
-//      hose.pipe(kestrel.source("tweets"))
-//      kestrel.sink("tweets").pipe(kestrel.source("tweets2"))
+      hose.pipe(kestrel.source("tweets"))
+      kestrel.sink("tweets").pipe(kestrel.source("tweets2"))
     }
   }
 }

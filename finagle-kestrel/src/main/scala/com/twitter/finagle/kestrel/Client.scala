@@ -94,6 +94,7 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
   def sink(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
     val sink = new ChannelSource[ChannelBuffer]
     sink.responds.first.foreach { _ =>
+      println("a responder registered...")
       receive(queueName, sink, waitUpTo, collection.Set(Open()))
     }
     sink
@@ -102,6 +103,7 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
   def source(queueName: String): ChannelSource[ChannelBuffer] = {
     val source = new ChannelSource[ChannelBuffer]
     source.respond(source) { item =>
+      println("putting item==")
       set(queueName, item)
     }
     source
@@ -109,8 +111,10 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
 
   private[this] def receive(queueName: String, channel: ChannelSource[ChannelBuffer], waitUpTo: Duration, options: collection.Set[GetOption]) {
     if (channel.isOpen) {
+      println("calling GET")
       underlying(Get(queueName, collection.Set(Timeout(waitUpTo)) ++ options)) respond {
         case Return(Values(Seq(Value(key, item)))) =>
+          println("getsting an item===")
           try {
             channel.send(item)
             receive(queueName, channel, waitUpTo, collection.Set(Close(), Open()))
@@ -120,8 +124,11 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
               channel.close()
           }
         case Return(Values(Seq())) =>
+          println("getting item==")
           receive(queueName, channel, waitUpTo, collection.Set(Open()))
         case Throw(e) =>
+          e.printStackTrace()
+          println("error")
           channel.close()
       }
     }

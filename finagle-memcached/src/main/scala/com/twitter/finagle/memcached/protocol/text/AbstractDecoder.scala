@@ -7,10 +7,20 @@ import org.jboss.netty.channel._
 import collection.mutable.ArrayBuffer
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import org.jboss.netty.util.CharsetUtil
 
 object AbstractDecoder {
   private val DELIMETER = ChannelBuffers.wrappedBuffer("\r\n".getBytes)
   private val SKIP_SPACE = 1
+  private val FIND_CRLF = new ChannelBufferIndexFinder() {
+    def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
+      if (buffer.writerIndex < guessedIndex + DELIMETER.readableBytes - 1) return false
+
+      val cr = buffer.getByte(guessedIndex)
+      val lf = buffer.getByte(guessedIndex + 1)
+      cr == '\r' && lf == '\n'
+    }
+}
 }
 
 abstract class AbstractDecoder extends FrameDecoder {
@@ -29,7 +39,7 @@ abstract class AbstractDecoder extends FrameDecoder {
   }
 
   protected def decodeLine(buffer: ChannelBuffer, needsData: Seq[ChannelBuffer] => Option[Int])(continue: Seq[ChannelBuffer] => Decoding): Decoding = {
-    val frameLength = buffer.bytesBefore(ChannelBufferIndexFinder.CRLF)
+    val frameLength = buffer.bytesBefore(FIND_CRLF)
     if (frameLength < 0) {
       needMoreData
     } else {
