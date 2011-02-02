@@ -53,7 +53,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val streamProject = project(
     "finagle-stream", "finagle-stream",
-    new StreamProject(_), coreProject)
+    new StreamProject(_), coreProject, kestrelProject)
 
   /**
    * finagle-stress has stress/integration test suites & tools for

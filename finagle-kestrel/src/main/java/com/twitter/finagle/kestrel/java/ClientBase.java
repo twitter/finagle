@@ -1,6 +1,7 @@
 package com.twitter.finagle.kestrel.java;
 
 import com.twitter.concurrent.Channel;
+import com.twitter.concurrent.ChannelSource;
 import com.twitter.finagle.kestrel.protocol.Response;
 import com.twitter.util.Duration;
 import com.twitter.util.Function;
@@ -41,7 +42,11 @@ public class ClientBase extends com.twitter.finagle.kestrel.java.Client {
     return underlying.delete(key);
   }
 
-  public Channel channel(String key, Duration waitFor) {
-    return underlying.channel(key, waitFor);
+  public Channel<ChannelBuffer> sink(String key, Duration waitFor) {
+    return underlying.sink(key, waitFor);
+  }
+
+  public ChannelSource<ChannelBuffer> source(String key) {
+    return underlying.source(key);
   }
 }

@@ -1,10 +1,10 @@
 package com.twitter.finagle.stream
 
-import org.jboss.netty.handler.codec.http.{HttpChunkTrailer, HttpChunk, HttpMessage}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import com.twitter.concurrent.{Serialized, ChannelSource}
+import org.jboss.netty.handler.codec.http._
 
 /**
  * Client handler for a streaming protocol.
@@ -14,10 +14,14 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler with Serialized {
     new AtomicReference[com.twitter.concurrent.ChannelSource[ChannelBuffer]](null)
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
-    case message: HttpMessage =>
+    case message: HttpResponse =>
+      println(message)
+      require(message.getStatus == HttpResponseStatus.OK,
+        "Error: " + message.getStatus)
       val source = new ChannelSource[ChannelBuffer]
       require(channelRef.compareAndSet(null, source),
         "Channel is already busy")
+
       ctx.getChannel.setReadable(false)
       source.responds.first.respond { _ =>
         if (!message.isChunked) {
