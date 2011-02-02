@@ -9,7 +9,7 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers
 
-object ConnectionLifecycleManagerSpec extends Specification with Mockito {
+object HttpServerConnectionLifecycleManagerSpec extends Specification with Mockito {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET
