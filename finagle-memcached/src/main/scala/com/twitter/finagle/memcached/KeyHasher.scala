@@ -142,6 +142,74 @@ object KeyHasher {
     override def toString() = "CRC32_ITU"
   }
 
+  /**
+   * Paul Hsieh's hash function.
+   * http://www.azillionmonkeys.com/qed/hash.html
+   */
+  val HSIEH = new KeyHasher {
+    override def hashKey(key: Array[Byte]): Long = {
+      // Do math in 64 bits, but force hash to 32-bits before any right shift to
+      // prevent sign extension from adding new high bits.
+      var hash: Long = 0L
+      val LONG_MASK = 0xffffffffL
+
+      if (key.isEmpty)
+        return 0
+
+      for (i <- 0 until key.length / 4) {
+        val b0 = key(i*4)
+        val b1 = key(i*4 + 1)
+        val b2 = key(i*4 + 2)
+        val b3 = key(i*4 + 3)
+        val s0 = (b1 << 8) | b0
+        val s1 = (b3 << 8) | b2
+
+        hash += s0
+        val tmp = (s1 << 11) ^ hash
+        hash = (hash << 16) ^ tmp
+        hash += (hash & LONG_MASK) >> 11
+      }
+
+      val rem = key.length % 4
+      val offset = key.length - rem
+      rem match {
+        case 3 =>
+          val b0 = key(offset)
+          val b1 = key(offset + 1)
+          val b2 = key(offset + 2)
+          val s0 = b1 << 8 | b0
+          hash += s0
+          hash ^= hash << 16
+          hash ^= b2 << 18
+          hash += (hash & LONG_MASK) >> 11
+        case 2 =>
+          val b0 = key(offset)
+          val b1 = key(offset + 1)
+          val s0 = b1 << 8 | b0
+          hash += s0
+          hash ^= hash << 11
+          hash += (hash & LONG_MASK) >> 17
+        case 1 =>
+          val b0 = key(offset)
+          hash += b0
+          hash ^= hash << 10
+          hash += (hash & LONG_MASK) >> 1
+        case 0 => ()
+      }
+
+      hash ^= hash << 3
+      hash += (hash & LONG_MASK) >> 5
+      hash ^= hash << 4
+      hash += (hash & LONG_MASK) >> 17
+      hash ^= hash << 25
+      hash += (hash & LONG_MASK) >> 6
+
+      hash & LONG_MASK
+    }
+
+    override def toString() = "FNV1A_64"
+  }
+
   private val hashes = new mutable.HashMap[String, KeyHasher]
   hashes += ("fnv" -> FNV1_32)
   hashes += ("fnv1" -> FNV1_32)
@@ -151,6 +219,7 @@ object KeyHasher {
   hashes += ("fnv1a-64" -> FNV1A_64)
   hashes += ("ketama" -> KETAMA)
   hashes += ("crc32-itu" -> CRC32_ITU)
+  hashes += ("hsieh" -> HSIEH)
 
   /**
    * Register a hash function by name. If used before creating a memcache client from a
