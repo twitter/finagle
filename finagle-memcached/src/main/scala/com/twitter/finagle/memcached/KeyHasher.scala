@@ -148,10 +148,7 @@ object KeyHasher {
    */
   val HSIEH = new KeyHasher {
     override def hashKey(key: Array[Byte]): Long = {
-      // Do math in 64 bits, but force hash to 32-bits before any right shift to
-      // prevent sign extension from adding new high bits.
-      var hash: Long = 0L
-      val LONG_MASK = 0xffffffffL
+      var hash: Int = 0
 
       if (key.isEmpty)
         return 0
@@ -167,7 +164,7 @@ object KeyHasher {
         hash += s0
         val tmp = (s1 << 11) ^ hash
         hash = (hash << 16) ^ tmp
-        hash += (hash & LONG_MASK) >> 11
+        hash += hash >>> 11
       }
 
       val rem = key.length % 4
@@ -181,33 +178,33 @@ object KeyHasher {
           hash += s0
           hash ^= hash << 16
           hash ^= b2 << 18
-          hash += (hash & LONG_MASK) >> 11
+          hash += hash >>> 11
         case 2 =>
           val b0 = key(offset)
           val b1 = key(offset + 1)
           val s0 = b1 << 8 | b0
           hash += s0
           hash ^= hash << 11
-          hash += (hash & LONG_MASK) >> 17
+          hash += hash >>> 17
         case 1 =>
           val b0 = key(offset)
           hash += b0
           hash ^= hash << 10
-          hash += (hash & LONG_MASK) >> 1
+          hash += hash >>> 1
         case 0 => ()
       }
 
       hash ^= hash << 3
-      hash += (hash & LONG_MASK) >> 5
+      hash += hash >>> 5
       hash ^= hash << 4
-      hash += (hash & LONG_MASK) >> 17
+      hash += hash >>> 17
       hash ^= hash << 25
-      hash += (hash & LONG_MASK) >> 6
+      hash += hash >>> 6
 
-      hash & LONG_MASK
+      hash & 0xffffffffL
     }
 
-    override def toString() = "FNV1A_64"
+    override def toString() = "Hsieh"
   }
 
   private val hashes = new mutable.HashMap[String, KeyHasher]
