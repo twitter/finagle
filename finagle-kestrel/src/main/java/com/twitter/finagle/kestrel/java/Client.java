@@ -1,6 +1,7 @@
 package com.twitter.finagle.kestrel.java;
 
 import com.twitter.concurrent.Channel;
+import com.twitter.concurrent.ChannelSource;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.kestrel.protocol.Command;
 import com.twitter.finagle.kestrel.protocol.Response;
@@ -61,9 +62,16 @@ public abstract class Client {
    * A friendly Channel object for Dequeueing items from a queue as they arrive.
    * @param key queue name
    * @param waitFor if the queue is empty, wait up to this duration for something to arrive before explicitly calling dequeueing again. A sensible value for this is infinity.
-   * @return
+   * @return a ChannelSource<ChannelBuffer>
    */
-  abstract public Channel channel(String key, Duration waitFor);
+  abstract public Channel<ChannelBuffer> sink(String key, Duration waitFor);
+
+  /**
+   * A friendly ChannelSource object for Enqueuing items from a queue as they arrive.
+   * @param key queue name
+   * @return a ChannelSource<ChannelBuffer>
+   */
+  abstract public ChannelSource<ChannelBuffer> source(String key);
 
   /**
    * Dequeue an item
@@ -81,8 +89,8 @@ public abstract class Client {
    * @param key the queue name
    * @return
    */
-  public Channel channel(String key) {
-    return this.channel(key, Duration.apply(10, TimeUnit.SECONDS));
+  public Channel<ChannelBuffer> sink(String key) {
+    return this.sink(key, Duration.apply(10, TimeUnit.SECONDS));
   }
 
   /**
