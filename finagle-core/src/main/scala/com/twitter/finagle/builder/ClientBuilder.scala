@@ -45,11 +45,33 @@ object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
-  lazy val defaultChannelFactory =
-    new ReferenceCountedChannelFactory(
-      new NioClientSocketChannelFactory(
-        Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool()))
+  lazy val defaultChannelFactory = new ReferenceCountedChannelFactory(
+    // A "revivable" and lazy ChannelFactory that allows us to
+    // revive ChannelFactories after they have been released.
+    new ChannelFactory {
+      private[this] def make() =
+        new NioClientSocketChannelFactory(
+          Executors.newCachedThreadPool(),
+          Executors.newCachedThreadPool())
+
+      @volatile private[this] var underlying: ChannelFactory = null
+
+      def newChannel(pipeline: ChannelPipeline) = {
+        if (underlying eq null) synchronized {
+          if (underlying eq null)
+            underlying = make()
+        }
+
+        underlying.newChannel(pipeline)
+      }
+
+      def releaseExternalResources() = synchronized {
+        if (underlying ne null) {
+          underlying.releaseExternalResources()
+          underlying = null
+        }
+      }
+    })
 }
 
 /**
