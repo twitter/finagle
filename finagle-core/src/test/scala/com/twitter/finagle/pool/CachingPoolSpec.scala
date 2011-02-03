@@ -11,22 +11,11 @@ import com.twitter.util.{Time, Duration, Future}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.MockTimer
 
 object CachingPoolSpec extends Specification with Mockito {
   "CachingPool" should {
-    val timer = new util.Timer {
-      val scheduled = Queue[(Time, Function0[Unit])]()
-      def schedule(when: Time)(f: => Unit) = {
-        scheduled += (when, () => f)
-        null  // not used by caller in this case.
-      }
- 
-      def schedule(when: Time, period: Duration)(f: => Unit) =
-        throw new Exception("periodic scheduling not supported")
- 
-      def stop() = ()
-    }
- 
+    val timer = new MockTimer
     val obj = mock[Object]
     val underlying = mock[ServiceFactory[Any, Any]]
     val underlyingService = mock[Service[Any, Any]]
@@ -41,21 +30,20 @@ object CachingPoolSpec extends Specification with Mockito {
         val f = cachingPool.make()()
         f(123)() must be_==(obj)
         there was one(underlying).make()
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
 
         f.release()
         there was one(underlyingService).isAvailable
         there was no(underlyingService).release()
-        timer.scheduled must haveSize(1)
-        val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-        timeToSchedule must be_==(Time.now + 5.seconds)
+        timer.tasks must haveSize(1)
+        timer.tasks.head.when must be_==(Time.now + 5.seconds)
  
         // Reap!
         timeControl.advance(5.seconds)
-        funToSchedule()
+        timer.tick()
         there was one(underlyingService).release()
  
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
       }
     }
  
@@ -66,33 +54,26 @@ object CachingPoolSpec extends Specification with Mockito {
 
         there was one(underlying).make()
         there was no(underlyingService).release()
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
 
         timeControl.advance(4.seconds)
 
         cachingPool.make()().release()
         there was one(underlying).make()
         there was no(underlyingService).release()
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
  
         // Originally scheduled time.
         timeControl.advance(1.second)
+        timer.tick()
  
-        {
-          val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-          timeToSchedule must be_==(Time.now)
-          funToSchedule()
-        }
- 
-        timer.scheduled must haveSize(1)  // reschedule
+        timer.tasks must haveSize(1)  // reschedule
         there was no(underlyingService).release()
  
-        {
-          val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-          timeToSchedule must be_==(Time.now + 4.seconds)
-          timeControl.advance(5.seconds)
-          funToSchedule()
-        }
+        timer.tasks.head.when must be_==(Time.now + 4.seconds)
+        timeControl.advance(5.seconds)
+        timer.tick()
+        timer.tasks must beEmpty
  
         there was one(underlyingService).release()
       }
@@ -133,43 +114,31 @@ object CachingPoolSpec extends Specification with Mockito {
           timeControl.advance(1.second)
         }
      
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
         ss foreach { s => there was no(s).release() }
         timeControl.advance(2.seconds)
      
-        {
-          val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-          timeToSchedule must be_==(Time.now)
-          funToSchedule()
-        }
- 
+        timer.tick()
+
         there was one(s0).release()
  
         timeControl.advance(1.second)
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
  
-        {
-          val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-          timeToSchedule must be_==(Time.now)
-          funToSchedule()
-        }
+        timer.tick()
  
-        timer.scheduled must haveSize(1)
-        timer.scheduled.head._1 must be_==(Time.now + 1.second)
+        timer.tasks must haveSize(1)
+        timer.tasks.head.when must be_==(Time.now + 1.second)
  
         // Take it!
         cachingPool.make()()(123)() must be_==(o2)
 
         timeControl.advance(1.second)
  
-        {
-          val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-          timeToSchedule must be_==(Time.now)
-          funToSchedule()
-        }
+        timer.tick()
  
         // Nothing left.
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
       }
     }
  
@@ -182,37 +151,33 @@ object CachingPoolSpec extends Specification with Mockito {
         val cachingPool = new CachingPool[Any, Any](underlying, 5.seconds, timer)
         underlying.make() returns Future.value(underlyingService)
 
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
         val service = cachingPool.make()()
         service(123)() must be_==(obj)
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
 
         service.release()
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
         there was no(underlyingService).release()
 
-        timer.scheduled.head._1 must be_==(Time.now + 5.seconds)
+        timer.tasks.head.when must be_==(Time.now + 5.seconds)
 
         timeControl.advance(1.second)
 
         cachingPool.make()()(123)() must be_==(obj)
 
         timeControl.advance(4.seconds)
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
 
-        {
-          val (timeToSchedule, funToSchedule) = timer.scheduled.dequeue()
-          timeToSchedule must be_==(Time.now)
-          funToSchedule()
-        }
- 
+        timer.tick()
+        
         there was no(underlyingService).release()
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
 
         service.release()
 
         there was no(underlyingService).release()
-        timer.scheduled must haveSize(1)
+        timer.tasks must haveSize(1)
       }
     }
  
@@ -232,7 +197,7 @@ object CachingPoolSpec extends Specification with Mockito {
         there was one(underlyingService).release()
 
         // No need to clean up an already disposed object. 
-        timer.scheduled must beEmpty
+        timer.tasks must beEmpty
       }
     }
 
