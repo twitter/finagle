@@ -36,9 +36,9 @@ class ChannelClosingHandler
     setChannel(ctx.getChannel)
   }
 
-  def afterAdd(ctx: ChannelHandlerContext) {/*nop*/}
+  def afterAdd(ctx: ChannelHandlerContext)     {/*nop*/}
   def beforeRemove(ctx: ChannelHandlerContext) {/*nop*/}
-  def afterRemove(ctx: ChannelHandlerContext) {/*nop*/}
+  def afterRemove(ctx: ChannelHandlerContext)  {/*nop*/}
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     setChannel(ctx.getChannel)

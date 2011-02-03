@@ -15,7 +15,7 @@ object TimeoutFilterSpec extends Specification with Mockito {
     val service = new Service[String, String] {
       def apply(request: String) = promise
     }
-    val timeoutFilter = new TimeoutFilter[String, String](timer, 1.second)
+    val timeoutFilter = new TimeoutFilter[String, String](1.second)
     val timeoutService = timeoutFilter.andThen(service)
 
     "cancels the request when the service succeeds" in {

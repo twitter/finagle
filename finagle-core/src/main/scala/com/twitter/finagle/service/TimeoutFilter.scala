@@ -11,7 +11,7 @@ import com.twitter.finagle.{Filter, Service}
  * A filter to apply a global timeout to the request. This allows,
  * e.g., for a server to apply a global request timeout.
  */
-class TimeoutFilter[Req, Rep](timer: Timer, timeout: Duration)
+class TimeoutFilter[Req, Rep](timeout: Duration, timer: Timer = Timer.default)
   extends Filter[Req, Rep, Req, Rep]
 {
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {

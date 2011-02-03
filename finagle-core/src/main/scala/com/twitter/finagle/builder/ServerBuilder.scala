@@ -21,7 +21,7 @@ import com.twitter.finagle.util.Conversions._
 import channel.{Job, QueueingChannelHandler, ChannelClosingHandler}
 import com.twitter.finagle.util._
 import com.twitter.util.{Future, Promise, Return}
-import service.{StatsFilter, ServiceToChannelHandler, ExpiringService}
+import service.{StatsFilter, ServiceToChannelHandler, ExpiringService, TimeoutFilter}
 import stats.{StatsReceiver}
 
 trait Server {
@@ -54,6 +54,7 @@ case class ServerBuilder[Req, Rep](
   _channelFactory: Option[ChannelFactory],
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
+  _requestTimeout: Option[Duration],
   _maxQueueDepth: Option[Int])
 {
   import ServerBuilder._
@@ -71,6 +72,7 @@ case class ServerBuilder[Req, Rep](
     None,              // channelFactory
     None,              // maxConcurrentRequests
     None,              // hostConnectionMaxIdleTime
+    None,              // requestTimeout
     None               // maxQueueDepth
   )
 
@@ -104,6 +106,9 @@ case class ServerBuilder[Req, Rep](
 
   def hostConnectionMaxIdleTime(howlong: Duration) =
     copy(_hostConnectionMaxIdleTime = Some(howlong))
+
+  def requestTimeout(howlong: Duration) =
+    copy(_requestTimeout = Some(howlong))
 
   def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
@@ -162,6 +167,10 @@ case class ServerBuilder[Req, Rep](
           service = new ExpiringService(service, duration) {
             override def didExpire() { closingHandler.close() }
           }
+        }
+
+        _requestTimeout foreach { duration =>
+          service = (new TimeoutFilter(duration)) andThen service
         }
 
         pipeline.addLast("service", new ServiceToChannelHandler(service))
