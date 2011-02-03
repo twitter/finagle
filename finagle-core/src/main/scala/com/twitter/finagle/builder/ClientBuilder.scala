@@ -10,7 +10,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.bootstrap.ClientBootstrap
 
-import com.twitter.util.Duration
+import com.twitter.util.{Future, Duration}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -45,11 +45,33 @@ object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
-  lazy val defaultChannelFactory =
-    new ReferenceCountedChannelFactory(
-      new NioClientSocketChannelFactory(
-        Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool()))
+  lazy val defaultChannelFactory = new ReferenceCountedChannelFactory(
+    // A "revivable" and lazy ChannelFactory that allows us to
+    // revive ChannelFactories after they have been released.
+    new ChannelFactory {
+      private[this] def make() =
+        new NioClientSocketChannelFactory(
+          Executors.newCachedThreadPool(),
+          Executors.newCachedThreadPool())
+
+      @volatile private[this] var underlying: ChannelFactory = null
+
+      def newChannel(pipeline: ChannelPipeline) = {
+        if (underlying eq null) synchronized {
+          if (underlying eq null)
+            underlying = make()
+        }
+
+        underlying.newChannel(pipeline)
+      }
+
+      def releaseExternalResources() = synchronized {
+        if (underlying ne null) {
+          underlying.releaseExternalResources()
+          underlying = null
+        }
+      }
+    })
 }
 
 /**
@@ -69,6 +91,7 @@ case class ClientBuilder[Req, Rep](
   _hostConnectionCoresize: Option[Int],
   _hostConnectionLimit: Option[Int],
   _hostConnectionIdleTime: Option[Duration],
+  _hostConnectionMaxIdleTime: Option[Duration],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
@@ -88,6 +111,7 @@ case class ClientBuilder[Req, Rep](
     None,               // hostConnectionCoresize
     None,               // hostConnectionLimit
     None,               // hostConnectionIdleTime
+    None,               // hostConnectionMaxIdleTime
     None,               // sendBufferSize
     None,               // recvBufferSize
     None,               // retries
@@ -99,23 +123,24 @@ case class ClientBuilder[Req, Rep](
 
   override def toString() = {
     val options = Seq(
-      "name"                   -> _name,
-      "cluster"                -> _cluster,
-      "protocol"               -> _protocol,
-      "connectionTimeout"      -> Some(_connectionTimeout),
-      "requestTimeout"         -> Some(_requestTimeout),
-      "statsReceiver"          -> _statsReceiver,
-      "loadStatistics"         -> _loadStatistics,
-      "hostConnectionLimit"    -> Some(_hostConnectionLimit),
-      "hostConnectionCoresize" -> Some(_hostConnectionCoresize),
-      "hostConnectionIdleTime" -> Some(_hostConnectionIdleTime),
-      "sendBufferSize"         -> _sendBufferSize,
-      "recvBufferSize"         -> _recvBufferSize,
-      "retries"                -> _retries,
-      "logger"                 -> _logger,
-      "channelFactory"         -> _channelFactory,
-      "tls"                    -> _tls,
-      "startTls"               -> _startTls
+      "name"                      -> _name,
+      "cluster"                   -> _cluster,
+      "protocol"                  -> _protocol,
+      "connectionTimeout"         -> Some(_connectionTimeout),
+      "requestTimeout"            -> Some(_requestTimeout),
+      "statsReceiver"             -> _statsReceiver,
+      "loadStatistics"            -> _loadStatistics,
+      "hostConnectionLimit"       -> Some(_hostConnectionLimit),
+      "hostConnectionCoresize"    -> Some(_hostConnectionCoresize),
+      "hostConnectionIdleTime"    -> Some(_hostConnectionIdleTime),
+      "hostConnectionMaxIdleTime" -> Some(_hostConnectionMaxIdleTime),
+      "sendBufferSize"            -> _sendBufferSize,
+      "recvBufferSize"            -> _recvBufferSize,
+      "retries"                   -> _retries,
+      "logger"                    -> _logger,
+      "channelFactory"            -> _channelFactory,
+      "tls"                       -> _tls,
+      "startTls"                  -> _startTls
     )
 
     "ClientBuilder(%s)".format(
@@ -176,6 +201,9 @@ case class ClientBuilder[Req, Rep](
 
   def hostConnectionIdleTime(timeout: Duration) =
     copy(_hostConnectionIdleTime = Some(timeout))
+
+  def hostConnectionMaxIdleTime(timeout: Duration) =
+    copy(_hostConnectionMaxIdleTime = Some(timeout))
 
   def retries(value: Int) =
     copy(_retries = Some(value))
@@ -251,9 +279,15 @@ case class ClientBuilder[Req, Rep](
 
   private[this] def prepareChannel(service: Service[Req, Rep]) = {
     val protocol = _protocol.get
-    // First the codec, then the protocol.
-    protocol.codec.prepareClientChannel(service) flatMap
-      protocol.prepareChannel _ 
+    var future: Future[Service[Req, Rep]] = null
+
+    future = protocol.codec.prepareClientChannel(service)
+    future = future.flatMap { protocol.prepareChannel(_) }
+    _hostConnectionMaxIdleTime.foreach { idleTime =>
+      future = future.map { new ExpiringService(_, idleTime) }
+    }
+
+    future
   }
 
   def buildFactory(): ServiceFactory[Req, Rep] = {

@@ -47,6 +47,19 @@ object ChannelServiceSpec extends Specification with Mockito {
         messageEvent.getFuture.setFailure(new Exception("doh."))
         future() must throwA(new WriteException(new Exception("doh.")))
       }
+
+      "silently ignore other errors after a downstream write failure" in {
+        messageEvent.getFuture.setFailure(new Exception("doh."))
+        future() must throwA(new WriteException(new Exception("doh.")))        
+
+        val stateEvent = mock[ChannelStateEvent]
+        stateEvent.getState returns ChannelState.OPEN
+        stateEvent.getValue returns java.lang.Boolean.FALSE
+        val context = mock[ChannelHandlerContext]
+        val handler = pipeline.getLast.asInstanceOf[ChannelUpstreamHandler]
+        handler.handleUpstream(context, stateEvent)
+        // (setting the future twice would cause an exception)
+      }
     }
 
     "receive replies" in {

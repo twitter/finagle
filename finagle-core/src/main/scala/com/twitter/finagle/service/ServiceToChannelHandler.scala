@@ -19,6 +19,9 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep])
     val channel = ctx.getChannel
     val message = e.getMessage
 
+
+    // TODO: Release, etc.
+
     try {
       // for an invalid type, the exception would be caught by the
       // SimpleChannelUpstreamHandler.

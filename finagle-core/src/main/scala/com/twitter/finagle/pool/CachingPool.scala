@@ -22,9 +22,11 @@ class CachingPool[Req, Rep](
   private[this] var isScheduled = false
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
-    extends PoolServiceWrapper[Req, Rep](underlying)
+    extends Service[Req, Rep]
   {
-    def doRelease() = CachingPool.this.synchronized {
+    def apply(request: Req) = underlying.apply(request)
+
+    override def release() = CachingPool.this.synchronized {
       if (underlying.isAvailable && isOpen) {
         deathRow += ((Time.now, underlying))
         if (!isScheduled) {
@@ -35,6 +37,8 @@ class CachingPool[Req, Rep](
         underlying.release()
       }
     }
+
+    override def isAvailable = underlying.isAvailable
   }
 
   private[this] def collect(): Unit = synchronized {
