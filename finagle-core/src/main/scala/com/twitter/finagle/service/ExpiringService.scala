@@ -15,15 +15,26 @@ class ExpiringService[Req, Rep](
   private[this] var requestCount = 0
   private[this] var expired = false
   private[this] var task: Option[com.twitter.util.TimerTask] =
-    Some(timer.schedule(maxIdleTime.fromNow) { doExpire() })
+    Some(timer.schedule(maxIdleTime.fromNow) { maybeExpire() })
 
-  private[this] def doExpire() = synchronized {
-    // We check requestCount == 0 here to avoid the race between
-    // cancellation & running of the timer.
-    if (!expired && requestCount == 0) {
-      underlying.release()
-      expired = true
+  private[this] def maybeExpire() = {
+    val justExpired = synchronized {
+      // We check requestCount == 0 here to avoid the race between
+      // cancellation & running of the timer.
+      if (!expired && requestCount == 0) {
+        expired = true
+        true
+      } else {
+        false
+      }
     }
+
+    if (justExpired) didExpire()
+  }
+
+  // May be overriden to provide your own expiration action.
+  protected def didExpire() {
+    underlying.release()
   }
 
   def apply(request: Req): Future[Rep] = synchronized {
@@ -44,7 +55,7 @@ class ExpiringService[Req, Rep](
         requestCount -= 1
         if (requestCount == 0) {
           require(!task.isDefined)
-          task = Some(timer.schedule(maxIdleTime.fromNow) { doExpire() })
+          task = Some(timer.schedule(maxIdleTime.fromNow) { maybeExpire() })
         }
       }
     }

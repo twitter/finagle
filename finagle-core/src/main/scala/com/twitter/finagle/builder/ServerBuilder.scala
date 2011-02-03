@@ -9,17 +9,19 @@ import javax.net.ssl.SSLContext
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
+import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.channel.socket.nio._
 
-import com.twitter.util.TimeConversions._
+import com.twitter.util.Duration
+import com.twitter.conversions.time._
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
-import channel.{Job, QueueingChannelHandler}
+import channel.{Job, QueueingChannelHandler, ChannelClosingHandler}
 import com.twitter.finagle.util._
 import com.twitter.util.{Future, Promise, Return}
-import service.{StatsFilter, ServiceToChannelHandler}
+import service.{StatsFilter, ServiceToChannelHandler, ExpiringService}
 import stats.{StatsReceiver}
 
 trait Server {
@@ -51,6 +53,7 @@ case class ServerBuilder[Req, Rep](
   _startTls: Boolean,
   _channelFactory: Option[ChannelFactory],
   _maxConcurrentRequests: Option[Int],
+  _hostConnectionMaxIdleTime: Option[Duration],
   _maxQueueDepth: Option[Int])
 {
   import ServerBuilder._
@@ -67,6 +70,7 @@ case class ServerBuilder[Req, Rep](
     false,             // startTls
     None,              // channelFactory
     None,              // maxConcurrentRequests
+    None,              // hostConnectionMaxIdleTime
     None               // maxQueueDepth
   )
 
@@ -97,6 +101,9 @@ case class ServerBuilder[Req, Rep](
 
   def maxConcurrentRequests(max: Int) =
     copy(_maxConcurrentRequests = Some(max))
+
+  def hostConnectionMaxIdleTime(howlong: Duration) =
+    copy(_hostConnectionMaxIdleTime = Some(howlong))
 
   def maxQueueDepth(max: Int) =
     copy(_maxQueueDepth = Some(max))
@@ -142,8 +149,22 @@ case class ServerBuilder[Req, Rep](
         var service = codec.wrapServerChannel(serviceFactory())
         if (_statsReceiver.isDefined)
           service = new StatsFilter(_statsReceiver.get).andThen(service)
-        pipeline.addLast("service", new ServiceToChannelHandler(service))
 
+        // We add the idle time after the codec. This ensures that a
+        // client couldn't DoS us by sending lots of little messages
+        // that don't produce a request object for some time. In other
+        // words, the idle time refers to the idle time from the view
+        // of the protocol.
+        _hostConnectionMaxIdleTime foreach { duration =>
+          val closingHandler = new ChannelClosingHandler
+          pipeline.addLast("closingHandler", closingHandler)
+
+          service = new ExpiringService(service, duration) {
+            override def didExpire() { closingHandler.close() }
+          }
+        }
+
+        pipeline.addLast("service", new ServiceToChannelHandler(service))
         pipeline
       }
     })

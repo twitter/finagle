@@ -41,6 +41,11 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
        }
     } catch {
       case e: ClassCastException =>
+        log.log(
+          Level.SEVERE,
+          "Got ClassCastException while processing a " +
+          "message. This is a codec bug. %s".format(e))
+
         shutdown(channel)
     }
   }
