@@ -39,7 +39,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
 
     val replyFuture = currentReplyFuture.getAndSet(null)
     if (replyFuture ne null)
-      replyFuture() = message
+      replyFuture.updateIfEmpty(message)
     else  // spurious reply!
       isHealthy = false
 
@@ -69,6 +69,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
       Channels.write(channel, request) {
         case Error(cause) =>
+          isHealthy = false
           replyFuture.updateIfEmpty(Throw(new WriteException(ChannelException(cause))))
         case _ => ()
       }

@@ -60,7 +60,9 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]] {
 
   val serverPipelineFactory = clientPipelineFactory
 
-  override def prepareClientChannel(underlying: Service[ThriftClientRequest, Array[Byte]]) = {
+  override def prepareClientChannel(
+    underlying: Service[ThriftClientRequest, Array[Byte]]) =
+  {
     // Attempt to upgrade the protocol the first time around by
     // sending a magic method invocation.
     val memoryBuffer = new TMemoryBuffer(512)
