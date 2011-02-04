@@ -1,4 +1,4 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.channel
 
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Logger
