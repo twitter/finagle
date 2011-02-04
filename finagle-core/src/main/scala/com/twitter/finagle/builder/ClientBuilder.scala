@@ -316,7 +316,7 @@ case class ClientBuilder[Req, Rep](
       factory = buildPool(factory)
 
       if (_requestTimeout < Duration.MaxValue) {
-        val filter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+        val filter = new TimeoutFilter[Req, Rep](_requestTimeout)
         factory = filter andThen factory
       }
 

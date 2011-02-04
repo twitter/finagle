@@ -1,5 +1,6 @@
 package com.twitter.finagle.service
 
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Logger
 import java.util.logging.Level
 
@@ -10,17 +11,21 @@ import com.twitter.util.{Return, Throw}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.Service
 
-class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep])
+class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
   extends SimpleChannelUpstreamHandler
 {
-  private[this] val log = Logger.getLogger(getClass.getName)
+  def this(service: Service[Req, Rep]) = this(service, Logger.getLogger(getClass.getName))
+  private[this] val isShutdown = new AtomicBoolean(false)
+
+  private[this] def shutdown(ch: Channel) =
+    if (isShutdown.compareAndSet(false, true)) {
+      if (ch.isOpen) ch.close()
+      service.release()
+    }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val channel = ctx.getChannel
     val message = e.getMessage
-
-
-    // TODO: Release, etc.
 
     try {
       // for an invalid type, the exception would be caught by the
@@ -32,12 +37,21 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep])
 
          case Throw(e: Throwable) =>
            log.log(Level.WARNING, e.getMessage, e)
-           Channels.close(channel)
+           shutdown(channel)
        }
     } catch {
       case e: ClassCastException =>
-        Channels.close(channel)
+        log.log(
+          Level.SEVERE,
+          "Got ClassCastException while processing a " +
+          "message. This is a codec bug. %s".format(e))
+
+        shutdown(channel)
     }
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    shutdown(ctx.getChannel)
   }
 
   /**
@@ -58,16 +72,9 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep])
         Level.WARNING
     }
 
-    log.log(level,
-            Option(cause.getMessage).getOrElse("Exception caught"),
-            cause)
+    log.log(
+      level, Option(cause.getMessage).getOrElse("Exception caught"), cause)
 
-    ctx.getChannel match {
-      case c: Channel
-      if c.isOpen =>
-        Channels.close(c)
-      case _ =>
-        ()
-    }
+    shutdown(ctx.getChannel)
   }
 }

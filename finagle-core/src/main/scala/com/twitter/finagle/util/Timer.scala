@@ -5,8 +5,8 @@ import com.twitter.util.{Time, Duration, TimerTask}
 import org.jboss.netty.util.{HashedWheelTimer, Timeout}
 
 object Timer {
-  implicit lazy val default =
-    new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
+  val defaultNettyTimer = new HashedWheelTimer(10, TimeUnit.MILLISECONDS)
+  implicit lazy val default = new Timer(defaultNettyTimer)
 }
 
 class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Timer 
