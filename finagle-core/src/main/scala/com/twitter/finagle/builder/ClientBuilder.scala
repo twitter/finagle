@@ -21,57 +21,16 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 
-class ReferenceCountedChannelFactory(underlying: ChannelFactory)
-  extends ChannelFactory
-{
-  private[this] var refcount = 0
-
-  def acquire() = synchronized {
-    refcount += 1
-  }
-
-  def newChannel(pipeline: ChannelPipeline) = underlying.newChannel(pipeline)
-
-  // TODO: after releasing external resources, we can still use the
-  // underlying factory?  (ie. it'll create new threads, etc.?)
-  def releaseExternalResources() = synchronized {
-    refcount -= 1
-    if (refcount == 0)
-      underlying.releaseExternalResources()
-  }
-}
-
 object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
-  lazy val defaultChannelFactory = new ReferenceCountedChannelFactory(
-    // A "revivable" and lazy ChannelFactory that allows us to
-    // revive ChannelFactories after they have been released.
-    new ChannelFactory {
-      private[this] def make() =
+  lazy val defaultChannelFactory =
+    new ReferenceCountedChannelFactory(
+      new LazyRevivableChannelFactory(() =>
         new NioClientSocketChannelFactory(
           Executors.newCachedThreadPool(),
-          Executors.newCachedThreadPool())
-
-      @volatile private[this] var underlying: ChannelFactory = null
-
-      def newChannel(pipeline: ChannelPipeline) = {
-        if (underlying eq null) synchronized {
-          if (underlying eq null)
-            underlying = make()
-        }
-
-        underlying.newChannel(pipeline)
-      }
-
-      def releaseExternalResources() = synchronized {
-        if (underlying ne null) {
-          underlying.releaseExternalResources()
-          underlying = null
-        }
-      }
-    })
+          Executors.newCachedThreadPool())))
 }
 
 /**

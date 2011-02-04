@@ -18,10 +18,10 @@ import com.twitter.conversions.time._
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
-import channel.{Job, QueueingChannelHandler, ChannelClosingHandler}
+import channel.{Job, QueueingChannelHandler, ChannelClosingHandler, ServiceToChannelHandler}
 import com.twitter.finagle.util._
 import com.twitter.util.{Future, Promise, Return}
-import service.{StatsFilter, ServiceToChannelHandler, ExpiringService, TimeoutFilter}
+import service.{StatsFilter, ExpiringService, TimeoutFilter}
 import stats.{StatsReceiver}
 
 trait Server {
@@ -32,10 +32,12 @@ object ServerBuilder {
   def apply() = new ServerBuilder[Any, Any]()
   def get() = apply()
 
-  val defaultChannelFactory =
-    new NioServerSocketChannelFactory(
-      Executors.newCachedThreadPool(),
-      Executors.newCachedThreadPool())
+  lazy val defaultChannelFactory =
+    new ReferenceCountedChannelFactory(
+      new LazyRevivableChannelFactory(() =>
+        new NioServerSocketChannelFactory(
+          Executors.newCachedThreadPool(),
+          Executors.newCachedThreadPool())))
 }
 
 // TODO: common superclass between client & server builders for common
@@ -51,7 +53,7 @@ case class ServerBuilder[Req, Rep](
   _logger: Option[Logger],
   _tls: Option[SSLContext],
   _startTls: Boolean,
-  _channelFactory: Option[ChannelFactory],
+  _channelFactory: Option[ReferenceCountedChannelFactory],
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
   _requestTimeout: Option[Duration],
@@ -90,7 +92,7 @@ case class ServerBuilder[Req, Rep](
   def bindTo(address: SocketAddress) =
     copy(_bindTo = Some(address))
 
-  def channelFactory(cf: ChannelFactory) =
+  def channelFactory(cf: ReferenceCountedChannelFactory) =
     copy(_channelFactory = Some(cf))
 
   def logger(logger: Logger) = copy(_logger = Some(logger))
@@ -120,7 +122,9 @@ case class ServerBuilder[Req, Rep](
       throw new IncompleteSpecification("No codec was specified")
     }
 
-   val bs = new ServerBootstrap(_channelFactory getOrElse defaultChannelFactory)
+   val cf = _channelFactory getOrElse defaultChannelFactory
+   cf.acquire()
+   val bs = new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
 
     bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)
@@ -173,6 +177,14 @@ case class ServerBuilder[Req, Rep](
           service = (new TimeoutFilter(duration)) andThen service
         }
 
+        // Register the channel so we can wait for them for a
+        // drain. We close the socket but wait for all handlers to
+        // complete (to drain them individually.)  Note: this would be
+        // complicated by the presence of pipelining.
+        
+        // Active request set? 
+
+
         pipeline.addLast("service", new ServiceToChannelHandler(service))
         pipeline
       }
@@ -183,6 +195,10 @@ case class ServerBuilder[Req, Rep](
       def close() = {
         val done = new Promise[Void]
         channel.close() { case _ => done() = Return(null) }
+
+        // Wait for outstanding requests.
+
+        // XXX cf.releaseExternalResources()
         done
       }
     }
