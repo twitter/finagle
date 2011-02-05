@@ -19,7 +19,7 @@ class ReferenceCountedChannelFactory(underlying: ChannelFactory)
   // underlying factory?  (ie. it'll create new threads, etc.?)
   def releaseExternalResources() = synchronized {
     refcount -= 1
-    if (refcount == 0)
+    if (refcount <= 0)
       underlying.releaseExternalResources()
   }
 }

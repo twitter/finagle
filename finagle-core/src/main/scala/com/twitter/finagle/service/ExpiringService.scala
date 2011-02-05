@@ -1,5 +1,12 @@
 package com.twitter.finagle.service
 
+/**
+ * A service wrapper that expires the underlying service after a
+ * certain amount of idle time. By default, expiring calls
+ * ``.release()'' on the underlying channel, but this action is
+ * customizable.
+ */
+
 import com.twitter.util
 import com.twitter.util.{Duration, Future}
 

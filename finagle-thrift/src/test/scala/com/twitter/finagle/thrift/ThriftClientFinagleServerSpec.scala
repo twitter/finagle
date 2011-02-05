@@ -40,7 +40,7 @@ object ThriftClientFinagleServerSpec extends Specification {
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     doAfter {
-      server.close()()
+      server.close()
     }
 
     val (client, transport) = {

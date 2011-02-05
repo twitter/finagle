@@ -25,7 +25,7 @@ object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
-  lazy val defaultChannelFactory =
+  val defaultChannelFactory =
     new ReferenceCountedChannelFactory(
       new LazyRevivableChannelFactory(() =>
         new NioClientSocketChannelFactory(

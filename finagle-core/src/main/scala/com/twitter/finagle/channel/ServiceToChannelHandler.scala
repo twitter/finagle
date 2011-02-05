@@ -6,38 +6,76 @@ import java.util.logging.Level
 
 import org.jboss.netty.channel._
 
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.Service
 
 class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
-  extends SimpleChannelUpstreamHandler
+  extends ChannelClosingHandler
 {
   def this(service: Service[Req, Rep]) = this(service, Logger.getLogger(getClass.getName))
-  private[this] val isShutdown = new AtomicBoolean(false)
 
-  private[this] def shutdown(ch: Channel) =
-    if (isShutdown.compareAndSet(false, true)) {
-      if (ch.isOpen) ch.close()
+  private[this] val onShutdownPromise = new Promise[Unit]
+  @volatile private[this] var isShutdown = false
+  @volatile private[this] var isDraining = false
+  @volatile private[this] var isIdle = true
+
+  private[this] def shutdown() = synchronized {
+    if (!isShutdown) {
+      isShutdown = true
+      close() onSuccess {
+        onShutdownPromise() = Return(())
+      }
       service.release()
     }
+  }
 
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+  val onShutdown: Future[Unit] = onShutdownPromise
+
+  // Admit no new requests.
+  def drain() = synchronized {
+    isDraining = true
+
+    if (isIdle)
+      shutdown()
+  }
+
+  // TODO: keep busy state?  today, this is the responsibility of the
+  // codec, but this seems icky. as a go-between, we may create a
+  // "serialization" handler in the server pipeline.
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = synchronized {
     val channel = ctx.getChannel
     val message = e.getMessage
+
+    if (isDraining) return
+
+    // This is possible if the codec queued messages for us while
+    // draining.
 
     try {
       // for an invalid type, the exception would be caught by the
       // SimpleChannelUpstreamHandler.
-      val req = message.asInstanceOf[Req]
-      service(req) respond {
+      val replyFuture = service(message.asInstanceOf[Req])
+
+      isIdle = false
+
+      // We really want to know when the *write* is done.  That's when
+      // we can drain.
+      replyFuture respond {
          case Return(value) =>
-           Channels.write(ctx.getChannel, value)
+           // Not really idle actually -- we shouldn't *actually* shut
+           // down here..
+           
+           synchronized { isIdle = true }
+
+           Channels.write(channel, value) onSuccessOrFailure {
+             synchronized { if (isDraining) shutdown() }
+           }
 
          case Throw(e: Throwable) =>
            log.log(Level.WARNING, e.getMessage, e)
-           shutdown(channel)
+           shutdown()
        }
     } catch {
       case e: ClassCastException =>
@@ -46,12 +84,12 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
           "Got ClassCastException while processing a " +
           "message. This is a codec bug. %s".format(e))
 
-        shutdown(channel)
+        shutdown()
     }
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    shutdown(ctx.getChannel)
+    shutdown()
   }
 
   /**
@@ -75,6 +113,6 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
     log.log(
       level, Option(cause.getMessage).getOrElse("Exception caught"), cause)
 
-    shutdown(ctx.getChannel)
+    shutdown()
   }
 }

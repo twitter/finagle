@@ -8,7 +8,8 @@ import org.mockito.{Matchers, ArgumentCaptor}
 
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel,
-  ChannelPipeline, DownstreamMessageEvent}
+  ChannelPipeline, DownstreamMessageEvent,
+  ChannelStateEvent, Channels}
 
 import com.twitter.util.Future
 import com.twitter.finagle.Service
@@ -23,13 +24,18 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     val handler = new ServiceToChannelHandler(service, log)
     val pipeline = mock[ChannelPipeline]
     val channel = mock[Channel]
+    val closeFuture = Channels.future(channel)
+    channel.close returns closeFuture
     channel.isOpen returns true
     val ctx = mock[ChannelHandlerContext]
-
     channel.getPipeline returns pipeline
     ctx.getChannel returns channel
     val e = mock[MessageEvent]
     e.getMessage returns request
+
+    // This opens the channel, so that the ClosingHandler discovers
+    // the channel.
+    handler.channelOpen(ctx, mock[ChannelStateEvent])
 
     service(Matchers.any[Foo]) answers { f => Future.value(f.asInstanceOf[Foo].fooMethod) }
 

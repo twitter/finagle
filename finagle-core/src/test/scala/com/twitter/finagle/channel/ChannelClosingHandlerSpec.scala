@@ -4,12 +4,14 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 
 import org.jboss.netty.channel.{
-  Channel, ChannelHandlerContext, ChannelStateEvent,
-  ChannelPipeline}
+  Channels, Channel, ChannelHandlerContext,
+  ChannelStateEvent, ChannelPipeline}
 
 object ChannelClosingHandlerSpec extends Specification with Mockito {
   "ChannelClosingHandler" should {
     val channel = mock[Channel]
+    val closeFuture = Channels.future(channel)
+    channel.close() returns closeFuture
     val handler = new ChannelClosingHandler
     val ctx = mock[ChannelHandlerContext]
     val e = mock[ChannelStateEvent]

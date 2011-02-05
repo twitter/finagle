@@ -9,31 +9,36 @@ import org.jboss.netty.channel.{
   SimpleChannelUpstreamHandler, LifeCycleAwareChannelHandler,
   ChannelHandlerContext, ChannelStateEvent, Channel}
 
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.LatentChannelFuture
+
 class ChannelClosingHandler
   extends SimpleChannelUpstreamHandler
   with LifeCycleAwareChannelHandler
 {
+  private[this] val channelCloseFuture = new LatentChannelFuture
   private[this] var channel: Channel = null
   private[this] var awaitingClose = false
 
   private[this] def setChannel(ch: Channel) = synchronized {
     channel = ch
+    channelCloseFuture.setChannel(ch)
     if (awaitingClose)
-      channel.close()
+      channel.close() proxyTo channelCloseFuture
   }
 
   def close() = synchronized {
-    if (channel ne null)
+    if (channel ne null) {
       channel.close()
-    else
+    } else {
       awaitingClose = true
+      channelCloseFuture
+    }
   }
 
   override def beforeAdd(ctx: ChannelHandlerContext) {
-    if (!ctx.getPipeline.isAttached)
-      return
-
-    setChannel(ctx.getChannel)
+    if (ctx.getPipeline.isAttached)
+      setChannel(ctx.getChannel)
   }
 
   def afterAdd(ctx: ChannelHandlerContext)     {/*nop*/}
@@ -42,5 +47,6 @@ class ChannelClosingHandler
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     setChannel(ctx.getChannel)
+    super.channelOpen(ctx, e)
   }
 }

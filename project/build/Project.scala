@@ -71,7 +71,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val nettyRepo =
       "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
     val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
-    val util      = "com.twitter"          %  "util"      % "1.6.1"
+    val util      = "com.twitter"          %  "util"      % "1.6.2"
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
