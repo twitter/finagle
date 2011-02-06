@@ -230,6 +230,7 @@ case class ServerBuilder[Req, Rep](
     })
 
     val serverChannel = bs.bind(_bindTo.get)
+    Timer.default.acquire()
     new Server {
       def close(timeout: Duration = Duration.MaxValue) = {
         // According to NETTY-256, the following sequence of operations
@@ -265,6 +266,7 @@ case class ServerBuilder[Req, Rep](
         channels.synchronized { channels foreach { _.close() } }
 
         bs.releaseExternalResources()
+        Timer.default.stop()
       }
     }
   }

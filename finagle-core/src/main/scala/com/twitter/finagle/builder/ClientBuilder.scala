@@ -255,6 +255,8 @@ case class ClientBuilder[Req, Rep](
     if (!_protocol.isDefined)
       throw new IncompleteSpecification("No protocol was specified")
 
+    Timer.default.acquire()
+
     val cluster  = _cluster.get
     val protocol = _protocol.get
 
@@ -288,7 +290,12 @@ case class ClientBuilder[Req, Rep](
       factory
     }
 
-    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
+    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep]) {
+      override def close() = {
+        super.close()
+        Timer.default.stop()
+      }
+    }
   }
 
   def build(): Service[Req, Rep] = {

@@ -2,10 +2,11 @@ package com.twitter.finagle.stats
 
 import java.util.logging.Logger
 import com.twitter.conversions.time._
+import com.twitter.util
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Timer
 
-class JavaLoggerStatsReceiver(logger: Logger, timer: Timer) extends StatsReceiver {
+class JavaLoggerStatsReceiver(logger: Logger, timer: util.Timer) extends StatsReceiver {
   def this(logger: Logger) = this(logger, Timer.default)
 
   def gauge(description: (String, String)*) = new Gauge {
