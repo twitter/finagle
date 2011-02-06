@@ -17,24 +17,30 @@ trait LoadBalancerStrategy[Req, Rep]
 
 // pass in strategy, etc.
 class LoadBalancedFactory[Req, Rep](
-    pools: Seq[ServiceFactory[Req, Rep]],
+    factories: Seq[ServiceFactory[Req, Rep]],
     strategy: LoadBalancerStrategy[Req, Rep])
   extends ServiceFactory[Req, Rep]
 {
-  def make() = {
-    // Make a snapshot of the pools. The passed-in seqs may not be
-    // immutable.
-    val snapshot = pools.toArray filter { _.isAvailable }
+  def make(): Future[Service[Req, Rep]] = {
+    // We first create a snapshot since the underlying seq could
+    // change.
+    val snapshot = factories.toArray
 
-    // TODO: (XXX) include *every* service if none are available.
-    
     if (snapshot.isEmpty)
-      Future.exception(new NoBrokersAvailableException)
-    else
+      return Future.exception(new NoBrokersAvailableException)
+
+    val available = snapshot.toArray filter { _.isAvailable }
+
+    // If none are available, we load balance over all of them. This
+    // is to remedy situations where the health checking becomes too
+    // pessimistic.
+    if (available.isEmpty)
       strategy(snapshot)
+    else
+      strategy(available)
   }
 
-  override def isAvailable = pools.exists(_.isAvailable)
+  override def isAvailable = factories.exists(_.isAvailable)
 
-  override def close() = pools foreach { _.close() }
+  override def close() = factories foreach { _.close() }
 }
