@@ -35,6 +35,10 @@ class Http(compressionLevel: Int = 0) extends Codec[HttpRequest, HttpResponse] {
         }
 
         pipeline.addLast(
+          "httpRequestAggregator",
+          (new AggregateHttpRequest(10 << 20)).channelHandler)
+
+        pipeline.addLast(
           "connectionLifecycleManager",
           new ServerConnectionManager)
 
