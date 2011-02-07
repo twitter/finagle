@@ -6,6 +6,7 @@ import org.specs.mock.Mockito
 import com.twitter.util.{Future, Time}
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.util.Timer
 import com.twitter.finagle.service.SingletonFactory
 
 object LeastLoadedStrategySpec extends Specification with Mockito {
@@ -19,6 +20,10 @@ object LeastLoadedStrategySpec extends Specification with Mockito {
 
     override def isAvailable = true
   }
+
+  // FIXME: This is non-obvious & fragile.
+  Timer.default.acquire()
+  doBefore { Timer.default.stop() }
 
   "LeastLoadedStrategy" should {
 
