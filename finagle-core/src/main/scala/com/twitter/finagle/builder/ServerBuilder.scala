@@ -25,15 +25,15 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.util.{Future, Promise, Return}
 
 import channel.{Job, QueueingChannelHandler, ChannelClosingHandler, ServiceToChannelHandler}
-import service.{ExpiringService, TimeoutFilter, ServiceToChannelHandler, StatsFilter}
+import service.{ExpiringService, TimeoutFilter, StatsFilter}
 import stats.{StatsReceiver}
 
 trait Server {
-  /** 
+  /**
    * Close the underlying server gracefully with the given grace
    * period. close() will drain the current channels, waiting up to
    * ``timeout'', after which channels are forcibly closed.
-   */ 
+   */
   def close(timeout: Duration = Duration.MaxValue)
 }
 
