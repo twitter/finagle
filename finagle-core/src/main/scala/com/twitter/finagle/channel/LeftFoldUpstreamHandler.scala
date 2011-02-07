@@ -8,6 +8,8 @@ package com.twitter.finagle.channel
 
 import org.jboss.netty.channel._
 
+import com.twitter.concurrent.Serialized
+
 class LeftFoldUpstreamHandler {
   def channelHandler = new LeftFoldHandlerToChannelHandler(this)
 
@@ -109,9 +111,12 @@ class LeftFoldUpstreamHandler {
 }
 
 private[channel] class LeftFoldHandlerToChannelHandler(initial: LeftFoldUpstreamHandler)
-  extends SimpleChannelUpstreamHandler
+  extends SimpleChannelUpstreamHandler with Serialized
 {
   private[this] var state = initial
+
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) =
+    serialized { super.handleUpstream(ctx, e) }
 
   override def channelBound(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     state = state.channelBound(ctx, e)
