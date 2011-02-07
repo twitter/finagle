@@ -100,7 +100,7 @@ class AggregateHttpRequest(maxBufferSize: Int)
           // Remove the the ``Expect:'' header and continue with
           // collecting chunks.
           request.removeHeader(HttpHeaders.Names.EXPECT)
-          new AggregateHttpChunks(this, request, maxBufferSize)
+          AggregateHttpChunks(this, request, maxBufferSize)
         }
 
       case _ =>
