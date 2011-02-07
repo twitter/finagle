@@ -30,9 +30,11 @@ class WatermarkPool[Req, Rep](
   private[this] var isOpen      = true
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
-    extends PoolServiceWrapper[Req, Rep](underlying)
+    extends Service[Req, Rep]
   {
-    override def doRelease() = WatermarkPool.this.synchronized {
+    def apply(request: Req) = underlying(request)
+    
+    override def release() = WatermarkPool.this.synchronized {
       if (!isOpen) {
         underlying.release()
         numServices -= 1
@@ -56,6 +58,8 @@ class WatermarkPool[Req, Rep](
         numServices -= 1
       }
     }
+
+    override def isAvailable = underlying.isAvailable
   }
 
   @tailrec private[this] def dequeue(): Option[Service[Req, Rep]] = {

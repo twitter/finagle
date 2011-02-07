@@ -40,6 +40,8 @@ object EndToEndSpec extends Specification {
       .bindTo(serverAddr)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
+    doAfter { server.close() }
+
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))
       .codec(ThriftClientFramedCodec())
@@ -58,8 +60,6 @@ object EndToEndSpec extends Specification {
       client.add_one(1, 2)()  // don't block!
 
       client.someway()() must beNull  // don't block!
-
-      server.close()()
     }
 
     "handle wrong interface" in {
@@ -67,8 +67,6 @@ object EndToEndSpec extends Specification {
 
       client.another_method(123)() must throwA(
         new TApplicationException("Invalid method name: 'another_method'"))
-
-      server.close()()
     }
   }
 

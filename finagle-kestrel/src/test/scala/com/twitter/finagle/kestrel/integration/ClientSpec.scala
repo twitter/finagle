@@ -8,7 +8,6 @@ import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import collection.mutable.ListBuffer
 import com.twitter.util.CountDownLatch
-import com.twitter.concurrent.Value
 import com.twitter.conversions.time._
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -39,9 +38,9 @@ object ClientSpec extends Specification {
           client.set("foo", "baz")()
           client.set("foo", "boing")()
 
-          val channel = client.channel("foo")
+          val channel = client.sink("foo")
           val latch = new CountDownLatch(3)
-          channel.foreach {
+          channel.respond(this) {
             case item =>
               result += item.toString(CharsetUtil.UTF_8)
               latch.countDown()
@@ -55,13 +54,13 @@ object ClientSpec extends Specification {
           client.set("foo", "bar")()
 
           var result: ChannelBuffer = null
-          var channel = client.channel("foo")
+          var channel = client.sink("foo")
           val latch = new CountDownLatch(1)
-          channel.foreach {
-            case item => throw new Exception
+          channel.respond(this) { item =>
+            throw new Exception
           }
-          channel = client.channel("foo")
-          channel.foreach {
+          channel = client.sink("foo")
+          channel.respond(this) {
             case item =>
               result = item
               latch.countDown()

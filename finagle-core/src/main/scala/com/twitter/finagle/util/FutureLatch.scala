@@ -25,7 +25,7 @@ class FutureLatch(initialCount: Int = 0) {
   /**
    * Increment the latch.
    */
-  def incr() = synchronized { count += 1 }
+  def incr() = synchronized { count += 1; count }
 
   /**
    * Decrement the latch. If the latch value reaches 0, awaiting
@@ -38,15 +38,6 @@ class FutureLatch(initialCount: Int = 0) {
       waiters foreach { _() }
       waiters.clear()
     }
+    count
   }
 }
-
-
-
-
-
-
-
-
-
-

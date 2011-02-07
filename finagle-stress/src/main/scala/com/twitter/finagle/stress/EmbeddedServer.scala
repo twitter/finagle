@@ -22,6 +22,7 @@ import com.twitter.finagle.util.Timer
 object EmbeddedServer {
   def apply() = new EmbeddedServer(RandomSocket())
   val timer = Timer.default
+  timer.acquire()
 }
 
 class EmbeddedServer(val addr: SocketAddress) {

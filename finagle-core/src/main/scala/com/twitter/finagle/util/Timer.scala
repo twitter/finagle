@@ -1,12 +1,16 @@
 package com.twitter.finagle.util
 
 import java.util.concurrent.TimeUnit
-import com.twitter.util.{Time, Duration, TimerTask}
+import com.twitter.util.{Time, Duration, TimerTask, ReferenceCountedTimer}
 import org.jboss.netty.util.{HashedWheelTimer, Timeout}
 
 object Timer {
-  implicit lazy val default =
-    new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
+  // This timer should only be used inside the context of finagle,
+  // since it requires explicit reference count management. (Via the
+  // builder routines.)
+  implicit val default =
+    new ReferenceCountedTimer(() =>
+      new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS)))
 }
 
 class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Timer 

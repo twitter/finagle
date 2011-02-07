@@ -9,41 +9,103 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers
 
-object ConnectionLifecycleManagerSpec extends Specification with Mockito {
+object ConnectionManagerSpec extends Specification with Mockito {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET
   //   - 100/continue
 
-  "the HTTP connection lifecycle handler" should {
-    val handler = new HttpServerConnectionLifecycleManager
-    val me = mock[MessageEvent]
-    val c = mock[Channel]
-    val ctx = mock[ChannelHandlerContext]
-    val cFuture = new DefaultChannelFuture(c, false)
-    me.getChannel returns c
+  val me = mock[MessageEvent]
+  val c = mock[Channel]
+  val ctx = mock[ChannelHandlerContext]
+  val cFuture = new DefaultChannelFuture(c, false)
+  me.getChannel returns c
 
-    new DefaultHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.OK)
-
-    def makeRequest(version: HttpVersion, headers: (String, String)*) = {
-      val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
-      headers foreach { case (k, v) =>
-        request.setHeader(k, v)
-      }
-
-      request
+  def makeRequest(version: HttpVersion, headers: (String, String)*) = {
+    val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
+    headers foreach { case (k, v) =>
+      request.setHeader(k, v)
     }
 
-    def makeResponse(version: HttpVersion, headers: (String, String)*) = {
-      val response = new DefaultHttpResponse(version, HttpResponseStatus.OK)
-      headers foreach { case (k, v) =>
-        response.setHeader(k, v)
-      }
+    request
+  }
 
-      response
+  def makeResponse(version: HttpVersion, headers: (String, String)*) = {
+    val response = new DefaultHttpResponse(version, HttpResponseStatus.OK)
+    headers foreach { case (k, v) =>
+      response.setHeader(k, v)
     }
 
+    response
+  }
 
+
+  "the client HTTP connection manager" should {
+    val handler = new ClientConnectionManager
+
+    def perform(request: HttpRequest, response: HttpResponse) {
+      me.getMessage returns request
+      me.getFuture returns cFuture
+      handler.writeRequested(ctx, me)
+
+      me.getMessage returns response
+      handler.messageReceived(ctx, me)
+    }
+
+    "not terminate regular http/1.1 connections" in {
+      perform(
+        makeRequest(HttpVersion.HTTP_1_1),
+        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
+      )
+
+      there was no(c).close()
+    }
+
+    // Note: by way of the codec, this reply is already taken care of.
+    "terminate http/1.1 connections without content length" in {
+      perform(
+        makeRequest(HttpVersion.HTTP_1_1),
+        makeResponse(HttpVersion.HTTP_1_1)
+      )
+
+      there was one(c).close()
+    }
+
+    "terminate http/1.1 connections with Connection: close" in {
+      perform(
+        makeRequest(HttpVersion.HTTP_1_1, "Connection" -> "close"),
+        makeResponse(HttpVersion.HTTP_1_1)
+      )
+      
+      there was one(c).close()
+    }
+
+    "terminate chunked http/1.1 with Connection: close" in {
+      val request = makeRequest(HttpVersion.HTTP_1_1, "connection" -> "close")
+      val response = makeResponse(HttpVersion.HTTP_1_1)
+      response.setChunked(true)
+
+      perform(request, response)
+      there was no(c).close()
+
+      val chunk = new DefaultHttpChunk(
+        ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
+
+      me.getMessage returns chunk
+      handler.messageReceived(ctx, me)
+      me.getMessage returns chunk
+      handler.messageReceived(ctx, me)
+
+      // The final chunk.
+      me.getMessage returns new DefaultHttpChunkTrailer
+      handler.messageReceived(ctx, me)
+
+      there was one(c).close()
+    }
+  }
+
+  "the server HTTP connection manager" should {
+    val handler = new ServerConnectionManager
     def perform(request: HttpRequest, response: HttpResponse) {
       me.getMessage returns request
       handler.messageReceived(ctx, me)
@@ -82,12 +144,11 @@ object ConnectionLifecycleManagerSpec extends Specification with Mockito {
         makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
       )
 
-      there was no(c).close()
       cFuture.setSuccess()   // write success
       there was no(c).close()
     }
 
-    "not terminate http/1.1 request with missing content-length (in the response)" in {
+    "terminate http/1.1 request with missing content-length (in the response)" in {
       perform(
         makeRequest(HttpVersion.HTTP_1_1),
         makeResponse(HttpVersion.HTTP_1_1)

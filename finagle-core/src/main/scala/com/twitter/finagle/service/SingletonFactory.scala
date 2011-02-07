@@ -3,31 +3,22 @@ package com.twitter.finagle.service
 import com.twitter.util.Future
 
 import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.util.FutureLatch
        
 class SingletonFactory[Req, Rep](service: Service[Req, Rep])
   extends ServiceFactory[Req, Rep]
 {
-  private[this] var outstandingInstances = 0
-  private[this] var needsRelease = false
+  private[this] var latch = new FutureLatch
 
-  def make() = synchronized {
-    outstandingInstances += 1
-    val wrapped = new Service[Req, Rep] {
+  def make() = Future {
+    latch.incr()
+    new Service[Req, Rep] {
       def apply(request: Req) = service(request)
-      override def release() = SingletonFactory.this.synchronized {
-        outstandingInstances -= 1
-        if (outstandingInstances == 0 && needsRelease)
-          service.release()
-      }
+      override def release() = latch.decr()
     }
-
-    Future.value(wrapped)
   }
 
-  def close() = synchronized {
-    if (outstandingInstances == 0)
-      service.release()
-    else
-      needsRelease = true
-  }
+  def close() = latch.await { service.release() }
+
+  override def isAvailable = service.isAvailable
 }

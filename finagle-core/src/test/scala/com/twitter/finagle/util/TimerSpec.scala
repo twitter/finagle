@@ -9,6 +9,8 @@ import com.twitter.conversions.time._
 object TimerSpec extends Specification with Mockito {
   "Timer" should {
     val timer = Timer.default
+    timer.acquire()
+    doAfter { timer.stop() }
 
     val start = Time.now
     var end = Time.now
