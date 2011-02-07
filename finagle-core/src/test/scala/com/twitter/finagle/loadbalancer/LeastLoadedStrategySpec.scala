@@ -16,6 +16,8 @@ object LeastLoadedStrategySpec extends Specification with Mockito {
       numInvocations += 1
       numInvocations
     }
+
+    override def isAvailable = true
   }
 
   "LeastLoadedStrategy" should {
