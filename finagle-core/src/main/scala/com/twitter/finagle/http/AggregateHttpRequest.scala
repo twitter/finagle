@@ -9,11 +9,14 @@ import scala.collection.JavaConversions._
 import java.nio.ByteOrder
 
 import org.jboss.netty.channel.{
-  MessageEvent, Channels, SimpleChannelUpstreamHandler,
+  MessageEvent, Channels,
+  SimpleChannelUpstreamHandler,
   ChannelHandlerContext}
 import org.jboss.netty.handler.codec.http.{
-  HttpHeaders, HttpRequest, HttpResponse, HttpChunk,
-  DefaultHttpResponse, HttpVersion, HttpResponseStatus}
+  HttpHeaders, HttpRequest,
+  HttpResponse, HttpChunk,
+  DefaultHttpResponse,
+  HttpVersion, HttpResponseStatus}
 import org.jboss.netty.buffer.{
   ChannelBuffer, ChannelBuffers,
   CompositeChannelBuffer}
@@ -29,7 +32,7 @@ object OneHundredContinueResponse
 class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
   extends LeftFoldUpstreamHandler
 {
-  { // TODO: always transition to an untenable state
+  {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
     val future = Channels.future(ctx.getChannel)
     Channels.write(ctx, future, response, ctx.getChannel.getRemoteAddress)    
@@ -43,9 +46,8 @@ class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
 case class AggregateHttpChunks(
     whenDone: LeftFoldUpstreamHandler,
     request: HttpRequest,
-    maxSize: Int,
-    bytesSoFar: Int = 0,
-    chunks: List[ChannelBuffer] = Nil)
+    bufferBudget: Int,
+    buffer: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER)
   extends LeftFoldUpstreamHandler
 {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) =
@@ -53,20 +55,20 @@ case class AggregateHttpChunks(
       case chunk: HttpChunk =>
         val chunkBuffer = chunk.getContent
         val chunkBufferSize = chunkBuffer.readableBytes
-        if (bytesSoFar + chunkBufferSize > maxSize) {
+
+        if (chunkBufferSize > bufferBudget) {
           new HttpFailure(ctx, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
         } else if (chunk.isLast) {
           // Remove traces of request chunking.
           val encodings = request.getHeaders(HttpHeaders.Names.TRANSFER_ENCODING)
           encodings.remove(HttpHeaders.Values.CHUNKED)
-          if (encodings.isEmpty())
-            request.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING);
+          if (encodings.isEmpty)
+            request.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING)
+
           request.setChunked(false)
 
           // Set the content
-          val compositeBuffer =
-            new CompositeChannelBuffer(ByteOrder.BIG_ENDIAN, (chunkBuffer :: chunks).reverse)
-          request.setContent(compositeBuffer)
+          request.setContent(ChannelBuffers.wrappedBuffer(buffer, chunkBuffer))
 
           // And let it on its way.
           Channels.fireMessageReceived(ctx, request)
@@ -74,8 +76,8 @@ case class AggregateHttpChunks(
           // Transition back to initial state.
           whenDone
         } else {
-          copy(bytesSoFar = bytesSoFar + chunkBufferSize,
-               chunks     = chunkBuffer :: chunks)
+          copy(bufferBudget = bufferBudget - chunkBufferSize,
+               buffer       = ChannelBuffers.wrappedBuffer(buffer, chunkBuffer))
         }
 
       case _ =>
@@ -94,6 +96,9 @@ class AggregateHttpRequest(maxBufferSize: Int)
         } else {
           val future = Channels.future(ctx.getChannel)
           Channels.write(ctx, future, OneHundredContinueResponse, e.getRemoteAddress)
+
+          // Remove the the ``Expect:'' header and continue with
+          // collecting chunks.
           request.removeHeader(HttpHeaders.Names.EXPECT)
           new AggregateHttpChunks(this, request, maxBufferSize)
         }
