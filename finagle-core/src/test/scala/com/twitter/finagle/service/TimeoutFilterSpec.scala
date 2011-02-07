@@ -11,6 +11,9 @@ import com.twitter.finagle.Service
 object TimeoutFilterSpec extends Specification with Mockito {
   "TimeoutFilter" should {
     val timer = Timer.default
+    timer.acquire()
+    doAfter { timer.stop() }
+
     val promise = new Promise[String]
     val service = new Service[String, String] {
       def apply(request: String) = promise
