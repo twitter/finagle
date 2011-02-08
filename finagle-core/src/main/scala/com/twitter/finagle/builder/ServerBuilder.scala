@@ -265,8 +265,9 @@ case class ServerBuilder[Req, Rep](
         joined.get(timeout)
 
         // Force close any remaining connections. Don't wait for
-        // success.
-        channels.synchronized { channels foreach { _.close() } }
+        // success. Buffer channels into an array to avoid
+        // deadlocking.
+        channels.synchronized { channels toArray } foreach { _.close() }
 
         bs.releaseExternalResources()
         Timer.default.stop()
