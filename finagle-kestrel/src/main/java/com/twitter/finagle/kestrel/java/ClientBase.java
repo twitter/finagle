@@ -43,10 +43,10 @@ public class ClientBase extends com.twitter.finagle.kestrel.java.Client {
   }
 
   public Channel<ChannelBuffer> sink(String key, Duration waitFor) {
-    return underlying.sink(key, waitFor);
+    return underlying.from(key, waitFor);
   }
 
   public ChannelSource<ChannelBuffer> source(String key) {
-    return underlying.source(key);
+    return underlying.to(key);
   }
 }

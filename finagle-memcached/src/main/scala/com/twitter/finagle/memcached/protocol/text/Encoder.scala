@@ -7,7 +7,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 
 object Encoder {
   private val SPACE         = " ".getBytes
-  private val DELIMETER     = "\r\n".getBytes
+  private val DELIMITER     = "\r\n".getBytes
   private val END           = "END".getBytes
 }
 
@@ -22,7 +22,7 @@ class Encoder extends OneToOneEncoder {
           buffer.writeBytes(token)
           buffer.writeBytes(SPACE)
         }
-        buffer.writeBytes(DELIMETER)
+        buffer.writeBytes(DELIMITER)
         buffer
       case TokensWithData(tokens, data) =>
         val buffer = ChannelBuffers.dynamicBuffer(50 + data.readableBytes)
@@ -31,9 +31,9 @@ class Encoder extends OneToOneEncoder {
           buffer.writeBytes(SPACE)
         }
         buffer.writeBytes(data.readableBytes.toString.getBytes)
-        buffer.writeBytes(DELIMETER)
+        buffer.writeBytes(DELIMITER)
         buffer.writeBytes(data)
-        buffer.writeBytes(DELIMETER)
+        buffer.writeBytes(DELIMITER)
         buffer
       case ValueLines(lines) =>
         val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
@@ -43,12 +43,12 @@ class Encoder extends OneToOneEncoder {
             buffer.writeBytes(SPACE)
           }
           buffer.writeBytes(data.readableBytes.toString.getBytes)
-          buffer.writeBytes(DELIMETER)
+          buffer.writeBytes(DELIMITER)
           buffer.writeBytes(data)
-          buffer.writeBytes(DELIMETER)
+          buffer.writeBytes(DELIMITER)
         }
         buffer.writeBytes(END)
-        buffer.writeBytes(DELIMETER)
+        buffer.writeBytes(DELIMITER)
         buffer
     }
   }

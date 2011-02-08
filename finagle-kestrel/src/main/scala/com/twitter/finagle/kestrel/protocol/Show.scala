@@ -55,10 +55,10 @@ class CommandToEncoding extends OneToOneEncoder {
         options foreach { option =>
           val optionString = option match {
             case Timeout(timeout) => "t=" + timeout.inMilliseconds.toString
-            case Open() => OPEN
+            case Open()  => OPEN
             case Close() => CLOSE
             case Abort() => ABORT
-            case Peek() => PEEK
+            case Peek()  => PEEK
           }
           key += "/" + optionString
         }

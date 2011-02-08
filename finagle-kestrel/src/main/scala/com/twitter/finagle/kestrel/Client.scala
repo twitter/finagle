@@ -3,14 +3,14 @@ package com.twitter.finagle.kestrel
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.util.{Future, Duration, Time, Return, Throw}
 import com.twitter.conversions.time._
-import com.twitter.finagle.Service
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.concurrent.{ChannelSource, Channel}
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.{ServiceFactory, Service}
 
 object Client {
-  def apply(raw: Service[Command, Response]): Client = {
+  def apply(raw: ServiceFactory[Command, Response]): Client = {
     new ConnectedClient(raw)
   }
 
@@ -18,7 +18,7 @@ object Client {
     val service = ClientBuilder()
       .codec(new Kestrel)
       .hosts(hosts)
-      .build()
+      .buildFactory()
     apply(service)
   }
 }
@@ -56,80 +56,98 @@ trait Client {
    *
    * @return A Channel object that you can receive items from as they arrive.
    */
-  def sink(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer]
+  def from(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer]
 
   /**
    * Get a ChannelSource for the given queue
    *
    * @return  A ChannelSource that you can send items to.
    */
-  def source(queueName: String): ChannelSource[ChannelBuffer]
+  def to(queueName: String): ChannelSource[ChannelBuffer]
 }
 
 /**
  * A Client representing a single TCP connection to a single server.
  *
- * @param  underlying  a Service[Command, Response]. '''Note:''' underlying MUST not use a connection pool or load-balance!
+ * @param  underlying  a ServiceFactory[Command, Response].
  */
-protected class ConnectedClient(underlying: Service[Command, Response]) extends Client {
+protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) extends Client {
   def flush(queueName: String) = {
-    underlying(Flush(queueName))
+    underlying.service(Flush(queueName))
   }
 
   def delete(queueName: String) = {
-    underlying(Delete(queueName))
+    underlying.service(Delete(queueName))
   }
 
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch) = {
-    underlying(Set(queueName, expiry, value))
+    underlying.service(Set(queueName, expiry, value))
   }
 
   def get(queueName: String, waitUpTo: Duration = 0.seconds) = {
-    underlying(Get(queueName, collection.Set(Timeout(waitUpTo)))) map {
+    underlying.service(Get(queueName, collection.Set(Timeout(waitUpTo)))) map {
       case Values(Seq()) => None
       case Values(Seq(Value(key, value))) => Some(value)
     }
   }
 
-  def sink(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
-    val sink = new ChannelSource[ChannelBuffer]
-    sink.responds.first.foreach { _ =>
-      println("a responder registered...")
-      receive(queueName, sink, waitUpTo, collection.Set(Open()))
+  def from(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
+    val serviceFuture = underlying.make()
+    val from = new ChannelSourceWithService(serviceFuture)
+    serviceFuture foreach { service =>
+      from.responds.first.foreach { _ =>
+        receive(service, queueName, from, waitUpTo, collection.Set(Open()))
+      }
     }
-    sink
+    from
   }
 
-  def source(queueName: String): ChannelSource[ChannelBuffer] = {
-    val source = new ChannelSource[ChannelBuffer]
-    source.respond(source) { item =>
-      println("putting item==")
+  def to(queueName: String): ChannelSource[ChannelBuffer] = {
+    val to = new ChannelSource[ChannelBuffer]
+    to.respond(to) { item =>
       set(queueName, item)
     }
-    source
+    to
   }
 
-  private[this] def receive(queueName: String, channel: ChannelSource[ChannelBuffer], waitUpTo: Duration, options: collection.Set[GetOption]) {
+  private[this] def receive(
+    service: Service[Command, Response],
+    queueName: String,
+    channel: ChannelSource[ChannelBuffer],
+    waitUpTo: Duration,
+    options: collection.Set[GetOption])
+  {
     if (channel.isOpen) {
-      println("calling GET")
-      underlying(Get(queueName, collection.Set(Timeout(waitUpTo)) ++ options)) respond {
+      service(Get(queueName, collection.Set(Timeout(waitUpTo)) ++ options)) respond {
         case Return(Values(Seq(Value(key, item)))) =>
-          println("getsting an item===")
           try {
             channel.send(item)
-            receive(queueName, channel, waitUpTo, collection.Set(Close(), Open()))
+            receive(service, queueName, channel, waitUpTo, collection.Set(Close(), Open()))
           } catch {
             case e =>
-              underlying(Get(queueName, collection.Set(Abort())))
+              service(Get(queueName, collection.Set(Abort())))
               channel.close()
           }
         case Return(Values(Seq())) =>
-          println("getting item==")
-          receive(queueName, channel, waitUpTo, collection.Set(Open()))
+          receive(service, queueName, channel, waitUpTo, collection.Set(Open()))
         case Throw(e) =>
           e.printStackTrace()
-          println("error")
           channel.close()
+      }
+    }
+  }
+
+  private[this] class ChannelSourceWithService(serviceFuture: Future[Service[Command, Response]]) extends ChannelSource[ChannelBuffer] {
+    serviceFuture handle { e =>
+      e.printStackTrace()
+      this.close()
+    }
+
+    override def close() {
+      try {
+        serviceFuture.foreach(_.release())
+      } finally {
+        super.close()
       }
     }
   }
