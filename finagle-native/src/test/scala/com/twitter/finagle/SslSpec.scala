@@ -24,7 +24,6 @@ object Pwd {
 object SslConfig {
   val certificatePath = Pwd / "finagle-native/src/test/resources/localhost.crt"
   val keyPath: String = Pwd / "finagle-native/src/test/resources/localhost.key"
-  // val serverCiphers = "HIGH:MEDIUM:!aNULL:!eNULL:@STRENGTH:-DHE-RSA-AES128-SHA:-EDH-RSA-DES-CBC3-SHA:-DHE-RSA-AES256-SHA:-DHE-RSA-AES256-SHA"
 }
 
 object SslSpec extends Specification {

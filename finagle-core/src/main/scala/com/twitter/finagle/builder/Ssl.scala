@@ -35,25 +35,23 @@ object PEMEncodedKeyManager {
     val process = Runtime.getRuntime.exec(strings)
     process.waitFor()
     if (process.exitValue() != 0)
-      throw new ExternalExecutableFailed("Failed to run command (%s)".format(strings.mkString(" ")))
+      throw new ExternalExecutableFailed(
+        "Failed to run command (%s)".format(strings.mkString(" ")))
   }
 
   private[this] def secret(length: Int): Array[Byte] = {
-    val rng = new Random(System.currentTimeMillis() % hashCode)
+    val rng = new Random()
     val b = new Array[Byte](length)
 
-    for (i <- 0 until length) {
+    for (i <- 0 until length)
       b(i) = (65 + rng.nextInt(90 - 65)).toByte
-    }
 
     b
   }
 
   private[this] def readFile(f: File): FileInputStream =
     if (f.length() > (10 << 20))
-      throw new Exception(
-        "File (%s) is too big to read (size=%d, max=%d)".format(
-          f.getAbsolutePath(), f.length(), 10 << 20))
+      throw new IOException("File length exceeds buffer size")
     else
       new FileInputStream(f)
 
@@ -106,9 +104,6 @@ object PEMEncodedKeyManager {
     val passwordChars = passwordStr.toCharArray
     val ksInput = new ByteArrayInputStream(readFileToBytes(jksPath))
 
-    // new File(pemPath).delete()
-    // new File(p12Path).delete()
-    // new File(jksPath).delete()
     Seq(pemPath, p12Path, jksPath).foreach(new File(_).delete())
     path.delete()
 
@@ -165,8 +160,8 @@ object Ssl {
     }
 
     private[this] def disableAnonCipherSuites(ctx: SSLContext) {
-      val excludeDiffieHellmanAnon = ((s:String) => s.indexOf("DH_anon") != -1)
-      filterCipherSuites(ctx, Seq(excludeDiffieHellmanAnon))
+      val excludeDHAnon = ((s: String) => s.indexOf("DH_anon") != -1)
+      filterCipherSuites(ctx, Seq(excludeDHAnon))
     }
 
     def apply(ctx: SSLContext) {
@@ -217,6 +212,7 @@ object Ssl {
     Seq(NativeJSSEContextFactory, DefaultJSSEContextFactory)
 
   class NoSuitableSslProvider(message: String) extends Exception(message: String)
+
   /**
    * Get a server context, using the native provider if available.
    * @param certificatePath The path to the PEM encoded certificate file
@@ -253,13 +249,13 @@ object Ssl {
 
 
   /**
-   * @return an SSLContext provisioned to be a client
+   * @returns an SSLContext provisioned to be a client
    */
   private[this] def clientContext =
     SSLContext.getInstance(protocol())
 
   /**
-   * Create a client
+   * Create a client. Always uses the default Sun JSSE implementation.
    */
   def client(): SSLContext = {
     val ctx = clientContext
@@ -269,7 +265,9 @@ object Ssl {
   }
 
   /**
-   * Create a client with a trust manager that does not check the validity of certificates
+   * Create a client with a trust manager that does not validate certificates.
+   *
+   * Obviously, this is insecure, but is included as it is useful for testing.
    */
   def clientWithoutCertificateValidation(): SSLContext = {
     val ctx = clientContext
@@ -319,13 +317,13 @@ object TemporaryDirectory {
   def readableOnlyByMe(): File = {
     val dir = apply()
 
-    val process = Runtime.getRuntime.exec(Array(
+    val chmod = Runtime.getRuntime.exec(Array(
       "chmod",
       "0700",
       dir.getAbsolutePath()))
-    process.waitFor()
+    chmod.waitFor()
 
-    if (process.exitValue() != 0) {
+    if (chmod.exitValue() != 0) {
       if (unixy) {
         val message = "'chown' failed, could not create a private directory"
         log.severe(message)
