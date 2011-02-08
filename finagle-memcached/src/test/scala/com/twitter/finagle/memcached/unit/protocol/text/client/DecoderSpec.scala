@@ -31,6 +31,8 @@ object DecoderSpec extends Specification with Mockito {
 
       "data" in {
         val buffer = stringToChannelBuffer("VALUE foo 0 1\r\n1\r\nVALUE bar 0 2\r\n12\r\nEND\r\n")
+        // These are called once for each state transition (i.e., once per \r\n)
+        // by the FramedCodec
         decoder.decode(null, null, buffer)
         decoder.decode(null, null, buffer)
         decoder.decode(null, null, buffer)
