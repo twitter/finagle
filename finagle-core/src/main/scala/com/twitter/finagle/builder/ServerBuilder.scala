@@ -1,37 +1,39 @@
 package com.twitter.finagle.builder
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
+import scala.collection.JavaConversions._
 
-import java.net.SocketAddress
 import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import java.util.logging.Logger
+import java.net.SocketAddress
 import javax.net.ssl.SSLContext
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
+import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.handler.ssl._
-import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.util.Duration
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.Conversions._
-import channel.{Job, QueueingChannelHandler, ChannelClosingHandler, ServiceToChannelHandler}
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
 import com.twitter.util.{Future, Promise, Return, Throw}
-import service.{StatsFilter, ExpiringService, TimeoutFilter}
+import com.twitter.util.{Future, Promise, Return}
+
+import channel.{Job, QueueingChannelHandler, ChannelClosingHandler, ServiceToChannelHandler}
+import service.{ExpiringService, TimeoutFilter, StatsFilter}
 import stats.{StatsReceiver}
 
 trait Server {
-  /** 
+  /**
    * Close the underlying server gracefully with the given grace
    * period. close() will drain the current channels, waiting up to
    * ``timeout'', after which channels are forcibly closed.
-   */ 
+   */
   def close(timeout: Duration = Duration.MaxValue)
 }
 
@@ -104,8 +106,8 @@ case class ServerBuilder[Req, Rep](
 
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
-  def tls(path: String, password: String) =
-    copy(_tls = Some(Ssl.server(path, password)))
+  def tls(certificatePath: String, keyPath: String) =
+    copy(_tls = Some(Ssl.server(certificatePath, keyPath)))
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
@@ -132,13 +134,13 @@ case class ServerBuilder[Req, Rep](
     val cf = _channelFactory getOrElse defaultChannelFactory
     cf.acquire()
     val bs = new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
-     
+
     bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
-     
+
     val queueingChannelHandler = _maxConcurrentRequests map { maxConcurrentRequests =>
       val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
       val queue = new LinkedBlockingQueue[Job](maxQueueDepth)
@@ -168,6 +170,7 @@ case class ServerBuilder[Req, Rep](
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(false)
           sslEngine.setEnableSessionCreation(true)
+
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
@@ -239,7 +242,7 @@ case class ServerBuilder[Req, Rep](
         //
         //   - close the server socket  (awaitUninterruptibly)
         //   - close all open channels  (awaitUninterruptibly)
-        //   - releaseExternalResources 
+        //   - releaseExternalResources
         //
         // We modify this a little bit, to allow for graceful draining,
         // closing open channels only after the grace period.
@@ -248,7 +251,7 @@ case class ServerBuilder[Req, Rep](
         // suspend reading, but not writing to a socket.  This may be
         // important for protocols that do any pipelining, and may
         // queue in their codecs.
-     
+
         // On cursory inspection of the relevant Netty code, this
         // should never block (it is little more than a close() syscall
         // on the FD).

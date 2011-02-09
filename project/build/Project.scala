@@ -48,6 +48,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new KestrelProject(_), coreProject, memcachedProject)
 
   /**
+   * finagle-native contains native code aimed to increase platform fluency
+   * and provide capabilities not available in the JVM
+   */
+  val nativeProject = project(
+    "finagle-native", "finagle-native",
+    new NativeProject(_), coreProject)
+
+  /**
    * finagle-stream contains a streaming http codec identical to
    * Twitter's "firehose".
    */
@@ -61,6 +69,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val stressProject = project(
     "finagle-stress", "finagle-stress",
+
     new StressProject(_), coreProject, ostrichProject)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
@@ -109,6 +118,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     val ostrich = "com.twitter" % "ostrich" % "2.3.4"
   }
+
+  class NativeProject(info: ProjectInfo) extends StressProject(info)
+    with SubversionPublisher with AdhocInlines with LibDirClasspath
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
