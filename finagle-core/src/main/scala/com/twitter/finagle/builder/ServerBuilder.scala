@@ -255,9 +255,7 @@ case class ServerBuilder[Req, Rep](
         serverChannel.close().awaitUninterruptibly()
 
         // At this point, no new channels may be created.
-        val joined = channels.synchronized {
-          Future.join(channels.toSeq map { _.drain() })
-        }
+        val joined = Future.join(channels.synchronized { channels toArray } map { _.drain() })
 
         // Wait for all channels to shut down.
         joined.get(timeout)
