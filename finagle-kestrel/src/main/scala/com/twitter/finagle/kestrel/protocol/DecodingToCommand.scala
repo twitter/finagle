@@ -5,8 +5,7 @@ import com.twitter.finagle.memcached.protocol.{ClientError, NonexistentCommand}
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import scala.Function.tupled
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
-import com.twitter.finagle.memcached.protocol.text.AbstractDecodingToCommand
+import com.twitter.finagle.memcached.protocol.text.server.AbstractDecodingToCommand
 
 class DecodingToCommand extends AbstractDecodingToCommand[Command] {
   private[this] val GET         = copiedBuffer("get"        .getBytes)

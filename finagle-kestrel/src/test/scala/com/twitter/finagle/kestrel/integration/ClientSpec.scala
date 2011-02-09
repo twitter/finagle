@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 object ClientSpec extends Specification {
   "ConnectedClient" should {
-//    skip("This test requires a Kestrel server to run. Please run manually")
+    skip("This test requires a Kestrel server to run. Please run manually")
 
     "simple client" in {
       val serviceFactory = ClientBuilder()

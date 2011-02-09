@@ -31,6 +31,8 @@ object Hose {
 object Stream2Kestrel extends Specification {
   "Stream Piped to Kestrel" should {
     "make you wet your pants" in {
+      skip("run this by hand")
+
       val stream = ClientBuilder()
         .codec(new Stream)
         .hosts("stream.twitter.com:80")
