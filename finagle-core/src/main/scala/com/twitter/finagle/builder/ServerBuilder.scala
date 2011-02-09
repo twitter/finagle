@@ -178,7 +178,8 @@ case class ServerBuilder[Req, Rep](
         var service = codec.wrapServerChannel(serviceFactory())
 
         _statsReceiver foreach { statsReceiver =>
-          service = (new StatsFilter(statsReceiver)) andThen service
+          val scoped = _name map (statsReceiver.scope(_)) getOrElse statsReceiver
+          service = (new StatsFilter(scoped)) andThen service
         }
 
         // We add the idle time after the codec. This ensures that a
@@ -257,9 +258,7 @@ case class ServerBuilder[Req, Rep](
         serverChannel.close().awaitUninterruptibly()
 
         // At this point, no new channels may be created.
-        val joined = channels.synchronized {
-          Future.join(channels.toSeq map { _.drain() })
-        }
+        val joined = Future.join(channels.synchronized { channels toArray } map { _.drain() })
 
         // Wait for all channels to shut down.
         joined.get(timeout)

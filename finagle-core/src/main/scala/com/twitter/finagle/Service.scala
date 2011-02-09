@@ -45,6 +45,12 @@ abstract class ServiceFactory[-Req, +Rep] {
   def make(): Future[Service[Req, Rep]]
 
   /**
+   * Make a service that after dispatching a request on that service,
+   * releases the service.
+   */
+  def service: Service[Req, Rep] = new FactoryToService(this)
+
+  /**
    * Close the factory and its underlying resources.
    */
   def close()

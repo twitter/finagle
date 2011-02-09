@@ -4,7 +4,7 @@ import com.twitter.finagle.Codec
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.protocol.text.{Encoder, ExceptionHandler, server, client}
+import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
 
 class Kestrel extends Codec[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer]("set")

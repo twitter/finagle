@@ -8,7 +8,7 @@ import collection.mutable.ArrayBuffer
  */
 class FutureLatch(initialCount: Int = 0) {
   require(initialCount >= 0)
-  private[this] var count = initialCount
+  @volatile private[this] var count = initialCount
   private[this] var waiters = new ArrayBuffer[() => Unit]
 
   /**
@@ -40,4 +40,6 @@ class FutureLatch(initialCount: Int = 0) {
     }
     count
   }
+
+  def getCount = count
 }
