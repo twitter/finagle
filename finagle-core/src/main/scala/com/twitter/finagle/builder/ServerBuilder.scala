@@ -106,8 +106,8 @@ case class ServerBuilder[Req, Rep](
 
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
-  def tls(path: String, password: String) =
-    copy(_tls = Some(Ssl.server(path, password)))
+  def tls(certificatePath: String, keyPath: String) =
+    copy(_tls = Some(Ssl.server(certificatePath, keyPath)))
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
@@ -134,13 +134,13 @@ case class ServerBuilder[Req, Rep](
     val cf = _channelFactory getOrElse defaultChannelFactory
     cf.acquire()
     val bs = new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
-     
+
     bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
-     
+
     val queueingChannelHandler = _maxConcurrentRequests map { maxConcurrentRequests =>
       val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
       val queue = new LinkedBlockingQueue[Job](maxQueueDepth)
@@ -241,7 +241,7 @@ case class ServerBuilder[Req, Rep](
         //
         //   - close the server socket  (awaitUninterruptibly)
         //   - close all open channels  (awaitUninterruptibly)
-        //   - releaseExternalResources 
+        //   - releaseExternalResources
         //
         // We modify this a little bit, to allow for graceful draining,
         // closing open channels only after the grace period.
@@ -250,7 +250,7 @@ case class ServerBuilder[Req, Rep](
         // suspend reading, but not writing to a socket.  This may be
         // important for protocols that do any pipelining, and may
         // queue in their codecs.
-     
+
         // On cursory inspection of the relevant Netty code, this
         // should never block (it is little more than a close() syscall
         // on the FD).

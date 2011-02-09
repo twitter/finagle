@@ -213,6 +213,9 @@ object Ssl {
 
   class NoSuitableSslProvider(message: String) extends Exception(message: String)
 
+  def fileMustExist(path: String) =
+    require(new File(path).exists(), "File '' does not exist.".format(path))
+
   /**
    * Get a server context, using the native provider if available.
    * @param certificatePath The path to the PEM encoded certificate file
@@ -221,6 +224,9 @@ object Ssl {
    * @returns an SSLContext
    */
   def server(certificatePath: String, keyPath: String): SSLContext = {
+    fileMustExist(certificatePath)
+    fileMustExist(keyPath)
+
     var context: SSLContext = null
 
     for (factory <- contextFactories)
@@ -239,7 +245,7 @@ object Ssl {
     else
       throw new NoSuitableSslProvider(
         "No SSL provider was suitable. Tried [%s].".format(
-          contextFactories.mkString(", ")))
+          contextFactories.map(_.getClass.getName).mkString(", ")))
   }
 
   /**
