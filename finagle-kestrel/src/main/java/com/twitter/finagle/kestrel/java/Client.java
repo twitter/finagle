@@ -2,7 +2,7 @@ package com.twitter.finagle.kestrel.java;
 
 import com.twitter.concurrent.Channel;
 import com.twitter.concurrent.ChannelSource;
-import com.twitter.finagle.Service;
+import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.kestrel.protocol.Command;
 import com.twitter.finagle.kestrel.protocol.Response;
 import com.twitter.util.Duration;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * A Java-friendly Client for interacting with Kestrel.
  */
 public abstract class Client {
-  public static Client newInstance(Service<Command, Response> finagleClient) {
+  public static Client newInstance(ServiceFactory<Command, Response> finagleClient) {
     com.twitter.finagle.kestrel.Client kestrelClient =
       com.twitter.finagle.kestrel.Client$.MODULE$.apply(finagleClient);
     return new com.twitter.finagle.kestrel.java.ClientBase(kestrelClient);

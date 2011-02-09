@@ -1,10 +1,12 @@
 package com.twitter.finagle.memcached.protocol.text
 
+import client.DecodingToResponse
 import com.twitter.finagle.Codec
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import server.DecodingToCommand
 
 class Memcached extends Codec[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer](

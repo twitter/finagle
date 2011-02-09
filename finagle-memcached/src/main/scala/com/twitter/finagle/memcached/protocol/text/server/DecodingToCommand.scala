@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached.protocol.text
+package com.twitter.finagle.memcached.protocol.text.server
 
 import scala.Function.tupled
 import com.twitter.finagle.memcached.protocol._
@@ -10,6 +10,7 @@ import com.twitter.conversions.time._
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.util.CharsetUtil
+import text.{TokensWithData, Tokens}
 
 object DecodingToCommand {
   private val NOREPLY = copiedBuffer("noreply".getBytes)
