@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
 import java.util.concurrent.Executors
 import javax.net.ssl.SSLContext
@@ -18,7 +18,7 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 
 object ClientBuilder {
@@ -269,10 +269,21 @@ case class ClientBuilder[Req, Rep](
       //   Stats
       //
       // the pool & below are host-specific,
+
+      val hostStatsReceiver = _statsReceiver map { statsReceiver =>
+        val hostname = host match {
+          case iaddr: InetSocketAddress => "%s:%d".format(iaddr.getHostName, iaddr.getPort)
+          case other => other.toString
+        }
+
+        val scoped = _name map (statsReceiver.scope(_)) getOrElse statsReceiver
+        new RollupStatsReceiver(scoped).withSuffix(hostname)
+      } getOrElse NullStatsReceiver
+
       var factory: ServiceFactory[Req, Rep] = null
 
       val bs = buildBootstrap(protocol, host)
-      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _)
+      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _, hostStatsReceiver)
 
       factory = buildPool(factory)
 
@@ -281,11 +292,8 @@ case class ClientBuilder[Req, Rep](
         factory = filter andThen factory
       }
 
-      if (_statsReceiver.isDefined) {
-        val statsFilter = new StatsFilter[Req, Rep](
-          _statsReceiver.get.scope("host" -> host.toString))
-        factory = statsFilter andThen factory
-      }
+      val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
+      factory = statsFilter andThen factory
 
       factory
     }

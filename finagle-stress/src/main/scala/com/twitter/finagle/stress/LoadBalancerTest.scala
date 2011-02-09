@@ -12,7 +12,7 @@ import com.twitter.conversions.time._
 
 import com.twitter.finagle.builder.{ClientBuilder, Http}
 import com.twitter.finagle.Service
-import com.twitter.finagle.stats.{NullStatsRepository, OstrichStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, OstrichStatsReceiver}
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.util.Conversions._
 
@@ -125,47 +125,49 @@ class LoadBalancerTest(
       server.setLatency(serverLatency)
     }
 
+    // TODO: Revive this at some point
+    
     // Capture gauges to report them at the end.
-    val gauges = new HashMap[Seq[(String, String)], Function0[Float]]
-    val localStatsReceiver = new NullStatsRepository {
-      override def mkGauge(description: Seq[(String, String)], f: => Float) {
-        gauges += description -> (() => f)
-      }
-    }
+    // val gauges = new HashMap[Seq[String], Function0[Float]]
+    // val localStatsReceiver = new NullStatsReceiver {
+    //   override def provideGauge(name: String*)(f: => Float) {
+    //     gauges += description -> (() => f)
+    //   }
+    // }
     // Also report to the main Ostrich stats object.
     Stats.clearAll()
-    val statsReceiver = localStatsReceiver.reportTo(new OstrichStatsReceiver)
+    // val statsReceiver = localStatsReceiver.reportTo(new OstrichStatsReceiver)
 
-    def captureGauges() {
-      Timer.default.schedule(500.milliseconds) {
-        val now = requestNumber.get
-        val values = gauges map { case (description, v) =>
-          val options = Map(description: _*)
-          val host = options("host")
-          val serverIndex = servers.findIndexOf { _.addr.toString == host }
-          val shortName = options("name") match {
-            case "load" => "l"
-            case "weight" => "w"
-            case "available" => "a"
-            case _ => "u"
-          }
-
-          val name = "%d/%s".format(serverIndex, shortName)
-
-          (name, v())
-        }
-        gaugeValues += ((now, Map() ++ values))
-       }
-    }
+    // def captureGauges() {
+    //   Timer.default.schedule(500.milliseconds) {
+    //     val now = requestNumber.get
+    //     val values = gauges map { case (description, v) =>
+    //       val options = Map(description: _*)
+    //       val host = options("host")
+    //       val serverIndex = servers.findIndexOf { _.addr.toString == host }
+    //       val shortName = options("name") match {
+    //         case "load" => "l"
+    //         case "weight" => "w"
+    //         case "available" => "a"
+    //         case _ => "u"
+    //       }
+    //  
+    //       val name = "%d/%s".format(serverIndex, shortName)
+    //  
+    //       (name, v())
+    //     }
+    //     gaugeValues += ((now, Map() ++ values))
+    //    }
+    // }
 
     val client = clientBuilder
       .codec(Http)
       .hosts(servers map(_.addr))
-      .reportTo(statsReceiver)
+      .reportTo(new OstrichStatsReceiver)
       .build()
 
     val begin = Time.now
-    captureGauges()
+    // captureGauges()
     0 until concurrency foreach { _ => dispatch(client, servers, behavior) }
     latch.await()
     val duration = begin.untilNow

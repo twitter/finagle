@@ -175,7 +175,8 @@ case class ServerBuilder[Req, Rep](
         var service = codec.wrapServerChannel(serviceFactory())
 
         _statsReceiver foreach { statsReceiver =>
-          service = (new StatsFilter(statsReceiver)) andThen service
+          val scoped = _name map (statsReceiver.scope(_)) getOrElse statsReceiver
+          service = (new StatsFilter(scoped)) andThen service
         }
 
         // We add the idle time after the codec. This ensures that a
