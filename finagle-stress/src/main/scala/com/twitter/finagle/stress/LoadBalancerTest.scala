@@ -6,7 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.ostrich.{StatsCollection, StatsProvider, Stats}
+import com.twitter.ostrich
+import com.twitter.ostrich.{StatsCollection, StatsProvider}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
 
@@ -75,21 +76,6 @@ class LoadBalancerTest(
   private[this] val stats         = new StatsCollection
   private[this] val gaugeValues   = new ArrayBuffer[(Int, Map[String, Float])]
 
-  private[this] def prettyPrintStats(stats: StatsProvider) {
-    stats.getCounterStats foreach { case (name, count) =>
-      println("# %-30s %d".format(name, count))
-    }
-
-    stats.getTimingStats foreach { case (name, stat) =>
-      val statMap = stat.toMap
-      val keys = statMap.keys.toList.sorted
-
-      keys foreach { key =>
-        println("# %-30s %s".format("request_%s".format(key), statMap(key)))
-      }
-    }
-  }
-
   private[this] def dispatch(
       client: Service[HttpRequest, HttpResponse],
       servers: Seq[EmbeddedServer],
@@ -135,7 +121,7 @@ class LoadBalancerTest(
     //   }
     // }
     // Also report to the main Ostrich stats object.
-    Stats.clearAll()
+    ostrich.Stats.clearAll()
     // val statsReceiver = localStatsReceiver.reportTo(new OstrichStatsReceiver)
 
     // def captureGauges() {
@@ -181,7 +167,7 @@ class LoadBalancerTest(
     val fail = stats.getCounter("fail")().toDouble
     println("> success rate: %.2f".format(100.0 * succ / (succ + fail)))
     println("> request rate: %.2f".format(rps))
-    prettyPrintStats(stats)
+    Stats.prettyPrint(stats)
 
     val allGaugeNames = {
       val unique = Set() ++ gaugeValues flatMap { case (_, gvs) => gvs map (_._1) }
@@ -202,10 +188,10 @@ class LoadBalancerTest(
     servers.zipWithIndex foreach { case (server, which) =>
       server.stop()
       println("> SERVER[%d] (%s)".format(which, server.addr))
-      prettyPrintStats(server.stats)
+      Stats.prettyPrint(server.stats)
     }
 
     println("> OSTRICH counters")
-    prettyPrintStats(Stats)
+    Stats.prettyPrint(ostrich.Stats)
   }
 }
