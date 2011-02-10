@@ -9,7 +9,7 @@ import org.jboss.netty.channel._
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.FutureLatch
+import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle.CodecException
 import com.twitter.finagle.Service
 
@@ -25,7 +25,7 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
   private[this] case object Shutdown extends State
 
   private[this] val state = new AtomicReference[State](Idle)
-  private[this] val pendingWrites = new FutureLatch(0)
+  private[this] val pendingWrites = new AsyncLatch(0)
 
   private[this] val onShutdownPromise = new Promise[Unit]
 

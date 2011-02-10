@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable.ArrayBuffer
 
 /**
- * The FutureLatch is an asynchronous latch.
+ * The AsyncLatch is an asynchronous latch.
  */
-class FutureLatch(initialCount: Int = 0) {
+class AsyncLatch(initialCount: Int = 0) {
   require(initialCount >= 0)
   @volatile private[this] var count = initialCount
   private[this] var waiters = new ArrayBuffer[() => Unit]

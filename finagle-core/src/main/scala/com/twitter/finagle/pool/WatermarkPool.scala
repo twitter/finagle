@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException}
-import com.twitter.finagle.util.FutureLatch
+import com.twitter.finagle.util.AsyncLatch
 
 /**
  * The watermark pool is an object pool with low & high

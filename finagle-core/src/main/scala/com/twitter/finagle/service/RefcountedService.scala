@@ -1,12 +1,12 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.util.FutureLatch
+import com.twitter.finagle.util.AsyncLatch
 
 class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
   extends Service[Req, Rep]
 {
-  protected[this] val replyLatch = new FutureLatch
+  protected[this] val replyLatch = new AsyncLatch
 
   def apply(request: Req) = {
     replyLatch.incr()
