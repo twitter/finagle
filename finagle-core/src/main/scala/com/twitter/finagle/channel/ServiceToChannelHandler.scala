@@ -18,11 +18,11 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
 {
   def this(service: Service[Req, Rep]) = this(service, Logger.getLogger(getClass.getName))
 
-  sealed trait State
-  case object Idle extends State
-  case object Busy extends State
-  case object Draining extends State
-  case object Shutdown extends State
+  private[this] sealed trait State
+  private[this] case object Idle extends State
+  private[this] case object Busy extends State
+  private[this] case object Draining extends State
+  private[this] case object Shutdown extends State
 
   private[this] val state = new AtomicReference[State](Idle)
   private[this] val pendingWrites = new FutureLatch(0)
