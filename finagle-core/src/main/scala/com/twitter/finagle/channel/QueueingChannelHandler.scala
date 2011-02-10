@@ -2,6 +2,7 @@ package com.twitter.finagle.channel
 
 import org.jboss.netty.channel._
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.Queue
 import scala._
 
@@ -13,13 +14,15 @@ private[finagle] case class Job(ctx: ChannelHandlerContext, e: MessageEvent) ext
 
   def apply() {
     _isStarted = true
-    Channels.fireMessageReceived(ctx, e, e.getRemoteAddress)
+    Channels.fireMessageReceived(ctx, e.getMessage, e.getRemoteAddress)
   }
 
   def isAlive = _isAlive
   def isStarted = _isStarted
   def markDead() { _isAlive = false }
 }
+
+class SerializingHandler extends QueueingChannelHandler(1, new LinkedBlockingQueue[Job]())
 
 class QueueingChannelHandler(concurrencyLevel: Int, queue: Queue[Job])
   extends SimpleChannelHandler
@@ -32,7 +35,6 @@ class QueueingChannelHandler(concurrencyLevel: Int, queue: Queue[Job])
     ctx.setAttachment(job)
     performNextJob()
   }
-
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     outstandingRequests.getAndDecrement()
