@@ -31,14 +31,20 @@ class FutureLatch(initialCount: Int = 0) {
    * Decrement the latch. If the latch value reaches 0, awaiting
    * computations are executed inline.
    */
-  def decr() = synchronized {
-    require(count > 0)
-    count -= 1
-    if (count == 0) {
-      waiters foreach { _() }
-      waiters.clear()
+  def decr() = {
+    val pendingTasks = synchronized {
+      require(count > 0)
+      count -= 1
+      if (count == 0) {
+        val pending = waiters
+        waiters = new ArrayBuffer[() => Unit]
+        pending
+      } else {
+        Seq()
+      }
     }
-    count
+
+    pendingTasks foreach { _() }
   }
 
   def getCount = count
