@@ -44,3 +44,5 @@ class ApiException                         extends Exception
 class TooManyConcurrentRequestsException   extends ApiException
 class InvalidPipelineException             extends ApiException
 class NotYetConnectedException             extends ApiException
+
+class CodecException(description: String) extends Exception(description)

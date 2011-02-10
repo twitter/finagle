@@ -1,6 +1,6 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
 import java.util.logging.Level
 
@@ -9,6 +9,8 @@ import org.jboss.netty.channel._
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.FutureLatch
+import com.twitter.finagle.CodecException
 import com.twitter.finagle.Service
 
 class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
@@ -16,67 +18,72 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
 {
   def this(service: Service[Req, Rep]) = this(service, Logger.getLogger(getClass.getName))
 
-  private[this] val onShutdownPromise = new Promise[Unit]
-  @volatile private[this] var isShutdown = false
-  @volatile private[this] var isDraining = false
-  @volatile private[this] var isIdle = true
+  sealed trait State
+  case object Idle extends State
+  case object Busy extends State
+  case object Draining extends State
+  case object Shutdown extends State
 
-  private[this] def shutdown() = synchronized {
-    if (!isShutdown) {
-      isShutdown = true
-      close() onSuccess {
-        onShutdownPromise() = Return(())
-      }
+  private[this] val state = new AtomicReference[State](Idle)
+  private[this] val pendingWrites = new FutureLatch(0)
+
+  private[this] val onShutdownPromise = new Promise[Unit]
+
+  private[this] def shutdown() =
+    if (state.getAndSet(Shutdown) != Shutdown) {
+      close() onSuccessOrFailure { onShutdownPromise() = Return(()) }
       service.release()
     }
-  }
 
   val onShutdown: Future[Unit] = onShutdownPromise
 
   // Admit no new requests.
-  def drain() = synchronized {
-    isDraining = true
-
-    if (isIdle)
-      shutdown()
+  def drain() = {
+    state.set(Draining)
+    pendingWrites await { shutdown() }
   }
 
-  // TODO: keep busy state?  today, this is the responsibility of the
-  // codec, but this seems icky. as a go-between, we may create a
-  // "serialization" handler in the server pipeline.
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = synchronized {
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
     val channel = ctx.getChannel
     val message = e.getMessage
 
-    if (isDraining) return
+    pendingWrites.incr()
 
-    // This is possible if the codec queued messages for us while
-    // draining.
+    var oldState: State = null
+    do {
+      if (state.compareAndSet(Busy, Busy))
+        oldState = Busy
+      if (state.compareAndSet(Shutdown, Shutdown))
+        oldState = Shutdown
+      if (state.compareAndSet(Draining, Draining))
+        oldState = Draining
+
+      if (state.compareAndSet(Idle, Busy))
+        oldState = Idle
+    } while (oldState eq null)
+
+    oldState match {
+      case Idle => ()
+      case Busy =>
+        pendingWrites.decr()
+        throw new CodecException("Codec issued concurrent requests")
+
+      case _ =>
+        // Let these requests fall on the floor.
+        pendingWrites.decr()
+        return
+    }
 
     try {
-      // for an invalid type, the exception would be caught by the
-      // SimpleChannelUpstreamHandler.
-      val replyFuture = service(message.asInstanceOf[Req])
+      service(message.asInstanceOf[Req]) respond {
+        case Return(value) =>
+          state.compareAndSet(Busy, Idle)
+          Channels.write(channel, value) onSuccessOrFailure { pendingWrites.decr() }
 
-      isIdle = false
-
-      // We really want to know when the *write* is done.  That's when
-      // we can drain.
-      replyFuture respond {
-         case Return(value) =>
-           // Not really idle actually -- we shouldn't *actually* shut
-           // down here..
-           
-           synchronized { isIdle = true }
-
-           Channels.write(channel, value) onSuccessOrFailure {
-             synchronized { if (isDraining) shutdown() }
-           }
-
-         case Throw(e: Throwable) =>
-           log.log(Level.WARNING, e.getMessage, e)
-           shutdown()
-       }
+        case Throw(e: Throwable) =>
+          log.log(Level.WARNING, e.getMessage, e)
+          shutdown()
+      }
     } catch {
       case e: ClassCastException =>
         log.log(
@@ -85,6 +92,9 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
           "message. This is a codec bug. %s".format(e))
 
         shutdown()
+
+      case e =>
+        Channels.fireExceptionCaught(channel, e)
     }
   }
 
@@ -104,7 +114,6 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
       case e: java.io.IOException
       if (e.getMessage == "Connection reset by peer" ||
           e.getMessage == "Broken pipe") =>
-        // XXX: we can probably just disregard all IOException throwables
         Level.FINEST
       case e: Throwable =>
         Level.WARNING
