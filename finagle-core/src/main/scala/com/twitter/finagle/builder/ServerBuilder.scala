@@ -22,7 +22,6 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
 import com.twitter.util.{Future, Promise, Return, Throw}
-import com.twitter.util.{Future, Promise, Return}
 
 import channel.{Job, QueueingChannelHandler, ChannelClosingHandler, ServiceToChannelHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter}
