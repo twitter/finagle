@@ -40,7 +40,7 @@ object EndToEndSpec extends Specification {
       .bindTo(serverAddr)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
-    doAfter { server.close() }
+    doAfter { server.close(20.milliseconds) }
 
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))

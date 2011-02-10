@@ -214,7 +214,7 @@ object Ssl {
   class NoSuitableSslProvider(message: String) extends Exception(message: String)
 
   def fileMustExist(path: String) =
-    require(new File(path).exists(), "File '' does not exist.".format(path))
+    require(new File(path).exists(), "File '%s' does not exist.".format(path))
 
   /**
    * Get a server context, using the native provider if available.
@@ -226,7 +226,6 @@ object Ssl {
   def server(certificatePath: String, keyPath: String): SSLContext = {
     fileMustExist(certificatePath)
     fileMustExist(keyPath)
-
     var context: SSLContext = null
 
     for (factory <- contextFactories)
@@ -236,7 +235,7 @@ object Ssl {
       } catch {
         case e: Throwable =>
           log.log(Level.WARNING, "Provider '%s' not suitable".format(factory.name()))
-          log.log(Level.FINE, e.getMessage, e)
+          log.log(Level.INFO, e.getMessage, e)
       }
     }
 

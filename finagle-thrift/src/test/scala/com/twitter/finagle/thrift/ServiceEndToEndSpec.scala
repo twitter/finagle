@@ -50,7 +50,7 @@ object ServiceEndToEndSpec extends Specification {
       .bindTo(addr)
       .build(sillyService)
 
-    doAfter { server.close() }
+    doAfter { server.close(20.milliseconds) }
 
     "with wrapped replies" in {
       "respond to calls with ThriftReply[Call.response_type]" in {
