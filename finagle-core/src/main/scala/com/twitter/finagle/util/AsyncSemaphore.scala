@@ -12,6 +12,9 @@ class AsyncSemaphore(initialPermits: Int = 0) {
   private[this] var waiters = new Queue[() => Unit]
   private[this] var availablePermits = initialPermits
 
+  def numWaiters = synchronized { waiters.size }
+  def numPermitsAvailable = availablePermits
+
   def acquire(f: => Unit) = {
     val runNow = synchronized {
       if (availablePermits > 0) {
