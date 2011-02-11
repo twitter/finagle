@@ -25,7 +25,7 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter}
-import stats.{StatsReceiver}
+import stats.StatsReceiver
 
 trait Server {
   /**
@@ -183,7 +183,7 @@ case class ServerBuilder[Req, Rep](
         // Add the (shared) queueing handler *after* request
         // serialization as it assumes one outstanding request per
         // channel.
-        queueingChannelHandler foreach { pipeline.addFirst("queue", _) }
+        queueingChannelHandler foreach { pipeline.addLast("queue", _) }
 
         // Compose the service stack.
         var service = codec.wrapServerChannel(serviceFactory())
@@ -217,9 +217,6 @@ case class ServerBuilder[Req, Rep](
         // drain. We close the socket but wait for all handlers to
         // complete (to drain them individually.)  Note: this would be
         // complicated by the presence of pipelining.
-
-        // serialize requests?
-
         val channelHandler = new ServiceToChannelHandler(service)
 
         val handle = new ChannelHandle {
