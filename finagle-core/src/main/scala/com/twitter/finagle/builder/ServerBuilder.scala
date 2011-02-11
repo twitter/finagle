@@ -183,7 +183,7 @@ case class ServerBuilder[Req, Rep](
         // Add the (shared) queueing handler *after* request
         // serialization as it assumes one outstanding request per
         // channel.
-        queueingChannelHandler foreach { pipeline.addFirst("queue", _) }
+        queueingChannelHandler foreach { pipeline.addLast("queue", _) }
 
         // Compose the service stack.
         var service = codec.wrapServerChannel(serviceFactory())
