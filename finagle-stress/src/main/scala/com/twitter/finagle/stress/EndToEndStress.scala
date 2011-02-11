@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.http.{
 
 import com.twitter.conversions.time._
 import com.twitter.util.{Future, RandomSocket, Return, Throw, Time}
-import com.twitter.ostrich
+import com.twitter.stats
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.builder.Http
@@ -40,9 +40,9 @@ object EndToEndStress {
       dispatchLoop(service)
     } respond {
       case Return(_) =>
-        ostrich.Stats.addTiming("request", beginTime.untilNow.inMilliseconds.toInt)
+        stats.Stats.addMetric("request_msec", beginTime.untilNow.inMilliseconds.toInt)
       case Throw(_) =>
-        ostrich.Stats.incr("failure")
+        stats.Stats.incr("failure")
     }
   }
 
@@ -65,7 +65,7 @@ object EndToEndStress {
     val beginTime = Time.now
     Timer.default.schedule(10.seconds) {
       println("@@ %ds".format(beginTime.untilNow.inSeconds))
-      Stats.prettyPrint(ostrich.Stats)
+      Stats.prettyPrint(stats.Stats)
     }
     
     run(10, serverAddr)

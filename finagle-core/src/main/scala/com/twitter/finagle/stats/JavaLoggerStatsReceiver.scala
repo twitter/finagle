@@ -10,8 +10,8 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: util.Timer) extends StatsRe
   def this(logger: Logger) = this(logger, Timer.default)
 
   def stat(name: String*) = new Stat {
-    def add(value: Float, count: Int) {
-      logger.info("%s add %f (%d)".format(formatName(name), value, count))
+    def add(value: Float) {
+      logger.info("%s add %f (%d)".format(formatName(name), value))
     }
   }
 

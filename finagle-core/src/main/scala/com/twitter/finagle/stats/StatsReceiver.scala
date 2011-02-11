@@ -13,8 +13,7 @@ trait Counter extends {
  * TODO: doc 
  */ 
 trait Stat {
-  def add(value: Float) { add(value, 1) }
-  def add(value: Float, count: Int)
+  def add(value: Float)
 }
 
 trait StatsReceiver {
@@ -71,7 +70,7 @@ class RollupStatsReceiver(val self: StatsReceiver)
 
   def stat(name: String*) = new Stat {
     private[this] val allStats = tails(name) map (self.stat(_: _*))
-    def add(value: Float, count: Int) = allStats foreach (_.add(value, count))
+    def add(value: Float) = allStats foreach (_.add(value))
   }
 
   def provideGauge(name: String*)(f: => Float) =
@@ -94,7 +93,7 @@ object NullStatsReceiver extends StatsReceiver {
   }
 
   def stat(name: String*) = new Stat {
-    def add(value: Float, count: Int) {}
+    def add(value: Float) {}
   }
 
   def provideGauge(name: String*)(f: => Float) {}

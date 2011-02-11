@@ -12,7 +12,7 @@ class OstrichStatsReceiver extends StatsReceiver {
   def stat(name: String*) = new Stat {
     private[this] val name_ = variableName(name)
 
-    def add(value: Float, count: Int) {
+    def add(value: Float) {
       // TODO: can't really implement this properly... should we take
       // the average over `count' and add `count' samples?
       Stats.addMetric(name_, value.toInt)

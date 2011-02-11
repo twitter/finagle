@@ -13,10 +13,9 @@ import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.conversions.time._
-
-import com.twitter.finagle.util.Conversions._
 import com.twitter.util.{RandomSocket, Duration}
-import com.twitter.ostrich.StatsCollection
+import com.twitter.stats.StatsCollection
+import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Timer
 
 object EmbeddedServer {

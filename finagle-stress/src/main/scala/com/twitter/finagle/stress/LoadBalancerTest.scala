@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.ostrich
-import com.twitter.ostrich.{StatsCollection, StatsProvider}
+import com.twitter.stats.{Stats => OstrichStats}
+import com.twitter.stats.{StatsCollection, StatsProvider}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
 
@@ -90,7 +90,7 @@ class LoadBalancerTest(
       result match {
         case Return(_) =>
           val duration = beginTime.untilNow
-          stats.addTiming("request", duration.inMilliseconds.toInt)
+          stats.addMetric("request_msec", duration.inMilliseconds.toInt)
           stats.incr("success")
         case Throw(exc) =>
           stats.incr("fail")
@@ -121,7 +121,7 @@ class LoadBalancerTest(
     //   }
     // }
     // Also report to the main Ostrich stats object.
-    ostrich.Stats.clearAll()
+    OstrichStats.clearAll()
     // val statsReceiver = localStatsReceiver.reportTo(new OstrichStatsReceiver)
 
     // def captureGauges() {
@@ -192,6 +192,6 @@ class LoadBalancerTest(
     }
 
     println("> OSTRICH counters")
-    Stats.prettyPrint(ostrich.Stats)
+    Stats.prettyPrint(OstrichStats)
   }
 }
