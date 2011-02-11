@@ -217,9 +217,6 @@ case class ServerBuilder[Req, Rep](
         // drain. We close the socket but wait for all handlers to
         // complete (to drain them individually.)  Note: this would be
         // complicated by the presence of pipelining.
-
-        // serialize requests?
-
         val channelHandler = new ServiceToChannelHandler(service)
 
         val handle = new ChannelHandle {
