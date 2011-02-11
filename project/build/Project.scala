@@ -123,13 +123,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
-    val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+    val ostrich2 = "com.twitter" % "ostrich" % "2.3.4"
   }
 
   class Ostrich3Project(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
-    val ostrich = "com.twitter" % "ostrich" % "3.0.4"
+    val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 
   class NativeProject(info: ProjectInfo) extends StressProject(info)
@@ -138,6 +138,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
   {
-    val ostrich = "com.twitter" % "ostrich" % "3.0.4"
+    val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 }
