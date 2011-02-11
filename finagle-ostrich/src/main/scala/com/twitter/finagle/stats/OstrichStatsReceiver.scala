@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import com.twitter.ostrich.Stats
+import com.twitter.stats.Stats
 
 class OstrichStatsReceiver extends StatsReceiver {
   def counter(name: String*) = new Counter {
@@ -15,7 +15,7 @@ class OstrichStatsReceiver extends StatsReceiver {
     def add(value: Float, count: Int) {
       // TODO: can't really implement this properly... should we take
       // the average over `count' and add `count' samples?
-      Stats.addTiming(name_, value.toInt)
+      Stats.addMetric(name_, value.toInt)
     }
   }
 

@@ -6,7 +6,7 @@ package com.twitter.finagle.stats
  */
 
 import collection.mutable.HashMap
-import com.twitter.ostrich.Stats
+import com.twitter.stats.Stats
 
 object AdditiveGauges {
   private[this] val gauges = new HashMap[String, Seq[() => Float]]
@@ -18,7 +18,7 @@ object AdditiveGauges {
       gauges(name) = gauges(name) ++ fs
     } else {
       gauges(name) = fs
-      Stats.makeGauge(name) {
+      Stats.addGauge(name) {
         AdditiveGauges.this.synchronized { gauges(name) map (_()) sum }
       }
     }
