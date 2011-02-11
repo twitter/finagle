@@ -23,9 +23,7 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
 import com.twitter.util.{Future, Promise, Return, Throw}
 
-import channel.{
-  Job, QueueingChannelHandler, ChannelClosingHandler,
-  ServiceToChannelHandler, ChannelSemaphoreHandler}
+import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter}
 import stats.{StatsReceiver}
 
