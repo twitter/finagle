@@ -25,7 +25,7 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter}
-import stats.{StatsReceiver}
+import stats.StatsReceiver
 
 trait Server {
   /**
