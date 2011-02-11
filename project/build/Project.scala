@@ -17,11 +17,18 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new CoreProject(_))
 
   /**
-   * finagle-ostrich implements a StatsReceiver for the Ostrich statistics library
+   * finagle-ostrich implements a StatsReceiver for the Ostrich 2.x statistics library
    */
   val ostrichProject = project(
     "finagle-ostrich", "finagle-ostrich",
     new OstrichProject(_), coreProject)
+
+  /**
+   * finagle-ostrich3 implements a StatsReceiver for the Ostrich 3.x statistics library
+   */
+  val ostrich3Project = project(
+    "finagle-ostrich3", "finagle-ostrich3",
+    new Ostrich3Project(_), coreProject)
 
   /**
    * finagle-thrift contains thrift codecs for use with the finagle
@@ -70,7 +77,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   val stressProject = project(
     "finagle-stress", "finagle-stress",
 
-    new StressProject(_), coreProject, ostrichProject)
+    new StressProject(_), coreProject, ostrich3Project)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
@@ -114,6 +121,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+  }
+
+  class Ostrich3Project(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
     val ostrich = "com.twitter" % "ostrich" % "3.0.4"
