@@ -16,6 +16,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.builder.Http
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.Service
+import com.twitter.finagle.stats.OstrichStatsReceiver
 
 object EndToEndStress {
   private[this] object HttpService
@@ -48,8 +49,11 @@ object EndToEndStress {
 
   private[this] def run(concurrency: Int, addr: InetSocketAddress) {
     val service = ClientBuilder()
+      .name("stressClient")
+      .reportTo(new OstrichStatsReceiver)
       .hosts(Seq(addr))
       .codec(Http)
+      //.hostConnectionLimit(10)
       .build()
 
     0 until concurrency foreach { _ => dispatchLoop(service) }
@@ -58,16 +62,19 @@ object EndToEndStress {
   def main(args: Array[String]) {
     val serverAddr = RandomSocket()
     val server = ServerBuilder()
+      .name("stressServer")
       .bindTo(serverAddr)
       .codec(Http)
+      .reportTo(new OstrichStatsReceiver)
+      .maxConcurrentRequests(5)
       .build(HttpService)
 
     val beginTime = Time.now
     Timer.default.schedule(10.seconds) {
       println("@@ %ds".format(beginTime.untilNow.inSeconds))
-      Stats.prettyPrint(stats.Stats)
+      Stats.prettyPrintStats()
     }
-    
-    run(10, serverAddr)
+
+    run(100, serverAddr)
   }
 }

@@ -14,7 +14,7 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try, Time}
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled, FutureLatch}
+import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
@@ -96,7 +96,7 @@ class ChannelServiceFactory[Req, Rep](
     statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
-  private[this] val channelLatch = new FutureLatch
+  private[this] val channelLatch = new AsyncLatch
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
 
   statsReceiver.provideGauge("connections") { channelLatch.getCount }

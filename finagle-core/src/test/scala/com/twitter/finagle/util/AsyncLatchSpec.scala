@@ -2,19 +2,19 @@ package com.twitter.finagle.util
 
 import org.specs.Specification
 
-object FutureLatchSpec extends Specification {
-  "when count=0, FutureLatch" should {
+object AsyncLatchSpec extends Specification {
+  "when count=0, AsyncLatch" should {
     "execute waiters immediately" in {
-      val latch = new FutureLatch(0)
+      val latch = new AsyncLatch(0)
       var didCall = false
       latch await { didCall = true }
       didCall must beTrue
     }
   }
 
-  "when count>0, FutureLatch" should {
+  "when count>0, AsyncLatch" should {
     "execute waiters when count has reached 0" in {
-      val latch = new FutureLatch(1)
+      val latch = new AsyncLatch(1)
       var didCall = false
       latch await { didCall = true }
       didCall must beFalse
@@ -23,7 +23,7 @@ object FutureLatchSpec extends Specification {
     }
 
     "not re-execute waiters when the count increases again" in {
-      val latch = new FutureLatch(1)
+      val latch = new AsyncLatch(1)
       var count0 = 0
       var count1 = 0
       latch await { count0 += 1 }

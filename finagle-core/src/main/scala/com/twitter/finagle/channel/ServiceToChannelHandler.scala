@@ -9,7 +9,7 @@ import org.jboss.netty.channel._
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.FutureLatch
+import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle.CodecException
 import com.twitter.finagle.Service
 
@@ -19,13 +19,17 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
   def this(service: Service[Req, Rep]) = this(service, Logger.getLogger(getClass.getName))
 
   private[this] sealed trait State
-  private[this] case object Idle extends State
-  private[this] case object Busy extends State
+
+  // valid transitions are:
+  //
+  //    Idle <=> Busy
+  //    {Idle, Busy, Draining} => {Draining, Shutdown}
+  private[this] case object Idle     extends State
+  private[this] case object Busy     extends State
   private[this] case object Draining extends State
   private[this] case object Shutdown extends State
 
   private[this] val state = new AtomicReference[State](Idle)
-  private[this] val pendingWrites = new FutureLatch(0)
 
   private[this] val onShutdownPromise = new Promise[Unit]
 
@@ -35,50 +39,53 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
       service.release()
     }
 
+  /** 
+   * onShutdown: this Future is satisfied when the channel has been
+   * closed.
+   */ 
   val onShutdown: Future[Unit] = onShutdownPromise
 
-  // Admit no new requests.
+  /** 
+   * drain(): admit no new requests.
+   */ 
   def drain() = {
-    state.set(Draining)
-    pendingWrites await { shutdown() }
+    var continue = false
+    do {
+      continue = false
+      if      (state.compareAndSet(Idle, Draining)) shutdown()
+      else if (state.compareAndSet(Busy, Draining)) ()
+      else if (state.get == Shutdown)               ()
+      else if (state.get == Draining)               ()
+      else continue = true
+    } while (continue)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
     val channel = ctx.getChannel
     val message = e.getMessage
 
-    pendingWrites.incr()
-
     var oldState: State = null
     do {
-      if (state.compareAndSet(Busy, Busy))
-        oldState = Busy
-      if (state.compareAndSet(Shutdown, Shutdown))
-        oldState = Shutdown
-      if (state.compareAndSet(Draining, Draining))
-        oldState = Draining
-
+      val state_ = state.get
+      if (state_ != Idle)
+        oldState = state_
       if (state.compareAndSet(Idle, Busy))
         oldState = Idle
     } while (oldState eq null)
 
     oldState match {
       case Idle => ()
-      case Busy =>
-        pendingWrites.decr()
-        throw new CodecException("Codec issued concurrent requests")
-
-      case _ =>
-        // Let these requests fall on the floor.
-        pendingWrites.decr()
-        return
+      case Busy => throw new CodecException("Codec issued concurrent requests")
+      case _    => /* let these fall on the floor */ return
     }
 
     try {
       service(message.asInstanceOf[Req]) respond {
         case Return(value) =>
-          state.compareAndSet(Busy, Idle)
-          Channels.write(channel, value) onSuccessOrFailure { pendingWrites.decr() }
+          Channels.write(channel, value) onSuccessOrFailure {
+            if (!state.compareAndSet(Busy, Idle) && state.get == Draining)
+              shutdown()
+          }
 
         case Throw(e: Throwable) =>
           log.log(Level.WARNING, e.getMessage, e)

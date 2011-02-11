@@ -23,7 +23,9 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
 import com.twitter.util.{Future, Promise, Return, Throw}
 
-import channel.{Job, QueueingChannelHandler, ChannelClosingHandler, ServiceToChannelHandler}
+import channel.{
+  Job, QueueingChannelHandler, ChannelClosingHandler,
+  ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter}
 import stats.{StatsReceiver}
 
@@ -64,8 +66,7 @@ case class ServerBuilder[Req, Rep](
   _channelFactory: Option[ReferenceCountedChannelFactory],
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
-  _requestTimeout: Option[Duration],
-  _maxQueueDepth: Option[Int])
+  _requestTimeout: Option[Duration])
 {
   import ServerBuilder._
 
@@ -82,8 +83,7 @@ case class ServerBuilder[Req, Rep](
     None,              // channelFactory
     None,              // maxConcurrentRequests
     None,              // hostConnectionMaxIdleTime
-    None,              // requestTimeout
-    None               // maxQueueDepth
+    None               // requestTimeout
   )
 
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
@@ -120,8 +120,8 @@ case class ServerBuilder[Req, Rep](
   def requestTimeout(howlong: Duration) =
     copy(_requestTimeout = Some(howlong))
 
-  def maxQueueDepth(max: Int) =
-    copy(_maxQueueDepth = Some(max))
+  private[this] def scopedStatsReceiver =
+    _statsReceiver map { sr => _name map (sr.scope(_)) getOrElse sr }
 
   def build(service: Service[Req, Rep]): Server = build(() => service)
 
@@ -140,10 +140,16 @@ case class ServerBuilder[Req, Rep](
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
 
+    // TODO: we need something akin to a max queue depth.
     val queueingChannelHandler = _maxConcurrentRequests map { maxConcurrentRequests =>
-      val maxQueueDepth = _maxQueueDepth.getOrElse(Int.MaxValue)
-      val queue = new LinkedBlockingQueue[Job](maxQueueDepth)
-      new QueueingChannelHandler(maxConcurrentRequests, queue)
+      val semaphore = new AsyncSemaphore(maxConcurrentRequests)
+      scopedStatsReceiver foreach { sr =>
+        sr.provideGauge("request_concurrency") {
+          maxConcurrentRequests - semaphore.numPermitsAvailable
+        }
+        sr.provideGauge("request_queue_size") { semaphore.numWaiters }
+      }
+      new ChannelSemaphoreHandler(semaphore)
     }
 
     trait ChannelHandle {
@@ -156,8 +162,6 @@ case class ServerBuilder[Req, Rep](
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
-
-        queueingChannelHandler foreach { pipeline.addFirst("queue", _) }
 
         _logger foreach { logger =>
           pipeline.addFirst(
@@ -173,12 +177,21 @@ case class ServerBuilder[Req, Rep](
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 
+        // Serialization keeps the codecs honest.
+        pipeline.addLast(
+          "requestSerializing",
+          new ChannelSemaphoreHandler(new AsyncSemaphore(1)))
+
+        // Add the (shared) queueing handler *after* request
+        // serialization as it assumes one outstanding request per
+        // channel.
+        queueingChannelHandler foreach { pipeline.addFirst("queue", _) }
+
         // Compose the service stack.
         var service = codec.wrapServerChannel(serviceFactory())
 
-        _statsReceiver foreach { statsReceiver =>
-          val scoped = _name map (statsReceiver.scope(_)) getOrElse statsReceiver
-          service = (new StatsFilter(scoped)) andThen service
+        scopedStatsReceiver foreach { sr =>
+          service = (new StatsFilter(sr)) andThen service
         }
 
         // We add the idle time after the codec. This ensures that a
