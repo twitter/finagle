@@ -68,7 +68,18 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   }
 
   // Do we need to cover anything else?
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)   = close(ctx)
-  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent)  = close(ctx)
-  override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) = close(ctx)
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    close(ctx)
+    super.exceptionCaught(ctx, e)
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    close(ctx)
+    super.channelClosed(ctx, e)
+  }
+
+  override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    close(ctx)
+    super.closeRequested(ctx, e)
+  }
 }
