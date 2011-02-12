@@ -52,7 +52,7 @@ class ThriftServerTracingFilter
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val msg = iprot.readMessageBegin()
 
-      Transaction() = Transaction(txid, msg.name.getBytes)
+      RequestContext().transactionID = txid
       service(body)
     } else {
       val memoryTransport = new TMemoryInputTransport(request)
