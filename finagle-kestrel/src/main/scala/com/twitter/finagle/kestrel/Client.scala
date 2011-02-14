@@ -88,6 +88,7 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
     underlying.service(Get(queueName, collection.Set(Timeout(waitUpTo)))) map {
       case Values(Seq()) => None
       case Values(Seq(Value(key, value))) => Some(value)
+      case _ => throw new IllegalArgumentException
     }
   }
 
@@ -105,7 +106,7 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
   def to(queueName: String): ChannelSource[ChannelBuffer] = {
     val to = new ChannelSource[ChannelBuffer]
     to.respond(to) { item =>
-      set(queueName, item)
+      Future { set(queueName, item) }
     }
     to
   }
@@ -133,6 +134,7 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
         case Throw(e) =>
           e.printStackTrace()
           channel.close()
+        case _ => throw new IllegalArgumentException
       }
     }
   }

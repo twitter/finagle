@@ -119,6 +119,7 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
       case Values(values) =>
         if (values.size > 0) Some(values.head.value)
         else None
+      case _ => throw new IllegalArgumentException
     }
   }
 
@@ -130,6 +131,7 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
             (key.toString(CharsetUtil.UTF_8), value)
         }
         Map(tuples: _*)
+      case _ => throw new IllegalArgumentException
     }
   }
 
@@ -158,6 +160,7 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     underlying(Incr(key, delta)) map {
       case Number(value) =>
         value
+      case _ => throw new IllegalArgumentException
     }
   }
 
@@ -166,6 +169,7 @@ protected class ConnectedClient(underlying: Service[Command, Response]) extends 
     underlying(Decr(key, delta)) map {
       case Number(value) =>
         value
+      case _ => throw new IllegalArgumentException
     }
   }
 

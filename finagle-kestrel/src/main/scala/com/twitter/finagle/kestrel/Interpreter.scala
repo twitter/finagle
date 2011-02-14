@@ -72,6 +72,8 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
         NotFound()
       case DumpStats() =>
         NotFound()
+      case Reload() =>
+        NotFound()
     }
   }
 }

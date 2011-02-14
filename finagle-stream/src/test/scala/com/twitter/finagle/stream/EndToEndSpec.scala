@@ -6,7 +6,8 @@ import com.twitter.concurrent._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import org.jboss.netty.handler.codec.http.{HttpMethod, HttpVersion, DefaultHttpRequest, HttpRequest}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import com.twitter.util.{Future, RandomSocket}
+import com.twitter.util.{Future, RandomSocket, CountDownLatch}
+import com.twitter.conversions.time._
 import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import java.nio.charset.Charset
@@ -34,7 +35,9 @@ object EndToEndSpec extends Specification {
       "writes from the server arrive on the client's channel" in {
         var result = ""
         channel.respond(this) { channelBuffer =>
-          result += channelBuffer.toString(Charset.defaultCharset)
+          Future {
+            result += channelBuffer.toString(Charset.defaultCharset)
+          }
         }
 
         channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes))
@@ -51,18 +54,18 @@ object EndToEndSpec extends Specification {
         channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes))
         channelSource.send(ChannelBuffers.wrappedBuffer("3".getBytes))
 
+        val latch = new CountDownLatch(3)
         var result = ""
         channel.respond(this) { channelBuffer =>
-          result += channelBuffer.toString(Charset.defaultCharset)
+          Future {
+            result += channelBuffer.toString(Charset.defaultCharset)
+            latch.countDown()
+          }
         }
 
+        latch.await(1.second)
         channelSource.close()
-
         result mustEqual "123"
-      }
-
-      "backpressure" in {
-
       }
     }
   }
