@@ -1,7 +1,7 @@
 package com.twitter.finagle.builder
 
 import java.net.SocketAddress
-import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
 
 /**
  * A collection of SocketAddresses. The intention of this interface
@@ -16,7 +16,7 @@ trait Cluster {
    * Produce a sequence of brokers that changes as servers join and
    * leave the cluster.
    */
-  def mapHosts[A](f: SocketAddress => A): Seq[A]
+  def mapHosts[Req, Rep](f: SocketAddress => ServiceFactory[Req, Rep]): Seq[ServiceFactory[Req, Rep]]
 
   def join(address: SocketAddress)
 }
@@ -26,7 +26,7 @@ class SocketAddressCluster(underlying: Seq[SocketAddress])
 {
   private[this] var self = underlying
 
-  def mapHosts[A](f: SocketAddress => A) = self map f
+  def mapHosts[Req, Rep](f: SocketAddress => ServiceFactory[Req, Rep]) = self map f
 
   def join(address: SocketAddress) {
     self = underlying ++ Seq(address)
