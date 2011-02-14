@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
-
+import com.twitter.util.Promise
 import org.jboss.netty.channel._
 
 /**
@@ -18,6 +18,8 @@ sealed abstract class State
 case object Cancelled extends State
 case class Ok(channel: Channel) extends State
 case class Error(cause: Throwable) extends State
+
+class CancelledException extends Exception
 
 // TODO: decide what to do about cancellation here.
 class RichChannelFuture(val self: ChannelFuture) {
@@ -161,5 +163,15 @@ class RichChannelFuture(val self: ChannelFuture) {
 
   def close() {
     self.addListener(ChannelFutureListener.CLOSE)
- }
+  }
+
+  def toTwitterFuture = {
+    val result = new Promise[Unit]
+    apply {
+      case Ok(_)     => result.setValue(())
+      case Cancelled => result.setException(new CancelledException)
+      case Error(e)  => result.setException(e)
+    }
+    result
+  }
 }

@@ -3,8 +3,11 @@ package com.twitter.finagle.stream
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.channel._
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.{AtomicReference, AtomicBoolean}
 import com.twitter.concurrent.Observer
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.Ok
+import org.jboss.netty.util.CharsetUtil
 
 /**
  * A Netty Channel Handler that adapts Twitter Channels to Netty Channels.
@@ -14,45 +17,49 @@ import com.twitter.concurrent.Observer
  * a duplex, socket-based comunication channel.
  */
 class ChannelToHttpChunk extends SimpleChannelDownstreamHandler {
-  private[this] val channelRef =
-    new AtomicReference[com.twitter.concurrent.Channel[ChannelBuffer]](null)
-  private[this] val observerRef =
-    new AtomicReference[Observer](null)
+  sealed abstract class State
+  case object Idle extends State
+  case object Open extends State
+  case class Observing(observer: Observer) extends State
+
+  private[this] val state = new AtomicReference[State](Idle)
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case channel: com.twitter.concurrent.Channel[ChannelBuffer] =>
-      require(channelRef.compareAndSet(null, channel), "Channel is already busy.")
+      require(state.compareAndSet(Idle, Open), "Channel is already open or busy.")
 
       val startMessage = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
       HttpHeaders.setHeader(startMessage, "Transfer-Encoding", "Chunked")
 
-      val ignoreOutcome = new DefaultChannelFuture(ctx.getChannel, false)
-      Channels.write(ctx, ignoreOutcome, startMessage)
-      val observer = channel.respond(this) { channelBuffer =>
-        val ignoreOutcome = new DefaultChannelFuture(ctx.getChannel, false)
-        Channels.write(ctx, ignoreOutcome, new DefaultHttpChunk(channelBuffer))
+      val startFuture = new DefaultChannelFuture(ctx.getChannel, false)
+      Channels.write(ctx, startFuture, startMessage)
+      startFuture {
+        case Ok(_) =>
+          val observer = channel.respond(this) { channelBuffer =>
+            val messageFuture = new DefaultChannelFuture(ctx.getChannel, false)
+            val result = messageFuture.toTwitterFuture
+            Channels.write(ctx, messageFuture, new DefaultHttpChunk(channelBuffer))
+            result
+          }
+          state.set(Observing(observer))
+          channel.closes.respond { _ =>
+            val closeFuture = new DefaultChannelFuture(ctx.getChannel, false)
+            val result = closeFuture.toTwitterFuture
+            state.set(Idle)
+            Channels.write(ctx, closeFuture, new DefaultHttpChunkTrailer)
+            result
+          }
+        case _ =>
       }
-      observerRef.set(observer)
-      channel.closes.respond { _ =>
-        val ignoreOutcome = new DefaultChannelFuture(ctx.getChannel, false)
-        channelRef.set(null)
-        observerRef.get.dispose()
-        observerRef.set(null)
-        Channels.write(ctx, ignoreOutcome, new DefaultHttpChunkTrailer)
-      }
+
     case _ =>
       throw new IllegalArgumentException("Expecting a Channel" + e.getMessage)
   }
 
-
-  override def setInterestOpsRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) = {
-    val observer = observerRef.get
-    if (ctx.getChannel.isWritable) observer.resume()
-    else observer.pause()
-  }
-
   override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    val channel = channelRef.get
-    if (channel ne null) channel.close()
+    state.getAndSet(Idle) match {
+      case Observing(observer) => observer.dispose
+      case _ =>
+    }
   }
 }

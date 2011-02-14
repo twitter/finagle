@@ -33,7 +33,7 @@ class WatermarkPool[Req, Rep](
     extends Service[Req, Rep]
   {
     def apply(request: Req) = underlying(request)
-    
+
     override def release() = WatermarkPool.this.synchronized {
       if (!isOpen) {
         underlying.release()
@@ -72,7 +72,7 @@ class WatermarkPool[Req, Rep](
         dequeue()
       } else {
         Some(service)
-      }        
+      }
     }
   }
 

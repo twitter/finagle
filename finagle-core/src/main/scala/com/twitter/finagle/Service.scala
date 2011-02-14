@@ -61,10 +61,11 @@ abstract class ServiceFactory[-Req, +Rep] {
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
-  def apply(request: Req) =
+  def apply(request: Req) = {
     factory.make() flatMap { service =>
       service(request) ensure { service.release() }
     }
+  }
 
   override def release() = factory.close()
   override def isAvailable = factory.isAvailable
