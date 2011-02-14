@@ -16,8 +16,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled, TracingHeader}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.ChannelService
-
-case class ThriftClientRequest(message: Array[Byte], oneway: Boolean)
+import com.twitter.finagle.tracing.TraceContext
 
 class ThriftClientChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -69,7 +68,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]] {
     val protocolFactory = new TBinaryProtocol.Factory()
     val oprot = protocolFactory.getProtocol(memoryBuffer)
     oprot.writeMessageBegin(
-      new TMessage(Tracing.CanTraceMethodName, TMessageType.CALL, 0))
+      new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
     val args = new CanTwitterTrace.can_twitter_trace_args()
     args.write(oprot)
     oprot.writeMessageEnd()
@@ -94,7 +93,7 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
 {
   def apply(request: ThriftClientRequest,
             service: Service[ThriftClientRequest, Array[Byte]]) = {
-    val message = TracingHeader.encode(RequestContext().transactionID, request.message)
+    val message = TracingHeader.encode(TraceContext().transactionID, request.message)
     val tracedRequest = ThriftClientRequest(message, request.oneway)
     service(tracedRequest)
   }

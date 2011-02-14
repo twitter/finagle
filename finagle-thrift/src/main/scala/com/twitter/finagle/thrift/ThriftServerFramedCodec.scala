@@ -14,6 +14,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.util.TracingHeader
+import com.twitter.finagle.tracing.TraceContext
 
 class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
@@ -32,6 +33,8 @@ object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodec
 }
 
+// TODO: use LeftFoldChannelHandler
+
 class ThriftServerTracingFilter
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
@@ -44,7 +47,6 @@ class ThriftServerTracingFilter
 
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     // What to do on exceptions here?
-
     if (isUpgraded) {
       val (body, txid) = TracingHeader.decode(request)
 
@@ -52,7 +54,7 @@ class ThriftServerTracingFilter
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val msg = iprot.readMessageBegin()
 
-      RequestContext().transactionID = txid
+      TraceContext().transactionID = txid
       service(body)
     } else {
       val memoryTransport = new TMemoryInputTransport(request)
@@ -60,7 +62,7 @@ class ThriftServerTracingFilter
       val msg = iprot.readMessageBegin()
 
       // Only try once?
-      if (msg.`type` == TMessageType.CALL && msg.name == Tracing.CanTraceMethodName) {
+      if (msg.`type` == TMessageType.CALL && msg.name == ThriftTracing.CanTraceMethodName) {
         // upgrade & reply.
         isUpgraded = true
 
@@ -68,7 +70,7 @@ class ThriftServerTracingFilter
         val protocolFactory = new TBinaryProtocol.Factory()
         val oprot = protocolFactory.getProtocol(memoryBuffer)
         oprot.writeMessageBegin(
-          new TMessage(Tracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
+          new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
         oprot.writeMessageEnd()
 
         Future.value(
@@ -80,7 +82,6 @@ class ThriftServerTracingFilter
     }
   }
 }
-
 
 class ThriftServerFramedCodec extends Codec[Array[Byte], Array[Byte]] {
   val clientPipelineFactory =

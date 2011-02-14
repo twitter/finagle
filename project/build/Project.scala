@@ -32,11 +32,17 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   /**
    * finagle-thrift contains thrift codecs for use with the finagle
-   * thrift service codegen.
+   * thrift service codegen. in order to be able to use thrift code
+   * generation in finagle-thrift, we break out commonly needed types
+   * (ie. for generation) into finagle-thrift-types.
    */
+  val thriftTypesProject = project(
+    "finagle-thrift-types", "finagle-thrift-types",
+    new SimpleProject(_))
+
   val thriftProject = project(
     "finagle-thrift", "finagle-thrift",
-    new ThriftProject(_), coreProject)
+    new ThriftProject(_), thriftTypesProject, coreProject)
 
   /**
    * finagle-memcached contains the memcached codec, ketama, and Java and Scala
@@ -60,7 +66,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val nativeProject = project(
     "finagle-native", "finagle-native",
-    new NativeProject(_), coreProject)
+    new SimpleProject(_), coreProject)
 
   /**
    * finagle-stream contains a streaming http codec identical to
@@ -94,7 +100,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with LibDirClasspath with AdhocInlines
+    with SubversionPublisher with LibDirClasspath
+    with AdhocInlines with CompileFinagleThrift
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"    %  "libthrift" % "0.5.0"
@@ -132,7 +139,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 
-  class NativeProject(info: ProjectInfo) extends StressProject(info)
+  class SimpleProject(info: ProjectInfo) extends StressProject(info)
     with SubversionPublisher with AdhocInlines with LibDirClasspath
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
