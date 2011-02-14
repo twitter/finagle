@@ -260,7 +260,7 @@ case class ClientBuilder[Req, Rep](
     val cluster  = _cluster.get
     val protocol = _protocol.get
 
-    val hostFactories = cluster mapHosts { host =>
+    val hostFactories = cluster mkFactories { host =>
       // The per-host stack is as follows:
       //
       //   ChannelService
