@@ -40,42 +40,45 @@ class ThriftServerTracingFilter
 {
   // Concurrency is not an issue here since we have an instance per
   // channel, and receive only one request at a time (thrift does no
-  // pipelining). We don't protect against this in the underlying
-  // codec, however.
+  // pipelining). Furthermore, finagle will guarantee this by
+  // serializing requests.
   private[this] var isUpgraded = false
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
 
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     // What to do on exceptions here?
     if (isUpgraded) {
-      val (body, txid) = TracingHeader.decode(request)
+      val header = new TracedRequest
+      val request_ = InputBuffer.peelMessage(request, header)
 
-      val memoryTransport = new TMemoryInputTransport(body)
-      val iprot = protocolFactory.getProtocol(memoryTransport)
-      val msg = iprot.readMessageBegin()
+      // TODO: Check isset?
+      TraceContext().parentSpanID = Some(header.getParent_span_id)
 
-      TraceContext().transactionID = txid
-      service(body)
+      // has a problem with dups-- but we filter them out.
+      
+      service(request_) map { response =>
+        // Wrap some trace data.
+        val header = new TracedResponse
+        val headerBytes = OutputBuffer.messageToArray(header)
+        headerBytes ++ response
+      }
     } else {
-      val memoryTransport = new TMemoryInputTransport(request)
-      val iprot = protocolFactory.getProtocol(memoryTransport)
-      val msg = iprot.readMessageBegin()
+      val buffer = new InputBuffer(request)
+      val msg = buffer().readMessageBegin()
 
-      // Only try once?
-      if (msg.`type` == TMessageType.CALL && msg.name == ThriftTracing.CanTraceMethodName) {
+      // TODO: only try once?
+      if (msg.`type` == TMessageType.CALL &&
+          msg.name == ThriftTracing.CanTraceMethodName) {
         // upgrade & reply.
         isUpgraded = true
 
-        val memoryBuffer = new TMemoryBuffer(512)
-        val protocolFactory = new TBinaryProtocol.Factory()
-        val oprot = protocolFactory.getProtocol(memoryBuffer)
-        oprot.writeMessageBegin(
+        val buffer = new OutputBuffer
+        buffer().writeMessageBegin(
           new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
-        oprot.writeMessageEnd()
+        buffer().writeMessageEnd()
 
-        Future.value(
-          java.util.Arrays.copyOfRange(
-            memoryBuffer.getArray(), 0, memoryBuffer.length()))
+        // TODO: parse out options?
+        Future.value(buffer.toArray)
       } else {
         service(request)
       }

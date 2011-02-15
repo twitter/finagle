@@ -10,6 +10,9 @@ import com.twitter.util.Time
 
 case class Record(
   host: Int,         // 32-bit IP address
+  vmID: String,      // virtual machine identifier
+  spanID: Long,
+  parentSpanID: Option[Long],
   timestamp: Time,   // (nanosecond granularity)
   message: String    // an arbitrary string message
 )
@@ -38,7 +41,7 @@ object NullTranscript extends Transcript {
   def record(message: => String) {}
   def iterator = Iterator.empty
   override def isRecording = false
-} 
+}
 
 /**
  * Buffers messages to an ArrayBuffer.
@@ -47,7 +50,11 @@ class BufferingTranscript extends Transcript {
   private[this] val buffer = new ArrayBuffer[Record]
 
   def record(message: => String) = synchronized {
-    buffer += Record(Host(), Time.now, message)
+    buffer += Record(
+      Host(), VMID(),
+      TraceContext().spanID, TraceContext().parentSpanID,
+      Time.now,
+      message)
   }
 
   def iterator = buffer.iterator

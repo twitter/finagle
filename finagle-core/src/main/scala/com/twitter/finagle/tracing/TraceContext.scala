@@ -11,7 +11,8 @@ import scala.util.Random
 import com.twitter.util.Local
 
 case class TraceContext(
-  var transactionID: Long,     // 64-bit transction identifier
+  var spanID: Long,
+  var parentSpanID: Option[Long],
   var transcript: Transcript   // an associated transcript
 )
 
@@ -34,5 +35,5 @@ object TraceContext {
     current().get
   }
 
-  def newContext() = TraceContext(rng.nextLong(), NullTranscript)
+  def newContext() = TraceContext(rng.nextLong(), None, NullTranscript)
 }
