@@ -82,8 +82,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val stressProject = project(
     "finagle-stress", "finagle-stress",
-
-    new StressProject(_), coreProject, ostrich3Project)
+    new StressProject(_), coreProject, ostrich3Project, thriftProject)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
@@ -144,7 +143,11 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
+    with CompileFinagleThrift
   {
+    override def compileOrder = CompileOrder.JavaThenScala
+    val thrift   = "thrift"    %  "libthrift" % "0.5.0"
+    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
     val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 }

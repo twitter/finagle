@@ -14,7 +14,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.util.TracingHeader
-import com.twitter.finagle.tracing.TraceContext
+import com.twitter.finagle.tracing.{BufferingTranscript, TraceContext}
 
 class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
@@ -33,8 +33,6 @@ object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodec
 }
 
-// TODO: use LeftFoldChannelHandler
-
 class ThriftServerTracingFilter
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
@@ -51,16 +49,32 @@ class ThriftServerTracingFilter
       val header = new TracedRequest
       val request_ = InputBuffer.peelMessage(request, header)
 
-      // TODO: Check isset?
-      TraceContext().parentSpanID = Some(header.getParent_span_id)
+      TraceContext.reset()
+      TraceContext().traceID.parentSpan = Some(header.getParent_span_id)
 
-      // has a problem with dups-- but we filter them out.
-      
+      if (header.debug && !TraceContext().transcript.isRecording)
+        TraceContext().transcript = new BufferingTranscript(TraceContext().traceID)
+
       service(request_) map { response =>
         // Wrap some trace data.
-        val header = new TracedResponse
-        val headerBytes = OutputBuffer.messageToArray(header)
-        headerBytes ++ response
+        val responseHeader = new TracedResponse
+
+        if (header.debug) {
+          TraceContext().transcript foreach { record =>
+            val thriftRecord = new TranscriptRecord(
+              record.traceID.host,
+              record.traceID.vm,
+              record.traceID.span,
+              record.traceID.parentSpan getOrElse 0,
+              record.timestamp.inMilliseconds,
+              record.message
+            )
+            responseHeader.addToTranscript(thriftRecord)
+          }
+        }
+
+        val responseHeaderBytes = OutputBuffer.messageToArray(responseHeader)
+        responseHeaderBytes ++ response
       }
     } else {
       val buffer = new InputBuffer(request)
@@ -77,7 +91,8 @@ class ThriftServerTracingFilter
           new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
         buffer().writeMessageEnd()
 
-        // TODO: parse out options?
+        // Note: currently there are no options, so there's no need
+        // top parse them out.
         Future.value(buffer.toArray)
       } else {
         service(request)

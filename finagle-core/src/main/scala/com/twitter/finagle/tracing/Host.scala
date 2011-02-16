@@ -13,9 +13,8 @@ object Host {
       dis.readInt
     } catch {
       case e =>
-        log.warning(
-          "Failed to retrieve local host address: %s".format(e))
-      0
+        log.warning("Failed to retrieve local host address: %s".format(e))
+        0
     }
 
   def apply(): Int = localHost

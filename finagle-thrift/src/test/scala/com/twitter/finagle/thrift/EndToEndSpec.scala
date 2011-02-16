@@ -28,7 +28,8 @@ object EndToEndSpec extends Specification {
       def add_one(a: Int, b: Int) = Future.void
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
-        new SomeStruct(123, TraceContext().parentSpanID.get.toString)
+        TraceContext().transcript.record("hey it's me!")
+        new SomeStruct(123, TraceContext().traceID.parentSpan.get.toString)
       }
       def someway() = Future.void
     }
@@ -52,8 +53,14 @@ object EndToEndSpec extends Specification {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
+      import com.twitter.finagle.tracing.BufferingTranscript
+      TraceContext().transcript = new BufferingTranscript(TraceContext().traceID)
+
       client.complex_return("a string")().arg_two must be_==(
-        "%s".format(TraceContext().spanID.toString))
+        "%s".format(TraceContext().traceID.span.toString))
+
+      TraceContext().transcript must haveSize(1)
+      TraceContext().transcript.head.message must be_==("hey it's me!")
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block!

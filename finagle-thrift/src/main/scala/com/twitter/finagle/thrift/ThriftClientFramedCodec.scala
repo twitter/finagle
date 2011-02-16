@@ -1,5 +1,7 @@
 package com.twitter.finagle.thrift
 
+import collection.JavaConversions._
+
 import org.jboss.netty.channel.{
   SimpleChannelHandler, Channel, ChannelEvent, ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
@@ -10,13 +12,14 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
 
-import com.twitter.util.Future
+import com.twitter.conversions.time._
+import com.twitter.util.{Time, Future}
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled, TracingHeader}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.ChannelService
-import com.twitter.finagle.tracing.TraceContext
+import com.twitter.finagle.tracing.{TraceID, TraceContext, Record}
 
 /** 
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -117,7 +120,8 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
             service: Service[ThriftClientRequest, Array[Byte]]) =
   {
     val header = new TracedRequest
-    header.setParent_span_id(TraceContext().spanID)
+    header.setParent_span_id(TraceContext().traceID.span)
+    header.setDebug(TraceContext().transcript.isRecording)
 
     val tracedRequest = request.copy(
       message = OutputBuffer.messageToArray(header) ++ request.message)
@@ -129,10 +133,28 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
       reply
     } else {
       reply map { response =>
-        val header = new TracedResponse
-        val rest = InputBuffer.peelMessage(response, header)
+        val responseHeader = new TracedResponse
+        val rest = InputBuffer.peelMessage(response, responseHeader)
 
-        // TODO: merge.
+        if (header.debug && responseHeader.isSetTranscript) {
+          val records = responseHeader.transcript map { thriftRecord =>
+            val traceID = TraceID(
+              thriftRecord.getSpan_id(),
+              {
+                val spanID = thriftRecord.getParent_span_id()
+                if (spanID == 0) None else Some(spanID)
+              },
+              thriftRecord.getHost(),
+              thriftRecord.getVm_id())
+
+            Record(
+              traceID,
+              Time.fromMilliseconds(thriftRecord.getTimestamp_ms()),
+              thriftRecord.getMessage())
+          }
+
+          TraceContext().transcript.merge(records.iterator)
+        }
 
         rest
       }

@@ -9,19 +9,21 @@ import collection.mutable.ArrayBuffer
 import com.twitter.util.Time
 
 case class Record(
-  host: Int,         // 32-bit IP address
-  vmID: String,      // virtual machine identifier
-  spanID: Long,
-  parentSpanID: Option[Long],
+  traceID: TraceID,
   timestamp: Time,   // (nanosecond granularity)
-  message: String    // an arbitrary string message
-)
+  message: String)    // an arbitrary string message
+{
+  override def toString = "[%s] @ %s: %s".format(traceID, timestamp, message)
+}
 
 trait Transcript extends Iterable[Record] {
-  // Log levels?
+  // TODO: support log levels?
 
   def record(message: => String)
   def isRecording = true
+  def merge(other: Iterator[Record])
+
+  def print() { foreach { println(_) } }
 }
 
 /**
@@ -32,6 +34,7 @@ object Transcript extends Transcript {
   def record(message: => String) { TraceContext().transcript.record(message) }
   def iterator = TraceContext().transcript.iterator
   override def isRecording = TraceContext().transcript.isRecording
+  def merge(other: Iterator[Record]) = TraceContext().transcript.merge(other)
 }
 
 /**
@@ -41,25 +44,32 @@ object NullTranscript extends Transcript {
   def record(message: => String) {}
   def iterator = Iterator.empty
   override def isRecording = false
+  def merge(other: Iterator[Record]) {}
 }
 
 /**
  * Buffers messages to an ArrayBuffer.
  */
-class BufferingTranscript extends Transcript {
+class BufferingTranscript(traceID: TraceID) extends Transcript {
   private[this] val buffer = new ArrayBuffer[Record]
 
   def record(message: => String) = synchronized {
-    buffer += Record(
-      Host(), VMID(),
-      TraceContext().spanID, TraceContext().parentSpanID,
-      Time.now,
-      message)
+    buffer += Record(traceID, Time.now, message)
   }
 
   def iterator = buffer.iterator
 
   def clear() = synchronized {
     buffer.clear()
+  }
+
+  def merge(other: Iterator[Record]) = synchronized {
+    // TODO: resolve time drift by causality
+    var combined = buffer ++ other
+    combined = combined sortWith { (a, b) => a.timestamp < b.timestamp }
+    combined = combined distinct
+
+    buffer.clear()
+    buffer.appendAll(combined)
   }
 }

@@ -8,17 +8,31 @@ package com.twitter.finagle.tracing
 
 import scala.util.Random
 
-import com.twitter.util.Local
+import com.twitter.util.{Local, RichU64Long}
+
+case class TraceID(
+  var span: Long,
+  var parentSpan: Option[Long],
+  val host: Int,
+  val vm: String)
+{
+  override def toString = {
+    val spanHex = new RichU64Long(span).toU64HexString
+    val parentSpanHex = parentSpan map (new RichU64Long(_).toU64HexString)
+
+    val spanString = parentSpanHex match {
+      case Some(parentSpanHex) => "%s<:%s".format(spanHex, parentSpanHex)
+      case None => spanHex
+    }
+
+    "%s,%s".format(spanString, vm)
+  }
+}
 
 case class TraceContext(
-  var spanID: Long,
-  var parentSpanID: Option[Long],
-  var transcript: Transcript   // an associated transcript
+  var traceID: TraceID,
+  var transcript: Transcript
 )
-
-// Span stuff.  Define a thrift struct for carrying this.  Blah.
-// transcript: machine identifier (IP address?)  subspans, etc?  these
-// are usually reconstructed later...  it's what we get for logging.
 
 object TraceContext {
   private[this] val rng = new Random
@@ -35,5 +49,12 @@ object TraceContext {
     current().get
   }
 
-  def newContext() = TraceContext(rng.nextLong(), None, NullTranscript)
+  def newContext() = {
+    val traceID = TraceID(rng.nextLong(), None, Host(), VMID())
+    TraceContext(traceID, NullTranscript)
+  }
+
+  def reset() {
+    this() = newContext()
+  }
 }
