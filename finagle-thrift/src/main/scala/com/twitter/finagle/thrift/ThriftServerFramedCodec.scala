@@ -14,7 +14,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.util.TracingHeader
-import com.twitter.finagle.tracing.{BufferingTranscript, TraceContext}
+import com.twitter.finagle.tracing.{BufferingTranscript, Trace}
 
 class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
@@ -49,18 +49,16 @@ class ThriftServerTracingFilter
       val header = new TracedRequest
       val request_ = InputBuffer.peelMessage(request, header)
 
-      TraceContext.reset()
-      TraceContext().traceID.parentSpan = Some(header.getParent_span_id)
-
-      if (header.debug && !TraceContext().transcript.isRecording)
-        TraceContext().transcript = new BufferingTranscript(TraceContext().traceID)
+      Trace.startSpan(header.getParent_span_id)
+      if (header.debug)
+        Trace.debug(true)  // (don't turn off when !header.debug)
 
       service(request_) map { response =>
         // Wrap some trace data.
         val responseHeader = new TracedResponse
 
         if (header.debug) {
-          TraceContext().transcript foreach { record =>
+          Trace().transcript foreach { record =>
             val thriftRecord = new TranscriptRecord(
               record.traceID.host,
               record.traceID.vm,
@@ -69,11 +67,13 @@ class ThriftServerTracingFilter
               record.timestamp.inMilliseconds,
               record.message
             )
+
             responseHeader.addToTranscript(thriftRecord)
           }
         }
 
-        val responseHeaderBytes = OutputBuffer.messageToArray(responseHeader)
+        val responseHeaderBytes =
+          OutputBuffer.messageToArray(responseHeader)
         responseHeaderBytes ++ response
       }
     } else {

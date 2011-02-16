@@ -19,7 +19,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled, TracingHeader}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.ChannelService
-import com.twitter.finagle.tracing.{TraceID, TraceContext, Record}
+import com.twitter.finagle.tracing.{TraceID, Trace, Record}
 
 /** 
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -70,7 +70,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
       } else {
         // Otherwise, apply our tracing filter first. This will read
         // the TraceData frames, and apply them to the current
-        // TraceContext.
+        // Trace.
         (new ThriftClientTracingFilter) andThen underlying
       }
     }
@@ -108,9 +108,9 @@ class ThriftClientChannelBufferEncoder
 }
 
 /** 
- * ThriftClientTracingFilter implements TraceContext support for
- * thrift. This is applied *after* the Channel has been upgraded (via
- * negotiation). It serializes the current TraceContext into a header
+ * ThriftClientTracingFilter implements Trace support for thrift. This
+ * is applied *after* the Channel has been upgraded (via
+ * negotiation). It serializes the current Trace into a header
  * on the wire. It is applied after all framing.
  */
 
@@ -120,8 +120,8 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
             service: Service[ThriftClientRequest, Array[Byte]]) =
   {
     val header = new TracedRequest
-    header.setParent_span_id(TraceContext().traceID.span)
-    header.setDebug(TraceContext().transcript.isRecording)
+    header.setParent_span_id(Trace().traceID.span)
+    header.setDebug(Trace().transcript.isRecording)
 
     val tracedRequest = request.copy(
       message = OutputBuffer.messageToArray(header) ++ request.message)
@@ -153,7 +153,7 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
               thriftRecord.getMessage())
           }
 
-          TraceContext().transcript.merge(records.iterator)
+          Trace().transcript.merge(records.iterator)
         }
 
         rest

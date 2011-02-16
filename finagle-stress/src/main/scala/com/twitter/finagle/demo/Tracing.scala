@@ -9,7 +9,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.thrift.{ThriftServerFramedCodec, ThriftClientFramedCodec}
-import com.twitter.finagle.tracing.{TraceContext, BufferingTranscript}
+import com.twitter.finagle.tracing.{Trace, BufferingTranscript}
 
 object Tracing1Service extends Tracing1.ServiceIface {
   private[this] val transport = ClientBuilder()
@@ -28,8 +28,8 @@ object Tracing1Service extends Tracing1.ServiceIface {
   } 
 
   def computeSomething(): Future[String] = {
-    println("T1 with trace ID", TraceContext().traceID)
-    TraceContext().transcript.record("hey i'm issuing a call")
+    println("T1 with trace ID", Trace().traceID)
+    Trace.record("hey i'm issuing a call")
 
     t2Client.computeSomethingElse() map { somethingElse =>
       "t1: " + somethingElse
@@ -54,15 +54,14 @@ object Tracing2Service extends Tracing2.ServiceIface {
   }
 
   def computeSomethingElse(): Future[String] = {
-    println("T2 with trace ID", TraceContext().traceID)
-    TraceContext().transcript.record("hey i'm issuing a call")
-
+    println("T2 with trace ID", Trace().traceID)
+    Trace.record("hey i'm issuing a call")
 
     for {
       x <- t3Client.oneMoreThingToCompute()
       y <- t3Client.oneMoreThingToCompute()
     } yield {
-      TraceContext().transcript.record(
+      Trace.record(
         "got my results!  (%s and %s), returning".format(x, y))
       "t2: " + x + y
     }
@@ -80,10 +79,10 @@ object Tracing3Service extends Tracing3.ServiceIface {
   }
 
   def oneMoreThingToCompute(): Future[String] = {
-    println("T3 with trace ID", TraceContext().traceID)
+    println("T3 with trace ID", Trace().traceID)
 
     val number = count.incrementAndGet()
-    TraceContext().transcript.record(
+    Trace.record(
       "(t3) hey i'm issuing a call %s".format(number))
     Future("t3: %d".format(number))
   }
@@ -100,13 +99,13 @@ object Client {
       transport, new TBinaryProtocol.Factory())
 
     // Turn (debug) tracing on.
-    TraceContext().transcript = new BufferingTranscript(TraceContext().traceID)
+    Trace().transcript = new BufferingTranscript(Trace().traceID)
 
-    TraceContext().transcript.record("about to start issuing the root request..")
+    Trace.record("about to start issuing the root request..")
     val result = client.computeSomething()()
     println("result", result)
 
     println("Trace:")
-    TraceContext().transcript.print()
+    Trace().transcript.print()
   }
 }

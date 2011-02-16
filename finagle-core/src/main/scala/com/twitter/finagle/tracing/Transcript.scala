@@ -1,8 +1,9 @@
 package com.twitter.finagle.tracing
 
 /** 
- * Transcripts are records of events and are contained in a trace
- * context.
+ * Transcripts are programmer-provided records of events and are
+ * contained in a trace context. They are equivalent to a sequence of
+ * "annotations" in Dapper.
  */ 
 
 import collection.mutable.ArrayBuffer
@@ -31,10 +32,10 @@ trait Transcript extends Iterable[Record] {
  * context.
  */
 object Transcript extends Transcript {
-  def record(message: => String) { TraceContext().transcript.record(message) }
-  def iterator = TraceContext().transcript.iterator
-  override def isRecording = TraceContext().transcript.isRecording
-  def merge(other: Iterator[Record]) = TraceContext().transcript.merge(other)
+  def record(message: => String) { Trace().transcript.record(message) }
+  def iterator = Trace().transcript.iterator
+  override def isRecording = Trace().transcript.isRecording
+  def merge(other: Iterator[Record]) = Trace().transcript.merge(other)
 }
 
 /**
