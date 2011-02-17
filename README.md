@@ -136,7 +136,7 @@ Let's consider a more involved example. Often it is nice to isolate distinct pha
           Future.exception(new OverflowException)                                        // (2)
     }
 
-# Notes
+### Notes
 
 1. A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. It saves a little bit of typing.
 1. An exception can be returned asynchronously by calling `Future.exception`. See the section "Using Futures" for more information.
@@ -184,22 +184,21 @@ This creates a load balanced HTTP client that balances requests among 3 (local) 
 
 1. If retries are specified (using `retries(n: Int)`), Finagle will retry the request in the event of an error, up to the number of times specified. Finagle **does not assume your RPC service is Idempotent**. Retries occur only in the event of TCP-related `WriteExceptions`, where we are certain the RPC has not been transmitted to the remote server.
 
-A request can be issued via a client like this:
+Once you have constructed a client, a request is issued like this:
 
 ### Scala
 
-   val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, Get, "/")
-   val futureResponse: Future[HttpResponse] = client(request)
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, Get, "/")
+    val futureResponse: Future[HttpResponse] = client(request)
 
 ### Java
 
-   HttpRequest request = new DefaultHttpRequest(HTTP_1_1, Get, "/")
-   Future<HttpResponse> futureResponse = client.apply(request)
+    HttpRequest request = new DefaultHttpRequest(HTTP_1_1, Get, "/")
+    Future<HttpResponse> futureResponse = client.apply(request)
 
 ### Timeouts
 
 A robust way to use RPC clients is to have an upper-bound on how long to wait for a response to arrive. With `Futures`, there are two ways to do this: synchronously and asynchrously. 1) The synchronous technique is to block, waiting for a response to arrive, and throw an exception if it does not arrive in time. 2) The asynchronous way is to register a callback to handle the result if it arrives in time, and invoke another callback if it fails.
-
 
 ### Scala
 
@@ -220,6 +219,38 @@ A robust way to use RPC clients is to have an upper-bound on how long to wait fo
     }
 
 ## Using Futures
+
+Finagle uses `com.twitter.util.Futures` as the unifying abstraction for all asynchronous computation. A `Future` represents a computation that has not yet completed, and that can succeed or fail. The two most basic ways to use a `Future` is to 1) wait for the computation to return, or 2) register a callback to be invoked when the computation eventually succeeds or fails.
+
+In the example below, we define a function `f` that takes an `Int` and returns a `Future[Int]`. It errors if given an odd number.
+
+### Scala
+
+    def f(a: Int): Future[Int] =
+      if (a % 2 == 0)
+        Future.value(a)
+      else
+        Future.exception(new OddNumberException)
+
+    val myFuture: Future[Int] = f(2)
+
+    // 1) Wait 1 second the for computation to return
+    try {
+      println(myFuture(1.second))
+    } catch {
+      case e: TimeoutException   => ...
+      case e: OddNumberException => ...
+    }
+
+    // 2) Invoke a callback when the computation succeeds or fails
+    myFuture respond {
+      case Return(i) => println(i)
+      case Throw(e) => ...
+    }
+
+### Java
+
+`Futures` employ a powerful set of combinators including `map`, `flatMap`, and `foreach`.
 
 ## Streaming Protocols
 
