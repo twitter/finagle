@@ -33,16 +33,11 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   /**
    * finagle-thrift contains thrift codecs for use with the finagle
    * thrift service codegen. in order to be able to use thrift code
-   * generation in finagle-thrift, we break out commonly needed types
-   * (ie. for generation) into finagle-thrift-types.
+   * generation in finagle-thrift.
    */
-  val thriftTypesProject = project(
-    "finagle-thrift-types", "finagle-thrift-types",
-    new SimpleProject(_))
-
   val thriftProject = project(
     "finagle-thrift", "finagle-thrift",
-    new ThriftProject(_), thriftTypesProject, coreProject)
+    new ThriftProject(_), coreProject)
 
   /**
    * finagle-memcached contains the memcached codec, ketama, and Java and Scala

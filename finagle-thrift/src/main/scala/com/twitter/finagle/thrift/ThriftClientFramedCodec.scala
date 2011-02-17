@@ -56,7 +56,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
     options.write(buffer())
     buffer().writeMessageEnd()
 
-    underlying(ThriftClientRequest(buffer.toArray, false)) map { bytes =>
+    underlying(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
       val protocolFactory = new TBinaryProtocol.Factory()
       val memoryTransport = new TMemoryInputTransport(bytes)
       val iprot           = protocolFactory.getProtocol(memoryTransport)
@@ -85,11 +85,11 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
 class ThriftClientChannelBufferEncoder
   extends SimpleChannelDownstreamHandler
 {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
-      case ThriftClientRequest(message, oneway) =>
-        Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(message))
-        if (oneway) {
+      case request: ThriftClientRequest =>
+        Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
+        if (request.oneway) {
           // oneway RPCs are satisfied when the write is complete.
           e.getFuture() {
             case Ok(_) =>
@@ -104,7 +104,6 @@ class ThriftClientChannelBufferEncoder
       case _ =>
         throw new IllegalArgumentException("No ThriftClientRequest on the wire")
     }
-  }
 }
 
 /** 
@@ -123,8 +122,9 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
     header.setParent_span_id(Trace().traceID.span)
     header.setDebug(Trace().transcript.isRecording)
 
-    val tracedRequest = request.copy(
-      message = OutputBuffer.messageToArray(header) ++ request.message)
+    val tracedRequest = new ThriftClientRequest(
+      OutputBuffer.messageToArray(header) ++ request.message,
+      request.oneway)
 
     val reply = service(tracedRequest) 
     if (tracedRequest.oneway) {
