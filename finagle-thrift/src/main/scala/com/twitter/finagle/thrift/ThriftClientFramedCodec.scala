@@ -1,5 +1,7 @@
 package com.twitter.finagle.thrift
 
+import collection.JavaConversions._
+
 import org.jboss.netty.channel.{
   SimpleChannelHandler, Channel, ChannelEvent, ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
@@ -10,16 +12,79 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
 
-import com.twitter.util.Future
+import com.twitter.conversions.time._
+import com.twitter.util.{Time, Future}
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled, TracingHeader}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.ChannelService
+import com.twitter.finagle.tracing.{TraceID, Trace, Record}
 
-case class ThriftClientRequest(message: Array[Byte], oneway: Boolean)
+/** 
+ * ThriftClientFramedCodec implements a framed thrift transport that
+ * supports upgrading in order to provide TraceContexts across
+ * requests.
+ */
+object ThriftClientFramedCodec {
+  def apply() = new ThriftClientFramedCodec
+}
 
-class ThriftClientChannelBufferEncoder extends SimpleChannelDownstreamHandler {
+class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
+{
+  val clientPipelineFactory =
+    new ChannelPipelineFactory {
+      def getPipeline() = {
+        val pipeline = Channels.pipeline()
+        pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
+        pipeline.addLast("byteEncoder",      new ThriftClientChannelBufferEncoder)
+        pipeline.addLast("byteDecoder",      new ThriftChannelBufferDecoder)
+        pipeline
+      }
+    }
+
+  val serverPipelineFactory = clientPipelineFactory
+
+  override def prepareClientChannel(underlying: Service[ThriftClientRequest, Array[Byte]]) =
+  {
+    // Attempt to upgrade the protocol the first time around by
+    // sending a magic method invocation.
+    val buffer = new OutputBuffer()
+    buffer().writeMessageBegin(
+      new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
+    val options = new TraceOptions
+    options.write(buffer())
+    buffer().writeMessageEnd()
+
+    underlying(ThriftClientRequest(buffer.toArray, false)) map { bytes =>
+      val protocolFactory = new TBinaryProtocol.Factory()
+      val memoryTransport = new TMemoryInputTransport(bytes)
+      val iprot           = protocolFactory.getProtocol(memoryTransport)
+      val reply           = iprot.readMessageBegin()
+
+      if (reply.`type` == TMessageType.EXCEPTION) {
+        // Return just the underlying service if we caused an
+        // exception: this means the remote end didn't support
+        // tracing.
+        underlying
+      } else {
+        // Otherwise, apply our tracing filter first. This will read
+        // the TraceData frames, and apply them to the current
+        // Trace.
+        (new ThriftClientTracingFilter) andThen underlying
+      }
+    }
+  }
+}
+
+/**
+ * ThriftClientChannelBufferEncoder translates ThriftClientRequests to
+ * bytes on the wire. It satisfies the request immediately if it is a
+ * "oneway" request.
+ */
+class ThriftClientChannelBufferEncoder
+  extends SimpleChannelDownstreamHandler
+{
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
       case ThriftClientRequest(message, oneway) =>
@@ -37,65 +102,62 @@ class ThriftClientChannelBufferEncoder extends SimpleChannelDownstreamHandler {
         }
 
       case _ =>
-        throw new IllegalArgumentException("no byte array")
+        throw new IllegalArgumentException("No ThriftClientRequest on the wire")
     }
   }
 }
 
-object ThriftClientFramedCodec {
-  def apply() = new ThriftClientFramedCodec
-}
-
-class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]] {
-  val clientPipelineFactory =
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
-        pipeline.addLast("byteEncoder", new ThriftClientChannelBufferEncoder)
-        pipeline.addLast("byteDecoder", new ThriftChannelBufferDecoder)
-        pipeline
-      }
-    }
-
-  val serverPipelineFactory = clientPipelineFactory
-
-  override def prepareClientChannel(
-    underlying: Service[ThriftClientRequest, Array[Byte]]) =
-  {
-    // Attempt to upgrade the protocol the first time around by
-    // sending a magic method invocation.
-    val memoryBuffer = new TMemoryBuffer(512)
-    val protocolFactory = new TBinaryProtocol.Factory()
-    val oprot = protocolFactory.getProtocol(memoryBuffer)
-    oprot.writeMessageBegin(
-      new TMessage(Tracing.CanTraceMethodName, TMessageType.CALL, 0))
-    val args = new CanTwitterTrace.can_twitter_trace_args()
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.getTransport().flush()
- 
-    val message = java.util.Arrays.copyOfRange(
-      memoryBuffer.getArray(), 0, memoryBuffer.length())
-    
-    underlying(ThriftClientRequest(message, false)) map { reply =>
-      val memoryTransport = new TMemoryInputTransport(reply)
-      val iprot = protocolFactory.getProtocol(memoryTransport)
-      val msg = iprot.readMessageBegin()
-      if (msg.`type` == TMessageType.EXCEPTION)
-        underlying
-      else
-        (new ThriftClientTracingFilter) andThen underlying
-    }
-  }
-}
+/** 
+ * ThriftClientTracingFilter implements Trace support for thrift. This
+ * is applied *after* the Channel has been upgraded (via
+ * negotiation). It serializes the current Trace into a header
+ * on the wire. It is applied after all framing.
+ */
 
 class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
   def apply(request: ThriftClientRequest,
-            service: Service[ThriftClientRequest, Array[Byte]]) = {
-    val message = TracingHeader.encode(Transaction().id, request.message)
-    val tracedRequest = ThriftClientRequest(message, request.oneway)
-    service(tracedRequest)
+            service: Service[ThriftClientRequest, Array[Byte]]) =
+  {
+    val header = new TracedRequest
+    header.setParent_span_id(Trace().traceID.span)
+    header.setDebug(Trace().transcript.isRecording)
+
+    val tracedRequest = request.copy(
+      message = OutputBuffer.messageToArray(header) ++ request.message)
+
+    val reply = service(tracedRequest) 
+    if (tracedRequest.oneway) {
+      // Oneway requests don't contain replies, and so they can't be
+      // traced.
+      reply
+    } else {
+      reply map { response =>
+        val responseHeader = new TracedResponse
+        val rest = InputBuffer.peelMessage(response, responseHeader)
+
+        if (header.debug && responseHeader.isSetTranscript) {
+          val records = responseHeader.transcript map { thriftRecord =>
+            val traceID = TraceID(
+              thriftRecord.getSpan_id(),
+              {
+                val spanID = thriftRecord.getParent_span_id()
+                if (spanID == 0) None else Some(spanID)
+              },
+              thriftRecord.getHost(),
+              thriftRecord.getVm_id())
+
+            Record(
+              traceID,
+              Time.fromMilliseconds(thriftRecord.getTimestamp_ms()),
+              thriftRecord.getMessage())
+          }
+
+          Trace().transcript.merge(records.iterator)
+        }
+
+        rest
+      }
+    }
   }
 }

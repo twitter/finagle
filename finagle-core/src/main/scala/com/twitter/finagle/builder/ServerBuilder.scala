@@ -18,6 +18,7 @@ import com.twitter.util.Duration
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
+import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
@@ -64,7 +65,8 @@ case class ServerBuilder[Req, Rep](
   _channelFactory: Option[ReferenceCountedChannelFactory],
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
-  _requestTimeout: Option[Duration])
+  _requestTimeout: Option[Duration],
+  _traceReceiver: Option[TraceReceiver])
 {
   import ServerBuilder._
 
@@ -81,7 +83,8 @@ case class ServerBuilder[Req, Rep](
     None,              // channelFactory
     None,              // maxConcurrentRequests
     None,              // hostConnectionMaxIdleTime
-    None               // requestTimeout
+    None,              // requestTimeout
+    None               // traceReceiver
   )
 
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
@@ -117,6 +120,9 @@ case class ServerBuilder[Req, Rep](
 
   def requestTimeout(howlong: Duration) =
     copy(_requestTimeout = Some(howlong))
+
+  def traceReceiver(receiver: TraceReceiver) =
+    copy(_traceReceiver = Some(receiver))
 
   private[this] def scopedStatsReceiver =
     _statsReceiver map { sr => _name map (sr.scope(_)) getOrElse sr }
@@ -211,6 +217,13 @@ case class ServerBuilder[Req, Rep](
 
         _requestTimeout foreach { duration =>
           service = (new TimeoutFilter(duration)) andThen service
+        }
+
+        // This has to go last (ie. first in the stack) so that
+        // protocol-specific trace support can override our generic
+        // one here.
+        _traceReceiver foreach { traceReceiver =>
+          service = (new TracingFilter(traceReceiver)) andThen service
         }
 
         // Register the channel so we can wait for them for a
