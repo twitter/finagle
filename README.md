@@ -248,11 +248,103 @@ In the example below, we define a function `f` that takes an `Int` and returns a
       case Throw(e) => ...
     }
 
-### Java
+In addition to waiting for results to return, `Futures` can be transformed in interesting ways. For instance, it is possible to convert a `Future[String]` to a `Future[Int]` by using `map`:
 
-`Futures` employ a powerful set of combinators including `map`, `flatMap`, and `foreach`.
+    val stringFuture: Future[String] = Future("1")
+    val intFuture: Future[Int] = stringFuture map (_.toInt)
+
+Similar to `map`, there is `flatMap`. This allows you to easily "pipeline" a sequence of `Futures`:
+
+    val authenticateUser: Future[User] = User.authenticate(email, password)
+    val lookupTweets: Future[Seq[Tweet]] = authenticateUser flatMap { user =>
+      Tweet.findAllByUser(user)
+    }
+
+In this example, `Tweet.findAllByUser(user)` is a function of type `User => Future[Seq[Tweet]]`.
+
+As a final example of `Futures` let's consider the problem of scatter/gather patterns. The challenge is to issue a series of requests in parallel and wait for all of them to arrive. Suppose for example, we have a sequence of `Futures`. To wait for all to return, we do like so:
+
+    val myFutures: Seq[Future[Int]] = ...
+
+    val waitTillAllComplete: Future[Seq[Int]] = Future.join(myFutures)
+
+In this example, `waitTillAllComplete` is a `Future[Unit]`. `Futures` of this type are often used to indicate when something has completed, but there is no value to return (or the value is available elsewhere).
+
+A more complex variation of scatter/gather is to perform a sequence of asynchronous operations and harvest only those that return within a certain time -- using a default value for those that don't return. A concrete example might be to issue a set of parallel requests to N partitions of a search index; those that don't return in time we consider to have returned the empty set.
+
+    import com.twitter.finagle.util.Timer._
+
+    val results: Seq[Future[Result]] = partitions.map { partition =>
+      partition.get(query).within(1.second) handle {
+        case _: TimeoutException => EmptyResult
+      }
+    }
+    val allResults: Future[Seq[Result]] = Future.join(timedResults)
+
+    // Process the results asynchronously.
+    // Note: this takes no longer than 1 second.
+    allResults onSuccess { results =>
+      println(results)
+    }
 
 ## Streaming Protocols
 
-Some incomplete API documentation is available:
-See [scaladoc](http://twitter.github.com/finagle/).
+Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalization of `Futures` called `Channels`. `Channels` represent a stream of events that can be listened to. To publish and subscribe to a `Channel`, do the following:
+
+    // a ChannelSource is a readable-writable stream of messages, whereas a Channel is only readable.
+    val source = new ChannelSource[Int]
+    val sink: Channel = source
+
+    // start listening for messages:
+    val observer1 = sink receive { message =>
+      Future { println("1: " + message) }                              // (1)
+    }
+    val observer2 = sink receive { message =>                          // (2)
+      Future { println("2: " + message) }
+    }
+
+    // send some messages on the channel
+    source send(1)
+    source send(2)
+    // etc.
+
+    // stop listening for messages:
+    observer1.dispose()
+
+### Notes
+
+1. Subscribers must return a `Future` indicating when processing of the received message is complete. This allows consumers to exhibit backpressure to producers.
+1. Just as with `Futures` there can be any number of receivers to a `Channel`.
+
+`Channels` have some of the usual sequence operations such as `map` and `filter`:
+
+    val channel = new ChannelSource[Int]
+    val evenChannel = channel filter (_ % 2 == 0)
+    val stringChannel = channel map (_.toString)
+
+Most of the tricky issues concerning `Channels` involve data-loss and backpressure. In order to ensure that no data is lost, a typical pattern is not to broadcast on a `Channel` until there is at least one subscriber. This is easily accomplished:
+
+    channel.receives.first { _ =>                                       // (1) (2)
+      // the first receiver has arrived, start sending!
+      // ...
+    }
+
+### Notes
+
+1. `channel.receives` is a `Channel` itself. In other words, every `Channel` has a sub-channel indicating when subscribers subscribe (and unsubscribe!).
+1. `channel.first` is a `Future` indicating when the first message arrives on that `Channel`.
+
+Backpressure (that is, slowing down production if consumers get backed up) is also easily accomplished. The `channel.send` method returns a `Seq[Future[Unit]]` -- a sequence of `Futures` indicating when all consumers have processed the message. You can use `Future.join` to slow down production in the following way:
+
+    Future.join(channel.send(1)) onSuccess { _ =>
+      Future.join(channel.send(2)) onSuccess { ... }
+    }
+
+With `Channels`, building a streaming RPC service is straightforward. You will need a codec that supports streaming (such as HTTP with chunked encoding). Then, build a `Service` that returns a `Channel`:
+
+    val channel = new ChannelSource[ChannelBuffer]
+    val myService = new Service[HttpRequest, Channel[ChannelBuffer]] {
+      def apply(request: HttpRequest) = Future.value(channel)
+    }
+
+Some incomplete API documentation is available: See [scaladoc](http://twitter.github.com/finagle/).
