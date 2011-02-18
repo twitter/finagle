@@ -55,6 +55,15 @@ case class Span(
       Span.timeFormat.format(startTime),
       (endTime - startTime).inMilliseconds)
   }
+
+  def print() {
+    transcript foreach { record =>
+      val atMs = (record.timestamp - startTime).inMilliseconds
+      record.message.split("\n") foreach { line =>
+        println("%s %03dms: %s".format(traceID, atMs, line))
+      }
+    }
+  }
 }
 
 object Trace {
@@ -80,7 +89,7 @@ object Trace {
   def clear() {
     current.clear()
   }
-  
+
   def startSpan() {
     this() = newSpan()
   }
