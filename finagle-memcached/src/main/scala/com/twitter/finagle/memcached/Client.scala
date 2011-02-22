@@ -27,23 +27,7 @@ object Client {
       .build())
 
   /**
-   * Construct a partitioned client from a set of Services.
-   */
-  def apply(services: Seq[Service[Command, Response]]): Client = {
-    val clients = services.map(apply(_))
-    val hasher = KeyHasher.byName("fnv")
-    val circle = {
-      val circle = new TreeMap[Long, Client]()
-      clients foreach { client =>
-        circle += hasher.hashKey(client.toString) -> client
-      }
-      circle
-    }
-    new PartitionedClient(clients, circle, hasher)
-  }
-
-  /**
-   * Construct an unpartitioned client from a single Service.
+   * Construct a client from a single Service.
    */
   def apply(raw: Service[Command, Response]): Client = {
     new ConnectedClient(raw)
@@ -54,11 +38,38 @@ object Client {
  * A friendly client to talk to a Memcached server.
  */
 trait Client {
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Response]
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Response]
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer):  Future[Response]
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Response]
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Response]
+  /**
+   * Store a key. Override an existing value.
+   * @returns true
+   */
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Unit]
+
+  /**
+   * Store a key but only if it doesn't already exist on the server.
+   * @returns true if stored, false if not stored
+   */
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Boolean]
+
+  /**
+   * Append bytes to the end of an existing key. If the key doesn't exist, the
+   * operation has no effect.
+   * @returns true if stored, false if not stored
+   */
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer):  Future[Boolean]
+
+  /**
+   * Prepend bytes to the beginning of an existing key. If the key doesn't
+   * exist, the operation has no effect.
+   * @returns true if stored, false if not stored
+   */
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
+
+  /**
+   * Replace bytes on an existing key. If the key doesn't exist, the
+   * operation has no effect.
+   * @returns true if stored, false if not stored
+   */
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
 
   /**
    * Get a key from the server.
@@ -73,51 +84,60 @@ trait Client {
 
   /**
    * Remove a key.
+   * @returns true if deleted, false if not found
    */
-  def delete(key: String):                        Future[Response]
+  def delete(key: String):                        Future[Boolean]
 
   /**
    * Increment a key. Interpret the key as an integer if it is parsable.
    * This operation has no effect if there is no value there already.
-   * A common idiom is to set(key, ""), incr(key).
    */
-  def incr(key: String):                          Future[Int]
-  def incr(key: String, delta: Int):              Future[Int]
+  def incr(key: String):                          Future[Option[Int]]
+  def incr(key: String, delta: Int):              Future[Option[Int]]
 
   /**
    * Decrement a key. Interpret the key as an integer if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def decr(key: String):                          Future[Int]
-  def decr(key: String, delta: Int):              Future[Int]
+  def decr(key: String):                          Future[Option[Int]]
+  def decr(key: String, delta: Int):              Future[Option[Int]]
 
   /**
    * Store a key. Override an existing values.
+   * @returns true
    */
-  def set(key: String, value: ChannelBuffer):     Future[Response] = set(key, 0, Time.epoch, value)
+  def set(key: String, value: ChannelBuffer): Future[Unit] =
+    set(key, 0, Time.epoch, value)
 
   /**
    * Store a key but only if it doesn't already exist on the server.
+   * @returns true if stored, false if not stored
    */
-  def add(key: String, value: ChannelBuffer):     Future[Response] = add(key, 0, Time.epoch, value)
+  def add(key: String, value: ChannelBuffer): Future[Boolean] =
+    add(key, 0, Time.epoch, value)
 
   /**
    * Append a set of bytes to the end of an existing key. If the key doesn't
    * exist, the operation has no effect.
+   * @returns true if stored, false if not stored
    */
-  def append(key: String, value: ChannelBuffer):  Future[Response] = append(key, 0, Time.epoch, value)
+  def append(key: String, value: ChannelBuffer): Future[Boolean] =
+    append(key, 0, Time.epoch, value)
 
   /**
    * Prepend a set of bytes to the beginning of an existing key. If the key
    * doesn't exist, the operation has no effect.
+   * @returns true if stored, false if not stored
    */
-  def prepend(key: String, value: ChannelBuffer): Future[Response] = prepend(key, 0, Time.epoch, value)
+  def prepend(key: String, value: ChannelBuffer): Future[Boolean] =
+    prepend(key, 0, Time.epoch, value)
 
   /**
    * Replace an item if it exists. If it doesn't exist, the operation has no
    * effect.
+   * @returns true if stored, false if not stored
    */
-  def replace(key: String, value: ChannelBuffer): Future[Response] = replace(key, 0, Time.epoch, value)
+  def replace(key: String, value: ChannelBuffer): Future[Boolean] = replace(key, 0, Time.epoch, value)
 }
 
 /**
@@ -125,174 +145,174 @@ trait Client {
  *
  * @param  underlying  the underlying Memcached Service.
  */
-protected class ConnectedClient(underlying: Service[Command, Response]) extends Client {
+protected class ConnectedClient(service: Service[Command, Response]) extends Client {
   def get(key: String) = {
-    underlying(Get(Seq(key))) map {
+    service(Get(Seq(key))) map {
       case Values(values) =>
         if (values.size > 0) Some(values.head.value)
         else None
-      case _ => throw new IllegalArgumentException
+      case Error(e) => throw e
+      case _        => throw new IllegalStateException
     }
   }
 
   def get(keys: Iterable[String]) = {
-    underlying(Get(keys.toSeq)) map {
+    service(Get(keys.toSeq)) map {
       case Values(values) =>
         val tuples = values.map {
           case Value(key, value) =>
             (key.toString(CharsetUtil.UTF_8), value)
         }
         Map(tuples: _*)
-      case _ => throw new IllegalArgumentException
+      case Error(e) => throw e
+      case _        => throw new IllegalStateException
     }
   }
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    underlying(Set(key, flags, expiry, value))
+    service(Set(key, flags, expiry, value)) map {
+      case Stored() => ()
+      case Error(e) => throw e
+      case _        => throw new IllegalStateException
+    }
 
   def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    underlying(Add(key, flags, expiry, value))
+    service(Add(key, flags, expiry, value)) map {
+      case Stored()     => true
+      case NotStored()  => false
+      case Error(e)     => throw e
+      case _            => throw new IllegalStateException
+    }
 
   def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    underlying(Append(key, flags, expiry, value))
+    service(Append(key, flags, expiry, value)) map {
+      case Stored()     => true
+      case NotStored()  => false
+      case Error(e)     => throw e
+      case _            => throw new IllegalStateException
+    }
 
   def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    underlying(Prepend(key, flags, expiry, value))
+    service(Prepend(key, flags, expiry, value)) map {
+      case Stored()     => true
+      case NotStored()  => false
+      case Error(e)     => throw e
+      case _            => throw new IllegalStateException
+    }
 
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    underlying(Replace(key, flags, expiry, value))
+    service(Replace(key, flags, expiry, value)) map {
+      case Stored()     => true
+      case NotStored()  => false
+      case Error(e)     => throw e
+      case _            => throw new IllegalStateException
+    }
 
-  def delete(key: String)                        = underlying(Delete(key))
+  def delete(key: String) =
+    service(Delete(key)) map {
+      case Deleted()    => true
+      case NotFound()   => false
+      case Error(e)     => throw e
+      case _            => throw new IllegalStateException
+    }
 
-  def incr(key: String): Future[Int]             = incr(key, 1)
+  def incr(key: String) = incr(key, 1)
 
-  def decr(key: String): Future[Int]             = decr(key, 1)
+  def decr(key: String) = decr(key, 1)
 
-  def incr(key: String, delta: Int): Future[Int] = {
-    underlying(Incr(key, delta)) map {
-      case Number(value) =>
-        value
-      case _ => throw new IllegalArgumentException
+  def incr(key: String, delta: Int): Future[Option[Int]] = {
+    service(Incr(key, delta)) map {
+      case Number(value) => Some(value)
+      case NotFound()    => None
+      case Error(e)      => throw e
+      case _             => throw new IllegalStateException
     }
   }
 
-  def decr(key: String, delta: Int): Future[Int] = {
-    underlying(Decr(key, delta)) map {
-      case Number(value) =>
-        value
-      case _ => throw new IllegalArgumentException
+  def decr(key: String, delta: Int): Future[Option[Int]] = {
+    service(Decr(key, delta)) map {
+      case Number(value) => Some(value)
+      case NotFound()    => None
+      case Error(e)      => throw e
+      case _             => throw new IllegalStateException
     }
   }
-
-  override def toString = hashCode.toString // FIXME this incompatible with Ketama
 }
 
 /**
- * A Memcached client that partitions data across multiple servers according to a
- * the provided consistent hash ring and key hasher.
- *
- * @param ring      consistent hash ring
- * @param keyHasher hash function for hashing keys on the hash ring
+ * A partitioned client is a client that delegates to an actual client based on
+ * the key value.  Subclasses implement clientOf to choose the Client.
  */
-class PartitionedClient(clients: Seq[Client], ring: TreeMap[Long, Client], keyHasher: KeyHasher) extends Client {
-  require(clients.size > 0, "At least one client must be provided")
+trait PartitionedClient extends Client {
+  def clientOf(key: String): Client
 
-  def get(key: String)                    = idx(key).get(key)
+  def get(key: String)                    = clientOf(key).get(key)
   def get(keys: Iterable[String])         = {
-    val keysGroupedByClient = keys.groupBy(idx(_))
+    if (!keys.isEmpty) {
+      val keysGroupedByClient = keys.groupBy(clientOf(_))
 
-    val mapOfMaps = keysGroupedByClient.map { case (client, keys) =>
-      client.get(keys)
-    }
-
-    mapOfMaps.reduceLeft { (result, nextMap) =>
-      for {
-        result <- result
-        nextMap <- nextMap
-      } yield {
-        result ++ nextMap
+      val mapOfMaps = keysGroupedByClient.map { case (client, keys) =>
+        client.get(keys)
       }
+
+      mapOfMaps.reduceLeft { (result, nextMap) =>
+        for {
+          result <- result
+          nextMap <- nextMap
+        } yield {
+          result ++ nextMap
+        }
+      }
+    } else {
+      Future(Map[String, ChannelBuffer]())
     }
   }
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    idx(key).set(key, flags, expiry, value)
+    clientOf(key).set(key, flags, expiry, value)
   def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    idx(key).add(key, flags, expiry, value)
+    clientOf(key).add(key, flags, expiry, value)
   def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    idx(key).append(key, flags, expiry, value)
+    clientOf(key).append(key, flags, expiry, value)
   def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    idx(key).prepend(key, flags, expiry, value)
+    clientOf(key).prepend(key, flags, expiry, value)
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    idx(key).replace(key, flags, expiry, value)
+    clientOf(key).replace(key, flags, expiry, value)
 
-  def delete(key: String)                        = idx(key).delete(key)
-  def incr(key: String)                          = idx(key).incr(key)
-  def incr(key: String, delta: Int)              = idx(key).incr(key, delta)
-  def decr(key: String)                          = idx(key).decr(key)
-  def decr(key: String, delta: Int)              = idx(key).decr(key, delta)
-
-  private[this] def idx(key: String) = {
-    val entry = ring.ceilingEntry(keyHasher.hashKey(key))
-    val client = if (entry ne null) entry.getValue
-    else ring.firstEntry.getValue
-    client
-  }
+  def delete(key: String)           = clientOf(key).delete(key)
+  def incr(key: String)             = clientOf(key).incr(key)
+  def incr(key: String, delta: Int) = clientOf(key).incr(key, delta)
+  def decr(key: String)             = clientOf(key).decr(key)
+  def decr(key: String, delta: Int) = clientOf(key).decr(key, delta)
 }
 
-case class KetamaClientBuilder(
-  _nodes: Seq[Tuple3[String, Int, Int]],
-  _hashName: Option[String],
-  _clientBuilder: Option[ClientBuilder[Command, Response]]) {
+object PartitionedClient {
+  def parseHostPortWeights(hostPortWeights: String): Seq[Tuple3[String, Int, Int]] =
+    hostPortWeights
+      .split(Array(' ', ','))
+      .filter((_ != ""))
+      .map(_.split(":"))
+      .map {
+        case Array(host)               => (host, 11211, 1)
+        case Array(host, port)         => (host, port.toInt, 1)
+        case Array(host, port, weight) => (host, port.toInt, weight.toInt)
+      }
+}
 
-  def this() = this(
-    Nil,  // nodes
-    None, // hashName
-    None  // clientBuilder
-  )
 
-  def nodes(nodes: Seq[Tuple3[String, Int, Int]]): KetamaClientBuilder =
-    copy(_nodes = nodes)
+class KetamaClient(clients: Map[Tuple3[String, Int, Int], Client], keyHasher: KeyHasher = KeyHasher.KETAMA)
+  extends PartitionedClient {
+  require(!clients.isEmpty, "At least one client must be provided")
 
-  def nodes(hostPortWeights: String): KetamaClientBuilder =
-    copy(_nodes = parseHostPortWeights(hostPortWeights))
+  // we use (NUM_REPS * #servers) total points, but allocate them based on server weights.
+  val NUM_REPS = 160
 
-  def hashName(hashName: String): KetamaClientBuilder =
-    copy(_hashName = Some(hashName))
+  val continuum = {
+    var continuum = new TreeMap[Long, Tuple3[String, Int, Int]]()
+    val serverCount = clients.size
+    val totalWeight = clients.keys.foldLeft(0.0) {_+_._3}
 
-  def clientBuilder(clientBuilder: ClientBuilder[Command, Response]): KetamaClientBuilder =
-    copy(_clientBuilder = Some(clientBuilder))
-
-  def parseHostPortWeights(hostPortWeights: String): Seq[Tuple3[String, Int, Int]] = {
-    val hpws = hostPortWeights split Array(' ', ',') filter (_ != "") map(_.split(":"))
-    hpws map { hpw => (hpw(0), hpw(1).toInt, hpw(2).toInt) } toList
-  }
-
-  private[this] def computeHash(key: String, alignment: Int) = {
-    val hasher = MessageDigest.getInstance("MD5")
-    hasher.update(key.getBytes("utf-8"))
-    val buffer = ByteBuffer.wrap(hasher.digest)
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.position(alignment << 2)
-    buffer.getInt.toLong & 0xffffffffL
-  }
-
-  def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder()
-    val hasher = KeyHasher.byName(_hashName getOrElse "fnv")
-    var continuum = new TreeMap[Long, Client]()
-    var clients: Seq[Client] = Seq()
-
-    val serverCount = _nodes.size
-    val totalWeight = _nodes.foldLeft(0.0) {_+_._3}
-
-    // we use (NUM_REPS * #servers) total points, but allocate them based on server weights.
-    val NUM_REPS = 160
-
-    for ((hostname, port, weight) <- _nodes) {
-      val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
-      clients = clients :+ client
-
+    for ((hostname, port, weight) <- clients.keys) {
       val percent = weight.toDouble / totalWeight
       // the tiny fudge fraction is added to counteract float errors.
       val itemWeight = (percent * serverCount * (NUM_REPS / 4) + 0.0000000001).toInt
@@ -303,7 +323,7 @@ case class KetamaClientBuilder(
           hostname + ":" + port + "-" + k
         }
         for (i <- 0 until 4) {
-          continuum += computeHash(key, i) -> client
+          continuum += computeHash(key, i) -> (hostname, port, weight)
         }
       }
     }
@@ -311,6 +331,105 @@ case class KetamaClientBuilder(
     assert(continuum.size <= NUM_REPS * serverCount)
     assert(continuum.size >= NUM_REPS * (serverCount - 1))
 
-    new PartitionedClient(clients, continuum, hasher)
+    continuum
+  }
+
+  def clientOf(key: String) = {
+    val hash = keyHasher.hashKey(key)
+    val entry = continuum.ceilingEntry(hash)
+    val clientTuple =
+      if (entry ne null)
+        entry.getValue
+      else
+        continuum.firstEntry.getValue
+    val client = clients(clientTuple)
+    client
+  }
+
+  def computeHash(key: String, alignment: Int) = {
+    val hasher = MessageDigest.getInstance("MD5")
+    hasher.update(key.getBytes("utf-8"))
+    val buffer = ByteBuffer.wrap(hasher.digest)
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.position(alignment << 2)
+    buffer.getInt.toLong & 0xffffffffL
+  }
+}
+
+
+case class KetamaClientBuilder(
+  _nodes: Seq[Tuple3[String, Int, Int]],
+  _hashName: Option[String],
+  _clientBuilder: Option[ClientBuilder[Command, Response]]) {
+
+  def this() = this(
+    Nil,            // nodes
+    Some("ketama"), // hashName
+    None            // clientBuilder
+  )
+
+  def nodes(nodes: Seq[Tuple3[String, Int, Int]]): KetamaClientBuilder =
+    copy(_nodes = nodes)
+
+  def nodes(hostPortWeights: String): KetamaClientBuilder =
+    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+
+  def hashName(hashName: String): KetamaClientBuilder =
+    copy(_hashName = Some(hashName))
+
+  def clientBuilder(clientBuilder: ClientBuilder[Command, Response]): KetamaClientBuilder =
+    copy(_clientBuilder = Some(clientBuilder))
+
+  def build(): PartitionedClient = {
+    val builder = _clientBuilder getOrElse ClientBuilder()
+    val clients = Map() ++ _nodes.map { case (hostname, port, weight) =>
+      val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      ((hostname, port, weight) -> client)
+    }
+    val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
+    new KetamaClient(clients, keyHasher)
+  }
+}
+
+
+/**
+ * Ruby memcache-client (MemCache) compatible client.
+ */
+class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
+  override def clientOf(key: String) = {
+    val hash = (KeyHasher.CRC32_ITU.hashKey(key) >> 16) & 0x7fff
+    val index = hash % clients.size
+    clients(index.toInt)
+  }
+}
+
+/**
+ * Builder for memcache-client (MemCache) compatible client.
+ */
+case class RubyMemCacheClientBuilder(
+  _nodes: Seq[Tuple3[String, Int, Int]],
+  _clientBuilder: Option[ClientBuilder[Command, Response]]) {
+
+  def this() = this(
+    Nil,  // nodes
+    None  // clientBuilder
+  )
+
+  def nodes(nodes: Seq[Tuple3[String, Int, Int]]): RubyMemCacheClientBuilder =
+    copy(_nodes = nodes)
+
+  def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
+    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+
+  def clientBuilder(clientBuilder: ClientBuilder[Command, Response]): RubyMemCacheClientBuilder =
+    copy(_clientBuilder = Some(clientBuilder))
+
+  def build(): PartitionedClient = {
+    val builder = _clientBuilder getOrElse ClientBuilder()
+    val clients = _nodes.map { case (hostname, port, weight) =>
+      require(weight == 1, "Ruby memcache node weight must be 1")
+      Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+    }
+    new RubyMemCacheClient(clients)
   }
 }
