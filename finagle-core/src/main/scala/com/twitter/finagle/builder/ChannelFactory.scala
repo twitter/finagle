@@ -43,8 +43,18 @@ class LazyRevivableChannelFactory(make: () => ChannelFactory)
   }
 
   def releaseExternalResources() = synchronized {
+    var thread: Thread = null
+
     if (underlying ne null) {
-      underlying.releaseExternalResources()
+      // releaseExternalResources must be called in a non-Netty
+      // thread, otherwise it can lead to a deadlock.
+      val _underlying = underlying
+      thread = new Thread {
+        override def run = {
+          _underlying.releaseExternalResources()
+        }
+      }
+      thread.start()
       underlying = null
     }
   }

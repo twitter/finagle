@@ -11,13 +11,13 @@ object EchoClient {
       .build()
 
     // Issue request:
-    client("hi mom\n") onSuccess { result =>
+    val result = client("hi mom\n")
+    result onSuccess { result =>
       println("Received result: " + result)
     } onFailure { error =>
       error.printStackTrace()
     } ensure {
       // All done! Close TCP connection:
-      println("releasin")
       client.release()
     }
   }
