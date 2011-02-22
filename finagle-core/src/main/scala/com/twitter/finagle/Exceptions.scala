@@ -15,7 +15,9 @@ class ConnectionFailedException             extends ChannelException
 class ChannelClosedException                extends ChannelException
 class SpuriousMessageException              extends ChannelException
 class IllegalMessageException               extends ChannelException
-class UnknownChannelException(e: Throwable) extends ChannelException
+class UnknownChannelException(e: Throwable) extends ChannelException {
+  override def toString = "%s: %s".format(super.toString, e.toString)  
+}
 class WriteException(e: Throwable)          extends ChannelException {
   override def toString = "%s: %s".format(super.toString, e.toString)
 }
@@ -44,3 +46,5 @@ class ApiException                         extends Exception
 class TooManyConcurrentRequestsException   extends ApiException
 class InvalidPipelineException             extends ApiException
 class NotYetConnectedException             extends ApiException
+
+class CodecException(description: String) extends Exception(description)

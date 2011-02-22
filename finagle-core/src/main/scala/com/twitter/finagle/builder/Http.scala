@@ -34,6 +34,10 @@ class Http(compressionLevel: Int = 0) extends Codec[HttpRequest, HttpResponse] {
             new HttpContentCompressor(compressionLevel))
         }
 
+        // Response to Expect: Continue
+        pipeline.addLast("respondToExpectContinue", new RespondToExpectContinue)
+        pipeline.addLast("httpDechunker", new HttpChunkAggregator(10<<20))
+
         pipeline.addLast(
           "connectionLifecycleManager",
           new ServerConnectionManager)

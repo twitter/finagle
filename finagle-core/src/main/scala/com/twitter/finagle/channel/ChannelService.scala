@@ -9,11 +9,12 @@ import org.jboss.netty.channel.{
   SimpleChannelUpstreamHandler, ExceptionEvent,
   ChannelStateEvent}
 
-import com.twitter.util.{Future, Promise, Return, Throw, Try}
+import com.twitter.util.{Future, Promise, Return, Throw, Try, Time}
 
 import com.twitter.finagle._
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled, FutureLatch}
+import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
 
 /**
  * The ChannelService bridges a finagle service onto a Netty
@@ -39,7 +40,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
 
     val replyFuture = currentReplyFuture.getAndSet(null)
     if (replyFuture ne null)
-      replyFuture() = message
+      replyFuture.updateIfEmpty(message)
     else  // spurious reply!
       isHealthy = false
 
@@ -69,6 +70,7 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
       Channels.write(channel, request) {
         case Error(cause) =>
+          isHealthy = false
           replyFuture.updateIfEmpty(Throw(new WriteException(ChannelException(cause))))
         case _ => ()
       }
@@ -90,20 +92,27 @@ class ChannelService[Req, Rep](channel: Channel, factory: ChannelServiceFactory[
  */
 class ChannelServiceFactory[Req, Rep](
     bootstrap: ClientBootstrap,
-    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]])
+    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]],
+    statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
-  private[this] val channelLatch = new FutureLatch
+  private[this] val channelLatch = new AsyncLatch
+  private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
+
+  statsReceiver.provideGauge("connections") { channelLatch.getCount }
 
   protected[channel] def channelReleased(channel: ChannelService[Req, Rep]) {
     channelLatch.decr()
   }
 
   def make() = {
+    val begin = Time.now
+
     val promise = new Promise[Service[Req, Rep]]
     bootstrap.connect() {
       case Ok(channel)  =>
         channelLatch.incr()
+        connectLatencyStat.add(begin.untilNow.inMilliseconds)
         prepareChannel(new ChannelService[Req, Rep](channel, this)) respond { promise() = _ }
 
       case Error(cause) =>

@@ -4,10 +4,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory
 
 import com.twitter.util.Future
 
-import com.twitter.finagle.channel.ChannelService
-
 /**
- * The codec provides protocol encoding via netty pipelines.
+ * The codec provides protocol encoding and decoding via netty pipelines.
  */
 // TODO: do we want to split this into client/server codecs?
 trait Codec[Req, Rep] {

@@ -17,15 +17,23 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new CoreProject(_))
 
   /**
-   * finagle-ostrich implements a StatsReceiver for the Ostrich statistics library
+   * finagle-ostrich implements a StatsReceiver for the Ostrich 2.x statistics library
    */
   val ostrichProject = project(
     "finagle-ostrich", "finagle-ostrich",
     new OstrichProject(_), coreProject)
 
   /**
+   * finagle-ostrich3 implements a StatsReceiver for the Ostrich 3.x statistics library
+   */
+  val ostrich3Project = project(
+    "finagle-ostrich3", "finagle-ostrich3",
+    new Ostrich3Project(_), coreProject)
+
+  /**
    * finagle-thrift contains thrift codecs for use with the finagle
-   * thrift service codegen.
+   * thrift service codegen. in order to be able to use thrift code
+   * generation in finagle-thrift.
    */
   val thriftProject = project(
     "finagle-thrift", "finagle-thrift",
@@ -48,12 +56,20 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new KestrelProject(_), coreProject, memcachedProject)
 
   /**
+   * finagle-native contains native code aimed to increase platform fluency
+   * and provide capabilities not available in the JVM
+   */
+  val nativeProject = project(
+    "finagle-native", "finagle-native",
+    new SimpleProject(_), coreProject)
+
+  /**
    * finagle-stream contains a streaming http codec identical to
    * Twitter's "firehose".
    */
   val streamProject = project(
     "finagle-stream", "finagle-stream",
-    new StreamProject(_), coreProject)
+    new StreamProject(_), coreProject, kestrelProject)
 
   /**
    * finagle-stress has stress/integration test suites & tools for
@@ -61,7 +77,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val stressProject = project(
     "finagle-stress", "finagle-stress",
-    new StressProject(_), coreProject, ostrichProject)
+    new StressProject(_), coreProject, ostrich3Project, thriftProject)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
@@ -71,14 +87,15 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val nettyRepo =
       "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
     val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
-    val util      = "com.twitter"          %  "util"      % "1.5.2"
+    val util      = "com.twitter"          %  "util"      % "1.6.4"
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with LibDirClasspath with AdhocInlines
+    with SubversionPublisher with LibDirClasspath
+    with AdhocInlines with CompileFinagleThrift
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"    %  "libthrift" % "0.5.0"
@@ -107,12 +124,25 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
-    val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+    val ostrich2 = "com.twitter" % "ostrich" % "2.3.4"
   }
+
+  class Ostrich3Project(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
+  }
+
+  class SimpleProject(info: ProjectInfo) extends StressProject(info)
+    with SubversionPublisher with AdhocInlines with LibDirClasspath
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
+    with CompileFinagleThrift
   {
-    val ostrich = "com.twitter" % "ostrich" % "2.3.4"
+    override def compileOrder = CompileOrder.JavaThenScala
+    val thrift   = "thrift"    %  "libthrift" % "0.5.0"
+    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
+    val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 }

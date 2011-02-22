@@ -1,7 +1,8 @@
 package com.twitter.finagle.kestrel.protocol
 
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.finagle.memcached.protocol.text.{AbstractDecodingToResponse, TokensWithData}
+import com.twitter.finagle.memcached.protocol.text.TokensWithData
+import com.twitter.finagle.memcached.protocol.text.client.AbstractDecodingToResponse
 
 class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._

@@ -1,5 +1,7 @@
 package com.twitter.finagle.service
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import com.twitter.util.{Future, Time, Throw}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Service, Filter}
@@ -7,21 +9,28 @@ import com.twitter.finagle.{Service, Filter}
 class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   extends Filter[Req, Rep, Req, Rep]
 {
-  private[this] val dispatchSample = statsReceiver.counter("count" -> "dispatches")
-  private[this] val latencySample = statsReceiver.gauge("count" -> "latency")
+  private[this] val outstandingRequestCount = new AtomicInteger(0)
+  private[this] val dispatchCount = statsReceiver.counter("requests")
+  private[this] val successCount = statsReceiver.counter("success")
+  private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
+
+  statsReceiver.provideGauge("pending") { outstandingRequestCount.get }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val requestedAt = Time.now
-    dispatchSample.incr()
+    dispatchCount.incr()
 
+    outstandingRequestCount.incrementAndGet()
     val result = service(request)
 
     result respond { response =>
-      latencySample.measure(requestedAt.untilNow.inMilliseconds)
+      outstandingRequestCount.decrementAndGet()
+      latencyStat.add(requestedAt.untilNow.inMilliseconds)
       response match {
         case Throw(e) =>
-          statsReceiver.counter("exception" -> e.getClass.getName).incr()
-        case _ => ()
+          statsReceiver.scope("failures").counter(e.getClass.getName).incr()
+        case _ =>
+          successCount.incr()
       }
     }
 

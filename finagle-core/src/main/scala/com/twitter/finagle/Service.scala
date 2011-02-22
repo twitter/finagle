@@ -2,6 +2,8 @@ package com.twitter.finagle
 
 import com.twitter.util.Future
 
+import com.twitter.finagle.service.RefcountedService
+
 /**
  * A Service is an asynchronous function from Request to Future[Response]. It is the
  * basic unit of an RPC interface.
@@ -21,7 +23,8 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def apply(request: Req): Future[Rep]
 
   /**
-   * Relinquishes the use of this service instance.
+   * Relinquishes the use of this service instance. Behavior is
+   * undefined is apply() is called after resources are relinquished.
    */
   def release() = ()
 
@@ -42,6 +45,12 @@ abstract class ServiceFactory[-Req, +Rep] {
   def make(): Future[Service[Req, Rep]]
 
   /**
+   * Make a service that after dispatching a request on that service,
+   * releases the service.
+   */
+  def service: Service[Req, Rep] = new FactoryToService(this)
+
+  /**
    * Close the factory and its underlying resources.
    */
   def close()
@@ -52,10 +61,11 @@ abstract class ServiceFactory[-Req, +Rep] {
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
-  def apply(request: Req) =
+  def apply(request: Req) = {
     factory.make() flatMap { service =>
       service(request) ensure { service.release() }
     }
+  }
 
   override def release() = factory.close()
   override def isAvailable = factory.isAvailable
@@ -118,9 +128,11 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    *
    */
   def andThen(service: Service[ReqOut, RepIn]) = new Service[ReqIn, RepOut] {
-    def apply(request: ReqIn) = Filter.this.apply(request, service)
-    override def release() = service.release()
-    override def isAvailable = service.isAvailable
+    private[this] val refcounted = new RefcountedService(service)
+
+    def apply(request: ReqIn) = Filter.this.apply(request, refcounted)
+    override def release() = refcounted.release()
+    override def isAvailable = refcounted.isAvailable
   }
 
   def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =

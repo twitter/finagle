@@ -8,7 +8,7 @@ import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import collection.mutable.ListBuffer
 import com.twitter.util.CountDownLatch
-import com.twitter.concurrent.Value
+import com.twitter.util.Future
 import com.twitter.conversions.time._
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -18,11 +18,11 @@ object ClientSpec extends Specification {
     skip("This test requires a Kestrel server to run. Please run manually")
 
     "simple client" in {
-      val service = ClientBuilder()
+      val serviceFactory = ClientBuilder()
         .hosts("localhost:22133")
         .codec(new Kestrel)
-        .build()
-      val client = Client(service)
+        .buildFactory()
+      val client = Client(serviceFactory)
 
       client.delete("foo")()
 
@@ -32,22 +32,23 @@ object ClientSpec extends Specification {
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
       }
 
-      "receive" in {
+      "from" in {
         "no errors" in {
           val result = new ListBuffer[String]
           client.set("foo", "bar")()
           client.set("foo", "baz")()
           client.set("foo", "boing")()
 
-          val channel = client.channel("foo")
+          val channel = client.from("foo")
           val latch = new CountDownLatch(3)
-          channel.foreach {
-            case item =>
+          channel.respond(this) { item =>
+            Future {
               result += item.toString(CharsetUtil.UTF_8)
               latch.countDown()
+            }
           }
           latch.await(1.second)
-          channel.close ()
+          channel.close()
           result mustEqual List("bar", "baz", "boing")
         }
 
@@ -55,21 +56,35 @@ object ClientSpec extends Specification {
           client.set("foo", "bar")()
 
           var result: ChannelBuffer = null
-          var channel = client.channel("foo")
+          var channel = client.from("foo")
           val latch = new CountDownLatch(1)
-          channel.foreach {
-            case item => throw new Exception
+          channel.respond(this) { item =>
+            throw new Exception
           }
-          channel = client.channel("foo")
-          channel.foreach {
-            case item =>
+          channel = client.from("foo")
+          channel.respond(this) { item =>
+            Future {
               result = item
               latch.countDown()
+            }
           }
-          latch.await(1.second)
+          latch.within(1.second)
           channel.close()
           result.toString(CharsetUtil.UTF_8) mustEqual "bar"
         }
+      }
+
+      "to" in {
+        val channelSource = client.to("foo")
+        channelSource.send("bar")
+        channelSource.send("baz")
+        channelSource.send("boing")
+        channelSource.close()
+
+        client.get("foo", 2.second)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        client.get("foo", 1.second)().get.toString(CharsetUtil.UTF_8) mustEqual "baz"
+        client.get("foo", 1.second)().get.toString(CharsetUtil.UTF_8) mustEqual "boing"
+        client.get("foo", 1.second)() mustEqual None
       }
     }
   }

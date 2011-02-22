@@ -2,34 +2,33 @@ package com.twitter.finagle.stats
 
 import java.util.logging.Logger
 import com.twitter.conversions.time._
+import com.twitter.util
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Timer
 
-class JavaLoggerStatsReceiver(logger: Logger, timer: Timer) extends StatsReceiver {
+class JavaLoggerStatsReceiver(logger: Logger, timer: util.Timer) extends StatsReceiver {
   def this(logger: Logger) = this(logger, Timer.default)
 
-  def gauge(description: (String, String)*) = new Gauge {
-    def measure(value: Float) {
-      logger.info("%s measure %f".format(formatDescription(description), value))
+  def stat(name: String*) = new Stat {
+    def add(value: Float) {
+      logger.info("%s add %f (%d)".format(formatName(name), value))
     }
   }
 
-  def counter(description: (String, String)*) = new Counter {
+  def counter(name: String*) = new Counter {
     def incr(delta: Int) {
-      logger.info("%s incr %d".format(formatDescription(description), delta))
+      logger.info("%s incr %d".format(formatName(name), delta))
     }
   }
 
-  def mkGauge(name: Seq[(String, String)], f: => Float) {
+  def provideGauge(name: String*)(f: => Float) {
     timer.schedule(10.seconds) {
-      logger.info("%s %2f".format(name, f))
+      logger.info("%s %2f".format(formatName(name), f))
     }
   }
 
-  private[this] def formatDescription(description: Seq[(String, String)]) = {
-    description.map { case (key, value) =>
-      "%s_%s".format(key, value)
-    }.mkString("__")
+  private[this] def formatName(description: Seq[String]) = {
+    description mkString "/"
   }
 }
 

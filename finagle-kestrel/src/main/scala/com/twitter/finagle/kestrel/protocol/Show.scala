@@ -54,11 +54,11 @@ class CommandToEncoding extends OneToOneEncoder {
         var key = queueName.toString(CharsetUtil.US_ASCII)
         options foreach { option =>
           val optionString = option match {
-            case Timeout(timeout) => "t=" + timeout.inSeconds
-            case Open() => OPEN
+            case Timeout(timeout) => "t=" + timeout.inMilliseconds.toString
+            case Open()  => OPEN
             case Close() => CLOSE
             case Abort() => ABORT
-            case Peek() => PEEK
+            case Peek()  => PEEK
           }
           key += "/" + optionString
         }

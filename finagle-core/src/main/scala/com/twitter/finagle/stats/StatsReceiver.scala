@@ -1,69 +1,100 @@
 package com.twitter.finagle.stats
 
 /**
- * A readable and writeable Counter. Only sums are kept of Counters.
- * An example Counter is "number of requests served".
+ * A writeable Counter. Only sums are kept of Counters.  An example
+ * Counter is "number of requests served".
  */
 trait Counter extends {
   def incr(delta: Int)
   def incr() { incr(1) }
 }
 
-/**
- * A readable and writeable Gauge. Gauages are usually continuous
- * values that are measured at moments in time (e.g., the value
- * of a share of Twitter's stock).
- */
-trait Gauge {
-  /**
-   * Record a measurement
-   */
-  def measure(value: Float)
+/** 
+ * TODO: doc 
+ */ 
+trait Stat {
+  def add(value: Float)
 }
 
 trait StatsReceiver {
   /**
-   *  Get a Counter with the description
+   * Get a Counter with the description
    */
-  def counter(description: (String, String)*): Counter
+  def counter(name: String*): Counter
 
   /**
    * Get a Gauge with the description
    */
-  def gauge(description: (String, String)*): Gauge
+  def stat(name: String*): Stat
 
   /**
    * Register a function to be periodically measured.
    */
-  def mkGauge(description: Seq[(String, String)], f: => Float)
+  def provideGauge(name: String*)(f: => Float)
 
   /**
-   * Convenvenience function to deal with 1-arity descriptions
+   * Prepend ``namespace'' to the names of this receiver.
    */
-  def mkGauge(description: (String, String), f: => Float) {
-    mkGauge(Seq(description), f)
-  }
-
-  /**
-   * Convenvenience function to deal with 2-arity descriptions
-   */
-  def mkGauge(description1: (String, String), description2: (String, String), f: => Float) {
-    mkGauge(Seq(description1, description2), f)
-  }
-
-  /**
-   * Prepends a prefix description to all descriptions on this StatsRepository
-   */
-  def scope(prefix: (String, String)*) = {
-    val self = this
-    new StatsReceiver {
-      def counter(description: (String, String)*) = self.counter(prefix ++ description: _*)
-
-      def gauge(description: (String, String)*) = self.gauge(prefix ++ description: _*)
-
-      def mkGauge(description: Seq[(String, String)], f: => Float) {
-        self.mkGauge(prefix ++ description, f)
-      }
+  def scope(namespace: String) = {
+    val seqPrefix = Seq(namespace)
+    new NameTranslatingStatsReceiver(this) {
+      protected[this] def translate(name: Seq[String]) = seqPrefix ++ name
     }
   }
+
+  def withSuffix(namespace: String) = {
+    val seqSuffix = Seq(namespace)
+    new NameTranslatingStatsReceiver(this) {
+      protected[this] def translate(name: Seq[String]) = name ++ seqSuffix
+    }
+  }
+}
+
+class RollupStatsReceiver(val self: StatsReceiver)
+  extends StatsReceiver with Proxy
+{
+  private[this] def tails[A](s: Seq[A]): Seq[Seq[A]] = {
+    s match {
+      case s@Seq(_) =>
+        Seq(s)
+
+      case Seq(hd, tl@_*) =>
+        Seq(Seq(hd)) ++ (tails(tl) map { t => Seq(hd) ++ t })
+    }
+  }
+
+  def counter(name: String*) = new Counter {
+    private[this] val allCounters = tails(name) map (self.counter(_: _*))
+    def incr(delta: Int) = allCounters foreach (_.incr(delta))
+  }
+
+  def stat(name: String*) = new Stat {
+    private[this] val allStats = tails(name) map (self.stat(_: _*))
+    def add(value: Float) = allStats foreach (_.add(value))
+  }
+
+  def provideGauge(name: String*)(f: => Float) =
+    tails(name) foreach { self.provideGauge(_: _*)(f) }
+}
+
+abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
+  extends StatsReceiver with Proxy
+{
+  protected[this] def translate(name: Seq[String]): Seq[String]
+
+  def counter(name: String*)                   = self.counter(translate(name): _*)
+  def stat(name: String*)                      = self.stat(translate(name): _*)
+  def provideGauge(name: String*)(f: => Float) = self.provideGauge(translate(name): _*)(f)
+}
+
+object NullStatsReceiver extends StatsReceiver {
+  def counter(name: String*) = new Counter {
+    def incr(delta: Int) {}
+  }
+
+  def stat(name: String*) = new Stat {
+    def add(value: Float) {}
+  }
+
+  def provideGauge(name: String*)(f: => Float) {}
 }

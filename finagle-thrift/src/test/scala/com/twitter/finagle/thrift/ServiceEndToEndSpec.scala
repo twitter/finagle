@@ -50,6 +50,8 @@ object ServiceEndToEndSpec extends Specification {
       .bindTo(addr)
       .build(sillyService)
 
+    doAfter { server.close(20.milliseconds) }
+
     "with wrapped replies" in {
       "respond to calls with ThriftReply[Call.response_type]" in {
         val client = ClientBuilder()
@@ -69,8 +71,6 @@ object ServiceEndToEndSpec extends Specification {
         result.isReturn must beTrue
         val reply = result().asInstanceOf[ThriftReply[Silly.bleep_result]]
         reply().response.success mustEqual "olleh"
-
-        server.close()()
       }
     }
   }

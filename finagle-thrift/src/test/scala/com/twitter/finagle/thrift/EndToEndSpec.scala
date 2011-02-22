@@ -14,7 +14,7 @@ import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.test.{B, SomeStruct, AnException, F}
-import com.twitter.finagle.Transaction
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.silly.Silly
@@ -28,8 +28,8 @@ object EndToEndSpec extends Specification {
       def add_one(a: Int, b: Int) = Future.void
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
-        new SomeStruct(123, "%s %s".format(
-          Transaction().id.toString, new String(Transaction().payload)))
+        Trace.record("hey it's me!")
+        new SomeStruct(123, Trace().traceID.parentSpan.get.toString)
       }
       def someway() = Future.void
     }
@@ -39,6 +39,8 @@ object EndToEndSpec extends Specification {
       .codec(ThriftServerFramedCodec())
       .bindTo(serverAddr)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
+
+    doAfter { server.close(20.milliseconds) }
 
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))
@@ -51,24 +53,26 @@ object EndToEndSpec extends Specification {
       val future = client.multiply(10, 30)
       future() must be_==(300)
 
+      import com.twitter.finagle.tracing.BufferingTranscript
+      Trace().transcript = new BufferingTranscript(Trace().traceID)
+
       client.complex_return("a string")().arg_two must be_==(
-        "%s complex_return".format(Transaction().id.toString))
+        "%s".format(Trace().traceID.span.toString))
+
+      Trace().transcript must haveSize(1)
+      Trace().transcript.head.message must be_==("hey it's me!")
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block!
 
       client.someway()() must beNull  // don't block!
-
-      server.close()()
     }
 
     "handle wrong interface" in {
       val client = new F.ServiceToClient(service, new TBinaryProtocol.Factory())
-
+     
       client.another_method(123)() must throwA(
         new TApplicationException("Invalid method name: 'another_method'"))
-
-      server.close()()
     }
   }
 

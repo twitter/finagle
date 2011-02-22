@@ -1,35 +1,46 @@
 package com.twitter.finagle.stream
 
-import org.jboss.netty.handler.codec.http.{HttpChunkTrailer, HttpChunk, HttpMessage}
-import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.concurrent.Topic
 import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
+import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
+import com.twitter.concurrent.ChannelSource
+import com.twitter.util.Future
+import org.jboss.netty.handler.codec.http._
 
+/**
+ * Client handler for a streaming protocol.
+ */
 class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
-  private[this] val topicRef =
-    new AtomicReference[com.twitter.concurrent.Topic[ChannelBuffer]](null)
+  private[this] val channelRef =
+    new AtomicReference[com.twitter.concurrent.ChannelSource[ChannelBuffer]](null)
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
-    case message: HttpMessage =>
-      val topic = new Topic[ChannelBuffer]
-      require(topicRef.compareAndSet(null, topic),
+    case message: HttpResponse =>
+      require(message.getStatus == HttpResponseStatus.OK,
+        "Error: " + message.getStatus)
+      val source = new ChannelSource[ChannelBuffer]
+      require(channelRef.compareAndSet(null, source),
         "Channel is already busy")
+
       ctx.getChannel.setReadable(false)
-      topic.onReceive {
+      source.responds.first.respond { _ =>
         if (!message.isChunked) {
-          topic.send(message.getContent)
-          topic.close()
-          topicRef.set(null)
+          source.send(message.getContent)
+          source.close()
+          channelRef.set(null)
         }
         ctx.getChannel.setReadable(true)
       }
-      Channels.fireMessageReceived(ctx, topic)
+      Channels.fireMessageReceived(ctx, source)
     case trailer: HttpChunkTrailer =>
-      val topic = topicRef.getAndSet(null)
+      val topic = channelRef.getAndSet(null)
       topic.close()
+      ctx.getChannel.setReadable(true)
     case chunk: HttpChunk =>
-      val topic = topicRef.get
-      topic.send(chunk.getContent)
+      ctx.getChannel.setReadable(false)
+      val topic = channelRef.get
+      Future.join(topic.send(chunk.getContent)) respond { _ =>
+        ctx.getChannel.setReadable(true)
+      }
   }
 }

@@ -9,6 +9,7 @@ import org.apache.thrift.transport.{
   TFramedTransport, TSocket, TTransportException, TTransport}
 
 import com.twitter.util.{Future, RandomSocket, Throw, Return, Promise}
+import com.twitter.util.TimeConversions._
 import com.twitter.test._
 
 import com.twitter.finagle.builder.ServerBuilder
@@ -40,7 +41,7 @@ object ThriftClientFinagleServerSpec extends Specification {
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     doAfter {
-      server.close()()
+      server.close(20.milliseconds)
     }
 
     val (client, transport) = {

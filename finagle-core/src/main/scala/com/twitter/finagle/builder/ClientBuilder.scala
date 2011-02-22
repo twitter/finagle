@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
 import java.util.concurrent.Executors
 import javax.net.ssl.SSLContext
@@ -10,7 +10,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.bootstrap.ClientBootstrap
 
-import com.twitter.util.Duration
+import com.twitter.util.{Future, Duration}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -18,38 +18,19 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
-
-class ReferenceCountedChannelFactory(underlying: ChannelFactory)
-  extends ChannelFactory
-{
-  private[this] var refcount = 0
-
-  def acquire() = synchronized {
-    refcount += 1
-  }
-
-  def newChannel(pipeline: ChannelPipeline) = underlying.newChannel(pipeline)
-
-  // TODO: after releasing external resources, we can still use the
-  // underlying factory?  (ie. it'll create new threads, etc.?)
-  def releaseExternalResources() = synchronized {
-    refcount -= 1
-    if (refcount == 0)
-      underlying.releaseExternalResources()
-  }
-}
 
 object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
 
-  lazy val defaultChannelFactory =
+  val defaultChannelFactory =
     new ReferenceCountedChannelFactory(
-      new NioClientSocketChannelFactory(
-        Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool()))
+      new LazyRevivableChannelFactory(() =>
+        new NioClientSocketChannelFactory(
+          Executors.newCachedThreadPool(),
+          Executors.newCachedThreadPool())))
 }
 
 /**
@@ -69,6 +50,7 @@ case class ClientBuilder[Req, Rep](
   _hostConnectionCoresize: Option[Int],
   _hostConnectionLimit: Option[Int],
   _hostConnectionIdleTime: Option[Duration],
+  _hostConnectionMaxIdleTime: Option[Duration],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
@@ -88,6 +70,7 @@ case class ClientBuilder[Req, Rep](
     None,               // hostConnectionCoresize
     None,               // hostConnectionLimit
     None,               // hostConnectionIdleTime
+    None,               // hostConnectionMaxIdleTime
     None,               // sendBufferSize
     None,               // recvBufferSize
     None,               // retries
@@ -97,27 +80,28 @@ case class ClientBuilder[Req, Rep](
     false               // startTls
   )
 
-  override def toString() = {
-    val options = Seq(
-      "name"                   -> _name,
-      "cluster"                -> _cluster,
-      "protocol"               -> _protocol,
-      "connectionTimeout"      -> Some(_connectionTimeout),
-      "requestTimeout"         -> Some(_requestTimeout),
-      "statsReceiver"          -> _statsReceiver,
-      "loadStatistics"         -> _loadStatistics,
-      "hostConnectionLimit"    -> Some(_hostConnectionLimit),
-      "hostConnectionCoresize" -> Some(_hostConnectionCoresize),
-      "hostConnectionIdleTime" -> Some(_hostConnectionIdleTime),
-      "sendBufferSize"         -> _sendBufferSize,
-      "recvBufferSize"         -> _recvBufferSize,
-      "retries"                -> _retries,
-      "logger"                 -> _logger,
-      "channelFactory"         -> _channelFactory,
-      "tls"                    -> _tls,
-      "startTls"               -> _startTls
-    )
+  private[this] def options = Seq(
+    "name"                      -> _name,
+    "cluster"                   -> _cluster,
+    "protocol"                  -> _protocol,
+    "connectionTimeout"         -> Some(_connectionTimeout),
+    "requestTimeout"            -> Some(_requestTimeout),
+    "statsReceiver"             -> _statsReceiver,
+    "loadStatistics"            -> _loadStatistics,
+    "hostConnectionLimit"       -> Some(_hostConnectionLimit),
+    "hostConnectionCoresize"    -> Some(_hostConnectionCoresize),
+    "hostConnectionIdleTime"    -> Some(_hostConnectionIdleTime),
+    "hostConnectionMaxIdleTime" -> Some(_hostConnectionMaxIdleTime),
+    "sendBufferSize"            -> _sendBufferSize,
+    "recvBufferSize"            -> _recvBufferSize,
+    "retries"                   -> _retries,
+    "logger"                    -> _logger,
+    "channelFactory"            -> _channelFactory,
+    "tls"                       -> _tls,
+    "startTls"                  -> _startTls
+  )
 
+  override def toString() = {
     "ClientBuilder(%s)".format(
       options flatMap {
         case (k, Some(v)) => Some("%s=%s".format(k, v))
@@ -176,6 +160,9 @@ case class ClientBuilder[Req, Rep](
 
   def hostConnectionIdleTime(timeout: Duration) =
     copy(_hostConnectionIdleTime = Some(timeout))
+
+  def hostConnectionMaxIdleTime(timeout: Duration) =
+    copy(_hostConnectionMaxIdleTime = Some(timeout))
 
   def retries(value: Int) =
     copy(_retries = Some(value))
@@ -251,9 +238,15 @@ case class ClientBuilder[Req, Rep](
 
   private[this] def prepareChannel(service: Service[Req, Rep]) = {
     val protocol = _protocol.get
-    // First the codec, then the protocol.
-    protocol.codec.prepareClientChannel(service) flatMap
-      protocol.prepareChannel _ 
+    var future: Future[Service[Req, Rep]] = null
+
+    future = protocol.codec.prepareClientChannel(service)
+    future = future.flatMap { protocol.prepareChannel(_) }
+    _hostConnectionMaxIdleTime.foreach { idleTime =>
+      future = future.map { new ExpiringService(_, idleTime) }
+    }
+
+    future
   }
 
   def buildFactory(): ServiceFactory[Req, Rep] = {
@@ -262,10 +255,12 @@ case class ClientBuilder[Req, Rep](
     if (!_protocol.isDefined)
       throw new IncompleteSpecification("No protocol was specified")
 
+    Timer.default.acquire()
+
     val cluster  = _cluster.get
     val protocol = _protocol.get
 
-    val hostFactories = cluster mapHosts { host =>
+    val hostFactories = cluster mkFactories { host =>
       // The per-host stack is as follows:
       //
       //   ChannelService
@@ -274,28 +269,41 @@ case class ClientBuilder[Req, Rep](
       //   Stats
       //
       // the pool & below are host-specific,
+
+      val hostStatsReceiver = _statsReceiver map { statsReceiver =>
+        val hostname = host match {
+          case iaddr: InetSocketAddress => "%s:%d".format(iaddr.getHostName, iaddr.getPort)
+          case other => other.toString
+        }
+
+        val scoped = _name map (statsReceiver.scope(_)) getOrElse statsReceiver
+        new RollupStatsReceiver(scoped).withSuffix(hostname)
+      } getOrElse NullStatsReceiver
+
       var factory: ServiceFactory[Req, Rep] = null
 
       val bs = buildBootstrap(protocol, host)
-      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _)
+      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _, hostStatsReceiver)
 
       factory = buildPool(factory)
 
       if (_requestTimeout < Duration.MaxValue) {
-        val filter = new TimeoutFilter[Req, Rep](Timer.default, _requestTimeout)
+        val filter = new TimeoutFilter[Req, Rep](_requestTimeout)
         factory = filter andThen factory
       }
 
-      if (_statsReceiver.isDefined) {
-        val statsFilter = new StatsFilter[Req, Rep](
-          _statsReceiver.get.scope("host" -> host.toString))
-        factory = statsFilter andThen factory
-      }
+      val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
+      factory = statsFilter andThen factory
 
       factory
     }
 
-    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep])
+    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep]) {
+      override def close() = {
+        super.close()
+        Timer.default.stop()
+      }
+    }
   }
 
   def build(): Service[Req, Rep] = {
