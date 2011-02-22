@@ -71,9 +71,9 @@ class CommandToEncoding extends OneToOneEncoder {
 
 class ExceptionHandler extends SimpleChannelUpstreamHandler {
   private[this] val DELIMITER     = "\r\n"
-  private[this] val ERROR         = copiedBuffer("ERROR",        DELIMITER)
-  private[this] val CLIENT_ERROR  = copiedBuffer("CLIENT_ERROR", DELIMITER)
-  private[this] val SERVER_ERROR  = copiedBuffer("SERVER_ERROR", DELIMITER)
+  private[this] val ERROR         = copiedBuffer("ERROR".getBytes,        DELIMITER.getBytes)
+  private[this] val CLIENT_ERROR  = copiedBuffer("CLIENT_ERROR".getBytes, DELIMITER.getBytes)
+  private[this] val SERVER_ERROR  = copiedBuffer("SERVER_ERROR".getBytes, DELIMITER.getBytes)
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) = {
     e.getCause match {
