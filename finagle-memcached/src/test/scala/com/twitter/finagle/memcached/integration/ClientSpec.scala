@@ -60,9 +60,9 @@ object ClientSpec extends Specification {
 
       "incr & decr" in {
         client.set("foo", "")()
-        client.incr("foo")()    mustEqual 1
-        client.incr("foo", 2)() mustEqual 3
-        client.decr("foo")()    mustEqual 2
+        client.incr("foo")()    mustEqual Some(1)
+        client.incr("foo", 2)() mustEqual Some(3)
+        client.decr("foo")()    mustEqual Some(2)
       }
     }
 
