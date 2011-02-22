@@ -120,6 +120,8 @@ case class ClientBuilder[Req, Rep](
     cluster(_cluster)
   }
 
+  def hosts(address: SocketAddress): ClientBuilder[Req, Rep] = hosts(Seq(address))
+
   def cluster(cluster: Cluster): ClientBuilder[Req, Rep] = {
     copy(_cluster = Some(cluster))
   }

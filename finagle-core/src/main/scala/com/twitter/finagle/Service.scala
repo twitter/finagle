@@ -12,7 +12,7 @@ import com.twitter.finagle.service.RefcountedService
  * compatibility, as it has implementation as well as interface.
  */
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
-  def map[Req1](f: (Req1) => (Req)) = new Service[Req1, Rep] {
+  def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
     override def release() = Service.this.release()
   }
