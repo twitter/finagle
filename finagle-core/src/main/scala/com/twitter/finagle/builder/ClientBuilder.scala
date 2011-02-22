@@ -80,28 +80,28 @@ case class ClientBuilder[Req, Rep](
     false               // startTls
   )
 
-  override def toString() = {
-    val options = Seq(
-      "name"                      -> _name,
-      "cluster"                   -> _cluster,
-      "protocol"                  -> _protocol,
-      "connectionTimeout"         -> Some(_connectionTimeout),
-      "requestTimeout"            -> Some(_requestTimeout),
-      "statsReceiver"             -> _statsReceiver,
-      "loadStatistics"            -> _loadStatistics,
-      "hostConnectionLimit"       -> Some(_hostConnectionLimit),
-      "hostConnectionCoresize"    -> Some(_hostConnectionCoresize),
-      "hostConnectionIdleTime"    -> Some(_hostConnectionIdleTime),
-      "hostConnectionMaxIdleTime" -> Some(_hostConnectionMaxIdleTime),
-      "sendBufferSize"            -> _sendBufferSize,
-      "recvBufferSize"            -> _recvBufferSize,
-      "retries"                   -> _retries,
-      "logger"                    -> _logger,
-      "channelFactory"            -> _channelFactory,
-      "tls"                       -> _tls,
-      "startTls"                  -> _startTls
-    )
+  private[this] def options = Seq(
+    "name"                      -> _name,
+    "cluster"                   -> _cluster,
+    "protocol"                  -> _protocol,
+    "connectionTimeout"         -> Some(_connectionTimeout),
+    "requestTimeout"            -> Some(_requestTimeout),
+    "statsReceiver"             -> _statsReceiver,
+    "loadStatistics"            -> _loadStatistics,
+    "hostConnectionLimit"       -> Some(_hostConnectionLimit),
+    "hostConnectionCoresize"    -> Some(_hostConnectionCoresize),
+    "hostConnectionIdleTime"    -> Some(_hostConnectionIdleTime),
+    "hostConnectionMaxIdleTime" -> Some(_hostConnectionMaxIdleTime),
+    "sendBufferSize"            -> _sendBufferSize,
+    "recvBufferSize"            -> _recvBufferSize,
+    "retries"                   -> _retries,
+    "logger"                    -> _logger,
+    "channelFactory"            -> _channelFactory,
+    "tls"                       -> _tls,
+    "startTls"                  -> _startTls
+  )
 
+  override def toString() = {
     "ClientBuilder(%s)".format(
       options flatMap {
         case (k, Some(v)) => Some("%s=%s".format(k, v))

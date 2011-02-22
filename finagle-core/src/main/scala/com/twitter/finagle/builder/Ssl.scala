@@ -213,7 +213,7 @@ object Ssl {
 
   class NoSuitableSslProvider(message: String) extends Exception(message: String)
 
-  def fileMustExist(path: String) =
+  private[this] def fileMustExist(path: String) =
     require(new File(path).exists(), "File '%s' does not exist.".format(path))
 
   /**

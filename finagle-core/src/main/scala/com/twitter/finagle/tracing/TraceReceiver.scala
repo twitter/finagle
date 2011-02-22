@@ -13,8 +13,15 @@ trait TraceReceiver {
   def receiveSpan(span: Span): Unit
 }
 
+class NullTraceReceiver extends TraceReceiver {
+  def receiveSpan(span: Span) {/*ignore*/}
+}
+
+/**
+ * Pretty-print the span together with the transcript on the console.
+ */
 class ConsoleTraceReceiver extends TraceReceiver {
   def receiveSpan(span: Span) {
-    println(span)
+    span.print()
   }
 }

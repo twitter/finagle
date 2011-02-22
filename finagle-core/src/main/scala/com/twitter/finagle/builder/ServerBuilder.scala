@@ -18,7 +18,7 @@ import com.twitter.util.Duration
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter}
+import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter, NullTraceReceiver}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
@@ -60,32 +60,57 @@ case class ServerBuilder[Req, Rep](
   _recvBufferSize: Option[Int],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
-  _tls: Option[SSLContext],
+  _tls: Option[(String, String)],
   _startTls: Boolean,
   _channelFactory: Option[ReferenceCountedChannelFactory],
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
   _requestTimeout: Option[Duration],
-  _traceReceiver: Option[TraceReceiver])
+  _traceReceiver: TraceReceiver)
 {
   import ServerBuilder._
 
   def this() = this(
-    None,              // codec
-    None,              // statsReceiver
-    None,              // name
-    None,              // sendBufferSize
-    None,              // recvBufferSize
-    None,              // bindTo
-    None,              // logger
-    None,              // tls
-    false,             // startTls
-    None,              // channelFactory
-    None,              // maxConcurrentRequests
-    None,              // hostConnectionMaxIdleTime
-    None,              // requestTimeout
-    None               // traceReceiver
+    None,                  // codec
+    None,                  // statsReceiver
+    None,                  // name
+    None,                  // sendBufferSize
+    None,                  // recvBufferSize
+    None,                  // bindTo
+    None,                  // logger
+    None,                  // tls
+    false,                 // startTls
+    None,                  // channelFactory
+    None,                  // maxConcurrentRequests
+    None,                  // hostConnectionMaxIdleTime
+    None,                  // requestTimeout
+    new NullTraceReceiver  // traceReceiver
   )
+
+  private[this] def options = Seq(
+    "codec"                     -> _codec,
+    "statsReceiver"             -> _statsReceiver,
+    "name"                      -> _name,
+    "sendBufferSize"            -> _sendBufferSize,
+    "recvBufferSize"            -> _recvBufferSize,
+    "bindTo"                    -> _bindTo,
+    "logger"                    -> _logger,
+    "tls"                       -> _tls,
+    "startTls"                  -> Some(_startTls),
+    "channelFactory"            -> _channelFactory,
+    "maxConcurrentRequests"     -> _maxConcurrentRequests,
+    "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
+    "requestTimeout"            -> _requestTimeout,
+    "traceReceiver"             -> Some(_traceReceiver)
+  )
+
+  override def toString() = {
+    "ServerBuilder(%s)".format(
+      options flatMap {
+        case (k, Some(v)) => Some("%s=%s".format(k, v))
+        case _ => None
+      } mkString(", "))
+  }
 
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
     copy(_codec = Some(codec))
@@ -107,7 +132,7 @@ case class ServerBuilder[Req, Rep](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   def tls(certificatePath: String, keyPath: String) =
-    copy(_tls = Some(Ssl.server(certificatePath, keyPath)))
+    copy(_tls = Some((certificatePath, keyPath)))
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
@@ -122,7 +147,7 @@ case class ServerBuilder[Req, Rep](
     copy(_requestTimeout = Some(howlong))
 
   def traceReceiver(receiver: TraceReceiver) =
-    copy(_traceReceiver = Some(receiver))
+    copy(_traceReceiver = receiver)
 
   private[this] def scopedStatsReceiver =
     _statsReceiver map { sr => _name map (sr.scope(_)) getOrElse sr }
@@ -173,8 +198,8 @@ case class ServerBuilder[Req, Rep](
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
-        _tls foreach { ctx =>
-          val sslEngine = ctx.createSSLEngine()
+        _tls foreach { case (certificatePath, keyPath) =>
+          val sslEngine = Ssl.server(certificatePath, keyPath).createSSLEngine()
           sslEngine.setUseClientMode(false)
           sslEngine.setEnableSessionCreation(true)
 
@@ -222,9 +247,7 @@ case class ServerBuilder[Req, Rep](
         // This has to go last (ie. first in the stack) so that
         // protocol-specific trace support can override our generic
         // one here.
-        _traceReceiver foreach { traceReceiver =>
-          service = (new TracingFilter(traceReceiver)) andThen service
-        }
+        service = (new TracingFilter(_traceReceiver)) andThen service
 
         // Register the channel so we can wait for them for a
         // drain. We close the socket but wait for all handlers to
@@ -290,6 +313,14 @@ case class ServerBuilder[Req, Rep](
 
         bs.releaseExternalResources()
         Timer.default.stop()
+      }
+
+      override def toString = {
+        "Server(%s)".format(
+          options flatMap {
+            case (k, Some(v)) => Some("%s=%s".format(k, v))
+            case _ => None
+          } mkString(", "))
       }
     }
   }
