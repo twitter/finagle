@@ -17,7 +17,7 @@ object EchoClient {
     } onFailure { error =>
       error.printStackTrace()
     } ensure {
-      // All done! Close TCP connection:
+      // All done! Close TCP connection(s):
       client.release()
     }
   }
