@@ -232,10 +232,9 @@ object Ssl {
     if (context == null) {
       try {
         context = factory.context(certificatePath, keyPath)
-        log.log(Level.INFO, "SSL provider '%s' was used".format(factory.name()))
       } catch {
         case e: Throwable =>
-          log.log(Level.WARNING, "Provider '%s' not suitable".format(factory.name()))
+          log.log(Level.FINE, "Provider '%s' not suitable".format(factory.name()))
           log.log(Level.FINEST, e.getMessage, e)
       }
     }
