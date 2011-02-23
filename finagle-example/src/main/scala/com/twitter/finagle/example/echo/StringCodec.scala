@@ -6,6 +6,11 @@ import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.util.CharsetUtil
 
+/**
+ * A really simple demonstration of a custom Codec. This Codec is a newline (\n)
+ * delimited line-based protocol. Here we re-use existing encoders/decoders as
+ * provided by Netty.
+ */
 object StringCodec extends StringCodec
 
 class StringCodec extends Codec[String, String] {

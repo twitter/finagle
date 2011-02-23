@@ -2,18 +2,20 @@ package com.twitter.finagle.example.echo
 
 import com.twitter.finagle.builder.ClientBuilder
 import java.net.InetSocketAddress
+import com.twitter.conversions.time._
 
 object EchoClient {
   def main(args: Array[String]) {
+    // Construct a client, and connect it to localhost:8080
     val client = ClientBuilder()
       .codec(StringCodec)
       .hosts(new InetSocketAddress(8080))
       .build()
 
-    // Issue request:
-    val result = client("hi mom\n")
-    result onSuccess { result =>
-      println("Received result: " + result)
+    // Issue a newline-delimited request, respond to the result
+    // asynchronously:
+    client("hi mom\n") onSuccess { result =>
+      println("Received result asynchronously: " + result)
     } onFailure { error =>
       error.printStackTrace()
     } ensure {
