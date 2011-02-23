@@ -12,9 +12,9 @@ import com.twitter.finagle.util.Timer
  * the given timeout amount of time.
  */
 class CachingPool[Req, Rep](
-    factory: ServiceFactory[Req, Rep],
-    timeout: Duration,
-    timer: com.twitter.util.Timer = Timer.default)
+  factory: ServiceFactory[Req, Rep],
+  timeout: Duration,
+  timer: com.twitter.util.Timer = Timer.default)
   extends ServiceFactory[Req, Rep]
 {
   private[this] val deathRow    = Queue[(Time, Service[Req, Rep])]()

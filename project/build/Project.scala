@@ -130,7 +130,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
-    with AdhocInlines
+    with SubversionPublisher with AdhocInlines
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
