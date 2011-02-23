@@ -188,6 +188,9 @@ case class ServerBuilder[Req, Rep](
 
     val channels = new HashSet[ChannelHandle]
 
+    // Share this stats receiver to avoid per-connection overhead.
+    val statsFilter = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
+
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
@@ -219,8 +222,8 @@ case class ServerBuilder[Req, Rep](
         // Compose the service stack.
         var service = codec.wrapServerChannel(serviceFactory())
 
-        scopedStatsReceiver foreach { sr =>
-          service = (new StatsFilter(sr)) andThen service
+        statsFilter foreach { sf =>
+          service = sf andThen service
         }
 
         // We add the idle time after the codec. This ensures that a
