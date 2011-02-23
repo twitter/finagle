@@ -88,7 +88,7 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
           }
 
         case Throw(e: Throwable) =>
-          log.log(Level.WARNING, e.getMessage, e)
+          log.log(Level.WARNING, "service exception", e)
           shutdown()
       }
     } catch {
