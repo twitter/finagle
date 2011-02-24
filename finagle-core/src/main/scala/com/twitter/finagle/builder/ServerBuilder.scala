@@ -170,16 +170,24 @@ case class ServerBuilder[Req, Rep](
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
 
     // TODO: we need something akin to a max queue depth.
-    val queueingChannelHandler = _maxConcurrentRequests map { maxConcurrentRequests =>
-      val semaphore = new AsyncSemaphore(maxConcurrentRequests)
-      scopedStatsReceiver foreach { sr =>
-        sr.provideGauge("request_concurrency") {
-          maxConcurrentRequests - semaphore.numPermitsAvailable
+    val queueingChannelHandlerAndGauges =
+      _maxConcurrentRequests map { maxConcurrentRequests =>
+        val semaphore = new AsyncSemaphore(maxConcurrentRequests)
+        val gauges = scopedStatsReceiver.toList flatMap { sr =>
+          sr.addGauge("request_concurrency") {
+            maxConcurrentRequests - semaphore.numPermitsAvailable
+          } :: sr.addGauge("request_queue_size") {
+            semaphore.numWaiters
+          } :: Nil
         }
-        sr.provideGauge("request_queue_size") { semaphore.numWaiters }
+
+        (new ChannelSemaphoreHandler(semaphore), gauges)
       }
-      new ChannelSemaphoreHandler(semaphore)
-    }
+
+    val queueingChannelHandler =
+      queueingChannelHandlerAndGauges map { case (q, _) => q }
+    val gauges =
+      queueingChannelHandlerAndGauges.toList flatMap { case (_, g) => g }
 
     trait ChannelHandle {
       def drain(): Future[Unit]
@@ -313,6 +321,9 @@ case class ServerBuilder[Req, Rep](
         // success. Buffer channels into an array to avoid
         // deadlocking.
         channels.synchronized { channels toArray } foreach { _.close() }
+
+        // Release any gauges we've created.
+        gauges foreach { _.remove() }
 
         bs.releaseExternalResources()
         Timer.default.stop()
