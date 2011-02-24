@@ -2,6 +2,7 @@ import org.specs.Specification
 
 import java.io.File
 import java.security.Provider
+import java.util.logging.Logger
 
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
@@ -58,14 +59,26 @@ object SslSpec extends Specification {
   }
 
   "automatically detected available provider" should {
-    "works as a server" in {
+    "be able to send and receive various sized content" in {
       val address = RandomSocket.nextAddress
+
+      def makeContent(length: Int) = {
+        val buf = ChannelBuffers.directBuffer(length)
+        while (buf.writableBytes() > 0)
+          buf.writeByte('Z')
+        buf
+      }
 
       val service = new Service[HttpRequest, HttpResponse] {
         def apply(request: HttpRequest) = Future {
+          val requestedBytes = request.getHeader("Requested-Bytes")
+          match {
+            case s: String => s.toInt
+            case _ => 17280
+          }
           val response = new DefaultHttpResponse(
             HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-          response.setContent(ChannelBuffers.wrappedBuffer("yo".getBytes))
+          response.setContent(makeContent(requestedBytes))
           response
         }
       }
@@ -85,9 +98,37 @@ object SslSpec extends Specification {
           .tlsWithoutValidation()
           .build()
 
-      val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-      val response = client(request)()
-      response.getStatus mustEqual HttpResponseStatus.OK
+      def test(requestSize: Int, responseSize: Int) {
+        "%d byte request, %d byte response".format(requestSize, responseSize) in {
+          val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+
+          if (requestSize > 0) {
+            request.setContent(makeContent(requestSize))
+            HttpHeaders.setContentLength(request, requestSize)
+          }
+
+          if (responseSize > 0)
+            request.setHeader("Requested-Bytes", responseSize)
+          else
+            request.setHeader("Requested-Bytes", 0)
+
+          val response = client(request)()
+          response.getStatus mustEqual HttpResponseStatus.OK
+          HttpHeaders.getContentLength(response) mustEqual responseSize
+          val content = response.getContent()
+
+          content.readableBytes() mustEqual responseSize
+          while (content.readableBytes() > 0) {
+            assert(content.readByte() == 'Z')
+          }
+        }
+      }
+
+      test(   0 * 1024, 16   * 1024)
+      test(  16 * 1024, 0    * 1024)
+      test(1000 * 1024, 16   * 1024)
+      test( 256 * 1024, 256  * 1024)
+      test(  16 * 1024, 2000 * 1024)
     }
   }
 }
