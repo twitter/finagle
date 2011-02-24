@@ -98,8 +98,8 @@ class ChannelServiceFactory[Req, Rep](
 {
   private[this] val channelLatch = new AsyncLatch
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
-
-  statsReceiver.provideGauge("connections") { channelLatch.getCount }
+  private[this] val gauge =
+    statsReceiver.addGauge("connections") { channelLatch.getCount }
 
   protected[channel] def channelReleased(channel: ChannelService[Req, Rep]) {
     channelLatch.decr()

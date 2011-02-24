@@ -6,7 +6,7 @@ import org.jboss.netty.channel._
 import java.util.concurrent.atomic.{AtomicReference, AtomicBoolean}
 import com.twitter.concurrent.Observer
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.Ok
+import com.twitter.finagle.util.{Ok, Error}
 import org.jboss.netty.util.CharsetUtil
 
 /**
@@ -28,8 +28,11 @@ class ChannelToHttpChunk extends SimpleChannelDownstreamHandler {
     case channel: com.twitter.concurrent.Channel[ChannelBuffer] =>
       require(state.compareAndSet(Idle, Open), "Channel is already open or busy.")
 
-      val startMessage = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-      HttpHeaders.setHeader(startMessage, "Transfer-Encoding", "Chunked")
+      val startMessage = {
+        val startMessage = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+        HttpHeaders.setHeader(startMessage, "Transfer-Encoding", "Chunked")
+        startMessage
+      }
 
       val startFuture = new DefaultChannelFuture(ctx.getChannel, false)
       Channels.write(ctx, startFuture, startMessage)
@@ -43,13 +46,12 @@ class ChannelToHttpChunk extends SimpleChannelDownstreamHandler {
           }
           state.set(Observing(observer))
           channel.closes.respond { _ =>
-            val closeFuture = new DefaultChannelFuture(ctx.getChannel, false)
-            val result = closeFuture.toTwitterFuture
+            val closeFuture = e.getFuture
             state.set(Idle)
             Channels.write(ctx, closeFuture, new DefaultHttpChunkTrailer)
-            result
           }
-        case _ =>
+        case Error(f) =>
+          e.getFuture.setFailure(f)
       }
 
     case _ =>
