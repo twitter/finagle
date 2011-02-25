@@ -11,8 +11,7 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.finagle.CodecException
-import com.twitter.finagle.Service
+import com.twitter.finagle.{CodecException, Service, WriteTimedOutException}
 
 class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
   extends ChannelClosingHandler
@@ -121,6 +120,8 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
         Level.FINEST
       case e: ReadTimeoutException =>
         Level.FINEST
+      case e: WriteTimedOutException =>
+        Level.FINEST
       case e: java.io.IOException
       if (e.getMessage == "Connection reset by peer" ||
           e.getMessage == "Broken pipe") =>
@@ -129,8 +130,7 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
         Level.WARNING
     }
 
-    log.log(
-      level, Option(cause.getMessage).getOrElse("Exception caught"), cause)
+    log.log(level, "Exception caught by service channel handler", cause)
 
     shutdown()
   }

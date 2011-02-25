@@ -15,10 +15,11 @@ import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 
-import com.twitter.util.Duration
+import com.twitter.util.{Time, Duration}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
+import com.twitter.finagle.channel.WriteCompletionTimeoutHandler
 import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter, NullTraceReceiver}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
@@ -68,6 +69,7 @@ case class ServerBuilder[Req, Rep](
   _hostConnectionMaxIdleTime: Option[Duration],
   _requestTimeout: Option[Duration],
   _readTimeout: Option[Duration],
+  _writeCompletionTimeout: Option[Duration],
   _traceReceiver: TraceReceiver)
 {
   import ServerBuilder._
@@ -87,6 +89,7 @@ case class ServerBuilder[Req, Rep](
     None,                  // hostConnectionMaxIdleTime
     None,                  // requestTimeout
     None,                  // readTimeout
+    None,                  // writeCompletionTimeout
     new NullTraceReceiver  // traceReceiver
   )
 
@@ -104,7 +107,8 @@ case class ServerBuilder[Req, Rep](
     "maxConcurrentRequests"     -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
     "requestTimeout"            -> _requestTimeout,
-    "readTimeout"               -> Some(_readTimeout),
+    "readTimeout"               -> _readTimeout,
+    "writeCompletionTimeout"    -> _writeCompletionTimeout,
     "traceReceiver"             -> Some(_traceReceiver)
   )
 
@@ -152,6 +156,9 @@ case class ServerBuilder[Req, Rep](
 
   def readTimeout(howlong: Duration) =
     copy(_readTimeout = Some(howlong))
+
+  def writeCompletionTimeout(howlong: Duration) =
+    copy(_writeCompletionTimeout = Some(howlong))
 
   def traceReceiver(receiver: TraceReceiver) =
     copy(_traceReceiver = receiver)
@@ -215,6 +222,9 @@ case class ServerBuilder[Req, Rep](
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
         }
 
+        // XXX/TODO: add stats for both read & write completion
+        // timeouts.
+
         // Note that the timeout is *after* request decoding. This
         // prevents death from clients trying to DoS by slowly
         // trickling in bytes to our (accumulating) codec.
@@ -223,6 +233,12 @@ case class ServerBuilder[Req, Rep](
           pipeline.addLast(
             "readTimeout",
             new ReadTimeoutHandler(Timer.defaultNettyTimer, timeoutValue, timeoutUnit))
+        }
+
+        _writeCompletionTimeout foreach { howlong =>
+          pipeline.addLast(
+            "writeCompletionTimeout",
+            new WriteCompletionTimeoutHandler(Timer.default, howlong))
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
