@@ -72,12 +72,19 @@ trait Client {
    * @return  A ChannelSource that you can send items to.
    */
   def to(queueName: String): ChannelSource[ChannelBuffer]
+
+  /**
+   * Close any consume resources such as TCP Connections. This should will not
+   * release resources created by the from() and to() methods; it is the
+   * responsibility of the caller to release those resources directly.
+   */
+  def close()
 }
 
 /**
  * A Client representing a single TCP connection to a single server.
  *
- * @param  underlying  a ServiceFactory[Command, Response].
+ * @param underlying  a ServiceFactory[Command, Response].
  */
 protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) extends Client {
   def flush(queueName: String) = {
@@ -124,7 +131,9 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
   def to(queueName: String): ChannelSource[ChannelBuffer] = {
     val to = new ChannelSource[ChannelBuffer]
     to.respond { item =>
-      set(queueName, item).unit
+      set(queueName, item).unit onFailure { _ =>
+        to.close()
+      }
     }
     to
   }
@@ -178,5 +187,9 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
         super.close()
       }
     }
+  }
+
+  def close() {
+    underlying.close()
   }
 }

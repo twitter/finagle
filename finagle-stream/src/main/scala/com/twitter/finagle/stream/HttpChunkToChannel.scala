@@ -2,7 +2,7 @@ package com.twitter.finagle.stream
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
-import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
+import java.util.concurrent.atomic.AtomicReference
 import com.twitter.concurrent.ChannelSource
 import com.twitter.util.Future
 import org.jboss.netty.handler.codec.http._
