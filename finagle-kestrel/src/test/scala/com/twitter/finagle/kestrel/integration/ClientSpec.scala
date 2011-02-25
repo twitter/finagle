@@ -12,7 +12,6 @@ import com.twitter.util.Future
 import com.twitter.conversions.time._
 import org.jboss.netty.buffer.ChannelBuffer
 
-
 object ClientSpec extends Specification {
   "ConnectedClient" should {
     skip("This test requires a Kestrel server to run. Please run manually")
@@ -41,14 +40,14 @@ object ClientSpec extends Specification {
 
           val channel = client.from("foo")
           val latch = new CountDownLatch(3)
-          channel.respond(this) { item =>
+          val o = channel.respond { item =>
             Future {
               result += item.toString(CharsetUtil.UTF_8)
               latch.countDown()
             }
           }
           latch.await(1.second)
-          channel.close()
+          o.dispose()
           result mustEqual List("bar", "baz", "boing")
         }
 
@@ -58,18 +57,18 @@ object ClientSpec extends Specification {
           var result: ChannelBuffer = null
           var channel = client.from("foo")
           val latch = new CountDownLatch(1)
-          channel.respond(this) { item =>
+          val o1 = channel.respond { item =>
             throw new Exception
           }
           channel = client.from("foo")
-          channel.respond(this) { item =>
+          val o2 = channel.respond { item =>
             Future {
               result = item
               latch.countDown()
             }
           }
           latch.within(1.second)
-          channel.close()
+          o1.dispose(); o2.dispose()
           result.toString(CharsetUtil.UTF_8) mustEqual "bar"
         }
       }

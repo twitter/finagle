@@ -5,6 +5,8 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest}
 import org.jboss.netty.buffer.ChannelBuffer
 
+object Stream extends Stream
+
 class Stream extends Codec[HttpRequest, com.twitter.concurrent.Channel[ChannelBuffer]] {
   val serverPipelineFactory = new ChannelPipelineFactory {
     def getPipeline = {

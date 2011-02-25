@@ -46,13 +46,13 @@ object PubSubSpec extends Specification {
       val result = new java.util.concurrent.ConcurrentLinkedQueue[String]
       val latchForChannel1 = new CountDownLatch(2)
       val latchForChannel2 = new CountDownLatch(1)
-      channel1.respond(this) { m =>
+      val o1 = channel1.respond { m =>
         Future {
           result add m.toString(Charset.defaultCharset)
           latchForChannel1.countDown()
         }
       }
-      channel2.respond(this) { m =>
+      val o2 = channel2.respond { m =>
         Future {
           result add m.toString(Charset.defaultCharset)
           latchForChannel2.countDown()
@@ -61,7 +61,7 @@ object PubSubSpec extends Specification {
 
       channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes))
       latchForChannel2.await(1.second) mustBe true
-      channel2.close()
+      o2.dispose()
       channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes))
       latchForChannel1.await(1.second) mustBe true
       result.poll() mustEqual "1"
