@@ -1,5 +1,11 @@
 package com.twitter.finagle.http
 
+/**
+ * The HTTP connection manager implements connection management in
+ * accordance with RFC 2616 § 8. This is just the state machine: the
+ * codec implementations are in {Server,Client}ConnectionManager.
+ */
+
 import org.jboss.netty.handler.codec.http._
 
 class ConnectionManager {
