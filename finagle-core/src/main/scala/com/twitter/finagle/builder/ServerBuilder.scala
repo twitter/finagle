@@ -28,7 +28,7 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter}
-import stats.StatsReceiver
+import stats.{StatsReceiver, NullStatsReceiver}
 
 trait Server {
   /**
@@ -297,7 +297,8 @@ case class ServerBuilder[Req, Rep](
         // drain. We close the socket but wait for all handlers to
         // complete (to drain them individually.)  Note: this would be
         // complicated by the presence of pipelining.
-        val channelHandler = new ServiceToChannelHandler(service)
+        val channelHandler = new ServiceToChannelHandler(
+          service, scopedStatsReceiver getOrElse NullStatsReceiver)
 
         val handle = new ChannelHandle {
           def close() =
