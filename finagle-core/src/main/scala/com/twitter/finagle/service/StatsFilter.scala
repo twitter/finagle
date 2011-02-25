@@ -13,8 +13,8 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
   private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
-
-  statsReceiver.provideGauge("pending") { outstandingRequestCount.get }
+  private[this] val outstandingRequestCountgauge =
+    statsReceiver.addGauge("pending") { outstandingRequestCount.get }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val requestedAt = Time.now

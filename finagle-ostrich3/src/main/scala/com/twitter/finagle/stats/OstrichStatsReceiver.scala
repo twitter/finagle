@@ -2,7 +2,15 @@ package com.twitter.finagle.stats
 
 import com.twitter.stats.Stats
 
-class OstrichStatsReceiver extends StatsReceiver {
+class OstrichStatsReceiver extends StatsReceiverWithCumulativeGauges {
+  protected[this] def registerGauge(name: Seq[String], f: => Float) {
+    Stats.addGauge(variableName(name)) { f }
+  }
+
+  protected[this] def deregisterGauge(name: Seq[String]) {
+    Stats.clearGauge(variableName(name))
+  }
+
   def counter(name: String*) = new Counter {
     private[this] val name_ = variableName(name)
 
@@ -15,10 +23,6 @@ class OstrichStatsReceiver extends StatsReceiver {
     def add(value: Float) {
       Stats.addMetric(name_, value.toInt)
     }
-  }
-
-  def provideGauge(name: String*)(f: => Float) = {
-    AdditiveGauges(variableName(name))(f)
   }
 
   private[this] def variableName(name: Seq[String]) = name mkString "/"

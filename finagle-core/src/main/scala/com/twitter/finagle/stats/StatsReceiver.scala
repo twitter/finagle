@@ -16,6 +16,14 @@ trait Stat {
   def add(value: Float)
 }
 
+trait Gauge {
+  def remove()
+}
+
+object StatsReceiver {
+  private[StatsReceiver] var immortalGauges: List[Gauge] = Nil
+}
+
 trait StatsReceiver {
   /**
    * Get a Counter with the description
@@ -28,9 +36,27 @@ trait StatsReceiver {
   def stat(name: String*): Stat
 
   /**
-   * Register a function to be periodically measured.
+   * Register a function to be periodically measured. This measurement
+   * exists in perpetuity. Measurements under the same name are added
+   * together.
    */
-  def provideGauge(name: String*)(f: => Float)
+  def provideGauge(name: String*)(f: => Float) {
+    val gauge = addGauge(name: _*)(f)
+    StatsReceiver.synchronized {
+      StatsReceiver.immortalGauges ::= gauge
+    }
+  }
+
+  /**
+   * Add the function ``f'' as a gauge with the given name. The
+   * returned gauge value is only weakly referenced by the
+   * StatsReceiver, and if garbage collected will cease to be a part
+   * of this measurement: thus, it needs to be retained by the
+   * caller. Immortal measurements are made with ``provideGauge''. As
+   * with ``provideGauge'', gauges with equal names are added
+   * together.
+   */
+  def addGauge(name: String*)(f: => Float): Gauge
 
   /**
    * Prepend ``namespace'' to the names of this receiver.
@@ -42,6 +68,9 @@ trait StatsReceiver {
     }
   }
 
+  /**
+   * Append ``namespace'' to the names of this receiver.
+   */
   def withSuffix(namespace: String) = {
     val seqSuffix = Seq(namespace)
     new NameTranslatingStatsReceiver(this) {
@@ -73,8 +102,10 @@ class RollupStatsReceiver(val self: StatsReceiver)
     def add(value: Float) = allStats foreach (_.add(value))
   }
 
-  def provideGauge(name: String*)(f: => Float) =
-    tails(name) foreach { self.provideGauge(_: _*)(f) }
+  def addGauge(name: String*)(f: => Float) = new Gauge {
+    private[this] val underlying = tails(name) map { self.addGauge(_: _*)(f) }
+    def remove() = underlying foreach { _.remove() }
+  }
 }
 
 abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
@@ -84,7 +115,8 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
 
   def counter(name: String*)                   = self.counter(translate(name): _*)
   def stat(name: String*)                      = self.stat(translate(name): _*)
-  def provideGauge(name: String*)(f: => Float) = self.provideGauge(translate(name): _*)(f)
+
+  def addGauge(name: String*)(f: => Float) = self.addGauge(translate(name): _*)(f)
 }
 
 object NullStatsReceiver extends StatsReceiver {
@@ -96,5 +128,5 @@ object NullStatsReceiver extends StatsReceiver {
     def add(value: Float) {}
   }
 
-  def provideGauge(name: String*)(f: => Float) {}
+  def addGauge(name: String*)(f: => Float) = new Gauge { def remove() {} }
 }

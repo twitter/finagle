@@ -13,6 +13,7 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.handler.ssl._
+import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 
 import com.twitter.util.Duration
 import com.twitter.conversions.time._
@@ -66,6 +67,7 @@ case class ServerBuilder[Req, Rep](
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
   _requestTimeout: Option[Duration],
+  _readTimeout: Option[Duration],
   _traceReceiver: TraceReceiver)
 {
   import ServerBuilder._
@@ -84,6 +86,7 @@ case class ServerBuilder[Req, Rep](
     None,                  // maxConcurrentRequests
     None,                  // hostConnectionMaxIdleTime
     None,                  // requestTimeout
+    None,                  // readTimeout
     new NullTraceReceiver  // traceReceiver
   )
 
@@ -101,6 +104,7 @@ case class ServerBuilder[Req, Rep](
     "maxConcurrentRequests"     -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
     "requestTimeout"            -> _requestTimeout,
+    "readTimeout"               -> Some(_readTimeout),
     "traceReceiver"             -> Some(_traceReceiver)
   )
 
@@ -146,6 +150,9 @@ case class ServerBuilder[Req, Rep](
   def requestTimeout(howlong: Duration) =
     copy(_requestTimeout = Some(howlong))
 
+  def readTimeout(howlong: Duration) =
+    copy(_readTimeout = Some(howlong))
+
   def traceReceiver(receiver: TraceReceiver) =
     copy(_traceReceiver = receiver)
 
@@ -170,16 +177,24 @@ case class ServerBuilder[Req, Rep](
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
 
     // TODO: we need something akin to a max queue depth.
-    val queueingChannelHandler = _maxConcurrentRequests map { maxConcurrentRequests =>
-      val semaphore = new AsyncSemaphore(maxConcurrentRequests)
-      scopedStatsReceiver foreach { sr =>
-        sr.provideGauge("request_concurrency") {
-          maxConcurrentRequests - semaphore.numPermitsAvailable
+    val queueingChannelHandlerAndGauges =
+      _maxConcurrentRequests map { maxConcurrentRequests =>
+        val semaphore = new AsyncSemaphore(maxConcurrentRequests)
+        val gauges = scopedStatsReceiver.toList flatMap { sr =>
+          sr.addGauge("request_concurrency") {
+            maxConcurrentRequests - semaphore.numPermitsAvailable
+          } :: sr.addGauge("request_queue_size") {
+            semaphore.numWaiters
+          } :: Nil
         }
-        sr.provideGauge("request_queue_size") { semaphore.numWaiters }
+
+        (new ChannelSemaphoreHandler(semaphore), gauges)
       }
-      new ChannelSemaphoreHandler(semaphore)
-    }
+
+    val queueingChannelHandler =
+      queueingChannelHandlerAndGauges map { case (q, _) => q }
+    val gauges =
+      queueingChannelHandlerAndGauges.toList flatMap { case (_, g) => g }
 
     trait ChannelHandle {
       def drain(): Future[Unit]
@@ -188,6 +203,9 @@ case class ServerBuilder[Req, Rep](
 
     val channels = new HashSet[ChannelHandle]
 
+    // Share this stats receiver to avoid per-connection overhead.
+    val statsFilter = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
+
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = codec.serverPipelineFactory.getPipeline
@@ -195,6 +213,16 @@ case class ServerBuilder[Req, Rep](
         _logger foreach { logger =>
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
+        }
+
+        // Note that the timeout is *after* request decoding. This
+        // prevents death from clients trying to DoS by slowly
+        // trickling in bytes to our (accumulating) codec.
+        _readTimeout foreach { howlong =>
+          val (timeoutValue, timeoutUnit) = howlong.inTimeUnit
+          pipeline.addLast(
+            "readTimeout",
+            new ReadTimeoutHandler(Timer.defaultNettyTimer, timeoutValue, timeoutUnit))
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
@@ -219,8 +247,8 @@ case class ServerBuilder[Req, Rep](
         // Compose the service stack.
         var service = codec.wrapServerChannel(serviceFactory())
 
-        scopedStatsReceiver foreach { sr =>
-          service = (new StatsFilter(sr)) andThen service
+        statsFilter foreach { sf =>
+          service = sf andThen service
         }
 
         // We add the idle time after the codec. This ensures that a
@@ -310,6 +338,9 @@ case class ServerBuilder[Req, Rep](
         // success. Buffer channels into an array to avoid
         // deadlocking.
         channels.synchronized { channels toArray } foreach { _.close() }
+
+        // Release any gauges we've created.
+        gauges foreach { _.remove() }
 
         bs.releaseExternalResources()
         Timer.default.stop()
