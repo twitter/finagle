@@ -5,6 +5,7 @@ import java.util.logging.Logger
 import java.util.logging.Level
 
 import org.jboss.netty.channel._
+import org.jboss.netty.handler.timeout.ReadTimeoutException
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 
@@ -117,6 +118,8 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
     val cause = e.getCause
     val level = cause match {
       case e: java.nio.channels.ClosedChannelException =>
+        Level.FINEST
+      case e: ReadTimeoutException =>
         Level.FINEST
       case e: java.io.IOException
       if (e.getMessage == "Connection reset by peer" ||

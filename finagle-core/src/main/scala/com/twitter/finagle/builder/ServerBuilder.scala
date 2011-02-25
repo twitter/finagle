@@ -13,6 +13,7 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.handler.ssl._
+import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 
 import com.twitter.util.Duration
 import com.twitter.conversions.time._
@@ -66,6 +67,7 @@ case class ServerBuilder[Req, Rep](
   _maxConcurrentRequests: Option[Int],
   _hostConnectionMaxIdleTime: Option[Duration],
   _requestTimeout: Option[Duration],
+  _readTimeout: Option[Duration],
   _traceReceiver: TraceReceiver)
 {
   import ServerBuilder._
@@ -84,6 +86,7 @@ case class ServerBuilder[Req, Rep](
     None,                  // maxConcurrentRequests
     None,                  // hostConnectionMaxIdleTime
     None,                  // requestTimeout
+    None,                  // readTimeout
     new NullTraceReceiver  // traceReceiver
   )
 
@@ -101,6 +104,7 @@ case class ServerBuilder[Req, Rep](
     "maxConcurrentRequests"     -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
     "requestTimeout"            -> _requestTimeout,
+    "readTimeout"               -> Some(_readTimeout),
     "traceReceiver"             -> Some(_traceReceiver)
   )
 
@@ -145,6 +149,9 @@ case class ServerBuilder[Req, Rep](
 
   def requestTimeout(howlong: Duration) =
     copy(_requestTimeout = Some(howlong))
+
+  def readTimeout(howlong: Duration) =
+    copy(_readTimeout = Some(howlong))
 
   def traceReceiver(receiver: TraceReceiver) =
     copy(_traceReceiver = receiver)
@@ -206,6 +213,16 @@ case class ServerBuilder[Req, Rep](
         _logger foreach { logger =>
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
+        }
+
+        // Note that the timeout is *after* request decoding. This
+        // prevents death from clients trying to DoS by slowly
+        // trickling in bytes to our (accumulating) codec.
+        _readTimeout foreach { howlong =>
+          val (timeoutValue, timeoutUnit) = howlong.inTimeUnit
+          pipeline.addLast(
+            "readTimeout",
+            new ReadTimeoutHandler(Timer.defaultNettyTimer, timeoutValue, timeoutUnit))
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
