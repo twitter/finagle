@@ -2,8 +2,8 @@ package com.twitter.finagle.example.echo
 
 import com.twitter.finagle.Service
 import com.twitter.util.Future
-import com.twitter.finagle.builder.ServerBuilder
 import java.net.InetSocketAddress
+import com.twitter.finagle.builder.{Server, ServerBuilder}
 
 object EchoServer {
   def main(args: Array[String]) {
@@ -17,7 +17,7 @@ object EchoServer {
     }
 
     // Bind the service to port 8080
-    val server = ServerBuilder()
+    val server: Server = ServerBuilder()
       .codec(StringCodec)
       .bindTo(new InetSocketAddress(8080))
       .build(service)

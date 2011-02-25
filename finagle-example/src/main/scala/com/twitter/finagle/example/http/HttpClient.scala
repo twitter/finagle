@@ -35,7 +35,7 @@ object HttpClient {
   }
 
   def main(args: Array[String]) {
-    val clientWithoutErrorHandling = ClientBuilder()
+    val clientWithoutErrorHandling: Service[HttpRequest, HttpResponse] = ClientBuilder()
       .codec(Http)
       .hosts(new InetSocketAddress(8080))
       .build()
@@ -43,7 +43,7 @@ object HttpClient {
     val handleErrors = new HandleErrors
 
     // compose the Filter with the client:
-    val client = handleErrors andThen clientWithoutErrorHandling
+    val client: Service[HttpRequest, HttpResponse] = handleErrors andThen clientWithoutErrorHandling
 
     println("))) Issuing two requests in parallel: ")
     val request1 = makeAuthorizedRequest(client)

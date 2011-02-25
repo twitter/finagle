@@ -34,7 +34,7 @@ object EndToEndSpec extends Specification {
 
       "writes from the server arrive on the client's channel" in {
         var result = ""
-        channel.respond(this) { channelBuffer =>
+        channel.respond { channelBuffer =>
           Future {
             result += channelBuffer.toString(Charset.defaultCharset)
           }
@@ -49,14 +49,14 @@ object EndToEndSpec extends Specification {
         result mustEqual "123"
       }
 
-      "writes from the server are queued before the client receives" in {
+      "writes from the server are queued before the client responds" in {
         channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes))
         channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes))
         channelSource.send(ChannelBuffers.wrappedBuffer("3".getBytes))
 
         val latch = new CountDownLatch(3)
         var result = ""
-        channel.respond(this) { channelBuffer =>
+        channel.respond { channelBuffer =>
           Future {
             result += channelBuffer.toString(Charset.defaultCharset)
             latch.countDown()

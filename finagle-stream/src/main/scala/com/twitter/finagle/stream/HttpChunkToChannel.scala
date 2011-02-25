@@ -13,24 +13,33 @@ import org.jboss.netty.handler.codec.http._
 class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
   private[this] val channelRef =
     new AtomicReference[com.twitter.concurrent.ChannelSource[ChannelBuffer]](null)
+  @volatile var numObservers = 0
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case message: HttpResponse =>
       require(message.getStatus == HttpResponseStatus.OK,
-        "Error: " + message.getStatus)
+        "Error: status code must be 200 OK: " + message.getStatus)
+      require(message.isChunked,
+        "Error: message must be chunked")
+
       val source = new ChannelSource[ChannelBuffer]
       require(channelRef.compareAndSet(null, source),
-        "Channel is already busy")
+        "Channel is already busy, only Chunks are OK at this point.")
 
       ctx.getChannel.setReadable(false)
-      source.responds.first.respond { _ =>
-        if (!message.isChunked) {
-          source.send(message.getContent)
-          source.close()
-          channelRef.set(null)
+
+      source.numObservers.respond { i =>
+        numObservers = i
+        i match {
+          case 1 =>
+            ctx.getChannel.setReadable(true)
+          case 0 =>
+            ctx.getChannel.setReadable(false)
+          case _ =>
         }
-        ctx.getChannel.setReadable(true)
+        Future.Done
       }
+
       Channels.fireMessageReceived(ctx, source)
     case trailer: HttpChunkTrailer =>
       val topic = channelRef.getAndSet(null)
@@ -39,8 +48,11 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
     case chunk: HttpChunk =>
       ctx.getChannel.setReadable(false)
       val topic = channelRef.get
-      Future.join(topic.send(chunk.getContent)) respond { _ =>
-        ctx.getChannel.setReadable(true)
+      Future.join(topic.send(chunk.getContent)) ensure {
+        // FIXME serialize on the channel
+        if (numObservers > 0) {
+          ctx.getChannel.setReadable(true)
+        }
       }
   }
 }

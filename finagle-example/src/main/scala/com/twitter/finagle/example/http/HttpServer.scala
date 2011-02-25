@@ -7,8 +7,8 @@ import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.util.CharsetUtil.UTF_8
 import com.twitter.util.Future
-import com.twitter.finagle.builder.{Http, ServerBuilder}
 import java.net.InetSocketAddress
+import com.twitter.finagle.builder.{Server, Http, ServerBuilder}
 
 /**
  * This example demonstrates a sophisticated HTTP server that handles exceptions
@@ -71,9 +71,9 @@ object HttpServer {
     val respond = new Respond
 
     // compose the Filters and Service together:
-    val myService = handleExceptions andThen authorize andThen respond
+    val myService: Service[HttpRequest, HttpResponse] = handleExceptions andThen authorize andThen respond
 
-    ServerBuilder()
+    val server: Server = ServerBuilder()
       .codec(Http)
       .bindTo(new InetSocketAddress(8080))
       .build(myService)
