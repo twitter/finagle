@@ -14,12 +14,13 @@ import com.twitter.finagle.Codec
 
 case class Http(
     _compressionLevel: Int = 0,
-    _maxChunkAggregationBufferSize: StorageUnit = 1.megabyte)
+    _maxRequestSize: StorageUnit = 1.megabyte,
+    _maxResponseSize: StorageUnit = 1.megabyte)
   extends Codec[HttpRequest, HttpResponse] {
 
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
-  def maxChunkAggregationBufferSize(bufferSize: StorageUnit) =
-    copy(_maxChunkAggregationBufferSize = bufferSize)
+  def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
+  def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
 
   val clientPipelineFactory: ChannelPipelineFactory =
     new ChannelPipelineFactory {
@@ -28,7 +29,7 @@ case class Http(
         pipeline.addLast("httpCodec", new HttpClientCodec())
         pipeline.addLast(
           "httpDechunker",
-          new HttpChunkAggregator(_maxChunkAggregationBufferSize.inBytes.toInt))
+          new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
 
         pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
 
@@ -55,7 +56,7 @@ case class Http(
         pipeline.addLast("respondToExpectContinue", new RespondToExpectContinue)
         pipeline.addLast(
           "httpDechunker",
-          new HttpChunkAggregator(_maxChunkAggregationBufferSize.inBytes.toInt))
+          new HttpChunkAggregator(_maxRequestSize.inBytes.toInt))
 
         pipeline.addLast(
           "connectionLifecycleManager",
