@@ -55,7 +55,7 @@ object HttpClient {
     }
   }
 
-  def makeAuthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
+  private[this] def makeAuthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
     val authorizedRequest = new DefaultHttpRequest(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     authorizedRequest.addHeader("Authorization", "open sesame")
@@ -66,7 +66,7 @@ object HttpClient {
     }
   }
 
-  def makeUnauthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
+  private[this] def makeUnauthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
     val unauthorizedRequest = new DefaultHttpRequest(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
