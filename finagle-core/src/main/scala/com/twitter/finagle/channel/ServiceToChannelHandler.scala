@@ -11,13 +11,19 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.finagle.CodecException
-import com.twitter.finagle.Service
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.{CodecException, Service, WriteTimedOutException}
 
-class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
+class ServiceToChannelHandler[Req, Rep](
+    service: Service[Req, Rep],
+    statsReceiver: StatsReceiver,
+    log: Logger)
   extends ChannelClosingHandler
 {
-  def this(service: Service[Req, Rep]) = this(service, Logger.getLogger(getClass.getName))
+  def this(service: Service[Req, Rep], statsReceiver: StatsReceiver) =
+    this(service, statsReceiver, Logger.getLogger(getClass.getName))
+  def this(service: Service[Req, Rep]) =
+    this(service, NullStatsReceiver)
 
   private[this] sealed trait State
 
@@ -120,6 +126,10 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
       case e: java.nio.channels.ClosedChannelException =>
         Level.FINEST
       case e: ReadTimeoutException =>
+        statsReceiver.counter("read_timeout").incr()
+        Level.FINEST
+      case e: WriteTimedOutException =>
+        statsReceiver.counter("write_timeout").incr()
         Level.FINEST
       case e: java.io.IOException
       if (e.getMessage == "Connection reset by peer" ||
@@ -129,8 +139,7 @@ class ServiceToChannelHandler[Req, Rep](service: Service[Req, Rep], log: Logger)
         Level.WARNING
     }
 
-    log.log(
-      level, Option(cause.getMessage).getOrElse("Exception caught"), cause)
+    log.log(level, "Exception caught by service channel handler", cause)
 
     shutdown()
   }

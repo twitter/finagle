@@ -110,7 +110,7 @@ class ChannelServiceFactory[Req, Rep](
 
     val promise = new Promise[Service[Req, Rep]]
     bootstrap.connect() {
-      case Ok(channel)  =>
+      case Ok(channel) =>
         channelLatch.incr()
         connectLatencyStat.add(begin.untilNow.inMilliseconds)
         prepareChannel(new ChannelService[Req, Rep](channel, this)) respond { promise() = _ }
