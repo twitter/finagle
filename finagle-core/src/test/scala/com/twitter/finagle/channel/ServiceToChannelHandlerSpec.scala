@@ -13,12 +13,13 @@ import org.jboss.netty.channel.{
 
 import com.twitter.util.Future
 import com.twitter.finagle.Service
+import com.twitter.finagle.stats.StatsReceiver
 
 object ServiceToChannelHandlerSpec extends Specification with Mockito {
   "ServiceToChannelHandler" should {
     class Foo { def fooMethod() = "hey there" }
 
-    val log = mock[Logger]
+    val log = mock[StatsReceiver]
     val request = new Foo
     val service = mock[Service[Foo, String]]
     val handler = new ServiceToChannelHandler(service, log)
@@ -48,8 +49,8 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
 
       "write the reply to the channel" in {
         val captor = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
-        there was one(pipeline).sendDownstream(captor.capture)        
-        
+        there was one(pipeline).sendDownstream(captor.capture)
+
         val dsme = captor.getValue
         dsme.getMessage must haveClass[String]
         dsme.getMessage must be_==("hey there")
