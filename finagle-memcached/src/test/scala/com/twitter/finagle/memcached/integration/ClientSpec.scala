@@ -8,7 +8,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.{Server, Client}
+import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
 import com.twitter.util.RandomSocket
 
 object ClientSpec extends Specification {
@@ -60,13 +60,13 @@ object ClientSpec extends Specification {
 
       "incr & decr" in {
         client.set("foo", "")()
-        client.incr("foo")()    mustEqual 1
-        client.incr("foo", 2)() mustEqual 3
-        client.decr("foo")()    mustEqual 2
+        client.incr("foo")()    mustEqual Some(1)
+        client.incr("foo", 2)() mustEqual Some(3)
+        client.decr("foo")()    mustEqual Some(2)
       }
     }
 
-    "partitioned client" in {
+    "ketama client" in {
       /**
        * We already proved above that we can hit a real memcache server,
        * so we can use our own for the partitioned client test.
@@ -88,19 +88,9 @@ object ClientSpec extends Specification {
         server2.stop()
       }
 
-      val service1 = ClientBuilder()
-        .name("service1")
-        .hosts("localhost:" + address1.getPort)
-        .codec(new Memcached)
+      val client = (new KetamaClientBuilder())
+        .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
         .build()
-
-      val service2 = ClientBuilder()
-        .name("service2")
-        .hosts("localhost:" + address2.getPort)
-        .codec(new Memcached)
-        .build()
-
-      val client = Client(Seq(service1, service2))
 
       "doesn't blow up" in {
         client.delete("foo")()
