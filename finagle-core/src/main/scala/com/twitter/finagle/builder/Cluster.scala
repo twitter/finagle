@@ -13,11 +13,14 @@ import com.twitter.finagle.ServiceFactory
  */
 trait Cluster {
   /**
-   * Produce a sequence of brokers that changes as servers join and
+   * Produce a sequence of ServiceFactories that changes as servers join and
    * leave the cluster.
    */
   def mkFactories[Req, Rep](f: SocketAddress => ServiceFactory[Req, Rep]): Seq[ServiceFactory[Req, Rep]]
 
+  /**
+   * Register a new Server in the cluster at the given SocketAddress.
+   */
   def join(address: SocketAddress)
 }
 

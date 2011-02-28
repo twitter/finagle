@@ -8,6 +8,8 @@ import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import server.DecodingToCommand
 
+object Memcached extends Memcached
+
 class Memcached extends Codec[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer](
     "set", "add", "replace", "append", "prepend")
