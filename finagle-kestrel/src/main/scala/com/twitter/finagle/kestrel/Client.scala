@@ -110,7 +110,7 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
   def from(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
     val result = new ChannelSource[ChannelBuffer]
     var isRunning: AtomicBoolean = null
-    result.numObservers.respond { i =>
+    result.numObservers.respond { i: Int =>
       i match {
         case 0 =>
           isRunning.set(false)

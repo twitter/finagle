@@ -39,32 +39,47 @@ public abstract class Client {
   abstract public Future<Map<String, ChannelBuffer>> get(List<String> keys);
 
   /**
-   * Store a key. Override an existing values.
+   * Store a key. Override an existing value.
+   * @return true
    */
-  abstract public Future<Response> set(String key, ChannelBuffer value);
+  abstract public Future<Void> set(String key, ChannelBuffer value);
 
   /**
    * Store a key but only if it doesn't already exist on the server.
+   * @return true if stored, false if not stored
    */
-  abstract public Future<Response> add(String key, ChannelBuffer value);
+  abstract public Future<Boolean> add(String key, ChannelBuffer value);
 
   /**
-   * Append a set of bytes to the end of an existing key. If the key doesn't
+   * Append bytes to the end of an existing key. If the key doesn't
    * exist, the operation has no effect.
+   * @return true if stored, false if not stored
    */
-  abstract public Future<Response> append(String key, ChannelBuffer value);
+  abstract public Future<Boolean> append(String key, ChannelBuffer value);
 
   /**
-   * Prepend a set of bytes to the beginning of an existing key. If the key
+   * Prepend bytes to the beginning of an existing key. If the key
    * doesn't exist, the operation has no effect.
+   * @return true if stored, false if not stored
    */
-  abstract public Future<Response> prepend(String key, ChannelBuffer value);
-  abstract public Future<Response> delete(String key);
+  abstract public Future<Boolean> prepend(String key, ChannelBuffer value);
+
+  /**
+   * Replace bytes on an existing key. If the key doesn't exist, the
+   * operation has no effect.
+   * @return true if stored, false if not stored
+   */
+  abstract public Future<Boolean> replace(String key, ChannelBuffer value);
+
+  /**
+   * Remove a key.
+   * @return true if deleted, false if not found
+   */
+  abstract public Future<Boolean> delete(String key);
 
   /**
    * Increment a key. Interpret the key as an integer if it is parsable.
    * This operation has no effect if there is no value there already.
-   * A common idiom is to set(key, ""), incr(key).
    */
   abstract public Future<Integer> incr(String key);
   abstract public Future<Integer> incr(String key, int delta);
@@ -76,19 +91,19 @@ public abstract class Client {
   abstract public Future<Integer> decr(String key);
   abstract public Future<Integer> decr(String key, int delta);
 
-  public Future<Response> set(String key, String value) {
+  public Future<Void> set(String key, String value) {
     return this.set(key, toChannelBuffer(value));
   }
 
-  public Future<Response> add(String key, String value) {
+  public Future<Boolean> add(String key, String value) {
     return this.add(key, toChannelBuffer(value));
   }
 
-  public Future<Response> append(String key, String value) {
+  public Future<Boolean> append(String key, String value) {
     return this.append(key, toChannelBuffer(value));
   }
 
-  public Future<Response> prepend(String key, String value) {
+  public Future<Boolean> prepend(String key, String value) {
     return this.prepend(key, toChannelBuffer(value));
   }
 

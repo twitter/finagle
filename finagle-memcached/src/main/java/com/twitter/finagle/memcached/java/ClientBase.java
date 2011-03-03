@@ -40,39 +40,84 @@ public class ClientBase extends Client {
     });
   }
 
-  public Future<Response> set(String key, ChannelBuffer value) {
-    return underlying.set(key, value);
+  public Future<Void> set(String key, ChannelBuffer value) {
+    Future<Object> result = underlying.set(key, value);
+    return result.map(new Function<Object, Void>() {
+      public Void apply(Object obj) {
+	return null;
+      }
+    });
   }
 
-  public Future<Response> add(String key, ChannelBuffer value) {
+  public Future<Boolean> add(String key, ChannelBuffer value) {
     return underlying.add(key, value);
   }
 
-  public Future<Response> append(String key, ChannelBuffer value) {
+  public Future<Boolean> append(String key, ChannelBuffer value) {
     return underlying.append(key, value);
   }
 
-  public Future<Response> prepend(String key, ChannelBuffer value) {
+  public Future<Boolean> prepend(String key, ChannelBuffer value) {
     return underlying.prepend(key, value);
   }
 
-  public Future<Response> delete(String key) {
+  public Future<Boolean> replace(String key, ChannelBuffer value) {
+    return underlying.replace(key, value);
+  }
+
+  public Future<Boolean> delete(String key) {
     return underlying.delete(key);
   }
 
   public Future<Integer> incr(String key) {
-    return underlying.incr(key);
+    Future<Option<Integer>> result = underlying.incr(key);
+    return result.map(new Function<Option<Integer>, Integer>() {
+      public Integer apply(Option<Integer> value) {
+	if (value.isDefined()) {
+	  return (Integer) value.get();
+	} else {
+	  return -1;
+	}
+      }
+    });
   }
 
   public Future<Integer> incr(String key, int delta) {
-    return underlying.incr(key, delta);
+    Future<Option<Integer>> result = underlying.incr(key, delta);
+    return result.map(new Function<Option<Integer>, Integer>() {
+      public Integer apply(Option<Integer> value) {
+	if (value.isDefined()) {
+	  return (Integer) value.get();
+	} else {
+	  return -1;
+	}
+      }
+    });
   }
 
   public Future<Integer> decr(String key) {
-    return underlying.decr(key);
+    Future<Option<Integer>> result = underlying.decr(key);
+    return result.map(new Function<Option<Integer>, Integer>() {
+      public Integer apply(Option<Integer> value) {
+	if (value.isDefined()) {
+	  return (Integer) value.get();
+	} else {
+	  return -1;
+	}
+      }
+    });
   }
 
   public Future<Integer> decr(String key, int delta) {
-    return underlying.decr(key, delta);
+    Future<Option<Integer>> result = underlying.decr(key, delta);
+    return result.map(new Function<Option<Integer>, Integer>() {
+      public Integer apply(Option<Integer> value) {
+	if (value.isDefined()) {
+	  return (Integer) value.get();
+	} else {
+	  return -1;
+	}
+      }
+    });
   }
 }
