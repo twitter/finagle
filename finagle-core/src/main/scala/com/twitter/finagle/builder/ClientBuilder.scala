@@ -227,7 +227,7 @@ case class ClientBuilder[Req, Rep](
     bs
   }
 
-  private[this] def buildPool(factory: ServiceFactory[Req, Rep]) = {
+  private[this] def buildPool(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) = {
     // These are conservative defaults, but probably the only safe
     // thing to do.
     val lowWatermark  = _hostConnectionCoresize getOrElse(1)
@@ -235,7 +235,7 @@ case class ClientBuilder[Req, Rep](
     val idleTime      = _hostConnectionIdleTime getOrElse(5.seconds)
 
     val cachingPool = new CachingPool(factory, idleTime)
-    new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark)
+    new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark, statsReceiver)
   }
 
   private[this] def prepareChannel(service: Service[Req, Rep]) = {
@@ -287,7 +287,7 @@ case class ClientBuilder[Req, Rep](
       val bs = buildBootstrap(protocol, host)
       factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _, hostStatsReceiver)
 
-      factory = buildPool(factory)
+      factory = buildPool(factory, hostStatsReceiver)
 
       if (_requestTimeout < Duration.MaxValue) {
         val filter = new TimeoutFilter[Req, Rep](_requestTimeout)

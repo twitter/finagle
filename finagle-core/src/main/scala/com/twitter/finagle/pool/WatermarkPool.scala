@@ -1,14 +1,11 @@
 package com.twitter.finagle.pool
 
-import annotation.tailrec
-import collection.mutable.Queue
-
-import java.util.concurrent.atomic.AtomicInteger
+import scala.annotation.tailrec
+import scala.collection.mutable.Queue
 
 import com.twitter.util.{Future, Promise, Return, Throw}
-
 import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException}
-import com.twitter.finagle.util.AsyncLatch
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
  * The watermark pool is an object pool with low & high
@@ -21,13 +18,16 @@ import com.twitter.finagle.util.AsyncLatch
  */
 class WatermarkPool[Req, Rep](
     factory: ServiceFactory[Req, Rep],
-    lowWatermark: Int, highWatermark: Int = Int.MaxValue)
+    lowWatermark: Int, highWatermark: Int = Int.MaxValue,
+    statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
   private[this] val queue       = Queue[Service[Req, Rep]]()
   private[this] val waiters     = Queue[Promise[Service[Req, Rep]]]()
   private[this] var numServices = 0
   private[this] var isOpen      = true
+
+  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters")(waiters.size)
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
     extends Service[Req, Rep]

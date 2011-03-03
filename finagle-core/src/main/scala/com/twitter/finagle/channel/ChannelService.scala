@@ -1,15 +1,13 @@
 package com.twitter.finagle.channel
 
 import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.LinkedBlockingQueue
-
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel, Channels,
   SimpleChannelUpstreamHandler, ExceptionEvent,
   ChannelStateEvent}
 
-import com.twitter.util.{Future, Promise, Return, Throw, Try, Time}
+import com.twitter.util.{Future, Promise, Throw, Try, Time}
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
