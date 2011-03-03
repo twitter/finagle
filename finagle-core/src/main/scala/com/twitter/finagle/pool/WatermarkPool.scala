@@ -85,7 +85,9 @@ class WatermarkPool[Req, Rep](
         Future.value(service)
       case None if numServices < highWatermark =>
         numServices += 1
-        factory.make() map { new ServiceWrapper(_) }
+        factory.make() map { new ServiceWrapper(_) } onFailure { f =>
+          numServices -= 1
+        }
       case None =>
         val promise = new Promise[Service[Req, Rep]]
         waiters += promise
