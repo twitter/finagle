@@ -61,7 +61,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val nativeProject = project(
     "finagle-native", "finagle-native",
-    new SimpleProject(_), coreProject)
+    new NativeProject(_), coreProject)
 
   /**
    * finagle-stream contains a streaming http codec identical to
@@ -145,7 +145,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 
-  class SimpleProject(info: ProjectInfo) extends StressProject(info)
+  class NativeProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines with LibDirClasspath
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)

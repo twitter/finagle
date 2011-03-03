@@ -1,11 +1,10 @@
 package com.twitter.finagle.channel
 
-/** 
+/**
  * A ChannelSemaphoreHandler admits requests on a channel only after
  * acquiring a lease from the passed-in semaphore.
- */ 
+ */
 
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 import org.jboss.netty.channel._
@@ -18,9 +17,9 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   extends SimpleChannelHandler
 {
   private[this] sealed trait State
-  private[this] case object Idle   extends State
-  private[this] case object Busy   extends State
-  private[this] case object Closed extends State
+  private[this] case object Idle                                extends State
+  private[this] case class Busy(permit: AsyncSemaphore#Permit)  extends State
+  private[this] case object Closed                              extends State
 
   private[this] def state(ctx: ChannelHandlerContext) = ctx.synchronized {
     if (ctx.getAttachment eq null)
@@ -30,31 +29,34 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   }
 
   private[this] def close(ctx: ChannelHandlerContext) {
-    if (state(ctx).getAndSet(Closed) == Busy)
-      semaphore.release()
+    val oldState = state(ctx).getAndSet(Closed)
+    oldState match {
+      case Busy(permit) => permit.release()
+      case _ =>
+    }
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    semaphore.acquire {
+    semaphore.acquire() onSuccess { permit =>
       val ctxState = state(ctx)
       var oldState: State = null
       do {
         val state_ = ctxState.get
         if (state_ != Idle)
           oldState = state_
-        if (ctxState.compareAndSet(Idle, Busy))
+        if (ctxState.compareAndSet(Idle, Busy(permit)))
           oldState = Idle
       } while (oldState eq null)
 
       oldState match {
         case Idle =>
           super.messageReceived(ctx, e)
-        case Busy =>
-          semaphore.release()
+        case Busy(permit) =>
+          permit.release()
           Channels.fireExceptionCaught(
             ctx.getChannel, new CodecException("Codec issued concurrent requests"))
         case Closed =>
-          semaphore.release()
+          permit.release()
       }
     }
   }
@@ -62,8 +64,13 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     super.writeRequested(ctx, e)
     e.getFuture onSuccessOrFailure {
-      if (state(ctx).compareAndSet(Busy, Idle))
-        semaphore.release()
+      val oldState = state(ctx).get
+      oldState match {
+        case Busy(permit) =>
+          if (state(ctx).compareAndSet(oldState, Idle))
+            permit.release()
+        case _ =>
+      }
     }
   }
 

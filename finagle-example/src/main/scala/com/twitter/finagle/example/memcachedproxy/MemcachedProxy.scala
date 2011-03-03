@@ -1,10 +1,10 @@
 package com.twitter.finagle.example.memcachedproxy
 
 import com.twitter.finagle.memcached.protocol.text.Memcached
-import java.net.InetSocketAddress
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{Server, ClientBuilder, ServerBuilder}
+import java.net.{ConnectException, Socket, InetSocketAddress}
 
 /**
  * Run a server on port 8080 that delegates all Memcached requests to a server
@@ -15,6 +15,8 @@ import com.twitter.finagle.builder.{Server, ClientBuilder, ServerBuilder}
  */
 object MemcachedProxy {
   def main(args: Array[String]) {
+    assertMemcachedRunning()
+
     val client: Service[Command, Response] = ClientBuilder()
       .codec(Memcached)
       .hosts(new InetSocketAddress(11211))
@@ -28,5 +30,16 @@ object MemcachedProxy {
       .codec(Memcached)
       .bindTo(new InetSocketAddress(8080))
       .build(proxyService)
+  }
+
+  private[this] def assertMemcachedRunning() {
+    try {
+      new Socket("localhost", 11211)
+    } catch {
+      case e: ConnectException =>
+        println("Error: Kestrel must be running on port 22133")
+        System.exit(1)
+    }
+
   }
 }

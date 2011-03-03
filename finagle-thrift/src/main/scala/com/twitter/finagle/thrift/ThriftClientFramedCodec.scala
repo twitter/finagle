@@ -1,27 +1,22 @@
 package com.twitter.finagle.thrift
 
 import collection.JavaConversions._
-
 import org.jboss.netty.channel.{
-  SimpleChannelHandler, Channel, ChannelEvent, ChannelHandlerContext,
+  ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-
+import org.jboss.netty.buffer.ChannelBuffers
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
+import org.apache.thrift.transport.TMemoryInputTransport
 
-import com.twitter.conversions.time._
-import com.twitter.util.{Time, Future}
+import com.twitter.util.Time
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.{Ok, Error, Cancelled, TracingHeader}
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.channel.ChannelService
 import com.twitter.finagle.tracing.{TraceID, Trace, Record}
 
-/** 
+/**
  * ThriftClientFramedCodec implements a framed thrift transport that
  * supports upgrading in order to provide TraceContexts across
  * requests.
@@ -106,7 +101,7 @@ class ThriftClientChannelBufferEncoder
     }
 }
 
-/** 
+/**
  * ThriftClientTracingFilter implements Trace support for thrift. This
  * is applied *after* the Channel has been upgraded (via
  * negotiation). It serializes the current Trace into a header
@@ -126,7 +121,7 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
       OutputBuffer.messageToArray(header) ++ request.message,
       request.oneway)
 
-    val reply = service(tracedRequest) 
+    val reply = service(tracedRequest)
     if (tracedRequest.oneway) {
       // Oneway requests don't contain replies, and so they can't be
       // traced.

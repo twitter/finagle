@@ -50,7 +50,7 @@ object Spritzer2Kestrel {
       }
     }
 
-    // Connect to Kestrel and grab a writeable Channel connected to the Kestrel
+    // Grab a writeable Channel connected to the Kestrel
     // queue named "queue"
     val kestrelClient = Kestrel("localhost:22133")
     val queue: ChannelSource[ChannelBuffer] = {
