@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
+import util.Random
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.finagle.{Service, ServiceFactory}
@@ -12,13 +13,15 @@ import com.twitter.finagle.util.WeakMetadata
 class LeastQueuedStrategy[Req, Rep]
   extends LoadBalancerStrategy[Req, Rep]
 {
+  private[this] val rng = new Random
   private[this] val queueStat = WeakMetadata[AtomicInteger] { new AtomicInteger(0) }
   private[this] val leastQueuedOrdering =
     Ordering.by { case (_, queueSize) => queueSize }: Ordering[(ServiceFactory[Req, Rep], Int)]
 
   private[this] def leastQueued(pools: Seq[ServiceFactory[Req, Rep]]) = {
     val snapshot = pools map { pool => (pool, queueStat(pool).get) }
-    val (selected, _) = snapshot.min(leastQueuedOrdering)
+    val shuffled = rng.shuffle(snapshot)
+    val (selected, _) = shuffled.min(leastQueuedOrdering)
     selected
   }
 
