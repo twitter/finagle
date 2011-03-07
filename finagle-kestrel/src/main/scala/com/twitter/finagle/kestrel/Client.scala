@@ -175,9 +175,10 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
   }
 
   private[this] class ChannelSourceWithService(serviceFuture: Future[Service[Command, Response]]) extends ChannelSource[ChannelBuffer] {
-    serviceFuture handle { e =>
-      e.printStackTrace()
-      this.close()
+    serviceFuture handle {
+      case e =>
+        e.printStackTrace()
+        this.close()
     }
 
     override def close() {

@@ -6,7 +6,7 @@ import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.Future
 
 /**
  * A somewhat advanced example of using Filters with Clients. Below, HTTP 4xx and 5xx
@@ -26,9 +26,9 @@ object HttpClient {
       // success and failure values:
       service(request) flatMap { response =>
         response.getStatus match {
-          case OK        => Return(response)
-          case FORBIDDEN => Throw(new InvalidRequest)
-          case _         => Throw(new Exception(response.getStatus.getReasonPhrase))
+          case OK        => Future.value(response)
+          case FORBIDDEN => Future.exception(new InvalidRequest)
+          case _         => Future.exception(new Exception(response.getStatus.getReasonPhrase))
         }
       }
     }

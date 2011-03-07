@@ -37,29 +37,19 @@ object Stress {
       .build()
 
 
-    val done = new Promise[Unit]
-    val requestsMade = new AtomicInteger(0)
-
-    (0 until concurrency) foreach { i =>
-      def doOne() {
+    val requests = Future.parallel(concurrency) {
+      Future.times(totalRequests / concurrency) {
         client(request) onSuccess { response =>
           responses(response.getStatus).incrementAndGet()
         } onFailure { f =>
           errors.incrementAndGet()
-        } ensure {
-          val was = requestsMade.incrementAndGet()
-          if (was == totalRequests) {
-            done.setValue(())
-          } else if (was < totalRequests) {
-            doOne()
-          }
         }
       }
-      doOne()
     }
+
     val start = Time.now
 
-    done ensure {
+    Future.join(requests) ensure {
       client.release()
 
       val duration = start.untilNow

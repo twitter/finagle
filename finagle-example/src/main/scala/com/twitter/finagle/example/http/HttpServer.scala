@@ -25,7 +25,7 @@ object HttpServer {
     def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
 
       // `handle` asynchronously handles exceptions.
-      service(request) handle { error =>
+      service(request) handle { case error =>
         val statusCode = error match {
           case _: IllegalArgumentException =>
             FORBIDDEN

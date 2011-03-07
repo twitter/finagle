@@ -95,7 +95,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val nettyRepo =
       "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
     val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
-    val util      = "com.twitter"          %  "util"      % "1.6.11"
+    val utilCore  = "com.twitter"          %  "util"      % "1.6.11" relativePath("util")
 
     val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
     val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
@@ -103,7 +103,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with LibDirClasspath
-    with AdhocInlines with CompileFinagleThrift
+    with AdhocInlines with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"    %  "libthrift" % "0.5.0"
@@ -130,7 +130,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines with CompileFinagleThrift
+    with SubversionPublisher with AdhocInlines with CompileThriftFinagle
 
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
@@ -150,7 +150,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with IntegrationSpecs with AdhocInlines
-    with CompileFinagleThrift
+    with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"    %  "libthrift" % "0.5.0"
