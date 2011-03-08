@@ -94,11 +94,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     val nettyRepo =
       "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
-    val netty     = "org.jboss.netty"      %  "netty"     % "3.2.3.Final"
-    val utilCore  = "com.twitter"          %  "util"      % "1.6.11" relativePath("util")
+    val netty           = "org.jboss.netty"         %  "netty"           % "3.2.3.Final"
+    val utilCore        = "com.twitter"             %  "util-core"       % "1.8.0" relativePath("util")
+    val utilCollection  = "com.twitter"             %  "util-collection" % "1.8.0" relativePath("util")
 
-    val mockito   = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
-    val specs     = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test" withSources()
+    val mockito         = "org.mockito"             % "mockito-all"      % "1.8.5" % "test" withSources()
+    val specs           = "org.scala-tools.testing" % "specs_2.8.0"      % "1.6.5" % "test" withSources()
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
