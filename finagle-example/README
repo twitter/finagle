@@ -1,0 +1,12 @@
+# How to run the examples:
+
+From the command line:
+
+% sbt "project finagle-example" run
+
+If the example requires a command line parameter, do this:
+
+% sbt "project finagle-example" "run p1 p2"
+
+If you are running a server and a client, start the server in one terminal, then start the client in another.
+

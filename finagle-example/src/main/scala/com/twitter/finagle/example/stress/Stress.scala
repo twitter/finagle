@@ -37,12 +37,16 @@ object Stress {
       .build()
 
 
+    val completedRequests = new AtomicInteger(0)
+
     val requests = Future.parallel(concurrency) {
       Future.times(totalRequests / concurrency) {
         client(request) onSuccess { response =>
           responses(response.getStatus).incrementAndGet()
-        } onFailure { f =>
+        } handle { case e =>
           errors.incrementAndGet()
+        } ensure {
+          completedRequests.incrementAndGet()
         }
       }
     }
@@ -58,8 +62,9 @@ object Stress {
         println("%20s\t%d".format(status, stat.get))
       }
       println("================")
-      println("%d requests completed in %dms (%2f requests per second)".format(
-        totalRequests, duration.inMilliseconds, totalRequests.toFloat / duration.inSeconds))
+      println("%d requests completed in %dms (%f requests per second)".format(
+        completedRequests.get, duration.inMilliseconds, totalRequests.toFloat / duration.inMillis.toFloat * 1000))
+      println("%d errors".format(errors.get))
     }
   }
 
