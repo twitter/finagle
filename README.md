@@ -152,7 +152,7 @@ Another `Filter` typical of an RPC Service is authentication and authorization. 
     }
 
 
-Finally, all of the `Filters` can be composed with our `Service in the following way:
+Finally, all of the `Filters` can be composed with our `Service` in the following way:
 
     val myService =
       ensureAuthorizedFilter andThen
