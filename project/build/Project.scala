@@ -31,6 +31,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new Ostrich3Project(_), coreProject)
 
   /**
+   * finagle-ostrich4 implements a StatsReceiver for the Ostrich 4.x statistics library
+   */
+  val ostrich4Project = project(
+    "finagle-ostrich4", "finagle-ostrich4",
+    new Ostrich4Project(_), coreProject)
+
+  /**
    * finagle-thrift contains thrift codecs for use with the finagle
    * thrift service codegen. in order to be able to use thrift code
    * generation in finagle-thrift.
@@ -95,8 +102,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val nettyRepo =
       "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
     val netty           = "org.jboss.netty"         %  "netty"           % "3.2.3.Final"
-    val utilCore        = "com.twitter"             %  "util-core"       % "1.8.0" relativePath("util")
-    val utilCollection  = "com.twitter"             %  "util-collection" % "1.8.0" relativePath("util")
+    val utilCore        = "com.twitter"             %  "util-core"       % "1.8.1" relativePath("util")
+    val utilCollection  = "com.twitter"             %  "util-collection" % "1.8.1" relativePath("util")
 
     val mockito         = "org.mockito"             % "mockito-all"      % "1.8.5" % "test" withSources()
     val specs           = "org.scala-tools.testing" % "specs_2.8.0"      % "1.6.5" % "test" withSources()
@@ -144,6 +151,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with SubversionPublisher with AdhocInlines
   {
     val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
+  }
+
+  class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    val ostrich4 = "com.twitter" % "ostrich" % "4.0.1"
   }
 
   class NativeProject(info: ProjectInfo) extends StandardProject(info)
