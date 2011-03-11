@@ -1,7 +1,7 @@
 package com.twitter.finagle.builder
 
 /**
- * Make a com.twitter.admin.Service from a finagle ServerBuilder.
+ * Make a com.twitter.ostrich.admin.Service from a finagle ServerBuilder.
  */
 
 import com.twitter.ostrich.admin
