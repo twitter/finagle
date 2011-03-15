@@ -19,10 +19,10 @@ object ChannelBufferUtils {
         val tokenLength = scratch.bytesBefore(stringToChannelBufferIndexFinder(delimiter))
 
         if (tokenLength < 0) {
-          tokens += scratch
+          tokens += scratch.copy
           scratch = scratch.slice(0, 0)
         } else {
-          tokens += scratch.slice(0, tokenLength)
+          tokens += scratch.slice(0, tokenLength).copy
           scratch = scratch.slice(tokenLength + skipDelimiter, scratch.capacity - tokenLength - skipDelimiter)
         }
       }
