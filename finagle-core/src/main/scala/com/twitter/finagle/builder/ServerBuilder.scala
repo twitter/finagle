@@ -19,7 +19,9 @@ import com.twitter.util.{Time, Duration}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.WriteCompletionTimeoutHandler
+import com.twitter.finagle.channel.{
+  WriteCompletionTimeoutHandler, ChannelStatsHandler,
+  ChannelRequestStatsHandler}
 import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter, NullTraceReceiver}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
@@ -210,8 +212,10 @@ case class ServerBuilder[Req, Rep](
 
     val channels = new HashSet[ChannelHandle]
 
-    // Share this stats receiver to avoid per-connection overhead.
-    val statsFilter = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
+    // We share some filters & handlers for cumulative stats.
+    val statsFilter                = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
+    val channelStatsHandler        = scopedStatsReceiver map { new ChannelStatsHandler(_) }
+    val channelRequestStatsHandler = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
@@ -220,6 +224,10 @@ case class ServerBuilder[Req, Rep](
         _logger foreach { logger =>
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(_name getOrElse "server")(logger.info))
+        }
+
+        channelStatsHandler foreach { handler =>
+          pipeline.addFirst("channelStatsHandler", handler)
         }
 
         // XXX/TODO: add stats for both read & write completion
@@ -254,6 +262,12 @@ case class ServerBuilder[Req, Rep](
         pipeline.addLast(
           "requestSerializing",
           new ChannelSemaphoreHandler(new AsyncSemaphore(1)))
+
+        // Add this after the serialization to get an accurate request
+        // count.
+        channelRequestStatsHandler foreach { handler =>
+          pipeline.addFirst("channelRequestStatsHandler", handler)
+        }
 
         // Add the (shared) queueing handler *after* request
         // serialization as it assumes one outstanding request per
