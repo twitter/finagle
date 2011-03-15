@@ -42,7 +42,7 @@ abstract class AbstractDecoder extends FrameDecoder {
     if (frameLength < 0) {
       needMoreData
     } else {
-      val frame = buffer.slice(buffer.readerIndex, frameLength).copy()
+      val frame = buffer.slice(buffer.readerIndex, frameLength)
       buffer.skipBytes(frameLength + DELIMITER.capacity)
 
       val tokens = frame.split(" ")
