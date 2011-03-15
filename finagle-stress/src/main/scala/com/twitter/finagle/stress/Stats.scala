@@ -2,8 +2,8 @@ package com.twitter.finagle.stress
 
 import java.io.PrintStream
 
-import com.twitter.stats.{Stats => OstrichStats}
-import com.twitter.stats.StatsProvider
+import com.twitter.ostrich.stats.{Stats => OstrichStats}
+import com.twitter.ostrich.stats.StatsProvider
 
 object Stats {
   private[this] def print(message: String) {

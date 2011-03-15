@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.stats.{Stats => OstrichStats}
-import com.twitter.stats.{StatsCollection, StatsProvider}
+import com.twitter.ostrich.stats.{Stats => OstrichStats}
+import com.twitter.ostrich.stats.{StatsCollection, StatsProvider}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
 
