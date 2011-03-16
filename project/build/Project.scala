@@ -80,6 +80,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new StreamProject(_), coreProject, kestrelProject)
 
   /**
+   * finagle-serversets contains a cluster implementation using
+   * twitter-common's Zookeeper-backed serverset implementation.
+   */
+  val serversetsProject = project(
+    "finagle-serversets", "finagle-serversets",
+    new ServersetsProject(_), coreProject)
+
+  /**
    * finagle-stream contains a streaming http codec identical to
    * Twitter's "firehose".
    */
@@ -139,6 +147,19 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with SubversionPublisher with AdhocInlines
   {
     override def compileOrder = CompileOrder.ScalaThenJava
+  }
+
+  class ServersetsProject(info: ProjectInfo) extends StandardProject(info)
+    with SubversionPublisher with AdhocInlines
+  {
+    override def ivyXML =
+      <dependencies>
+        <exclude module="jms"/>
+        <exclude module="jmxtools"/>
+        <exclude module="jmxri"/>
+      </dependencies>
+
+    val commonsZookeeper = "com.twitter.common" % "zookeeper" % "0.0.14"
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)

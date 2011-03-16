@@ -346,3 +346,32 @@ With `Channels`, building a streaming RPC service is straightforward. You will n
     }
 
 Some incomplete API documentation is available: See [scaladoc](http://twitter.github.com/finagle/).
+
+## Serversets 
+
+`finagle-serversets` is an implementation of the Finagle Cluster interface using `com.twitter.com.zookeeper` [ServerSets](http://twitter.github.com/commons/pants.doc/index.html#com.twitter.common.zookeeper.ServerSet).
+
+Here's how to use it:
+
+### Instantiate a ServerSet and a Cluster
+
+    val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+    val cluster = new ZookeeperServerSetCluster(serverSet)
+
+### If you're a Server, join the Cluster:
+
+    val serviceAddress = new InetSocketAddress(...)
+    val server = ServerBuilder()
+      .bindTo(serviceAddress)
+      .build()
+
+    cluster.join(serviceAddress)
+
+### If you're a Client,
+
+    val client = ClientBuilder()
+      .cluster(cluster) // check this out!!
+      .codec(new StringCodec)
+      .build()
+
+That's it!
