@@ -17,6 +17,7 @@ object Stats {
 
   def prettyPrint(stats: StatsProvider) {
     stats.getCounters foreach { case (name, count) =>
+      print("# %-60s %d".format(name, count))
     }
 
     stats.getMetrics foreach { case (name, stat) =>
