@@ -9,6 +9,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   val twitterRepo = "twitter.com" at "http://maven.twttr.com/"
 
+  override def ivyXML =
+    <dependencies>
+      <exclude module="jms"/>
+      <exclude module="jmxtools"/>
+      <exclude module="jmxri"/>
+    </dependencies>
+
   /**
    * finagle-core contains the finagle kernel itself, plus builders,
    * HTTP codecs [HTTP may move to its own project soon]
