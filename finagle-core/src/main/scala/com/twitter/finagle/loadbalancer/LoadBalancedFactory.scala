@@ -29,7 +29,7 @@ class LoadBalancedFactory[Req, Rep](
     if (snapshot.isEmpty)
       return Future.exception(new NoBrokersAvailableException)
 
-    val available = snapshot.toArray filter { _.isAvailable }
+    val available = snapshot filter { _.isAvailable }
 
     // If none are available, we load balance over all of them. This
     // is to remedy situations where the health checking becomes too
