@@ -24,8 +24,7 @@ class LoadBalancedFactory[Req, Rep](
   def make(): Future[Service[Req, Rep]] = {
     // We first create a snapshot since the underlying seq could
     // change.
-    val snapshot = factories.toArray
-
+    val snapshot = factories.toSeq
     if (snapshot.isEmpty)
       return Future.exception(new NoBrokersAvailableException)
 
