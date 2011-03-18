@@ -375,3 +375,14 @@ Here's how to use it:
       .build()
 
 That's it!
+
+# Changes
+
+## 1.2.3 (2011-03-18)
+
+- A faster memcache codec (joint work with Arya from profiling rooster usage)
+- Fix a bug in memcache decoding of big responses (due to Arya)
+- More exported pool & connection statistics
+- Fix a bug in the CachingPool wherein connection accounting broke
+- Speed up leastqueued loadbalancer strategy
+- finagle-serversets is now included in the opensource distribution, instructions at https://github.com/twitter/finagle/blob/master/README.md
