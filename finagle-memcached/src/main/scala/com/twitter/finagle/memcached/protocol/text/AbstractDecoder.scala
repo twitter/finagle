@@ -8,18 +8,18 @@ import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 
 object AbstractDecoder {
-  private val DELIMITER = ChannelBuffers.wrappedBuffer("\r\n".getBytes)
-  private val SKIP_SPACE = 1
-  private val FIND_CRLF = new ChannelBufferIndexFinder() {
+  private val Delimiter = ChannelBuffers.wrappedBuffer("\r\n".getBytes)
+  private val DelimiterLength = Delimiter.capacity
+  private val FindCRLF = new ChannelBufferIndexFinder() {
     def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
-      val enoughBytesForDelimeter = guessedIndex + DELIMITER.readableBytes
+      val enoughBytesForDelimeter = guessedIndex + Delimiter.readableBytes
       if (buffer.writerIndex < enoughBytesForDelimeter) return false
 
       val cr = buffer.getByte(guessedIndex)
       val lf = buffer.getByte(guessedIndex + 1)
       cr == '\r' && lf == '\n'
     }
-}
+  }
 }
 
 abstract class AbstractDecoder extends FrameDecoder {
@@ -38,12 +38,12 @@ abstract class AbstractDecoder extends FrameDecoder {
   }
 
   protected def decodeLine(buffer: ChannelBuffer, needsData: Seq[ChannelBuffer] => Option[Int])(continue: Seq[ChannelBuffer] => Decoding): Decoding = {
-    val frameLength = buffer.bytesBefore(FIND_CRLF)
+    val frameLength = buffer.bytesBefore(FindCRLF)
     if (frameLength < 0) {
       needMoreData
     } else {
       val frame = buffer.slice(buffer.readerIndex, frameLength)
-      buffer.skipBytes(frameLength + DELIMITER.capacity)
+      buffer.skipBytes(frameLength + DelimiterLength)
 
       val tokens = frame.split
       val bytesNeeded = needsData(tokens)
@@ -58,14 +58,14 @@ abstract class AbstractDecoder extends FrameDecoder {
   }
 
   protected def decodeData(bytesNeeded: Int, buffer: ChannelBuffer)(continue: ChannelBuffer => Decoding): Decoding = {
-    if (buffer.readableBytes < (bytesNeeded + DELIMITER.capacity))
+    if (buffer.readableBytes < (bytesNeeded + DelimiterLength))
       needMoreData
     else {
-      val lastTwoBytesInFrame = buffer.slice(bytesNeeded + buffer.readerIndex, DELIMITER.capacity)
-      if (!lastTwoBytesInFrame.equals(DELIMITER)) throw new ClientError("Missing delimiter")
+      val lastTwoBytesInFrame = buffer.slice(bytesNeeded + buffer.readerIndex, DelimiterLength)
+      if (!lastTwoBytesInFrame.equals(Delimiter)) throw new ClientError("Missing delimiter")
 
       val data = buffer.slice(buffer.readerIndex, bytesNeeded)
-      buffer.skipBytes(bytesNeeded + DELIMITER.capacity)
+      buffer.skipBytes(bytesNeeded + DelimiterLength)
 
       start()
       // Copied rather than wrapped to avoid caching data outside the reader/writer mark.

@@ -22,12 +22,17 @@ object ChannelBufferUtils {
     override def toString = buffer.toString(CharsetUtil.UTF_8)
     def size = buffer.writerIndex() - buffer.readerIndex()
 
-    def split = {
+    def split: Seq[ChannelBuffer] =
+      split(FIND_SPACE, 1)
+
+    def split(delimiter: String): Seq[ChannelBuffer] =
+      split(stringToChannelBufferIndexFinder(delimiter), delimiter.size)
+
+    def split(indexFinder: ChannelBufferIndexFinder, delimiterLength: Int): Seq[ChannelBuffer] = {
       val tokens = new ArrayBuffer[ChannelBuffer]
-      val skipDelimiter = 1
       var scratch = buffer
       while (scratch.capacity > 0) {
-        val tokenLength = scratch.bytesBefore(FIND_SPACE)
+        val tokenLength = scratch.bytesBefore(indexFinder)
 
         if (tokenLength < 0) {
           tokens += scratch.copy
@@ -35,12 +40,13 @@ object ChannelBufferUtils {
         } else {
           tokens += scratch.slice(0, tokenLength).copy
           scratch = scratch.slice(
-            tokenLength + skipDelimiter,
-            scratch.capacity - tokenLength - skipDelimiter)
+            tokenLength + delimiterLength,
+            scratch.capacity - tokenLength - delimiterLength)
         }
       }
       tokens
     }
+
   }
 
   implicit def channelBufferToRichChannelBuffer(buffer: ChannelBuffer) =
@@ -54,4 +60,18 @@ object ChannelBufferUtils {
 
   implicit def stringToByteArray(string: String) =
     string.getBytes
+
+	implicit def stringToChannelBufferIndexFinder(string: String): ChannelBufferIndexFinder =
+		new ChannelBufferIndexFinder {
+			def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
+				val array = string.toArray
+				var i: Int = 0
+				while (i < string.size) {
+					if (buffer.getByte(guessedIndex + i) != array(i).toByte)
+						return false
+					i += 1
+				}
+				return true
+      }
+    }
 }
