@@ -113,8 +113,8 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
 {
   protected[this] def translate(name: Seq[String]): Seq[String]
 
-  def counter(name: String*)                   = self.counter(translate(name): _*)
-  def stat(name: String*)                      = self.stat(translate(name): _*)
+  def counter(name: String*) = self.counter(translate(name): _*)
+  def stat(name: String*)    = self.stat(translate(name): _*)
 
   def addGauge(name: String*)(f: => Float) = self.addGauge(translate(name): _*)(f)
 }
