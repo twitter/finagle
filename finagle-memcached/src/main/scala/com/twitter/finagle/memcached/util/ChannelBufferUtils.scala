@@ -54,20 +54,4 @@ object ChannelBufferUtils {
 
   implicit def stringToByteArray(string: String) =
     string.getBytes
-
-  implicit def stringToChannelBufferIndexFinder(string: String): ChannelBufferIndexFinder =
-    new ChannelBufferIndexFinder {
-      def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
-        val array = string.toArray
-
-        var i: Int = 0
-        while (i < string.size) {
-          if (buffer.getByte(guessedIndex + i) != array(i).toByte)
-            return false
-          i += 1
-        }
-
-        return true
-      }
-    }
 }
