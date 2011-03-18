@@ -31,7 +31,7 @@ class CachingPool[Req, Rep](
         deathRow += ((Time.now, underlying))
         if (!isScheduled) {
           isScheduled = true
-          timer.schedule(timeout.fromNow)(collect)
+          timer.schedule(timeout.fromNow) { collect() }
         }
       } else {
         underlying.release()
@@ -47,7 +47,10 @@ class CachingPool[Req, Rep](
       timestamp.until(now) >= timeout
     }
 
-    dequeued foreach { case (_, service) => service.release() }
+    dequeued foreach { case (_, service) =>
+      service.release()
+    }
+
     if (!deathRow.isEmpty) {
       // TODO: what happens if an event is scheduled in the past?
       timer.schedule(deathRow.head._1 + timeout)(collect)
@@ -64,6 +67,8 @@ class CachingPool[Req, Rep](
       val (_, service) = deathRow.dequeue()
       if (service.isAvailable)
         return Future.value(new WrappedService(service))
+      else
+        service.release()
     }
 
     factory.make() map { new WrappedService(_) }
