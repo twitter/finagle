@@ -27,7 +27,8 @@ class WatermarkPool[Req, Rep](
   private[this] var numServices = 0
   private[this] var isOpen      = true
 
-  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters")(waiters.size)
+  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { waiters.size }
+  private[this] val sizeStat = statsReceiver.addGauge("pool_size") { numServices }
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
     extends Service[Req, Rep]
