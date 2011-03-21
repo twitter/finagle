@@ -51,6 +51,7 @@ case class ClientBuilder[Req, Rep](
   _hostConnectionLimit: Option[Int],
   _hostConnectionIdleTime: Option[Duration],
   _hostConnectionMaxIdleTime: Option[Duration],
+  _hostConnectionMaxLifeTime: Option[Duration],
   _sendBufferSize: Option[Int],
   _recvBufferSize: Option[Int],
   _retries: Option[Int],
@@ -71,6 +72,7 @@ case class ClientBuilder[Req, Rep](
     None,               // hostConnectionLimit
     None,               // hostConnectionIdleTime
     None,               // hostConnectionMaxIdleTime
+    None,               // hostConnectionMaxLifeTime
     None,               // sendBufferSize
     None,               // recvBufferSize
     None,               // retries
@@ -92,6 +94,7 @@ case class ClientBuilder[Req, Rep](
     "hostConnectionCoresize"    -> Some(_hostConnectionCoresize),
     "hostConnectionIdleTime"    -> Some(_hostConnectionIdleTime),
     "hostConnectionMaxIdleTime" -> Some(_hostConnectionMaxIdleTime),
+    "hostConnectionMaxLifeTime" -> Some(_hostConnectionMaxLifeTime),
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
     "retries"                   -> _retries,
@@ -244,8 +247,9 @@ case class ClientBuilder[Req, Rep](
 
     future = protocol.codec.prepareClientChannel(service)
     future = future.flatMap { protocol.prepareChannel(_) }
-    _hostConnectionMaxIdleTime.foreach { idleTime =>
-      future = future.map { new ExpiringService(_, idleTime) }
+
+    if (_hostConnectionMaxIdleTime.isDefined || _hostConnectionMaxLifeTime.isDefined) {
+      future = future.map { new ExpiringService(_, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime) }
     }
 
     future
