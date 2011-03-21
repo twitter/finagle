@@ -97,8 +97,12 @@ class ExpiringService[Req, Rep](
         requestCount -= 1
         if (requestCount == 0) {
           require(!idleTimeTask.isDefined)
-          maxIdleTime foreach { time =>
-            idleTimeTask = Some(timer.schedule(time.fromNow) { maybeIdleExpire() })
+          if (expired) {
+            didExpire()
+          } else {
+            maxIdleTime foreach { time =>
+              idleTimeTask = Some(timer.schedule(time.fromNow) { maybeIdleExpire() })
+            }
           }
         }
       }

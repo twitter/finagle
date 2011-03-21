@@ -146,6 +146,32 @@ object ExpiringServiceSpec extends Specification with Mockito {
           there was one(underlying).release()
         }
       }
+      
+      "life timer fires while there are requests" in {
+        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(5.seconds), timer)
+        timer.tasks must haveSize(2)
+        timer.tasks forall(!_.isCancelled) must beTrue
+        
+        "expire after the given life time" in {
+          service(123)
+          timer.tasks must haveSize(1)
+          timer.tasks.head.isCancelled must beFalse
+         
+          timeControl.advance(8.seconds)
+          timer.tick()
+
+          timer.tasks must beEmpty
+          service.isAvailable must beFalse
+          there was no(underlying).release()
+          
+          promise() = Return(321)
+          timer.tasks must beEmpty
+          service.isAvailable must beFalse
+          there was one(underlying).release()
+          
+          service(132)() must throwA[WriteException]
+        }
+      }
     }
   }
 }
