@@ -38,14 +38,12 @@ object ExpiringServiceSpec extends Specification with Mockito {
 
         "cancel the timer when a request is issued" in {
           service(123)
-          timer.tasks must haveSize(1)
-          timer.tasks.head.isCancelled must beTrue
+          timer.tasks must beEmpty
         }
 
         "restart the timer when the request finished" in {
           service(123)
-          timer.tasks must haveSize(1)
-          timer.tasks.head.isCancelled must beTrue
+          timer.tasks must beEmpty
 
           timeControl.advance(10.seconds)
           timer.tick()
@@ -115,8 +113,7 @@ object ExpiringServiceSpec extends Specification with Mockito {
           service.isAvailable must beFalse
           there was one(underlying).release()
 
-          timer.tasks must haveSize(1)
-          timer.tasks.head.isCancelled must beTrue
+          timer.tasks must beEmpty
         }                
       }
       
@@ -127,27 +124,24 @@ object ExpiringServiceSpec extends Specification with Mockito {
         
         "expire after the given life time" in {
           service(123)
-          timer.tasks must haveSize(2)
-          timer.tasks(0).isCancelled must beTrue
-          timer.tasks(1).isCancelled must beFalse
+          timer.tasks must haveSize(1)
+          timer.tasks.head.isCancelled must beFalse
          
           timeControl.advance(8.seconds)
           timer.tick()
 
-          timer.tasks must haveSize(2)
+          timer.tasks must haveSize(1)
+          timer.tasks.head.isCancelled must beFalse
+          
           promise() = Return(321)
-        
-          timer.tasks must haveSize(3)
-          timer.tasks(0).isCancelled must beTrue
-          timer.tasks(1).isCancelled must beFalse
-          timer.tasks(2).isCancelled must beFalse
+          timer.tasks must haveSize(2)
+          timer.tasks forall(!_.isCancelled) must beTrue
 
           there was no(underlying).release()
           timeControl.advance(8.seconds)
           timer.tick()
 
-          timer.tasks must haveSize(1)
-          timer.tasks forall(_.isCancelled) must beTrue
+          timer.tasks must beEmpty
           service.isAvailable must beFalse
           there was one(underlying).release()
         }
