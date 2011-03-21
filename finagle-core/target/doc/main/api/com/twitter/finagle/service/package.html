@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.service</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>service</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">service</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.ExpiringService">
+      <a id="ExpiringService:ExpiringService[Req, Rep]"></a>
+      <h4 class="signature"><a href="ExpiringService.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ExpiringService</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends Service[Req, Rep]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.FailureAccrualFactory">
+      <a id="FailureAccrualFactory:FailureAccrualFactory[Req, Rep]"></a>
+      <h4 class="signature"><a href="FailureAccrualFactory.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">FailureAccrualFactory</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends ServiceFactory[Req, Rep]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A factory that does failure accrual, marking it unavailable when
+deemed unhealthy according to its parameterization.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.NumTriesRetryStrategy">
+      <a id="NumTriesRetryStrategy:NumTriesRetryStrategy"></a>
+      <h4 class="signature"><a href="NumTriesRetryStrategy.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NumTriesRetryStrategy</span>
+        
+        
+        <span class="result"> extends RetryStrategy</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RefcountedService">
+      <a id="RefcountedService:RefcountedService[Req, Rep]"></a>
+      <h4 class="signature"><a href="RefcountedService.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RefcountedService</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends Service[Req, Rep]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.service.RetryStrategy">
+      <a id="RetryStrategy:RetryStrategy"></a>
+      <h4 class="signature"><a href="RetryStrategy.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">RetryStrategy</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RetryingFilter">
+      <a id="RetryingFilter:RetryingFilter[Req, Rep]"></a>
+      <h4 class="signature"><a href="RetryingFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RetryingFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[Req, Rep]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The RetryingFilter attempts to replay a request in certain failure
+conditions.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.SingletonFactory">
+      <a id="SingletonFactory:SingletonFactory[Req, Rep]"></a>
+      <h4 class="signature"><a href="SingletonFactory.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SingletonFactory</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends ServiceFactory[Req, Rep]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.StatsFilter">
+      <a id="StatsFilter:StatsFilter[Req, Rep]"></a>
+      <h4 class="signature"><a href="StatsFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">StatsFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends Filter[Req, Rep, Req, Rep]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.TimeoutFilter">
+      <a id="TimeoutFilter:TimeoutFilter[Req, Rep]"></a>
+      <h4 class="signature"><a href="TimeoutFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TimeoutFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends Filter[Req, Rep, Req, Rep]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A filter to apply a global timeout to the request.</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RetryingService">
+      <a id="RetryingService:RetryingService"></a>
+      <h4 class="signature"><a href="RetryingService$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">RetryingService</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

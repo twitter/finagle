@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.tracing</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>tracing</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">tracing</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.BufferingTranscript">
+      <a id="BufferingTranscript:BufferingTranscript"></a>
+      <h4 class="signature"><a href="BufferingTranscript.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BufferingTranscript</span>
+        
+        
+        <span class="result"> extends Transcript</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Buffers messages to an ArrayBuffer.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.ConsoleTraceReceiver">
+      <a id="ConsoleTraceReceiver:ConsoleTraceReceiver"></a>
+      <h4 class="signature"><a href="ConsoleTraceReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ConsoleTraceReceiver</span>
+        
+        
+        <span class="result"> extends TraceReceiver</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Pretty-print the span together with the transcript on the console.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.NullTraceReceiver">
+      <a id="NullTraceReceiver:NullTraceReceiver"></a>
+      <h4 class="signature"><a href="NullTraceReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NullTraceReceiver</span>
+        
+        
+        <span class="result"> extends TraceReceiver</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Record">
+      <a id="Record:Record"></a>
+      <h4 class="signature"><a href="Record.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Record</span>
+        
+        <span class="params">(<span name="traceID">traceID: TraceID</span>, <span name="timestamp">timestamp: Time</span>, <span name="message">message: String</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Span">
+      <a id="Span:Span"></a>
+      <h4 class="signature"><a href="Span.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Span</span>
+        
+        <span class="params">(<span name="traceID">traceID: TraceID</span>, <span name="startTime">startTime: Time</span>, <span name="endTime">endTime: Time</span>, <span name="transcript">transcript: Transcript</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.TraceID">
+      <a id="TraceID:TraceID"></a>
+      <h4 class="signature"><a href="TraceID.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">TraceID</span>
+        
+        <span class="params">(<span name="span">span: Long</span>, <span name="parentSpan">parentSpan: Option[Long]</span>, <span name="host">host: Int</span>, <span name="vm">vm: String</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.tracing.TraceReceiver">
+      <a id="TraceReceiver:TraceReceiver"></a>
+      <h4 class="signature"><a href="TraceReceiver.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">TraceReceiver</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Trace receivers are called after the completion of every span.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.TracingFilter">
+      <a id="TracingFilter:TracingFilter[Req, Rep]"></a>
+      <h4 class="signature"><a href="TracingFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TracingFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[Req, Rep]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.tracing.Transcript">
+      <a id="Transcript:Transcript"></a>
+      <h4 class="signature"><a href="Transcript.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Transcript</span>
+        
+        
+        <span class="result"> extends Iterable[Record]</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Host">
+      <a id="Host:Host"></a>
+      <h4 class="signature"><a href="Host$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Host</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.NullTranscript">
+      <a id="NullTranscript:NullTranscript"></a>
+      <h4 class="signature"><a href="NullTranscript$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">NullTranscript</span>
+        
+        
+        <span class="result"> extends Transcript</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Sinks all messages
+</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Span">
+      <a id="Span:Span"></a>
+      <h4 class="signature"><a href="Span$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Span</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Trace">
+      <a id="Trace:Trace"></a>
+      <h4 class="signature"><a href="Trace$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Trace</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Transcript">
+      <a id="Transcript:Transcript"></a>
+      <h4 class="signature"><a href="Transcript$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Transcript</span>
+        
+        
+        <span class="result"> extends Transcript</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The default transcript uses the current transcript as of per trace
+context.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.VMID">
+      <a id="VMID:VMID"></a>
+      <h4 class="signature"><a href="VMID$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">VMID</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

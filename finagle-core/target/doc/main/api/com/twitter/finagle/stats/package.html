@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.stats</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>stats</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">stats</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.Counter">
+      <a id="Counter:Counter"></a>
+      <h4 class="signature"><a href="Counter.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Counter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A writeable Counter.</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.CumulativeGauge">
+      <a id="CumulativeGauge:CumulativeGauge"></a>
+      <h4 class="signature"><a href="CumulativeGauge.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">CumulativeGauge</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.Gauge">
+      <a id="Gauge:Gauge"></a>
+      <h4 class="signature"><a href="Gauge.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Gauge</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">
+      <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
+      <h4 class="signature"><a href="JavaLoggerStatsReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">JavaLoggerStatsReceiver</span>
+        
+        
+        <span class="result"> extends StatsReceiverWithCumulativeGauges</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.NameTranslatingStatsReceiver">
+      <a id="NameTranslatingStatsReceiver:NameTranslatingStatsReceiver"></a>
+      <h4 class="signature"><a href="NameTranslatingStatsReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NameTranslatingStatsReceiver</span>
+        
+        
+        <span class="result"> extends StatsReceiver with Proxy</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.RollupStatsReceiver">
+      <a id="RollupStatsReceiver:RollupStatsReceiver"></a>
+      <h4 class="signature"><a href="RollupStatsReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RollupStatsReceiver</span>
+        
+        
+        <span class="result"> extends StatsReceiver with Proxy</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.Stat">
+      <a id="Stat:Stat"></a>
+      <h4 class="signature"><a href="Stat.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Stat</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">TODO: doc
+</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.StatsReceiver">
+      <a id="StatsReceiver:StatsReceiver"></a>
+      <h4 class="signature"><a href="StatsReceiver.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">StatsReceiver</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">
+      <a id="StatsReceiverWithCumulativeGauges:StatsReceiverWithCumulativeGauges"></a>
+      <h4 class="signature"><a href="StatsReceiverWithCumulativeGauges.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">StatsReceiverWithCumulativeGauges</span>
+        
+        
+        <span class="result"> extends StatsReceiver</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">
+      <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
+      <h4 class="signature"><a href="JavaLoggerStatsReceiver$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">JavaLoggerStatsReceiver</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.NullStatsReceiver">
+      <a id="NullStatsReceiver:NullStatsReceiver"></a>
+      <h4 class="signature"><a href="NullStatsReceiver$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">NullStatsReceiver</span>
+        
+        
+        <span class="result"> extends StatsReceiver</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.StatsReceiver">
+      <a id="StatsReceiver:StatsReceiver"></a>
+      <h4 class="signature"><a href="StatsReceiver$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">StatsReceiver</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
