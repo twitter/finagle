@@ -45,7 +45,7 @@ case class SpanId(
 }
 
 object SpanId {
-  private[this] val rng     = new Random
+  private[this] val rng = new Random
   def apply(): SpanId = SpanId(rng.nextLong(), None, None, Host(), VMID())
 }
 

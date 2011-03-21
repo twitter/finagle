@@ -56,6 +56,8 @@ class RichTranscript(self: Transcript) {
       spanId._rootId  foreach { span.setTrace_id(_) }
       spanId.parentId foreach { span.setParent_id(_) }
 
+      // XXX: Binary ones, filter out.
+
       val annotations = records map { record =>
         val value = record.annotation match {
           case Annotation.ClientSend()   => thrift.Constants.CLIENT_SEND
