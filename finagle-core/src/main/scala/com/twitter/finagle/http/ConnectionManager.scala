@@ -8,7 +8,7 @@ package com.twitter.finagle.http
 
 import org.jboss.netty.handler.codec.http._
 
-private[finagle] class ConnectionManager {
+class ConnectionManager {
   private[this] var isKeepAlive = false
   private[this] var isIdle = true
 

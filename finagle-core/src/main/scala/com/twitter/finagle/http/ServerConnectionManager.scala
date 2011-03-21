@@ -18,7 +18,7 @@ import com.twitter.finagle.util.Conversions._
 // the Connection header, that request becomes the last one for the
 // connection."
 
-private[finagle] class ServerConnectionManager extends SimpleChannelHandler {
+class ServerConnectionManager extends SimpleChannelHandler {
   private[this] val manager = new ConnectionManager
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

@@ -23,7 +23,7 @@ private[finagle] object OneHundredContinueResponse
     HttpVersion.HTTP_1_1,
     HttpResponseStatus.CONTINUE)
 
-private[finagle] class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
+class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
   extends LeftFoldUpstreamHandler
 {
   {
@@ -37,7 +37,7 @@ private[finagle] class HttpFailure(ctx: ChannelHandlerContext, status: HttpRespo
     this  // (swallow the message)
 }
 
-private[finagle] case class AggregateHttpChunks(
+case class AggregateHttpChunks(
     whenDone: LeftFoldUpstreamHandler,
     request: HttpRequest,
     bufferBudget: Int,
@@ -79,7 +79,7 @@ private[finagle] case class AggregateHttpChunks(
     }
 }
 
-private[finagle] class AggregateHttpRequest(maxBufferSize: Int)
+class AggregateHttpRequest(maxBufferSize: Int)
   extends LeftFoldUpstreamHandler
 {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) =
