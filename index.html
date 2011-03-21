@@ -40,7 +40,41 @@
  
     <div class="description"> 
       <p>Finagle is a library for building asynchronous RPC servers and clients in Java, Scala, or any JVM language.</p>
-      <p>Built atop Netty, Finagle provides a rich set of tools that are protocol independent. Please read the brief overview of Finagle <a href="https://github.com/twitter/finagle/blob/master/README.md">in the README</a>. Also read <a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example">the examples</a>.</p>
+    </div>
+    <div>
+      <h2>Overview</h2>
+      <p>Built atop Netty, Finagle provides a rich set of tools that are protocol independent.</p>
+      <p>Finagle is flexible enough to support a variety of RPC styles, including request-response, streaming, and pipelining (e.g., HTTP pipelining and Redis pipelining). It also makes it easy to work with stateful RPC styles (e.g., those requiring authentication and those that support transactions).</p>
+
+<h3>Client Features</h3>
+
+<ul>
+<li> Connection Pooling
+<li> Load Balancing
+<li> Failure Detection
+<li> Failover/Retry
+<li> Distributed Tracing (a la <a href="http://research.google.com/pubs/pub36356.html">Dapper</a>)
+<li> Service Discovery (e.g., via <a href="http://hadoop.apache.org/zookeeper/">Zookeeper</a>)
+<li> Rich Statistics
+<li> Native OpenSSL bindings
+</ul>
+
+<h3>Server Features</h3>
+<ul>
+<li> Backpressure (to defend against abusive clients)
+<li> Service Registration (e.g., via Zookeeper)
+<li> Native OpenSSL bindings
+</ul>
+
+<h3>Supported Protocols</h3>
+<ul>
+<li> HTTP
+<li> Thrift
+<li> Memcached/Kestrel
+<li> More to come!
+</ul>
+
+
     </div> 
  
     <h2>Authors</h2> 
@@ -60,13 +94,14 @@
 <li>Nick Kallen (nick@twitter.com)
 </ul>
     <h2>Getting Started</h2>
-    <p>The best way to get started is by reading the examples.</p>
+    <p>Please read the brief overview of Finagle <a href="https://github.com/twitter/finagle/blob/master/README.md">in the README</a>.</p>
+    <p>But probably the best way to get started is by reading the examples.</p>
     <ul>
       <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/echo">Echo</a> - A simple echo client and server using a newline-delimited protocol. Illustrates the basics of asynchronous control-flow.
       <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/http">Http</a> - An advanced HTTP client and server that illustrates the use of Filters to compositionally organize your code. Filters are used here to isolate authentication and error handling concerns.
       <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/memcachedproxy">Memcached Proxy</a> - A simple proxy supporting the Memcached protocol.
       <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stream">Stream</a> - An illustration of Channels, the abstraction for Streaming protocols.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel">Spritzer 2 Kestrel</a> - An illustration of Channels, the abstraction for Streaming protocols. Here the <a href="http://dev.twitter.com/pages/streaming_api">Twitter Firehose</a> is "piped" into a Kestrel message queue, illustrating some of the compositionality of Channels.
+      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel">Spritzer 2 Kestrel</a> - An illustration of Channels, the abstraction for Streaming protocols. Here the <a href="http://dev.twitter.com/pages/streaming_api">Twitter Firehose</a> is "piped" into a <a href="https://github.com/robey/kestrel">Kestrel</a> message queue, illustrating some of the compositionality of Channels.
       <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stress">Stress</a> - A high-throughput HTTP client for driving stressful traffic to an HTTP server. Illustrates more advanced asynchronous control-flow.
       <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/thrift">Thrift</a> - A simple client and server for a Thrift protocol.</a>
     </ul>
