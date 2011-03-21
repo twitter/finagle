@@ -12,7 +12,7 @@ import org.jboss.netty.channel.{
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.LatentChannelFuture
 
-class ChannelClosingHandler
+private[finagle] class ChannelClosingHandler
   extends SimpleChannelUpstreamHandler
   with LifeCycleAwareChannelHandler
 {

@@ -1,8 +1,6 @@
 package com.twitter.finagle.http
 
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
-
 import com.twitter.finagle.util.Conversions._
 
 /**
@@ -20,7 +18,7 @@ import com.twitter.finagle.util.Conversions._
 // the Connection header, that request becomes the last one for the
 // connection."
 
-class ServerConnectionManager extends SimpleChannelHandler {
+private[finagle] class ServerConnectionManager extends SimpleChannelHandler {
   private[this] val manager = new ConnectionManager
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

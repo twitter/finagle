@@ -6,36 +6,30 @@ package com.twitter.finagle.http
 
 import scala.collection.JavaConversions._
 
-import java.nio.ByteOrder
-
 import org.jboss.netty.channel.{
-  MessageEvent, Channels,
-  SimpleChannelUpstreamHandler,
-  ChannelHandlerContext}
+  MessageEvent, Channels, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.http.{
   HttpHeaders, HttpRequest,
-  HttpResponse, HttpChunk,
-  DefaultHttpResponse,
+  HttpChunk, DefaultHttpResponse,
   HttpVersion, HttpResponseStatus}
 import org.jboss.netty.buffer.{
-  ChannelBuffer, ChannelBuffers,
-  CompositeChannelBuffer}
+  ChannelBuffer, ChannelBuffers}
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.LeftFoldUpstreamHandler
 
-object OneHundredContinueResponse
+private[finagle] object OneHundredContinueResponse
   extends DefaultHttpResponse(
     HttpVersion.HTTP_1_1,
     HttpResponseStatus.CONTINUE)
 
-class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
+private[finagle] class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
   extends LeftFoldUpstreamHandler
 {
   {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
     val future = Channels.future(ctx.getChannel)
-    Channels.write(ctx, future, response, ctx.getChannel.getRemoteAddress)    
+    Channels.write(ctx, future, response, ctx.getChannel.getRemoteAddress)
     future onSuccessOrFailure { ctx.getChannel.close() }
   }
 
@@ -43,7 +37,7 @@ class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
     this  // (swallow the message)
 }
 
-case class AggregateHttpChunks(
+private[finagle] case class AggregateHttpChunks(
     whenDone: LeftFoldUpstreamHandler,
     request: HttpRequest,
     bufferBudget: Int,
@@ -85,7 +79,7 @@ case class AggregateHttpChunks(
     }
 }
 
-class AggregateHttpRequest(maxBufferSize: Int)
+private[finagle] class AggregateHttpRequest(maxBufferSize: Int)
   extends LeftFoldUpstreamHandler
 {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) =

@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Service
 import com.twitter.finagle.util.AsyncLatch
 
-class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
+private[finagle] class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
   extends Service[Req, Rep]
 {
   protected[this] val replyLatch = new AsyncLatch

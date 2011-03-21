@@ -1,15 +1,15 @@
 package com.twitter.finagle.stats
 
+import ref.WeakReference
+import collection.mutable.WeakHashMap
+
+
 /**
  * CumulativeGauge provides a gauge that is composed of the (addition)
  * of several underlying gauges. It follows the weak reference
  * semantics of Gauges as outlined in StatsReceiver.
  */
-
-import ref.WeakReference
-import collection.mutable.WeakHashMap
-
-trait CumulativeGauge {
+private[finagle] trait CumulativeGauge {
   private[this] case class UnderlyingGauge(f: () => Float) extends Gauge {
     def remove() { removeGauge(this) }
   }
@@ -51,7 +51,7 @@ trait CumulativeGauge {
   def deregister(): Unit
 }
 
-trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
+private[finagle] trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
   private[this] val gaugeMap = new WeakHashMap[Seq[String], CumulativeGauge]
 
   /**
@@ -60,7 +60,7 @@ trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
    */
   protected[this] def registerGauge(name: Seq[String], f: => Float)
   protected[this] def deregisterGauge(name: Seq[String])
-  
+
   def addGauge(name: String*)(f: => Float) = synchronized {
     val cumulativeGauge = gaugeMap getOrElseUpdate(name, {
       new CumulativeGauge {

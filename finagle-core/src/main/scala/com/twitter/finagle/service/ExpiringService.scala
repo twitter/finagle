@@ -1,22 +1,22 @@
 package com.twitter.finagle.service
 
-/**
- * A service wrapper that expires the underlying service after a
- * certain amount of idle time. By default, expiring calls
- * ``.release()'' on the underlying channel, but this action is
- * customizable.
- */
-
 import com.twitter.util
 import com.twitter.util.{Duration, Future}
 
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.{Service, WriteException, ChannelClosedException}
 
+
+/**
+ * A service wrapper that expires the underlying service after a
+ * certain amount of idle time. By default, expiring calls
+ * ``.release()'' on the underlying channel, but this action is
+ * customizable.
+ */
 class ExpiringService[Req, Rep](
-    underlying: Service[Req, Rep],
-    maxIdleTime: Duration,
-    timer: util.Timer = Timer.default)
+  underlying: Service[Req, Rep],
+  maxIdleTime: Duration,
+  timer: util.Timer = Timer.default)
   extends Service[Req, Rep]
 {
   private[this] var requestCount = 0

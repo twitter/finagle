@@ -5,7 +5,7 @@ import com.twitter.util.{Duration, Future, Promise, Try}
 
 import Conversions._
 
-class RichFuture[A](self: Future[A]) {
+private[finagle] class RichFuture[A](self: Future[A]) {
   def timeout(timer: util.Timer, howlong: Duration)(orElse: => Try[A]) = {
     val promise = new Promise[A]
     val timeout = timer.schedule(howlong.fromNow) { promise.updateIfEmpty(orElse) }

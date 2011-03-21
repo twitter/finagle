@@ -53,26 +53,26 @@ object ServerBuilder {
           Executors.newCachedThreadPool())))
 }
 
-// TODO: common superclass between client & server builders for common
-// concerns.
-
+/**
+ * A handy Builder for constructing Servers (i.e., binding Services to a port).
+ */
 case class ServerBuilder[Req, Rep](
-  _codec: Option[Codec[Req, Rep]],
-  _statsReceiver: Option[StatsReceiver],
-  _name: Option[String],
-  _sendBufferSize: Option[Int],
-  _recvBufferSize: Option[Int],
-  _bindTo: Option[SocketAddress],
-  _logger: Option[Logger],
-  _tls: Option[(String, String)],
-  _startTls: Boolean,
-  _channelFactory: Option[ReferenceCountedChannelFactory],
-  _maxConcurrentRequests: Option[Int],
-  _hostConnectionMaxIdleTime: Option[Duration],
-  _requestTimeout: Option[Duration],
-  _readTimeout: Option[Duration],
-  _writeCompletionTimeout: Option[Duration],
-  _traceReceiver: TraceReceiver)
+  private val _codec: Option[Codec[Req, Rep]],
+  private val _statsReceiver: Option[StatsReceiver],
+  private val _name: Option[String],
+  private val _sendBufferSize: Option[Int],
+  private val _recvBufferSize: Option[Int],
+  private val _bindTo: Option[SocketAddress],
+  private val _logger: Option[Logger],
+  private val _tls: Option[(String, String)],
+  private val _startTls: Boolean,
+  private val _channelFactory: Option[ReferenceCountedChannelFactory],
+  private val _maxConcurrentRequests: Option[Int],
+  private val _hostConnectionMaxIdleTime: Option[Duration],
+  private val _requestTimeout: Option[Duration],
+  private val _readTimeout: Option[Duration],
+  private val _writeCompletionTimeout: Option[Duration],
+  private val _traceReceiver: TraceReceiver)
 {
   import ServerBuilder._
 
@@ -168,8 +168,16 @@ case class ServerBuilder[Req, Rep](
   private[this] def scopedStatsReceiver =
     _statsReceiver map { sr => _name map (sr.scope(_)) getOrElse sr }
 
+  /**
+   * Construct the Server, given the provided Service.
+   */
   def build(service: Service[Req, Rep]): Server = build(() => service)
 
+  /**
+   * Construct the Server, given the provided ServiceFactory. This
+   * is useful if the protocol is stateful (e.g., requires authentication
+   * or supports transactions).
+   */
   def build(serviceFactory: () => Service[Req, Rep]): Server = {
     val codec = _codec.getOrElse {
       throw new IncompleteSpecification("No codec was specified")

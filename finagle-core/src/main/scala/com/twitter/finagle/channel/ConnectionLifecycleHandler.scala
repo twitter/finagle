@@ -2,13 +2,13 @@ package com.twitter.finagle.channel
 
 import org.jboss.netty.channel.{
   SimpleChannelHandler, LifeCycleAwareChannelHandler,
-  Channel, ChannelHandlerContext, ChannelStateEvent}
+  ChannelHandlerContext, ChannelStateEvent}
 
 import com.twitter.util.{Future, Promise, Return}
 
 import com.twitter.finagle.util.Conversions._
 
-trait ConnectionLifecycleHandler
+private[finagle] trait ConnectionLifecycleHandler
   extends SimpleChannelHandler
   with LifeCycleAwareChannelHandler
 {

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 import com.twitter.util.{Time, Duration, TimerTask, ReferenceCountedTimer}
 import org.jboss.netty.util.{HashedWheelTimer, Timeout}
 
-object Timer {
+private[finagle] object Timer {
   // This timer should only be used inside the context of finagle,
   // since it requires explicit reference count management. (Via the
   // builder routines.)
