@@ -5,7 +5,7 @@ import collection.JavaConversions._
 import com.twitter.util.Time
 import com.twitter.finagle.tracing.{SpanId, Record, Annotation, FrozenTranscript, Transcript}
 
-object ThriftTracing {
+private[thrift] object ThriftTracing {
   /**
    * v1: transaction id frame
    * v2: full tracing header
@@ -14,7 +14,7 @@ object ThriftTracing {
   val CanTraceMethodName = "__can__finagle__trace__v3__"
 }
 
-class RichSpan(self: thrift.Span) {
+private[thrift] class RichSpan(self: thrift.Span) {
   /**
    * Translate this thrift-encoded span into a transcript.
    */
@@ -43,7 +43,7 @@ class RichSpan(self: thrift.Span) {
   }
 }
 
-class RichTranscript(self: Transcript) {
+private[thrift] class RichTranscript(self: Transcript) {
   /**
    * Translate this transcript to a set of spans. A transcript may
    * contain annotations from several spans.
@@ -79,7 +79,7 @@ class RichTranscript(self: Transcript) {
   }
 }
 
-object conversions {
+private[thrift] object conversions {
   implicit def spanToRichSpan(span: thrift.Span) =
     new RichSpan(span)
   implicit def transcriptToRichTranscript(transcript: Transcript) =

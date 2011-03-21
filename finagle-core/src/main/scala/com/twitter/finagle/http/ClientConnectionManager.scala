@@ -1,11 +1,8 @@
 package com.twitter.finagle.http
 
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 
-import com.twitter.finagle.util.Conversions._
-
-class ClientConnectionManager extends SimpleChannelHandler {
+private[finagle] class ClientConnectionManager extends SimpleChannelHandler {
   private[this] val manager = new ConnectionManager
 
   // Note that for HTTP requests without a content length, the

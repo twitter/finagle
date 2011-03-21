@@ -1,20 +1,5 @@
 package com.twitter.finagle.tracing
 
-/** 
- * Support for tracing in finagle. The main abstraction herein is the
- * "Trace", which is a local that contains various metadata required
- * for distributed tracing as well as references to the local traced
- * events. We mimic Dapper in many ways, including borrowing its
- * nomenclature.
- *
- * “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,
- * Benjamin H. Sigelman, Luiz André Barroso, Mike Burrows, Pat
- * Stephenson, Manoj Plakal, Donald Beaver, Saul Jaspan, Chandan
- * Shanbhag, 2010.
- *
- *   http://research.google.com/pubs/archive/36356.pdf
- */ 
-
 import scala.util.Random
 
 import com.twitter.util.{Local, Time, TimeFormat, RichU64Long}

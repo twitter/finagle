@@ -80,7 +80,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
  * bytes on the wire. It satisfies the request immediately if it is a
  * "oneway" request.
  */
-class ThriftClientChannelBufferEncoder
+private[thrift] class ThriftClientChannelBufferEncoder
   extends SimpleChannelDownstreamHandler
 {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
@@ -111,7 +111,8 @@ class ThriftClientChannelBufferEncoder
  * on the wire. It is applied after all framing.
  */
 
-class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
+private[thrift] class ThriftClientTracingFilter
+  extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
   def apply(
     request: ThriftClientRequest,

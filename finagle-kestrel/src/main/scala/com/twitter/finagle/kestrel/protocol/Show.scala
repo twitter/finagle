@@ -1,7 +1,7 @@
 package com.twitter.finagle.kestrel.protocol
 
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.{ChannelBuffers}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
@@ -9,7 +9,7 @@ import com.twitter.finagle.kestrel.protocol._
 import org.jboss.netty.util.CharsetUtil
 
 
-class ResponseToEncoding extends OneToOneEncoder {
+private[kestrel] class ResponseToEncoding extends OneToOneEncoder {
   private[this] val ZERO          = "0"
   private[this] val VALUE         = "VALUE"
 
@@ -32,7 +32,7 @@ class ResponseToEncoding extends OneToOneEncoder {
   }
 }
 
-class CommandToEncoding extends OneToOneEncoder {
+private[kestrel] class CommandToEncoding extends OneToOneEncoder {
   private[this] val ZERO          = "0"
 
   private[this] val OPEN          = "open"

@@ -4,7 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.protocol.text.TokensWithData
 import com.twitter.finagle.memcached.protocol.text.client.AbstractDecodingToResponse
 
-class DecodingToResponse extends AbstractDecodingToResponse[Response] {
+private[kestrel] class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._
 
   def parseResponse(tokens: Seq[ChannelBuffer]) = {

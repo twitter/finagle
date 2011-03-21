@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.replay.{ReplayingDecoder, VoidEnum}
 /**
  * Translate ThriftCalls to their wire representation
  */
-class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
+private[thrift] class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
   protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
   protected var seqid = 0
 
@@ -34,7 +34,7 @@ class ThriftClientEncoder extends SimpleChannelDownstreamHandler {
 /**
  * Translate wire representation to ThriftReply
  */
-class ThriftClientDecoder extends ReplayingDecoder[VoidEnum]
+private[thrift] class ThriftClientDecoder extends ReplayingDecoder[VoidEnum]
 {
   protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
 

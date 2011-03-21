@@ -1,10 +1,6 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.atomic.AtomicInteger
-
 import com.twitter.util.{Time, Duration, Throw, Return}
-import com.twitter.conversions.time._
-
 import com.twitter.finagle.{Service, ServiceFactory}
 
 /**

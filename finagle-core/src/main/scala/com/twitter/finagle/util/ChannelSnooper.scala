@@ -2,7 +2,6 @@ package com.twitter.finagle.util
 
 import java.io.PrintStream
 import java.nio.charset.Charset
-import java.util.logging.Logger
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
