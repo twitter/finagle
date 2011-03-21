@@ -22,21 +22,8 @@ class ExpiringService[Req, Rep](
 {
   private[this] var requestCount = 0
   private[this] var expired = false
-  private[this] var idleTimeTask: Option[com.twitter.util.TimerTask] =
-    maxIdleTime match {
-      case Some(idleTime: Duration) =>
-        Some(timer.schedule(idleTime.fromNow) { maybeIdleExpire() })
-      case _ =>
-        None
-    }
-    
-  private[this] var lifeTimeTask: Option[com.twitter.util.TimerTask] =
-    maxLifeTime match {
-      case Some(lifeTime: Duration) =>
-        Some(timer.schedule(lifeTime.fromNow) { maybeLifeTimeExpire() })
-      case _ =>
-        None
-    }
+  private[this] var idleTimeTask = maxIdleTime map { idleTime => timer.schedule(idleTime.fromNow) { maybeIdleExpire() } }
+  private[this] var lifeTimeTask = maxLifeTime map { lifeTime => timer.schedule(lifeTime.fromNow) { maybeLifeTimeExpire() } }
 
   private[this] def maybeExpire() = {
     val justExpired = synchronized {
