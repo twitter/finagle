@@ -1,6 +1,7 @@
 package com.twitter.finagle.thrift
 
 import collection.JavaConversions._
+
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
@@ -14,7 +15,9 @@ import com.twitter.util.Time
 import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.tracing.{TraceID, Trace, Record}
+import com.twitter.finagle.tracing.{SpanId, Trace, Record, Annotation}
+
+import conversions._
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -47,7 +50,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
     val buffer = new OutputBuffer()
     buffer().writeMessageBegin(
       new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
-    val options = new TraceOptions
+    val options = new thrift.TraceOptions
     options.write(buffer())
     buffer().writeMessageEnd()
 
@@ -110,11 +113,13 @@ class ThriftClientChannelBufferEncoder
 
 class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
-  def apply(request: ThriftClientRequest,
-            service: Service[ThriftClientRequest, Array[Byte]]) =
-  {
-    val header = new TracedRequest
-    header.setParent_span_id(Trace().traceID.span)
+  def apply(
+    request: ThriftClientRequest,
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ) = {
+    val header = new thrift.TracedRequestHeader
+    header.setTrace_id(Trace().spanId.rootId)
+    header.setParent_span_id(Trace().spanId.id)
     header.setDebug(Trace().transcript.isRecording)
 
     val tracedRequest = new ThriftClientRequest(
@@ -128,27 +133,16 @@ class ThriftClientTracingFilter extends SimpleFilter[ThriftClientRequest, Array[
       reply
     } else {
       reply map { response =>
-        val responseHeader = new TracedResponse
+        // Peel off the TracedResponseHeader and add any piggy-backed
+        // spans to our own transcript (if we're in debug mode).
+        val responseHeader = new thrift.TracedResponseHeader
         val rest = InputBuffer.peelMessage(response, responseHeader)
 
-        if (header.debug && responseHeader.isSetTranscript) {
-          val records = responseHeader.transcript map { thriftRecord =>
-            val traceID = TraceID(
-              thriftRecord.getSpan_id(),
-              {
-                val spanID = thriftRecord.getParent_span_id()
-                if (spanID == 0) None else Some(spanID)
-              },
-              thriftRecord.getHost(),
-              thriftRecord.getVm_id())
-
-            Record(
-              traceID,
-              Time.fromMilliseconds(thriftRecord.getTimestamp_ms()),
-              thriftRecord.getMessage())
+        if (header.debug && (responseHeader.spans ne null)) {
+          responseHeader.spans foreach { span =>
+            val transcript = span.toTranscript
+            Trace().transcript.merge(transcript)
           }
-
-          Trace().transcript.merge(records.iterator)
         }
 
         rest

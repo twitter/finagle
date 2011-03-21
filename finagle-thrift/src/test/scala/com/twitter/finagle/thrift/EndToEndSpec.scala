@@ -14,6 +14,7 @@ import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.test.{B, SomeStruct, AnException, F}
+import com.twitter.finagle.tracing
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
@@ -29,7 +30,7 @@ object EndToEndSpec extends Specification {
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
         Trace.record("hey it's me!")
-        new SomeStruct(123, Trace().traceID.parentSpan.get.toString)
+        new SomeStruct(123, Trace().spanId.parentId.get.toString)
       }
       def someway() = Future.void
     }
@@ -54,13 +55,13 @@ object EndToEndSpec extends Specification {
       future() must be_==(300)
 
       import com.twitter.finagle.tracing.BufferingTranscript
-      Trace().transcript = new BufferingTranscript(Trace().traceID)
+      Trace().transcript = new BufferingTranscript(Trace().spanId)
 
       client.complex_return("a string")().arg_two must be_==(
-        "%s".format(Trace().traceID.span.toString))
+        "%s".format(Trace().spanId.id.toString))
 
       Trace().transcript must haveSize(1)
-      Trace().transcript.head.message must be_==("hey it's me!")
+      Trace().transcript.head.annotation must be_==(tracing.Annotation.Message("hey it's me!"))
 
       client.add(1, 2)() must throwA[AnException]
       client.add_one(1, 2)()  // don't block!

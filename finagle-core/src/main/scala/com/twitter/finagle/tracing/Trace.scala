@@ -19,15 +19,21 @@ import scala.util.Random
 
 import com.twitter.util.{Local, Time, TimeFormat, RichU64Long}
 
-case class TraceID(
-  var span: Long,
-  var parentSpan: Option[Long],
-  val host: Int,
-  val vm: String)
+/**
+ * Identifies a span, including parent & root span information.
+ */
+case class SpanId(
+  id:        Long,
+  parentId:  Option[Long],
+  _rootId:   Option[Long],
+  host:      Int,
+  vm:        String)
 {
+  val rootId = _rootId getOrElse (parentId getOrElse id)
+
   override def toString = {
-    val spanHex = new RichU64Long(span).toU64HexString
-    val parentSpanHex = parentSpan map (new RichU64Long(_).toU64HexString)
+    val spanHex = new RichU64Long(id).toU64HexString
+    val parentSpanHex = parentId map (new RichU64Long(_).toU64HexString)
 
     val spanString = parentSpanHex match {
       case Some(parentSpanHex) => "%s<:%s".format(spanHex, parentSpanHex)
@@ -38,20 +44,20 @@ case class TraceID(
   }
 }
 
-object Span {
-  private[Span] val timeFormat =
-    new TimeFormat("yyyyMMdd.HHmmss")
+object SpanId {
+  private[this] val rng     = new Random
+  def apply(): SpanId = SpanId(rng.nextLong(), None, None, Host(), VMID())
 }
 
 case class Span(
-  var traceID: TraceID,
+  var spanId: SpanId,
   var startTime: Time,
   var endTime: Time,
-  var transcript: Transcript)
-{
+  var transcript: Transcript
+) {
   override def toString = {
     "%s: %s+%d".format(
-      traceID,
+      spanId,
       Span.timeFormat.format(startTime),
       (endTime - startTime).inMilliseconds)
   }
@@ -59,20 +65,30 @@ case class Span(
   def print() {
     transcript foreach { record =>
       val atMs = (record.timestamp - startTime).inMilliseconds
-      record.message.split("\n") foreach { line =>
-        println("%s %03dms: %s".format(traceID, atMs, line))
+      val lines: Seq[String] = record.annotation match {
+        case Annotation.Message(text) => text.split("\n")
+        case annotation => Seq(annotation.toString)
+      }
+
+      lines foreach { line =>
+        println("%s %03dms: %s".format(spanId, atMs, line))
       }
     }
   }
 }
 
+object Span {
+  private[Span] val timeFormat =
+    new TimeFormat("yyyyMMdd.HHmmss")
+
+  def apply(): Span = Span(SpanId())
+  def apply(id: SpanId): Span = Span(id, Time.now, Time.epoch, NullTranscript)  
+}
+
 object Trace {
-  private[this] val rng     = new Random
   private[this] val current = new Local[Span]
 
   private[this] def newSpan() = {
-    val traceID = TraceID(rng.nextLong(), None, Host(), VMID())
-    Span(traceID, Time.now, Time.epoch, NullTranscript)
   }
 
   def update(ctx: Span) {
@@ -81,7 +97,7 @@ object Trace {
 
   def apply(): Span = {
     if (!current().isDefined)
-      current() = newSpan()
+      current() = Span()
 
     current().get
   }
@@ -90,13 +106,12 @@ object Trace {
     current.clear()
   }
 
-  def startSpan() {
-    this() = newSpan()
+  def startSpan(spanId: SpanId) {
+    this() = Span(spanId)
   }
 
-  def startSpan(parentSpanID: Long) {
-    startSpan()
-    this().traceID.parentSpan = Some(parentSpanID)
+  def startSpan() {
+    startSpan(SpanId())
   }
 
   def endSpan(): Span = {
@@ -108,14 +123,14 @@ object Trace {
 
   def debug(isOn: Boolean) {
     if (isOn && !Trace().transcript.isRecording)
-      Trace().transcript = new BufferingTranscript(Trace().traceID)
+      Trace().transcript = new BufferingTranscript(Trace().spanId)
     else if (!isOn && Trace().transcript.isRecording)
       Trace().transcript = NullTranscript
   }
 
-  def spanID = Trace().traceID.span
+  def spanID = Trace().spanId.id
 
   def record(message: => String) {
-    Trace().transcript.record(message)
+    Trace().transcript.record(Annotation.Message(message))
   }
 }

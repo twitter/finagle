@@ -9,21 +9,33 @@ package com.twitter.finagle.tracing
 import collection.mutable.ArrayBuffer
 import com.twitter.util.Time
 
+sealed trait Annotation
+object Annotation {
+  case class ClientSend() extends Annotation
+  case class ClientRecv() extends Annotation
+  case class ServerSend() extends Annotation
+  case class ServerRecv() extends Annotation
+
+  case class Message(content: String) extends Annotation
+}
+
 case class Record(
-  traceID: TraceID,
-  timestamp: Time,   // (nanosecond granularity)
-  message: String)    // an arbitrary string message
+  spanId: SpanId,
+  timestamp: Time,  // (nanosecond granularity)
+  annotation: Annotation)
 {
-  override def toString = "[%s] @ %s: %s".format(traceID, timestamp, message)
+  override def toString = "[%s] @ %s: %s".format(spanId, timestamp, annotation)
 }
 
 trait Transcript extends Iterable[Record] {
   // TODO: support log levels?
 
-  def record(message: => String)
-  def isRecording = true
-  def merge(other: Iterator[Record])
+  def record(annotation: => Annotation)
+  def recordAll(other: Iterator[Record])
 
+  def merge(other: Transcript) = recordAll(other.iterator)
+
+  def isRecording = true
   def print() { foreach { println(_) } }
 }
 
@@ -32,39 +44,34 @@ trait Transcript extends Iterable[Record] {
  * context.
  */
 object Transcript extends Transcript {
-  def record(message: => String) { Trace().transcript.record(message) }
+  def record(annotation: => Annotation) { Trace().transcript.record(annotation) }
+  def recordAll(other: Iterator[Record]) = Trace().transcript.recordAll(other)
   def iterator = Trace().transcript.iterator
   override def isRecording = Trace().transcript.isRecording
-  def merge(other: Iterator[Record]) = Trace().transcript.merge(other)
 }
 
 /**
  * Sinks all messages
  */
 object NullTranscript extends Transcript {
-  def record(message: => String) {}
+  def record(annotation: => Annotation) {}
+  def recordAll(other: Iterator[Record]) {}
   def iterator = Iterator.empty
   override def isRecording = false
-  def merge(other: Iterator[Record]) {}
 }
 
 /**
  * Buffers messages to an ArrayBuffer.
  */
-class BufferingTranscript(traceID: TraceID) extends Transcript {
+class BufferingTranscript(spanId: SpanId) extends Transcript {
   private[this] val buffer = new ArrayBuffer[Record]
 
-  def record(message: => String) = synchronized {
-    buffer += Record(traceID, Time.now, message)
+  def record(annotation: => Annotation) = synchronized {
+    // TODO: insertion sort?
+    buffer += Record(spanId, Time.now, annotation)
   }
 
-  def iterator = buffer.iterator
-
-  def clear() = synchronized {
-    buffer.clear()
-  }
-
-  def merge(other: Iterator[Record]) = synchronized {
+  def recordAll(other: Iterator[Record]) = synchronized {
     // TODO: resolve time drift by causality
     var combined = buffer ++ other
     combined = combined sortWith { (a, b) => a.timestamp < b.timestamp }
@@ -73,4 +80,17 @@ class BufferingTranscript(traceID: TraceID) extends Transcript {
     buffer.clear()
     buffer.appendAll(combined)
   }
+
+  def iterator = buffer.iterator
+
+  def clear() = synchronized {
+    buffer.clear()
+  }
+}
+
+class FrozenTranscript(underlying: Iterable[Record]) extends Transcript {
+  def record(annotation: => Annotation) {}
+  def recordAll(other: Iterator[Record]) {}
+  def iterator = underlying.iterator
+  override def isRecording = false
 }
