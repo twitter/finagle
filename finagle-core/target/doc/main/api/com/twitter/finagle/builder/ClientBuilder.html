@@ -30,7 +30,7 @@
         <span class="result"> extends <span class="extype" name="scala.Product">Product</span></span>
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="comment cmt"><p>A word about the default values:</p><p>  o connectionTimeout: optimized for within a datanceter
+      <div class="fullcomment" id="comment"><div class="comment cmt"><p>A handy way to construct an RPC Client.</p><p><i>Note</i>: A word about the default values:</p><p>  o connectionTimeout: optimized for within a datanceter
   o by default, no request timeout
 </p></div><div class="block">
             go to: <a href="ClientBuilder$.html">companion</a>
@@ -246,222 +246,6 @@
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_channelFactory">
-      <a id="_channelFactory:Option[ReferenceCountedChannelFactory]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_channelFactory</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="ReferenceCountedChannelFactory.html" class="extype" name="com.twitter.finagle.builder.ReferenceCountedChannelFactory">ReferenceCountedChannelFactory</a>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_cluster">
-      <a id="_cluster:Option[Cluster]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_cluster</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_connectionTimeout">
-      <a id="_connectionTimeout:Duration"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_connectionTimeout</span>
-        
-        
-        <span class="result">: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_hostConnectionCoresize">
-      <a id="_hostConnectionCoresize:Option[Int]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_hostConnectionCoresize</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_hostConnectionIdleTime">
-      <a id="_hostConnectionIdleTime:Option[Duration]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_hostConnectionIdleTime</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_hostConnectionLimit">
-      <a id="_hostConnectionLimit:Option[Int]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_hostConnectionLimit</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_hostConnectionMaxIdleTime">
-      <a id="_hostConnectionMaxIdleTime:Option[Duration]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_hostConnectionMaxIdleTime</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_loadStatistics">
-      <a id="_loadStatistics:(Int, Duration)"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_loadStatistics</span>
-        
-        
-        <span class="result">: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="com.twitter.util.Duration">Duration</span>)</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_logger">
-      <a id="_logger:Option[Logger]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_logger</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.util.logging.Logger">Logger</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_name">
-      <a id="_name:Option[String]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_name</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_protocol">
-      <a id="_protocol:Option[Protocol[Req, Rep]]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_protocol</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="../Protocol.html" class="extype" name="com.twitter.finagle.Protocol">Protocol</a>[Req, Rep]]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_recvBufferSize">
-      <a id="_recvBufferSize:Option[Int]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_recvBufferSize</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_requestTimeout">
-      <a id="_requestTimeout:Duration"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_requestTimeout</span>
-        
-        
-        <span class="result">: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_retries">
-      <a id="_retries:Option[Int]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_retries</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_sendBufferSize">
-      <a id="_sendBufferSize:Option[Int]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_sendBufferSize</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_startTls">
-      <a id="_startTls:Boolean"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_startTls</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_statsReceiver">
-      <a id="_statsReceiver:Option[StatsReceiver]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_statsReceiver</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#_tls">
-      <a id="_tls:Option[SSLContext]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">_tls</span>
-        
-        
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span>]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" data-isabs="false" name="scala.Any#asInstanceOf">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -499,6 +283,14 @@ part of compilation it is not possible to check whether the contents of the list
       </span>
       </h4>
       
+            <p class="shortcomment cmt">Construct a Service.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Construct a Service.
+</p></div>
+            
+            
+            
+          </div>
+          
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#buildFactory">
       <a id="buildFactory():ServiceFactory[Req, Rep]"></a>
       <h4 class="signature">
@@ -511,6 +303,15 @@ part of compilation it is not possible to check whether the contents of the list
       </span>
       </h4>
       
+            <p class="shortcomment cmt">Construct a ServiceFactory.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Construct a ServiceFactory. This is useful for stateful protocols (e.g.,
+those that support transactions or authentication).
+</p></div>
+            
+            
+            
+          </div>
+          
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#canEqual">
       <a id="canEqual(Any):Boolean"></a>
       <h4 class="signature">

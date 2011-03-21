@@ -64,56 +64,6 @@
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ChannelBufferToTransport">
-      <a id="ChannelBufferToTransport:ChannelBufferToTransport"></a>
-      <h4 class="signature"><a href="ChannelBufferToTransport.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ChannelBufferToTransport</span>
-        
-        
-        <span class="result"> extends TTransport</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Adapts a single Netty ChannelBuffer to a Thrift TTransport
-</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.DuplexChannelBufferTransport">
-      <a id="DuplexChannelBufferTransport:DuplexChannelBufferTransport"></a>
-      <h4 class="signature"><a href="DuplexChannelBufferTransport.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">DuplexChannelBufferTransport</span>
-        
-        
-        <span class="result"> extends TTransport</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Adapts input and output Netty ChannelBuffers to a Thrift TTransport
-</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.InputBuffer">
-      <a id="InputBuffer:InputBuffer"></a>
-      <h4 class="signature"><a href="InputBuffer.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">InputBuffer</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.OutputBuffer">
-      <a id="OutputBuffer:OutputBuffer"></a>
-      <h4 class="signature"><a href="OutputBuffer.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">OutputBuffer</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.Thrift">
       <a id="Thrift:Thrift"></a>
       <h4 class="signature"><a href="Thrift.html">
@@ -151,57 +101,6 @@ channel.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftChannelBufferDecoder">
-      <a id="ThriftChannelBufferDecoder:ThriftChannelBufferDecoder"></a>
-      <h4 class="signature"><a href="ThriftChannelBufferDecoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftChannelBufferDecoder</span>
-        
-        
-        <span class="result"> extends OneToOneDecoder</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientChannelBufferEncoder">
-      <a id="ThriftClientChannelBufferEncoder:ThriftClientChannelBufferEncoder"></a>
-      <h4 class="signature"><a href="ThriftClientChannelBufferEncoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftClientChannelBufferEncoder</span>
-        
-        
-        <span class="result"> extends SimpleChannelDownstreamHandler</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">ThriftClientChannelBufferEncoder translates ThriftClientRequests to
-bytes on the wire.</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientDecoder">
-      <a id="ThriftClientDecoder:ThriftClientDecoder"></a>
-      <h4 class="signature"><a href="ThriftClientDecoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftClientDecoder</span>
-        
-        
-        <span class="result"> extends ReplayingDecoder[VoidEnum]</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Translate wire representation to ThriftReply
-</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientEncoder">
-      <a id="ThriftClientEncoder:ThriftClientEncoder"></a>
-      <h4 class="signature"><a href="ThriftClientEncoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftClientEncoder</span>
-        
-        
-        <span class="result"> extends SimpleChannelDownstreamHandler</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Translate ThriftCalls to their wire representation
-</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientFramedCodec">
       <a id="ThriftClientFramedCodec:ThriftClientFramedCodec"></a>
       <h4 class="signature"><a href="ThriftClientFramedCodec.html">
@@ -226,18 +125,6 @@ bytes on the wire.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientTracingFilter">
-      <a id="ThriftClientTracingFilter:ThriftClientTracingFilter"></a>
-      <h4 class="signature"><a href="ThriftClientTracingFilter.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftClientTracingFilter</span>
-        
-        
-        <span class="result"> extends SimpleFilter[ThriftClientRequest, Array[Byte]]</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">ThriftClientTracingFilter implements Trace support for thrift.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftFrameCodec">
       <a id="ThriftFrameCodec:ThriftFrameCodec"></a>
       <h4 class="signature"><a href="ThriftFrameCodec.html">
@@ -247,18 +134,6 @@ bytes on the wire.</p>
         
         
         <span class="result"> extends SimpleChannelHandler</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftProcessorHandler">
-      <a id="ThriftProcessorHandler:ThriftProcessorHandler"></a>
-      <h4 class="signature"><a href="ThriftProcessorHandler.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftProcessorHandler</span>
-        
-        
-        <span class="result"> extends SimpleChannelUpstreamHandler</span>
       </span>
       </a></h4>
       
@@ -274,43 +149,6 @@ bytes on the wire.</p>
       </span>
       </a></h4>
       <p class="comment cmt">Encapsulates the result of a call to a Thrift service.</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerChannelBufferEncoder">
-      <a id="ThriftServerChannelBufferEncoder:ThriftServerChannelBufferEncoder"></a>
-      <h4 class="signature"><a href="ThriftServerChannelBufferEncoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftServerChannelBufferEncoder</span>
-        
-        
-        <span class="result"> extends SimpleChannelDownstreamHandler</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerDecoder">
-      <a id="ThriftServerDecoder:ThriftServerDecoder"></a>
-      <h4 class="signature"><a href="ThriftServerDecoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftServerDecoder</span>
-        
-        
-        <span class="result"> extends ReplayingDecoder[VoidEnum]</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Translate wire representation to ThriftCalls
-</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerEncoder">
-      <a id="ThriftServerEncoder:ThriftServerEncoder"></a>
-      <h4 class="signature"><a href="ThriftServerEncoder.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftServerEncoder</span>
-        
-        
-        <span class="result"> extends SimpleChannelDownstreamHandler</span>
-      </span>
-      </a></h4>
-      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">
       <a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
       <h4 class="signature"><a href="ThriftServerFramedCodec.html">
@@ -320,18 +158,6 @@ bytes on the wire.</p>
         
         
         <span class="result"> extends Codec[Array[Byte], Array[Byte]]</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerTracingFilter">
-      <a id="ThriftServerTracingFilter:ThriftServerTracingFilter"></a>
-      <h4 class="signature"><a href="ThriftServerTracingFilter.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ThriftServerTracingFilter</span>
-        
-        
-        <span class="result"> extends SimpleFilter[Array[Byte], Array[Byte]]</span>
       </span>
       </a></h4>
       
@@ -400,30 +226,6 @@ bytes on the wire.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.InputBuffer">
-      <a id="InputBuffer:InputBuffer"></a>
-      <h4 class="signature"><a href="InputBuffer$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">InputBuffer</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.OutputBuffer">
-      <a id="OutputBuffer:OutputBuffer"></a>
-      <h4 class="signature"><a href="OutputBuffer$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">OutputBuffer</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientFramedCodec">
       <a id="ThriftClientFramedCodec:ThriftClientFramedCodec"></a>
       <h4 class="signature"><a href="ThriftClientFramedCodec$.html">
@@ -444,18 +246,6 @@ requests.</p>
       <span class="kind">object</span>
       <span class="symbol">
         <span class="name">ThriftServerFramedCodec</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftTracing">
-      <a id="ThriftTracing:ThriftTracing"></a>
-      <h4 class="signature"><a href="ThriftTracing$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">ThriftTracing</span>
         
         
         <span class="result"> extends AnyRef</span>

@@ -30,11 +30,18 @@
         <span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep]</span>
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="block">
+      <div class="fullcomment" id="comment"><div class="comment cmt"><p>A service wrapper that expires the underlying service after a
+certain amount of idle time. By default, expiring calls<code></code>.release()<i> on the underlying channel, but this action is
+customizable.
+</i></p></div><div class="block">
             go to: <a href="ExpiringService$.html">companion</a>
           </div><div class="block">
             linear super types: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep], (Req) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[Rep], AnyRef, <span class="extype" name="scala.Any">Any</span>
-          </div></div>
+          </div>
+            
+            
+            
+          </div>
 
       <div id="template">
 
