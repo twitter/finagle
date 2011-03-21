@@ -169,6 +169,9 @@ case class ClientBuilder[Req, Rep](
   def hostConnectionMaxIdleTime(timeout: Duration) =
     copy(_hostConnectionMaxIdleTime = Some(timeout))
 
+  def hostConnectionMaxLifeTime(timeout: Duration) =
+    copy(_hostConnectionMaxLifeTime = Some(timeout))
+
   def retries(value: Int) =
     copy(_retries = Some(value))
 
