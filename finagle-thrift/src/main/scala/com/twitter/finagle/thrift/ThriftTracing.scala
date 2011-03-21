@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-object ThriftTracing {
+private[thrift] object ThriftTracing {
   /**
    * v1: transaction id frame
    * v2: full tracing header

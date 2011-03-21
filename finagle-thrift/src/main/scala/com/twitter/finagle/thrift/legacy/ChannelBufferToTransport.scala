@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.ChannelBuffer
  * @param  underlying  a netty channelBuffer
  *
  */
-class ChannelBufferToTransport(underlying: ChannelBuffer) extends TTransport {
+private[thrift] class ChannelBufferToTransport(underlying: ChannelBuffer) extends TTransport {
   override def isOpen = true
   override def open() {}
   override def close() {}
@@ -32,7 +32,7 @@ class ChannelBufferToTransport(underlying: ChannelBuffer) extends TTransport {
  * @param  output  a netty channelBuffer to write to
  *
  */
-class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer) extends TTransport {
+private[thrift] class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer) extends TTransport {
   override def isOpen = true
   override def open() {}
   override def close() {}

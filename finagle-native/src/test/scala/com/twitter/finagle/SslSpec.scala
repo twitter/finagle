@@ -2,7 +2,6 @@ import org.specs.Specification
 
 import java.io.File
 import java.security.Provider
-import java.util.logging.Logger
 
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._

@@ -10,7 +10,7 @@ import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.Trace
 
-class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
+private[thrift] class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
       // An empty array indicates a oneway reply.
@@ -27,7 +27,7 @@ object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodec
 }
 
-class ThriftServerTracingFilter
+private[thrift] class ThriftServerTracingFilter
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
   // Concurrency is not an issue here since we have an instance per
