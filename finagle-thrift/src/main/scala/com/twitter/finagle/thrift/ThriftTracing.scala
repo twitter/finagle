@@ -51,7 +51,7 @@ class RichTranscript(self: Transcript) {
   def toThriftSpans: Seq[thrift.Span] = {
     (self groupBy { _.spanId } toSeq) map { case (spanId, records) =>
       val span = new thrift.Span
-      span.setId(span.id)
+      span.setId(spanId.id)
       span.setServer_host(spanId.host)
       spanId._rootId  foreach { span.setTrace_id(_) }
       spanId.parentId foreach { span.setParent_id(_) }

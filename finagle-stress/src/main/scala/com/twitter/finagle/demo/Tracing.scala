@@ -28,7 +28,7 @@ object Tracing1Service extends Tracing1.ServiceIface {
   } 
 
   def computeSomething(): Future[String] = {
-    println("T1 with trace ID", Trace().traceID)
+    println("T1 with trace ID", Trace().spanId)
     Trace.record("hey i'm issuing a call")
 
     t2Client.computeSomethingElse() map { somethingElse =>
@@ -54,7 +54,7 @@ object Tracing2Service extends Tracing2.ServiceIface {
   }
 
   def computeSomethingElse(): Future[String] = {
-    println("T2 with trace ID", Trace().traceID)
+    println("T2 with trace ID", Trace().spanId)
     Trace.record("hey i'm issuing a call")
 
     for {
@@ -79,7 +79,7 @@ object Tracing3Service extends Tracing3.ServiceIface {
   }
 
   def oneMoreThingToCompute(): Future[String] = {
-    println("T3 with trace ID", Trace().traceID)
+    println("T3 with trace ID", Trace().spanId)
 
     val number = count.incrementAndGet()
     Trace.record(
@@ -99,7 +99,7 @@ object Client {
       transport, new TBinaryProtocol.Factory())
 
     // Turn (debug) tracing on.
-    Trace().transcript = new BufferingTranscript(Trace().traceID)
+    Trace().transcript = new BufferingTranscript(Trace().spanId)
 
     Trace.record("about to start issuing the root request..")
     val result = client.computeSomething()()

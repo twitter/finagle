@@ -59,7 +59,3 @@ struct TracedResponseHeader {
  * upgrade. (Intentionally left blank: for future use).
  */
 struct TraceOptions {}
-
-
-
-# BBB
