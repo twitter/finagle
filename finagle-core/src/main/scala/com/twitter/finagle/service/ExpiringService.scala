@@ -25,7 +25,7 @@ class ExpiringService[Req, Rep](
   private[this] var idleTimeTask = maxIdleTime map { idleTime => timer.schedule(idleTime.fromNow) { maybeIdleExpire() } }
   private[this] var lifeTimeTask = maxLifeTime map { lifeTime => timer.schedule(lifeTime.fromNow) { maybeLifeTimeExpire() } }
 
-  private[this] def maybeExpire() = {
+  private[this] def maybeExpire(force_expire: Boolean) = {
     val justExpired = synchronized {
       // We check requestCount == 0 here to avoid the race between
       // cancellation & running of the timer.
@@ -33,6 +33,7 @@ class ExpiringService[Req, Rep](
         expired = true
         true
       } else {
+        if (force_expire) expired = true
         false
       }
     }
@@ -42,15 +43,11 @@ class ExpiringService[Req, Rep](
   }
 
   private[this] def maybeIdleExpire() {
-    if (maybeExpire()) cancelLifeTimer()
+    if (maybeExpire(false)) cancelLifeTimer()
   }
 
   private[this] def maybeLifeTimeExpire() {
-    if (maybeExpire()) {
-      cancelIdleTimer()
-    } else {
-      expired = true  
-    }
+    if (maybeExpire(true)) cancelIdleTimer()
   }
 
   // May be overriden to provide your own expiration action.
