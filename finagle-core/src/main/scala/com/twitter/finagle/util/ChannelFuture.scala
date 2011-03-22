@@ -7,22 +7,22 @@ import org.jboss.netty.channel._
 /**
  * A ChannelFuture that doesn't need to have a channel on creation.
  */
-class LatentChannelFuture extends DefaultChannelFuture(null, false) {
+private[finagle] class LatentChannelFuture extends DefaultChannelFuture(null, false) {
   @volatile private var channel: Channel = _
 
   def setChannel(c: Channel) { channel = c }
   override def getChannel() = channel
 }
 
-sealed abstract class State
-case object Cancelled extends State
-case class Ok(channel: Channel) extends State
-case class Error(cause: Throwable) extends State
+private[finagle] sealed abstract class State
+private[finagle] case object Cancelled extends State
+private[finagle] case class Ok(channel: Channel) extends State
+private[finagle] case class Error(cause: Throwable) extends State
 
-class CancelledException extends Exception
+private[finagle] class CancelledException extends Exception
 
 // TODO: decide what to do about cancellation here.
-class RichChannelFuture(val self: ChannelFuture) {
+private[finagle] class RichChannelFuture(val self: ChannelFuture) {
   def apply(f: State => Unit) {
     self.addListener(new ChannelFutureListener {
       def operationComplete(future: ChannelFuture) {

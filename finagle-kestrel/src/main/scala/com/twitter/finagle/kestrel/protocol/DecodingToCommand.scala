@@ -7,7 +7,7 @@ import scala.Function.tupled
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.server.AbstractDecodingToCommand
 
-class DecodingToCommand extends AbstractDecodingToCommand[Command] {
+private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Command] {
   private[this] val GET         = copiedBuffer("get"        .getBytes)
   private[this] val SET         = copiedBuffer("set"        .getBytes)
   private[this] val DELETE      = copiedBuffer("delete"     .getBytes)

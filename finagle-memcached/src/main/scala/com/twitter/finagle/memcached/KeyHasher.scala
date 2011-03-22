@@ -4,7 +4,6 @@ import scala.collection.mutable
 import _root_.java.nio.{ByteBuffer, ByteOrder}
 import _root_.java.security.MessageDigest
 
-
 /**
  * Hashes a memcache key into a 32-bit or 64-bit number (depending on the algorithm).
  * This is a purely optional trait, meant to allow NodeLocator implementations to share
@@ -13,7 +12,6 @@ import _root_.java.security.MessageDigest
 trait KeyHasher {
   def hashKey(key: Array[Byte]): Long
 }
-
 
 /**
  * Commonly used key hashing algorithms.

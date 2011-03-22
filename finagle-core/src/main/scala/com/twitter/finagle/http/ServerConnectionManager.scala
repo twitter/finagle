@@ -1,8 +1,6 @@
 package com.twitter.finagle.http
 
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
-
 import com.twitter.finagle.util.Conversions._
 
 /**
