@@ -8,14 +8,12 @@ import com.twitter.util.Time
 
 object TrascriptSpec extends Specification {
   "BufferingTranscript" should {
-    val traceID = SpanId(1L, Some(2L), None, 0, "myVM")
-
     "record traceID, current time, and message" in {
       Time.withCurrentTimeFrozen { timeControl =>
-        val t = new BufferingTranscript(traceID)
+        val t = new BufferingTranscript
         t.record(Annotation.Message("hey there"))
 
-        val expectedRecord = Record(traceID, Time.now, Annotation.Message("hey there"))
+        val expectedRecord = Record(Time.now, Annotation.Message("hey there"))
 
         t.size must be_==(1)
         t.head must be_==(expectedRecord)
@@ -24,8 +22,8 @@ object TrascriptSpec extends Specification {
 
     "recordAll" in {
       Time.withCurrentTimeFrozen { timeControl =>
-        val t0 = new BufferingTranscript(traceID)
-        val t1 = new BufferingTranscript(traceID)
+        val t0 = new BufferingTranscript
+        val t1 = new BufferingTranscript
 
         t0.record(Annotation.Message("1"))
         timeControl.advance(1.second)

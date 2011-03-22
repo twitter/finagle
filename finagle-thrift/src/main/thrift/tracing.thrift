@@ -4,9 +4,6 @@
 
 namespace java com.twitter.finagle.thrift.thrift
 
-// VM key for finagle span identifiers.
-const string VM_KEY = "vm"
-
 /**
  * The following is from BigBrotherBird:
  *   http://j.mp/fZZnyD
@@ -30,7 +27,7 @@ struct Span {
   5: optional i32 client_host,              // ipv4
   6: optional i32 server_host,              // ipv4
   7: optional list<Annotation> annotations, // list of all annotations/events that occured
-  8: optional map<string, binary> binary_annotations // any binary annotations
+  8: optional map<string, binary> binary_annotations, // any binary annotations
 }
 
 /**
@@ -43,9 +40,10 @@ struct Span {
  * a flag indicating whether the request is to be debugged.
  */
 struct TracedRequestHeader {
-  1: i64   trace_id;
-  2: i64   parent_span_id;
-  3: bool  debug;
+  1: i64  trace_id;
+  2: i64  span_id;
+  3: i64  parent_span_id;
+  4: bool debug;
 }
 
 /**

@@ -10,7 +10,7 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{BufferingTranscript, Trace, SpanId}
+import com.twitter.finagle.tracing.{BufferingTranscript, Trace, Annotation}
 
 import conversions._
 
@@ -49,27 +49,28 @@ private[thrift] class ThriftServerTracingFilter
       val header = new thrift.TracedRequestHeader
       val request_ = InputBuffer.peelMessage(request, header)
 
-      val spanId = SpanId().copy(
-        _rootId = Some(header.getTrace_id),
-        parentId = Some(header.getParent_span_id))
+      Trace.startSpan(
+        Some(header.getSpan_id),
+        Some(header.getParent_span_id),
+        Some(header.getTrace_id))
 
-      Trace.startSpan(spanId)
       if (header.debug)
         Trace.debug(true)  // (don't turn off when !header.debug)
 
+      Trace.record(Annotation.ServerRecv())
+
       service(request_) map { response =>
+        Trace.record(Annotation.ServerSend())
+
         // Wrap some trace data.
         val responseHeader = new thrift.TracedResponseHeader
 
         if (header.debug) {
           // Piggy-back span data if we're in debug mode.
-          Trace().transcript.toThriftSpans foreach { responseHeader.addToSpans(_) }
+          Trace().toThriftSpans foreach { responseHeader.addToSpans(_) }
         }
 
-        val responseHeaderBytes =
-          OutputBuffer.messageToArray(responseHeader)
-
-        responseHeaderBytes ++ response
+        OutputBuffer.messageToArray(responseHeader) ++ response
       }
     } else {
       val buffer = new InputBuffer(request)

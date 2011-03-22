@@ -15,7 +15,7 @@ import com.twitter.util.Time
 import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.tracing.{SpanId, Trace, Record, Annotation}
+import com.twitter.finagle.tracing.{Trace, Record, Annotation}
 
 import conversions._
 
@@ -118,14 +118,19 @@ private[thrift] class ThriftClientTracingFilter
     request: ThriftClientRequest,
     service: Service[ThriftClientRequest, Array[Byte]]
   ) = {
+    // Create a new span identifier for this request.
+    val span = Trace.addChild()
     val header = new thrift.TracedRequestHeader
-    header.setTrace_id(Trace().spanId.rootId)
-    header.setParent_span_id(Trace().spanId.id)
+    header.setSpan_id(span.id)
+    header.setTrace_id(span.rootId)
+    span.parentId foreach { header.setParent_span_id(_) }
     header.setDebug(Trace().transcript.isRecording)
 
     val tracedRequest = new ThriftClientRequest(
       OutputBuffer.messageToArray(header) ++ request.message,
       request.oneway)
+
+    span.transcript.record(Annotation.ClientSend())
 
     val reply = service(tracedRequest)
     if (tracedRequest.oneway) {
@@ -134,16 +139,27 @@ private[thrift] class ThriftClientTracingFilter
       reply
     } else {
       reply map { response =>
+        span.transcript.record(Annotation.ClientRecv())
+
         // Peel off the TracedResponseHeader and add any piggy-backed
         // spans to our own transcript (if we're in debug mode).
         val responseHeader = new thrift.TracedResponseHeader
         val rest = InputBuffer.peelMessage(response, responseHeader)
 
         if (header.debug && (responseHeader.spans ne null)) {
-          responseHeader.spans foreach { span =>
-            val transcript = span.toTranscript
-            Trace().transcript.merge(transcript)
-          }
+          val spans = responseHeader.spans map { _.toFinagleSpan }
+
+          // println("before")
+          // Trace().print()
+          // println("merge")
+          // spans foreach { span =>
+          //   println("SPAN", span.idString)
+          //   span.print()
+          // }
+
+          Trace.merge(spans)
+          // println("after")
+          // Trace().print()
         }
 
         rest

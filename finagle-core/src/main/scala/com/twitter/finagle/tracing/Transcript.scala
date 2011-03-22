@@ -18,12 +18,8 @@ object Annotation {
   case class Message(content: String) extends Annotation
 }
 
-case class Record(
-  spanId: SpanId,
-  timestamp: Time,  // (nanosecond granularity)
-  annotation: Annotation)
-{
-  override def toString = "[%s] @ %s: %s".format(spanId, timestamp, annotation)
+case class Record(timestamp: Time, annotation: Annotation) {
+  override def toString = "%s: %s".format(timestamp, annotation)
 }
 
 trait Transcript extends Iterable[Record] {
@@ -32,21 +28,11 @@ trait Transcript extends Iterable[Record] {
   def record(annotation: => Annotation)
   def recordAll(other: Iterator[Record])
 
+  // XXX remove.
   def merge(other: Transcript) = recordAll(other.iterator)
 
   def isRecording = true
   def print() { foreach { println(_) } }
-}
-
-/**
- * The default transcript uses the current transcript as of per trace
- * context.
- */
-object Transcript extends Transcript {
-  def record(annotation: => Annotation) { Trace().transcript.record(annotation) }
-  def recordAll(other: Iterator[Record]) = Trace().transcript.recordAll(other)
-  def iterator = Trace().transcript.iterator
-  override def isRecording = Trace().transcript.isRecording
 }
 
 /**
@@ -62,12 +48,12 @@ object NullTranscript extends Transcript {
 /**
  * Buffers messages to an ArrayBuffer.
  */
-class BufferingTranscript(spanId: SpanId) extends Transcript {
+class BufferingTranscript extends Transcript {
   private[this] val buffer = new ArrayBuffer[Record]
 
   def record(annotation: => Annotation) = synchronized {
     // TODO: insertion sort?
-    buffer += Record(spanId, Time.now, annotation)
+    buffer += Record(Time.now, annotation)
   }
 
   def recordAll(other: Iterator[Record]) = synchronized {
