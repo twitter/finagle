@@ -64,7 +64,7 @@ case class ServerBuilder[Req, Rep](
   _recvBufferSize: Option[Int],
   _bindTo: Option[SocketAddress],
   _logger: Option[Logger],
-  _tls: Option[(String, String)],
+  _tls: Option[SSLContext],
   _startTls: Boolean,
   _channelFactory: Option[ReferenceCountedChannelFactory],
   _maxConcurrentRequests: Option[Int],
@@ -142,7 +142,7 @@ case class ServerBuilder[Req, Rep](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   def tls(certificatePath: String, keyPath: String) =
-    copy(_tls = Some((certificatePath, keyPath)))
+    copy(_tls = Some(Ssl.server(certificatePath, keyPath)))
 
   def startTls(value: Boolean) =
     copy(_startTls = true)
@@ -250,8 +250,8 @@ case class ServerBuilder[Req, Rep](
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
-        _tls foreach { case (certificatePath, keyPath) =>
-          val sslEngine = Ssl.server(certificatePath, keyPath).createSSLEngine()
+        _tls foreach { ctx: SSLContext =>
+          val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(false)
           sslEngine.setEnableSessionCreation(true)
 
