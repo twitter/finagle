@@ -58,6 +58,8 @@ case class Http(
           "httpDechunker",
           new HttpChunkAggregator(_maxRequestSize.inBytes.toInt))
 
+        pipeline.addLast("annotateCipher", new AnnotateCipher)
+
         pipeline.addLast(
           "connectionLifecycleManager",
           new ServerConnectionManager)

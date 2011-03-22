@@ -6,7 +6,7 @@ import scala.collection.JavaConversions._
 import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import java.util.logging.Logger
 import java.net.SocketAddress
-import javax.net.ssl.SSLContext
+import javax.net.ssl.{SSLContext, SSLEngine}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
@@ -64,7 +64,7 @@ case class ServerBuilder[Req, Rep](
   private val _recvBufferSize: Option[Int],
   private val _bindTo: Option[SocketAddress],
   private val _logger: Option[Logger],
-  private val _tls: Option[SslContext,
+  private val _tls: Option[SSLContext],
   private val _startTls: Boolean,
   private val _channelFactory: Option[ReferenceCountedChannelFactory],
   private val _maxConcurrentRequests: Option[Int],
@@ -257,12 +257,15 @@ case class ServerBuilder[Req, Rep](
             new WriteCompletionTimeoutHandler(Timer.default, howlong))
         }
 
+        var sslEngine: SSLEngine = null
+
         // SSL comes first so that ChannelSnooper gets plaintext
         _tls foreach { ctx: SSLContext =>
-          val sslEngine = ctx.createSSLEngine()
+          sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(false)
           sslEngine.setEnableSessionCreation(true)
 
+          pipeline.addFirst("sslCipherAttribution", new SslCipherAttributionHandler(sslEngine))
           pipeline.addFirst("ssl", new SslHandler(sslEngine, _startTls))
         }
 

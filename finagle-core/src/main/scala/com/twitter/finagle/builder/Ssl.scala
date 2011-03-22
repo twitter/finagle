@@ -9,6 +9,9 @@ import java.security.spec._
 import javax.net.ssl._
 import java.util.Random
 
+import org.jboss.netty.channel.{Channel, ChannelLocal, ChannelHandlerContext,
+                                MessageEvent, SimpleChannelHandler}
+
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
@@ -19,6 +22,32 @@ import scala.util.control.Breaks._
 case class SslServerConfiguration(
   val certificatePath: String,
   val keyPath: String)
+
+object SslCipherAttribution extends ChannelLocal[String] {
+
+  /**
+   * Set the cipher suite attribution for the given Channel to the current cipher
+   * in use in the specified SSLEngine.
+   *
+   * Fails silently if either is null.
+   */
+  def apply(channel: Channel, sslEngine: SSLEngine) {
+    if (channel != null && sslEngine != null)
+      set(channel, sslEngine.getSession.getCipherSuite)
+  }
+
+  def apply(channel: Channel) =
+    get(channel)
+
+  override protected def initialValue(channel: Channel): String = "plaintext"
+}
+
+class SslCipherAttributionHandler(sslEngine: SSLEngine) extends SimpleChannelHandler {
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    SslCipherAttribution(ctx.getChannel, sslEngine)
+    super.messageReceived(ctx, e)
+  }
+}
 
 /**
  * Creates KeyManagers for PEM files.
