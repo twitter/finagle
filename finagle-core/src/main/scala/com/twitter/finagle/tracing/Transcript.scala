@@ -11,13 +11,11 @@ import com.twitter.util.Time
 
 sealed trait Annotation
 object Annotation {
-  case class ClientSend() extends Annotation
-  case class ClientRecv() extends Annotation
-  case class ServerSend() extends Annotation
-  case class ServerRecv() extends Annotation
-
-  case class Message(content: String)                 extends Annotation
-  case class Data(name: String, content: Array[Byte]) extends Annotation
+  case class ClientSend()             extends Annotation
+  case class ClientRecv()             extends Annotation
+  case class ServerSend()             extends Annotation
+  case class ServerRecv()             extends Annotation
+  case class Message(content: String) extends Annotation
 }
 
 case class Record(

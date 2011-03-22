@@ -4,6 +4,9 @@
 
 namespace java com.twitter.finagle.thrift.thrift
 
+// VM key for finagle span identifiers.
+const string VM_KEY = "vm"
+
 /**
  * The following is from BigBrotherBird:
  *   http://j.mp/fZZnyD

@@ -1,5 +1,7 @@
 package com.twitter.finagle.thrift
 
+import collection.JavaConversions._     // XXX
+
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
@@ -8,7 +10,6 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.util.TracingHeader
 import com.twitter.finagle.tracing.{BufferingTranscript, Trace, SpanId}
 
 import conversions._
@@ -61,13 +62,13 @@ private[thrift] class ThriftServerTracingFilter
         val responseHeader = new thrift.TracedResponseHeader
 
         if (header.debug) {
-          // Piggy back span data if we're in debug mode.
-          val spans = Trace().transcript.toThriftSpans
-          spans foreach { responseHeader.addToSpans(_) }
+          // Piggy-back span data if we're in debug mode.
+          Trace().transcript.toThriftSpans foreach { responseHeader.addToSpans(_) }
         }
 
         val responseHeaderBytes =
           OutputBuffer.messageToArray(responseHeader)
+
         responseHeaderBytes ++ response
       }
     } else {
