@@ -1,5 +1,9 @@
 package com.twitter.finagle.thrift
 
+/**
+ * Support for finagle tracing in thrift.
+ */
+
 import collection.JavaConversions._
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
@@ -115,4 +119,3 @@ private[thrift] object conversions {
   implicit def spanToRichSpan(span: Span) =
     new RichSpan(span)
 }
-

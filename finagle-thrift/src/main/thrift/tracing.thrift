@@ -20,8 +20,8 @@ struct Annotation {
 }
 
 struct Endpoint {
-  1: i32 ipv4,
-  2: i16 port
+  1: optional i32 ipv4,
+  2: optional i16 port
 }
 
 struct Span {

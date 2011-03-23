@@ -88,7 +88,7 @@ private[thrift] class ThriftServerTracingFilter
         buffer().writeMessageEnd()
 
         // Note: currently there are no options, so there's no need
-        // top parse them out.
+        // to parse them out.
         Future.value(buffer.toArray)
       } else {
         service(request)
