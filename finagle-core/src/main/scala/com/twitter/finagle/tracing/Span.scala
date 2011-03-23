@@ -1,9 +1,26 @@
 package com.twitter.finagle.tracing
 
+/**
+ * The `Span` is the core datastructure in RPC tracing. It denotes the
+ * issuance and handling of a single RPC request.
+ */
+
 import util.Random
 
-import com.twitter.util.{TimeFormat, Time, RichU64Long}
+import com.twitter.util.RichU64Long
 
+/**
+ * The span itself is an immutable datastructure. Mutations are done
+ * through copying & updating span references elsewhere. If an
+ * explicit root identifier is not specified, it is computed to be
+ * either the parent span or this span itself.
+ *
+ * @param id           A 64-bit span identifier
+ * @param parentId     Span identifier for the parent span
+ * @param _rootId      Span identifier for the root span (aka "Trace")
+ * @param transcript   The event-transcript for this span
+ * @param children     A sequence of child transcripts
+ */
 case class Span(
   id         : Long,
   parentId   : Option[Long],
@@ -11,10 +28,21 @@ case class Span(
   transcript : Transcript,
   children   : Seq[Span])
 {
+  /**
+   * @return the root identifier for the trace to which this span
+   *         belongs
+   */
   val rootId = _rootId getOrElse (parentId getOrElse id)
 
+  /**
+   * @return whether the transcript for this span is currently
+   *         recording
+   */
   def isRecording = transcript.isRecording
   
+  /**
+   * @return a pretty string for this span ID.
+   */
   def idString = {
     val spanHex = new RichU64Long(id).toU64HexString
     val parentSpanHex = parentId map (new RichU64Long(_).toU64HexString)
@@ -29,6 +57,9 @@ case class Span(
     "<Span %s>".format(idString)
   }
 
+  /**
+   * Print this span (together with its children) to the console.
+   */
   def print(): Unit = print(0)
   def print(indent: Int) {
     transcript foreach { record =>
@@ -48,6 +79,9 @@ case class Span(
     children foreach { _.print(indent + 2) }
   }
 
+  /**
+   * Make a copy of this span with recording turned off/on.
+   */
   def recording(v: Boolean) = {
     if (v && !isRecording)
       copy(transcript = new BufferingTranscript)
@@ -57,6 +91,10 @@ case class Span(
       this
   }
 
+  /**
+   * Merge the given spans into this one, splicing them into the span
+   * tree by ID. Any spans that cannot be parented are not merged in.
+   */
   def merge(spans: Seq[Span]): Span = {
     val parented = spans map { parent =>
       val children = spans filter { child =>
@@ -73,7 +111,7 @@ case class Span(
     newSpan
   }
 
-  def splice(spans: Seq[Span]): (Span, Seq[Span]) = {
+  private def splice(spans: Seq[Span]): (Span, Seq[Span]) = {
     // First split out spans that we need to merge
     val (spansToMerge, otherSpans) = spans partition { _.id == id }
 
@@ -97,8 +135,6 @@ case class Span(
 }
 
 object Span {
-  private[Span] val timeFormat =
-    new TimeFormat("yyyyMMdd.HHmmss")
   private[Span] val rng = new Random
 
   def apply(): Span = Span(None, None, None)
