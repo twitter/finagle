@@ -1,22 +1,16 @@
 package com.twitter.finagle.thrift
 
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
-
 import org.jboss.netty.channel.{
-  SimpleChannelHandler, Channel, ChannelEvent, ChannelHandlerContext,
+  ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-
+import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.util.TracingHeader
-import com.twitter.finagle.tracing.{BufferingTranscript, Trace}
+import com.twitter.finagle.tracing.Trace
 
-class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
+private[thrift] class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
       // An empty array indicates a oneway reply.
@@ -33,7 +27,7 @@ object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodec
 }
 
-class ThriftServerTracingFilter
+private[thrift] class ThriftServerTracingFilter
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
   // Concurrency is not an issue here since we have an instance per

@@ -6,8 +6,9 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.apache.thrift.TProcessorFactory
 import org.apache.thrift.protocol.TBinaryProtocol
 
-class ThriftProcessorHandler(processorFactory: TProcessorFactory)
-extends SimpleChannelUpstreamHandler {
+private[thrift] class ThriftProcessorHandler(processorFactory: TProcessorFactory)
+  extends SimpleChannelUpstreamHandler
+{
   val protocolFactory = new TBinaryProtocol.Factory()
 
   private def process(input: ChannelBuffer, output: ChannelBuffer) {

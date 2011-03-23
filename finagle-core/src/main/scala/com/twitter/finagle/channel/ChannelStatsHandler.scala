@@ -6,10 +6,9 @@ package com.twitter.finagle.channel
  */
 
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
+import java.util.logging.Logger
 
-import org.jboss.netty.channel.{
-  SimpleChannelHandler, ChannelHandlerContext,
-  WriteCompletionEvent, MessageEvent}
+import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext, MessageEvent}
 import org.jboss.netty.buffer.ChannelBuffer
 
 import com.twitter.util.{Time, Future}
@@ -19,6 +18,8 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
 {
+  private[this] val log = Logger.getLogger(getClass.getName)
+
   private[this] val connects                = statsReceiver.counter("connects")
   private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
   private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
@@ -48,12 +49,17 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     }
   }
 
-  override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val (_, channelWriteCount) = ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
 
-    channelWriteCount.getAndAdd(e.getWrittenAmount())
-    writeCount.getAndAdd(e.getWrittenAmount())
-    super.writeComplete(ctx, e)
+    e.getMessage match {
+      case buffer: ChannelBuffer =>
+        channelWriteCount.getAndAdd(buffer.readableBytes)
+      case _ =>
+        log.warning("ChannelStatsHandler received non-channelbuffer write")
+    }
+
+    super.writeRequested(ctx, e)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -63,7 +69,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
         channelReadCount.getAndAdd(buffer.readableBytes())
         readCount.getAndAdd(buffer.readableBytes())
       case _ =>
-        ()
+        log.warning("ChannelStatsHandler received non-channelbuffer read")
     }
 
     super.messageReceived(ctx, e)

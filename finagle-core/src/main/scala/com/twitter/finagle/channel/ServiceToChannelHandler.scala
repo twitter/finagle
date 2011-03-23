@@ -10,11 +10,10 @@ import org.jboss.netty.handler.timeout.ReadTimeoutException
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{CodecException, Service, WriteTimedOutException}
 
-class ServiceToChannelHandler[Req, Rep](
+private[finagle] class ServiceToChannelHandler[Req, Rep](
     service: Service[Req, Rep],
     statsReceiver: StatsReceiver,
     log: Logger)
@@ -25,7 +24,7 @@ class ServiceToChannelHandler[Req, Rep](
   def this(service: Service[Req, Rep]) =
     this(service, NullStatsReceiver)
 
-  private[this] sealed trait State
+  private[this] sealed abstract class State
 
   // valid transitions are:
   //
@@ -46,15 +45,15 @@ class ServiceToChannelHandler[Req, Rep](
       service.release()
     }
 
-  /** 
+  /**
    * onShutdown: this Future is satisfied when the channel has been
    * closed.
-   */ 
+   */
   val onShutdown: Future[Unit] = onShutdownPromise
 
-  /** 
+  /**
    * drain(): admit no new requests.
-   */ 
+   */
   def drain() = {
     var continue = false
     do {

@@ -6,25 +6,19 @@ package com.twitter.finagle.http
 
 import scala.collection.JavaConversions._
 
-import java.nio.ByteOrder
-
 import org.jboss.netty.channel.{
-  MessageEvent, Channels,
-  SimpleChannelUpstreamHandler,
-  ChannelHandlerContext}
+  MessageEvent, Channels, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.http.{
   HttpHeaders, HttpRequest,
-  HttpResponse, HttpChunk,
-  DefaultHttpResponse,
+  HttpChunk, DefaultHttpResponse,
   HttpVersion, HttpResponseStatus}
 import org.jboss.netty.buffer.{
-  ChannelBuffer, ChannelBuffers,
-  CompositeChannelBuffer}
+  ChannelBuffer, ChannelBuffers}
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.channel.LeftFoldUpstreamHandler
 
-object OneHundredContinueResponse
+private[finagle] object OneHundredContinueResponse
   extends DefaultHttpResponse(
     HttpVersion.HTTP_1_1,
     HttpResponseStatus.CONTINUE)
@@ -35,7 +29,7 @@ class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)
   {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
     val future = Channels.future(ctx.getChannel)
-    Channels.write(ctx, future, response, ctx.getChannel.getRemoteAddress)    
+    Channels.write(ctx, future, response, ctx.getChannel.getRemoteAddress)
     future onSuccessOrFailure { ctx.getChannel.close() }
   }
 

@@ -9,7 +9,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TMemoryBuffer
 import org.apache.thrift.TBase
 
-object OutputBuffer {
+private[thrift] object OutputBuffer {
   private[thrift] val protocolFactory = new TBinaryProtocol.Factory()
 
   def messageToArray(message: TBase[_, _]) = {
@@ -19,7 +19,7 @@ object OutputBuffer {
   }
 }
 
-class OutputBuffer {
+private[thrift] class OutputBuffer {
   import OutputBuffer._
 
   private[this] val memoryBuffer = new TMemoryBuffer(512)

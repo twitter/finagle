@@ -34,31 +34,33 @@ object ClientBuilder {
 }
 
 /**
- * A word about the default values:
+ * A handy way to construct an RPC Client.
+ *
+ * ''Note'': A word about the default values:
  *
  *   o connectionTimeout: optimized for within a datanceter
  *   o by default, no request timeout
  */
 case class ClientBuilder[Req, Rep](
-  _cluster: Option[Cluster],
-  _protocol: Option[Protocol[Req, Rep]],
-  _connectionTimeout: Duration,
-  _requestTimeout: Duration,
-  _statsReceiver: Option[StatsReceiver],
-  _loadStatistics: (Int, Duration),
-  _name: Option[String],
-  _hostConnectionCoresize: Option[Int],
-  _hostConnectionLimit: Option[Int],
-  _hostConnectionIdleTime: Option[Duration],
-  _hostConnectionMaxIdleTime: Option[Duration],
-  _hostConnectionMaxLifeTime: Option[Duration],
-  _sendBufferSize: Option[Int],
-  _recvBufferSize: Option[Int],
-  _retries: Option[Int],
-  _logger: Option[Logger],
-  _channelFactory: Option[ReferenceCountedChannelFactory],
-  _tls: Option[SSLContext],
-  _startTls: Boolean)
+  private val _cluster: Option[Cluster],
+  private val _protocol: Option[Protocol[Req, Rep]],
+  private val _connectionTimeout: Duration,
+  private val _requestTimeout: Duration,
+  private val _statsReceiver: Option[StatsReceiver],
+  private val _loadStatistics: (Int, Duration),
+  private val _name: Option[String],
+  private val _hostConnectionCoresize: Option[Int],
+  private val _hostConnectionLimit: Option[Int],
+  private val _hostConnectionIdleTime: Option[Duration],
+  private val _hostConnectionMaxIdleTime: Option[Duration],
+  private val _hostConnectionMaxLifeTime: Option[Duration],
+  private val _sendBufferSize: Option[Int],
+  private val _recvBufferSize: Option[Int],
+  private val _retries: Option[Int],
+  private val _logger: Option[Logger],
+  private val _channelFactory: Option[ReferenceCountedChannelFactory],
+  private val _tls: Option[SSLContext],
+  private val _startTls: Boolean)
 {
   def this() = this(
     None,               // cluster
@@ -258,6 +260,10 @@ case class ClientBuilder[Req, Rep](
     future
   }
 
+  /**
+   * Construct a ServiceFactory. This is useful for stateful protocols (e.g.,
+   * those that support transactions or authentication).
+   */
   def buildFactory(): ServiceFactory[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
@@ -315,6 +321,9 @@ case class ClientBuilder[Req, Rep](
     }
   }
 
+  /**
+   * Construct a Service.
+   */
   def build(): Service[Req, Rep] = {
     var service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
 

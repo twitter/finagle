@@ -12,7 +12,7 @@ import java.util.logging.{Logger, Level}
 /*
  * Translate ThriftReplys to wire representation
  */
-class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
+private[thrift] class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
   protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
@@ -31,7 +31,7 @@ class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
 /**
  * Translate wire representation to ThriftCalls
  */
-class ThriftServerDecoder extends ReplayingDecoder[VoidEnum] {
+private[thrift] class ThriftServerDecoder extends ReplayingDecoder[VoidEnum] {
   private[this] val logger = Logger.getLogger(getClass.getName)
   private[this] val protocolFactory = new TBinaryProtocol.Factory(true, true)
 
