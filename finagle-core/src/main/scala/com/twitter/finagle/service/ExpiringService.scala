@@ -15,16 +15,17 @@ import com.twitter.finagle.{Service, WriteException, ChannelClosedException}
  */
 class ExpiringService[Req, Rep](
   underlying: Service[Req, Rep],
-  maxIdleTime: Duration,
+  maxIdleTime: Option[Duration],
+  maxLifeTime: Option[Duration],
   timer: util.Timer = Timer.default)
   extends Service[Req, Rep]
 {
   private[this] var requestCount = 0
   private[this] var expired = false
-  private[this] var task: Option[com.twitter.util.TimerTask] =
-    Some(timer.schedule(maxIdleTime.fromNow) { maybeExpire() })
+  private[this] var idleTimeTask = maxIdleTime map { idleTime => timer.schedule(idleTime.fromNow) { maybeIdleExpire() } }
+  private[this] var lifeTimeTask = maxLifeTime map { lifeTime => timer.schedule(lifeTime.fromNow) { maybeLifeTimeExpire() } }
 
-  private[this] def maybeExpire() = {
+  private[this] def maybeExpire(forceExpire: Boolean) = {
     val justExpired = synchronized {
       // We check requestCount == 0 here to avoid the race between
       // cancellation & running of the timer.
@@ -32,16 +33,38 @@ class ExpiringService[Req, Rep](
         expired = true
         true
       } else {
+        if (forceExpire) expired = true
         false
       }
     }
 
     if (justExpired) didExpire()
+    justExpired
+  }
+
+  private[this] def maybeIdleExpire() {
+    if (maybeExpire(false)) cancelLifeTimer()
+  }
+
+  private[this] def maybeLifeTimeExpire() {
+    if (maybeExpire(true)) cancelIdleTimer()
   }
 
   // May be overriden to provide your own expiration action.
   protected def didExpire() {
     underlying.release()
+  }
+
+  protected def cancelIdleTimer() {
+    // Cancel the existing timer.
+    idleTimeTask foreach { _.cancel() }
+    idleTimeTask = None
+  }
+
+  protected def cancelLifeTimer() {
+    // Cancel the existing timer.
+    lifeTimeTask foreach { _.cancel() }
+    lifeTimeTask = None
   }
 
   def apply(request: Req): Future[Rep] = synchronized {
@@ -51,18 +74,20 @@ class ExpiringService[Req, Rep](
     }
 
     requestCount += 1
-    if (requestCount == 1) {
-      // Cancel the existing timer.
-      task foreach { _.cancel() }
-      task = None
-    }
+    if (requestCount == 1) cancelIdleTimer()
 
     underlying(request) ensure {
       synchronized {
         requestCount -= 1
         if (requestCount == 0) {
-          require(!task.isDefined)
-          task = Some(timer.schedule(maxIdleTime.fromNow) { maybeExpire() })
+          require(!idleTimeTask.isDefined)
+          if (expired) {
+            didExpire()
+          } else {
+            maxIdleTime foreach { time =>
+              idleTimeTask = Some(timer.schedule(time.fromNow) { maybeIdleExpire() })
+            }
+          }
         }
       }
     }

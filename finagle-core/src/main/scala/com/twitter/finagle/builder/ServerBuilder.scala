@@ -69,6 +69,7 @@ case class ServerBuilder[Req, Rep](
   private val _channelFactory: Option[ReferenceCountedChannelFactory],
   private val _maxConcurrentRequests: Option[Int],
   private val _hostConnectionMaxIdleTime: Option[Duration],
+  private val _hostConnectionMaxLifeTime: Option[Duration],
   private val _requestTimeout: Option[Duration],
   private val _readTimeout: Option[Duration],
   private val _writeCompletionTimeout: Option[Duration],
@@ -89,6 +90,7 @@ case class ServerBuilder[Req, Rep](
     None,                  // channelFactory
     None,                  // maxConcurrentRequests
     None,                  // hostConnectionMaxIdleTime
+    None,                  // hostConnectionMaxLifeTime
     None,                  // requestTimeout
     None,                  // readTimeout
     None,                  // writeCompletionTimeout
@@ -108,6 +110,7 @@ case class ServerBuilder[Req, Rep](
     "channelFactory"            -> _channelFactory,
     "maxConcurrentRequests"     -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
+    "hostConnectionMaxLifeTime" -> _hostConnectionMaxLifeTime,
     "requestTimeout"            -> _requestTimeout,
     "readTimeout"               -> _readTimeout,
     "writeCompletionTimeout"    -> _writeCompletionTimeout,
@@ -152,6 +155,9 @@ case class ServerBuilder[Req, Rep](
 
   def hostConnectionMaxIdleTime(howlong: Duration) =
     copy(_hostConnectionMaxIdleTime = Some(howlong))
+
+  def hostConnectionMaxLifeTime(howlong: Duration) =
+    copy(_hostConnectionMaxLifeTime = Some(howlong))
 
   def requestTimeout(howlong: Duration) =
     copy(_requestTimeout = Some(howlong))
@@ -300,8 +306,8 @@ case class ServerBuilder[Req, Rep](
 
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
-        _hostConnectionMaxIdleTime foreach { duration =>
-          service = new ExpiringService(service, duration) {
+        if (_hostConnectionMaxIdleTime.isDefined || _hostConnectionMaxLifeTime.isDefined) {
+          service = new ExpiringService(service, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime) {
             override def didExpire() { closingHandler.close() }
           }
         }
