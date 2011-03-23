@@ -19,13 +19,18 @@ struct Annotation {
   2: optional string value
 }
 
+struct Endpoint {
+  1: i32 ipv4,
+  2: i16 port
+}
+
 struct Span {
   1: optional i64 trace_id                  // unique trace id, use for all spans in trace
   2: optional string name,                  // span name, rpc method for example
   3: optional i64 id,                       // unique span id, only used for this span
   4: optional i64 parent_id,                // parent span id
-  5: optional i32 client_host,              // ipv4
-  6: optional i32 server_host,              // ipv4
+  5: optional Endpoint client,
+  6: optional Endpoint server,
   7: optional list<Annotation> annotations, // list of all annotations/events that occured
   8: optional map<string, binary> binary_annotations, // any binary annotations
 }

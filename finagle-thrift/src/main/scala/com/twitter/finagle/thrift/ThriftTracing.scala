@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.util.Time
 import com.twitter.finagle.tracing.{
   Record, Annotation, FrozenTranscript,
-  Transcript, Span}
+  Transcript, Span, Endpoint}
 
 private[thrift] object ThriftTracing {
   /**
@@ -27,14 +27,19 @@ private[thrift] object RichSpan {
 private[thrift] class RichThriftSpan(self: thrift.Span) {
   import RichSpan._
 
+  private[this] def endpointFromThrift(endpoint: thrift.Endpoint): Option[Endpoint] =
+    Option(endpoint) map { e => Endpoint(e.getIpv4, e.getPort) }
+
   /**
    * Creates a Finagle span from this thrift span.
    */
   def toFinagleSpan: Span = Span(
     self.getId,
-    if (self.isSetParent_id)   Some(self.getParent_id) else None,
-    if (self.isSetTrace_id)    Some(self.getTrace_id)  else None,
+    if (self.isSetParent_id) Some(self.getParent_id) else None,
+    if (self.isSetTrace_id)  Some(self.getTrace_id)  else None,
     toTranscript,
+    endpointFromThrift(self.getClient),
+    endpointFromThrift(self.getServer),
     Seq()
   )
 
@@ -59,6 +64,13 @@ private[thrift] class RichThriftSpan(self: thrift.Span) {
 }
 
 private[thrift] class RichSpan(self: Span) {
+  private[this] def endpointFromFinagle(endpoint: Endpoint): thrift.Endpoint = {
+    val e = new thrift.Endpoint
+    e.setIpv4(endpoint.ipv4)
+    e.setPort(endpoint.port)
+    e
+  }
+
   /**
    * Translate this transcript to a set of spans. A transcript may
    * contain annotations from several spans.
@@ -69,6 +81,10 @@ private[thrift] class RichSpan(self: Span) {
     span.setId(self.id)
     self.parentId foreach { span.setParent_id(_) }
     span.setTrace_id(self.rootId)
+
+    // Endpoints (optional)
+    self.client foreach { e => span.setClient(endpointFromFinagle(e)) }
+    self.server foreach { e => span.setServer(endpointFromFinagle(e)) }
 
     val annotations = self.transcript map { record =>
       val value = record.annotation match {

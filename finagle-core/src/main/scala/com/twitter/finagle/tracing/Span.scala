@@ -19,6 +19,8 @@ import com.twitter.util.RichU64Long
  * @param parentId     Span identifier for the parent span
  * @param _rootId      Span identifier for the root span (aka "Trace")
  * @param transcript   The event-transcript for this span
+ * @param client       The client endpoint participating in the span
+ * @param server       The server endpoint participating in the span
  * @param children     A sequence of child transcripts
  */
 case class Span(
@@ -26,6 +28,8 @@ case class Span(
   parentId   : Option[Long],
   _rootId    : Option[Long],
   transcript : Transcript,
+  client     : Option[Endpoint],
+  server     : Option[Endpoint],
   children   : Seq[Span])
 {
   /**
@@ -139,5 +143,5 @@ object Span {
 
   def apply(): Span = Span(None, None, None)
   def apply(id: Option[Long], parentId: Option[Long], rootId: Option[Long]): Span =
-    Span(id getOrElse rng.nextLong, parentId, rootId, NullTranscript, Seq())
+    Span(id getOrElse rng.nextLong, parentId, rootId, NullTranscript, None, None, Seq())
 }
