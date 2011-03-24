@@ -67,6 +67,7 @@ final case class ServerConfig[Req, Rep](
   private val _channelFactory:            ReferenceCountedChannelFactory            = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:     Option[Int]                               = None,
   private val _hostConnectionMaxIdleTime: Option[Duration]                          = None,
+  private val _hostConnectionMaxLifeTime: Option[Duration]                          = None,
   private val _requestTimeout:            Option[Duration]                          = None,
   private val _readTimeout:               Option[Duration]                          = None,
   private val _writeCompletionTimeout:    Option[Duration]                          = None,
@@ -89,6 +90,7 @@ final case class ServerConfig[Req, Rep](
   val channelFactory            = _channelFactory
   val maxConcurrentRequests     = _maxConcurrentRequests
   val hostConnectionMaxIdleTime = _hostConnectionMaxIdleTime
+  val hostConnectionMaxLifeTime = _hostConnectionMaxIdleTime
   val requestTimeout            = _requestTimeout
   val readTimeout               = _readTimeout
   val writeCompletionTimeout    = _writeCompletionTimeout
@@ -107,6 +109,7 @@ final case class ServerConfig[Req, Rep](
     "channelFactory"            -> Some(_channelFactory),
     "maxConcurrentRequests"     -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
+    "hostConnectionMaxLifeTime" -> _hostConnectionMaxLifeTime,
     "requestTimeout"            -> _requestTimeout,
     "readTimeout"               -> _readTimeout,
     "writeCompletionTimeout"    -> _writeCompletionTimeout,
@@ -183,6 +186,9 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
 
   def hostConnectionMaxIdleTime(howlong: Duration) =
     copy(config.copy(_hostConnectionMaxIdleTime = Some(howlong)))
+
+  def hostConnectionMaxLifeTime(howlong: Duration) =
+    copy(config.copy(_hostConnectionMaxLifeTime = Some(howlong)))
 
   def requestTimeout(howlong: Duration) =
     copy(config.copy(_requestTimeout = Some(howlong)))
@@ -327,8 +333,9 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
 
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
-        config.hostConnectionMaxIdleTime foreach { duration =>
-          service = new ExpiringService(service, duration) {
+
+        if (config.hostConnectionMaxIdleTime.isDefined || config.hostConnectionMaxLifeTime.isDefined) {
+          service = new ExpiringService(service, config.hostConnectionMaxIdleTime, config.hostConnectionMaxLifeTime) {
             override def didExpire() { closingHandler.close() }
           }
         }

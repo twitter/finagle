@@ -53,6 +53,7 @@ case class ClientBuilder[Req, Rep](
   private val _hostConnectionLimit: Option[Int],
   private val _hostConnectionIdleTime: Option[Duration],
   private val _hostConnectionMaxIdleTime: Option[Duration],
+  private val _hostConnectionMaxLifeTime: Option[Duration],
   private val _sendBufferSize: Option[Int],
   private val _recvBufferSize: Option[Int],
   private val _retries: Option[Int],
@@ -73,6 +74,7 @@ case class ClientBuilder[Req, Rep](
     None,               // hostConnectionLimit
     None,               // hostConnectionIdleTime
     None,               // hostConnectionMaxIdleTime
+    None,               // hostConnectionMaxLifeTime
     None,               // sendBufferSize
     None,               // recvBufferSize
     None,               // retries
@@ -94,6 +96,7 @@ case class ClientBuilder[Req, Rep](
     "hostConnectionCoresize"    -> Some(_hostConnectionCoresize),
     "hostConnectionIdleTime"    -> Some(_hostConnectionIdleTime),
     "hostConnectionMaxIdleTime" -> Some(_hostConnectionMaxIdleTime),
+    "hostConnectionMaxLifeTime" -> Some(_hostConnectionMaxLifeTime),
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
     "retries"                   -> _retries,
@@ -167,6 +170,9 @@ case class ClientBuilder[Req, Rep](
 
   def hostConnectionMaxIdleTime(timeout: Duration) =
     copy(_hostConnectionMaxIdleTime = Some(timeout))
+
+  def hostConnectionMaxLifeTime(timeout: Duration) =
+    copy(_hostConnectionMaxLifeTime = Some(timeout))
 
   def retries(value: Int) =
     copy(_retries = Some(value))
@@ -246,8 +252,9 @@ case class ClientBuilder[Req, Rep](
 
     future = protocol.codec.prepareClientChannel(service)
     future = future.flatMap { protocol.prepareChannel(_) }
-    _hostConnectionMaxIdleTime.foreach { idleTime =>
-      future = future.map { new ExpiringService(_, idleTime) }
+
+    if (_hostConnectionMaxIdleTime.isDefined || _hostConnectionMaxLifeTime.isDefined) {
+      future = future.map { new ExpiringService(_, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime) }
     }
 
     future

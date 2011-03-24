@@ -5,11 +5,11 @@ import collection.mutable.ArrayBuffer
 import com.twitter.util.{Time, Duration}
 
 class MockTimer extends com.twitter.util.Timer {
-  case class Task(when: Time, runner: Function0[Unit])
+  case class Task(var when: Time, runner: Function0[Unit])
     extends com.twitter.util.TimerTask
   {
     var isCancelled = false
-    def cancel() { isCancelled = true }
+    def cancel() { isCancelled = true; when = Time.now; tick() }
   }
 
   var isStopped = false
