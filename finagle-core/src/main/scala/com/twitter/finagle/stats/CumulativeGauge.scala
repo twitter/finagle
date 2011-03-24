@@ -51,7 +51,7 @@ private[finagle] trait CumulativeGauge {
   def deregister(): Unit
 }
 
-private[finagle] trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
+trait StatsReceiverWithCumulativeGauges extends StatsReceiver {
   private[this] val gaugeMap = new WeakHashMap[Seq[String], CumulativeGauge]
 
   /**

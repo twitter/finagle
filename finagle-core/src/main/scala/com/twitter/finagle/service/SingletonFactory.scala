@@ -5,7 +5,7 @@ import com.twitter.util.Future
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.util.AsyncLatch
 
-private[finagle] class SingletonFactory[Req, Rep](service: Service[Req, Rep])
+class SingletonFactory[Req, Rep](service: Service[Req, Rep])
   extends ServiceFactory[Req, Rep]
 {
   private[this] var latch = new AsyncLatch
