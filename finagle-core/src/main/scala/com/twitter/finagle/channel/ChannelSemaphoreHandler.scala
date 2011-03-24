@@ -11,6 +11,7 @@ import org.jboss.netty.channel._
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.AsyncSemaphore
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.CodecException
 
 class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
@@ -62,8 +63,14 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    super.writeRequested(ctx, e)
-    e.getFuture onSuccessOrFailure {
+    val writeComplete = Channels.future(e.getChannel)
+    val proxiedEvent = new DownstreamMessageEvent(
+      e.getChannel, writeComplete, e.getMessage, e.getRemoteAddress)
+    super.writeRequested(ctx, proxiedEvent)
+
+    writeComplete { res =>
+      e.getFuture.update(res)
+
       val oldState = state(ctx).get
       oldState match {
         case Busy(permit) =>

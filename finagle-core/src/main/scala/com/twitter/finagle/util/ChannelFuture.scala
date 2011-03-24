@@ -31,6 +31,14 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
     })
   }
 
+  def update(state: State) {
+    state match {
+      case Ok(channel)  => self.setSuccess()
+      case Error(cause) => self.setFailure(cause)
+      case Cancelled    => self.cancel()
+    }
+  }
+  
   def state: State =
     if (self.isSuccess)
       Ok(self.getChannel)
