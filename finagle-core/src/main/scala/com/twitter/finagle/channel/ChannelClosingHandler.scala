@@ -6,14 +6,14 @@ package com.twitter.finagle.channel
  */
 
 import org.jboss.netty.channel.{
-  SimpleChannelUpstreamHandler, LifeCycleAwareChannelHandler,
+  SimpleChannelHandler, LifeCycleAwareChannelHandler,
   ChannelHandlerContext, ChannelStateEvent, Channel}
 
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.LatentChannelFuture
 
 class ChannelClosingHandler
-  extends SimpleChannelUpstreamHandler
+  extends SimpleChannelHandler
   with LifeCycleAwareChannelHandler
 {
   private[this] val channelCloseFuture = new LatentChannelFuture
