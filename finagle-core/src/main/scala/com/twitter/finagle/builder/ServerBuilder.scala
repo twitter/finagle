@@ -27,7 +27,7 @@ import com.twitter.finagle.util.Timer._
 import com.twitter.util.Future
 
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
-import service.{ExpiringService, TimeoutFilter, StatsFilter}
+import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver}
 
 trait Server {
@@ -55,7 +55,7 @@ object ServerBuilder {
  * A configuration object that represents what shall be built.
  */
 final case class ServerConfig[Req, Rep](
-  private val _codec:                     Option[Codec[Req, Rep]]          = None,
+  private val _codec:                     Option[ServerCodec[Req, Rep]]    = None,
   private val _statsReceiver:             Option[StatsReceiver]            = None,
   private val _name:                      Option[String]                   = None,
   private val _sendBufferSize:            Option[Int]                      = None,
@@ -152,6 +152,10 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
     new ServerBuilder(config)
 
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
+    copy(config.copy(_codec = Some(codec.serverCodec)))
+
+  // ServerCodec.
+  def codec[Req1, Rep1](codec: ServerCodec[Req1, Rep1]) =
     copy(config.copy(_codec = Some(codec)))
 
   def reportTo(receiver: StatsReceiver) =
@@ -262,7 +266,7 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
-        val pipeline = codec.serverPipelineFactory.getPipeline
+        val pipeline = codec.pipelineFactory.getPipeline
 
         config.logger foreach { logger =>
           pipeline.addFirst(
@@ -316,7 +320,11 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         queueingChannelHandler foreach { pipeline.addLast("queue", _) }
 
         // Compose the service stack.
-        var service = codec.wrapServerChannel(serviceFactory())
+        var service: Service[Req, Rep] = {
+          val underlying = serviceFactory()
+          val prepared   = codec.prepareService(underlying)
+          new ProxyService(prepared)
+        }
 
         statsFilter foreach { sf =>
           service = sf andThen service

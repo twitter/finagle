@@ -36,8 +36,9 @@ object ChannelException {
 }
 
 // Service layer errors.
-class ServiceException       extends Exception
-class ServiceClosedException extends ServiceException
+class ServiceException             extends Exception
+class ServiceClosedException       extends ServiceException
+class ServiceNotAvailableException extends ServiceException
 
 // Subclass this for application exceptions
 class ApplicationException extends Exception
