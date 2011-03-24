@@ -88,11 +88,7 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
     try {
       service(message.asInstanceOf[Req]) respond {
         case Return(value) =>
-          Channels.write(channel, value) onSuccessOrFailure {
-            if (!state.compareAndSet(Busy, Idle) && state.get == Draining)
-              shutdown()
-          }
-
+          Channels.write(channel, value)
         case Throw(e: Throwable) =>
           log.log(Level.WARNING, "service exception", e)
           shutdown()
@@ -113,6 +109,19 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     shutdown()
+  }
+
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    // This is here and not on Channels.write's return value because there is a race
+    // where the future is complete before this callback is added and then the state is
+    // out of date.
+    // We need to have this callback added BEFORE the NioWorker has a chance to complete it,
+    // otherwise we run the risk of receiving more messages before the callback runs.
+    e.getFuture onSuccessOrFailure {
+      if (!state.compareAndSet(Busy, Idle) && state.get == Draining)
+        shutdown()
+    }
+    super.writeRequested(ctx, e)
   }
 
   /**
