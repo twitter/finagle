@@ -6,12 +6,10 @@ import org.apache.thrift.protocol.TProtocolFactory
 import com.twitter.finagle.Codec
 
 class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory)
-  extends Codec[ThriftClientRequest, Array[Byte]]
+  extends ThriftClientFramedCodec
 {
-  private[this] val framedCodec = new ThriftClientFramedCodec
-
-  override val clientPipelineFactory = {
-    val framedPipelineFactory = framedCodec.clientPipelineFactory
+  override def pipelineFactory = {
+    val framedPipelineFactory = super.pipelineFactory
 
     new ChannelPipelineFactory {
       def getPipeline() = {
@@ -23,7 +21,5 @@ class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory)
       }
     }
   }
-
-  override val serverPipelineFactory = clientPipelineFactory  
 }
 

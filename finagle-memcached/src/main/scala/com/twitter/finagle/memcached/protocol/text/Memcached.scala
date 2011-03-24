@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.protocol.text
 
 import client.DecodingToResponse
-import com.twitter.finagle.Codec
+import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
@@ -14,8 +14,8 @@ class Memcached extends Codec[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer](
     "set", "add", "replace", "append", "prepend")
 
-  override val serverPipelineFactory = {
-    new ChannelPipelineFactory {
+  override def serverCodec = new ServerCodec[Command, Response] {
+    def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 
@@ -31,9 +31,8 @@ class Memcached extends Codec[Command, Response] {
     }
   }
 
-
-  override val clientPipelineFactory = {
-    new ChannelPipelineFactory {
+  override def clientCodec = new ClientCodec[Command, Response] {
+    def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 

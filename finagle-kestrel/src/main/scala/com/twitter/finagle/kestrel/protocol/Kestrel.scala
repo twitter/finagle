@@ -1,6 +1,6 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.Codec
+import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
@@ -9,8 +9,8 @@ import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
 class Kestrel extends Codec[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer]("set")
 
-  override val serverPipelineFactory = {
-    new ChannelPipelineFactory {
+  override def serverCodec = new ServerCodec[Command, Response] {
+    def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 
@@ -26,9 +26,8 @@ class Kestrel extends Codec[Command, Response] {
     }
   }
 
-
-  override val clientPipelineFactory = {
-    new ChannelPipelineFactory {
+  override def clientCodec = new ClientCodec[Command, Response] {
+    def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
 
