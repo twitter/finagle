@@ -154,7 +154,6 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
     copy(config.copy(_codec = Some(codec.serverCodec)))
 
-  // ServerCodec.
   def codec[Req1, Rep1](codec: ServerCodec[Req1, Rep1]) =
     copy(config.copy(_codec = Some(codec)))
 
