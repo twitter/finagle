@@ -29,6 +29,11 @@ object ClientBuilderSpec extends Specification with Mockito {
     val channelPipeline = mock[ChannelPipeline]
     clientPipelineFactory.getPipeline returns channelPipeline
     _codec.clientPipelineFactory returns clientPipelineFactory
+    val clientCodec = mock[ClientCodec[Int, Float]]
+    _codec.clientCodec returns clientCodec
+    clientCodec.pipelineFactory returns clientPipelineFactory
+    (clientCodec.prepareService(Matchers.any[Service[Int, Float]])
+     answers { s => Future.value(s.asInstanceOf[Service[Int, Float]]) })
 
     // Channel
     val channelFactory = mock[ChannelFactory]

@@ -16,7 +16,7 @@ import org.jboss.netty.channel._
 import com.twitter.finagle.{Codec, Service}
 
 class StringCodec extends Codec[String, String] {
-  val serverPipelineFactory = new ChannelPipelineFactory {
+  override val serverPipelineFactory = new ChannelPipelineFactory {
     def getPipeline = {
       val pipeline = Channels.pipeline()
       pipeline.addLast("line",
@@ -27,7 +27,7 @@ class StringCodec extends Codec[String, String] {
     }
   }
 
-  val clientPipelineFactory = new ChannelPipelineFactory {
+  override val clientPipelineFactory = new ChannelPipelineFactory {
     def getPipeline = {
       val pipeline = Channels.pipeline()
       pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
