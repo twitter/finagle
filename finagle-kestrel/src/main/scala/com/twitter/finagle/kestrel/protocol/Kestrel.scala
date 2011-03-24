@@ -9,7 +9,7 @@ import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
 class Kestrel extends Codec[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer]("set")
 
-  val serverPipelineFactory = {
+  override val serverPipelineFactory = {
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -27,7 +27,7 @@ class Kestrel extends Codec[Command, Response] {
   }
 
 
-  val clientPipelineFactory = {
+  override val clientPipelineFactory = {
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()

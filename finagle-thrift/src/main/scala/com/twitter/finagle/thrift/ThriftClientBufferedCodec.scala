@@ -10,7 +10,7 @@ class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory)
 {
   private[this] val framedCodec = new ThriftClientFramedCodec
 
-  val clientPipelineFactory = {
+  override val clientPipelineFactory = {
     val framedPipelineFactory = framedCodec.clientPipelineFactory
 
     new ChannelPipelineFactory {
@@ -24,6 +24,6 @@ class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory)
     }
   }
 
-  val serverPipelineFactory = clientPipelineFactory  
+  override val serverPipelineFactory = clientPipelineFactory  
 }
 

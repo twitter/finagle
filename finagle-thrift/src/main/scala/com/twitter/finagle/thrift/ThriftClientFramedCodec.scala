@@ -27,7 +27,7 @@ object ThriftClientFramedCodec {
 
 class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
 {
-  val clientPipelineFactory =
+  override val clientPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -38,7 +38,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
       }
     }
 
-  val serverPipelineFactory = clientPipelineFactory
+  override val serverPipelineFactory = clientPipelineFactory
 
   override def prepareClientChannel(underlying: Service[ThriftClientRequest, Array[Byte]]) =
   {

@@ -9,7 +9,7 @@ class Thrift extends Codec[ThriftCall[_, _], ThriftReply[_]]
   val wrapReplies = false
   val instance = this
 
-  val clientPipelineFactory =
+  override val clientPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -20,7 +20,7 @@ class Thrift extends Codec[ThriftCall[_, _], ThriftReply[_]]
       }
     }
 
-  val serverPipelineFactory =
+  override val serverPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()

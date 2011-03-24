@@ -8,7 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 object Stream extends Stream
 
 class Stream extends Codec[HttpRequest, com.twitter.concurrent.Channel[ChannelBuffer]] {
-  val serverPipelineFactory = new ChannelPipelineFactory {
+  override val serverPipelineFactory = new ChannelPipelineFactory {
     def getPipeline = {
       val pipeline = Channels.pipeline()
       pipeline.addLast("httpCodec", new HttpServerCodec)
@@ -17,7 +17,7 @@ class Stream extends Codec[HttpRequest, com.twitter.concurrent.Channel[ChannelBu
     }
   }
 
-  val clientPipelineFactory = new ChannelPipelineFactory {
+  override val clientPipelineFactory = new ChannelPipelineFactory {
     def getPipeline = {
       val pipeline = Channels.pipeline()
       pipeline.addLast("httpCodec", new HttpClientCodec)
