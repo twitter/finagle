@@ -1,20 +1,78 @@
 package com.twitter.finagle
 
-import org.jboss.netty.channel.ChannelPipelineFactory
+/**
+ * Codecs provide protocol encoding and decoding via netty pipelines
+ * as well as a standard filter stack that are applied to services
+ * from this codec.
+ */
 
+import org.jboss.netty.channel.ChannelPipelineFactory
 import com.twitter.util.Future
 
 /**
- * The codec provides protocol encoding and decoding via netty pipelines.
+ * Superclass for all codecs.
  */
-// TODO: do we want to split this into client/server codecs?
+trait AbstractCodec[Req, Rep] {
+  type IReq = Req
+  type IRep = Rep
+
+  /**
+   * The pipeline factory that implements the protocol.
+   */
+  def pipelineFactory: ChannelPipelineFactory
+}
+
+trait ClientCodec[Req, Rep] extends AbstractCodec[Req, Rep] {
+  /**
+   * Prepare a newly-created connected Service endpoint. It becomes
+   * available once the returned Future is satisfied.
+   */
+  def prepareService(
+    underlying: Service[IReq, IRep]
+  ): Future[Service[Req, Rep]] = Future.value(underlying)
+}
+
+trait ServerCodec[Req, Rep] extends AbstractCodec[Req, Rep] {
+  /**
+   * Prepare a newly created service.
+   * 
+   */
+  def prepareService(
+    underlying: Service[IReq, IRep]
+  ): Service[Req, Rep] = underlying
+}
+
+/**
+ * A combined codec provides both client and server codecs in one
+ * (when available). These are also the legacy codecs, and retains a
+ * backwards-compatible interface.
+ */
 trait Codec[Req, Rep] {
-  val clientPipelineFactory: ChannelPipelineFactory
-  val serverPipelineFactory: ChannelPipelineFactory
+  def clientCodec: ClientCodec[Req, Rep] =
+    new ClientCodec[Req, Rep] {
+      def pipelineFactory = clientPipelineFactory
+      override def prepareService(underlying: Service[Req, Rep]) =
+        prepareClientChannel(underlying)
+    }
 
-  def prepareClientChannel(underlying: Service[Req, Rep]): Future[Service[Req, Rep]] =
-    Future.value(underlying)
+  def serverCodec: ServerCodec[Req, Rep] =
+    new ServerCodec[Req, Rep] {
+      def pipelineFactory = serverPipelineFactory
+      override def prepareService(underlying: Service[Req, Rep]) =
+        wrapServerChannel(underlying)
+    }
 
+  @deprecated("clientPipelineFactory is deprecated, use clientCodec instead")
+  val clientPipelineFactory: ChannelPipelineFactory = null
+  @deprecated("serverPipelineFactory is deprecated, use serverCodec instead")
+  val serverPipelineFactory: ChannelPipelineFactory = null
+
+  @deprecated("prepareClientChannel is deprecated, use clientCodec.prepareService instead")
+  def prepareClientChannel(
+    underlying: Service[Req, Rep]
+  ): Future[Service[Req, Rep]] = Future.value(underlying)
+
+  @deprecated("wrapServerChannel is deprecated, use ServerCodec.prepareService instead")
   def wrapServerChannel(service: Service[Req, Rep]): Service[Req, Rep] = service
 }
 
@@ -24,6 +82,7 @@ trait Codec[Req, Rep] {
  */
 trait Protocol[Req, Rep] {
   def codec: Codec[Req, Rep]
-  def prepareChannel(underlying: Service[Req, Rep]): Future[Service[Req, Rep]] =
-    Future.value(underlying)
+  def prepareChannel(
+    underlying: Service[Req, Rep]
+  ): Future[Service[Req, Rep]] = Future.value(underlying)
 }

@@ -8,7 +8,7 @@ import com.twitter.finagle.http._
 
 @deprecated("Use com.twitter.finagle.http.Http instead")
 class Http(compressionLevel: Int = 0) extends Codec[HttpRequest, HttpResponse] {
-  val clientPipelineFactory: ChannelPipelineFactory =
+  override val clientPipelineFactory: ChannelPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -24,7 +24,7 @@ class Http(compressionLevel: Int = 0) extends Codec[HttpRequest, HttpResponse] {
       }
     }
 
-  val serverPipelineFactory =
+  override val serverPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()

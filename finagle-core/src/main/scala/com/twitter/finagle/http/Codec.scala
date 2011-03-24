@@ -22,7 +22,7 @@ case class Http(
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
 
-  val clientPipelineFactory: ChannelPipelineFactory =
+  override val clientPipelineFactory: ChannelPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -41,7 +41,7 @@ case class Http(
       }
     }
 
-  val serverPipelineFactory =
+  override val serverPipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
