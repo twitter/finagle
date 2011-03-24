@@ -254,7 +254,9 @@ case class ClientBuilder[Req, Rep](
     future = future.flatMap { protocol.prepareChannel(_) }
 
     if (_hostConnectionMaxIdleTime.isDefined || _hostConnectionMaxLifeTime.isDefined) {
-      future = future.map { new ExpiringService(_, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime) }
+      future = future map {
+        new ExpiringService(_, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime)
+      }
     }
 
     future

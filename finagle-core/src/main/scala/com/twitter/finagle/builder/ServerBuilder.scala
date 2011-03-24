@@ -55,23 +55,23 @@ object ServerBuilder {
  * A configuration object that represents what shall be built.
  */
 final case class ServerConfig[Req, Rep](
-  private val _codec:                     Option[Codec[Req, Rep]]                   = None,
-  private val _statsReceiver:             Option[StatsReceiver]                     = None,
-  private val _name:                      Option[String]                            = None,
-  private val _sendBufferSize:            Option[Int]                               = None,
-  private val _recvBufferSize:            Option[Int]                               = None,
-  private val _bindTo:                    Option[SocketAddress]                     = None,
-  private val _logger:                    Option[Logger]                            = None,
-  private val _tls:                       Option[(String, String)]                  = None,
-  private val _startTls:                  Boolean                                   = false,
-  private val _channelFactory:            ReferenceCountedChannelFactory            = ServerBuilder.defaultChannelFactory,
-  private val _maxConcurrentRequests:     Option[Int]                               = None,
-  private val _hostConnectionMaxIdleTime: Option[Duration]                          = None,
-  private val _hostConnectionMaxLifeTime: Option[Duration]                          = None,
-  private val _requestTimeout:            Option[Duration]                          = None,
-  private val _readTimeout:               Option[Duration]                          = None,
-  private val _writeCompletionTimeout:    Option[Duration]                          = None,
-  private val _traceReceiver:             TraceReceiver                             = new NullTraceReceiver)
+  private val _codec:                     Option[Codec[Req, Rep]]          = None,
+  private val _statsReceiver:             Option[StatsReceiver]            = None,
+  private val _name:                      Option[String]                   = None,
+  private val _sendBufferSize:            Option[Int]                      = None,
+  private val _recvBufferSize:            Option[Int]                      = None,
+  private val _bindTo:                    Option[SocketAddress]            = None,
+  private val _logger:                    Option[Logger]                   = None,
+  private val _tls:                       Option[(String, String)]         = None,
+  private val _startTls:                  Boolean                          = false,
+  private val _channelFactory:            ReferenceCountedChannelFactory   = ServerBuilder.defaultChannelFactory,
+  private val _maxConcurrentRequests:     Option[Int]                      = None,
+  private val _hostConnectionMaxIdleTime: Option[Duration]                 = None,
+  private val _hostConnectionMaxLifeTime: Option[Duration]                 = None,
+  private val _requestTimeout:            Option[Duration]                 = None,
+  private val _readTimeout:               Option[Duration]                 = None,
+  private val _writeCompletionTimeout:    Option[Duration]                 = None,
+  private val _traceReceiver:             TraceReceiver                    = new NullTraceReceiver)
 {
   /**
    * The Scala compiler errors if the case class members don't have underscores.
@@ -334,10 +334,16 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
 
-        if (config.hostConnectionMaxIdleTime.isDefined || config.hostConnectionMaxLifeTime.isDefined) {
-          service = new ExpiringService(service, config.hostConnectionMaxIdleTime, config.hostConnectionMaxLifeTime) {
-            override def didExpire() { closingHandler.close() }
-          }
+        if (config.hostConnectionMaxIdleTime.isDefined ||
+            config.hostConnectionMaxLifeTime.isDefined) {
+          service =
+            new ExpiringService(
+              service,
+              config.hostConnectionMaxIdleTime,
+              config.hostConnectionMaxLifeTime
+            ) {
+              override def didExpire() { closingHandler.close() }
+            }
         }
 
         config.requestTimeout foreach { duration =>

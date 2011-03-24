@@ -20,9 +20,7 @@ trait AbstractCodec[Req, Rep] {
    * The pipeline factory that implements the protocol.
    */
   def pipelineFactory: ChannelPipelineFactory
-}
 
-trait ClientCodec[Req, Rep] extends AbstractCodec[Req, Rep] {
   /**
    * Prepare a newly-created connected Service endpoint. It becomes
    * available once the returned Future is satisfied.
@@ -32,15 +30,8 @@ trait ClientCodec[Req, Rep] extends AbstractCodec[Req, Rep] {
   ): Future[Service[Req, Rep]] = Future.value(underlying)
 }
 
-trait ServerCodec[Req, Rep] extends AbstractCodec[Req, Rep] {
-  /**
-   * Prepare a newly created service.
-   * 
-   */
-  def prepareService(
-    underlying: Service[IReq, IRep]
-  ): Service[Req, Rep] = underlying
-}
+trait ClientCodec[Req, Rep] extends AbstractCodec[Req, Rep]
+trait ServerCodec[Req, Rep] extends AbstractCodec[Req, Rep]
 
 /**
  * A combined codec provides both client and server codecs in one
@@ -59,7 +50,7 @@ trait Codec[Req, Rep] {
     new ServerCodec[Req, Rep] {
       def pipelineFactory = serverPipelineFactory
       override def prepareService(underlying: Service[Req, Rep]) =
-        wrapServerChannel(underlying)
+        Future.value(wrapServerChannel(underlying))
     }
 
   @deprecated("clientPipelineFactory is deprecated, use clientCodec instead")
