@@ -244,6 +244,8 @@ Finagle uses `com.twitter.util.Futures` as the unifying abstraction for all asyn
 
 In the example below, we define a function `f` that takes an `Int` and returns a `Future[Int]`. It errors if given an odd number.
 
+[See the Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Future.html)
+
 ### Scala
 
     def f(a: Int): Future[Int] =
@@ -318,6 +320,8 @@ A more complex variation of scatter/gather is to perform a sequence of asynchron
 ## Streaming Protocols
 
 Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalization of `Futures` called `Channels`. `Channels` represent a stream of events that can be listened to. To publish and subscribe to a `Channel`, do the following:
+
+[See the Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Channel.html)
 
     // a ChannelSource is a readable-writable stream of messages, whereas a Channel is only readable.
     val source = new ChannelSource[Int]
