@@ -18,6 +18,7 @@ private[finagle] object ChannelBufferUtils {
   class RichChannelBuffer(buffer: ChannelBuffer) {
     def matches(string: String) = buffer.toString(CharsetUtil.UTF_8).matches(string)
     def toInt = toString.toInt
+    def toLong = toString.toLong
     override def toString = buffer.toString(CharsetUtil.UTF_8)
     def size = buffer.writerIndex() - buffer.readerIndex()
 

@@ -103,6 +103,20 @@ trait Client {
   def decr(key: String, delta: Int):              Future[Option[Int]]
 
   /**
+   * Increment a key. Interpret the key as an Long if it is parsable.
+   * This operation has no effect if there is no value there already.
+   */
+  def incrl(key: String):                         Future[Option[Long]]
+  def incrl(key: String, delta: Long):            Future[Option[Long]]
+
+  /**
+   * Decrement a key. Interpret the key as an Long if it is parsable.
+   * This operation has no effect if there is no value there already.
+   */
+  def decrl(key: String):                         Future[Option[Long]]
+  def decrl(key: String, delta: Long):            Future[Option[Long]]
+
+  /**
    * Store a key. Override an existing values.
    * @return true
    */
@@ -220,7 +234,17 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
 
   def decr(key: String) = decr(key, 1)
 
-  def incr(key: String, delta: Int): Future[Option[Int]] = {
+  def incr(key: String, delta: Int): Future[Option[Int]] =
+    incrl(key, delta) map { _ map (_.asInstanceOf[Int]) }
+
+  def decr(key: String, delta: Int): Future[Option[Int]] =
+    decrl(key, delta) map { _ map (_.asInstanceOf[Int]) }
+
+  def incrl(key: String) = incrl(key, 1L)
+
+  def decrl(key: String) = decrl(key, 1L)
+
+  def incrl(key: String, delta: Long): Future[Option[Long]] = {
     service(Incr(key, delta)) map {
       case Number(value) => Some(value)
       case NotFound()    => None
@@ -229,7 +253,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
-  def decr(key: String, delta: Int): Future[Option[Int]] = {
+  def decrl(key: String, delta: Long): Future[Option[Long]] = {
     service(Decr(key, delta)) map {
       case Number(value) => Some(value)
       case NotFound()    => None
@@ -279,11 +303,15 @@ trait PartitionedClient extends Client {
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     clientOf(key).replace(key, flags, expiry, value)
 
-  def delete(key: String)           = clientOf(key).delete(key)
-  def incr(key: String)             = clientOf(key).incr(key)
-  def incr(key: String, delta: Int) = clientOf(key).incr(key, delta)
-  def decr(key: String)             = clientOf(key).decr(key)
-  def decr(key: String, delta: Int) = clientOf(key).decr(key, delta)
+  def delete(key: String)             = clientOf(key).delete(key)
+  def incr(key: String)               = clientOf(key).incr(key)
+  def incr(key: String, delta: Int)   = clientOf(key).incr(key, delta)
+  def decr(key: String)               = clientOf(key).decr(key)
+  def decr(key: String, delta: Int)   = clientOf(key).decr(key, delta)
+  def incrl(key: String)              = clientOf(key).incrl(key)
+  def incrl(key: String, delta: Long) = clientOf(key).incrl(key, delta)
+  def decrl(key: String)              = clientOf(key).decrl(key)
+  def decrl(key: String, delta: Long) = clientOf(key).decrl(key, delta)
 }
 
 object PartitionedClient {

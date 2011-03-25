@@ -120,4 +120,56 @@ public class ClientBase extends Client {
       }
     });
   }
+
+  public Future<Long> incrl(String key) {
+    Future<Option<Long>> result = underlying.incrl(key);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
+	if (value.isDefined()) {
+	  return (Long) value.get();
+	} else {
+	  return -1L;
+	}
+      }
+    });
+  }
+
+  public Future<Long> incrl(String key, Long delta) {
+    Future<Option<Long>> result = underlying.incrl(key, delta);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
+	if (value.isDefined()) {
+	  return (Long) value.get();
+	} else {
+	  return -1L;
+	}
+      }
+    });
+  }
+
+  public Future<Long> decrl(String key) {
+    Future<Option<Long>> result = underlying.decrl(key);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
+	if (value.isDefined()) {
+	  return (Long) value.get();
+	} else {
+	  return -1L;
+	}
+      }
+    });
+  }
+
+  public Future<Long> decrl(String key, Long delta) {
+    Future<Option<Long>> result = underlying.decrl(key, delta);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
+	if (value.isDefined()) {
+	  return (Long) value.get();
+	} else {
+	  return -1L;
+	}
+      }
+    });
+  }
 }

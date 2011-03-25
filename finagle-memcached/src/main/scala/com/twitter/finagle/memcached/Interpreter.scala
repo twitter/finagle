@@ -88,8 +88,8 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
               throw new ClientError("cannot increment or decrement non-numeric value")
 
             val existingValue =
-              if (existingString.isEmpty) 0
-              else existingString.toInt
+              if (existingString.isEmpty) 0L
+              else existingString.toLong
 
             val result = existingValue + delta
             data(key) = result.toString

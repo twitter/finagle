@@ -91,6 +91,20 @@ public abstract class Client {
   abstract public Future<Integer> decr(String key);
   abstract public Future<Integer> decr(String key, int delta);
 
+  /**
+   * Increment a key. Interpret the key as an Long if it is parsable.
+   * This operation has no effect if there is no value there already.
+   */
+  abstract public Future<Long> incrl(String key);
+  abstract public Future<Long> incrl(String key, Long delta);
+
+  /**
+   * Decrement a key. Interpret the key as an Long if it is parsable.
+   * This operation has no effect if there is no value there already.
+   */
+  abstract public Future<Long> decrl(String key);
+  abstract public Future<Long> decrl(String key, Long delta);
+
   public Future<Void> set(String key, String value) {
     return this.set(key, toChannelBuffer(value));
   }
