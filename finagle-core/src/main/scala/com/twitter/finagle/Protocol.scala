@@ -28,6 +28,10 @@ trait AbstractCodec[Req, Rep] {
   def prepareService(
     underlying: Service[IReq, IRep]
   ): Future[Service[Req, Rep]] = Future.value(underlying)
+
+  // XXX: here we can hide the intermediate types entirely by
+  // producing the channel service here(!).
+  // ChannelService, then 
 }
 
 trait ClientCodec[Req, Rep] extends AbstractCodec[Req, Rep]
