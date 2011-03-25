@@ -43,7 +43,7 @@ object ClientBuilder {
  */
 case class ClientBuilder[Req, Rep](
   private val _cluster: Option[Cluster],
-  private val _protocol: Option[Protocol[Req, Rep]],
+  private val _codec: Option[ClientCodec[Req, Rep]],
   private val _connectionTimeout: Duration,
   private val _requestTimeout: Duration,
   private val _statsReceiver: Option[StatsReceiver],
@@ -64,7 +64,7 @@ case class ClientBuilder[Req, Rep](
 {
   def this() = this(
     None,               // cluster
-    None,               // protocol
+    None,               // codec
     10.milliseconds,    // connectionTimeout
     Duration.MaxValue,  // requestTimeout
     None,               // statsReceiver
@@ -87,7 +87,7 @@ case class ClientBuilder[Req, Rep](
   private[this] def options = Seq(
     "name"                      -> _name,
     "cluster"                   -> _cluster,
-    "protocol"                  -> _protocol,
+    "codec"                     -> _codec,
     "connectionTimeout"         -> Some(_connectionTimeout),
     "requestTimeout"            -> Some(_requestTimeout),
     "statsReceiver"             -> _statsReceiver,
@@ -131,13 +131,21 @@ case class ClientBuilder[Req, Rep](
     copy(_cluster = Some(cluster))
   }
 
-  def protocol[Req1, Rep1](protocol: Protocol[Req1, Rep1]) =
-    copy(_protocol = Some(protocol))
+  def codec[Req1, Rep1](codec: ClientCodec[Req1, Rep1]) =
+    copy(_codec = Some(codec))
 
-  def codec[Req1, Rep1](_codec: Codec[Req1, Rep1]) =
-    copy(_protocol = Some(new Protocol[Req1, Rep1] {
-      def codec = _codec
+  def protocol[Req1, Rep1](protocol: Protocol[Req1, Rep1]) =
+    copy(_codec = Some(new ClientCodec[Req1, Rep1] {
+      def pipelineFactory = protocol.codec.clientCodec.pipelineFactory
+
+      override def prepareService(underlying: Service[Req1, Rep1]) = {
+        val future = protocol.codec.clientCodec.prepareService(underlying)
+        future flatMap { protocol.prepareChannel(_) }
+      }
     }))
+
+  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
+    copy(_codec = Some(codec.clientCodec))
 
   def connectionTimeout(duration: Duration) =
     copy(_connectionTimeout = duration)
@@ -201,13 +209,13 @@ case class ClientBuilder[Req, Rep](
   def logger(logger: Logger) = copy(_logger = Some(logger))
 
   // ** BUILDING
-  private[this] def buildBootstrap(protocol: Protocol[Req, Rep], host: SocketAddress) = {
+  private[this] def buildBootstrap(codec: ClientCodec[Req, Rep], host: SocketAddress) = {
     val cf = _channelFactory getOrElse ClientBuilder.defaultChannelFactory
     cf.acquire()
     val bs = new ClientBootstrap(cf)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
-        val pipeline = protocol.codec.clientPipelineFactory.getPipeline
+        val pipeline = codec.pipelineFactory.getPipeline
         for (ctx <- _tls) {
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(true)
@@ -246,15 +254,16 @@ case class ClientBuilder[Req, Rep](
     new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark, statsReceiver)
   }
 
-  private[this] def prepareChannel(service: Service[Req, Rep]) = {
-    val protocol = _protocol.get
+  private[this] def prepareService(service: Service[Req, Rep]) = {
+    val codec = _codec.get
     var future: Future[Service[Req, Rep]] = null
 
-    future = protocol.codec.prepareClientChannel(service)
-    future = future.flatMap { protocol.prepareChannel(_) }
+    future = codec.prepareService(service)
 
     if (_hostConnectionMaxIdleTime.isDefined || _hostConnectionMaxLifeTime.isDefined) {
-      future = future.map { new ExpiringService(_, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime) }
+      future = future map {
+        new ExpiringService(_, _hostConnectionMaxIdleTime, _hostConnectionMaxLifeTime)
+      }
     }
 
     future
@@ -267,13 +276,13 @@ case class ClientBuilder[Req, Rep](
   def buildFactory(): ServiceFactory[Req, Rep] = {
     if (!_cluster.isDefined)
       throw new IncompleteSpecification("No hosts were specified")
-    if (!_protocol.isDefined)
-      throw new IncompleteSpecification("No protocol was specified")
+    if (!_codec.isDefined)
+      throw new IncompleteSpecification("No codec was specified")
 
     Timer.default.acquire()
 
     val cluster  = _cluster.get
-    val protocol = _protocol.get
+    val codec = _codec.get
 
     val hostFactories = cluster mkFactories { host =>
       // The per-host stack is as follows:
@@ -297,9 +306,8 @@ case class ClientBuilder[Req, Rep](
 
       var factory: ServiceFactory[Req, Rep] = null
 
-      val bs = buildBootstrap(protocol, host)
-      factory = new ChannelServiceFactory[Req, Rep](bs, prepareChannel _, hostStatsReceiver)
-
+      val bs = buildBootstrap(codec, host)
+      factory = new ChannelServiceFactory[Req, Rep](bs, prepareService _, hostStatsReceiver)
       factory = buildPool(factory, hostStatsReceiver)
 
       if (_requestTimeout < Duration.MaxValue) {

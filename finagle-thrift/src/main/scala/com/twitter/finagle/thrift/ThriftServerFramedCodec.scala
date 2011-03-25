@@ -97,8 +97,10 @@ private[thrift] class ThriftServerTracingFilter
   }
 }
 
-class ThriftServerFramedCodec extends Codec[Array[Byte], Array[Byte]] {
-  val clientPipelineFactory =
+class ThriftServerFramedCodec
+  extends ServerCodec[Array[Byte], Array[Byte]]
+{
+  def pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -109,8 +111,6 @@ class ThriftServerFramedCodec extends Codec[Array[Byte], Array[Byte]] {
       }
     }
 
-  val serverPipelineFactory = clientPipelineFactory
-
-  override def wrapServerChannel(service: Service[Array[Byte], Array[Byte]]) =
-    (new ThriftServerTracingFilter) andThen service
+  override def prepareService(service: Service[Array[Byte], Array[Byte]]) =
+    Future.value((new ThriftServerTracingFilter) andThen service)
 }

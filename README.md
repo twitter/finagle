@@ -1,6 +1,6 @@
 # Finagle
 
-Finagle is an library for building *asynchronous* RPC servers and clients in Java, Scala, or any JVM language. Built atop [Netty](http://www.jboss.org/netty), Finagle provides a rich set of tools that are protocol independent.
+Finagle is a library for building *asynchronous* RPC servers and clients in Java, Scala, or any JVM language. Built atop [Netty](http://www.jboss.org/netty), Finagle provides a rich set of tools that are protocol independent.
 
 Finagle is flexible enough to support a variety of RPC styles, including request-response, streaming, and pipelining (e.g., HTTP pipelining and Redis pipelining). It also makes it easy to work with stateful RPC styles (e.g., those requiring authentication and those that support transactions).
 
@@ -10,7 +10,7 @@ Finagle is flexible enough to support a variety of RPC styles, including request
 * Load Balancing
 * Failure Detection
 * Failover/Retry
-* Distributed Tracing (a la Dapper http://research.google.com/pubs/pub36356.html)
+* Distributed Tracing (a la [Dapper](http://research.google.com/pubs/pub36356.html))
 * Service Discovery (e.g., via Zookeeper)
 * Rich Statistics
 * Native OpenSSL bindings
@@ -19,16 +19,38 @@ Finagle is flexible enough to support a variety of RPC styles, including request
 
 * Backpressure (to defend against abusive clients)
 * Service Registration (e.g., via Zookeeper)
+* Distributed Tracing
 * Native OpenSSL bindings
 
 ### Supported Protocols
 
 * HTTP
+* HTTP streaming (Comet)
 * Thrift
 * Memcached/Kestrel
 * More to come!
 
 ## How do I start?
+
+### API Documentation
+
+Links to the Scaladoc is available [here](http://twitter.github.com/finagle/)
+
+### Examples
+
+I think the best way to start is to look at examples:
+
+* [Echo](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/echo) - A simple echo client and server using a newline-delimited protocol. Illustrates the basics of asynchronous control-flow.
+* [Http](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/http) - An advanced HTTP client and server that illustrates the use of Filters to compositionally organize your code. Filters are used here to isolate authentication and error handling concerns.
+* [Memcached Proxy](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/memcachedproxy) - A simple proxy supporting the Memcached protocol.
+* [Stream](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stream) - An illustration of Channels, the abstraction for Streaming protocols.
+* [Spritzer 2 Kestrel](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel) - An illustration of Channels, the abstraction for Streaming protocols. Here the Twitter Firehose is "piped" into a Kestrel message queue, illustrating some of the compositionality of Channels.
+* [Stress](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stress) - A high-throughput HTTP client for driving stressful traffic to an HTTP server. Illustrates more advanced asynchronous control-flow.
+* [Thrift](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/thrift) - A simple client and server for a Thrift protocol.
+
+But a great way to start might be to read the following conceptual overview:
+
+### Conceptual Overview
 
 Here is a simple HTTP server and client. The server returns a simple HTTP 200 response:
 
@@ -68,7 +90,7 @@ Note that the variable `responseFuture` in this example is of type `Future[HttpR
      println(responseFuture(1.second))
 
      // (2) Alternatively, when the response arrives, invoke the callback, then print:
-     responseFuture foreach { response =>
+     responseFuture onSuccess { response =>
        println(response)
      }
 
@@ -92,11 +114,12 @@ Once you have defined your `Service`, it can be bound to a SocketAddress, thus b
 
     ServerBuilder()
       .bindTo(address)
+      .codec(...)
       .build(plusOneService)
 
 ### Filters
 
-However, an RPC Server must speak a specific protocol. One nice way to design an RPC Server is to decouple the protocol handling code from the implimentation of the business service. A `Filter` provides a easy way to do this.
+However, an RPC Server must speak a specific codec/protocol. One nice way to design an RPC Server is to decouple the protocol handling code from the implementation of the business rules. For example, we can have an adding service exposed via HTTP and Thrift. A `Filter` provides a easy way to do this.
 
 Here is a `Filter` that adapts the `HttpRequest => HttpResponse` protocol to the `Int => Int` `plusOneService`:
 
@@ -175,8 +198,7 @@ Finagle makes it easy to build RPC clients with connection pooling, load balanci
         .logger(Logger.getLogger("http"))
         .build()
 
-
-This creates a load balanced HTTP client that balances requests among 3 (local) endpoints. The balancing strategy is to pick the endpoint with the least number of outstanding requests (this is similar to "least connections" in other load balancers).
+This creates a load balanced HTTP client that balances requests among 3 (local) endpoints. The balancing strategy is to pick the endpoint with the least number of outstanding requests (this is similar to "least connections" in other load balancers). The load-balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. **In general a lot of thought has gone into making robust load-balancing and failover.**
 
 ### Notes
 
@@ -210,10 +232,10 @@ A robust way to use RPC clients is to have an upper-bound on how long to wait fo
     // (2) asynchronous timeouts require an (implicit) Timer object
     import com.twitter.finagle.util.Timer._
 
-    futureResponse.within(1.second) respond {
-      case Throw(t) => ...
-      case Return(response) =>
-        println("yay it worked: " + response)
+    futureResponse.within(1.second) onSuccess { response =>
+      println("yay it worked: " + response)
+    } onFailure {
+      case e: TimeoutException => ...
     }
 
 ## Using Futures
@@ -232,6 +254,13 @@ In the example below, we define a function `f` that takes an `Int` and returns a
 
     val myFuture: Future[Int] = f(2)
 
+    // an alternative way to define the function `f`:
+
+    def f(a: Int): Future[Int] = Future {
+      if (a % 2 == 0) a
+      else throw new OddNumberException
+    }
+
     // 1) Wait 1 second the for computation to return
     try {
       println(myFuture(1.second))
@@ -241,9 +270,12 @@ In the example below, we define a function `f` that takes an `Int` and returns a
     }
 
     // 2) Invoke a callback when the computation succeeds or fails
-    myFuture respond {
-      case Return(i) => println(i)
-      case Throw(e) => ...
+    myFuture onSuccess { i =>
+      println(i)
+    } onFailure { e =>
+      println("uh oh!")
+    } ensure {
+      externalResources.release()
     }
 
 In addition to waiting for results to return, `Futures` can be transformed in interesting ways. For instance, it is possible to convert a `Future[String]` to a `Future[Int]` by using `map`:
@@ -264,9 +296,7 @@ As a final example of `Futures` let's consider the problem of scatter/gather pat
 
     val myFutures: Seq[Future[Int]] = ...
 
-    val waitTillAllComplete: Future[Seq[Int]] = Future.join(myFutures)
-
-In this example, `waitTillAllComplete` is a `Future[Unit]`. `Futures` of this type are often used to indicate when something has completed, but there is no value to return (or the value is available elsewhere).
+    val waitTillAllComplete: Future[Seq[Int]] = Future.collect(myFutures)
 
 A more complex variation of scatter/gather is to perform a sequence of asynchronous operations and harvest only those that return within a certain time -- using a default value for those that don't return. A concrete example might be to issue a set of parallel requests to N partitions of a search index; those that don't return in time we consider to have returned the empty set.
 
@@ -277,7 +307,7 @@ A more complex variation of scatter/gather is to perform a sequence of asynchron
         case _: TimeoutException => EmptyResult
       }
     }
-    val allResults: Future[Seq[Result]] = Future.join(timedResults)
+    val allResults: Future[Seq[Result]] = Future.collect(timedResults)
 
     // Process the results asynchronously.
     // Note: this takes no longer than 1 second.
@@ -294,16 +324,16 @@ Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalizat
     val sink: Channel = source
 
     // start listening for messages:
-    val observer1 = sink receive { message =>
+    val observer1 = sink respond { message =>
       Future { println("1: " + message) }                              // (1)
     }
-    val observer2 = sink receive { message =>                          // (2)
+    val observer2 = sink respond { message =>                          // (2)
       Future { println("2: " + message) }
     }
 
     // send some messages on the channel
-    source send(1)
-    source send(2)
+    source.send(1)
+    source.send(2)
     // etc.
 
     // stop listening for messages:
@@ -312,7 +342,7 @@ Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalizat
 ### Notes
 
 1. Subscribers must return a `Future` indicating when processing of the received message is complete. This allows consumers to exhibit backpressure to producers.
-1. Just as with `Futures` there can be any number of receivers to a `Channel`.
+1. Just as with `Futures` there can be any number of responders to a `Channel`.
 
 `Channels` have some of the usual sequence operations such as `map` and `filter`:
 
@@ -322,21 +352,41 @@ Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalizat
 
 Most of the tricky issues concerning `Channels` involve data-loss and backpressure. In order to ensure that no data is lost, a typical pattern is not to broadcast on a `Channel` until there is at least one subscriber. This is easily accomplished:
 
-    channel.receives.first { _ =>                                       // (1) (2)
-      // the first receiver has arrived, start sending!
+    channel.responds.first { _ =>                                       // (1) (2)
+      // the first responder has arrived, start sending!
       // ...
     }
 
 ### Notes
 
-1. `channel.receives` is a `Channel` itself. In other words, every `Channel` has a sub-channel indicating when subscribers subscribe (and unsubscribe!).
+1. `channel.responds` is a `Channel` itself. In other words, every `Channel` has a sub-channel indicating when subscribers subscribe (and unsubscribe!).
 1. `channel.first` is a `Future` indicating when the first message arrives on that `Channel`.
+
+However, a more robust producer stops producing when all consumers `dispose()`. This is easily accomplished.
+
+    channel.numObservers.respond { i =>
+      i match {
+        case 0 => start()
+        case 1 => stop()
+        case _ => // continue
+      }
+      Future.Done
+    }
 
 Backpressure (that is, slowing down production if consumers get backed up) is also easily accomplished. The `channel.send` method returns a `Seq[Future[Unit]]` -- a sequence of `Futures` indicating when all consumers have processed the message. You can use `Future.join` to slow down production in the following way:
 
     Future.join(channel.send(1)) onSuccess { _ =>
       Future.join(channel.send(2)) onSuccess { ... }
     }
+
+You can use recursion to send 10 messages, throttled by consumer performance. Additionally, Future provides a number of control flow constructs that are useful:
+
+    val i = new AtomicInteger(0)
+    Future.times(10) { channel.send(i.getAndIncrement()) } // (1)
+
+### Notes
+
+1. Future has methods like times(), parallel(), and whileDo() that implement advanced control-flow patterns.
 
 With `Channels`, building a streaming RPC service is straightforward. You will need a codec that supports streaming (such as HTTP with chunked encoding). Then, build a `Service` that returns a `Channel`:
 
@@ -347,7 +397,7 @@ With `Channels`, building a streaming RPC service is straightforward. You will n
 
 Some incomplete API documentation is available: See [scaladoc](http://twitter.github.com/finagle/).
 
-## Serversets 
+## Serversets
 
 `finagle-serversets` is an implementation of the Finagle Cluster interface using `com.twitter.com.zookeeper` [ServerSets](http://twitter.github.com/commons/pants.doc/index.html#com.twitter.common.zookeeper.ServerSet).
 

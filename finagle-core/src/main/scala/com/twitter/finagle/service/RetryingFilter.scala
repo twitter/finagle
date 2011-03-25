@@ -30,7 +30,7 @@ class RetryingFilter[Req, Rep](retryStrategy: RetryStrategy)
   {
     service(request) respond {
       // Only write exceptions are retriable.
-      case t @ Throw(cause) if cause.isInstanceOf[WriteException] =>
+      case t@Throw(cause) if cause.isInstanceOf[WriteException] =>
         // Time to retry.
         strategy.nextStrategy respond {
           case Return(nextStrategy) =>

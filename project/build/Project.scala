@@ -188,7 +188,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with AdhocInlines
   {
-    val ostrich4 = "com.twitter" % "ostrich" % "4.0.1"
+    val ostrich4 = "com.twitter" % "ostrich" % "4.0.2"
   }
 
   class NativeProject(info: ProjectInfo) extends StandardProject(info)

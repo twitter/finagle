@@ -14,7 +14,7 @@ import org.apache.thrift.async.AsyncMethodCallback
 import com.twitter.test.{B, AnException, SomeStruct}
 import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
-import com.twitter.finagle.Codec
+import com.twitter.finagle.{Codec, ClientCodec}
 import com.twitter.finagle.builder.ClientBuilder
 
 object FinagleClientThriftServerSpec extends Specification {
@@ -62,7 +62,10 @@ object FinagleClientThriftServerSpec extends Specification {
     }
 
 
-    def doit(transportFactory: TTransportFactory, codec: Codec[ThriftClientRequest, Array[Byte]]) {
+    def doit(
+      transportFactory: TTransportFactory,
+      codec: ClientCodec[ThriftClientRequest, Array[Byte]]
+    ) {
       "talk to each other" in {
         // TODO: interleave requests (to test seqids, etc.)
        
