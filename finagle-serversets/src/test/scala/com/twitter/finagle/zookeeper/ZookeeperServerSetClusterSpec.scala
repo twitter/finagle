@@ -13,26 +13,30 @@ import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecod
 import com.twitter.util.{Future, RandomSocket}
 import com.twitter.conversions.time._
 import org.jboss.netty.channel._
-import com.twitter.finagle.{Codec, Service}
+import com.twitter.finagle.{Codec, ClientCodec, ServerCodec, Service}
 
 class StringCodec extends Codec[String, String] {
-  val serverPipelineFactory = new ChannelPipelineFactory {
-    def getPipeline = {
-      val pipeline = Channels.pipeline()
-      pipeline.addLast("line",
-        new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-      pipeline.addLast("stringDecoder", new StringDecoder(CharsetUtil.UTF_8))
-      pipeline.addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8))
-      pipeline
+  override def serverCodec = new ServerCodec[String, String] {
+    def pipelineFactory = new ChannelPipelineFactory {
+      def getPipeline = {
+        val pipeline = Channels.pipeline()
+        pipeline.addLast("line",
+          new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
+        pipeline.addLast("stringDecoder", new StringDecoder(CharsetUtil.UTF_8))
+        pipeline.addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8))
+        pipeline
+      }
     }
   }
 
-  val clientPipelineFactory = new ChannelPipelineFactory {
-    def getPipeline = {
-      val pipeline = Channels.pipeline()
-      pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
-      pipeline.addLast("stringDecode", new StringDecoder(CharsetUtil.UTF_8))
-      pipeline
+  override def clientCodec = new ClientCodec[String, String] {
+    def pipelineFactory = new ChannelPipelineFactory {
+      def getPipeline = {
+        val pipeline = Channels.pipeline()
+        pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
+        pipeline.addLast("stringDecode", new StringDecoder(CharsetUtil.UTF_8))
+        pipeline
+      }
     }
   }
 }

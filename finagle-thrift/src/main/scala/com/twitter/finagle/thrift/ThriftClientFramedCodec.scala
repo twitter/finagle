@@ -25,9 +25,9 @@ object ThriftClientFramedCodec {
   def apply() = new ThriftClientFramedCodec
 }
 
-class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
+class ThriftClientFramedCodec extends ClientCodec[ThriftClientRequest, Array[Byte]]
 {
-  val clientPipelineFactory =
+  def pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
@@ -38,10 +38,7 @@ class ThriftClientFramedCodec extends Codec[ThriftClientRequest, Array[Byte]]
       }
     }
 
-  val serverPipelineFactory = clientPipelineFactory
-
-  override def prepareClientChannel(underlying: Service[ThriftClientRequest, Array[Byte]]) =
-  {
+  override def prepareService(underlying: Service[ThriftClientRequest, Array[Byte]]) = {
     // Attempt to upgrade the protocol the first time around by
     // sending a magic method invocation.
     val buffer = new OutputBuffer()

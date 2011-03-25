@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.http._
 import com.twitter.util.StorageUnit
 import com.twitter.conversions.storage._
 
-import com.twitter.finagle.Codec
+import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
 
 case class Http(
     _compressionLevel: Int = 0,
@@ -22,8 +22,8 @@ case class Http(
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
 
-  val clientPipelineFactory: ChannelPipelineFactory =
-    new ChannelPipelineFactory {
+  override def clientCodec = new ClientCodec[HttpRequest, HttpResponse] {
+    def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpClientCodec())
@@ -40,9 +40,10 @@ case class Http(
         pipeline
       }
     }
+  }
 
-  val serverPipelineFactory =
-    new ChannelPipelineFactory {
+  override def serverCodec = new ServerCodec[HttpRequest, HttpResponse] {
+    def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
         pipeline.addLast("httpCodec", new HttpServerCodec)
@@ -65,6 +66,7 @@ case class Http(
         pipeline
       }
     }
+  }
 }
 
 object Http {
