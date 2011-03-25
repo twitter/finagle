@@ -42,7 +42,7 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
       case ERROR        => Error(new NonexistentCommand(""))
       case CLIENT_ERROR => Error(new ClientError(""))
       case SERVER_ERROR => Error(new ServerError(""))
-      case ds         => Number(ds.toInt)
+      case ds         => Number(ds.toLong)
     }
   }
 

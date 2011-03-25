@@ -64,6 +64,15 @@ object ClientSpec extends Specification {
         client.incr("foo", 2)() mustEqual Some(3)
         client.decr("foo")()    mustEqual Some(2)
       }
+
+      "incrl & decrl" in {
+        client.set("foo", "")()
+        client.incrl("foo")()    mustEqual Some(1L)
+        val l = 1L << 50
+        client.incrl("foo", l)() mustEqual Some(l + 1L)
+        client.decrl("foo")()    mustEqual Some(l)
+        client.decrl("foo", l)() mustEqual Some(0L)
+      }
     }
 
     "ketama client" in {
