@@ -90,9 +90,9 @@ private[finagle] class ChannelService[Req, Rep](
 /**
  * A factory for ChannelService instances, given a bootstrap.
  */
-private[finagle] class ChannelServiceFactory[Req, Rep, IReq, IRep](
+private[finagle] class ChannelServiceFactory[Req, Rep](
     bootstrap: ClientBootstrap,
-    prepareChannel: Service[IReq, IRep] => Future[Service[Req, Rep]],
+    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]],
     statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
@@ -113,7 +113,7 @@ private[finagle] class ChannelServiceFactory[Req, Rep, IReq, IRep](
       case Ok(channel) =>
         channelLatch.incr()
         connectLatencyStat.add(begin.untilNow.inMilliseconds)
-        prepareChannel(new ChannelService[IReq, IRep](channel, this)) respond { promise() = _ }
+        prepareChannel(new ChannelService[Req, Rep](channel, this)) respond { promise() = _ }
 
       case Error(cause) =>
         promise() = Throw(new WriteException(cause))
