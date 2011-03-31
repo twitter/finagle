@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.http.{
 
 import com.twitter.conversions.time._
 import com.twitter.util.{Future, RandomSocket, Return, Throw, Time}
-import com.twitter.stats
+import com.twitter.ostrich.stats
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.builder.Http
