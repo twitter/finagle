@@ -35,13 +35,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new OstrichProject(_), coreProject)
 
   /**
-   * finagle-ostrich3 implements a StatsReceiver for the Ostrich 3.x statistics library
-   */
-  val ostrich3Project = project(
-    "finagle-ostrich3", "finagle-ostrich3",
-    new Ostrich3Project(_), coreProject)
-
-  /**
    * finagle-ostrich4 implements a StatsReceiver for the Ostrich 4.x statistics library
    */
   val ostrich4Project = project(
@@ -185,12 +178,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val ostrich2 = "com.twitter" % "ostrich" % "2.3.4"
   }
 
-  class Ostrich3Project(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with ProjectDependencies
-  {
-    val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
-  }
-
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with ProjectDependencies
   {
@@ -207,6 +194,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"      % "libthrift" % "0.5.0"
     val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.2" % "provided"
-    val ostrich3 = "com.twitter" % "ostrich" % "4.0.2"
+    val ostrich4 = "com.twitter" % "ostrich" % "4.0.2"
   }
 }
