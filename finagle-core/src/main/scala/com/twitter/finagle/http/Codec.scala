@@ -15,12 +15,14 @@ import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
 case class Http(
     _compressionLevel: Int = 0,
     _maxRequestSize: StorageUnit = 1.megabyte,
-    _maxResponseSize: StorageUnit = 1.megabyte)
+    _maxResponseSize: StorageUnit = 1.megabyte,
+    _decompressionEnabled: Boolean = true)
   extends Codec[HttpRequest, HttpResponse] {
 
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
+  def decompressionEnabled(yesno: Boolean) = copy(_decompressionEnabled = yesno)
 
   override def clientCodec = new ClientCodec[HttpRequest, HttpResponse] {
     def pipelineFactory = new ChannelPipelineFactory {
@@ -31,7 +33,8 @@ case class Http(
           "httpDechunker",
           new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
 
-        pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
+        if (_decompressionEnabled)
+          pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
 
         pipeline.addLast(
           "connectionLifecycleManager",
