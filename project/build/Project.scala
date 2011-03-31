@@ -3,9 +3,12 @@ import com.twitter.sbt._
 
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
-  with AdhocInlines
+  with ProjectDependencies
 {
   override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
+
+  val nettyRepo =
+    "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
 
   val twitterRepo = "twitter.com" at "http://maven.twttr.com/"
 
@@ -113,15 +116,15 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new StressProject(_), coreProject, ostrich4Project, thriftProject)
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     override def compileOrder = CompileOrder.ScalaThenJava
+    val netty = "org.jboss.netty" %  "netty" % "3.2.3.Final"
 
-    val nettyRepo =
-      "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
-    val netty           = "org.jboss.netty" %  "netty"           % "3.2.3.Final"
-    val utilCore        = "com.twitter"     %  "util-core"       % "1.8.5" relativePath("util")
-    val utilCollection  = "com.twitter"     %  "util-collection" % "1.8.5" relativePath("util")
+    projectDependencies(
+      "util" ~ "util-core",
+      "util" ~ "util-collection"
+    )
 
     // Testing:
     val mockito = "org.mockito"             % "mockito-all"      % "1.8.5" % "test" withSources()
@@ -130,7 +133,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
     with SubversionPublisher with LibDirClasspath
-    with AdhocInlines with CompileThriftFinagle
+    with ProjectDependencies with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"    %  "libthrift" % "0.5.0"
@@ -138,26 +141,26 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class MemcachedProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     override def compileOrder = CompileOrder.ScalaThenJava
     val junit = "junit" % "junit" % "3.8.2" % "test"
   }
 
   class KestrelProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     override def compileOrder = CompileOrder.ScalaThenJava
   }
 
   class StreamProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     override def compileOrder = CompileOrder.ScalaThenJava
   }
 
   class ServersetsProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     override def ivyXML =
       <dependencies>
@@ -170,32 +173,35 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines with CompileThriftFinagle
+    with SubversionPublisher with ProjectDependencies with CompileThriftFinagle
+  {
+    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
+  }
 
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     val ostrich2 = "com.twitter" % "ostrich" % "2.3.4"
   }
 
   class Ostrich3Project(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     val ostrich3 = "com.twitter" % "ostrich" % "3.0.4"
   }
 
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines
+    with SubversionPublisher with ProjectDependencies
   {
     val ostrich4 = "com.twitter" % "ostrich" % "4.0.2"
   }
 
   class NativeProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with AdhocInlines with LibDirClasspath
+    with SubversionPublisher with ProjectDependencies with LibDirClasspath
 
   class StressProject(info: ProjectInfo) extends StandardProject(info)
-    with SubversionPublisher with IntegrationSpecs with AdhocInlines
+    with SubversionPublisher with IntegrationSpecs with ProjectDependencies
     with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
