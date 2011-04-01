@@ -13,6 +13,7 @@ import com.twitter.finagle.builder.Ssl.ContextFactory
 
 import com.twitter.util.{Future, RandomSocket}
 import com.twitter.util.TimeConversions._
+import com.twitter.io.TempFile
 
 object Pwd {
   def pwd = System.getenv("PWD")
@@ -22,8 +23,11 @@ object Pwd {
 }
 
 object SslConfig {
-  val certificatePath = Pwd / "finagle-native/src/test/resources/localhost.crt"
-  val keyPath: String = Pwd / "finagle-native/src/test/resources/localhost.key"
+  val certificateFile = TempFile.fromResourcePath(getClass, "/localhost.crt")
+  val keyFile         = TempFile.fromResourcePath(getClass, "/localhost.key")
+
+  val certificatePath = certificateFile.getAbsolutePath
+  val keyPath: String = keyFile.getAbsolutePath
 }
 
 object SslSpec extends Specification {
