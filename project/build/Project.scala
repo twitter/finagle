@@ -3,7 +3,7 @@ import com.twitter.sbt._
 
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
-  with ProjectDependencies
+  with ParentProjectDependencies
   with TartifactoryRepos
 {
   override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
@@ -138,8 +138,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults with LibDirClasspath with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
-    val thrift   = "thrift"    %  "libthrift" % "0.5.0"
-    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
+    val thrift    = "thrift"    % "libthrift" % "0.5.0"
+    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.2" % "provided"
   }
 
   class MemcachedProject(info: ProjectInfo) extends StandardProject(info)
