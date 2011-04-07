@@ -78,18 +78,18 @@ public abstract class Client {
   abstract public Future<Boolean> delete(String key);
 
   /**
-   * Increment a key. Interpret the key as an integer if it is parsable.
+   * Increment a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  abstract public Future<Integer> incr(String key);
-  abstract public Future<Integer> incr(String key, int delta);
+  abstract public Future<Long> incr(String key);
+  abstract public Future<Long> incr(String key, long delta);
 
   /**
-   * Decrement a key. Interpret the key as an integer if it is parsable.
+   * Decrement a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  abstract public Future<Integer> decr(String key);
-  abstract public Future<Integer> decr(String key, int delta);
+  abstract public Future<Long> decr(String key);
+  abstract public Future<Long> decr(String key, long delta);
 
   public Future<Void> set(String key, String value) {
     return this.set(key, toChannelBuffer(value));

@@ -60,9 +60,16 @@ object ClientSpec extends Specification {
 
       "incr & decr" in {
         client.set("foo", "")()
-        client.incr("foo")()    mustEqual Some(1)
-        client.incr("foo", 2)() mustEqual Some(3)
-        client.decr("foo")()    mustEqual Some(2)
+        client.incr("foo")()    mustEqual Some(1L)
+        client.incr("foo", 2)() mustEqual Some(3L)
+        client.decr("foo")()    mustEqual Some(2L)
+
+        client.set("foo", "")()
+        client.incr("foo")()    mustEqual Some(1L)
+        val l = 1L << 50
+        client.incr("foo", l)() mustEqual Some(l + 1L)
+        client.decr("foo")()    mustEqual Some(l)
+        client.decr("foo", l)() mustEqual Some(0L)
       }
     }
 

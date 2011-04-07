@@ -57,5 +57,4 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
     if (tokens.size > 5) throw new ClientError("Too many arguments")
     if (!tokens(3).matches(DIGITS)) throw new ClientError("Bad frame length")
   }
-
 }

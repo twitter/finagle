@@ -59,7 +59,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
     if (tokens.size == 3 && tokens.last != NOREPLY) throw new ClientError("Too many arguments")
     if (!tokens(1).matches(DIGITS)) throw new ClientError("Delta is not a number")
 
-    (tokens.head, tokens(1).toInt)
+    (tokens.head, tokens(1).toLong)
   }
 
   protected def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {

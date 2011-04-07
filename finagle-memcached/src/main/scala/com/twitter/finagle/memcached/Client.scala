@@ -89,18 +89,18 @@ trait Client {
   def delete(key: String):                        Future[Boolean]
 
   /**
-   * Increment a key. Interpret the key as an integer if it is parsable.
+   * Increment a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def incr(key: String):                          Future[Option[Int]]
-  def incr(key: String, delta: Int):              Future[Option[Int]]
+  def incr(key: String):                         Future[Option[Long]]
+  def incr(key: String, delta: Long):            Future[Option[Long]]
 
   /**
-   * Decrement a key. Interpret the key as an integer if it is parsable.
+   * Decrement a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def decr(key: String):                          Future[Option[Int]]
-  def decr(key: String, delta: Int):              Future[Option[Int]]
+  def decr(key: String):                         Future[Option[Long]]
+  def decr(key: String, delta: Long):            Future[Option[Long]]
 
   /**
    * Store a key. Override an existing values.
@@ -216,11 +216,11 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
       case _            => throw new IllegalStateException
     }
 
-  def incr(key: String) = incr(key, 1)
+  def incr(key: String) = incr(key, 1L)
 
-  def decr(key: String) = decr(key, 1)
+  def decr(key: String) = decr(key, 1L)
 
-  def incr(key: String, delta: Int): Future[Option[Int]] = {
+  def incr(key: String, delta: Long): Future[Option[Long]] = {
     service(Incr(key, delta)) map {
       case Number(value) => Some(value)
       case NotFound()    => None
@@ -229,7 +229,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
-  def decr(key: String, delta: Int): Future[Option[Int]] = {
+  def decr(key: String, delta: Long): Future[Option[Long]] = {
     service(Decr(key, delta)) map {
       case Number(value) => Some(value)
       case NotFound()    => None
@@ -279,11 +279,11 @@ trait PartitionedClient extends Client {
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     clientOf(key).replace(key, flags, expiry, value)
 
-  def delete(key: String)           = clientOf(key).delete(key)
-  def incr(key: String)             = clientOf(key).incr(key)
-  def incr(key: String, delta: Int) = clientOf(key).incr(key, delta)
-  def decr(key: String)             = clientOf(key).decr(key)
-  def decr(key: String, delta: Int) = clientOf(key).decr(key, delta)
+  def delete(key: String)             = clientOf(key).delete(key)
+  def incr(key: String)              = clientOf(key).incr(key)
+  def incr(key: String, delta: Long) = clientOf(key).incr(key, delta)
+  def decr(key: String)              = clientOf(key).decr(key)
+  def decr(key: String, delta: Long) = clientOf(key).decr(key, delta)
 }
 
 object PartitionedClient {

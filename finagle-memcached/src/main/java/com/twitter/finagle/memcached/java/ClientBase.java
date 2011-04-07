@@ -69,53 +69,53 @@ public class ClientBase extends Client {
     return underlying.delete(key);
   }
 
-  public Future<Integer> incr(String key) {
-    Future<Option<Integer>> result = underlying.incr(key);
-    return result.map(new Function<Option<Integer>, Integer>() {
-      public Integer apply(Option<Integer> value) {
+  public Future<Long> incr(String key) {
+    Future<Option<Long>> result = underlying.incr(key);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
 	if (value.isDefined()) {
-	  return (Integer) value.get();
+	  return (Long) value.get();
 	} else {
-	  return -1;
+	  return -1L;
 	}
       }
     });
   }
 
-  public Future<Integer> incr(String key, int delta) {
-    Future<Option<Integer>> result = underlying.incr(key, delta);
-    return result.map(new Function<Option<Integer>, Integer>() {
-      public Integer apply(Option<Integer> value) {
+  public Future<Long> incr(String key, long delta) {
+    Future<Option<Long>> result = underlying.incr(key, delta);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
 	if (value.isDefined()) {
-	  return (Integer) value.get();
+	  return (Long) value.get();
 	} else {
-	  return -1;
+	  return -1L;
 	}
       }
     });
   }
 
-  public Future<Integer> decr(String key) {
-    Future<Option<Integer>> result = underlying.decr(key);
-    return result.map(new Function<Option<Integer>, Integer>() {
-      public Integer apply(Option<Integer> value) {
+  public Future<Long> decr(String key) {
+    Future<Option<Long>> result = underlying.decr(key);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
 	if (value.isDefined()) {
-	  return (Integer) value.get();
+	  return (Long) value.get();
 	} else {
-	  return -1;
+	  return -1L;
 	}
       }
     });
   }
 
-  public Future<Integer> decr(String key, int delta) {
-    Future<Option<Integer>> result = underlying.decr(key, delta);
-    return result.map(new Function<Option<Integer>, Integer>() {
-      public Integer apply(Option<Integer> value) {
+  public Future<Long> decr(String key, long delta) {
+    Future<Option<Long>> result = underlying.decr(key, delta);
+    return result.map(new Function<Option<Long>, Long>() {
+      public Long apply(Option<Long> value) {
 	if (value.isDefined()) {
-	  return (Integer) value.get();
+	  return (Long) value.get();
 	} else {
-	  return -1;
+	  return -1L;
 	}
       }
     });

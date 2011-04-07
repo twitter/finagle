@@ -10,6 +10,6 @@ case class Deleted()                      extends Response
 case class Error(cause: Exception)        extends Response
 
 case class Values(values: Seq[Value]) extends Response
-case class Number(value: Int)         extends Response
+case class Number(value: Long)         extends Response
 
 case class Value(key: ChannelBuffer, value: ChannelBuffer)
