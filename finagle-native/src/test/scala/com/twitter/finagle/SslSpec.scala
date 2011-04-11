@@ -8,7 +8,8 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Http, Ssl}
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Ssl}
+import com.twitter.finagle.http.Http
 import com.twitter.finagle.builder.Ssl.ContextFactory
 
 import com.twitter.util.{Future, RandomSocket}
@@ -81,14 +82,20 @@ object SslSpec extends Specification {
           }
           val response = new DefaultHttpResponse(
             HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+          Option(request.getHeader("X-Transport-Cipher")) foreach { cipher: String =>
+            response.setHeader("X-Transport-Cipher", cipher)
+          }
           response.setContent(makeContent(requestedBytes))
           response
         }
       }
 
+      val codec =
+        Http().annotateCipherHeader("X-Transport-Cipher")
+
       val server =
         ServerBuilder()
-          .codec(Http)
+          .codec(codec.serverCodec)
           .bindTo(address)
           .tls(SslConfig.certificatePath, SslConfig.keyPath)
           .build(service)
@@ -97,7 +104,7 @@ object SslSpec extends Specification {
         ClientBuilder()
           .name("http-client")
           .hosts(Seq(address))
-          .codec(Http)
+          .codec(codec.clientCodec)
           .tlsWithoutValidation()
           .build()
 
@@ -121,9 +128,13 @@ object SslSpec extends Specification {
           val content = response.getContent()
 
           content.readableBytes() mustEqual responseSize
+
           while (content.readableBytes() > 0) {
             assert(content.readByte() == 'Z')
           }
+
+          val cipher = response.getHeader("X-Transport-Cipher")
+          cipher must be_!=("null")
         }
       }
 
@@ -131,7 +142,6 @@ object SslSpec extends Specification {
       test(  16 * 1024, 0    * 1024)
       test(1000 * 1024, 16   * 1024)
       test( 256 * 1024, 256  * 1024)
-      test(  16 * 1024, 2000 * 1024)
     }
   }
 }

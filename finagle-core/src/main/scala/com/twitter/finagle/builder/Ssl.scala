@@ -13,12 +13,16 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
 
+import org.jboss.netty.channel.{Channel, ChannelHandlerContext, ChannelLocal,
+                                MessageEvent, SimpleChannelHandler}
+
 /**
  * Store the files necessary to configure an SSL
  */
 case class SslServerConfiguration(
   val certificatePath: String,
   val keyPath: String)
+
 
 /**
  * Creates KeyManagers for PEM files.
