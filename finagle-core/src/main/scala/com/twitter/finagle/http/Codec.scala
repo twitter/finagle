@@ -11,7 +11,6 @@ import com.twitter.util.StorageUnit
 import com.twitter.conversions.storage._
 
 import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
-import com.twitter.finagle.http.AnnotateCipher
 
 case class Http(
     _compressionLevel: Int = 0,
