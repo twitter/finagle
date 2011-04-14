@@ -1,14 +1,14 @@
 package com.twitter.finagle.example.stream
 
-import com.twitter.finagle.builder.ClientBuilder
-import java.net.InetSocketAddress
-import com.twitter.finagle.stream.Stream
-import org.jboss.netty.util.CharsetUtil
-import com.twitter.util.Future
-import com.twitter.finagle.ServiceFactory
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.concurrent.{Channel, Observer}
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.stream.{Stream, StreamResponse}
+import com.twitter.util.Future
+import java.net.InetSocketAddress
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpVersion, HttpMethod, DefaultHttpRequest}
+import org.jboss.netty.util.CharsetUtil
 
 /**
  * This client connects to a Streaming HTTP service, prints 1000 messages, then disconnects.
@@ -19,14 +19,15 @@ object StreamClient {
   def main(args: Array[String]) {
     // Construct a ServiceFactory rather than a Client since the TCP Connection
     // is stateful (i.e., messages on the stream even after the initial response).
-    val clientFactory: ServiceFactory[HttpRequest, Channel[ChannelBuffer]] = ClientBuilder()
+    val clientFactory: ServiceFactory[HttpRequest, StreamResponse] = ClientBuilder()
       .codec(Stream)
       .hosts(new InetSocketAddress(8080))
       .buildFactory()
 
+    val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     for {
       client <- clientFactory.make()
-      channel <- client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
+      StreamResponse(httpResponse, channel) <- client(request)
     } {
       var observer: Observer = null
       var messageCount = 0 // Wait for 1000 messages then shut down.

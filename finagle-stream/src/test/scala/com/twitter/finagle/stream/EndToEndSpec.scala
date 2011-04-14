@@ -1,36 +1,36 @@
 package com.twitter.finagle.stream
 
-import org.specs.Specification
-import com.twitter.finagle.Service
 import com.twitter.concurrent._
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import org.jboss.netty.handler.codec.http.{HttpMethod, HttpVersion, DefaultHttpRequest, HttpRequest}
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import com.twitter.finagle.Service
 import com.twitter.util.{Future, RandomSocket, CountDownLatch}
-import com.twitter.conversions.time._
-import com.twitter.concurrent._
-import com.twitter.conversions.time._
 import java.nio.charset.Charset
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.handler.codec.http._
+import org.specs.Specification
 
 object EndToEndSpec extends Specification {
-  class MyService(topic: ChannelSource[ChannelBuffer]) extends Service[HttpRequest, Channel[ChannelBuffer]] {
-    def apply(request: HttpRequest) = Future.value(topic)
+  class MyService(response: StreamResponse) extends Service[HttpRequest, StreamResponse] {
+    def apply(request: HttpRequest) = Future.value(response)
   }
 
   "Streams" should {
     "work" in {
       val address = RandomSocket()
+      val httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+      val httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
       val channelSource = new ChannelSource[ChannelBuffer]
       val server = ServerBuilder()
         .codec(new Stream)
         .bindTo(address)
-        .build(new MyService(channelSource))
+        .build(new MyService(StreamResponse(httpResponse, channelSource)))
       val client = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
         .build()
 
-      val channel = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))(1.second)
+      val channel = client(httpRequest)(1.second).channel
 
       "writes from the server arrive on the client's channel" in {
         var result = ""

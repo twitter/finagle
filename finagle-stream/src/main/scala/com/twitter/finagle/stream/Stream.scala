@@ -1,15 +1,18 @@
 package com.twitter.finagle.stream
 
+import com.twitter.concurrent.Channel
 import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest}
 import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
+import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
 
 object Stream extends Stream
 
-class Stream extends Codec[HttpRequest, com.twitter.concurrent.Channel[ChannelBuffer]] {
+case class StreamResponse(httpResponse: HttpResponse, channel: Channel[ChannelBuffer])
+
+class Stream extends Codec[HttpRequest, StreamResponse] {
   override def serverCodec =
-    new ServerCodec[HttpRequest, com.twitter.concurrent.Channel[ChannelBuffer]] {
+    new ServerCodec[HttpRequest, StreamResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
@@ -21,7 +24,7 @@ class Stream extends Codec[HttpRequest, com.twitter.concurrent.Channel[ChannelBu
     }
 
   override def clientCodec =
-    new ClientCodec[HttpRequest, com.twitter.concurrent.Channel[ChannelBuffer]] {
+    new ClientCodec[HttpRequest, StreamResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()

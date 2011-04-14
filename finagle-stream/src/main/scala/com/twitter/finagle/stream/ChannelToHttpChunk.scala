@@ -1,12 +1,12 @@
 package com.twitter.finagle.stream
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.channel._
-import java.util.concurrent.atomic.AtomicReference
+import com.twitter.concurrent.{Channel => ConChannel, Observer, Serialized}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.concurrent.{Serialized, Observer}
 import com.twitter.finagle.util.{Cancelled, Ok, Error}
+import java.util.concurrent.atomic.AtomicReference
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.http._
 
 /**
  * A Netty Channel Handler that adapts Twitter Channels to Netty Channels.
@@ -15,25 +15,22 @@ import com.twitter.finagle.util.{Cancelled, Ok, Error}
  * communication channel, whereas a Netty Channel typically represents
  * a duplex, socket-based comunication channel.
  */
-  class ChannelToHttpChunk extends SimpleChannelHandler {
-    sealed abstract class State
+class ChannelToHttpChunk extends SimpleChannelHandler {
+  sealed abstract class State
   case object Idle extends State
   case object Open extends State
   case class Observing(observer: Observer) extends State
   private[this] val state = new AtomicReference[State](Idle)
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
-    case twitterChannel: com.twitter.concurrent.Channel[ChannelBuffer] =>
+    case StreamResponse(httpResponse, twitterChannel) =>
       require(state.compareAndSet(Idle, Open), "Channel is already open or busy.")
 
-      val startMessage = {
-        val startMessage = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        HttpHeaders.setHeader(startMessage, "Transfer-Encoding", "Chunked")
-        startMessage
-      }
+      httpResponse.setChunked(true)
+      HttpHeaders.setHeader(httpResponse, "Transfer-Encoding", "Chunked")
 
       val sendStartMessage = Channels.future(ctx.getChannel)
-      Channels.write(ctx, sendStartMessage, startMessage)
+      Channels.write(ctx, sendStartMessage, httpResponse)
       sendStartMessage {
         case Ok(_) =>
           streamMessagesFromChannel(ctx, twitterChannel, e)
@@ -49,7 +46,7 @@ import com.twitter.finagle.util.{Cancelled, Ok, Error}
 
   private[this] def streamMessagesFromChannel(
     ctx: ChannelHandlerContext,
-    channel: com.twitter.concurrent.Channel[ChannelBuffer],
+    channel: ConChannel[ChannelBuffer],
     e: MessageEvent)
   {
     channel.serialized {
