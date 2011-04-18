@@ -1,4 +1,15 @@
 package com.twitter.finagle.builder
+/**
+ * Provides a class for building servers.
+ * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
+ * {{{
+ * ServerBuilder()
+ *   .codec(Http)
+ *   .hostConnectionMaxLifeTime(5.minutes)
+ *   .readTimeout(2.minutes)
+ *   .build(plusOneService)
+ * }}}
+ */
 
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
@@ -40,6 +51,9 @@ trait Server {
   def close(timeout: Duration = Duration.MaxValue)
 }
 
+/**
+ * Factory for [[com.twitter.finagle.builder.ServerBuilder]] instances
+ */
 object ServerBuilder {
   def apply() = new ServerBuilder[Any, Any]
   def get() = apply()

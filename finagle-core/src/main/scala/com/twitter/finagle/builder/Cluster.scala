@@ -1,4 +1,14 @@
 package com.twitter.finagle.builder
+/*
+ * Provides a class for specifying a collection of servers.
+ * e.g. `finagle-serversets` is an implementation of the Finagle Cluster interface using
+ * [[com.twitter.com.zookeeper.ServerSets] (
+ * http://twitter.github.com/commons/pants.doc/index.html#com.twitter.common.zookeeper.ServerSet),
+ * {{{
+ *   val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+ *   val cluster = new ZookeeperServerSetCluster(serverSet)
+ * }}}
+ */
 
 import java.net.SocketAddress
 import com.twitter.finagle.ServiceFactory
@@ -19,7 +29,14 @@ trait Cluster {
   def mkFactories[Req, Rep](f: SocketAddress => ServiceFactory[Req, Rep]): Seq[ServiceFactory[Req, Rep]]
 
   /**
-   * Register a new Server in the cluster at the given SocketAddress.
+   * Register a new Server in the cluster at the given SocketAddress, as so
+   * {{{
+   *   val serviceAddress = new InetSocketAddress(...)
+   *   val server = ServerBuilder()
+   *     .bindTo(serviceAddress)
+   *     .build()
+   *   cluster.join(serviceAddress)
+   * }}}
    */
   def join(address: SocketAddress)
 }

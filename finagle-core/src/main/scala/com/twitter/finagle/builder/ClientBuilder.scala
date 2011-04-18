@@ -1,4 +1,18 @@
 package com.twitter.finagle.builder
+/*
+ * Provides a class for building clients.
+ * The main class to use is [[com.twitter.finagle.builder.ClientBuilder]], as so
+ * {{{
+ * val client = ClientBuilder()
+ *   .codec(Http)
+ *   .hosts("localhost:10000,localhost:10001,localhost:10003")
+ *   .connectionTimeout(1.second)        // max time to spend establishing a TCP connection.
+ *   .retries(2)                         // (1) per-request retries
+ *   .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
+ *   .logger(Logger.getLogger("http"))
+ *   .build()
+ * }}}
+ */
 
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
@@ -21,6 +35,9 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 
+/**
+ * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
+ */
 object ClientBuilder {
   def apply() = new ClientBuilder[Any, Any]
   def get() = apply()
