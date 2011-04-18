@@ -1,5 +1,8 @@
 package com.twitter.finagle.builder
 
+/**
+ * This is deprecated. Use com.twitter.finagle.http.Http instead.
+ */
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.http._
 
