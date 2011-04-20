@@ -13,30 +13,32 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{CodecException, Service, WriteTimedOutException}
 
+private[finagle] object ServiceToChannelHandler {
+  // valid transitions are:
+  //
+  //    Idle <=> Busy
+  //    {Idle, Busy, Draining} => {Draining, Shutdown}
+  object State extends Enumeration {
+    type State = Value
+    val Idle, Busy, Draining, Shutdown = Value
+  }
+}
+
 private[finagle] class ServiceToChannelHandler[Req, Rep](
     service: Service[Req, Rep],
     statsReceiver: StatsReceiver,
     log: Logger)
   extends ChannelClosingHandler
 {
+  import ServiceToChannelHandler._
+  import State._
+
   def this(service: Service[Req, Rep], statsReceiver: StatsReceiver) =
     this(service, statsReceiver, Logger.getLogger(getClass.getName))
   def this(service: Service[Req, Rep]) =
     this(service, NullStatsReceiver)
 
-  private[this] sealed abstract class State
-
-  // valid transitions are:
-  //
-  //    Idle <=> Busy
-  //    {Idle, Busy, Draining} => {Draining, Shutdown}
-  private[this] case object Idle     extends State
-  private[this] case object Busy     extends State
-  private[this] case object Draining extends State
-  private[this] case object Shutdown extends State
-
   private[this] val state = new AtomicReference[State](Idle)
-
   private[this] val onShutdownPromise = new Promise[Unit]
 
   private[this] def shutdown() =
@@ -112,14 +114,17 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    // This is here and not on Channels.write's return value because there is a race
-    // where the future is complete before this callback is added and then the state is
-    // out of date.
-    // We need to have this callback added BEFORE the NioWorker has a chance to complete it,
-    // otherwise we run the risk of receiving more messages before the callback runs.
+    /**
+     * This is here and not on Channels.write's return value because
+     * there is a race where the future is complete before this
+     * callback is added and then the state is out of date. We need to
+     * have this callback added BEFORE the NioWorker has a chance to
+     * complete it, otherwise we run the risk of receiving more
+     * messages before the callback runs.
+     */
     e.getFuture onSuccessOrFailure {
-      if (!state.compareAndSet(Busy, Idle) && state.get == Draining)
-        shutdown()
+      val becameIdle = state.compareAndSet(Busy, Idle)
+      if (!becameIdle && state.get == Draining) shutdown()
     }
     super.writeRequested(ctx, e)
   }

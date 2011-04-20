@@ -330,8 +330,8 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         }
 
         // Add the (shared) queueing handler *after* request
-        // serialization as it assumes one outstanding request per
-        // channel.
+        // serialization as it assumes at most one outstanding request
+        // per channel.
         queueingChannelHandler foreach { pipeline.addLast("queue", _) }
 
         // Compose the service stack.

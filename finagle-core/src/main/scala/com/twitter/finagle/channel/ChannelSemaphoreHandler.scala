@@ -17,66 +17,58 @@ import com.twitter.finagle.CodecException
 class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   extends SimpleChannelHandler
 {
-  private[this] sealed trait State
-  private[this] case object Idle                                extends State
-  private[this] case class Busy(permit: AsyncSemaphore#Permit)  extends State
-  private[this] case object Closed                              extends State
-
-  private[this] def state(ctx: ChannelHandlerContext) = ctx.synchronized {
+  private[this] def waiter(ctx: ChannelHandlerContext) = ctx.synchronized {
     if (ctx.getAttachment eq null)
-      ctx.setAttachment(new AtomicReference[State](Idle))
+      ctx.setAttachment(new AtomicReference[AsyncSemaphore#Permit](null))
 
-    ctx.getAttachment.asInstanceOf[AtomicReference[State]]
+    ctx.getAttachment.asInstanceOf[AtomicReference[AsyncSemaphore#Permit]]
   }
 
   private[this] def close(ctx: ChannelHandlerContext) {
-    val oldState = state(ctx).getAndSet(Closed)
-    oldState match {
-      case Busy(permit) => permit.release()
-      case _ =>
-    }
+    Option(waiter(ctx).getAndSet(null)) foreach { _.release() }
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     semaphore.acquire() onSuccess { permit =>
-      val ctxState = state(ctx)
-      var oldState: State = null
-      do {
-        val state_ = ctxState.get
-        if (state_ != Idle)
-          oldState = state_
-        if (ctxState.compareAndSet(Idle, Busy(permit)))
-          oldState = Idle
-      } while (oldState eq null)
-
-      oldState match {
-        case Idle =>
-          super.messageReceived(ctx, e)
-        case Busy(permit) =>
-          permit.release()
-          Channels.fireExceptionCaught(
-            ctx.getChannel, new CodecException("Codec issued concurrent requests"))
-        case Closed =>
-          permit.release()
+      val oldPermit = waiter(ctx).getAndSet(permit)
+      if (oldPermit ne null) {
+        // Freak. Out.
+        permit.release()
+        oldPermit.release()
+        waiter(ctx).set(null)
+        Channels.fireExceptionCaught(
+          ctx.getChannel, new CodecException("Codec issued concurrent requests"))
+      } else {
+        super.messageReceived(ctx, e)
       }
     }
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    /**
+     * We proxy the event here to ensure the correct ordering: we
+     * need to update the upstream future *first* (so that listening
+     * code may run), and only *then* release the semaphore. This
+     * ensures correct ordering upstream.
+     */
     val writeComplete = Channels.future(e.getChannel)
     val proxiedEvent = new DownstreamMessageEvent(
-      e.getChannel, writeComplete, e.getMessage, e.getRemoteAddress)
+      e.getChannel, writeComplete,
+      e.getMessage, e.getRemoteAddress)
     super.writeRequested(ctx, proxiedEvent)
 
     writeComplete { res =>
+      // First let the upstream know about our write completion.
       e.getFuture.update(res)
 
-      val oldState = state(ctx).get
-      oldState match {
-        case Busy(permit) =>
-          if (state(ctx).compareAndSet(oldState, Idle))
-            permit.release()
-        case _ =>
+      // Then release the permit, allowing for additional requests.
+      val permit = waiter(ctx).getAndSet(null)
+      if (permit eq null) {
+        Channels.fireExceptionCaught(
+          ctx.getChannel,
+          new CodecException("No waiter for downstream message!"))
+      } else {
+        permit.release()
       }
     }
   }
