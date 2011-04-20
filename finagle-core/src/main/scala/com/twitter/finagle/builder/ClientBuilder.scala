@@ -324,7 +324,8 @@ case class ClientBuilder[Req, Rep](
       var factory: ServiceFactory[Req, Rep] = null
 
       val bs = buildBootstrap(codec, host)
-      factory = new ChannelServiceFactory[Req, Rep](bs, prepareService _, hostStatsReceiver)
+      factory = new ChannelServiceFactory[Req, Rep](
+        bs, prepareService _, hostStatsReceiver)
       factory = buildPool(factory, hostStatsReceiver)
 
       if (_requestTimeout < Duration.MaxValue) {
