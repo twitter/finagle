@@ -13,6 +13,7 @@ object TracerSpec extends Specification {
     }
 
     "record children, propagating its changes" in {
+      tracer.debug(true)
       val child = tracer.addChild()
       child.record("oh hey ho yay")
       child.record("another")
@@ -26,6 +27,11 @@ object TracerSpec extends Specification {
         case _ =>
           false
       }
+    }
+
+    "not record messages when debugging isn't turned on" in {
+      tracer.record("oh hey")
+      tracer().annotations must beEmpty
     }
   }
 }

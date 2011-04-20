@@ -6,6 +6,7 @@ object TraceSpec extends Specification {
   "Trace" should {
     "start and end spans" in {
       Trace.startSpan()
+      Trace.debug(true)
       Trace.record(Event.ClientSend())
       Trace.record("oh hey")
       val span = Trace.endSpan()
@@ -17,7 +18,7 @@ object TraceSpec extends Specification {
           Seq()) => true
         case _ => false
       }
-      
+
       Trace().annotations must beEmpty
     }
 
