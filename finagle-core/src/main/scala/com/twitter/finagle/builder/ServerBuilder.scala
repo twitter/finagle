@@ -326,7 +326,7 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         // Add this after the serialization to get an accurate request
         // count.
         channelRequestStatsHandler foreach { handler =>
-          pipeline.addFirst("channelRequestStatsHandler", handler)
+          pipeline.addLast("channelRequestStatsHandler", handler)
         }
 
         // Add the (shared) queueing handler *after* request
