@@ -10,22 +10,30 @@ import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.channel._
 
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.AsyncSemaphore
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.CodecException
+
+import com.twitter.concurrent.{AsyncSemaphore, Permit}
+
+object ChannelSemaphoreHandler {
+  object DeadPermit extends Permit {
+    def release() = ()
+  }
+}
 
 class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   extends SimpleChannelHandler
 {
+  import ChannelSemaphoreHandler._
+
   private[this] def waiter(ctx: ChannelHandlerContext) = ctx.synchronized {
     if (ctx.getAttachment eq null)
-      ctx.setAttachment(new AtomicReference[AsyncSemaphore#Permit](null))
-
-    ctx.getAttachment.asInstanceOf[AtomicReference[AsyncSemaphore#Permit]]
+      ctx.setAttachment(new AtomicReference[Permit](null))
+    ctx.getAttachment.asInstanceOf[AtomicReference[Permit]]
   }
 
   private[this] def close(ctx: ChannelHandlerContext) {
-    Option(waiter(ctx).getAndSet(null)) foreach { _.release() }
+    Option(waiter(ctx).getAndSet(DeadPermit)) foreach { _.release() }
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
