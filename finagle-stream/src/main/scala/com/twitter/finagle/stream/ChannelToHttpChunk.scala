@@ -1,6 +1,7 @@
 package com.twitter.finagle.stream
 
-import com.twitter.concurrent.{Channel => ConChannel, Observer, Serialized}
+import com.twitter.concurrent
+import com.twitter.concurrent.{Observer, Serialized}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{Cancelled, Ok, Error}
 import java.util.concurrent.atomic.AtomicReference
@@ -46,7 +47,7 @@ class ChannelToHttpChunk extends SimpleChannelHandler {
 
   private[this] def streamMessagesFromChannel(
     ctx: ChannelHandlerContext,
-    channel: ConChannel[ChannelBuffer],
+    channel: concurrent.Channel[ChannelBuffer],
     e: MessageEvent)
   {
     channel.serialized {
