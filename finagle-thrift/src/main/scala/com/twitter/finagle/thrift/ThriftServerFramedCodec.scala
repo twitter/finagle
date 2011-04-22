@@ -1,5 +1,7 @@
 package com.twitter.finagle.thrift
 
+import collection.JavaConversions._     // XXX
+
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
@@ -8,9 +10,13 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.{Trace, Event}
 
-private[thrift] class ThriftServerChannelBufferEncoder extends SimpleChannelDownstreamHandler {
+import conversions._
+
+private[thrift] class ThriftServerChannelBufferEncoder
+  extends SimpleChannelDownstreamHandler
+{
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
       // An empty array indicates a oneway reply.
@@ -40,35 +46,31 @@ private[thrift] class ThriftServerTracingFilter
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     // What to do on exceptions here?
     if (isUpgraded) {
-      val header = new TracedRequest
+      val header = new thrift.TracedRequestHeader
       val request_ = InputBuffer.peelMessage(request, header)
 
-      Trace.startSpan(header.getParent_span_id)
+      Trace.startSpan(
+        Some(header.getSpan_id),
+        Some(header.getParent_span_id),
+        Some(header.getTrace_id))
+
       if (header.debug)
         Trace.debug(true)  // (don't turn off when !header.debug)
 
+      Trace.record(Event.ServerRecv())
+
       service(request_) map { response =>
+        Trace.record(Event.ServerSend())
+
         // Wrap some trace data.
-        val responseHeader = new TracedResponse
+        val responseHeader = new thrift.TracedResponseHeader
 
         if (header.debug) {
-          Trace().transcript foreach { record =>
-            val thriftRecord = new TranscriptRecord(
-              record.traceID.host,
-              record.traceID.vm,
-              record.traceID.span,
-              record.traceID.parentSpan getOrElse 0,
-              record.timestamp.inMilliseconds,
-              record.message
-            )
-
-            responseHeader.addToTranscript(thriftRecord)
-          }
+          // Piggy-back span data if we're in debug mode.
+          Trace().toThriftSpans foreach { responseHeader.addToSpans(_) }
         }
 
-        val responseHeaderBytes =
-          OutputBuffer.messageToArray(responseHeader)
-        responseHeaderBytes ++ response
+        OutputBuffer.messageToArray(responseHeader) ++ response
       }
     } else {
       val buffer = new InputBuffer(request)
@@ -86,7 +88,7 @@ private[thrift] class ThriftServerTracingFilter
         buffer().writeMessageEnd()
 
         // Note: currently there are no options, so there's no need
-        // top parse them out.
+        // to parse them out.
         Future.value(buffer.toArray)
       } else {
         service(request)

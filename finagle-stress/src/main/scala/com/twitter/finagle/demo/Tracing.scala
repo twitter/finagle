@@ -9,7 +9,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.thrift.{ThriftServerFramedCodec, ThriftClientFramedCodec}
-import com.twitter.finagle.tracing.{Trace, BufferingTranscript}
+import com.twitter.finagle.tracing.Trace
 
 object Tracing1Service extends Tracing1.ServiceIface {
   private[this] val transport = ClientBuilder()
@@ -28,8 +28,8 @@ object Tracing1Service extends Tracing1.ServiceIface {
   } 
 
   def computeSomething(): Future[String] = {
-    println("T1 with trace ID", Trace().traceID)
-    Trace.record("hey i'm issuing a call")
+    println("T1 with trace ID", Trace.id)
+    Trace.record("ISSUES")
 
     t2Client.computeSomethingElse() map { somethingElse =>
       "t1: " + somethingElse
@@ -54,15 +54,14 @@ object Tracing2Service extends Tracing2.ServiceIface {
   }
 
   def computeSomethingElse(): Future[String] = {
-    println("T2 with trace ID", Trace().traceID)
-    Trace.record("hey i'm issuing a call")
+    println("T2 with trace ID", Trace.id)
+    Trace.record("(t2) hey i'm issuing a call")
 
     for {
       x <- t3Client.oneMoreThingToCompute()
       y <- t3Client.oneMoreThingToCompute()
     } yield {
-      Trace.record(
-        "got my results!  (%s and %s), returning".format(x, y))
+      Trace.record("got my results!  (%s and %s), returning".format(x, y))
       "t2: " + x + y
     }
   }
@@ -79,11 +78,10 @@ object Tracing3Service extends Tracing3.ServiceIface {
   }
 
   def oneMoreThingToCompute(): Future[String] = {
-    println("T3 with trace ID", Trace().traceID)
+    println("T3 with trace ID", Trace.id)
 
     val number = count.incrementAndGet()
-    Trace.record(
-      "(t3) hey i'm issuing a call %s".format(number))
+    Trace.record("(t3) hey i'm issuing a call %s".format(number))
     Future("t3: %d".format(number))
   }
 }
@@ -99,13 +97,14 @@ object Client {
       transport, new TBinaryProtocol.Factory())
 
     // Turn (debug) tracing on.
-    Trace().transcript = new BufferingTranscript(Trace().traceID)
-
+    Trace.debug(true)
     Trace.record("about to start issuing the root request..")
-    val result = client.computeSomething()()
-    println("result", result)
 
-    println("Trace:")
-    Trace().transcript.print()
+    val result = client.computeSomething()
+    result foreach { result =>
+      println("result", result)
+      println("Trace:")
+      Trace().print()
+    }
   }
 }

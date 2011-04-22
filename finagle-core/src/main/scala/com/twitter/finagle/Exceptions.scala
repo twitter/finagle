@@ -50,3 +50,6 @@ class InvalidPipelineException             extends ApiException
 class NotYetConnectedException             extends ApiException
 
 class CodecException(description: String) extends Exception(description)
+
+// Channel buffer usage errors.
+class ChannelBufferUsageException(description: String) extends Exception(description)

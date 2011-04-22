@@ -15,8 +15,8 @@ class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory)
       def getPipeline() = {
         val pipeline = framedPipelineFactory.getPipeline
         pipeline.replace(
-          "thriftFrameCodec", "thriftBufferCodec",
-          new ThriftBufferCodec(protocolFactory))
+          "thriftFrameCodec", "thriftBufferDecoder",
+          new ThriftBufferDecoder(protocolFactory))
         pipeline
       }
     }

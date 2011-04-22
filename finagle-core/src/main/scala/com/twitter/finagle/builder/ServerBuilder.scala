@@ -37,6 +37,7 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
 import com.twitter.util.Future
+import com.twitter.concurrent.AsyncSemaphore
 
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
@@ -326,12 +327,12 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         // Add this after the serialization to get an accurate request
         // count.
         channelRequestStatsHandler foreach { handler =>
-          pipeline.addFirst("channelRequestStatsHandler", handler)
+          pipeline.addLast("channelRequestStatsHandler", handler)
         }
 
         // Add the (shared) queueing handler *after* request
-        // serialization as it assumes one outstanding request per
-        // channel.
+        // serialization as it assumes at most one outstanding request
+        // per channel.
         queueingChannelHandler foreach { pipeline.addLast("queue", _) }
 
         // Compose the service stack.

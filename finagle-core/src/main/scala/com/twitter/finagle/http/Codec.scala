@@ -17,6 +17,7 @@ case class Http(
     _maxRequestSize: StorageUnit = 1.megabyte,
     _maxResponseSize: StorageUnit = 1.megabyte,
     _decompressionEnabled: Boolean = true,
+    _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
     _annotateCipherHeader: Option[String] = None)
   extends Codec[HttpRequest, HttpResponse] {
 
@@ -24,6 +25,7 @@ case class Http(
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
   def decompressionEnabled(yesno: Boolean) = copy(_decompressionEnabled = yesno)
+  def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) = copy(_channelBufferUsageTracker = Some(usageTracker))
   def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
 
   override def clientCodec = new ClientCodec[HttpRequest, HttpResponse] {
@@ -51,6 +53,9 @@ case class Http(
     def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = Channels.pipeline()
+        if (_channelBufferUsageTracker.isDefined) {
+          pipeline.addLast("channelBufferManager", new ChannelBufferManager(_channelBufferUsageTracker.get))
+        }
         pipeline.addLast("httpCodec", new HttpServerCodec)
         if (_compressionLevel > 0) {
           pipeline.addLast(

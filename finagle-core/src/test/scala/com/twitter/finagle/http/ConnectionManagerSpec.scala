@@ -170,6 +170,18 @@ object ConnectionManagerSpec extends Specification with Mockito {
       there was one(c).close()
     }
 
+    "normalize header values with content length in the response" in {
+      perform(
+        makeRequest(HttpVersion.HTTP_1_1, "coNNECTion" -> "cloSE"),
+        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
+      )
+
+      there was no(c).close()
+      cFuture.setSuccess()   // write success
+      there was one(c).close()
+    }
+
+
     "respect server-side connection termination" in {
       perform(
         makeRequest(HttpVersion.HTTP_1_1),
