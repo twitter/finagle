@@ -16,13 +16,15 @@ package com.twitter.finagle.builder
 
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
-import java.util.concurrent.Executors
+import java.util.concurrent.{Executors, TimeUnit}
 import javax.net.ssl.SSLContext
 
+import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
-import org.jboss.netty.bootstrap.ClientBootstrap
+import org.jboss.netty.handler.timeout.IdleStateHandler
+import org.jboss.netty.util.HashedWheelTimer
 
 import com.twitter.util.{Future, Duration}
 import com.twitter.util.TimeConversions._
@@ -63,6 +65,9 @@ case class ClientBuilder[Req, Rep](
   private val _codec: Option[ClientCodec[Req, Rep]],
   private val _connectionTimeout: Duration,
   private val _requestTimeout: Duration,
+  private val _keepAlive: Option[Boolean],
+  private val _readerIdleTimeout: Option[Duration],
+  private val _writerIdleTimeout: Option[Duration],
   private val _statsReceiver: Option[StatsReceiver],
   private val _loadStatistics: (Int, Duration),
   private val _name: Option[String],
@@ -84,6 +89,9 @@ case class ClientBuilder[Req, Rep](
     None,               // codec
     10.milliseconds,    // connectionTimeout
     Duration.MaxValue,  // requestTimeout
+    None,               // keepAlive
+    None,               // readerIdleTimeout
+    None,               // writerIdleTimeout
     None,               // statsReceiver
     (60, 10.seconds),   // loadStatistics
     Some("client"),     // name
@@ -107,6 +115,9 @@ case class ClientBuilder[Req, Rep](
     "codec"                     -> _codec,
     "connectionTimeout"         -> Some(_connectionTimeout),
     "requestTimeout"            -> Some(_requestTimeout),
+    "keepAlive"                 -> Some(_keepAlive),
+    "readerIdleTimeout"         -> Some(_readerIdleTimeout),
+    "writerIdleTimeout"         -> Some(_writerIdleTimeout),
     "statsReceiver"             -> _statsReceiver,
     "loadStatistics"            -> _loadStatistics,
     "hostConnectionLimit"       -> Some(_hostConnectionLimit),
@@ -169,6 +180,15 @@ case class ClientBuilder[Req, Rep](
 
   def requestTimeout(duration: Duration) =
     copy(_requestTimeout = duration)
+
+  def keepAlive(value: Boolean) =
+    copy(_keepAlive = Some(value))
+
+  def readerIdleTimeout(duration: Duration) =
+    copy(_readerIdleTimeout = Some(duration))
+
+  def writerIdleTimeout(duration: Duration) =
+    copy(_writerIdleTimeout = Some(duration))
 
   def reportTo(receiver: StatsReceiver) =
     copy(_statsReceiver = Some(receiver))
@@ -233,6 +253,15 @@ case class ClientBuilder[Req, Rep](
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
         val pipeline = codec.pipelineFactory.getPipeline
+
+        if (_readerIdleTimeout.isDefined || _writerIdleTimeout.isDefined) {
+          val readerMillis = _readerIdleTimeout.map(_.inMilliseconds).getOrElse(0L)
+          val writerMillis = _writerIdleTimeout.map(_.inMilliseconds).getOrElse(0L)
+          val timer = new HashedWheelTimer
+          pipeline.addFirst("idle",
+            new IdleStateHandler(timer, readerMillis, writerMillis, 0, TimeUnit.MILLISECONDS))
+        }
+
         for (ctx <- _tls) {
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(true)
@@ -254,6 +283,7 @@ case class ClientBuilder[Req, Rep](
     bs.setOption("connectTimeoutMillis", _connectionTimeout.inMilliseconds)
     bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
     // bs.setOption("soLinger", 0)  (TODO)
+    _keepAlive.foreach(value => bs.setOption("keepAlive", value))
     bs.setOption("reuseAddress", true)
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }

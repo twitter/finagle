@@ -4,13 +4,15 @@ import com.twitter.concurrent.ChannelSource
 import com.twitter.util.Future
 import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
+import org.jboss.netty.channel.{Channels, ChannelHandlerContext, ChannelStateEvent,
+  ExceptionEvent, MessageEvent}
 import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.timeout.{IdleState, IdleStateAwareChannelUpstreamHandler, IdleStateEvent}
 
 /**
  * Client handler for a streaming protocol.
  */
-class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
+class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
   private[this] val channelRef =
     new AtomicReference[com.twitter.concurrent.ChannelSource[ChannelBuffer]](null)
   @volatile var numObservers = 0
@@ -32,7 +34,6 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
             ctx.getChannel.setReadable(true)
           case 0 =>
             // if there are no more observers, then shut everything down
-            ctx.getChannel.setReadable(false)
             ctx.getChannel.close()
             source.close()
           case _ =>
@@ -57,5 +58,30 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
           ctx.getChannel.setReadable(true)
         }
       }
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    Console.println("channelClosed " + ctx + ", " + e)
+    Option(channelRef.get).foreach(_.close())
+  }
+
+  override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    Console.println("channelDisconnected " + ctx + ", " + e)
+    Option(channelRef.get).foreach(_.close())
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)  {
+    Console.println("exceptionCaught " + ctx + ", " + e)
+    Thread.dumpStack
+    ctx.getChannel.close()
+    Option(channelRef.get).foreach(_.close())
+  }
+
+  override def channelIdle(ctx: ChannelHandlerContext, e: IdleStateEvent)  {
+    Console.println("channelIdle " + ctx + ", " + e)
+    if (e.getState() == IdleState.READER_IDLE) {
+      e.getChannel.close()
+      Option(channelRef.get).foreach(_.close())
+    }
   }
 }
