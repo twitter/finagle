@@ -72,7 +72,6 @@ class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)  {
     Console.println("exceptionCaught " + ctx + ", " + e)
-    Thread.dumpStack
     ctx.getChannel.close()
     Option(channelRef.get).foreach(_.close())
   }
