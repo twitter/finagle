@@ -24,9 +24,10 @@ class ChannelToHttpChunk extends SimpleChannelHandler {
   private[this] val state = new AtomicReference[State](Idle)
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
-    case StreamResponse(httpResponse, twitterChannel) =>
+    case streamResponse: StreamResponse =>
       require(state.compareAndSet(Idle, Open), "Channel is already open or busy.")
 
+      val httpResponse = streamResponse.httpResponse
       httpResponse.setChunked(true)
       HttpHeaders.setHeader(httpResponse, "Transfer-Encoding", "Chunked")
 
@@ -34,7 +35,7 @@ class ChannelToHttpChunk extends SimpleChannelHandler {
       Channels.write(ctx, sendStartMessage, httpResponse)
       sendStartMessage {
         case Ok(_) =>
-          streamMessagesFromChannel(ctx, twitterChannel, e)
+          streamMessagesFromChannel(ctx, streamResponse.channel, e)
         case Cancelled =>
           e.getFuture.cancel()
         case Error(f) =>

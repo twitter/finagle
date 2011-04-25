@@ -11,6 +11,13 @@ import org.jboss.netty.handler.codec.http._
 import org.specs.Specification
 
 object PubSubSpec extends Specification {
+  case class MyStreamResponse(
+      httpResponse: HttpResponse,
+      channel: Channel[ChannelBuffer])
+      extends StreamResponse
+  {
+    def release() = ()
+  }
   class MyService(response: StreamResponse) extends Service[HttpRequest, StreamResponse] {
     def apply(request: HttpRequest) = Future.value(response)
   }
@@ -24,7 +31,7 @@ object PubSubSpec extends Specification {
       val server = ServerBuilder()
         .codec(new Stream)
         .bindTo(address)
-        .build(new MyService(StreamResponse(httpResponse, channelSource)))
+        .build(new MyService(MyStreamResponse(httpResponse, channelSource)))
       val client = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
@@ -32,8 +39,8 @@ object PubSubSpec extends Specification {
 
       def makeChannel = for {
         client <- client.make()
-        StreamResponse(_, channel) <- client(httpRequest)
-      } yield channel
+        streamResponse <- client(httpRequest)
+      } yield streamResponse.channel
 
       // these two channels represent two TCP connections to the server
       val channel1 = makeChannel(1.second)

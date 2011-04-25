@@ -2,13 +2,10 @@ package com.twitter.finagle.stream
 
 import com.twitter.concurrent.Channel
 import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
-import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
 
 object Stream extends Stream
-
-case class StreamResponse(httpResponse: HttpResponse, channel: Channel[ChannelBuffer])
 
 class Stream extends Codec[HttpRequest, StreamResponse] {
   override def serverCodec =

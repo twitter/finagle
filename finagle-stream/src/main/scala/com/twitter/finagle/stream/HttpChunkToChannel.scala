@@ -7,7 +7,8 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channels, ChannelHandlerContext, ChannelStateEvent,
   ExceptionEvent, MessageEvent}
 import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.timeout.{IdleState, IdleStateAwareChannelUpstreamHandler, IdleStateEvent}
+import org.jboss.netty.handler.timeout.{IdleState, IdleStateAwareChannelUpstreamHandler,
+  IdleStateEvent}
 
 /**
  * Client handler for a streaming protocol.
@@ -19,11 +20,20 @@ class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case message: HttpResponse =>
-      require(message.isChunked, "Error: message must be chunked")
+//      require(message.isChunked, "Error: message must be chunked")
 
       val source = new ChannelSource[ChannelBuffer]
       require(channelRef.compareAndSet(null, source),
         "Channel is already busy, only Chunks are OK at this point.")
+
+      val response = new StreamResponse {
+        val httpResponse = message
+        val channel = source
+        def release() {
+          ctx.getChannel.close()
+          source.close()
+        }
+      }
 
       ctx.getChannel.setReadable(false)
 
@@ -34,14 +44,12 @@ class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
             ctx.getChannel.setReadable(true)
           case 0 =>
             // if there are no more observers, then shut everything down
-            ctx.getChannel.close()
-            source.close()
+            response.release()
           case _ =>
         }
         Future.Done
       }
 
-      val response = StreamResponse(message, source)
       Channels.fireMessageReceived(ctx, response)
 
     case trailer: HttpChunkTrailer =>

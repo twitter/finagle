@@ -11,6 +11,14 @@ import org.jboss.netty.handler.codec.http._
 import org.specs.Specification
 
 object EndToEndSpec extends Specification {
+  case class MyStreamResponse(
+      httpResponse: HttpResponse,
+      channel: Channel[ChannelBuffer])
+      extends StreamResponse
+  {
+    def release() = ()
+  }
+
   class MyService(response: StreamResponse) extends Service[HttpRequest, StreamResponse] {
     def apply(request: HttpRequest) = Future.value(response)
   }
@@ -24,7 +32,7 @@ object EndToEndSpec extends Specification {
       val server = ServerBuilder()
         .codec(new Stream)
         .bindTo(address)
-        .build(new MyService(StreamResponse(httpResponse, channelSource)))
+        .build(new MyService(MyStreamResponse(httpResponse, channelSource)))
       val client = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
