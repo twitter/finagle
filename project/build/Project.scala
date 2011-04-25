@@ -110,6 +110,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-stress", "finagle-stress",
     new StressProject(_), coreProject, ostrich4Project, thriftProject)
 
+  /**
+   * finagle-b3 contains bindings for the B3, or BigBrotherBird, tracing
+   * framework. Send messages via scribe that is collected, indexed and analyzed.
+   */
+  val b3Project = project(
+    "finagle-b3", "finagle-b3",
+    new B3Project(_), coreProject, thriftProject)
+
   trait Defaults
     extends ProjectDependencies
     with TartifactoryRepos
@@ -204,4 +212,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.2" % "provided"
     val ostrich4 = "com.twitter" % "ostrich" % "4.1.0"
   }
+  
+  class B3Project(info: ProjectInfo) extends StandardProject(info)
+    with Defaults with LibDirClasspath with CompileThriftFinagle
+  {
+    override def compileOrder = CompileOrder.JavaThenScala
+    val thrift    = "thrift"    % "libthrift" % "0.5.0"
+    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.2" % "provided"
+  }  
 }
