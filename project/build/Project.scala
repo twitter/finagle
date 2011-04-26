@@ -212,12 +212,12 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.2" % "provided"
     val ostrich4 = "com.twitter" % "ostrich" % "4.1.0"
   }
-  
+
   class B3Project(info: ProjectInfo) extends StandardProject(info)
     with Defaults with LibDirClasspath with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift    = "thrift"    % "libthrift" % "0.5.0"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.2" % "provided"
-  }  
+  }
 }

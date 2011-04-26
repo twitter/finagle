@@ -32,7 +32,7 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(10)
-      .build(), 
+      .build(),
     new TBinaryProtocol.Factory()))
   }
 
@@ -41,7 +41,7 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
    *
    * How much to let through? For everything, use 10000 = 100.00%
    * Default is 10 = 0.1% (let one in a 1000nd pass)
-   */ 
+   */
   def setSampleRate(sr: Int) {
     if (sr < 0 || sr > 10000) {
       throw new IllegalArgumentException("Sample rate not within the valid range of 0-10000, was " + sr)
