@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.replay.{ReplayingDecoder, VoidEnum}
 
 import org.apache.thrift.protocol.{TProtocolFactory, TProtocolUtil, TType}
 
-class ThriftBufferDecoder(protocolFactory: TProtocolFactory)
+private[thrift] class ThriftBufferDecoder(protocolFactory: TProtocolFactory)
   extends ReplayingDecoder[VoidEnum]
 {
   override def decode(
@@ -27,7 +27,7 @@ class ThriftBufferDecoder(protocolFactory: TProtocolFactory)
 
     iprot.readMessageBegin()
     TProtocolUtil.skip(iprot, TType.STRUCT)
-    iprot.readMessageEnd()    
+    iprot.readMessageEnd()
 
     val endIndex = buffer.readerIndex
     buffer.resetReaderIndex()

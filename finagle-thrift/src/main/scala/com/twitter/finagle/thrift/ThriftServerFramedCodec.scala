@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import collection.JavaConversions._     // XXX
+import collection.JavaConversions._
 
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.jboss.netty.channel.{
@@ -13,6 +13,28 @@ import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Trace, Event}
 
 import conversions._
+
+object ThriftServerFramedCodec {
+  def apply() = new ThriftServerFramedCodec
+}
+
+class ThriftServerFramedCodec
+  extends ServerCodec[Array[Byte], Array[Byte]]
+{
+  def pipelineFactory =
+    new ChannelPipelineFactory {
+      def getPipeline() = {
+        val pipeline = Channels.pipeline()
+        pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
+        pipeline.addLast("byteEncoder", new ThriftServerChannelBufferEncoder)
+        pipeline.addLast("byteDecoder", new ThriftChannelBufferDecoder)
+        pipeline
+      }
+    }
+
+  override def prepareService(service: Service[Array[Byte], Array[Byte]]) =
+    Future.value((new ThriftServerTracingFilter) andThen service)
+}
 
 private[thrift] class ThriftServerChannelBufferEncoder
   extends SimpleChannelDownstreamHandler
@@ -29,10 +51,6 @@ private[thrift] class ThriftServerChannelBufferEncoder
   }
 }
 
-object ThriftServerFramedCodec {
-  def apply() = new ThriftServerFramedCodec
-}
-
 private[thrift] class ThriftServerTracingFilter
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
@@ -41,7 +59,6 @@ private[thrift] class ThriftServerTracingFilter
   // pipelining). Furthermore, finagle will guarantee this by
   // serializing requests.
   private[this] var isUpgraded = false
-  private[this] val protocolFactory = new TBinaryProtocol.Factory()
 
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
     // What to do on exceptions here?
@@ -97,20 +114,3 @@ private[thrift] class ThriftServerTracingFilter
   }
 }
 
-class ThriftServerFramedCodec
-  extends ServerCodec[Array[Byte], Array[Byte]]
-{
-  def pipelineFactory =
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
-        pipeline.addLast("byteEncoder", new ThriftServerChannelBufferEncoder)
-        pipeline.addLast("byteDecoder", new ThriftChannelBufferDecoder)
-        pipeline
-      }
-    }
-
-  override def prepareService(service: Service[Array[Byte], Array[Byte]]) =
-    Future.value((new ThriftServerTracingFilter) andThen service)
-}
