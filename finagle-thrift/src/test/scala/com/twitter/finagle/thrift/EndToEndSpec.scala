@@ -46,6 +46,7 @@ object EndToEndSpec extends Specification {
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))
       .codec(ThriftClientFramedCodec())
+      .hostConnectionLimit(1)
       .build()
 
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())

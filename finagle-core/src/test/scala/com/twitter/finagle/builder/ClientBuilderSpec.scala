@@ -60,9 +60,11 @@ object ClientBuilderSpec extends Specification with Mockito {
 
       // Client
       val client = ClientBuilder()
+        .codec(_codec)
         .channelFactory(refcountedChannelFactory)
         .protocol(protocol)
         .hosts(Seq(clientAddress))
+        .hostConnectionLimit(1)
         .build()
 
       val requestFuture = client(123)
@@ -86,12 +88,14 @@ object ClientBuilderSpec extends Specification with Mockito {
         .channelFactory(refcountedChannelFactory)
         .codec(_codec)
         .hosts(Seq(clientAddress))
+        .hostConnectionLimit(1)
         .build()
 
       val client2 = ClientBuilder()
         .channelFactory(refcountedChannelFactory)
         .codec(_codec)
         .hosts(Seq(clientAddress))
+        .hostConnectionLimit(1)
         .build()
 
       client1.release()
