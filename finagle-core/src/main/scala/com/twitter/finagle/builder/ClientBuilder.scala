@@ -285,20 +285,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def connectionTimeout(duration: Duration): This =
     withConfig(_.copy(_connectionTimeout = duration))
 
-  def keepAlive(value: Boolean) =
-    withConfig(copy(_keepAlive = Some(value)))
-
-  def readerIdleTimeout(duration: Duration) =
-    withConfig(copy(_readerIdleTimeout = Some(duration)))
-
-  def writerIdleTimeout(duration: Duration) =
-    withConfig(copy(_writerIdleTimeout = Some(duration)))
-
-  def reportTo(receiver: StatsReceiver) =
-    withConfig(copy(_statsReceiver = Some(receiver)))
-
   def requestTimeout(duration: Duration): This =
     withConfig(_.copy(_requestTimeout = duration))
+
+  def keepAlive(value: Boolean): This =
+    withConfig(_.copy(_keepAlive = Some(value)))
+
+  def readerIdleTimeout(duration: Duration): This =
+    withConfig(_.copy(_readerIdleTimeout = Some(duration)))
+
+  def writerIdleTimeout(duration: Duration): This =
+    withConfig(_.copy(_writerIdleTimeout = Some(duration)))
 
   def reportTo(receiver: StatsReceiver): This =
     withConfig(_.copy(_statsReceiver = Some(receiver)))
