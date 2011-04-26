@@ -42,18 +42,27 @@ object EndToEndSpec extends Specification {
 
       "writes from the server arrive on the client's channel" in {
         var result = ""
+        val latch = new CountDownLatch(1)
+
+        channel.closes.respond { _ =>
+          Future { latch.countDown() }
+        }
+
         channel.respond { channelBuffer =>
           Future {
+            Thread.dumpStack
             result += channelBuffer.toString(Charset.defaultCharset)
           }
         }
 
-        channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes))
-        channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes))
-        channelSource.send(ChannelBuffers.wrappedBuffer("3".getBytes))
+        val futures: Seq[Future[Observer]] =
+          channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes)) ++
+          channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes)) ++
+          channelSource.send(ChannelBuffers.wrappedBuffer("3".getBytes))
 
         channelSource.close()
 
+        latch.await(1.second)
         result mustEqual "123"
       }
 

@@ -20,8 +20,6 @@ class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case message: HttpResponse =>
-//      require(message.isChunked, "Error: message must be chunked")
-
       val source = new ChannelSource[ChannelBuffer]
       require(channelRef.compareAndSet(null, source),
         "Channel is already busy, only Chunks are OK at this point.")
@@ -69,26 +67,14 @@ class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    Console.println("channelClosed " + ctx + ", " + e)
     Option(channelRef.get).foreach(_.close())
   }
 
   override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    Console.println("channelDisconnected " + ctx + ", " + e)
     Option(channelRef.get).foreach(_.close())
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)  {
-    Console.println("exceptionCaught " + ctx + ", " + e)
-    ctx.getChannel.close()
-    Option(channelRef.get).foreach(_.close())
-  }
-
-  override def channelIdle(ctx: ChannelHandlerContext, e: IdleStateEvent)  {
-    Console.println("channelIdle " + ctx + ", " + e)
-    if (e.getState() == IdleState.READER_IDLE) {
-      e.getChannel.close()
-      Option(channelRef.get).foreach(_.close())
-    }
+    // should we pass the exception to the observer somehow?
   }
 }

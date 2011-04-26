@@ -284,7 +284,7 @@ case class ClientBuilder[Req, Rep](
     bs.setOption("connectTimeoutMillis", _connectionTimeout.inMilliseconds)
     bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
     // bs.setOption("soLinger", 0)  (TODO)
-    _keepAlive.foreach(value => bs.setOption("keepAlive", value))
+    _keepAlive foreach { value => bs.setOption("keepAlive", value) }
     bs.setOption("reuseAddress", true)
     _sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
     _recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
