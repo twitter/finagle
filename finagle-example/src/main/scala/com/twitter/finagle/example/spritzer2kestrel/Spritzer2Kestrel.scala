@@ -34,7 +34,7 @@ object Spritzer2Kestrel {
       .codec(Stream)
       .hosts("stream.twitter.com:80")
       .build()
-    val StreamResponse(_, spritzer) = {
+    val streamResponse = {
       val request = {
         val request = new DefaultHttpRequest(HTTP_1_1, GET, "/1/statuses/sample.json")
         request.addHeader("Host", "stream.twitter.com")
@@ -49,6 +49,8 @@ object Spritzer2Kestrel {
           throw e
       }
     }
+
+    val spritzer = streamResponse.channel
 
     // Grab a writeable Channel connected to the Kestrel
     // queue named "queue"

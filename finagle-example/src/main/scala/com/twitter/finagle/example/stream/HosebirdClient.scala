@@ -39,8 +39,10 @@ object HosebirdClient {
     println(request)
     for {
       client <- clientFactory.make()
-      StreamResponse(httpResponse, channel) <- client(request)
+      streamResponse <- client(request)
     } {
+      val httpResponse = streamResponse.httpResponse
+      val channel = streamResponse.channel
       if (httpResponse.getStatus.getCode != 200) {
         println(httpResponse.toString)
         client.release()

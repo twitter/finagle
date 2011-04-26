@@ -44,8 +44,11 @@ object StreamServer {
   def main(args: Array[String]) {
     val myService = new Service[HttpRequest, StreamResponse] {
       def apply(request: HttpRequest) = Future {
-        val httpResponse = new DefaultHttpResponse(request.getProtocolVersion, HttpResponseStatus.OK)
-        StreamResponse(httpResponse, channelSource)
+        new StreamResponse {
+          val httpResponse = new DefaultHttpResponse(request.getProtocolVersion, HttpResponseStatus.OK)
+          def channel = channelSource
+          def release() = ()
+        }
       }
     }
 

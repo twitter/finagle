@@ -24,7 +24,6 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
-import org.jboss.netty.util.HashedWheelTimer
 
 import com.twitter.util.{Future, Duration}
 import com.twitter.util.TimeConversions._
@@ -255,11 +254,13 @@ case class ClientBuilder[Req, Rep](
         val pipeline = codec.pipelineFactory.getPipeline
 
         if (_readerIdleTimeout.isDefined || _writerIdleTimeout.isDefined) {
-          val readerMillis = _readerIdleTimeout.map(_.inMilliseconds).getOrElse(0L)
-          val writerMillis = _writerIdleTimeout.map(_.inMilliseconds).getOrElse(0L)
-          val timer = new HashedWheelTimer
-          pipeline.addFirst("idle",
-            new IdleStateHandler(timer, readerMillis, writerMillis, 0, TimeUnit.MILLISECONDS))
+          pipeline.addFirst("idleReactor", new IdleChannelHandler)
+          pipeline.addFirst("idleDetector",
+            new IdleStateHandler(Timer.defaultNettyTimer,
+              _readerIdleTimeout.map(_.inMilliseconds).getOrElse(0L),
+              _writerIdleTimeout.map(_.inMilliseconds).getOrElse(0L),
+              0,
+              TimeUnit.MILLISECONDS))
         }
 
         for (ctx <- _tls) {
