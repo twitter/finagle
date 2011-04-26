@@ -57,7 +57,8 @@ object ServiceEndToEndSpec extends Specification {
         val client = ClientBuilder()
           .codec(new Thrift)
           .hosts(Seq(addr))
-          .build
+          .hostConnectionLimit(1)
+          .build()
 
         val promise = new Promise[ThriftReply[_]]
 

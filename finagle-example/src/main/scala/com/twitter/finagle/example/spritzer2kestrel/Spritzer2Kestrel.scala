@@ -33,6 +33,7 @@ object Spritzer2Kestrel {
     val spritzerClient = ClientBuilder()
       .codec(Stream)
       .hosts("stream.twitter.com:80")
+      .hostConnectionLimit(1)
       .build()
     val spritzer: Channel[ChannelBuffer] = {
       val request = {

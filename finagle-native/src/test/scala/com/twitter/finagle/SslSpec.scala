@@ -105,6 +105,7 @@ object SslSpec extends Specification {
           .name("http-client")
           .hosts(Seq(address))
           .codec(codec.clientCodec)
+          .hostConnectionLimit(1)
           .tlsWithoutValidation()
           .build()
 

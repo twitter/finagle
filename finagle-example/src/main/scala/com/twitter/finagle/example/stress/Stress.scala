@@ -1,12 +1,12 @@
 package com.twitter.finagle.example.stress
 
 import com.twitter.finagle.builder.{Http, ClientBuilder}
-import com.twitter.finagle.util.AsyncSemaphore
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.handler.codec.http._
 import java.net.{InetSocketAddress, URI}
 import com.twitter.finagle.Service
 import com.twitter.util.{Promise, Time, Future, MapMaker}
+import com.twitter.concurrent.AsyncSemaphore
 
 /**
  * A program to stress an HTTP server. The code below throttles request using an

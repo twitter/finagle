@@ -22,6 +22,7 @@ object StreamClient {
     val clientFactory: ServiceFactory[HttpRequest, Channel[ChannelBuffer]] = ClientBuilder()
       .codec(Stream)
       .hosts(new InetSocketAddress(8080))
+      .hostConnectionLimit(1)
       .buildFactory()
 
     for {

@@ -75,6 +75,7 @@ object FinagleClientThriftServerSpec extends Specification {
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
+          .hostConnectionLimit(1)
           .build()
        
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
@@ -90,6 +91,7 @@ object FinagleClientThriftServerSpec extends Specification {
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
+          .hostConnectionLimit(1)
           .build()
        
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
@@ -104,6 +106,7 @@ object FinagleClientThriftServerSpec extends Specification {
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
+          .hostConnectionLimit(1)
           .build()
        
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
@@ -120,6 +123,7 @@ object FinagleClientThriftServerSpec extends Specification {
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
+          .hostConnectionLimit(1)
           .build()
        
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
@@ -141,6 +145,7 @@ object FinagleClientThriftServerSpec extends Specification {
         val service = ClientBuilder()
           .hosts(addrs)
           .codec(codec)
+          .hostConnectionLimit(1)
           .build()
        
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
