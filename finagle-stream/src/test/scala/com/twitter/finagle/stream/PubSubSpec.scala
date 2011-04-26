@@ -35,6 +35,7 @@ object PubSubSpec extends Specification {
       val client = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
+        .hostConnectionLimit(2)
         .buildFactory()
 
       def makeChannel = for {

@@ -23,6 +23,7 @@ object ClientSpec extends Specification {
       val service = ClientBuilder()
         .hosts(Seq(ExternalMemcached.address.get))
         .codec(new Memcached)
+        .hostConnectionLimit(1)
         .build()
       client = Client(service)
     }

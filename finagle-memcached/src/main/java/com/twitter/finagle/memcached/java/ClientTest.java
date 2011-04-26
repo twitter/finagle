@@ -11,11 +11,12 @@ import java.nio.charset.Charset;
 public class ClientTest {
   public static void main(String[] args) {
     Service<Command, Response> service =
-      ClientBuilder
-        .get()
-        .hosts("localhost:11211")
-        .codec(new Memcached())
-        .build();
+      ClientBuilder.safeBuild(
+        ClientBuilder
+          .get()
+          .hosts("localhost:11211")
+          .hostConnectionLimit(1)
+          .codec(new Memcached()));
 
     Client client = Client.newInstance(service);
     client.delete("foo").get();

@@ -9,8 +9,8 @@ import java.security.spec._
 import javax.net.ssl._
 import java.util.Random
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
+import scala.collection.mutable.{Map => MutableMap}
 import scala.util.control.Breaks._
 
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext, ChannelLocal,
@@ -220,6 +220,8 @@ object Ssl {
   private[this] def fileMustExist(path: String) =
     require(new File(path).exists(), "File '%s' does not exist.".format(path))
 
+  private[this] val sslContexts: MutableMap[String, SSLContext] = MutableMap.empty
+
   /**
    * Get a server context, using the native provider if available.
    * @param certificatePath The path to the PEM encoded certificate file
@@ -227,7 +229,14 @@ object Ssl {
    * @throws a NoSuitableSslProvider if no provider could be initialized
    * @returns an SSLContext
    */
-  def server(certificatePath: String, keyPath: String): SSLContext = {
+  def server(certificatePath: String, keyPath: String): SSLContext =
+    synchronized {
+      sslContexts.getOrElseUpdate(certificatePath,
+                                  { mkServer(certificatePath, keyPath) })
+    }
+
+  private[this] def mkServer(certificatePath: String, keyPath: String): SSLContext = {
+    log.info("Initializing SSL context for cert '%s'".format(certificatePath))
     fileMustExist(certificatePath)
     fileMustExist(keyPath)
     var context: SSLContext = null

@@ -54,7 +54,7 @@ object EndToEndStress {
       .reportTo(new OstrichStatsReceiver)
       .hosts(Seq(addr))
       .codec(Http)
-      //.hostConnectionLimit(10)
+      .hostConnectionLimit(10)
       .build()
 
     0 until concurrency foreach { _ => dispatchLoop(service) }

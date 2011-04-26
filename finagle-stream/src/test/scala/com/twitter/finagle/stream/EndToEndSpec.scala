@@ -36,6 +36,7 @@ object EndToEndSpec extends Specification {
       val client = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
+        .hostConnectionLimit(1)
         .build()
 
       val channel = client(httpRequest)(1.second).channel

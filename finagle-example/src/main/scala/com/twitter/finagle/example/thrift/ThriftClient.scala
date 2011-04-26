@@ -13,6 +13,7 @@ object ThriftClient {
     val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()
       .hosts(new InetSocketAddress(8080))
       .codec(ThriftClientFramedCodec())
+      .hostConnectionLimit(1)
       .build()
 
     // Wrap the raw Thrift service in a Client decorator. The client

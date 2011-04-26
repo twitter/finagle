@@ -1,8 +1,8 @@
 package com.twitter.finagle.example.stress
 
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.builder.{Http, ClientBuilder}
 import com.twitter.finagle.Service
-import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.util.{Promise, Time, Future, MapMaker}
 import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.atomic.AtomicInteger

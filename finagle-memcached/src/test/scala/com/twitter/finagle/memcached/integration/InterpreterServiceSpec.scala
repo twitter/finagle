@@ -22,6 +22,7 @@ object InterpreterServiceSpec extends Specification {
       client = ClientBuilder()
         .hosts("localhost:" + address.getPort)
         .codec(new Memcached)
+        .hostConnectionLimit(1)
         .build()
     }
 
