@@ -30,7 +30,7 @@ object PubSubSpec extends Specification {
       val client = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
-        .hostConnectionLimit(1)
+        .hostConnectionLimit(2)
         .buildFactory()
 
       val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
