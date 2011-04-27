@@ -443,7 +443,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
-    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy[Req, Rep]) {
+    new LoadBalancedFactory(hostFactories, new LeastQueuedStrategy) {
       override def close() = {
         super.close()
         Timer.default.stop()
