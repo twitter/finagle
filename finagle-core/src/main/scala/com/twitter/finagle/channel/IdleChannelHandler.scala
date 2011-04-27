@@ -11,5 +11,6 @@ class IdleChannelHandler extends IdleStateAwareChannelHandler {
     if (e.getState() == IdleState.READER_IDLE || e.getState() == IdleState.WRITER_IDLE) {
       e.getChannel.close()
     }
+    super.channelIdle(ctx, e)
   }
 }

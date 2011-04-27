@@ -5,15 +5,13 @@ import com.twitter.util.Future
 import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channels, ChannelHandlerContext, ChannelStateEvent,
-  ExceptionEvent, MessageEvent}
+  ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
 import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.timeout.{IdleState, IdleStateAwareChannelUpstreamHandler,
-  IdleStateEvent}
 
 /**
  * Client handler for a streaming protocol.
  */
-class HttpChunkToChannel extends IdleStateAwareChannelUpstreamHandler {
+class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
   private[this] val channelRef =
     new AtomicReference[com.twitter.concurrent.ChannelSource[ChannelBuffer]](null)
   @volatile var numObservers = 0
