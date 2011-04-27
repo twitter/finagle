@@ -1,56 +1,52 @@
 package com.twitter.finagle.loadbalancer
 
-import util.Random
-import collection.mutable.ArrayBuffer
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.util.WeakMetadata
 
 /**
- * The "least queued" strategy will dispatch the next request to the
- * service with the fewest number of outstanding requests.
+ * The "least queued" strategy will produce weights inversely proportional
+ * to the number of queued requests. Highly-queued factories will have
+ * weights near zero.
  */
-class LeastQueuedStrategy[Req, Rep]
-  extends LoadBalancerStrategy[Req, Rep]
+class LeastQueuedStrategy()
+  extends LoadBalancerStrategy
 {
-  private[this] val rng = new Random
   private[this] val queueStat = WeakMetadata[AtomicInteger] { new AtomicInteger(0) }
 
-  private[this] def leastQueued(factories: Seq[ServiceFactory[Req, Rep]]) = {
-    var minLoad = Int.MaxValue
-    val mins = new ArrayBuffer[ServiceFactory[Req, Rep]]
+  override def apply[Req, Rep](factories: Seq[ServiceFactory[Req, Rep]]) = {
+    var totalLoad = 0
 
-    factories foreach { factory =>
+    val loadedFactories = factories map { factory =>
       val load = queueStat(factory).get
-      if (load < minLoad) {
-        mins.clear()
-        mins += factory
-        minLoad = load
-      } else if (load == minLoad) {
-        mins += factory
-      }
+      totalLoad += load
+      (factory, load)
     }
 
-    if (mins.size == 1)
-      mins(0)
-    else 
-      mins(rng.nextInt(mins.size))
+    loadedFactories map { case (factory, load) =>
+      val weight = if (totalLoad == 0) 1F else 1 - (load.toFloat / totalLoad)
+      (annotate(factory), weight)
+    }
   }
 
-  def apply(pools: Seq[ServiceFactory[Req, Rep]]) = {
-    val pool = if (pools.size == 1) pools.head else leastQueued(pools)
-    val qs = queueStat(pool)
-    qs.incrementAndGet()
+  private[this] def annotate[Req, Rep](underlying: ServiceFactory[Req, Rep]) =
+    new ServiceFactory[Req, Rep] {
+      override def make() = {
+        val qs = queueStat(underlying)
+        qs.incrementAndGet()
 
-    pool.make() map { service =>
-      new Service[Req, Rep] {
-        def apply(request: Req) = service(request)
-        override def release() {
-          service.release()
-          qs.decrementAndGet()
+        underlying.make() map { service =>
+          new Service[Req, Rep] {
+            def apply(request: Req) = service(request)
+            override def release() {
+              service.release()
+              qs.decrementAndGet()
+            }
+          }
         }
       }
-    }
+    override def close() = underlying.close()
+    override def isAvailable = underlying.isAvailable
   }
 }

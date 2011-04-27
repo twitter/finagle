@@ -29,24 +29,27 @@ object LeastQueuedStrategySpec extends Specification with Mockito {
     }
   }
 
-  "LeastQueuedStrategy" should {
+  "LeastWeightedStrategy" should {
     val s0 = new FixedCapacityService[Int](1)
     val s1 = new FixedCapacityService[Int](10)
     val services = Seq(s0, s1)
     val pools = services map { new SingletonFactory(_) }
-    val strategy = new LeastQueuedStrategy[Int, Int]()
+    val strategy = new LeastQueuedStrategy()
+    val balancer = new LoadBalancedFactory(pools, strategy)
 
-    "distribute load according to capacity" in {
+    "assign weight according to capacity" in {
       0 until 100000 foreach { i =>
-        if (i % 10 == 0)
+        if (i % 10 == 0) {
           services foreach { _.tick() }
+        }
 
-        val service = strategy(pools)()
+        val service: Service[Int, Int] = balancer.make()()
         service(123) ensure { service.release() }
       }
 
       s0.count + s1.count must be_==(100000)
       s0.count.toDouble / 100000.0 must beCloseTo(1.0 / 11.0, 0.02)
+      s1.count.toDouble / 100000.0 must beCloseTo(10.0 / 11.0, 0.02)
     }
   }
 }
