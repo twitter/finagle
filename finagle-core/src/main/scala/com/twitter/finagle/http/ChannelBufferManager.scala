@@ -13,46 +13,60 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.ChannelBufferUsageException
+import com.twitter.util.StorageUnit
+import com.twitter.conversions.storage._
 
-class ChannelBufferUsageTracker(limit: Long, statsReceiver: StatsReceiver = NullStatsReceiver) {
-  private[this] var currentUsage = 0L
-  private[this] var maxUsage = 0L
-  private[this] var usageLimit = limit
+class ChannelBufferUsageTracker(
+  limit: StorageUnit,
+  statsReceiver: StatsReceiver = NullStatsReceiver
+) {
+  private[this] object state {
+    var currentUsage = 0L
+    var maxUsage = 0L
+    var usageLimit = limit
+  }
 
-  // It is probably not necessary to use synchronized methods here. We can change this if there is a performance problem.
-  private[this] val currentUsageStat = statsReceiver.addGauge("channel_buffer_current_usage") { currentUsage() }
-  private[this] val maxUsageStat = statsReceiver.addGauge("channel_buffer_max_usage") { maxUsage() }
+  // It is probably not necessary to use synchronized methods here. We
+  // can change this if there is a performance problem.
+  private[this] val currentUsageStat =
+    statsReceiver.addGauge("channel_buffer_current_usage") { currentUsage.inBytes }
+  private[this] val maxUsageStat =
+    statsReceiver.addGauge("channel_buffer_max_usage") { maxUsage.inBytes }
 
-  def currentUsage(): Long = synchronized { currentUsage}
+  def currentUsage: StorageUnit = synchronized { state.currentUsage.bytes }
 
-  def maxUsage(): Long = synchronized { maxUsage }
+  def maxUsage: StorageUnit = synchronized { state.maxUsage.bytes }
 
-  def usageLimit(): Long = synchronized { usageLimit }
+  def usageLimit(): StorageUnit = synchronized { state.usageLimit }
 
-  def setUsageLimit(limit: Long) = synchronized { usageLimit = limit }
+  def setUsageLimit(limit: StorageUnit) = synchronized { state.usageLimit = limit }
 
   def increase(size: Long) = synchronized {
-    if (currentUsage + size > usageLimit) {
+    if (state.currentUsage + size > state.usageLimit.inBytes) {
       throw new ChannelBufferUsageException(
-        "Channel buffer usage exceeded limit (" + currentUsage + ", " + size + " vs. " + usageLimit + ")")
+        "Channel buffer usage exceeded limit ("
+        + currentUsage + ", " + size + " vs. " + usageLimit + ")")
     } else {
-      currentUsage += size
+      state.currentUsage += size
       if (currentUsage > maxUsage)
-        maxUsage = currentUsage
+        state.maxUsage = state.currentUsage
     }
   }
 
   def decrease(size: Long) = synchronized {
-    if (currentUsage < size) {
+    if (state.currentUsage < size) {
       throw new ChannelBufferUsageException(
-        "invalid ChannelBufferUsageTracker decrease operation (" + size + " vs. " + currentUsage + ")")
+        "invalid ChannelBufferUsageTracker decrease operation ("
+        + size + " vs. " + currentUsage + ")")
     } else {
-      currentUsage -= size
+      state.currentUsage -= size
     }
   }
 }
 
-class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker) extends SimpleChannelHandler {
+class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker)
+  extends SimpleChannelHandler
+{
   private[this] var bufferUsage = 0L
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
