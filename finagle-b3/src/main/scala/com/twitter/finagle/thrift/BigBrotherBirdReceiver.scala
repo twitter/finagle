@@ -70,7 +70,7 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
         val serializedBase64Span = encoder.encode(baos.toByteArray)
         msgs.add(new LogEntry().setCategory(traceCategory).setMessage(serializedBase64Span))
       } catch {
-        case e => statsReceiver.counter("BigBrotherBirdReceiver:createLogEntries-%s".format(e.toString)).incr()
+        case e => statsReceiver.scope("b3").counter("create_log_entries_%s".format(e.toString)).incr()
       }
     }
 
@@ -82,11 +82,11 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
    */
   def logSpan(span: Span) {
     client.Log(createLogEntries(span)) onSuccess {
-      case ResultCode.OK => statsReceiver.counter("BigBrotherBirdReceiver:logSpan-OK").incr()
-      case ResultCode.TRY_LATER => statsReceiver.counter("BigBrotherBirdReceiver:logSpan-TRY_LATER").incr()
+      case ResultCode.OK => statsReceiver.scope("b3").counter("log_span_ok").incr()
+      case ResultCode.TRY_LATER => statsReceiver.scope("b3").counter("log_span_try_later").incr()
       case _ => () /* ignore */
     } onFailure {
-      case e => statsReceiver.counter("BigBrotherBirdReceiver:logSpan-%s".format(e.toString)).incr()
+      case e => statsReceiver.scope("b3").counter("log_span_%s".format(e.toString)).incr()
     }
   }
 
