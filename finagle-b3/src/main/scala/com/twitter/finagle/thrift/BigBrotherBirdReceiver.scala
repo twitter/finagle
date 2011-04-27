@@ -63,11 +63,15 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
     val msgs = new ArrayList[LogEntry]()
 
     val spans = new RichSpan(span).toThriftSpans
-    spans.foreach{s =>
-      val baos = new ByteArrayOutputStream
-      s.write(protocolFactory.getProtocol(new TIOStreamTransport(baos)))
-      val serializedBase64Span = encoder.encode(baos.toByteArray)
-      msgs.add(new LogEntry().setCategory(traceCategory).setMessage(serializedBase64Span))
+    spans.foreach { s =>
+      try {
+        val baos = new ByteArrayOutputStream
+        s.write(protocolFactory.getProtocol(new TIOStreamTransport(baos)))
+        val serializedBase64Span = encoder.encode(baos.toByteArray)
+        msgs.add(new LogEntry().setCategory(traceCategory).setMessage(serializedBase64Span))
+      } catch {
+        case e => statsReceiver.counter("BigBrotherBirdReceiver:createLogEntries-%s".format(e.toString)).incr()
+      }
     }
 
     msgs
@@ -78,12 +82,11 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
    */
   def logSpan(span: Span) {
     client.Log(createLogEntries(span)) onSuccess {
-      case ResultCode.OK => statsReceiver.counter("BigBrotherBirdReceiver-OK").incr()
-      case ResultCode.TRY_LATER => statsReceiver.counter("BigBrotherBirdReceiver-TRY_LATER").incr()
+      case ResultCode.OK => statsReceiver.counter("BigBrotherBirdReceiver:logSpan-OK").incr()
+      case ResultCode.TRY_LATER => statsReceiver.counter("BigBrotherBirdReceiver:logSpan-TRY_LATER").incr()
       case _ => () /* ignore */
     } onFailure {
-      case e: WriteException => statsReceiver.counter("BigBrotherBirdReceiver-WriteExecption").incr()
-      // not much we can do about this exception dropping the message and moving on with our lives
+      case e => statsReceiver.counter("BigBrotherBirdReceiver:logSpan-%s".format(e.toString)).incr()
     }
   }
 
