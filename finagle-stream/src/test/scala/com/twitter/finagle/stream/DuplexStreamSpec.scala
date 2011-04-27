@@ -45,6 +45,7 @@ object DuplexStreamSpec extends Specification {
       val factory = ClientBuilder()
         .codec(new DuplexStreamCodec(true))
         .hosts(Seq(address))
+        .hostConnectionLimit(1)
         .buildFactory()
 
       val client = factory.make()()
