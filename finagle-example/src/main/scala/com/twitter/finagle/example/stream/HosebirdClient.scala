@@ -29,6 +29,7 @@ object HosebirdClient {
       .codec(Stream)
       .hosts(hostAndPort)
       .connectionTimeout(1.microsecond)
+      .hostConnectionLimit(1)
       .buildFactory()
 
     val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path)
