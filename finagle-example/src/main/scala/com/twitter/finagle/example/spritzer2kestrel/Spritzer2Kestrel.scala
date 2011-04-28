@@ -1,18 +1,18 @@
 package com.twitter.finagle.example.spritzer2kestrel
 
-import org.jboss.netty.handler.codec.base64.Base64
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import java.nio.charset.Charset
+import com.twitter.concurrent.{Channel, ChannelSource}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.stream.Stream
+import com.twitter.finagle.kestrel.{Client => Kestrel}
+import com.twitter.finagle.stream.{Stream, StreamResponse}
+import java.net.{Socket, ConnectException}
+import java.nio.charset.Charset
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
+import org.jboss.netty.handler.codec.base64.Base64
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest
 import org.jboss.netty.handler.codec.http.HttpMethod.GET
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest
-import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.concurrent.{Channel, ChannelSource}
-import com.twitter.finagle.kestrel.{Client => Kestrel}
 import org.jboss.netty.util.CharsetUtil
-import java.net.{Socket, ConnectException}
 
 /**
  * This example demonstrates some of the composability of Channels. The Twitter
@@ -35,7 +35,7 @@ object Spritzer2Kestrel {
       .hosts("stream.twitter.com:80")
       .hostConnectionLimit(1)
       .build()
-    val spritzer: Channel[ChannelBuffer] = {
+    val streamResponse = {
       val request = {
         val request = new DefaultHttpRequest(HTTP_1_1, GET, "/1/statuses/sample.json")
         request.addHeader("Host", "stream.twitter.com")
@@ -50,6 +50,8 @@ object Spritzer2Kestrel {
           throw e
       }
     }
+
+    val spritzer = streamResponse.channel
 
     // Grab a writeable Channel connected to the Kestrel
     // queue named "queue"

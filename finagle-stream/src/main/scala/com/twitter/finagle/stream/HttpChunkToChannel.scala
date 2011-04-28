@@ -1,10 +1,11 @@
 package com.twitter.finagle.stream
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
-import java.util.concurrent.atomic.AtomicReference
 import com.twitter.concurrent.ChannelSource
 import com.twitter.util.Future
+import java.util.concurrent.atomic.AtomicReference
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel.{Channels, ChannelHandlerContext, ChannelStateEvent,
+  ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
 import org.jboss.netty.handler.codec.http._
 
 /**
@@ -17,14 +18,18 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case message: HttpResponse =>
-      require(message.getStatus == HttpResponseStatus.OK,
-        "Error: status code must be 200 OK: " + message.getStatus)
-      require(message.isChunked,
-        "Error: message must be chunked")
-
       val source = new ChannelSource[ChannelBuffer]
       require(channelRef.compareAndSet(null, source),
         "Channel is already busy, only Chunks are OK at this point.")
+
+      val response = new StreamResponse {
+        val httpResponse = message
+        val channel = source
+        def release() {
+          ctx.getChannel.close()
+          source.close()
+        }
+      }
 
       ctx.getChannel.setReadable(false)
 
@@ -34,17 +39,20 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
           case 1 =>
             ctx.getChannel.setReadable(true)
           case 0 =>
-            ctx.getChannel.setReadable(false)
+            // if there are no more observers, then shut everything down
+            response.release()
           case _ =>
         }
         Future.Done
       }
 
-      Channels.fireMessageReceived(ctx, source)
+      Channels.fireMessageReceived(ctx, response)
+
     case trailer: HttpChunkTrailer =>
       val topic = channelRef.getAndSet(null)
       topic.close()
       ctx.getChannel.setReadable(true)
+
     case chunk: HttpChunk =>
       ctx.getChannel.setReadable(false)
       val topic = channelRef.get
@@ -54,5 +62,17 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
           ctx.getChannel.setReadable(true)
         }
       }
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    Option(channelRef.get).foreach(_.close())
+  }
+
+  override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    Option(channelRef.get).foreach(_.close())
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)  {
+    // should we pass the exception to the observer somehow?
   }
 }

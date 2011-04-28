@@ -1,16 +1,16 @@
 package com.twitter.finagle.example.stream
 
-import org.jboss.netty.handler.codec.http.HttpRequest
+import com.twitter.concurrent.{ChannelSource, Channel}
+import com.twitter.finagle.builder.{Server, ServerBuilder}
+import com.twitter.finagle.Service
+import com.twitter.finagle.stream.{Stream, StreamResponse}
+import com.twitter.util.Future
+import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import com.twitter.finagle.Service
-import com.twitter.concurrent.{ChannelSource, Channel}
-import com.twitter.util.Future
-import com.twitter.finagle.stream.Stream
-import java.net.InetSocketAddress
-import scala.util.Random
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponseStatus}
 import org.jboss.netty.util.CharsetUtil
-import com.twitter.finagle.builder.{Server, ServerBuilder}
+import scala.util.Random
 
 /**
  * An example of a streaming server using HTTP Chunking. The Stream
@@ -42,8 +42,14 @@ object StreamServer {
   var producer: ProducerThread = null
 
   def main(args: Array[String]) {
-    val myService = new Service[HttpRequest, Channel[ChannelBuffer]] {
-      def apply(request: HttpRequest) = Future.value(channelSource)
+    val myService = new Service[HttpRequest, StreamResponse] {
+      def apply(request: HttpRequest) = Future {
+        new StreamResponse {
+          val httpResponse = new DefaultHttpResponse(request.getProtocolVersion, HttpResponseStatus.OK)
+          def channel = channelSource
+          def release() = ()
+        }
+      }
     }
 
     val server: Server = ServerBuilder()
