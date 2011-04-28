@@ -72,6 +72,7 @@ The client connects to the server, and issues a simple HTTP GET request:
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
       .codec(Http)
       .hosts(address)
+      .hostConnectionLimit(1)
       .build()
 
     // Issue a request, get a response:
@@ -189,10 +190,15 @@ Finagle makes it easy to build RPC clients with connection pooling, load balanci
 
 ### Scala
 
+Note that the `ClientBuilder` requires the definition of `codec`,
+`hosts` and `hostConnectionLimit`. In Scala, this requirement is
+statically typechecked.
+    
     val client = ClientBuilder()
         .codec(Http)
         .hosts("localhost:10000,localhost:10001,localhost:10003")
         .connectionTimeout(1.second)        // max time to spend establishing a TCP connection.
+        .hostConnectionLimit(1)
         .retries(2)                         // (1) per-request retries
         .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
         .logger(Logger.getLogger("http"))
@@ -426,6 +432,7 @@ Here's how to use it:
     val client = ClientBuilder()
       .cluster(cluster) // check this out!!
       .codec(new StringCodec)
+      .hostConnectionLimit(1)
       .build()
 
 That's it!
