@@ -22,7 +22,7 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
 
   private[this] val encoder = new BASE64Encoder
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
-  private[this] val statsReceiver = NullStatsReceiver // TODO how to pick up whatever Finagle is using?
+  private[this] val statsReceiver = NullStatsReceiver.scope("b3") // TODO how to pick up whatever Finagle is using?
 
   private[this] val traceCategory = "b3"
 
@@ -70,7 +70,7 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
         val serializedBase64Span = encoder.encode(baos.toByteArray)
         msgs.add(new LogEntry().setCategory(traceCategory).setMessage(serializedBase64Span))
       } catch {
-        case e => statsReceiver.scope("b3").counter("create_log_entries_%s".format(e.toString)).incr()
+        case e => statsReceiver.counter("create_log_entries_%s".format(e.toString)).incr()
       }
     }
 
@@ -82,11 +82,11 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
    */
   def logSpan(span: Span) {
     client.Log(createLogEntries(span)) onSuccess {
-      case ResultCode.OK => statsReceiver.scope("b3").counter("log_span_ok").incr()
-      case ResultCode.TRY_LATER => statsReceiver.scope("b3").counter("log_span_try_later").incr()
+      case ResultCode.OK => statsReceiver.counter("log_span_ok").incr()
+      case ResultCode.TRY_LATER => statsReceiver.counter("log_span_try_later").incr()
       case _ => () /* ignore */
     } onFailure {
-      case e => statsReceiver.scope("b3").counter("log_span_%s".format(e.toString)).incr()
+      case e => statsReceiver.counter("log_span_%s".format(e.toString)).incr()
     }
   }
 
