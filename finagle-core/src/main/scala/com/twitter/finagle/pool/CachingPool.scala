@@ -84,4 +84,6 @@ class CachingPool[Req, Rep](
   }
 
   override def isAvailable = isOpen
+
+  override val toString = "caching_pool_%s".format(factory.toString)
 }

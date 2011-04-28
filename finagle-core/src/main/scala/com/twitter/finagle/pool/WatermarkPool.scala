@@ -117,4 +117,6 @@ class WatermarkPool[Req, Rep](
   }
 
   override def isAvailable = isOpen
+
+  override val toString = "watermark_pool_%s".format(factory.toString)
 }

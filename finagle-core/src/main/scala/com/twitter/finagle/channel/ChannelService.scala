@@ -130,4 +130,9 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
       bootstrap.releaseExternalResources()
     }
   }
+
+  override val toString = {
+    val bootstrapHost = Option(bootstrap.getOption("remoteAddress")) getOrElse(bootstrap.toString)
+    "host:%s".format(bootstrapHost)
+  }
 }

@@ -8,6 +8,7 @@ import com.twitter.util.{Future, Return, Time, Try}
 
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.finagle.stats.StatsReceiver
 
 /**
  * A LoadBalancerStrategy produces a sequence of factories and weights.
@@ -25,19 +26,39 @@ trait LoadBalancerStrategy {
  */
 class LoadBalancedFactory[Req, Rep](
     factories: Seq[ServiceFactory[Req, Rep]],
+    statsReceiver: StatsReceiver,
     strategies: LoadBalancerStrategy*)
   extends ServiceFactory[Req, Rep]
 {
   // initialize using Time.now for predictable test behavior
   private[this] val rng = new Random(Time.now.inMillis)
 
+  private[this] val gauges = {
+    val scopedStatsReceiver = statsReceiver.scope("load_balancer")
+    factories map { factory =>
+      scopedStatsReceiver.addGauge("factory_weight_"+factory.toString) {
+        weight(factory)
+      }
+    }
+  }
+
   def make(): Future[Service[Req, Rep]] = {
     val available = availableOrAll
     if (available.isEmpty)
       return Future.exception(new NoBrokersAvailableException)
+    max(weights(available)).make()
+  }
+
+  def weight(factory: ServiceFactory[Req, Rep]): Float = {
+    val (_, weight) = weights(Seq(factory)).head
+    weight
+  }
+
+  private[this] def weights(
+    available: Seq[ServiceFactory[Req, Rep]]
+  ):Seq[(ServiceFactory[Req, Rep], Float)] = {
     val base = available map((_, 1F))
-    val weightedFactories = applyWeights(base, strategies.toList)
-    max(weightedFactories).make()
+    applyWeights(base, strategies.toList)
   }
 
   private[this] def availableOrAll: Seq[ServiceFactory[Req, Rep]] = {
@@ -93,4 +114,7 @@ class LoadBalancedFactory[Req, Rep](
   override def isAvailable = factories.exists(_.isAvailable)
 
   override def close() = factories foreach { _.close() }
+
+  override val toString = "load_balanced_factory_%s".format(
+    factories map { _.toString } mkString(","))
 }

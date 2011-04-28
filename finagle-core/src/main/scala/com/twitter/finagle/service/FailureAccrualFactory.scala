@@ -49,4 +49,6 @@ class FailureAccrualFactory[Req, Rep](
     underlying.isAvailable && synchronized { failedAt.untilNow >= markDeadFor }
 
   override def close() = underlying.close()
+
+  override val toString = "failure_accrual_%s".format(underlying.toString)
 }

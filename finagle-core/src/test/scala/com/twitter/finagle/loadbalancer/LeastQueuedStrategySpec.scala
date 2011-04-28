@@ -9,6 +9,7 @@ import com.twitter.util.{Future, Promise, Return}
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.SingletonFactory
+import com.twitter.finagle.stats.NullStatsReceiver
 
 object LeastQueuedStrategySpec extends Specification with Mockito {
   class FixedCapacityService[T](requestsPerTick: Int) extends Service[T, T] {
@@ -35,7 +36,7 @@ object LeastQueuedStrategySpec extends Specification with Mockito {
     val services = Seq(s0, s1)
     val pools = services map { new SingletonFactory(_) }
     val strategy = new LeastQueuedStrategy()
-    val balancer = new LoadBalancedFactory(pools, strategy)
+    val balancer = new LoadBalancedFactory(pools, NullStatsReceiver, strategy)
 
     "assign weight according to capacity" in {
       0 until 100000 foreach { i =>

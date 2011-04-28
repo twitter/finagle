@@ -21,4 +21,6 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
   def close() = latch.await { service.release() }
 
   override def isAvailable = service.isAvailable
+
+  override val toString = "singleton_factory_%s".format(service.toString)
 }
