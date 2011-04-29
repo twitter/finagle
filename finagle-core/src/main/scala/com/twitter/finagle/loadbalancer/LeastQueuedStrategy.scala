@@ -6,9 +6,9 @@ import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.util.WeakMetadata
 
 /**
- * The "least queued" strategy will produce weights inversely proportional
- * to the number of queued requests. Highly-queued factories will have
- * weights near zero.
+ * The "least queued" strategy will produce weights inversely
+ * proportional to the number of queued requests. Highly-queued
+ * factories will have weights near zero.
  */
 class LeastQueuedStrategy()
   extends LoadBalancerStrategy

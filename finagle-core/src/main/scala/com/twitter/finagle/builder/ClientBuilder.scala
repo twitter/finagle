@@ -56,7 +56,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 
-import com.twitter.util.{Future, Duration}
+import com.twitter.util.{Future, Duration, Throw, Return}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -64,6 +64,7 @@ import com.twitter.finagle.util._
 import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
+import com.twitter.finagle.factory._
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 
@@ -422,6 +423,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     future
   }
 
+  private[this] lazy val statsReceiver = {
+    val statsReceiver = config.statsReceiver getOrElse NullStatsReceiver
+    config.name match {
+      case Some(name) => statsReceiver.scope(name)
+      case None       => statsReceiver
+    }
+  }
+
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
    * (e.g., those that support transactions or authentication).
@@ -445,15 +454,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       //
       // the pool & below are host-specific,
 
-      val hostStatsReceiver = config.statsReceiver map { statsReceiver =>
-        val hostname = host match {
+      val hostStatsReceiver = new RollupStatsReceiver(statsReceiver).withSuffix(
+        host match {
           case iaddr: InetSocketAddress => "%s:%d".format(iaddr.getHostName, iaddr.getPort)
           case other => other.toString
         }
-
-        val scoped = config.name map (statsReceiver.scope(_)) getOrElse statsReceiver
-        new RollupStatsReceiver(scoped).withSuffix(hostname)
-      } getOrElse NullStatsReceiver
+      )
 
       var factory: ServiceFactory[Req, Rep] = null
 
@@ -473,9 +479,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
-    new LoadBalancedFactory(
+    val loadbalanced = new LoadBalancedFactory(
       hostFactories,
-      config.statsReceiver getOrElse NullStatsReceiver,
+      statsReceiver.scope("loadbalancer"),
       new LeastQueuedStrategy)
     {
       override def close() = {
@@ -483,6 +489,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         Timer.default.stop()
       }
     }
+
+    // We maintain a separate log of factory failures here so that
+    // factory failures are captured in the service failure
+    // stats. Logically these are service failures, but since the
+    // requests are never dispatched to the underlying stack, they
+    // don't get recorded there.
+    new StatsFactoryWrapper(loadbalanced, statsReceiver)
   }
 
   /**

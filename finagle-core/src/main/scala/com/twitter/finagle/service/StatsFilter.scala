@@ -4,10 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.util.{Future, Time, Throw}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{Service, Filter}
+import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter}
 
 class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
-  extends Filter[Req, Rep, Req, Rep]
+  extends SimpleFilter[Req, Rep]
 {
   private[this] val outstandingRequestCount = new AtomicInteger(0)
   private[this] val dispatchCount = statsReceiver.counter("requests")

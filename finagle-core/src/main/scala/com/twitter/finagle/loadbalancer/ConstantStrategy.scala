@@ -5,13 +5,14 @@ import com.twitter.util.{Return, Throw, Try}
 import com.twitter.finagle.{Service, ServiceFactory}
 
 /**
- * Returns weights based on sequence of factory/weight pairs passed in on instantiation.
- * Will throw on apply if one of the factories in the sequence isn't in the initial
- * sequence of pairs.
+ * Returns weights based on sequence of factory/weight pairs passed in
+ * on instantiation.  Will throw on apply if one of the factories in
+ * the sequence isn't in the initial sequence of pairs.
  *
- * A ConstantStrategy should always be at the beginning of a LoadBalancerStrategy sequence
- * unless the assignWeight method is clever enough to figure out the underlying factories
- * that preceeded strategies have wrapped in their apply methods.
+ * A ConstantStrategy should always be at the beginning of a
+ * LoadBalancerStrategy sequence unless the assignWeight method is
+ * clever enough to figure out the underlying factories that preceeded
+ * strategies have wrapped in their apply methods.
  */
 class ConstantStrategy(
     assignWeight: (ServiceFactory[_, _] => Float))

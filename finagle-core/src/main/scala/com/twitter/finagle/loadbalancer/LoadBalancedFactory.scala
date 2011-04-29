@@ -20,9 +20,9 @@ trait LoadBalancerStrategy {
 }
 
 /**
- * returns a service by applying a Seq of LoadBalancerStrategies to a Seq of
- * ServiceFactories, multiplying the weights for each factory, and choosing a factory
- * of the highest weight.
+ * Returns a service by applying a Seq of LoadBalancerStrategies to a
+ * Seq of ServiceFactories, multiplying the weights for each factory,
+ * and choosing a factory of the highest weight.
  */
 class LoadBalancedFactory[Req, Rep](
     factories: Seq[ServiceFactory[Req, Rep]],
@@ -34,9 +34,8 @@ class LoadBalancedFactory[Req, Rep](
   private[this] val rng = new Random(Time.now.inMillis)
 
   private[this] val gauges = {
-    val scopedStatsReceiver = statsReceiver.scope("load_balancer")
     factories map { factory =>
-      scopedStatsReceiver.addGauge("factory_weight_"+factory.toString) {
+      statsReceiver.scope("weight").addGauge(factory.toString) {
         weight(factory)
       }
     }
@@ -46,6 +45,7 @@ class LoadBalancedFactory[Req, Rep](
     val available = availableOrAll
     if (available.isEmpty)
       return Future.exception(new NoBrokersAvailableException)
+
     max(weights(available)).make()
   }
 
@@ -56,7 +56,7 @@ class LoadBalancedFactory[Req, Rep](
 
   private[this] def weights(
     available: Seq[ServiceFactory[Req, Rep]]
-  ):Seq[(ServiceFactory[Req, Rep], Float)] = {
+  ): Seq[(ServiceFactory[Req, Rep], Float)] = {
     val base = available map((_, 1F))
     applyWeights(base, strategies.toList)
   }
