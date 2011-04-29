@@ -56,11 +56,11 @@ object EndToEndSpec extends Specification {
       future() must be_==(300)
 
       Trace.debug(true)
+      Trace().children must beEmpty
 
       client.complex_return("a string")().arg_two must be_==(
         "%s".format(Trace().id.toString))
 
-      
       Trace().children must haveSize(1)
       val childSpan = Trace().children.head
 
