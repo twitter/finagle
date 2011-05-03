@@ -1,6 +1,8 @@
 package com.twitter.finagle.tracing
 
 import org.specs.Specification
+import java.nio.ByteBuffer
+import scala.collection.Map
 
 object TracerSpec extends Specification {
   "RefTracer" should {
@@ -17,12 +19,15 @@ object TracerSpec extends Specification {
       val child = tracer.addChild()
       child.record("oh hey ho yay")
       child.record("another")
+      child.recordBinary("this is a key", ByteBuffer.wrap("this is a value".getBytes()))
 
+      val testMap = Map("this is a key" -> ByteBuffer.wrap("this is a value".getBytes()))
       tracer().children must beLike {
         case Seq(
           Span(init._traceId, _, _, _, Some(init.id),
                Seq(Annotation(_, Event.Message("oh hey ho yay"), _),
                    Annotation(_, Event.Message("another"), _)),
+               testMap,
                Seq())) => true
         case _ =>
           false
@@ -31,7 +36,9 @@ object TracerSpec extends Specification {
 
     "not record messages when debugging isn't turned on" in {
       tracer.record("oh hey")
+      tracer.recordBinary("this is a key", ByteBuffer.wrap("this is a value".getBytes()))
       tracer().annotations must beEmpty
+      tracer().bAnnotations must beEmpty
     }
   }
 }

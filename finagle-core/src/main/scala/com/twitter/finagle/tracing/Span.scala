@@ -8,6 +8,8 @@ package com.twitter.finagle.tracing
 import util.Random
 
 import com.twitter.util.{RichU64Long, Time}
+import scala.collection.Map
+import java.nio.ByteBuffer
 
 /**
  * Endpoints describe a TCP endpoint that terminates RPC
@@ -46,6 +48,7 @@ case class Annotation(
  * @param id           Identifier for this span
  * @param parentId     Span identifier for the parent span
  * @param annotations  A sequence of annotations made in this span
+ * @param bAnnotations Key-Value annotations, used to attach non timestamped data
  * @param children     A sequence of child transcripts
  */
 case class Span(
@@ -55,6 +58,7 @@ case class Span(
   id          : Long,
   parentId    : Option[Long],
   annotations : Seq[Annotation],
+  bAnnotations: Map[String, ByteBuffer],
   children    : Seq[Span])
 {
   /**
@@ -142,9 +146,11 @@ case class Span(
       unmatchedSpans partition { _.parentId map { _ == id } getOrElse false }
 
     val newAnnotations = spansToMerge flatMap { _.annotations }
+    val newBAnnotations = spansToMerge flatMap { _.bAnnotations }
     val newSpan = copy(
       children = splicedChildren ++ newChildren,
-      annotations = annotations ++ newAnnotations
+      annotations = annotations ++ newAnnotations,
+      bAnnotations = bAnnotations ++ newBAnnotations
     )
 
     (newSpan, nextSpans)
@@ -162,6 +168,7 @@ object Span {
     id = id getOrElse rng.nextLong,
     parentId = parentId,
     annotations = Seq(),
+    bAnnotations = Map(),
     children = Seq()
   )
 }

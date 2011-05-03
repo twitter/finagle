@@ -41,7 +41,7 @@ object BigBrotherBirdSpec extends Specification with Mockito {
       receiver.setSampleRate(10000)
 
       val expected = new ArrayList[LogEntry]()
-      expected.add(new LogEntry().setCategory("b3").setMessage("CgABAAAAAAAAAHsKAAQAAAAAAAAByAoABQAAAAAAAAMVAA=="))
+      expected.add(new LogEntry().setCategory("b3").setMessage("CgABAAAAAAAAAHsKAAQAAAAAAAAByAoABQAAAAAAAAMVDQAHCwsAAAAAAA=="))
       client.Log(expected) returns Future(ResultCode.OK)
 
       // execute the code we're testing

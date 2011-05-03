@@ -1,6 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.util.{Local, Time}
+import java.nio.ByteBuffer
 
 /**
  * Tracers are responsible for mutating spans in-situ.
@@ -48,9 +49,25 @@ trait Tracer {
    * Record a new [[com.twitter.finagle.tracing.Event.Message]]
    * annotation. This is only affected when debugging is turned on.
    */
-  def record(message: => String) {
+  def record(message: String) {
     if (isDebugging)
       record(Event.Message(message))
+  }
+
+  /**
+   * Record a binary annotation. This is a key value pair,
+   * with the value being a binary blob.
+   *
+   * Useful for example to record information that does not need
+   * a timestamp associated. For example request http response
+   * codes, tweet id or more structured information.
+   */
+  def recordBinary(key: String, value: ByteBuffer) {
+    if (isDebugging) {
+      mutate { span =>
+        span.copy(bAnnotations = span.bAnnotations + (key -> value))
+      }
+    }
   }
 
   /**

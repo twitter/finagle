@@ -36,13 +36,14 @@ private[thrift] class RichThriftSpan(self: thrift.Span) {
    * Creates a Finagle span from this thrift span.
    */
   def toFinagleSpan: Span = Span(
-    _traceId    = if (self.isSetTrace_id)     Some(self.getTrace_id)     else None,
-    serviceName = if (self.isSetService_name) Some(self.getService_name) else None,
-    name        = if (self.isSetName)         Some(self.getName)         else None,
-    id          = self.getId,
-    parentId    = if (self.isSetParent_id) Some(self.getParent_id) else None,
-    annotations = toAnnotations,
-    children    = Seq()
+    _traceId      = if (self.isSetTrace_id)     Some(self.getTrace_id)     else None,
+    serviceName   = if (self.isSetService_name) Some(self.getService_name) else None,
+    name          = if (self.isSetName)         Some(self.getName)         else None,
+    id            = self.getId,
+    parentId      = if (self.isSetParent_id) Some(self.getParent_id) else None,
+    annotations   = toAnnotations,
+    bAnnotations  = self.getBinary_annotations,
+    children      = Seq()
   )
 
   /**
@@ -102,6 +103,8 @@ private[thrift] class RichSpan(self: Span) {
     }
 
     annotations foreach { span.addToAnnotations(_) }
+
+    span.setBinary_annotations(self.bAnnotations)
 
     val childThriftSpans =
       self.children map { new RichSpan(_) } flatMap { _.toThriftSpans }
