@@ -1,9 +1,13 @@
 package com.twitter.finagle.javaapi;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.jboss.netty.handler.codec.http.*;
 
 import com.twitter.finagle.*;
 import com.twitter.finagle.builder.*;
+import com.twitter.util.Promise;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
 import com.twitter.util.*;
@@ -31,5 +35,23 @@ public class HttpClientTest {
           System.exit(1);
         }
       });
+
+    /* If the following compiles, variance annotations work (maybe!). */
+    Promise<List<Integer>> promise = new Promise();
+    promise.addEventListener(
+      new FutureEventListener<Collection<Integer>>() {
+        public void onSuccess(Collection<Integer> coll) {}
+        public void onFailure(Throwable cause) {}
+      });
+
+    /* The following should *not* compile. Uncomment to test manually. */
+    /*
+    Promise<Collection<Integer>> badPromise = new Promise();
+    badPromise.addEventListener(
+      new FutureEventListener<List<Integer>>() {
+        public void onSuccess(List<Integer> coll) {}
+        public void onFailure(Throwable cause) {}
+      });
+    */
   }
 }
