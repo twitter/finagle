@@ -361,7 +361,7 @@ class KetamaClient(clients: Map[(String, Int, Int), Client], keyHasher: KeyHashe
 case class KetamaClientBuilder(
   _nodes: Seq[(String, Int, Int)],
   _hashName: Option[String],
-  _clientBuilder: Option[ClientBuilder[_, _, Nothing, Nothing, ClientConfig.Yes]]) {
+  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
 
   def this() = this(
     Nil,            // nodes
@@ -378,7 +378,7 @@ case class KetamaClientBuilder(
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
 
-  def clientBuilder(clientBuilder: ClientBuilder[_, _, Nothing, Nothing, ClientConfig.Yes]): KetamaClientBuilder =
+  def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): KetamaClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
@@ -411,7 +411,7 @@ class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
  */
 case class RubyMemCacheClientBuilder(
   _nodes: Seq[(String, Int, Int)],
-  _clientBuilder: Option[ClientBuilder[_, _, Nothing, Nothing, ClientConfig.Yes]]) {
+  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
 
   def this() = this(
     Nil,  // nodes
@@ -424,7 +424,7 @@ case class RubyMemCacheClientBuilder(
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
     copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
 
-  def clientBuilder(clientBuilder: ClientBuilder[_, _, Nothing, Nothing, ClientConfig.Yes]): RubyMemCacheClientBuilder =
+  def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): RubyMemCacheClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
