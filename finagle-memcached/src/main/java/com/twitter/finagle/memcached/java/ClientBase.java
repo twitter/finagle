@@ -2,6 +2,7 @@ package com.twitter.finagle.memcached.java;
 
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.util.Future;
+import com.twitter.util.Time;
 import org.jboss.netty.buffer.ChannelBuffer;
 import scala.Option;
 import scala.collection.JavaConversions;
@@ -49,8 +50,21 @@ public class ClientBase extends Client {
     });
   }
 
+  public Future<Void> set(String key, int flags, Time expiry, ChannelBuffer value) {
+    Future<Object> result = underlying.set(key, flags, expiry, value);
+    return result.map(new Function<Object, Void>() {
+      public Void apply(Object obj) {
+	return null;
+      }
+    });
+  }
+
   public Future<Boolean> add(String key, ChannelBuffer value) {
     return underlying.add(key, value);
+  }
+
+  public Future<Boolean> add(String key, int flags, Time expiry, ChannelBuffer value) {
+    return underlying.add(key, flags, expiry, value);
   }
 
   public Future<Boolean> append(String key, ChannelBuffer value) {
@@ -63,6 +77,10 @@ public class ClientBase extends Client {
 
   public Future<Boolean> replace(String key, ChannelBuffer value) {
     return underlying.replace(key, value);
+  }
+
+  public Future<Boolean> replace(String key, int flags, Time expiry, ChannelBuffer value) {
+    return underlying.replace(key, flags, expiry, value);
   }
 
   public Future<Boolean> delete(String key) {
