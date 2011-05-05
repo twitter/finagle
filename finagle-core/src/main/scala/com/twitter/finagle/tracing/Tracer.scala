@@ -33,7 +33,7 @@ trait Tracer {
    * The current trace ID. This is the root span ID, and is the same
    * for each request handled by the same request tree.
    */
-  def id(): Long = this().traceId
+  def id(): SpanId = this().traceId
 
   /**
    * Record the given event. A timestamp is added.

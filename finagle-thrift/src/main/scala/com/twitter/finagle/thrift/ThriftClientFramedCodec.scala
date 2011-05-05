@@ -125,9 +125,9 @@ private[thrift] class ThriftClientTracingFilter
     // Create a new span identifier for this request.
     val childTracer = Trace.addChild()
     val header = new thrift.TracedRequestHeader
-    header.setSpan_id(childTracer().id)
-    header.setTrace_id(childTracer().traceId)
-    childTracer().parentId foreach { header.setParent_span_id(_) }
+    header.setSpan_id(childTracer().id.toLong)
+    header.setTrace_id(childTracer().traceId.toLong)
+    childTracer().parentId foreach { parentId => header.setParent_span_id(parentId.toLong) }
     header.setDebug(Trace.isDebugging)
 
     val tracedRequest = new ThriftClientRequest(

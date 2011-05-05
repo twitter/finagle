@@ -18,14 +18,14 @@ import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
 import com.twitter.finagle.{Codec, ClientCodec}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.tracing.Span
+import com.twitter.finagle.tracing.{Span, SpanId}
 
 import java.util.ArrayList
 
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
 
 object BigBrotherBirdSpec extends Specification with Mockito {
-  val span = Span(Some(123), Some(456), Some(789))
+  val span = Span(Some(SpanId(123)), Some(SpanId(456)), Some(SpanId(789)))
 
   "BigBrotherBirdReceiver" should {
     "throw exception if illegal sample rate" in {

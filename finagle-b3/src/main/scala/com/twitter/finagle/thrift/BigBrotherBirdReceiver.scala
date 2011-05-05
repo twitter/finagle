@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.builder.ClientBuilder
 import java.net.InetSocketAddress
 import org.apache.thrift.protocol.TBinaryProtocol
-import com.twitter.finagle.tracing.{Span, TraceReceiver}
+import com.twitter.finagle.tracing.{Span, SpanId, TraceReceiver}
 import java.util.ArrayList
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
 import java.io.ByteArrayOutputStream
@@ -52,8 +52,8 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
   /**
    * Should we drop this particular trace or send it on to Scribe?
    */
-  private def shouldDropTrace(traceId: Long, sampleRate: Int): Boolean = {
-    traceId % 10000 >= sampleRate
+  private def shouldDropTrace(traceId: SpanId, sampleRate: Int): Boolean = {
+    traceId.toLong % 10000 >= sampleRate
   }
 
   /**
