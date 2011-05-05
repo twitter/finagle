@@ -108,6 +108,7 @@ object ClientBuilder {
 
 object ClientConfig {
   sealed abstract trait Yes
+  type FullySpecified[Req, Rep] = ClientConfig[Req, Rep, Yes, Yes, Yes]
 }
 
 /**
@@ -116,7 +117,7 @@ object ClientConfig {
  */
 final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
   private val _cluster                   : Option[Cluster]               = None,
-  private val _codec                     : Option[ClientCodec[Req, Rep]] = None,
+  private val _codecFactory              : Option[ClientCodecFactory[Req, Rep]] = None,
   private val _connectionTimeout         : Duration                      = 10.milliseconds,
   private val _requestTimeout            : Duration                      = Duration.MaxValue,
   private val _keepAlive                 : Option[Boolean]               = None,
@@ -145,7 +146,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
    * underscores.
    */
   val cluster                   = _cluster
-  val codec                     = _codec
+  val codecFactory              = _codecFactory
   val connectionTimeout         = _connectionTimeout
   val requestTimeout            = _requestTimeout
   val statsReceiver             = _statsReceiver
@@ -168,7 +169,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
 
   def toMap = Map(
     "cluster"                   -> _cluster,
-    "codec"                     -> _codec,
+    "codecFactory"              -> _codecFactory,
     "connectionTimeout"         -> Some(_connectionTimeout),
     "requestTimeout"            -> Some(_requestTimeout),
     "keepAlive"                 -> Some(_keepAlive),
@@ -201,8 +202,8 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   }
 
   def validated: ClientConfig[Req, Rep, Yes, Yes, Yes] = {
-    cluster getOrElse { throw new IncompleteSpecification("No hosts were specified") }
-    codec   getOrElse { throw new IncompleteSpecification("No codec was specified") }
+    cluster      getOrElse { throw new IncompleteSpecification("No hosts were specified") }
+    codecFactory getOrElse { throw new IncompleteSpecification("No codec was specified") }
     hostConnectionLimit getOrElse {
       throw new IncompleteSpecification("No host connection limit was specified")
     }
@@ -217,7 +218,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   import ClientConfig._
 
   // Convenient aliases.
-  type FullySpecifiedConfig = ClientConfig[Req, Rep, Yes, Yes, Yes]
+  type FullySpecifiedConfig = FullySpecified[Req, Rep]
   type ThisConfig           = ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
   type This                 = ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
 
@@ -261,7 +262,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def codec[Req1, Rep1](
     codec: ClientCodec[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    withConfig(_.copy(_codec = Some(codec)))
+    withConfig(_.copy(_codecFactory = Some(ClientCodecFactory.singleton(codec))))
 
   def protocol[Req1, Rep1](
     protocol: Protocol[Req1, Rep1]
@@ -275,13 +276,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     }
 
-    withConfig(_.copy(_codec = Some(codec)))
+    withConfig(_.copy(_codecFactory = Some(ClientCodecFactory.singleton(codec))))
   }
 
   def codec[Req1, Rep1](
     codec: Codec[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    withConfig(_.copy(_codec = Some(codec.clientCodec)))
+    withConfig(_.copy(_codecFactory = Some(ClientCodecFactory.singleton(codec.clientCodec))))
+
+  def codec[Req1, Rep1](
+    codecFactory: ClientCodecFactory[Req1, Rep1]
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+    withConfig(_.copy(_codecFactory = Some(codecFactory)))
 
   def connectionTimeout(duration: Duration): This =
     withConfig(_.copy(_connectionTimeout = duration))
@@ -404,11 +410,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark, statsReceiver)
   }
 
-  private[this] def prepareService(service: Service[Req, Rep]) = {
-    val codec = config.codec.get
-    var future: Future[Service[Req, Rep]] = null
-
-    future = codec.prepareService(service)
+  private[this] def prepareService(codec: ClientCodec[Req, Rep])(service: Service[Req, Rep]) = {
+    var future: Future[Service[Req, Rep]] = codec.prepareService(service)
 
     if (config.hostConnectionMaxIdleTime.isDefined ||
         config.hostConnectionMaxLifeTime.isDefined) {
@@ -442,7 +445,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     Timer.default.acquire()
 
     val cluster = config.cluster.get
-    val codec   = config.codec.get
+    val codec   = config.codecFactory.get(ClientCodecConfig())
 
     val hostFactories = cluster mkFactories { host =>
       // The per-host stack is as follows:
@@ -465,7 +468,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
       val bs = buildBootstrap(codec, host)
       factory = new ChannelServiceFactory[Req, Rep](
-        bs, prepareService _, hostStatsReceiver)
+        bs, prepareService(codec) _, hostStatsReceiver)
       factory = buildPool(factory, hostStatsReceiver)
 
       if (config.requestTimeout < Duration.MaxValue) {

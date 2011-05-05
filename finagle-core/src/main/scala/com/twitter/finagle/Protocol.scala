@@ -6,8 +6,10 @@ package com.twitter.finagle
  * from this codec.
  */
 
+import java.net.SocketAddress
 import org.jboss.netty.channel.ChannelPipelineFactory
 import com.twitter.util.Future
+import com.twitter.finagle.builder.{ClientConfig, ServerConfig}
 
 /**
  * Superclass for all codecs.
@@ -32,6 +34,30 @@ trait AbstractCodec[Req, Rep] {
 
 trait ClientCodec[Req, Rep] extends AbstractCodec[Req, Rep]
 trait ServerCodec[Req, Rep] extends AbstractCodec[Req, Rep]
+
+/**
+ * Codec factories create codecs given some configuration.
+ */
+
+case class ClientCodecConfig()
+trait ClientCodecFactory[Req, Rep] extends (ClientCodecConfig => ClientCodec[Req, Rep])
+
+object ClientCodecFactory {
+  def singleton[Req, Rep](codec: ClientCodec[Req, Rep]) =
+    new ClientCodecFactory[Req, Rep] {
+      def apply(config: ClientCodecConfig) = codec
+    }
+}
+
+case class ServerCodecConfig(serviceName: Option[String], boundAddress: SocketAddress)
+trait ServerCodecFactory[Req, Rep] extends (ServerCodecConfig => ServerCodec[Req, Rep])
+
+object ServerCodecFactory {
+  def singleton[Req, Rep](codec: ServerCodec[Req, Rep]) =
+    new ServerCodecFactory[Req, Rep] {
+      def apply(config: ServerCodecConfig) = codec
+    }
+}
 
 /**
  * A combined codec provides both client and server codecs in one
