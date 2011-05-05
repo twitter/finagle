@@ -1,7 +1,8 @@
 package com.twitter.finagle.stream
 
 import com.twitter.concurrent.Channel
-import com.twitter.finagle.{Codec, ClientCodec, ServerCodec}
+import com.twitter.finagle.{Codec, ClientCodec, ServerCodec, Service, ServiceProxy}
+import com.twitter.util.Future
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
 
@@ -30,5 +31,26 @@ class Stream extends Codec[HttpRequest, StreamResponse] {
           pipeline
         }
       }
+      override def prepareService(
+        underlying: Service[HttpRequest, StreamResponse]
+      ): Future[Service[HttpRequest, StreamResponse]] = {
+        Future.value(new UseOnceService(underlying))
+      }
     }
+
+  private class UseOnceService(underlying: Service[HttpRequest, StreamResponse])
+    extends ServiceProxy[HttpRequest, StreamResponse](underlying)
+  {
+    private var used = false
+
+    override def apply(request: HttpRequest) = {
+      require(used == false)
+      used = true
+      underlying(request)
+    }
+
+    override def isAvailable = {
+      !used && underlying.isAvailable
+    }
+  }
 }

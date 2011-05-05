@@ -4,7 +4,7 @@ import collection.mutable.Queue
 
 import com.twitter.util.{Future, Time, Duration}
 
-import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException}
 import com.twitter.finagle.util.Timer
 
 /**
@@ -22,10 +22,8 @@ class CachingPool[Req, Rep](
   private[this] var isScheduled = false
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
-    extends Service[Req, Rep]
+    extends ServiceProxy[Req, Rep](underlying)
   {
-    def apply(request: Req) = underlying.apply(request)
-
     override def release() = CachingPool.this.synchronized {
       if (underlying.isAvailable && isOpen) {
         deathRow += ((Time.now, underlying))
@@ -37,8 +35,6 @@ class CachingPool[Req, Rep](
         underlying.release()
       }
     }
-
-    override def isAvailable = underlying.isAvailable
   }
 
   private[this] def collect(): Unit = synchronized {

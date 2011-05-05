@@ -4,7 +4,7 @@ import com.twitter.util
 import com.twitter.util.{Duration, Future}
 
 import com.twitter.finagle.util.Timer
-import com.twitter.finagle.{Service, WriteException, ChannelClosedException}
+import com.twitter.finagle.{Service, ServiceProxy, WriteException, ChannelClosedException}
 
 
 /**
@@ -18,7 +18,7 @@ class ExpiringService[Req, Rep](
   maxIdleTime: Option[Duration],
   maxLifeTime: Option[Duration],
   timer: util.Timer = Timer.default)
-  extends Service[Req, Rep]
+  extends ServiceProxy[Req, Rep](underlying)
 {
   private[this] var requestCount = 0
   private[this] var expired = false
@@ -67,7 +67,7 @@ class ExpiringService[Req, Rep](
     lifeTimeTask = None
   }
 
-  def apply(request: Req): Future[Rep] = synchronized {
+  override def apply(request: Req): Future[Rep] = synchronized {
     if (expired) {
       return Future.exception(
         new WriteException(new ChannelClosedException))

@@ -33,11 +33,18 @@ object EndToEndSpec extends Specification {
         .codec(new Stream)
         .bindTo(address)
         .build(new MyService(MyStreamResponse(httpResponse, channelSource)))
-      val client = ClientBuilder()
+      val clientFactory = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
         .hostConnectionLimit(1)
-        .build()
+        .buildFactory()
+      val client = clientFactory.make()()
+
+      doAfter {
+        client.release()
+        clientFactory.close()
+        server.close()
+      }
 
       val channel = client(httpRequest)(1.second).channel
 
@@ -51,19 +58,16 @@ object EndToEndSpec extends Specification {
 
         channel.respond { channelBuffer =>
           Future {
-            Thread.dumpStack
             result += channelBuffer.toString(Charset.defaultCharset)
           }
         }
 
-        val futures: Seq[Future[Observer]] =
-          channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes)) ++
-          channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes)) ++
-          channelSource.send(ChannelBuffers.wrappedBuffer("3".getBytes))
-
+        channelSource.send(ChannelBuffers.wrappedBuffer("1".getBytes))
+        channelSource.send(ChannelBuffers.wrappedBuffer("2".getBytes))
+        channelSource.send(ChannelBuffers.wrappedBuffer("3".getBytes))
         channelSource.close()
 
-        latch.await(1.second)
+        latch.within(1.second)
         result mustEqual "123"
       }
 
@@ -81,7 +85,7 @@ object EndToEndSpec extends Specification {
           }
         }
 
-        latch.await(1.second)
+        latch.within(1.second)
         channelSource.close()
         result mustEqual "123"
       }

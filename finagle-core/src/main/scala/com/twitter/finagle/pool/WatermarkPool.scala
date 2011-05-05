@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.Queue
 
 import com.twitter.util.{Future, Promise, Return, Throw}
-import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceClosedException, ServiceProxy}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
@@ -31,10 +31,8 @@ class WatermarkPool[Req, Rep](
   private[this] val sizeStat = statsReceiver.addGauge("pool_size") { numServices }
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
-    extends Service[Req, Rep]
+    extends ServiceProxy[Req, Rep](underlying)
   {
-    def apply(request: Req) = underlying(request)
-
     override def release() = WatermarkPool.this.synchronized {
       if (!isOpen) {
         underlying.release()
@@ -59,8 +57,6 @@ class WatermarkPool[Req, Rep](
         numServices -= 1
       }
     }
-
-    override def isAvailable = underlying.isAvailable
   }
 
   @tailrec private[this] def dequeue(): Option[Service[Req, Rep]] = {
