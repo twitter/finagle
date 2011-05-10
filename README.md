@@ -158,9 +158,9 @@ Let's consider a more involved example. Often it is nice to isolate distinct pha
           Future.exception(new OverflowException)                                        // (2)
     }
 
-### Asynchronous Threading Model
+### Threading Model
 
-Finagle uses an asynchronous event loop (being built atop Netty). Thus it's important that code executing in any of the event threads remain nonblocking (for example by using Finagle for all network IO). Any event dispatched from Finagle runs in one of the event loops. That is: `Future` methods other than `apply` (which blocks the current thread until a result is available) will all be dispatched in an event thread, and it's important that these do not block. Secondly, services dispatched by Finagle are also executed in the event loop. Examples:
+Finagle uses an event loop (being built atop Netty) for dispatching. Thus it's important that code executing in any of the event threads remain nonblocking (for example by using Finagle for all network IO). Any event dispatched from Finagle runs in one of the event loops. That is: `Future` methods other than `apply` (which blocks the current thread until a result is available) will all be dispatched in an event thread, and it's important that these do not block. Secondly, services dispatched by Finagle are also executed in the event loop. Examples:
 
     val service = new Service[Request, Response] {
       def apply(request: Request): Future[Response] = {

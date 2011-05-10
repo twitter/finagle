@@ -30,7 +30,8 @@ object ChannelException {
       case _: java.net.ConnectException                    => new ConnectionFailedException
       case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
       case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException
-      case e: java.io.IOException if "Connection reset by peer" == e.getMessage => new ChannelClosedException
+      case e: java.io.IOException if "Connection reset by peer" == e.getMessage =>
+        new ChannelClosedException
       case e                                               => new UnknownChannelException(e)
     }
   }

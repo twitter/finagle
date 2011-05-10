@@ -513,7 +513,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // We keep the retrying filter at the very bottom: this allows us
     // to retry across multiple hosts, etc.
     config.retries map { numRetries =>
-      val filter = new RetryingFilter[Req, Rep](new NumTriesRetryStrategy(numRetries))
+      val filter = new RetryingFilter[Req, Rep](
+        new NumTriesRetryStrategy(numRetries),
+        statsReceiver)
       service = filter andThen service
     }
 
