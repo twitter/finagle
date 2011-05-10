@@ -18,6 +18,7 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
     case message: HttpResponse =>
+      Console.println("HttpChunkToChannel.messageReceived: message=" + message)
       val source = new ChannelSource[ChannelBuffer]
       require(channelRef.compareAndSet(null, source),
         "Channel is already busy, only Chunks are OK at this point.")
@@ -35,8 +36,15 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
 
       source.numObservers.respond { i =>
         numObservers = i
+        Console.println("numObservers=" + i)
         i match {
           case 1 =>
+            if (!message.isChunked) {
+              val content = message.getContent
+              if (content.readable) {
+                Future.join(source.send(content))
+              }
+            }
             ctx.getChannel.setReadable(true)
           case 0 =>
             // if there are no more observers, then shut everything down
@@ -48,12 +56,15 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
 
       Channels.fireMessageReceived(ctx, response)
 
-    case trailer: HttpChunkTrailer =>
+    case chunk: HttpChunk if chunk.isLast  =>
+      Console.println("HttpChunkToChannel.messageReceived: trailer=" + chunk)
       val topic = channelRef.getAndSet(null)
+      Future.join(topic.send(chunk.getContent))
       topic.close()
       ctx.getChannel.setReadable(true)
 
     case chunk: HttpChunk =>
+      Console.println("HttpChunkToChannel.messageReceived: chunk=" + chunk)
       ctx.getChannel.setReadable(false)
       val topic = channelRef.get
       Future.join(topic.send(chunk.getContent)) ensure {
@@ -73,6 +84,7 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)  {
+    Console.println(e)
     // should we pass the exception to the observer somehow?
   }
 }
