@@ -85,6 +85,7 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent)  {
     Console.println(e)
+    e.getCause.printStackTrace
     // should we pass the exception to the observer somehow?
   }
 }
