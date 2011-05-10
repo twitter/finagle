@@ -1,8 +1,10 @@
 package com.twitter.finagle.example.stress
 
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.finagle.builder.{Http, ClientBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.Service
+import com.twitter.finagle.http.Http
+import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.util.{Promise, Time, Future, MapMaker}
 import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,13 +31,16 @@ object Stress {
     val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getPath)
     HttpHeaders.setHost(request, uri.getHost)
 
+    val statsReceiver = new SummarizingStatsReceiver
+
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
-      .codec(Http)
+      .codec(Http())
       .hosts(new InetSocketAddress(uri.getHost, uri.getPort))
       .hostConnectionCoresize(concurrency)
+      .reportTo(statsReceiver)
+      .retries(3)
       .hostConnectionLimit(concurrency)
       .build()
-
 
     val completedRequests = new AtomicInteger(0)
 
@@ -58,13 +63,18 @@ object Stress {
 
       val duration = start.untilNow
       println("%20s\t%s".format("Status", "Count"))
-      for ((status, stat) <- responses) {
+      for ((status, stat) <- responses)
         println("%20s\t%d".format(status, stat.get))
-      }
       println("================")
       println("%d requests completed in %dms (%f requests per second)".format(
-        completedRequests.get, duration.inMilliseconds, totalRequests.toFloat / duration.inMillis.toFloat * 1000))
+        completedRequests.get, duration.inMilliseconds,
+        totalRequests.toFloat / duration.inMillis.toFloat * 1000))
       println("%d errors".format(errors.get))
+
+      println("stats")
+      println("=====")
+
+      statsReceiver.print()
     }
   }
 

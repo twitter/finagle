@@ -1,6 +1,8 @@
 package com.twitter.finagle.http
 
 import java.nio.charset.Charset
+import org.jboss.netty.channel.UpstreamMessageEvent
+import org.mockito.ArgumentCaptor
 
 import org.specs.Specification
 import org.specs.mock.Mockito
@@ -8,6 +10,8 @@ import org.specs.mock.Mockito
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers
+
+import com.twitter.finagle.channel.ChannelServiceReply
 
 object ConnectionManagerSpec extends Specification with Mockito {
   // > further tests
@@ -43,41 +47,44 @@ object ConnectionManagerSpec extends Specification with Mockito {
   "the client HTTP connection manager" should {
     val handler = new ClientConnectionManager
 
-    def perform(request: HttpRequest, response: HttpResponse) {
+    def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
       me.getMessage returns request
       me.getFuture returns cFuture
       handler.writeRequested(ctx, me)
 
       me.getMessage returns response
       handler.messageReceived(ctx, me)
+
+      val messageEvent = ArgumentCaptor.forClass(classOf[MessageEvent])
+      there was one(ctx).sendUpstream(messageEvent.capture)
+      val reply = messageEvent.getValue.getMessage.asInstanceOf[ChannelServiceReply]
+
+      reply.message must be_==(response)
+      reply.markDead must be_==(shouldMarkDead)
     }
 
     "not terminate regular http/1.1 connections" in {
       perform(
         makeRequest(HttpVersion.HTTP_1_1),
-        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1")
-      )
-
-      there was no(c).close()
+        makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1"),
+        false)
     }
 
     // Note: by way of the codec, this reply is already taken care of.
     "terminate http/1.1 connections without content length" in {
       perform(
         makeRequest(HttpVersion.HTTP_1_1),
-        makeResponse(HttpVersion.HTTP_1_1)
+        makeResponse(HttpVersion.HTTP_1_1),
+        true
       )
-
-      there was one(c).close()
     }
 
     "terminate http/1.1 connections with Connection: close" in {
       perform(
         makeRequest(HttpVersion.HTTP_1_1, "Connection" -> "close"),
-        makeResponse(HttpVersion.HTTP_1_1)
+        makeResponse(HttpVersion.HTTP_1_1),
+        true
       )
-      
-      there was one(c).close()
     }
 
     "terminate chunked http/1.1 with Connection: close" in {
@@ -85,22 +92,25 @@ object ConnectionManagerSpec extends Specification with Mockito {
       val response = makeResponse(HttpVersion.HTTP_1_1)
       response.setChunked(true)
 
-      perform(request, response)
-      there was no(c).close()
+      perform(request, response, false)
+
+      def receive(me: MessageEvent, count: Int) = {
+        val messageEvent = ArgumentCaptor.forClass(classOf[MessageEvent])
+        handler.messageReceived(ctx, me)
+        there were count.times(ctx).sendUpstream(messageEvent.capture)
+        messageEvent.getValue.getMessage.asInstanceOf[ChannelServiceReply]
+      }
 
       val chunk = new DefaultHttpChunk(
         ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
 
       me.getMessage returns chunk
-      handler.messageReceived(ctx, me)
-      me.getMessage returns chunk
-      handler.messageReceived(ctx, me)
+      receive(me, 2).markDead must beFalse
+      receive(me, 3).markDead must beFalse
 
       // The final chunk.
       me.getMessage returns new DefaultHttpChunkTrailer
-      handler.messageReceived(ctx, me)
-
-      there was one(c).close()
+      receive(me, 4).markDead must beTrue
     }
   }
 

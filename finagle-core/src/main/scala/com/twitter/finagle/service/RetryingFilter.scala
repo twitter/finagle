@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.util._
 import com.twitter.finagle.WriteException
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{SimpleFilter, Service}
 
 object RetryingService {
@@ -21,25 +22,32 @@ trait RetryStrategy {
  * except to say that the message itself was not delivered. Any other
  * types of retries must be done in the service stack.
  */
-class RetryingFilter[Req, Rep](retryStrategy: RetryStrategy)
+class RetryingFilter[Req, Rep](
+    retryStrategy: RetryStrategy,
+    statsReceiver: StatsReceiver = NullStatsReceiver)
   extends SimpleFilter[Req, Rep]
 {
+  private[this] val retriesStats = statsReceiver.stat("retries")
+
   private[this] def dispatch(
     request: Req, service: Service[Req, Rep],
-    replyPromise: Promise[Rep], strategy: RetryStrategy)
-  {
+    replyPromise: Promise[Rep],
+    strategy: RetryStrategy, count: Int = 0
+  ) {
     service(request) respond {
       // Only write exceptions are retriable.
       case t@Throw(cause) if cause.isInstanceOf[WriteException] =>
         // Time to retry.
         strategy.nextStrategy respond {
           case Return(nextStrategy) =>
-            dispatch(request, service, replyPromise, nextStrategy)
+            dispatch(request, service, replyPromise, nextStrategy, count + 1)
           case Throw(_) =>
             replyPromise.updateIfEmpty(t)
         }
 
-      case rv => replyPromise.updateIfEmpty(rv)
+      case rv =>
+        if (count > 0) retriesStats.add(count)
+        replyPromise.updateIfEmpty(rv)
     }
   }
 
