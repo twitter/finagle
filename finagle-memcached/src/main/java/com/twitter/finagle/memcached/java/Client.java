@@ -4,6 +4,7 @@ import com.twitter.finagle.Service;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.util.Future;
+import com.twitter.util.Time;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
@@ -45,10 +46,22 @@ public abstract class Client {
   abstract public Future<Void> set(String key, ChannelBuffer value);
 
   /**
+   * Store a key. Override an existing value.
+   * @return void
+   */
+  abstract public Future<Void> set(String key, int flags, Time expiry, ChannelBuffer value);
+
+  /**
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
   abstract public Future<Boolean> add(String key, ChannelBuffer value);
+
+  /**
+   * Store a key but only if it doesn't already exist on the server.
+   * @return true if stored, false if not stored
+   */
+  abstract public Future<Boolean> add(String key, int flags, Time expiry, ChannelBuffer value);
 
   /**
    * Append bytes to the end of an existing key. If the key doesn't
@@ -70,6 +83,13 @@ public abstract class Client {
    * @return true if stored, false if not stored
    */
   abstract public Future<Boolean> replace(String key, ChannelBuffer value);
+
+  /**
+   * Replace bytes on an existing key. If the key doesn't exist, the
+   * operation has no effect.
+   * @return true if stored, false if not stored
+   */
+  abstract public Future<Boolean> replace(String key, int flags, Time expiry, ChannelBuffer value);
 
   /**
    * Remove a key.

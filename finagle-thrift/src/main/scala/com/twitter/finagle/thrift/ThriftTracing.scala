@@ -11,7 +11,7 @@ import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 
 import com.twitter.util.Time
-import com.twitter.finagle.tracing.{Annotation, Span, Endpoint, Event}
+import com.twitter.finagle.tracing.{Annotation, Span, SpanId, Endpoint, Event}
 
 private[thrift] object ThriftTracing {
   /**
@@ -36,11 +36,11 @@ private[thrift] class RichThriftSpan(self: thrift.Span) {
    * Creates a Finagle span from this thrift span.
    */
   def toFinagleSpan: Span = Span(
-    _traceId      = if (self.isSetTrace_id)     Some(self.getTrace_id)     else None,
-    serviceName   = if (self.isSetService_name) Some(self.getService_name) else None,
-    name          = if (self.isSetName)         Some(self.getName)         else None,
-    id            = self.getId,
-    parentId      = if (self.isSetParent_id) Some(self.getParent_id) else None,
+    _traceId      = if (self.isSetTrace_id)     Some(SpanId(self.getTrace_id))     else None,
+    serviceName   = if (self.isSetService_name) Some(self.getService_name)         else None,
+    name          = if (self.isSetName)         Some(self.getName)                 else None,
+    id            = SpanId(self.getId),
+    parentId      = if (self.isSetParent_id)    Some(SpanId(self.getParent_id))    else None,
     annotations   = toAnnotations,
     bAnnotations  = self.getBinary_annotations,
     children      = Seq()
@@ -80,9 +80,9 @@ private[thrift] class RichSpan(self: Span) {
   def toThriftSpans: Seq[thrift.Span] = {
     val span = new thrift.Span
 
-    span.setId(self.id)
-    self.parentId foreach { span.setParent_id(_) }
-    span.setTrace_id(self.traceId)
+    span.setId(self.id.toLong)
+    self.parentId foreach { parentId => span.setParent_id(parentId.toLong) }
+    span.setTrace_id(self.traceId.toLong)
 
     val annotations = self.annotations map { annotation =>
       val value = annotation.event match {

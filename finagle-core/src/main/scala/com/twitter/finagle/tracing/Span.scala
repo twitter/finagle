@@ -52,11 +52,11 @@ case class Annotation(
  * @param children     A sequence of child transcripts
  */
 case class Span(
-  _traceId    : Option[Long],
+  _traceId    : Option[SpanId],
   serviceName : Option[String],
   name        : Option[String],
-  id          : Long,
-  parentId    : Option[Long],
+  id          : SpanId,
+  parentId    : Option[SpanId],
   annotations : Seq[Annotation],
   bAnnotations: Map[String, ByteBuffer],
   children    : Seq[Span])
@@ -71,12 +71,12 @@ case class Span(
    * @return a pretty string for this span ID.
    */
   def idString = {
-    val spanHex = new RichU64Long(id).toU64HexString
-    val parentSpanHex = parentId map (new RichU64Long(_).toU64HexString)
+    val spanString = id.toString
+    val parentSpanString = parentId map (_.toString)
 
-    parentSpanHex match {
-      case Some(parentSpanHex) => "%s<:%s".format(spanHex, parentSpanHex)
-      case None => spanHex
+    parentSpanString match {
+      case Some(parentSpanString) => "%s<:%s".format(spanString, parentSpanString)
+      case None => spanString
     }
   }
 
@@ -161,11 +161,11 @@ object Span {
   private[Span] val rng = new Random
 
   def apply(): Span = Span(None, None, None)
-  def apply(traceId: Option[Long], id: Option[Long], parentId: Option[Long]): Span = Span(
+  def apply(traceId: Option[SpanId], id: Option[SpanId], parentId: Option[SpanId]): Span = Span(
     _traceId = traceId,
     serviceName = None,
     name = None,
-    id = id getOrElse rng.nextLong,
+    id = id getOrElse SpanId(rng.nextLong),
     parentId = parentId,
     annotations = Seq(),
     bAnnotations = Map(),

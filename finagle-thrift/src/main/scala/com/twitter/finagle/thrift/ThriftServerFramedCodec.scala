@@ -10,7 +10,7 @@ import org.jboss.netty.channel.{
 import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Event}
+import com.twitter.finagle.tracing.{Trace, Event, SpanId}
 
 import conversions._
 
@@ -67,9 +67,9 @@ private[thrift] class ThriftServerTracingFilter
       val request_ = InputBuffer.peelMessage(request, header)
 
       Trace.startSpan(
-        Some(header.getSpan_id),
-        Some(header.getParent_span_id),
-        Some(header.getTrace_id))
+        Some(SpanId(header.getSpan_id)),
+        Some(SpanId(header.getParent_span_id)),
+        Some(SpanId(header.getTrace_id)))
 
       if (header.debug)
         Trace.debug(true)  // (don't turn off when !header.debug)

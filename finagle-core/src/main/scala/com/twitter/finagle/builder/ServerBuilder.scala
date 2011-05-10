@@ -67,11 +67,15 @@ object ServerBuilder {
           Executors.newCachedThreadPool())))
 }
 
+object ServerConfig {
+  type FullySpecified[Req, Rep] = ServerConfig[Req, Rep]
+}
+
 /**
  * A configuration object that represents what shall be built.
  */
 final case class ServerConfig[Req, Rep](
-  private val _codec:                     Option[ServerCodec[Req, Rep]]    = None,
+  private val _codecFactory:              Option[ServerCodecFactory[Req, Rep]] = None,
   private val _statsReceiver:             Option[StatsReceiver]            = None,
   private val _name:                      Option[String]                   = None,
   private val _sendBufferSize:            Option[Int]                      = None,
@@ -94,7 +98,7 @@ final case class ServerConfig[Req, Rep](
    * Nevertheless, we want a friendly public API so we create delegators without
    * underscores.
    */
-  val codec                     = _codec
+  val codecFactory              = _codecFactory
   val statsReceiver             = _statsReceiver
   val name                      = _name
   val sendBufferSize            = _sendBufferSize
@@ -113,7 +117,7 @@ final case class ServerConfig[Req, Rep](
   val traceReceiver             = _traceReceiver
 
   def toMap = Map(
-    "codec"                     -> _codec,
+    "codecFactory"              -> _codecFactory,
     "statsReceiver"             -> _statsReceiver,
     "name"                      -> _name,
     "sendBufferSize"            -> _sendBufferSize,
@@ -143,7 +147,7 @@ final case class ServerConfig[Req, Rep](
   }
 
   def assertValid() {
-    _codec.getOrElse {
+    _codecFactory.getOrElse {
       throw new IncompleteSpecification("No codec was specified")
     }
     _bindTo.getOrElse {
@@ -171,10 +175,13 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
     copy(f(config))
 
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
-    withConfig(_.copy(_codec = Some(codec.serverCodec)))
+    withConfig(_.copy(_codecFactory = Some(ServerCodecFactory.singleton(codec.serverCodec))))
 
   def codec[Req1, Rep1](codec: ServerCodec[Req1, Rep1]) =
-    withConfig(_.copy(_codec = Some(codec)))
+    withConfig(_.copy(_codecFactory = Some(ServerCodecFactory.singleton(codec))))
+
+  def codec[Req1, Rep1](codecFactory: ServerCodecFactory[Req1, Rep1]) =
+    withConfig(_.copy(_codecFactory = Some(codecFactory)))
 
   def reportTo(receiver: StatsReceiver) =
     withConfig(_.copy(_statsReceiver = Some(receiver)))
@@ -240,7 +247,10 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
     val scopedStatsReceiver =
       config.statsReceiver map { sr => config.name map (sr.scope(_)) getOrElse sr }
 
-    val codec = config.codec.get
+    val codecConfig = ServerCodecConfig(
+      serviceName = config.name,
+      boundAddress = config.bindTo.get)
+    val codec = config.codecFactory.get(codecConfig)
 
     val cf = config.channelFactory
     cf.acquire()

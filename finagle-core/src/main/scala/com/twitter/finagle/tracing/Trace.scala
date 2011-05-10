@@ -12,7 +12,7 @@ package com.twitter.finagle.tracing
  * it is up to the underlying codec to implement the transport.
  */
 
-import com.twitter.util.{Local, Time}
+import com.twitter.util.{Local, Time, RichU64String}
 
 /**
  * `Trace` specifies global mutable operations on traces.
@@ -52,7 +52,7 @@ object Trace extends Tracer {
    * Start a new span. When identifiers are specified, use those,
    * otherwise they are generated for you.
    */
-  def startSpan(id: Option[Long], parentId: Option[Long], traceId: Option[Long]) {
+  def startSpan(id: Option[SpanId], parentId: Option[SpanId], traceId: Option[SpanId]) {
     clear()
     mutate { _ => Span(traceId, id, parentId) }
   }
