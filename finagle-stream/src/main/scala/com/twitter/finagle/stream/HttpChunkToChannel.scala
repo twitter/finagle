@@ -40,7 +40,7 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
             if (!message.isChunked) {
               val content = message.getContent
               if (content.readable) {
-                Future.join(source.send(content))
+                source.send(content)
               }
             }
             ctx.getChannel.setReadable(true)
@@ -58,7 +58,7 @@ class HttpChunkToChannel extends SimpleChannelUpstreamHandler {
       val topic = channelRef.getAndSet(null)
       val content = chunk.getContent
       if (content.readable) {
-        Future.join(topic.send(content))
+        topic.send(content)
       }
       topic.close()
       ctx.getChannel.setReadable(true)
