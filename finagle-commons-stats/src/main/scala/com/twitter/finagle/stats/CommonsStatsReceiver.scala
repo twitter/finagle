@@ -16,17 +16,15 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   def counter(name: String*) = new Counter {
-    private[this] val name_ = variableName(name)
-    private[this] val counter = Stats.exportLong(name_)
+    private[this] val counter = Stats.exportLong(variableName(name))
     def incr(delta: Int) { counter.addAndGet(delta) }
   }
 
   def stat(name: String*) = new Stat {
-    private[this] val name_ = variableName(name)
     @volatile
     private[this] var float = 0.0f
 
-    private[this] val jstat = new JStat[Float](name_){
+    private[this] val jstat = new JStat[Float](variableName(name)){
       def read: Float = float
     }
 
