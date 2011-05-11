@@ -37,7 +37,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     connectionCount.incrementAndGet()
 
     val connectTime = Time.now
-    onClose respond { _ =>
+    onClose ensure {
       val (channelReadCount, channelWriteCount) =
         ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
 
