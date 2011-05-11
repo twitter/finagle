@@ -29,6 +29,8 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
       def read: Float = float
     }
 
+    Stats.exportStatic(jstat)
+
     def add(value: Float) {
       float += value
     }

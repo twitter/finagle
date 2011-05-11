@@ -6,7 +6,7 @@ import org.specs.Specification
 
 object CommonsStatsReceiverSpec extends Specification {
   "counter" should {
-    "return a new counter object with the given name" in {
+    "return a new counter object with the given name and reflect incr operations" in {
       val counter = (new CommonsStatsReceiver()).counter("foo")
       assert (Stats.getVariable("foo").read == 0)
       counter.incr(7)
@@ -16,4 +16,17 @@ object CommonsStatsReceiverSpec extends Specification {
     }
   }
   
+  "stat" should {
+    "work" in {
+      val stat = (new CommonsStatsReceiver()).stat("bar")
+
+      assert(Stats.getVariable("bar").getName == "bar")
+      assert(Stats.getVariable("bar").read == 0.0f)
+
+      stat.add(1.37f)
+
+      assert(Stats.getVariable("bar").read == 1.37f)
+    }
+  }
+
 }
