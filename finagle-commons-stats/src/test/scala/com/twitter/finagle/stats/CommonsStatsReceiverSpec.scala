@@ -2,9 +2,15 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.stats.Stats
 import org.specs.Specification
+import scala.collection.JavaConversions._
 
 
+//TODO after each clear Stats
 object CommonsStatsReceiverSpec extends Specification {
+  doAfter{
+    Stats.flush
+  }
+
   "counter" should {
     "return a new counter object with the given name and reflect incr operations" in {
       val counter = (new CommonsStatsReceiver()).counter("foo")
@@ -20,12 +26,9 @@ object CommonsStatsReceiverSpec extends Specification {
     "work" in {
       val stat = (new CommonsStatsReceiver()).stat("bar")
 
-      assert(Stats.getVariable("bar").getName == "bar")
-      assert(Stats.getVariable("bar").read == 0.0f)
-
-      stat.add(1.37f)
-
-      assert(Stats.getVariable("bar").read == 1.37f)
+      assert(Stats.getVariable("bar_50th_percentile").read == 0.0f)
+      assert(Stats.getVariable("bar_95th_percentile").read == 0.0f)
+      assert(Stats.getVariable("bar_99th_percentile").read == 0.0f)
     }
   }
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.stats.Stats
-import com.twitter.common.stats.{StatImpl => JStat}
+import com.twitter.common.stats.Percentile
 import com.twitter.common.base.Supplier
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
@@ -21,17 +21,10 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   def stat(name: String*) = new Stat {
-    @volatile
-    private[this] var float = 0.0f
+    private[this] val percentile = new Percentile[java.lang.Float](variableName(name), 100.0f, 50, 95, 99)
 
-    private[this] val jstat = new JStat[Float](variableName(name)){
-      def read: Float = float
-    }
-
-    Stats.exportStatic(jstat)
-
-    def add(value: Float) {
-      float += value
+    def add(value: Float) = synchronized {
+      percentile.record(new java.lang.Float(value))
     }
   }
 
