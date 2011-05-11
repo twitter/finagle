@@ -130,7 +130,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val netty = "org.jboss.netty" %  "netty" % "3.2.3.Final"
+    val netty = "org.jboss.netty" %  "netty" % "3.2.4.Final"
 
     projectDependencies(
       "util" ~ "util-core",
