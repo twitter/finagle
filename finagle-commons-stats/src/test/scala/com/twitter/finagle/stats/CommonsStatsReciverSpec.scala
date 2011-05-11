@@ -29,4 +29,16 @@ object CommonsStatsReceiverSpec extends Specification {
     }
   }
 
+  "addGauge" should {
+    "work" in {
+      var inner = 0.0f
+      (new CommonsStatsReceiver).addGauge("bam") {
+        inner
+      }
+      assert(Stats.getVariable("bam").read == 0.0f)
+      inner = 3.14f
+      assert(Stats.getVariable("bam").read == 3.14f)
+    }
+  }
+
 }
