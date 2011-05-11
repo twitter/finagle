@@ -6,8 +6,8 @@ import com.twitter.common.base.Supplier
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   protected[this] def registerGauge(name: Seq[String], f: => Float) {
-    Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float]{
-      def get = {new java.lang.Float(f)}
+    Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
+      def get = new java.lang.Float(f)
     })
   }
 
