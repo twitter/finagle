@@ -30,6 +30,7 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
     }
 
     def add(value: Float) {
+      float += value
     }
   }
 
