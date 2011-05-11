@@ -20,6 +20,6 @@ class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
     else
       super.ivyRepositories
 
-  val defaultProject = "com.twitter" % "standard-project" % "0.12.3"
+  val defaultProject = "com.twitter" % "standard-project" % "0.12.6"
   val sbtThrift      = "com.twitter" % "sbt-thrift" % "1.4.2"
 }
