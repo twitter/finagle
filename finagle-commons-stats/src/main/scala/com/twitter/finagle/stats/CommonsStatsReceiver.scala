@@ -7,7 +7,7 @@ import com.twitter.common.base.Supplier
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   protected[this] def registerGauge(name: Seq[String], f: => Float) {
     Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float]{
-      def get = {f.asInstanceOf[java.lang.Float]}
+      def get = {new java.lang.Float(f)}
     })
   }
 
@@ -23,6 +23,7 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   def stat(name: String*) = new Stat {
     private[this] val name_ = variableName(name)
+    @volatile
     private[this] var float = 0.0f
 
     private[this] val jstat = new JStat[Float](name_){

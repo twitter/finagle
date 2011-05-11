@@ -119,7 +119,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new B3Project(_), coreProject, thriftProject)
 
   /**
-   * finagle-commons-stas contains bindings for using finagle in java projects
+   * finagle-commons-stats contains bindings for using finagle in java projects
    * that export their stats through the twitter commons libraries
    */
   val commonsStatsProject = project(
