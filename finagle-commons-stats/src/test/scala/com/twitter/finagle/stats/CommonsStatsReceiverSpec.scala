@@ -21,7 +21,7 @@ object CommonsStatsReceiverSpec extends Specification {
       assert (Stats.getVariable("foo").read == -1)
     }
   }
-  
+
   "stat" should {
     "work" in {
       val stat = (new CommonsStatsReceiver()).stat("bar")
@@ -29,6 +29,12 @@ object CommonsStatsReceiverSpec extends Specification {
       assert(Stats.getVariable("bar_50th_percentile").read == 0.0f)
       assert(Stats.getVariable("bar_95th_percentile").read == 0.0f)
       assert(Stats.getVariable("bar_99th_percentile").read == 0.0f)
+
+      for (i <- 0.until(10000)) {
+        stat.add(i.toFloat)
+      }
+
+      //TODO find a way to poke at the stats, need to do something with a StatsModule
     }
   }
 
