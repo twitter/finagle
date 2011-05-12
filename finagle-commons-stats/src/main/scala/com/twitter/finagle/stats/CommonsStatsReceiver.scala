@@ -6,6 +6,9 @@ import com.twitter.common.base.Supplier
 import com.twitter.common.util.Sampler
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
+
+  val statMap = collection.mutable.Map.empty[String, Stat]
+
   protected[this] def registerGauge(name: Seq[String], f: => Float) {
     Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
       def get = new java.lang.Float(f)
@@ -21,12 +24,14 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
     def incr(delta: Int) { counter.addAndGet(delta) }
   }
 
-  def stat(name: String*) = new Stat {
-    val percentile = new Percentile[java.lang.Float](variableName(name), 100.0f , 50, 95, 99)
+  def stat(name: String*) = {
+    statMap.getOrElseUpdate(variableName(name), new Stat {
+      val percentile = new Percentile[java.lang.Float](variableName(name), 100.0f , 50, 95, 99)
 
-    def add(value: Float) = {
-      percentile.record(value)
-    }
+      def add(value: Float) = {
+        percentile.record(value)
+      }
+    })
   }
 
   private[this] def variableName(name: Seq[String]) = name mkString "_"

@@ -36,6 +36,13 @@ object CommonsStatsReceiverSpec extends Specification {
 
       //TODO find a way to poke at the stats, need to do something with a StatsModule
     }
+
+    "should be memoized" in {
+      val receiver = new CommonsStatsReceiver()
+      val stat1 = receiver.stat("what")
+      val stat2 = receiver.stat("what")
+      assert (stat1 == stat2)
+    }
   }
 
   "addGauge" should {
