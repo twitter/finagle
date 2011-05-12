@@ -3,6 +3,7 @@ package com.twitter.finagle.stats
 import com.twitter.common.stats.Stats
 import com.twitter.common.stats.Percentile
 import com.twitter.common.base.Supplier
+import com.twitter.common.util.Sampler
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   protected[this] def registerGauge(name: Seq[String], f: => Float) {
@@ -21,10 +22,10 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   def stat(name: String*) = new Stat {
-    private[this] val percentile = new Percentile[java.lang.Float](variableName(name), 100.0f, 50, 95, 99)
+    val percentile = new Percentile[java.lang.Float](variableName(name), 100.0f , 50, 95, 99)
 
-    def add(value: Float) = synchronized {
-      percentile.record(new java.lang.Float(value))
+    def add(value: Float) = {
+      percentile.record(value)
     }
   }
 
