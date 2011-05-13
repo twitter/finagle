@@ -41,16 +41,18 @@ class Stream extends Codec[HttpRequest, StreamResponse] {
   private class UseOnceService(underlying: Service[HttpRequest, StreamResponse])
     extends ServiceProxy[HttpRequest, StreamResponse](underlying)
   {
-    private var used = false
+    @volatile private[this] var used = false
 
     override def apply(request: HttpRequest) = {
-      require(used == false)
-      used = true
+      synchronized {
+        require(used == false)
+        used = true
+      }
       underlying(request)
     }
 
     override def isAvailable = {
-      !used && underlying.isAvailable
+      !synchronized(used) && underlying.isAvailable
     }
   }
 }
