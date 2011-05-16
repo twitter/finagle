@@ -15,17 +15,9 @@ import com.twitter.finagle.CodecException
 
 import com.twitter.concurrent.{AsyncSemaphore, Permit}
 
-object ChannelSemaphoreHandler {
-  object DeadPermit extends Permit {
-    def release() = ()
-  }
-}
-
 class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   extends SimpleChannelHandler
 {
-  import ChannelSemaphoreHandler._
-
   private[this] def waiter(ctx: ChannelHandlerContext) = ctx.synchronized {
     if (ctx.getAttachment eq null)
       ctx.setAttachment(new AtomicReference[Permit](null))
@@ -33,26 +25,39 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   }
 
   private[this] def close(ctx: ChannelHandlerContext) {
-    Option(waiter(ctx).getAndSet(DeadPermit)) foreach { _.release() }
+    // Putting null here only causes exceptions when a write is requested after the conn is closed.
+    Option(waiter(ctx).getAndSet(null)) foreach { _.release() }
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     semaphore.acquire() onSuccess { permit =>
-      val oldPermit = waiter(ctx).getAndSet(permit)
-      if (oldPermit ne null) {
-        // Freak. Out.
-        permit.release()
-        oldPermit.release()
-        waiter(ctx).set(null)
-        Channels.fireExceptionCaught(
-          ctx.getChannel, new CodecException("Codec issued concurrent requests"))
-      } else {
+      if (waiter(ctx).compareAndSet(null, permit)) {
         super.messageReceived(ctx, e)
+      } else {
+        // Freak. Out.
+        // Don't release the permit that we didn't acquire.
+        permit.release()
+        Channels.fireExceptionCaught(
+          ctx.getChannel,
+          new CodecException("Codec issued concurrent requests"))
       }
     }
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val permit = waiter(ctx).getAndSet(null)
+    if (permit eq null) {
+      /**
+      * The circumstances that the permit is null are:
+      *  - A write was issued without a corresponding request.
+      *  - The connection has closed or an exception was thrown,
+      *    in which case this error is still accurate.
+      */
+      Channels.fireExceptionCaught(
+        ctx.getChannel,
+        new CodecException("No waiter for downstream message!"))
+    }
+
     /**
      * We proxy the event here to ensure the correct ordering: we
      * need to update the upstream future *first* (so that listening
@@ -63,22 +68,22 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
     val proxiedEvent = new DownstreamMessageEvent(
       e.getChannel, writeComplete,
       e.getMessage, e.getRemoteAddress)
-    super.writeRequested(ctx, proxiedEvent)
 
+    /**
+    * We need to attach this here because we want to release our permit before
+    * another event does something like close the connection.
+    */
     writeComplete { res =>
-      // First let the upstream know about our write completion.
-      e.getFuture.update(res)
-
-      // Then release the permit, allowing for additional requests.
-      val permit = waiter(ctx).getAndSet(null)
-      if (permit eq null) {
-        Channels.fireExceptionCaught(
-          ctx.getChannel,
-          new CodecException("No waiter for downstream message!"))
-      } else {
+      try {
+        // First let the upstream know about our write completion.
+        e.getFuture.update(res)
+      } finally {
+        // Then release the permit, allowing for additional requests.
         permit.release()
       }
     }
+
+    super.writeRequested(ctx, proxiedEvent)
   }
 
   // Do we need to cover anything else?
