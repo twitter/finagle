@@ -105,8 +105,9 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
 {
   private[this] val channelLatch = new AsyncLatch
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
-  private[this] val gauge =
-    statsReceiver.addGauge("connections") { channelLatch.getCount }
+  private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
+  private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
+  private[this] val gauge = statsReceiver.addGauge("connections") { channelLatch.getCount }
 
   protected[channel] def channelReleased(channel: ChannelService[Req, Rep]) {
     channelLatch.decr()
@@ -123,9 +124,11 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
         prepareChannel(new ChannelService[Req, Rep](channel, this)) proxyTo promise
 
       case Error(cause) =>
+        failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)
         promise() = Throw(new WriteException(cause))
 
       case Cancelled =>
+        cancelledConnects.incr()
         promise() = Throw(new WriteException(new CancelledConnectionException))
     }
 
@@ -139,7 +142,8 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
   }
 
   override val toString = {
-    val bootstrapHost = Option(bootstrap.getOption("remoteAddress")) getOrElse(bootstrap.toString)
+    val bootstrapHost =
+      Option(bootstrap.getOption("remoteAddress")) getOrElse(bootstrap.toString)
     "host:%s".format(bootstrapHost)
   }
 }

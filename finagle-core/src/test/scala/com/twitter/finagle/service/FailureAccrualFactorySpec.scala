@@ -128,4 +128,23 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
       service.isAvailable must beFalse
     }
   }
+
+  "a broken factory" should {
+    val underlying = mock[ServiceFactory[Int, Int]]
+    underlying.isAvailable returns true
+    underlying.make() returns Future.exception(new Exception("i broked :-("))
+    val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds)
+    
+    "fail after the given number of tries" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+        factory.isAvailable must beTrue
+        factory.make()() must throwA[Exception]
+        factory.isAvailable must beTrue   
+        factory.make()() must throwA[Exception]
+        factory.isAvailable must beTrue   
+        factory.make()() must throwA[Exception]
+        factory.isAvailable must beFalse
+      }
+    }
+  }
 }

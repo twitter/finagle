@@ -270,11 +270,12 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
     cf.acquire()
     val bs = new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
 
-    bs.setOption("tcpNoDelay", true)
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
-    config.sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
-    config.recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
+
+    bs.setOption("child.tcpNoDelay", true)
+    config.sendBufferSize foreach { s => bs.setOption("child.sendBufferSize", s) }
+    config.recvBufferSize foreach { s => bs.setOption("child.receiveBufferSize", s) }
 
     // TODO: we need something akin to a max queue depth.
     val queueingChannelHandlerAndGauges =

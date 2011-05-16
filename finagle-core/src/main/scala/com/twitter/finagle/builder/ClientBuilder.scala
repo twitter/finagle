@@ -136,7 +136,8 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[SSLContext]            = None,
-  private val _startTls                  : Boolean                       = false)
+  private val _startTls                  : Boolean                       = false,
+  private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds))
 {
   import ClientConfig._
 
@@ -166,6 +167,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val channelFactory            = _channelFactory
   val tls                       = _tls
   val startTls                  = _startTls
+  val failureAccrualParams      = _failureAccrualParams
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -188,7 +190,8 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
-    "startTls"                  -> Some(_startTls)
+    "startTls"                  -> Some(_startTls),
+    "failureAccrualParams"      -> _failureAccrualParams
   )
 
   override def toString = {
@@ -350,6 +353,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   def logger(logger: Logger): This = withConfig(_.copy(_logger = Some(logger)))
 
+  def failureAccrualParams(params: (Int, Duration)): This =
+    withConfig(_.copy(_failureAccrualParams = Some(params)))
+
   /* BUILDING */
   /* ======== */
 
@@ -394,7 +400,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // bs.setOption("soLinger", 0)  (TODO)
     config.keepAlive foreach { value => bs.setOption("keepAlive", value) }
     bs.setOption("reuseAddress", true)
-    config.sendBufferSize foreach { s => bs.setOption("sendBufferSize", s) }
+    config.sendBufferSize foreach { s => bs.setOption("sendBufferSize", s)    }
     config.recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
     bs
   }
@@ -453,6 +459,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       //   ChannelService
       //   Pool
       //   Timeout
+      //   Failure accrual
       //   Stats
       //
       // the pool & below are host-specific,
@@ -476,6 +483,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         factory = filter andThen factory
       }
 
+      config.failureAccrualParams foreach { case (numFailures, markDeadFor) =>
+        factory = new FailureAccrualFactory(factory, numFailures, markDeadFor)
+      }
+
       val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
       factory = statsFilter andThen factory
 
@@ -485,7 +496,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val loadbalanced = new LoadBalancedFactory(
       hostFactories,
       statsReceiver.scope("loadbalancer"),
-      new LeastQueuedStrategy)
+      new LeastQueuedStrategy(statsReceiver.scope("least_queued_strategy")))
     {
       override def close() = {
         super.close()

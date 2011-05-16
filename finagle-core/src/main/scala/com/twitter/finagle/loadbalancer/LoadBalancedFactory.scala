@@ -33,8 +33,13 @@ class LoadBalancedFactory[Req, Rep](
   // initialize using Time.now for predictable test behavior
   private[this] val rng = new Random(Time.now.inMillis)
 
+  // TODO: make this work for dynamic Seq[Factory..]
   private[this] val gauges = {
     factories map { factory =>
+      statsReceiver.scope("available").addGauge(factory.toString) {
+        if (factory.isAvailable) 1F else 0F
+      }
+
       statsReceiver.scope("weight").addGauge(factory.toString) {
         weight(factory)
       }
@@ -49,9 +54,16 @@ class LoadBalancedFactory[Req, Rep](
     max(weights(available)).make()
   }
 
-  def weight(factory: ServiceFactory[Req, Rep]): Float = {
-    val (_, weight) = weights(Seq(factory)).head
-    weight
+  // Compute the weight of the given factory. Used for stats reporting
+  // only. This is also used in testing.
+  private[finagle] def weight(factory: ServiceFactory[Req, Rep]): Float = {
+    var snapshot = factories.toSeq
+    if (!(snapshot contains factory))
+      snapshot ++= Seq(factory)
+    weights(snapshot) find { case (f, _) => f equals factory } match {
+      case Some((_, weight)) => weight
+      case None => 0F
+    }
   }
 
   private[this] def weights(

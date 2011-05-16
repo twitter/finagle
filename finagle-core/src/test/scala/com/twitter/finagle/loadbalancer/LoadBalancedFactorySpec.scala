@@ -5,18 +5,13 @@ import org.specs.mock.Mockito
 import org.mockito.Matchers
 
 import com.twitter.util.Future
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceFactoryProxy}
 import com.twitter.finagle.stats.NullStatsReceiver
 
 object LoadBalancedFactorySpec extends Specification with Mockito {
   "LoadBalancedFactory" should {
     case class Wrapper[Req, Rep](underlying: ServiceFactory[Req, Rep])
-      extends ServiceFactory[Req, Rep]
-    {
-      override def make() = underlying.make()
-      override def close() = underlying.close()
-      override def isAvailable = underlying.isAvailable
-    }
+      extends ServiceFactoryProxy[Req, Rep](underlying)
 
     val f1 = mock[ServiceFactory[Any, Any]]
     f1.toString returns "f1"
@@ -41,7 +36,7 @@ object LoadBalancedFactorySpec extends Specification with Mockito {
       override def apply[Req, Rep](
         factories: Seq[ServiceFactory[Req, Rep]]
       ): Seq[(ServiceFactory[Req, Rep], Float)] = {
-        super.apply(factories map(Wrapper(_)))
+        super.apply(factories map { Wrapper(_) })
       }
     }
 
@@ -87,7 +82,6 @@ object LoadBalancedFactorySpec extends Specification with Mockito {
 
         val balancer = new LoadBalancedFactory(Seq(f1, f2, f3, f4), NullStatsReceiver, s1, s2)
         balancer.make()
-
         there was one(s1)(Seq(f1, f2, f3, f4))
         there was one(s2)(Seq(Wrapper(f1), Wrapper(f2), Wrapper(f3), Wrapper(f4)))
         there was one(f4).make

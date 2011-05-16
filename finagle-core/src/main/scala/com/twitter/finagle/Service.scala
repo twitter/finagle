@@ -36,10 +36,12 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
 }
 
 /**
- * A simple proxy Service that forwards all calls to another Service.  This is
- * is useful if you to wrap-but-modify an exisiting service.
+ * A simple proxy Service that forwards all calls to another Service.
+ * This is is useful if you to wrap-but-modify an existing service.
  */
-abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep]) extends Service[Req, Rep] with Proxy {
+abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
+  extends Service[Req, Rep] with Proxy
+{
   def apply(request: Req) = self(request)
   override def release() = self.release()
   override def isAvailable = self.isAvailable
@@ -58,7 +60,7 @@ abstract class ServiceFactory[-Req, +Rep] {
    * Make a service that after dispatching a request on that service,
    * releases the service.
    */
-  def service: Service[Req, Rep] = new FactoryToService(this)
+  final def service: Service[Req, Rep] = new FactoryToService(this)
 
   /**
    * Close the factory and its underlying resources.
@@ -66,6 +68,19 @@ abstract class ServiceFactory[-Req, +Rep] {
   def close()
 
   def isAvailable: Boolean = true
+}
+
+/**
+ * A simple proxy ServiceFactory that forwards all calls to another
+ * ServiceFactory.  This is is useful if you to wrap-but-modify an
+ * existing service factory.
+ */
+abstract class ServiceFactoryProxy[-Req, +Rep](val self: ServiceFactory[Req, Rep])
+  extends ServiceFactory[Req, Rep] with Proxy
+{
+  def make() = self.make()
+  def close() = self.close()
+  override def isAvailable = self.isAvailable
 }
 
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
@@ -150,6 +165,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
       def make() = factory.make() map { Filter.this andThen _ }
       override def close() = factory.close()
       override def isAvailable = factory.isAvailable
+      override def toString = factory.toString
     }
 
   /**

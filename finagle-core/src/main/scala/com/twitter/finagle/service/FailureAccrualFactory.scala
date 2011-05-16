@@ -6,6 +6,9 @@ import com.twitter.finagle.{Service, ServiceFactory}
 /**
  * A factory that does failure accrual, marking it unavailable when
  * deemed unhealthy according to its parameterization.
+ *
+ * TODO: treat different failures differently (eg. connect failures
+ * vs. not), enable different backoff strategies.
  */
 class FailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
@@ -43,7 +46,7 @@ class FailureAccrualFactory[Req, Rep](
         override def isAvailable =
           service.isAvailable && FailureAccrualFactory.this.isAvailable
       }
-    }
+    } onFailure { _ => didFail() }
 
   override def isAvailable =
     underlying.isAvailable && synchronized { failedAt.untilNow >= markDeadFor }

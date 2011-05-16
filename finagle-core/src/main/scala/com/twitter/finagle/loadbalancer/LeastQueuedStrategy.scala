@@ -2,24 +2,38 @@ package com.twitter.finagle.loadbalancer
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.finagle.util.WeakMetadata
+import com.twitter.util.MapMaker
+import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceFactoryProxy}
 
 /**
  * The "least queued" strategy will produce weights inversely
  * proportional to the number of queued requests. Highly-queued
  * factories will have weights near zero.
  */
-class LeastQueuedStrategy()
+class LeastQueuedStrategy(statsReceiver: StatsReceiver)
   extends LoadBalancerStrategy
 {
-  private[this] val queueStat = WeakMetadata[AtomicInteger] { new AtomicInteger(0) }
+  def this() = this(NullStatsReceiver)
+
+  private[this] val queueStat =
+    MapMaker[ServiceFactory[_, _], (AtomicInteger, Gauge)] { config =>
+      config.compute { factory =>
+        val queueSize = new AtomicInteger(0)
+        // We tag a gauge along with it to measure queue sizes.
+        val gauge = statsReceiver.scope("queue_size").addGauge(factory.toString) {
+          queueSize.get.toFloat
+        }
+        (queueSize, gauge)
+      }
+    }
 
   override def apply[Req, Rep](factories: Seq[ServiceFactory[Req, Rep]]) = {
     var totalLoad = 0
 
     val loadedFactories = factories map { factory =>
-      val load = queueStat(factory).get
+      val (qs, _) = queueStat(factory)
+      val load = qs.get
       totalLoad += load
       (factory, load)
     }
@@ -31,12 +45,12 @@ class LeastQueuedStrategy()
   }
 
   private[this] def annotate[Req, Rep](underlying: ServiceFactory[Req, Rep]) =
-    new ServiceFactory[Req, Rep] {
+    new ServiceFactoryProxy[Req, Rep](underlying) {
       override def make() = {
-        val qs = queueStat(underlying)
+        val (qs, _) = queueStat(self)
         qs.incrementAndGet()
 
-        underlying.make() map { service =>
+        self.make() map { service =>
           new Service[Req, Rep] {
             def apply(request: Req) = service(request)
             override def release() {
@@ -44,9 +58,10 @@ class LeastQueuedStrategy()
               qs.decrementAndGet()
             }
           }
+        } onFailure { _ =>
+          // The factory creation failed.
+          qs.decrementAndGet()
         }
       }
-    override def close() = underlying.close()
-    override def isAvailable = underlying.isAvailable
   }
 }
