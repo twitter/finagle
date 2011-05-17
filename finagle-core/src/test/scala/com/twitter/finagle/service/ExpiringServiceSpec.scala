@@ -17,7 +17,29 @@ object ExpiringServiceSpec extends Specification with Mockito {
       val promise = new Promise[Int]
       underlying(123) returns promise
       underlying.isAvailable returns true
-
+      
+      "have release-once semantics" in {
+        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer)
+        there was no(underlying).release()
+        
+        "when calling service.release() multiple times" in {
+          service.release()
+          there was one(underlying).release()
+          service.release()
+          there was one(underlying).release()
+        }
+        
+        "after expiring" in {
+          timeControl.advance(10.seconds)
+          timer.tick()
+          
+          there was one(underlying).release()
+          
+          // Now attempt to release it once more:
+          service.release()
+          there was one(underlying).release()
+        }
+      }
 
       "idle time between requests" in {
         val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer)

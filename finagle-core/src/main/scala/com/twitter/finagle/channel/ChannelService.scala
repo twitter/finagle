@@ -1,6 +1,7 @@
 package com.twitter.finagle.channel
 
 import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.{Logger, Level}
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel, Channels,
@@ -23,11 +24,16 @@ case class ChannelServiceReply(message: Any, markDead: Boolean)
  */
 private[finagle] class ChannelService[Req, Rep](
     channel: Channel,
-    factory: ChannelServiceFactory[Req, Rep])
+    factory: ChannelServiceFactory[Req, Rep],
+    log: Logger)
   extends Service[Req, Rep]
 {
+  def this(channel: Channel, factory: ChannelServiceFactory[Req, Rep]) = 
+    this(channel, factory, Logger.getLogger(classOf[ChannelService[Req, Rep]].getName))
+
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
   @volatile private[this] var isHealthy = true
+  private[this] var wasReleased = false
 
   private[this] def reply(message: Try[Rep], markDead: Boolean = false) {
     if (message.isThrow || markDead) {
@@ -88,8 +94,23 @@ private[finagle] class ChannelService[Req, Rep](
   }
 
   override def release() = {
-    if (channel.isOpen) channel.close()
-    factory.channelReleased(this)
+    val doRelease = synchronized {
+      // This happens only if there's a bug up the stack. We do however want to document
+      // it for diagnostics.
+      if (wasReleased) {
+        val e = new Exception  // in order to get a backtrace.
+        log.log(Level.SEVERE, "more-than-once release for channel!", e)
+        false
+      } else {
+        wasReleased = true
+        true
+      }
+    }
+    
+    if (doRelease) {
+      if (channel.isOpen) channel.close()
+      factory.channelReleased(this)
+    }
   }
   override def isAvailable = isHealthy && channel.isOpen
 }
