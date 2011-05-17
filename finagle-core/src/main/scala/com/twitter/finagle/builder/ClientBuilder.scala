@@ -269,7 +269,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   def protocol[Req1, Rep1](
     protocol: Protocol[Req1, Rep1]
-  ): ClientBuilder[Req1, Rep1, HasCluster, HasCodec, HasHostConnectionLimit] = {
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] = {
     val codec = new ClientCodec[Req1, Rep1] {
       def pipelineFactory = protocol.codec.clientCodec.pipelineFactory
 
