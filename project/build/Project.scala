@@ -166,6 +166,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     override def compileOrder = CompileOrder.ScalaThenJava
     val junit = "junit" % "junit" % "3.8.2" % "test"
+
+    projectDependencies(
+      "util" ~ "util-hashing"
+    )
   }
 
   class KestrelProject(info: ProjectInfo) extends StandardProject(info)

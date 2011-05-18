@@ -1,9 +1,5 @@
 package com.twitter.finagle.memcached
 
-import _root_.java.util.TreeMap
-import _root_.java.security.MessageDigest
-import _root_.java.nio.{ByteBuffer, ByteOrder}
-
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.util.CharsetUtil
@@ -13,6 +9,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import text.Memcached
 import com.twitter.finagle.Service
 import com.twitter.util.{Time, Future}
+import com.twitter.hashing._
 
 object Client {
   /**
@@ -306,55 +303,18 @@ class KetamaClient(clients: Map[(String, Int, Int), Client], keyHasher: KeyHashe
 {
   require(!clients.isEmpty, "At least one client must be provided")
 
-  // we use (NUM_REPS * #servers) total points, but allocate them based on server weights.
-  val NUM_REPS = 160
+  private val NUM_REPS = 160
 
-  protected val continuum = {
-    var continuum = new TreeMap[Long, (String, Int, Int)]()
-    val serverCount = clients.size
-    val totalWeight = clients.keys.foldLeft(0.0) {_+_._3}
-
-    for ((hostname, port, weight) <- clients.keys) {
-      val percent = weight.toDouble / totalWeight
-      // the tiny fudge fraction is added to counteract float errors.
-      val itemWeight = (percent * serverCount * (NUM_REPS / 4) + 0.0000000001).toInt
-      for (k <- 0 until itemWeight) {
-        val key = if (port == 11211) {
-          hostname + "-" + k
-        } else {
-          hostname + ":" + port + "-" + k
-        }
-        for (i <- 0 until 4) {
-          continuum += computeHash(key, i) -> (hostname, port, weight)
-        }
-      }
-    }
-
-    assert(continuum.size <= NUM_REPS * serverCount)
-    assert(continuum.size >= NUM_REPS * (serverCount - 1))
-
-    continuum
+  protected val distributor = {
+    val nodes = clients.map { case ((ip, port, weight), client) =>
+      val identifier = if (port == 11211) ip else ip + ":" + port
+      KetamaNode(identifier, weight, client)
+    }.toList
+    new KetamaDistributor(nodes, NUM_REPS, keyHasher)
   }
 
   protected[memcached] def clientOf(key: String) = {
-    val hash = keyHasher.hashKey(key)
-    val entry = continuum.ceilingEntry(hash)
-    val clientTuple =
-      if (entry ne null)
-        entry.getValue
-      else
-        continuum.firstEntry.getValue
-    val client = clients(clientTuple)
-    client
-  }
-
-  protected def computeHash(key: String, alignment: Int) = {
-    val hasher = MessageDigest.getInstance("MD5")
-    hasher.update(key.getBytes("utf-8"))
-    val buffer = ByteBuffer.wrap(hasher.digest)
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.position(alignment << 2)
-    buffer.getInt.toLong & 0xffffffffL
+    distributor.nodeForKey(key)
   }
 }
 

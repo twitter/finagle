@@ -1,10 +1,12 @@
 package com.twitter.finagle.memcached.unit
 
-import _root_.java.io.{BufferedReader, InputStreamReader}
 import com.twitter.finagle.memcached._
-import org.specs.Specification
+import com.twitter.hashing.KeyHasher
 import org.specs.mock.Mockito
+import org.specs.Specification
 import scala.collection.mutable
+import _root_.java.io.{BufferedReader, InputStreamReader}
+
 
 object ClientSpec extends Specification with Mockito {
   "KetamaClient" should {
