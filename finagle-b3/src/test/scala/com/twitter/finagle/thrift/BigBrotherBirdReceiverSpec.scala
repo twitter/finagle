@@ -18,14 +18,15 @@ import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
 import com.twitter.finagle.{Codec, ClientCodec}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.tracing.{Span, SpanId}
+import com.twitter.finagle.tracing.{Span, SpanId, Endpoint}
 
 import java.util.ArrayList
 
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
 
-object BigBrotherBirdSpec extends Specification with Mockito {
-  val span = Span(Some(SpanId(123)), Some(SpanId(456)), Some(SpanId(789)))
+object BigBrotherBirdReceiverSpec extends Specification with Mockito {
+  val span = Span(Some(SpanId(123)), Some(SpanId(456)), Some(SpanId(789)), Some("service"),
+    Some("method"), Some(Endpoint(123, 1000)))
 
   "BigBrotherBirdReceiver" should {
     "throw exception if illegal sample rate" in {
@@ -41,7 +42,8 @@ object BigBrotherBirdSpec extends Specification with Mockito {
       receiver.setSampleRate(10000)
 
       val expected = new ArrayList[LogEntry]()
-      expected.add(new LogEntry().setCategory("b3").setMessage("CgABAAAAAAAAAHsKAAQAAAAAAAAByAoABQAAAAAAAAMVDQAHCwsAAAAAAA=="))
+      expected.add(new LogEntry().setCategory("b3")
+        .setMessage("CgABAAAAAAAAAHsLAAIAAAAHc2VydmljZQsAAwAAAAZtZXRob2QKAAQAAAAAAAAByAoABQAAAAAA\nAAMVDQAHCwsAAAAAAA=="))
       client.Log(expected) returns Future(ResultCode.OK)
 
       // execute the code we're testing

@@ -14,7 +14,7 @@ import org.apache.thrift.async.AsyncMethodCallback
 import com.twitter.test.{B, AnException, SomeStruct}
 import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
-import com.twitter.finagle.{Codec, ClientCodec}
+import com.twitter.finagle.{Codec, ClientCodec, ClientCodecConfig}
 import com.twitter.finagle.builder.ClientBuilder
 
 object FinagleClientThriftServerSpec extends Specification {
@@ -159,11 +159,11 @@ object FinagleClientThriftServerSpec extends Specification {
     }
 
     "framed transport" in {
-      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec())
+      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec()(new ClientCodecConfig(Some("service"))))
     }
 
     "buffered transport" in {
-      doit(new TTransportFactory, new ThriftClientBufferedCodec(new TBinaryProtocol.Factory))
+      doit(new TTransportFactory, new ThriftClientBufferedCodec(new TBinaryProtocol.Factory, new ClientCodecConfig(Some("service"))))
     }
   }
 }

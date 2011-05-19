@@ -8,17 +8,23 @@ import org.jboss.netty.channel.{
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
+import java.net.SocketAddress
+
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Event, SpanId}
+import com.twitter.finagle.tracing.{Trace, Event, SpanId, Endpoint}
 
 import conversions._
 
 object ThriftServerFramedCodec {
-  def apply() = new ThriftServerFramedCodec
+  def apply() = ThriftServerFramedCodecFactory
 }
 
-class ThriftServerFramedCodec
+object ThriftServerFramedCodecFactory extends ServerCodecFactory[Array[Byte], Array[Byte]] {
+  def apply(config: ServerCodecConfig) = new ThriftServerFramedCodec(config)
+}
+
+class ThriftServerFramedCodec(config: ServerCodecConfig)
   extends ServerCodec[Array[Byte], Array[Byte]]
 {
   def pipelineFactory =
@@ -33,7 +39,7 @@ class ThriftServerFramedCodec
     }
 
   override def prepareService(service: Service[Array[Byte], Array[Byte]]) =
-    Future.value((new ThriftServerTracingFilter) andThen service)
+    Future.value((new ThriftServerTracingFilter(config.serviceName, config.boundAddress)) andThen service)
 }
 
 private[thrift] class ThriftServerChannelBufferEncoder
@@ -52,7 +58,9 @@ private[thrift] class ThriftServerChannelBufferEncoder
 }
 
 private[thrift] class ThriftServerTracingFilter
-  extends SimpleFilter[Array[Byte], Array[Byte]]
+(
+  serviceName: Option[String], boundAddress: SocketAddress
+) extends SimpleFilter[Array[Byte], Array[Byte]]
 {
   // Concurrency is not an issue here since we have an instance per
   // channel, and receive only one request at a time (thrift does no
@@ -66,10 +74,14 @@ private[thrift] class ThriftServerTracingFilter
       val header = new thrift.TracedRequestHeader
       val request_ = InputBuffer.peelMessage(request, header)
 
+      val msg = new InputBuffer(request_)().readMessageBegin()
       Trace.startSpan(
         Some(SpanId(header.getSpan_id)),
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
-        Some(SpanId(header.getTrace_id)))
+        Some(SpanId(header.getTrace_id)),
+        serviceName,
+        Some(msg.name),
+        Some(Endpoint.fromSocketAddress(boundAddress)))
 
       if (header.debug)
         Trace.debug(true)  // (don't turn off when !header.debug)

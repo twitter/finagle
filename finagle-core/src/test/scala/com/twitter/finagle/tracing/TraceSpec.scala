@@ -21,6 +21,7 @@ object TraceSpec extends Specification {
           Seq(Annotation(_, Event.ClientSend(), _),
               Annotation(_, Event.Message("oh hey"), _)),
           emptyMap,
+          None,
           Seq()) => true
         case _ => false
       }
@@ -31,7 +32,7 @@ object TraceSpec extends Specification {
     "add child spans, updating the parent span" in {
       Trace.startSpan()
       Trace.record(Event.ClientSend())
-      val child = Trace.addChild
+      val child = Trace.addChild(None, None, None)
       child.record(Event.ClientRecv())
       val span = Trace.endSpan()
       val emptyMap1 = Map[String, ByteBuffer]()
@@ -42,10 +43,12 @@ object TraceSpec extends Specification {
           None, None, None, _, None,
           Seq(Annotation(_, Event.ClientSend(), _)),
           emptyMap1,
+          None,
           Seq(
             Span(None, None, None, _, Some(span.id),
                  Seq(Annotation(_, Event.ClientRecv(), _)),
                  emptyMap2,
+                 None,
                  Seq()))) => true
         case _ => false
       }

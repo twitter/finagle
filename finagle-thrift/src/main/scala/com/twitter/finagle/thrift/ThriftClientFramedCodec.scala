@@ -11,13 +11,14 @@ import org.apache.thrift.protocol.{
   TBinaryProtocol, TMessage,
   TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
+import java.net.SocketAddress
 
 import com.twitter.util.Time
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.tracing.{Trace, Annotation, Event}
+import com.twitter.finagle.tracing.{Trace, Annotation, Event, Endpoint}
 
 import conversions._
 
@@ -28,14 +29,22 @@ import conversions._
  */
 object ThriftClientFramedCodec {
   /**
-   * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
-   * with a thrift `TBinaryProtocol` factory.
+   * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodecFactory]]
    */
-  def apply(): ThriftClientFramedCodec =
-    new ThriftClientFramedCodec(new TBinaryProtocol.Factory())
+  def apply() = ThriftClientFramedCodecFactory
 }
 
-class ThriftClientFramedCodec(protocolFactory: TProtocolFactory)
+object ThriftClientFramedCodecFactory extends ClientCodecFactory[ThriftClientRequest, Array[Byte]] {
+  /**
+   * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
+   * with a default TBinaryProtocol.
+   */
+  def apply(config: ClientCodecConfig) = {
+    new ThriftClientFramedCodec(new TBinaryProtocol.Factory(), config)
+  }
+}
+
+class ThriftClientFramedCodec(protocolFactory: TProtocolFactory, config: ClientCodecConfig)
   extends ClientCodec[ThriftClientRequest, Array[Byte]]
 {
   def pipelineFactory =
@@ -73,7 +82,7 @@ class ThriftClientFramedCodec(protocolFactory: TProtocolFactory)
         // Otherwise, apply our tracing filter first. This will read
         // the TraceData frames, and apply them to the current
         // Trace.
-        (new ThriftClientTracingFilter) andThen underlying
+        (new ThriftClientTracingFilter(config.serviceName)) andThen underlying
       }
     }
   }
@@ -115,7 +124,7 @@ private[thrift] class ThriftClientChannelBufferEncoder
  * on the wire. It is applied after all framing.
  */
 
-private[thrift] class ThriftClientTracingFilter
+private[thrift] class ThriftClientTracingFilter(serviceName: Option[String])
   extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
   def apply(
@@ -123,7 +132,9 @@ private[thrift] class ThriftClientTracingFilter
     service: Service[ThriftClientRequest, Array[Byte]]
   ) = {
     // Create a new span identifier for this request.
-    val childTracer = Trace.addChild()
+    val msg = new InputBuffer(request.message)().readMessageBegin()
+    val childTracer = Trace.addChild(serviceName, Some(msg.name), Some(Endpoint.Unknown))
+    // TODO need to get the actual endpoint called from the netty channel somehow
     val header = new thrift.TracedRequestHeader
     header.setSpan_id(childTracer().id.toLong)
     header.setTrace_id(childTracer().traceId.toLong)

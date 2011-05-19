@@ -451,7 +451,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     Timer.default.acquire()
 
     val cluster = config.cluster.get
-    val codec   = config.codecFactory.get(ClientCodecConfig())
+    val codec   = config.codecFactory.get(ClientCodecConfig(serviceName = config.name))
 
     val hostFactories = cluster mkFactories { host =>
       // The per-host stack is as follows:

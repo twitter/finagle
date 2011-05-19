@@ -39,8 +39,9 @@ trait Tracer {
    * Record the given event. A timestamp is added.
    */
   def record(event: Event) {
-    val annotation = Annotation(Time.now, event, Endpoint.Unknown)
     mutate { span =>
+      val endpoint = span.endpoint getOrElse Endpoint.Unknown
+      val annotation = Annotation(Time.now, event, endpoint)
       span.copy(annotations = span.annotations ++ Seq(annotation))
     }
   }
@@ -76,8 +77,8 @@ trait Tracer {
    *
    * @return the newly-defined child span
    */
-  def addChild(): Tracer = {
-    val childSpan = Span(this()._traceId, None, Some(this().id))
+  def addChild(serviceName: Option[String], name: Option[String], endpoint: Option[Endpoint]): Tracer = {
+    val childSpan = Span(this()._traceId, None, Some(this().id), serviceName, name, endpoint)
     mutate { span =>
       span.copy(children = span.children ++ Seq(childSpan))
     }

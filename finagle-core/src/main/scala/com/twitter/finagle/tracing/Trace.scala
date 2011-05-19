@@ -52,16 +52,19 @@ object Trace extends Tracer {
    * Start a new span. When identifiers are specified, use those,
    * otherwise they are generated for you.
    */
-  def startSpan(id: Option[SpanId], parentId: Option[SpanId], traceId: Option[SpanId]) {
+  def startSpan(
+    id: Option[SpanId], parentId: Option[SpanId], traceId: Option[SpanId],
+    serviceName: Option[String], name: Option[String], endpoint: Option[Endpoint]
+  ) {
     clear()
-    mutate { _ => Span(traceId, id, parentId) }
+    mutate { _ => Span(traceId, id, parentId, serviceName, name, endpoint) }
   }
 
   /**
    * Start a new span with random identifiers.
    */
   def startSpan() {
-    startSpan(None, None, None)
+    startSpan(None, None, None, None, None, None)
   }
 
   /**

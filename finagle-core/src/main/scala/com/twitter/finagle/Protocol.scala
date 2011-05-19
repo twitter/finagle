@@ -39,7 +39,7 @@ trait ServerCodec[Req, Rep] extends AbstractCodec[Req, Rep]
  * Codec factories create codecs given some configuration.
  */
 
-case class ClientCodecConfig()
+case class ClientCodecConfig(serviceName: Option[String])
 trait ClientCodecFactory[Req, Rep] extends (ClientCodecConfig => ClientCodec[Req, Rep])
 
 object ClientCodecFactory {

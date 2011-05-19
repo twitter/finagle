@@ -37,12 +37,13 @@ private[thrift] class RichThriftSpan(self: thrift.Span) {
    */
   def toFinagleSpan: Span = Span(
     _traceId      = if (self.isSetTrace_id)     Some(SpanId(self.getTrace_id))     else None,
-    serviceName   = if (self.isSetService_name) Some(self.getService_name)         else None,
-    name          = if (self.isSetName)         Some(self.getName)                 else None,
+    _serviceName   = if (self.isSetService_name) Some(self.getService_name)         else None,
+    _name          = if (self.isSetName)         Some(self.getName)                 else None,
     id            = SpanId(self.getId),
     parentId      = if (self.isSetParent_id)    Some(SpanId(self.getParent_id))    else None,
     annotations   = toAnnotations,
     bAnnotations  = self.getBinary_annotations,
+    endpoint      = None,
     children      = Seq()
   )
 
@@ -83,6 +84,8 @@ private[thrift] class RichSpan(self: Span) {
     span.setId(self.id.toLong)
     self.parentId foreach { parentId => span.setParent_id(parentId.toLong) }
     span.setTrace_id(self.traceId.toLong)
+    span.setService_name(self.serviceName)
+    span.setName(self.name)
 
     val annotations = self.annotations map { annotation =>
       val value = annotation.event match {
@@ -96,8 +99,12 @@ private[thrift] class RichSpan(self: Span) {
       val thriftAnnotation = new thrift.Annotation
       thriftAnnotation.setTimestamp(annotation.timestamp.inMilliseconds.toLong)
       thriftAnnotation.setValue(value)
-      if (annotation.endpoint != Endpoint.Unknown)
+      if (annotation.endpoint != Endpoint.Unknown) {
         thriftAnnotation.setHost(endpointFromFinagle(annotation.endpoint))
+      } else self.endpoint match {
+        case Some(s) => thriftAnnotation.setHost(endpointFromFinagle(s))
+        case None => ()
+      }
 
       thriftAnnotation
     }

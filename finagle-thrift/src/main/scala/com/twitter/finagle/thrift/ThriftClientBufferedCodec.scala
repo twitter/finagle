@@ -4,9 +4,10 @@ import org.jboss.netty.channel.ChannelPipelineFactory
 import org.apache.thrift.protocol.TProtocolFactory
 
 import com.twitter.finagle.Codec
+import com.twitter.finagle.ClientCodecConfig
 
-class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory)
-  extends ThriftClientFramedCodec(protocolFactory)
+class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory, config: ClientCodecConfig)
+  extends ThriftClientFramedCodec(protocolFactory, config)
 {
   override def pipelineFactory = {
     val framedPipelineFactory = super.pipelineFactory

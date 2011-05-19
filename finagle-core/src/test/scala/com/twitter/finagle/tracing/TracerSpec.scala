@@ -16,7 +16,7 @@ object TracerSpec extends Specification {
 
     "record children, propagating its changes" in {
       tracer.debug(true)
-      val child = tracer.addChild()
+      val child = tracer.addChild(Some("service"), Some("method"), Some(Endpoint.Unknown))
       child.record("oh hey ho yay")
       child.record("another")
       child.recordBinary("this is a key", ByteBuffer.wrap("this is a value".getBytes()))
@@ -28,6 +28,7 @@ object TracerSpec extends Specification {
                Seq(Annotation(_, Event.Message("oh hey ho yay"), _),
                    Annotation(_, Event.Message("another"), _)),
                testMap,
+               Some(Endpoint.Unknown),
                Seq())) => true
         case _ =>
           false

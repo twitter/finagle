@@ -10,6 +10,8 @@ import util.Random
 import com.twitter.util.{RichU64Long, Time}
 import scala.collection.Map
 import java.nio.ByteBuffer
+import java.net.SocketAddress
+import java.net.InetSocketAddress
 
 /**
  * Endpoints describe a TCP endpoint that terminates RPC
@@ -19,6 +21,20 @@ import java.nio.ByteBuffer
 case class Endpoint(ipv4: Int, port: Short)
 object Endpoint {
   val Unknown = Endpoint(0, 0)
+
+  /**
+   * @return If possible, convert from a SocketAddress object to an Endpoint.
+   * If not, return Unknown Endpoint.
+   */
+  def fromSocketAddress(socketAddress: SocketAddress): Endpoint = {
+    socketAddress match {
+      case inet: InetSocketAddress => {
+        val addr = ByteBuffer.wrap(inet.getAddress.getAddress).getInt
+        Endpoint(addr, inet.getPort.toShort)
+      }
+      case _ => Endpoint.Unknown
+    }
+  }
 }
 
 sealed trait Event
@@ -49,16 +65,18 @@ case class Annotation(
  * @param parentId     Span identifier for the parent span. None if this is the root span.
  * @param annotations  A sequence of annotations made in this span
  * @param bAnnotations Key-Value annotations, used to attach non timestamped data
+ * @param endpoint     Endpoint for this service, used to populate annotations
  * @param children     A sequence of child transcripts
  */
 case class Span(
   _traceId    : Option[SpanId],
-  serviceName : Option[String],
-  name        : Option[String],
+  _serviceName : Option[String],
+  _name        : Option[String],
   id          : SpanId,
   parentId    : Option[SpanId],
   annotations : Seq[Annotation],
   bAnnotations: Map[String, ByteBuffer],
+  endpoint    : Option[Endpoint],
   children    : Seq[Span])
 {
   /**
@@ -66,6 +84,8 @@ case class Span(
    *         belongs
    */
   val traceId = _traceId getOrElse (parentId getOrElse id)
+  val serviceName = _serviceName getOrElse "Unknown"
+  val name = _name getOrElse "Unknown"
 
   /**
    * @return a pretty string for this span ID.
@@ -160,15 +180,19 @@ case class Span(
 object Span {
   private[Span] val rng = new Random
 
-  def apply(): Span = Span(None, None, None)
-  def apply(traceId: Option[SpanId], id: Option[SpanId], parentId: Option[SpanId]): Span = Span(
+  def apply(): Span = Span(None, None, None, None, None, None)
+  def apply(
+    traceId: Option[SpanId], id: Option[SpanId], parentId: Option[SpanId],
+    serviceName: Option[String], name: Option[String], endpoint: Option[Endpoint]
+  ): Span = Span(
     _traceId = traceId,
-    serviceName = None,
-    name = None,
+    _serviceName = serviceName,
+    _name = name,
     id = id getOrElse SpanId(rng.nextLong),
     parentId = parentId,
     annotations = Seq(),
     bAnnotations = Map(),
+    endpoint = endpoint,
     children = Seq()
   )
 }
