@@ -47,7 +47,7 @@ struct Span {
 struct TracedRequestHeader {
   1: i64  trace_id,
   2: i64  span_id,
-  3: i64  parent_span_id,
+  3: optional i64 parent_span_id,
   4: bool debug
 }
 

@@ -68,7 +68,7 @@ private[thrift] class ThriftServerTracingFilter
 
       Trace.startSpan(
         Some(SpanId(header.getSpan_id)),
-        Some(SpanId(header.getParent_span_id)),
+        if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
         Some(SpanId(header.getTrace_id)))
 
       if (header.debug)

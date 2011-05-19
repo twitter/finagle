@@ -46,7 +46,7 @@ case class Annotation(
  * @param serviceName  The name of the service handling the RPC
  * @param name         The name of the RPC method
  * @param id           Identifier for this span
- * @param parentId     Span identifier for the parent span
+ * @param parentId     Span identifier for the parent span. None if this is the root span.
  * @param annotations  A sequence of annotations made in this span
  * @param bAnnotations Key-Value annotations, used to attach non timestamped data
  * @param children     A sequence of child transcripts
