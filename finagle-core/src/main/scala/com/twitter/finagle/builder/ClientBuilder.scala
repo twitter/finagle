@@ -67,6 +67,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
+import tracing.{NullTraceReceiver, TracingFilter, TraceReceiver}
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -111,6 +112,21 @@ object ClientConfig {
   type FullySpecified[Req, Rep] = ClientConfig[Req, Rep, Yes, Yes, Yes]
 }
 
+// Necessary because of the 22 argument limit on case classes
+final case class ClientHostConfig(
+  private val _hostConnectionCoresize    : Option[Int]                   = None,
+  private val _hostConnectionLimit       : Option[Int]                   = None,
+  private val _hostConnectionIdleTime    : Option[Duration]              = None,
+  private val _hostConnectionMaxIdleTime : Option[Duration]              = None,
+  private val _hostConnectionMaxLifeTime : Option[Duration]              = None) {
+
+  val hostConnectionCoresize    = _hostConnectionCoresize
+  val hostConnectionLimit       = _hostConnectionLimit
+  val hostConnectionIdleTime    = _hostConnectionIdleTime
+  val hostConnectionMaxIdleTime = _hostConnectionMaxIdleTime
+  val hostConnectionMaxLifeTime = _hostConnectionMaxLifeTime
+}
+
 /**
  * TODO: do we really need to specify HasCodec? -- it's implied in a
  * way by the proper Req, Rep
@@ -125,11 +141,6 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _writerIdleTimeout         : Option[Duration]              = None,
   private val _statsReceiver             : Option[StatsReceiver]         = None,
   private val _name                      : Option[String]                = Some("client"),
-  private val _hostConnectionCoresize    : Option[Int]                   = None,
-  private val _hostConnectionLimit       : Option[Int]                   = None,
-  private val _hostConnectionIdleTime    : Option[Duration]              = None,
-  private val _hostConnectionMaxIdleTime : Option[Duration]              = None,
-  private val _hostConnectionMaxLifeTime : Option[Duration]              = None,
   private val _sendBufferSize            : Option[Int]                   = None,
   private val _recvBufferSize            : Option[Int]                   = None,
   private val _retries                   : Option[Int]                   = None,
@@ -137,7 +148,9 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[SSLContext]            = None,
   private val _startTls                  : Boolean                       = false,
-  private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds))
+  private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
+  private val _traceReceiver             : TraceReceiver                 = new NullTraceReceiver,
+  private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
 {
   import ClientConfig._
 
@@ -155,11 +168,12 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val readerIdleTimeout         = _readerIdleTimeout
   val writerIdleTimeout         = _writerIdleTimeout
   val name                      = _name
-  val hostConnectionCoresize    = _hostConnectionCoresize
-  val hostConnectionLimit       = _hostConnectionLimit
-  val hostConnectionIdleTime    = _hostConnectionIdleTime
-  val hostConnectionMaxIdleTime = _hostConnectionMaxIdleTime
-  val hostConnectionMaxLifeTime = _hostConnectionMaxLifeTime
+  val hostConnectionCoresize    = _hostConfig.hostConnectionCoresize
+  val hostConnectionLimit       = _hostConfig.hostConnectionLimit
+  val hostConnectionIdleTime    = _hostConfig.hostConnectionIdleTime
+  val hostConnectionMaxIdleTime = _hostConfig.hostConnectionMaxIdleTime
+  val hostConnectionMaxLifeTime = _hostConfig.hostConnectionMaxLifeTime
+  val hostConfig                = _hostConfig
   val sendBufferSize            = _sendBufferSize
   val recvBufferSize            = _recvBufferSize
   val retries                   = _retries
@@ -168,6 +182,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val tls                       = _tls
   val startTls                  = _startTls
   val failureAccrualParams      = _failureAccrualParams
+  val traceReceiver             = _traceReceiver
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -179,11 +194,11 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "writerIdleTimeout"         -> Some(_writerIdleTimeout),
     "statsReceiver"             -> _statsReceiver,
     "name"                      -> _name,
-    "hostConnectionCoresize"    -> _hostConnectionCoresize,
-    "hostConnectionLimit"       -> _hostConnectionLimit,
-    "hostConnectionIdleTime"    -> _hostConnectionIdleTime,
-    "hostConnectionMaxIdleTime" -> _hostConnectionMaxIdleTime,
-    "hostConnectionMaxLifeTime" -> _hostConnectionMaxLifeTime,
+    "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
+    "hostConnectionLimit"       -> _hostConfig.hostConnectionLimit,
+    "hostConnectionIdleTime"    -> _hostConfig.hostConnectionIdleTime,
+    "hostConnectionMaxIdleTime" -> _hostConfig.hostConnectionMaxIdleTime,
+    "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
     "retries"                   -> _retries,
@@ -191,7 +206,8 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
     "startTls"                  -> Some(_startTls),
-    "failureAccrualParams"      -> _failureAccrualParams
+    "failureAccrualParams"      -> _failureAccrualParams,
+    "traceReceiver"             -> Some(traceReceiver)
   )
 
   override def toString = {
@@ -313,19 +329,19 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def name(value: String): This = withConfig(_.copy(_name = Some(value)))
 
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
-    withConfig(_.copy(_hostConnectionLimit = Some(value)))
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionLimit = Some(value))))
 
   def hostConnectionCoresize(value: Int): This =
-    withConfig(_.copy(_hostConnectionCoresize = Some(value)))
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionCoresize = Some(value))))
 
   def hostConnectionIdleTime(timeout: Duration): This =
-    withConfig(_.copy(_hostConnectionIdleTime = Some(timeout)))
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionIdleTime = Some(timeout))))
 
   def hostConnectionMaxIdleTime(timeout: Duration): This =
-    withConfig(_.copy(_hostConnectionMaxIdleTime = Some(timeout)))
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxIdleTime = Some(timeout))))
 
   def hostConnectionMaxLifeTime(timeout: Duration): This =
-    withConfig(_.copy(_hostConnectionMaxLifeTime = Some(timeout)))
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxLifeTime = Some(timeout))))
 
   def retries(value: Int): This =
     withConfig(_.copy(_retries = Some(value)))
@@ -350,6 +366,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   def startTls(value: Boolean): This =
     withConfig(_.copy(_startTls = true))
+
+  def traceReceiver(receiver: TraceReceiver): This =
+    withConfig(_.copy(_traceReceiver = receiver))
 
   def logger(logger: Logger): This = withConfig(_.copy(_logger = Some(logger)))
 
@@ -530,7 +549,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       service = filter andThen service
     }
 
-    service
+    (new TracingFilter(config.traceReceiver)) andThen service
   }
 
   /**

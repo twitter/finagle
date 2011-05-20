@@ -100,7 +100,6 @@ class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiv
     if (shouldDropTrace(span.traceId, sampleRate)) {
       return
     }
-
     logSpan(span)
   }
 }
