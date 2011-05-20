@@ -117,12 +117,14 @@ final case class ClientHostConfig(
   private val _hostConnectionCoresize    : Option[Int]                   = None,
   private val _hostConnectionLimit       : Option[Int]                   = None,
   private val _hostConnectionIdleTime    : Option[Duration]              = None,
+  private val _hostConnectionMaxWaiters  : Option[Int]                   = None,
   private val _hostConnectionMaxIdleTime : Option[Duration]              = None,
   private val _hostConnectionMaxLifeTime : Option[Duration]              = None) {
 
   val hostConnectionCoresize    = _hostConnectionCoresize
   val hostConnectionLimit       = _hostConnectionLimit
   val hostConnectionIdleTime    = _hostConnectionIdleTime
+  val hostConnectionMaxWaiters  = _hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConnectionMaxLifeTime
 }
@@ -171,6 +173,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val hostConnectionCoresize    = _hostConfig.hostConnectionCoresize
   val hostConnectionLimit       = _hostConfig.hostConnectionLimit
   val hostConnectionIdleTime    = _hostConfig.hostConnectionIdleTime
+  val hostConnectionMaxWaiters  = _hostConfig.hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConfig.hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConfig.hostConnectionMaxLifeTime
   val hostConfig                = _hostConfig
@@ -197,6 +200,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
     "hostConnectionLimit"       -> _hostConfig.hostConnectionLimit,
     "hostConnectionIdleTime"    -> _hostConfig.hostConnectionIdleTime,
+    "hostConnectionMaxWaiters"  -> _hostConfig.hostConnectionMaxWaiters,    
     "hostConnectionMaxIdleTime" -> _hostConfig.hostConnectionMaxIdleTime,
     "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
     "sendBufferSize"            -> _sendBufferSize,
@@ -336,6 +340,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   def hostConnectionIdleTime(timeout: Duration): This =
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionIdleTime = Some(timeout))))
+    
+  def hostConnectionMaxWaiters(nWaiters: Int): This =
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxWaiters = Some(nWaiters))))    
 
   def hostConnectionMaxIdleTime(timeout: Duration): This =
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxIdleTime = Some(timeout))))
@@ -427,12 +434,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[this] def buildPool(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) = {
     // These are conservative defaults, but probably the only safe
     // thing to do.
-    val lowWatermark  = config.hostConnectionCoresize getOrElse(1)
-    val highWatermark = config.hostConnectionLimit    getOrElse(Int.MaxValue)
-    val idleTime      = config.hostConnectionIdleTime getOrElse(5.seconds)
+    val lowWatermark  = config.hostConnectionCoresize   getOrElse(1)
+    val highWatermark = config.hostConnectionLimit      getOrElse(Int.MaxValue)
+    val idleTime      = config.hostConnectionIdleTime   getOrElse(5.seconds)
+    val maxWaiters    = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
 
     val cachingPool = new CachingPool(factory, idleTime)
-    new WatermarkPool[Req, Rep](cachingPool, lowWatermark, highWatermark, statsReceiver)
+    new WatermarkPool[Req, Rep](
+      cachingPool, lowWatermark, highWatermark, 
+      statsReceiver, maxWaiters)
   }
 
   private[this] def prepareService(codec: ClientCodec[Req, Rep])(service: Service[Req, Rep]) = {

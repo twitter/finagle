@@ -91,6 +91,43 @@ object WatermarkPoolSpec extends Specification with Mockito {
       there was no(service1).release()
     }
   }
+  
+  "WatermarkPool (lowWatermark = 1, highWatermark = 1, maxWaiters = 2)" should {
+    val factory = mock[ServiceFactory[Int, Int]]
+    val service0 = mock[Service[Int, Int]]
+    val promise = new Promise[Service[Int, Int]]
+
+    factory.make() returns Future.value(service0)
+    service0.isAvailable returns true
+
+    val pool = new WatermarkPool(factory, 1, 1, maxWaiters = 2)
+    
+    "throw TooManyWaitersException when the number of waiters exceeds 2" in {
+      val f0 = pool.make()
+      f0.isDefined must beTrue
+      there was one(factory).make()
+      
+      // one waiter. this is cool.
+      val f1 = pool.make()
+      f1.isDefined must beFalse
+      
+      // two waiters. this is *still* cool.
+      val f2 = pool.make()
+      f2.isDefined must beFalse
+      
+      // three waiters and i freak out.
+      val f3 = pool.make()
+      f3.isDefined must beTrue
+      f3() must throwA[TooManyWaitersException]
+      
+      // give back my original item, and f1 should still get something.
+      f0().release()
+
+      f1.isDefined must beTrue
+      there was one(service0).isAvailable
+      there was no(service0).release()
+    }
+  }
 
   "WatermarkPool (lowWatermark = 100, highWatermark = 1000)" should {
     val factory = mock[ServiceFactory[Int, Int]]
