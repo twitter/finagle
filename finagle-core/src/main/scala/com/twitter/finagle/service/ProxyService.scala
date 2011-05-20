@@ -1,15 +1,13 @@
 package com.twitter.finagle.service
 
+import scala.collection.mutable.ArrayBuffer
+import com.twitter.finagle.{Service, ServiceNotAvailableException}
+import com.twitter.util.{Future, Promise, Throw, Return}
+
 /**
  * A service that simply proxies requests to an underlying service
  * yielded through a Future.
  */
-
-import collection.mutable.ArrayBuffer
-
-import com.twitter.util.{Future, Promise, Throw, Return}
-import com.twitter.finagle.{Service, ServiceNotAvailableException}
-
 class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
   extends Service[Req, Rep]
 {
@@ -61,6 +59,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
   }
 
   def apply(request: Req): Future[Rep] = proxy(request)
+  override def connected() = proxy.connected()
   override def release() = proxy.release()
   override def isAvailable = proxy.isAvailable
 }
