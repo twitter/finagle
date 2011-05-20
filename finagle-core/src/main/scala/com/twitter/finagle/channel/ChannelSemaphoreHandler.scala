@@ -15,6 +15,11 @@ import com.twitter.finagle.CodecException
 
 import com.twitter.concurrent.{AsyncSemaphore, Permit}
 
+// This is used as a no-op permit for the ChannelSemaphoreHandler.
+private[channel] object DeadPermit extends Permit {
+  def release() = ()
+}
+
 class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   extends SimpleChannelHandler
 {
@@ -25,8 +30,9 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   }
 
   private[this] def close(ctx: ChannelHandlerContext) {
-    // Putting null here only causes exceptions when a write is requested after the conn is closed.
-    Option(waiter(ctx).getAndSet(null)) foreach { _.release() }
+    // We substitute the permit with a dead one-- this causes subsequent 
+    // permit releases to be no-ops, which is what we want.
+    Option(waiter(ctx).getAndSet(DeadPermit)) foreach { _.release() }
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -47,16 +53,24 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val permit = waiter(ctx).getAndSet(null)
     if (permit eq null) {
-      /**
-      * The circumstances that the permit is null are:
-      *  - A write was issued without a corresponding request.
-      *  - The connection has closed or an exception was thrown,
-      *    in which case this error is still accurate.
-      */
-      Channels.fireExceptionCaught(
-        ctx.getChannel,
-        new CodecException("No waiter for downstream message!"))
+      // This should only happen when a write is issued 
+      // without a corresponding request.
+      val exc = new CodecException("No waiter for downstream message!")
+      Channels.fireExceptionCaught(ctx.getChannel, exc)
+
+      // Don't propagate the write: it is invalid after all.
+      e.getFuture.update(Error(exc))
+      return
     }
+
+    /**
+     * Note: the permit at this point may well be dead (eg.  if the channel
+     * has closed or had an exception.  However, this matters not: we simply
+     * perform a no-op by releasing the dead permit, and the write will fail
+     * anyway.  If we're writing on a truly dead channel, it's indeed the
+     * fault of any upstream handler -- but we don't become inconsistent
+     * because of it.
+     */
 
     /**
      * We proxy the event here to ensure the correct ordering: we
