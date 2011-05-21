@@ -1,8 +1,10 @@
 package com.twitter.finagle.channel
 
+import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
-import com.twitter.finagle.{ClientConnection, CodecException, Service, WriteTimedOutException}
+import com.twitter.finagle.{ClientConnection, CodecException, Service, PostponedService,
+  WriteTimedOutException}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Future, Promise, Return, Throw}
@@ -22,20 +24,14 @@ private[finagle] object ServiceToChannelHandler {
 
 private[finagle] class ServiceToChannelHandler[Req, Rep](
     service: Service[Req, Rep],
+    postponedService: PostponedService[Req, Rep],
+    serviceFactory: (ClientConnection) => Service[Req, Rep],
     statsReceiver: StatsReceiver,
-    log: Logger,
-    clientConnection: Option[ClientConnection])
+    log: Logger)
   extends ChannelClosingHandler
 {
   import ServiceToChannelHandler._
   import State._
-
-  def this(service: Service[Req, Rep], statsReceiver: StatsReceiver, clientConnection: Option[ClientConnection]) =
-    this(service, statsReceiver, Logger.getLogger(getClass.getName), clientConnection)
-  def this(service: Service[Req, Rep], statsReceiver: StatsReceiver) =
-    this(service, statsReceiver, Logger.getLogger(getClass.getName), None)
-  def this(service: Service[Req, Rep]) =
-    this(service, NullStatsReceiver, None)
 
   private[this] val state = new AtomicReference[State](Idle)
   private[this] val onShutdownPromise = new Promise[Unit]
@@ -109,8 +105,13 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   }
 
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    clientConnection.foreach { _.channel = ctx.getChannel }
-    service.connected()
+    val channel = ctx.getChannel
+    val clientConnection = new ClientConnection {
+      def remoteAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+      def localAddress = channel.getLocalAddress.asInstanceOf[InetSocketAddress]
+      def close() { channel.disconnect() }
+    }
+    postponedService.create(serviceFactory(clientConnection))
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {

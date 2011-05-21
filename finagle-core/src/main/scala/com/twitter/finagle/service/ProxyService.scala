@@ -59,7 +59,6 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
   }
 
   def apply(request: Req): Future[Rep] = proxy(request)
-  override def connected() = proxy.connected()
   override def release() = proxy.release()
   override def isAvailable = proxy.isAvailable
 }

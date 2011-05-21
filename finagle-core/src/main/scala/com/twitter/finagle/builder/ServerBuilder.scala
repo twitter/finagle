@@ -393,11 +393,15 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         // per channel.
         queueingChannelHandler foreach { pipeline.addLast("queue", _) }
 
+        /*
+         * this is a wrapper for the factory-created service for this connection, which we'll
+         * build once we get an "open" event from netty.
+         */
+        val postponedService = new PostponedService[Req, Rep]
+
         // Compose the service stack.
-        val clientConnection = new ClientConnection()
         var service: Service[Req, Rep] = {
-          val underlying = serviceFactory(clientConnection)
-          val prepared   = codec.prepareService(underlying)
+          val prepared   = codec.prepareService(postponedService)
           new ProxyService(prepared)
         }
 
@@ -438,13 +442,14 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
         // one here.
         service = (new TracingFilter(config.traceReceiver)) andThen service
 
-        // Register the channel so we can wait for them for a
-        // drain. We close the socket but wait for all handlers to
-        // complete (to drain them individually.)  Note: this would be
-        // complicated by the presence of pipelining.
         val channelHandler = new ServiceToChannelHandler(
-          service, scopedOrNullStatsReceiver, Some(clientConnection))
+          service, postponedService, serviceFactory, scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName))
 
+        /*
+         * Register the channel so we can wait for them for a drain. We close the socket but wait
+         * for all handlers to complete (to drain them individually.)  Note: this would be
+         * complicated by the presence of pipelining.
+         */
         val handle = new ChannelHandle {
           def close() =
             channelHandler.close()

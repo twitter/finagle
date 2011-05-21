@@ -15,7 +15,6 @@ import org.jboss.netty.channel.Channel
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
   def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
-    override def connected() = Service.this.connected()
     override def release() = Service.this.release()
   }
 
@@ -23,12 +22,6 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
    * This is the method to override/implement to create your own Service.
    */
   def apply(request: Req): Future[Rep]
-
-  /**
-   * When a client is actually connected, and local & remote addresses are
-   * known, this signal is sent to the service.
-   */
-  def connected() = ()
 
   /**
    * Relinquishes the use of this service instance. Behavior is
@@ -47,28 +40,41 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
  * Information about a client, passed to a Service factory for each new
  * connection.
  */
-class ClientConnection {
-  // tricky. we can't fill in the Channel till the first event call from netty.
-  private[finagle] var channel: Channel = null
-
+trait ClientConnection {
   /**
    * Host/port of the client. This is only available after `Service#connected`
    * has been signalled.
    */
-  def remoteAddress: InetSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+  def remoteAddress: InetSocketAddress
 
   /**
    * Host/port of the local side of a client connection. This is only
    * available after `Service#connected` has been signalled.
    */
-  def localAddress: InetSocketAddress = channel.getLocalAddress.asInstanceOf[InetSocketAddress]
+  def localAddress: InetSocketAddress
 
   /**
    * Close the underlying client connection.
    */
-  def close() {
-    channel.disconnect()
+  def close()
+}
+
+class PostponedService[Req, Rep] extends Service[Req, Rep] {
+  private[this] var underlying: Option[Service[Req, Rep]] = None
+
+  def create(service: Service[Req, Rep]) {
+    underlying = Some(service)
   }
+
+  def apply(request: Req) = {
+    underlying.map { _(request) }.getOrElse { throw new IllegalArgumentException("No service yet") }
+  }
+
+  override def release() {
+    underlying.foreach { _.release() }
+  }
+
+  override def isAvailable = underlying.map { _.isAvailable }.getOrElse(false)
 }
 
 /**
@@ -174,7 +180,6 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
       def apply(request: ReqIn, service: Service[Req2, Rep2]) = {
         Filter.this.apply(request, new Service[ReqOut, RepIn] {
           def apply(request: ReqOut): Future[RepIn] = next(request, service)
-          override def connected() = service.connected()
           override def release() = service.release()
           override def isAvailable = service.isAvailable
         })
@@ -193,7 +198,6 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     private[this] val refcounted = new RefcountedService(service)
 
     def apply(request: ReqIn) = Filter.this.apply(request, refcounted)
-    override def connected() = refcounted.connected()
     override def release() = refcounted.release()
     override def isAvailable = refcounted.isAvailable
   }
