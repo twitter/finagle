@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import scala.ref.WeakReference
-import scala.collection.mutable.{WeakHashMap, ArrayBuffer}
+import scala.collection.mutable.WeakHashMap
 
 /**
  * CumulativeGauge provides a gauge that is composed of the (addition)
@@ -13,18 +13,14 @@ private[finagle] trait CumulativeGauge {
     def remove() { removeGauge(this) }
   }
 
-  private[this] var underlying: List[WeakReference[UnderlyingGauge]] = Nil
+  @volatile private[this] var underlying: List[WeakReference[UnderlyingGauge]] = Nil
 
   /**
    * Returns a buffered version of the current gauges
    */
   private[this] def get(): Seq[UnderlyingGauge] = {
     removeGauge(null)  // GC.
-    synchronized {
-      val buffer = new ArrayBuffer[UnderlyingGauge]()
-      (underlying map { _.get } flatten).copyToBuffer(buffer)
-      buffer
-    }
+    underlying map { _.get } flatten
   }
 
   private[this] def removeGauge(underlyingGauge: UnderlyingGauge) = synchronized {
