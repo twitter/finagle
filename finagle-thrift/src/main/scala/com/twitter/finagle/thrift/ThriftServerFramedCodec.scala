@@ -120,7 +120,13 @@ private[thrift] class ThriftServerTracingFilter
         // to parse them out.
         Future.value(buffer.toArray)
       } else {
-        Trace.startSpan()
+        Trace.startSpan(
+          None,
+          None,
+          None,
+          serviceName,
+          Some(msg.name),
+          Some(Endpoint.fromSocketAddress(boundAddress)))
         Trace.record(Event.ServerRecv())
 
         service(request) map { response =>
