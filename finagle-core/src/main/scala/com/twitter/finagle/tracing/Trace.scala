@@ -72,9 +72,13 @@ object Trace extends Tracer {
    *
    * @return The span that was just ended.
    */
-  def endSpan(): Span = {
-    val span = this()
-    clear()
-    span
+  def endSpan(): Option[Span] = {
+    if (current().isDefined) {
+      val span = this()
+      clear()
+      Some(span)
+    } else {
+      None
+    }
   }
 }
