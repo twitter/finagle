@@ -134,13 +134,13 @@ private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isU
       header.setSpan_id(childTracer().id.toLong)
       header.setTrace_id(childTracer().traceId.toLong)
       childTracer().parentId foreach { parentId => header.setParent_span_id(parentId.toLong) }
-      header.setDebug(Trace.isDebugging)
+      header.setDebug(childTracer.isDebugging)
 
       new ThriftClientRequest(
         OutputBuffer.messageToArray(header) ++ request.message,
         request.oneway)
     } else {
-      new ThriftClientRequest(request.message, request.oneway)
+      request
     }
 
     childTracer.record(Event.ClientSend())
@@ -159,7 +159,7 @@ private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isU
           val responseHeader = new thrift.TracedResponseHeader
           val rest = InputBuffer.peelMessage(response, responseHeader)
 
-          if (Trace.isDebugging && (responseHeader.spans ne null)) {
+          if (childTracer.isDebugging && (responseHeader.spans ne null)) {
             Trace.merge(responseHeader.spans map { _.toFinagleSpan })
           }
 
