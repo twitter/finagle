@@ -14,7 +14,7 @@ class TracingFilter[Req, Rep](receiver: TraceReceiver)
 {
   def apply(request: Req, service: Service[Req, Rep]) = {
     service(request) ensure {
-      receiver.receiveSpan(Trace.endSpan())
+      Trace.endSpan() foreach(receiver.receiveSpan)
     }
   }
 }

@@ -49,6 +49,18 @@ object Trace extends Tracer {
   }
 
   /**
+   * Adds a child tracer to the current tracer if it exists, otherwise creates a new tracer.
+   */
+  override def addChild(
+    serviceName: Option[String], name: Option[String], endpoint: Option[Endpoint]
+  ): Tracer = {
+    if (current().isDefined)
+      super.addChild(serviceName, name, endpoint)
+    else
+      new RootRefTracer(Span(None, None, None, serviceName, name, endpoint))
+  }
+
+  /**
    * Start a new span. When identifiers are specified, use those,
    * otherwise they are generated for you.
    */
@@ -72,9 +84,13 @@ object Trace extends Tracer {
    *
    * @return The span that was just ended.
    */
-  def endSpan(): Span = {
-    val span = this()
-    clear()
-    span
+  def endSpan(): Option[Span] = {
+    if (current().isDefined) {
+      val span = this()
+      clear()
+      Some(span)
+    } else {
+      None
+    }
   }
 }

@@ -23,6 +23,7 @@ import com.twitter.finagle.tracing.{Span, SpanId, Endpoint}
 import java.util.ArrayList
 
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
+import com.twitter.finagle.stats.NullStatsReceiver
 
 object BigBrotherBirdReceiverSpec extends Specification with Mockito {
   val span = Span(Some(SpanId(123)), Some(SpanId(456)), Some(SpanId(789)), Some("service"),
@@ -30,7 +31,7 @@ object BigBrotherBirdReceiverSpec extends Specification with Mockito {
 
   "BigBrotherBirdReceiver" should {
     "throw exception if illegal sample rate" in {
-      val receiver = new BigBrotherBirdReceiver(null)
+      val receiver = new BigBrotherBirdReceiver(null, NullStatsReceiver)
       receiver.setSampleRate(-1) must throwA[IllegalArgumentException]
       receiver.setSampleRate(10001) must throwA[IllegalArgumentException]
     }
@@ -38,7 +39,7 @@ object BigBrotherBirdReceiverSpec extends Specification with Mockito {
     "not sample any traces and send all to scribe" in {
       val client = mock[scribe.ServiceToClient]
 
-      val receiver = new BigBrotherBirdReceiver(client)
+      val receiver = new BigBrotherBirdReceiver(client, NullStatsReceiver)
       receiver.setSampleRate(10000)
 
       val expected = new ArrayList[LogEntry]()
@@ -55,7 +56,7 @@ object BigBrotherBirdReceiverSpec extends Specification with Mockito {
     "sample all traces and send none to scribe" in {
       val client = mock[scribe.ServiceToClient]
 
-      val receiver = new BigBrotherBirdReceiver(client)
+      val receiver = new BigBrotherBirdReceiver(client, NullStatsReceiver)
       receiver.setSampleRate(0)
       receiver.receiveSpan(span)
 

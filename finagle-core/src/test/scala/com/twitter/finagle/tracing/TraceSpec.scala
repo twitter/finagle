@@ -15,7 +15,7 @@ object TraceSpec extends Specification {
       val span = Trace.endSpan()
       val emptyMap = Map[String, ByteBuffer]()
 
-      span must beLike {
+      span.get must beLike {
         case Span(
           None, None, None, _, None,
           Seq(Annotation(_, Event.ClientSend(), _),
@@ -34,7 +34,7 @@ object TraceSpec extends Specification {
       Trace.record(Event.ClientSend())
       val child = Trace.addChild(None, None, None)
       child.record(Event.ClientRecv())
-      val span = Trace.endSpan()
+      val span = Trace.endSpan().get
       val emptyMap1 = Map[String, ByteBuffer]()
       val emptyMap2 = Map[String, ByteBuffer]()
 

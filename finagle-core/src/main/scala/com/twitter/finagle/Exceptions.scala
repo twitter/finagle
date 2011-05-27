@@ -5,6 +5,7 @@ class RequestException             extends Exception
 class TimedoutRequestException     extends RequestException
 class RetryFailureException        extends RequestException
 class CancelledRequestException    extends RequestException
+class TooManyWaitersException      extends RequestException
 class CancelledConnectionException extends RequestException
 class NoBrokersAvailableException  extends RequestException
 class ReplyCastException           extends RequestException
