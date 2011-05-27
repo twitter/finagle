@@ -10,30 +10,32 @@ import java.io.ByteArrayOutputStream
 import sun.misc.BASE64Encoder
 import com.twitter.finagle.{WriteException, Service}
 import org.apache.thrift.transport.TIOStreamTransport
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
  * Receives the Finagle generated traces, samples them
  * and sends off the survivors to BigBrotherBird via scribe.
  */
-class BigBrotherBirdReceiver(client: scribe.ServiceToClient) extends TraceReceiver {
+class BigBrotherBirdReceiver(client: scribe.ServiceToClient, statsReceiver: StatsReceiver)
+    extends TraceReceiver {
 
   private[this] var sampleRate = 10
 
   private[this] val encoder = new BASE64Encoder
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
-  private[this] val statsReceiver = NullStatsReceiver.scope("b3") // TODO how to pick up whatever Finagle is using?
 
   private[this] val traceCategory = "b3"
 
-  def this(scribeHost: String = "localhost", scribePort: Int = 1463) {
+  def this(scribeHost: String = "localhost",
+      scribePort: Int = 1463,
+      statsReceiver: StatsReceiver = NullStatsReceiver.scope("b3")) {
     this(new scribe.ServiceToClient(
       ClientBuilder()
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(10)
       .build(),
-    new TBinaryProtocol.Factory()))
+    new TBinaryProtocol.Factory()), statsReceiver)
   }
 
   /**
