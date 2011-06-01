@@ -11,8 +11,6 @@ import org.apache.thrift.protocol.{
   TBinaryProtocol, TMessage,
   TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
-import java.net.SocketAddress
-
 import com.twitter.util.Time
 
 import com.twitter.finagle._
@@ -21,6 +19,7 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.tracing.{Trace, Annotation, Event, Endpoint}
 
 import conversions._
+import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -92,6 +91,17 @@ private[thrift] class ThriftClientChannelBufferEncoder
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
       case request: ThriftClientRequest =>
+        if(request.tracer ne null) {
+          // Netty returns a SocketAddress, but it is useless and the only known subclass is
+          // InetSocketAddress, so we can always cast it
+          ctx.getChannel.getLocalAddress()  match {
+            case sockaddr: InetSocketAddress =>
+              request.tracer.mutate { _.copy(endpoint = Some(Endpoint.fromSocketAddress(sockaddr))) }
+            case _ => () // nothing
+          }
+
+        }
+
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
         if (request.oneway) {
           // oneway RPCs are satisfied when the write is complete.
@@ -128,7 +138,8 @@ private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isU
   ) = {
     // Create a new span identifier for this request.
     val msg = new InputBuffer(request.message)().readMessageBegin()
-    val childTracer = Trace.addChild(serviceName, Some(msg.name), Some(Endpoint.Unknown))
+    val childTracer = Trace.addChild(serviceName, Some(msg.name), None)
+    request.tracer = childTracer
     val thriftRequest = if (isUpgraded) {
       val header = new thrift.TracedRequestHeader
       header.setSpan_id(childTracer().id.toLong)
