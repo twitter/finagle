@@ -1,6 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
 import com.twitter.finagle.{ClientConnection, CodecException, Service, WriteTimedOutException}
@@ -107,8 +106,8 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     val channel = ctx.getChannel
     val clientConnection = new ClientConnection {
-      def remoteAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
-      def localAddress = channel.getLocalAddress.asInstanceOf[InetSocketAddress]
+      def remoteAddress = channel.getRemoteAddress
+      def localAddress = channel.getLocalAddress
       def close() { channel.disconnect() }
     }
     postponedService.setValue(serviceFactory(clientConnection))

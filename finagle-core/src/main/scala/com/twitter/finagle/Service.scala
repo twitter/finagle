@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import com.twitter.finagle.service.RefcountedService
 import com.twitter.util.Future
 import org.jboss.netty.channel.Channel
@@ -45,13 +45,13 @@ trait ClientConnection {
    * Host/port of the client. This is only available after `Service#connected`
    * has been signalled.
    */
-  def remoteAddress: InetSocketAddress
+  def remoteAddress: SocketAddress
 
   /**
    * Host/port of the local side of a client connection. This is only
    * available after `Service#connected` has been signalled.
    */
-  def localAddress: InetSocketAddress
+  def localAddress: SocketAddress
 
   /**
    * Close the underlying client connection.
