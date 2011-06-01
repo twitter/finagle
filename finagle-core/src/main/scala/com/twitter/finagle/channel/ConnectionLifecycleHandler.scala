@@ -32,7 +32,7 @@ private[finagle] trait ConnectionLifecycleHandler
       channelDidConnect(ctx)
   }
 
-  def afterAdd(ctx: ChannelHandlerContext)     {/*nop*/}
-  def beforeRemove(ctx: ChannelHandlerContext) {/*nop*/}
-  def afterRemove(ctx: ChannelHandlerContext)  {/*nop*/}
+  override def afterAdd(ctx: ChannelHandlerContext)     {/*nop*/}
+  override def beforeRemove(ctx: ChannelHandlerContext) {/*nop*/}
+  override def afterRemove(ctx: ChannelHandlerContext)  {/*nop*/}
 }

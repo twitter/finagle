@@ -38,7 +38,7 @@ import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter, NullTraceRecei
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
-import com.twitter.util.Future
+import com.twitter.util.{Future, Promise}
 import com.twitter.concurrent.AsyncSemaphore
 
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
@@ -397,12 +397,11 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
          * this is a wrapper for the factory-created service for this connection, which we'll
          * build once we get an "open" event from netty.
          */
-        val postponedService = new PostponedService[Req, Rep]
+        val postponedService = new Promise[Service[Req, Rep]]
 
         // Compose the service stack.
         var service: Service[Req, Rep] = {
-          val prepared   = codec.prepareService(postponedService)
-          new ProxyService(prepared)
+          new ProxyService(postponedService flatMap { s => codec.prepareService(s) })
         }
 
         statsFilter foreach { sf =>

@@ -59,24 +59,6 @@ trait ClientConnection {
   def close()
 }
 
-class PostponedService[Req, Rep] extends Service[Req, Rep] {
-  private[this] var underlying: Option[Service[Req, Rep]] = None
-
-  def create(service: Service[Req, Rep]) {
-    underlying = Some(service)
-  }
-
-  def apply(request: Req) = {
-    underlying.map { _(request) }.getOrElse { throw new IllegalArgumentException("No service yet") }
-  }
-
-  override def release() {
-    underlying.foreach { _.release() }
-  }
-
-  override def isAvailable = underlying.map { _.isAvailable }.getOrElse(false)
-}
-
 /**
  * A simple proxy Service that forwards all calls to another Service.
  * This is is useful if you to wrap-but-modify an existing service.

@@ -3,9 +3,9 @@ package com.twitter.finagle.channel
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
-import com.twitter.finagle.{ClientConnection, CodecException, Service, PostponedService,
-  WriteTimedOutException}
+import com.twitter.finagle.{ClientConnection, CodecException, Service, WriteTimedOutException}
 import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.service.ProxyService
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.channel._
@@ -24,11 +24,11 @@ private[finagle] object ServiceToChannelHandler {
 
 private[finagle] class ServiceToChannelHandler[Req, Rep](
     service: Service[Req, Rep],
-    postponedService: PostponedService[Req, Rep],
+    postponedService: Promise[Service[Req, Rep]],
     serviceFactory: (ClientConnection) => Service[Req, Rep],
     statsReceiver: StatsReceiver,
     log: Logger)
-  extends ChannelClosingHandler
+  extends ChannelClosingHandler with ConnectionLifecycleHandler
 {
   import ServiceToChannelHandler._
   import State._
@@ -104,14 +104,14 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
     }
   }
 
-  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     val channel = ctx.getChannel
     val clientConnection = new ClientConnection {
       def remoteAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
       def localAddress = channel.getLocalAddress.asInstanceOf[InetSocketAddress]
       def close() { channel.disconnect() }
     }
-    postponedService.create(serviceFactory(clientConnection))
+    postponedService.setValue(serviceFactory(clientConnection))
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
