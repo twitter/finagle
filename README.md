@@ -160,7 +160,11 @@ Let's consider a more involved example. Often it is nice to isolate distinct pha
 
 ### Threading Model
 
-Finagle uses an event loop (being built atop Netty) for dispatching. Thus it's important that code executing in any of the event threads remain nonblocking (for example by using Finagle for all network IO). Any event dispatched from Finagle runs in one of the event loops. That is: `Future` methods other than `apply` (which blocks the current thread until a result is available) will all be dispatched in an event thread, and it's important that these do not block. Secondly, services dispatched by Finagle are also executed in the event loop. Examples:
+Finagle is capable of handling many connections concurrently. Finagle works by placing events from the connections onto a queue, and then continuously looping, executing the code corresponding to each event in turn. This loop is called the event dispatch loop. Using this technique, a single thread can dispatch events for many connections, which yields certain performance advantages. (Under the hood, Finagle maintains multiple queues and multiple threads, but the details of which threads handle which connections are hidden from you, as is the exact sequence in which events are processed.)
+
+This design has an important consequence: while one event is being dispatched, all other queued events must wait. Because of this, if you write code that blocks, or if you perform a long-running operation within Finagle event dispatch code, all other connections handled by that thread will hang. This will harm your system's performance. Blocking operations include network calls, system calls, database calls, or anything that synchronizes around a shared resource. Long-running operations include image processing operations, public key cryptography, or anything that might take a non-trivial amount of clock time to perform.
+
+All code that executes inside a Finagle client request, or Finagle server response, is part of the Finagle event loop, and must avoid those operations. For example, a method that implements an RPC call in a Finagle Thrift server, or a method that communicates with a remote network server in a Finagle client, is part of the event loop. On the other hand, setup code, teardown code, and code explicitly placed on a separate thread is outside of Finagle's control and is not subject to these restrictions. Here's a simple example that illustrates which code lies in Fingle's event loop and which doesn't:
 
     val service = new Service[Request, Response] {
       def apply(request: Request): Future[Response] = {
@@ -179,14 +183,17 @@ Finagle uses an event loop (being built atop Netty) for dispatching. Thus it's i
       val result = client(request)()
     }
 
-The number of threads used is equal to twice the number of physical CPUs available on the machine.
+To avoid placing these operations in the event loop, Finagle provides Futures. A blocking or long-running operation expressed as a Future allows Finagle to process other events as it waits for the operation to complete, and allows you to structure your code similar to how you would if the operations were happening sequentially and without interruption. See the section "Using Futures" below to learn how to use Futures and FuturePools to avoid remove blocking or long-running operations from the Finagle event dispatch loop. 
 
-### Notes
+Footnote: Strictly speaking, synchronization in the event loop is fine as long as contention and wait time are going to be low. But you should be sure you know what you're doing.
 
-1. A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. It saves a little bit of typing.
-1. An exception can be returned asynchronously by calling `Future.exception`. See the section "Using Futures" for more information.
+### An authorization filter
 
 Another `Filter` typical of an RPC Service is authentication and authorization. Our `Service` wants to ensure that the user is authorized to perform addition:
+
+Notes:
+1. A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. It saves a little bit of typing.
+1. An exception can be returned asynchronously by calling `Future.exception`. See the section "Using Futures" for more information.
 
 ### Scala
 
@@ -197,7 +204,6 @@ Another `Filter` typical of an RPC Service is authentication and authorization. 
         else
           Future.exception(new UnauthorizedException)
     }
-
 
 Finally, all of the `Filters` can be composed with our `Service` in the following way:
 

@@ -213,7 +213,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
-    val ostrich4 = "com.twitter" % "ostrich" % "4.2.1"
+    val ostrich4 = "com.twitter" % "ostrich" % "4.2.2"
   }
 
   class NativeProject(info: ProjectInfo) extends StandardProject(info)
@@ -225,7 +225,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"      % "libthrift" % "0.5.0"
     val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.2" % "provided"
-    val ostrich4 = "com.twitter" % "ostrich" % "4.2.1"
+    val ostrich4 = "com.twitter" % "ostrich" % "4.2.2"
   }
 
   class B3Project(info: ProjectInfo) extends StandardProject(info)

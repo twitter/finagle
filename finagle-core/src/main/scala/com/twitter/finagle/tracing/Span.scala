@@ -18,7 +18,12 @@ import java.net.InetSocketAddress
  * communication.
  */
 
-case class Endpoint(ipv4: Int, port: Short)
+case class Endpoint(ipv4: Int, port: Short) {
+  /**
+   * @return If this endpoint's ip is 0.0.0.0 we get the local host and return that.
+   */
+  def boundEndpoint: Endpoint = if (ipv4 == 0)  Endpoint(Host(), port) else this
+}
 object Endpoint {
   val Unknown = Endpoint(0, 0)
 

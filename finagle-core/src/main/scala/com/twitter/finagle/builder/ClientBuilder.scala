@@ -474,8 +474,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * (e.g., those that support transactions or authentication).
    */
   def buildFactory()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig => FullySpecifiedConfig
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: 
+      ThisConfig =:= FullySpecifiedConfig
   ): ServiceFactory[Req, Rep] = {
     Timer.default.acquire()
 
@@ -545,8 +545,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Construct a Service.
    */
   def build()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig => FullySpecifiedConfig
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: 
+      ThisConfig =:= FullySpecifiedConfig
   ): Service[Req, Rep] = {
     var service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
 
