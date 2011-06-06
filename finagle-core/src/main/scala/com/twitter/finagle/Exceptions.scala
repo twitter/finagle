@@ -9,6 +9,7 @@ class TooManyWaitersException      extends RequestException
 class CancelledConnectionException extends RequestException
 class NoBrokersAvailableException  extends RequestException
 class ReplyCastException           extends RequestException
+class NotServableException extends RequestException
 
 // Channel exceptions are failures on the channels themselves.
 class ChannelException                      extends Exception
@@ -18,7 +19,7 @@ class SpuriousMessageException              extends ChannelException
 class IllegalMessageException               extends ChannelException
 class WriteTimedOutException                extends ChannelException
 class UnknownChannelException(e: Throwable) extends ChannelException {
-  override def toString = "%s: %s".format(super.toString, e.toString)  
+  override def toString = "%s: %s".format(super.toString, e.toString)
 }
 class WriteException(e: Throwable)          extends ChannelException {
   override def toString = "%s: %s".format(super.toString, e.toString)
