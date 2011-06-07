@@ -2,10 +2,10 @@ package com.twitter.finagle.util
 
 import collection.mutable.HashSet
 
-import org.jboss.netty.util.{HashedWheelTimer, Timeout}
-
 import java.util.concurrent.{TimeUnit, Executors}
 import java.util.concurrent.atomic.AtomicReference
+import org.jboss.netty.util.{HashedWheelTimer, Timeout}
+
 import com.twitter.util.{
   Time, Duration, TimerTask,
   ReferenceCountedTimer, ThreadStoppingTimer}
