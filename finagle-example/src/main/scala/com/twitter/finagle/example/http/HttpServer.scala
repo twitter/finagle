@@ -77,6 +77,7 @@ object HttpServer {
     val server: Server = ServerBuilder()
       .codec(Http())
       .bindTo(new InetSocketAddress(8080))
+      .name("httpserver")
       .build(myService)
   }
 }

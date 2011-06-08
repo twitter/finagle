@@ -32,6 +32,7 @@ object EndToEndSpec extends Specification {
       val server = ServerBuilder()
         .codec(new Stream)
         .bindTo(address)
+        .name("Streams")
         .build(new MyService(MyStreamResponse(httpResponse, channelSource)))
       val clientFactory = ClientBuilder()
         .codec(new Stream)

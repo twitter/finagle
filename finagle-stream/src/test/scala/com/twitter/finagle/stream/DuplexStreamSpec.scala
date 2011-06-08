@@ -40,6 +40,7 @@ object DuplexStreamSpec extends Specification {
       val server = ServerBuilder()
         .codec(new DuplexStreamCodec(true))
         .bindTo(address)
+        .name("SimpleService")
         .build(service)
 
       val factory = ClientBuilder()

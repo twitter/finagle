@@ -20,6 +20,7 @@ object EchoServer {
     val server: Server = ServerBuilder()
       .codec(StringCodec)
       .bindTo(new InetSocketAddress(8080))
+      .name("echoserver")
       .build(service)
   }
 }

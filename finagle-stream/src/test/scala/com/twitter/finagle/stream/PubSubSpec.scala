@@ -31,6 +31,7 @@ object PubSubSpec extends Specification {
       val server = ServerBuilder()
         .codec(new Stream)
         .bindTo(address)
+        .name("PubSub")
         .build(new MyService(MyStreamResponse(httpResponse, channelSource)))
       val client = ClientBuilder()
         .codec(new Stream)

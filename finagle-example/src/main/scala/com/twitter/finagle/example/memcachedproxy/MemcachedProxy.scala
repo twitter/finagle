@@ -30,6 +30,7 @@ object MemcachedProxy {
     val server: Server = ServerBuilder()
       .codec(Memcached)
       .bindTo(new InetSocketAddress(8080))
+      .name("memcachedproxy")
       .build(proxyService)
   }
 

@@ -19,6 +19,7 @@ object ThriftServer {
     val server: Server = ServerBuilder()
       .bindTo(new InetSocketAddress(8080))
       .codec(ThriftServerFramedCodec())
+      .name("thriftserver")
       .build(service)
   }
 }

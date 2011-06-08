@@ -25,8 +25,9 @@ object Tracing1Service extends Tracing1.ServiceIface {
     ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(new InetSocketAddress(6001))
-      .build(new Tracing1.Service(this, new TBinaryProtocol.Factory()))    
-  } 
+      .name("tracing1")
+      .build(new Tracing1.Service(this, new TBinaryProtocol.Factory()))
+  }
 
   def computeSomething(): Future[String] = {
     println("T1 with trace ID", Trace.id)
@@ -52,6 +53,7 @@ object Tracing2Service extends Tracing2.ServiceIface {
     ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(new InetSocketAddress(6002))
+      .name("tracing2")
       .build(new Tracing2.Service(this, new TBinaryProtocol.Factory()))
   }
 
@@ -76,6 +78,7 @@ object Tracing3Service extends Tracing3.ServiceIface {
     ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(new InetSocketAddress(6003))
+      .name("tracing3")
       .build(new Tracing3.Service(this, new TBinaryProtocol.Factory()))
   }
 

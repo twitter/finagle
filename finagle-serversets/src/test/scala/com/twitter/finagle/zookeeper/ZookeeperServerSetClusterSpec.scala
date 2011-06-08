@@ -68,6 +68,7 @@ object ZookeeperServerSetClusterSpec extends Specification {
       val server = ServerBuilder()
         .codec(StringCodec)
         .bindTo(serviceAddress)
+        .name("ZKTestServer")
         .build(sillyService)
 
       cluster.join(serviceAddress)

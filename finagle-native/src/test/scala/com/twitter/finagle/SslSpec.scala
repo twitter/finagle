@@ -98,6 +98,7 @@ object SslSpec extends Specification {
           .codec(codec)
           .bindTo(address)
           .tls(SslConfig.certificatePath, SslConfig.keyPath)
+          .name("SSLServer")
           .build(service)
 
       val client =

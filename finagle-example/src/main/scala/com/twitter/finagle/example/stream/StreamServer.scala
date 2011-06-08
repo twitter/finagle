@@ -55,6 +55,7 @@ object StreamServer {
     val server: Server = ServerBuilder()
       .codec(Stream)
       .bindTo(new InetSocketAddress(8080))
+      .name("streamserver")
       .build(myService)
 
     // Start sending when there is at least one observer.

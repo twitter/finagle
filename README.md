@@ -116,6 +116,7 @@ Once you have defined your `Service`, it can be bound to a SocketAddress, thus b
     ServerBuilder()
       .bindTo(address)
       .codec(...)
+      .name("servicename")
       .build(plusOneService)
 
 ### Filters

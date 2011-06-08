@@ -30,10 +30,12 @@ public class HttpServerTest {
         }
       };
 
-    ServerBuilder.get()
+    ServerBuilder.safeBuild(
+      service,
+      ServerBuilder.get()
       .codec(Http.get())
       .bindTo(new InetSocketAddress("localhost", 10000))
-      .build(service);
+      .name("HttpServer"));
   }
 
   public static void main(String args[]) {

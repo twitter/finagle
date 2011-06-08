@@ -7,8 +7,36 @@ package com.twitter.finagle.builder
  *   .codec(Http)
  *   .hostConnectionMaxLifeTime(5.minutes)
  *   .readTimeout(2.minutes)
+ *   .name("servicename")
+ *   .bindTo(new InetSocketAddress(serverPort))
  *   .build(plusOneService)
  * }}}
+ *
+ * The `ServerBuilder` requires the definition of `codec`, `bindTo`
+ * and `name`. In Scala, these are statically type
+ * checked, and in Java the lack of any of the above causes a runtime
+ * error.
+ *
+ * The `build` method uses an implicit argument to statically
+ * typecheck the builder (to ensure completeness, see above). The Java
+ * compiler cannot provide such implicit, so we provide a separate
+ * function in Java to accomplish this. Thus, the Java code for the
+ * above is
+ *
+ * {{{
+ * ServerBuilder.safeBuild(
+ *  plusOneService,
+ *  ServerBuilder.get()
+ *   .codec(Http)
+ *   .hostConnectionMaxLifeTime(5.minutes)
+ *   .readTimeout(2.minutes)
+ *   .name("servicename")
+ *   .bindTo(new InetSocketAddress(serverPort)));
+ * }}}
+ *
+ * Alternatively, using the `unsafeBuild` method on `ServerBuilder`
+ * verifies the builder dynamically, resulting in a runtime error
+ * instead of a compiler error.
  */
 
 import scala.collection.mutable.HashSet
@@ -58,8 +86,17 @@ trait Server {
  * Factory for [[com.twitter.finagle.builder.ServerBuilder]] instances
  */
 object ServerBuilder {
-  def apply() = new ServerBuilder[Any, Any]
+
+  type Complete[Req, Rep] = ServerBuilder[Req, Rep, ServerConfig.Yes, ServerConfig.Yes, ServerConfig.Yes]
+
+  def apply() = new ServerBuilder()
   def get() = apply()
+
+  /**
+   * Provides a typesafe `build` for Java.
+   */
+  def safeBuild[Req, Rep](service: Service[Req, Rep], builder: Complete[Req, Rep]): Server =
+    builder.build(service)
 
   val defaultChannelFactory =
     new ReferenceCountedChannelFactory(
@@ -70,13 +107,14 @@ object ServerBuilder {
 }
 
 object ServerConfig {
-  type FullySpecified[Req, Rep] = ServerConfig[Req, Rep]
+  sealed abstract trait Yes
+  type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 }
 
 /**
  * A configuration object that represents what shall be built.
  */
-final case class ServerConfig[Req, Rep](
+final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]   = None,
   private val _statsReceiver:                   Option[StatsReceiver]                   = None,
   private val _name:                            Option[String]                          = None,
@@ -99,6 +137,8 @@ final case class ServerConfig[Req, Rep](
   private val _writeCompletionTimeout:          Option[Duration]                        = None,
   private val _traceReceiver:                   TraceReceiver                           = new NullTraceReceiver)
 {
+  import ServerConfig._
+
   /**
    * The Scala compiler errors if the case class members don't have underscores.
    * Nevertheless, we want a friendly public API so we create delegators without
@@ -160,13 +200,11 @@ final case class ServerConfig[Req, Rep](
       } mkString(", "))
   }
 
-  def assertValid() {
-    _codecFactory.getOrElse {
-      throw new IncompleteSpecification("No codec was specified")
-    }
-    _bindTo.getOrElse {
-      throw new IncompleteSpecification("No port was specified")
-    }
+  def validated: ServerConfig[Req, Rep, Yes, Yes, Yes] = {
+    _codecFactory getOrElse { throw new IncompleteSpecification("No codec was specified") }
+    _bindTo       getOrElse { throw new IncompleteSpecification("No bindTo was specified") }
+    _name         getOrElse { throw new IncompleteSpecification("No name were specified") }
+    copy()
   }
 }
 
@@ -175,105 +213,130 @@ final case class ServerConfig[Req, Rep](
  * a port).  This class is subclassable. Override copy() and build()
  * to do your own dirty work.
  */
-class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
-  import ServerBuilder._
+class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
+  val config: ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
+) {
+  import ServerConfig._
 
-  def this() = this(new ServerConfig)
+  // Convenient aliases.
+  type FullySpecifiedConfig = FullySpecified[Req, Rep]
+  type ThisConfig           = ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
+  type This                 = ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName]
+
+  private[builder] def this() = this(new ServerConfig)
 
   override def toString() = "ServerBuilder(%s)".format(config.toString)
 
-  protected def copy[Req1, Rep1](config: ServerConfig[Req1, Rep1]) =
+  protected def copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
+    config: ServerConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]
+  ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] =
     new ServerBuilder(config)
 
-  protected def withConfig[Req1, Rep1](f: ServerConfig[Req, Rep] => ServerConfig[Req1, Rep1]) =
-    copy(f(config))
+  protected def withConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
+    f: ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName] =>
+       ServerConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]
+    ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] = copy(f(config))
 
-  def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
+  def codec[Req1, Rep1](
+    codec: Codec[Req1, Rep1]
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     withConfig(_.copy(_codecFactory = Some(Function.const(codec) _)))
 
-  def codec[Req1, Rep1](codecFactory: CodecFactory[Req1, Rep1]#Server) =
+  def codec[Req1, Rep1](
+    codecFactory: CodecFactory[Req1, Rep1]#Server
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     withConfig(_.copy(_codecFactory = Some(codecFactory)))
 
-  def codec[Req1, Rep1](codecFactory: CodecFactory[Req1, Rep1]) =
+  def codec[Req1, Rep1](
+    codecFactory: CodecFactory[Req1, Rep1]
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     withConfig(_.copy(_codecFactory = Some(codecFactory.server)))
 
-  def reportTo(receiver: StatsReceiver) =
+  def reportTo(receiver: StatsReceiver): This =
     withConfig(_.copy(_statsReceiver = Some(receiver)))
 
-  def name(value: String) =
+  def name(value: String): ServerBuilder[Req, Rep, HasCodec, HasBindTo, Yes] =
     withConfig(_.copy(_name = Some(value)))
 
-  def sendBufferSize(value: Int) =
+  def sendBufferSize(value: Int): This =
     withConfig(_.copy(_sendBufferSize = Some(value)))
 
-  def recvBufferSize(value: Int) =
+  def recvBufferSize(value: Int): This =
     withConfig(_.copy(_recvBufferSize = Some(value)))
 
-  def keepAlive(value: Boolean) =
+  def keepAlive(value: Boolean): This =
     withConfig(_.copy(_keepAlive = Some(value)))
 
-  def backlog(value: Int) =
+  def backlog(value: Int): This =
     withConfig(_.copy(_backlog = Some(value)))
 
-  def bindTo(address: SocketAddress) =
+  def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
     withConfig(_.copy(_bindTo = Some(address)))
 
-  def channelFactory(cf: ReferenceCountedChannelFactory) =
+  def channelFactory(cf: ReferenceCountedChannelFactory): This =
     withConfig(_.copy(_channelFactory = cf))
 
-  def logger(logger: Logger) =
+  def logger(logger: Logger): This =
     withConfig(_.copy(_logger = Some(logger)))
 
-  def tls(certificatePath: String, keyPath: String) =
+  def tls(certificatePath: String, keyPath: String): This =
     withConfig(_.copy(_tls = Some(certificatePath, keyPath)))
 
-  def startTls(value: Boolean) =
+  def startTls(value: Boolean): This =
     withConfig(_.copy(_startTls = true))
 
-  def maxConcurrentRequests(max: Int) =
+  def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
 
-  def healthEventCallback(callback: HealthEvent => Unit) =
+  def healthEventCallback(callback: HealthEvent => Unit): This =
     withConfig(_.copy(_healthEventCallback = callback))
 
-  def hostConnectionMaxIdleTime(howlong: Duration) =
+  def hostConnectionMaxIdleTime(howlong: Duration): This =
     withConfig(_.copy(_hostConnectionMaxIdleTime = Some(howlong)))
 
-  def hostConnectionMaxLifeTime(howlong: Duration) =
+  def hostConnectionMaxLifeTime(howlong: Duration): This =
     withConfig(_.copy(_hostConnectionMaxLifeTime = Some(howlong)))
 
-  def openConnectionsHealthThresholds(thresholds: OpenConnectionsHealthThresholds) =
+  def openConnectionsHealthThresholds(thresholds: OpenConnectionsHealthThresholds): This =
     withConfig(_.copy(_openConnectionsHealthThresholds = Some(thresholds)))
 
-  def requestTimeout(howlong: Duration) =
+  def requestTimeout(howlong: Duration): This =
     withConfig(_.copy(_requestTimeout = Some(howlong)))
 
-  def readTimeout(howlong: Duration) =
+  def readTimeout(howlong: Duration): This =
     withConfig(_.copy(_readTimeout = Some(howlong)))
 
-  def writeCompletionTimeout(howlong: Duration) =
+  def writeCompletionTimeout(howlong: Duration): This =
     withConfig(_.copy(_writeCompletionTimeout = Some(howlong)))
 
-  def traceReceiver(receiver: TraceReceiver) =
+  def traceReceiver(receiver: TraceReceiver): This =
     withConfig(_.copy(_traceReceiver = receiver))
 
   /**
    * Construct the Server, given the provided Service.
    */
-  def build(service: Service[Req, Rep]): Server = build(() => service)
+  def build(service: Service[Req, Rep]) (
+     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+       ThisConfig =:= FullySpecifiedConfig
+   ): Server = build(() => service)
 
   /**
    * Construct the Server, given the provided Service factory.
    */
-  def build(serviceFactory: () => Service[Req, Rep]): Server = build(_ => serviceFactory())
+  def build(serviceFactory: () => Service[Req, Rep])(
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Server = build(_ => serviceFactory())
 
   /**
    * Construct the Server, given the provided ServiceFactory. This
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
    */
-  def build(serviceFactory: (ClientConnection) => Service[Req, Rep]): Server = {
-    config.assertValid()
+  def build(serviceFactory: (ClientConnection) => Service[Req, Rep])(
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Server = {
 
     val scopedStatsReceiver =
       config.statsReceiver map { sr => config.name map (sr.scope(_)) getOrElse sr }
@@ -515,4 +578,11 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
       override def toString = "Server(%s)".format(config.toString)
     }
   }
+
+  /**
+   * Construct a Service, with runtime checks for builder
+   * completeness.
+   */
+  def unsafeBuild(service: Service[Req, Rep]): Server =
+    withConfig(_.validated).build(service)
 }

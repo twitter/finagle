@@ -39,6 +39,7 @@ object EndToEndSpec extends Specification {
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(serverAddr)
+      .name("ThriftServer")
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     doAfter { server.close(20.milliseconds) }
