@@ -135,7 +135,7 @@ final case class ClientHostConfig(
  */
 final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
   private val _cluster                   : Option[Cluster]               = None,
-  private val _codecFactory              : Option[ClientCodecFactory[Req, Rep]] = None,
+  private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _connectionTimeout         : Duration                      = 10.milliseconds,
   private val _requestTimeout            : Duration                      = Duration.MaxValue,
   private val _keepAlive                 : Option[Boolean]               = None,
@@ -200,7 +200,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
     "hostConnectionLimit"       -> _hostConfig.hostConnectionLimit,
     "hostConnectionIdleTime"    -> _hostConfig.hostConnectionIdleTime,
-    "hostConnectionMaxWaiters"  -> _hostConfig.hostConnectionMaxWaiters,    
+    "hostConnectionMaxWaiters"  -> _hostConfig.hostConnectionMaxWaiters,
     "hostConnectionMaxIdleTime" -> _hostConfig.hostConnectionMaxIdleTime,
     "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
     "sendBufferSize"            -> _sendBufferSize,
@@ -283,32 +283,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_cluster = Some(cluster)))
 
   def codec[Req1, Rep1](
-    codec: ClientCodec[Req1, Rep1]
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    withConfig(_.copy(_codecFactory = Some(ClientCodecFactory.singleton(codec))))
-
-  def protocol[Req1, Rep1](
-    protocol: Protocol[Req1, Rep1]
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] = {
-    val codec = new ClientCodec[Req1, Rep1] {
-      def pipelineFactory = protocol.codec.clientCodec.pipelineFactory
-
-      override def prepareService(underlying: Service[Req1, Rep1]) = {
-        val future = protocol.codec.clientCodec.prepareService(underlying)
-        future flatMap { protocol.prepareChannel(_) }
-      }
-    }
-
-    withConfig(_.copy(_codecFactory = Some(ClientCodecFactory.singleton(codec))))
-  }
-
-  def codec[Req1, Rep1](
     codec: Codec[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    withConfig(_.copy(_codecFactory = Some(ClientCodecFactory.singleton(codec.clientCodec))))
+    withConfig(_.copy(_codecFactory = Some(Function.const(codec) _)))
 
   def codec[Req1, Rep1](
-    codecFactory: ClientCodecFactory[Req1, Rep1]
+    codecFactory: CodecFactory[Req1, Rep1]
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+    withConfig(_.copy(_codecFactory = Some(codecFactory.client)))
+
+  def codec[Req1, Rep1](
+    codecFactory: CodecFactory[Req1, Rep1]#Client
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     withConfig(_.copy(_codecFactory = Some(codecFactory)))
 
@@ -340,9 +325,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   def hostConnectionIdleTime(timeout: Duration): This =
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionIdleTime = Some(timeout))))
-    
+
   def hostConnectionMaxWaiters(nWaiters: Int): This =
-    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxWaiters = Some(nWaiters))))    
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxWaiters = Some(nWaiters))))
 
   def hostConnectionMaxIdleTime(timeout: Duration): This =
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxIdleTime = Some(timeout))))
@@ -385,7 +370,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /* BUILDING */
   /* ======== */
 
-  private[this] def buildBootstrap(codec: ClientCodec[Req, Rep], host: SocketAddress) = {
+  private[this] def buildBootstrap(codec: Codec[Req, Rep], host: SocketAddress) = {
     val cf = config.channelFactory getOrElse ClientBuilder.defaultChannelFactory
     cf.acquire()
     val bs = new ClientBootstrap(cf)
@@ -441,11 +426,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     val cachingPool = new CachingPool(factory, idleTime)
     new WatermarkPool[Req, Rep](
-      cachingPool, lowWatermark, highWatermark, 
+      cachingPool, lowWatermark, highWatermark,
       statsReceiver, maxWaiters)
   }
 
-  private[this] def prepareService(codec: ClientCodec[Req, Rep])(service: Service[Req, Rep]) = {
+  private[this] def prepareService(codec: Codec[Req, Rep])(service: Service[Req, Rep]) = {
     var future: Future[Service[Req, Rep]] = codec.prepareService(service)
 
     if (config.hostConnectionMaxIdleTime.isDefined ||
@@ -474,7 +459,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * (e.g., those that support transactions or authentication).
    */
   def buildFactory()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: 
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): ServiceFactory[Req, Rep] = {
     Timer.default.acquire()
@@ -545,7 +530,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Construct a Service.
    */
   def build()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: 
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Service[Req, Rep] = {
     var service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())

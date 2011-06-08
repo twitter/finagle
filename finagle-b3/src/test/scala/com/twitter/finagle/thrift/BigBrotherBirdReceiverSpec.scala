@@ -16,7 +16,6 @@ import org.apache.thrift.async.AsyncMethodCallback
 import com.twitter.test.{B, AnException, SomeStruct}
 import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
-import com.twitter.finagle.{Codec, ClientCodec}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.tracing.{Span, SpanId, Endpoint}
 

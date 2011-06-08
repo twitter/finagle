@@ -95,7 +95,7 @@ object SslSpec extends Specification {
 
       val server =
         ServerBuilder()
-          .codec(codec.serverCodec)
+          .codec(codec)
           .bindTo(address)
           .tls(SslConfig.certificatePath, SslConfig.keyPath)
           .build(service)
@@ -104,7 +104,7 @@ object SslSpec extends Specification {
         ClientBuilder()
           .name("http-client")
           .hosts(Seq(address))
-          .codec(codec.clientCodec)
+          .codec(codec)
           .hostConnectionLimit(1)
           .tlsWithoutValidation()
           .build()

@@ -33,7 +33,9 @@ object ThriftClientFramedCodec {
   def apply() = ThriftClientFramedCodecFactory
 }
 
-object ThriftClientFramedCodecFactory extends ClientCodecFactory[ThriftClientRequest, Array[Byte]] {
+object ThriftClientFramedCodecFactory
+  extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
+{
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
@@ -44,7 +46,7 @@ object ThriftClientFramedCodecFactory extends ClientCodecFactory[ThriftClientReq
 }
 
 class ThriftClientFramedCodec(protocolFactory: TProtocolFactory, config: ClientCodecConfig)
-  extends ClientCodec[ThriftClientRequest, Array[Byte]]
+  extends Codec[ThriftClientRequest, Array[Byte]]
 {
   def pipelineFactory =
     new ChannelPipelineFactory {

@@ -77,7 +77,7 @@ object ServerConfig {
  * A configuration object that represents what shall be built.
  */
 final case class ServerConfig[Req, Rep](
-  private val _codecFactory:                    Option[ServerCodecFactory[Req, Rep]]    = None,
+  private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]   = None,
   private val _statsReceiver:                   Option[StatsReceiver]                   = None,
   private val _name:                            Option[String]                          = None,
   private val _sendBufferSize:                  Option[Int]                             = None,
@@ -189,13 +189,13 @@ class ServerBuilder[Req, Rep](val config: ServerConfig[Req, Rep]) {
     copy(f(config))
 
   def codec[Req1, Rep1](codec: Codec[Req1, Rep1]) =
-    withConfig(_.copy(_codecFactory = Some(ServerCodecFactory.singleton(codec.serverCodec))))
+    withConfig(_.copy(_codecFactory = Some(Function.const(codec) _)))
 
-  def codec[Req1, Rep1](codec: ServerCodec[Req1, Rep1]) =
-    withConfig(_.copy(_codecFactory = Some(ServerCodecFactory.singleton(codec))))
-
-  def codec[Req1, Rep1](codecFactory: ServerCodecFactory[Req1, Rep1]) =
+  def codec[Req1, Rep1](codecFactory: CodecFactory[Req1, Rep1]#Server) =
     withConfig(_.copy(_codecFactory = Some(codecFactory)))
+
+  def codec[Req1, Rep1](codecFactory: CodecFactory[Req1, Rep1]) =
+    withConfig(_.copy(_codecFactory = Some(codecFactory.server)))
 
   def reportTo(receiver: StatsReceiver) =
     withConfig(_.copy(_statsReceiver = Some(receiver)))

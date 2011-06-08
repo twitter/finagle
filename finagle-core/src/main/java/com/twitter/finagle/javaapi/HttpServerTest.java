@@ -11,6 +11,7 @@ import org.jboss.netty.handler.codec.http.*;
 
 import com.twitter.finagle.*;
 import com.twitter.finagle.builder.*;
+import com.twitter.finagle.http.Http;
 import com.twitter.util.Future;
 import com.twitter.util.*;
 
@@ -30,7 +31,7 @@ public class HttpServerTest {
       };
 
     ServerBuilder.get()
-      .codec(Codec4J.Http)
+      .codec(Http.get())
       .bindTo(new InetSocketAddress("localhost", 10000))
       .build(service);
   }

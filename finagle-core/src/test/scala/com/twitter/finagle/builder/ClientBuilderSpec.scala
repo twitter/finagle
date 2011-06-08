@@ -19,7 +19,7 @@ import com.twitter.finagle.channel.ChannelService
 object ClientBuilderSpec extends Specification with Mockito {
   "ClientBuilder" should {
     val _codec = mock[Codec[Int, Float]]
-    (_codec.prepareClientChannel(Matchers.any[Service[Int, Float]])
+    (_codec.prepareService(Matchers.any[Service[Int, Float]])
      answers { s => Future.value(s.asInstanceOf[Service[Int, Float]]) })
 
     val clientAddress = new SocketAddress {}
@@ -28,12 +28,7 @@ object ClientBuilderSpec extends Specification with Mockito {
     val clientPipelineFactory = mock[ChannelPipelineFactory]
     val channelPipeline = mock[ChannelPipeline]
     clientPipelineFactory.getPipeline returns channelPipeline
-    _codec.clientPipelineFactory returns clientPipelineFactory
-    val clientCodec = mock[ClientCodec[Int, Float]]
-    _codec.clientCodec returns clientCodec
-    clientCodec.pipelineFactory returns clientPipelineFactory
-    (clientCodec.prepareService(Matchers.any[Service[Int, Float]])
-     answers { s => Future.value(s.asInstanceOf[Service[Int, Float]]) })
+    _codec.pipelineFactory returns clientPipelineFactory
 
     // Channel
     val channelFactory = mock[ChannelFactory]
@@ -46,33 +41,28 @@ object ClientBuilderSpec extends Specification with Mockito {
     channel.getPipeline returns channelPipeline
     channelFactory.newChannel(channelPipeline) returns channel
 
+    val codecFactory = Function.const(_codec) _
+
     "invoke prepareChannel on connection establishment" in {
       val prepareChannelPromise = new Promise[Service[Int, Float]]
-      var theUnderlyingService: Service[Int, Float] = null
 
-      val protocol = new Protocol[Int, Float] {
-        def codec = _codec
-        override def prepareChannel(underlying: Service[Int, Float]) = {
-          theUnderlyingService = underlying
-          prepareChannelPromise
-        }
-      }
+      (_codec.prepareService(Matchers.any[Service[Int, Float]])
+       returns prepareChannelPromise)
 
       // Client
       val client = ClientBuilder()
-        .codec(_codec)
+        .codec(codecFactory)
         .channelFactory(refcountedChannelFactory)
-        .protocol(protocol)
         .hosts(Seq(clientAddress))
         .hostConnectionLimit(1)
         .build()
 
       val requestFuture = client(123)
 
+      there was no(_codec).prepareService(any)
       there was one(channelFactory).newChannel(channelPipeline)
-      theUnderlyingService must beNull
       connectFuture.setSuccess()
-      theUnderlyingService must notBeNull
+      there was one(_codec).prepareService(any)
 
       requestFuture.isDefined must beFalse
       val wrappedChannelService = mock[ChannelService[Int, Float]]
@@ -86,14 +76,14 @@ object ClientBuilderSpec extends Specification with Mockito {
     "releaseExternalResources once all clients are released" in {
       val client1 = ClientBuilder()
         .channelFactory(refcountedChannelFactory)
-        .codec(_codec)
+        .codec(codecFactory)
         .hosts(Seq(clientAddress))
         .hostConnectionLimit(1)
         .build()
 
       val client2 = ClientBuilder()
         .channelFactory(refcountedChannelFactory)
-        .codec(_codec)
+        .codec(codecFactory)
         .hosts(Seq(clientAddress))
         .hostConnectionLimit(1)
         .build()

@@ -11,7 +11,8 @@ import com.twitter.ostrich.stats.{StatsCollection, StatsProvider}
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.builder.{ClientBuilder, Http}
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.http.Http
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.{NullStatsReceiver, OstrichStatsReceiver}
 import com.twitter.finagle.util.Timer
@@ -112,7 +113,7 @@ class LoadBalancerTest(
     }
 
     // TODO: Revive this at some point
-    
+
     // Capture gauges to report them at the end.
     // val gauges = new HashMap[Seq[String], Function0[Float]]
     // val localStatsReceiver = new NullStatsReceiver {
@@ -137,9 +138,9 @@ class LoadBalancerTest(
     //         case "available" => "a"
     //         case _ => "u"
     //       }
-    //  
+    //
     //       val name = "%d/%s".format(serverIndex, shortName)
-    //  
+    //
     //       (name, v())
     //     }
     //     gaugeValues += ((now, Map() ++ values))
@@ -147,7 +148,7 @@ class LoadBalancerTest(
     // }
 
     val client = clientBuilder
-      .codec(Http)
+      .codec(Http())
       .hosts(servers map(_.addr))
       .hostConnectionLimit(Int.MaxValue)
       .reportTo(new OstrichStatsReceiver)

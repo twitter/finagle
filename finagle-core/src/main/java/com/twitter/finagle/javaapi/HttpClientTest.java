@@ -6,6 +6,7 @@ import java.util.List;
 import org.jboss.netty.handler.codec.http.*;
 
 import com.twitter.finagle.*;
+import com.twitter.finagle.http.Http;
 import com.twitter.finagle.builder.*;
 import com.twitter.util.Promise;
 import com.twitter.util.Future;
@@ -16,7 +17,7 @@ public class HttpClientTest {
   public static void main(String args[]) {
     Service<HttpRequest, HttpResponse> client =
       ClientBuilder.safeBuild(ClientBuilder.get()
-        .codec(Codec4J.Http)
+        .codec(Http.get())
         .hosts("localhost:10000")
         .hostConnectionLimit(1));
 

@@ -14,7 +14,7 @@ import org.apache.thrift.async.AsyncMethodCallback
 import com.twitter.test.{B, AnException, SomeStruct}
 import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 
-import com.twitter.finagle.{Codec, ClientCodec, ClientCodecConfig}
+import com.twitter.finagle.{Codec, ClientCodecConfig, CodecFactory}
 import com.twitter.finagle.builder.ClientBuilder
 
 object FinagleClientThriftServerSpec extends Specification {
@@ -64,92 +64,92 @@ object FinagleClientThriftServerSpec extends Specification {
 
     def doit(
       transportFactory: TTransportFactory,
-      codec: ClientCodec[ThriftClientRequest, Array[Byte]]
+      codec: CodecFactory[ThriftClientRequest, Array[Byte]]#Client
     ) {
       "talk to each other" in {
         // TODO: interleave requests (to test seqids, etc.)
-       
+
         val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
-       
+
         // ** Set up the client & query the server.
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
           .hostConnectionLimit(1)
           .build()
-       
+
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-       
+
         val future = client.multiply(1, 2)
         future() must be_==(3)
       }
-       
+
       "handle exceptions" in {
         val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
-        
+
         // ** Set up the client & query the server.
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
           .hostConnectionLimit(1)
           .build()
-       
+
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-       
+
         client.add(1, 2)() must throwA[AnException]
       }
-       
+
       "handle void returns" in {
         val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
-        
+
         // ** Set up the client & query the server.
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
           .hostConnectionLimit(1)
           .build()
-       
+
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-       
+
         client.add_one(1, 2)()
         true must beTrue
       }
-       
+
       // race condition..
       "handle one-way calls" in {
         val thriftServerAddr = makeServer(transportFactory) { (a, b) => a + b }
-       
+
         // ** Set up the client & query the server.
         val service = ClientBuilder()
           .hosts(Seq(thriftServerAddr))
           .codec(codec)
           .hostConnectionLimit(1)
           .build()
-       
+
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-       
+
         somewayPromise.isDefined must beFalse
         client.someway()() must beNull  // returns
         somewayPromise() must be_==(())
       }
-       
+
       "talk to multiple servers" in {
         val NumParties = 10
         val barrier = new CyclicBarrier(NumParties)
-       
+
         val addrs = 0 until NumParties map { _ =>
           makeServer(transportFactory) { (a, b) => barrier.await(); a + b }
         }
-       
+
         // ** Set up the client & query the server.
         val service = ClientBuilder()
           .hosts(addrs)
           .codec(codec)
           .hostConnectionLimit(1)
           .build()
-       
+
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-       
+
         {
           val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
           val resolved = futures map(_())
@@ -159,11 +159,11 @@ object FinagleClientThriftServerSpec extends Specification {
     }
 
     "framed transport" in {
-      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec()(new ClientCodecConfig(Some("service"))))
+      doit(new TFramedTransport.Factory(), ThriftClientFramedCodecFactory)
     }
 
     "buffered transport" in {
-      doit(new TTransportFactory, new ThriftClientBufferedCodec(new TBinaryProtocol.Factory, new ClientCodecConfig(Some("service"))))
+      doit(new TTransportFactory, ThriftClientBufferedCodecFactory)
     }
   }
 }

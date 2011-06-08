@@ -5,7 +5,8 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
 import com.twitter.concurrent.{Channel, ChannelSource, Observer}
-import com.twitter.finagle.{Codec, ClientCodec, ServerCodec, Service, Filter}
+import com.twitter.finagle.{
+  Codec, CodecFactory, Service, Filter}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.util.{Future, Promise, Return}
 
@@ -117,9 +118,11 @@ class ClientBufferToChannelCodec extends BufferToChannelCodec {
   }
 }
 
-class DuplexStreamCodec(useReliable: Boolean) extends Codec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
-  override def serverCodec =
-    new ServerCodec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
+class DuplexStreamCodec(useReliable: Boolean)
+  extends CodecFactory[Channel[ChannelBuffer], Channel[ChannelBuffer]]
+{
+  def server = Function.const {
+    new Codec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
@@ -137,9 +140,10 @@ class DuplexStreamCodec(useReliable: Boolean) extends Codec[Channel[ChannelBuffe
         }
       }
     }
+  }
 
-  override def clientCodec =
-    new ClientCodec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
+  def client = Function.const {
+    new Codec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline = {
           val pipeline = Channels.pipeline()
@@ -157,4 +161,5 @@ class DuplexStreamCodec(useReliable: Boolean) extends Codec[Channel[ChannelBuffe
         }
       }
     }
+  }
 }

@@ -1,6 +1,7 @@
 package com.twitter.finagle.example.http
 
-import com.twitter.finagle.builder.{Http, ClientBuilder}
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.http.Http
 import java.net.InetSocketAddress
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http._
@@ -36,7 +37,7 @@ object HttpClient {
 
   def main(args: Array[String]) {
     val clientWithoutErrorHandling: Service[HttpRequest, HttpResponse] = ClientBuilder()
-      .codec(Http)
+      .codec(Http())
       .hosts(new InetSocketAddress(8080))
       .hostConnectionLimit(1)
       .build()

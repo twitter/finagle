@@ -20,12 +20,14 @@ object ThriftServerFramedCodec {
   def apply() = ThriftServerFramedCodecFactory
 }
 
-object ThriftServerFramedCodecFactory extends ServerCodecFactory[Array[Byte], Array[Byte]] {
+object ThriftServerFramedCodecFactory
+  extends CodecFactory[Array[Byte], Array[Byte]]#Server
+{
   def apply(config: ServerCodecConfig) = new ThriftServerFramedCodec(config)
 }
 
 class ThriftServerFramedCodec(config: ServerCodecConfig)
-  extends ServerCodec[Array[Byte], Array[Byte]]
+  extends Codec[Array[Byte], Array[Byte]]
 {
   def pipelineFactory =
     new ChannelPipelineFactory {

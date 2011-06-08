@@ -13,7 +13,7 @@ import com.twitter.util.{Future, RandomSocket, Return, Throw, Time}
 import com.twitter.ostrich.stats
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.builder.Http
+import com.twitter.finagle.http.Http
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.OstrichStatsReceiver
@@ -53,7 +53,7 @@ object EndToEndStress {
       .name("stressClient")
       .reportTo(new OstrichStatsReceiver)
       .hosts(Seq(addr))
-      .codec(Http)
+      .codec(Http())
       .hostConnectionLimit(10)
       .build()
 
@@ -65,7 +65,7 @@ object EndToEndStress {
     val server = ServerBuilder()
       .name("stressServer")
       .bindTo(serverAddr)
-      .codec(Http)
+      .codec(Http())
       .reportTo(new OstrichStatsReceiver)
       .maxConcurrentRequests(5)
       .build(HttpService)
