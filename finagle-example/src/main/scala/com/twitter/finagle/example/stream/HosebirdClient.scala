@@ -26,7 +26,7 @@ object HosebirdClient {
     // Construct a ServiceFactory rather than a Client since the TCP Connection
     // is stateful (i.e., messages on the stream even after the initial response).
     val clientFactory: ServiceFactory[HttpRequest, StreamResponse] = ClientBuilder()
-      .codec(Stream)
+      .codec(Stream())
       .hosts(hostAndPort)
       .connectionTimeout(1.microsecond)
       .hostConnectionLimit(1)

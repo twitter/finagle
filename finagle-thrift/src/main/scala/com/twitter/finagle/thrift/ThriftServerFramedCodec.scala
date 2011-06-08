@@ -18,6 +18,7 @@ import conversions._
 
 object ThriftServerFramedCodec {
   def apply() = ThriftServerFramedCodecFactory
+  def get() = apply()
 }
 
 object ThriftServerFramedCodecFactory

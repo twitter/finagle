@@ -53,7 +53,7 @@ object StreamServer {
     }
 
     val server: Server = ServerBuilder()
-      .codec(Stream)
+      .codec(Stream())
       .bindTo(new InetSocketAddress(8080))
       .name("streamserver")
       .build(myService)

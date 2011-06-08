@@ -19,7 +19,7 @@ object ClientSpec extends Specification {
     "simple client" in {
       val serviceFactory = ClientBuilder()
         .hosts("localhost:22133")
-        .codec(new Kestrel)
+        .codec(Kestrel())
         .hostConnectionLimit(1)
         .buildFactory()
       val client = Client(serviceFactory)

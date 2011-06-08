@@ -7,7 +7,10 @@ import com.twitter.util.Future
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
 
-object Stream extends Stream
+object Stream {
+  def apply(): Stream = new Stream()
+  def get() = apply()
+}
 
 class Stream extends CodecFactory[HttpRequest, StreamResponse] {
   def server = Function.const {

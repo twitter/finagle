@@ -23,7 +23,7 @@ class Server(address: SocketAddress) {
   private[this] val serverSpec =
     ServerBuilder()
       .name("schmestrel")
-      .codec(new Kestrel)
+      .codec(Kestrel())
       .bindTo(address)
 
   private[this] var server: Option[BuiltServer] = None

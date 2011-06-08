@@ -13,10 +13,10 @@ object ThriftClientBufferedCodec {
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientBufferedCodecFactory]]
    */
-  def apply() = ThriftClientBufferedCodecFactory
+  def apply() = new ThriftClientBufferedCodecFactory
 }
 
-object ThriftClientBufferedCodecFactory extends
+class ThriftClientBufferedCodecFactory extends
   CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
   /**

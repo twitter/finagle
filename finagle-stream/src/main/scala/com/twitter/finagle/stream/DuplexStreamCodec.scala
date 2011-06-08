@@ -118,9 +118,11 @@ class ClientBufferToChannelCodec extends BufferToChannelCodec {
   }
 }
 
-class DuplexStreamCodec(useReliable: Boolean)
+case class DuplexStreamCodec(_reliable: Boolean = false)
   extends CodecFactory[Channel[ChannelBuffer], Channel[ChannelBuffer]]
 {
+  def reliable(v: Boolean) = copy(_reliable = v)
+
   def server = Function.const {
     new Codec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
       def pipelineFactory = new ChannelPipelineFactory {
@@ -133,7 +135,7 @@ class DuplexStreamCodec(useReliable: Boolean)
       }
 
       override def prepareService(service: Service[Channel[ChannelBuffer], Channel[ChannelBuffer]]) = {
-        if (useReliable) {
+        if (_reliable) {
           Future.value(new ReliableDuplexServerFilter().andThen(service))
         } else {
           Future.value(service)
@@ -154,7 +156,7 @@ class DuplexStreamCodec(useReliable: Boolean)
       }
 
       override def prepareService(service: Service[Channel[ChannelBuffer], Channel[ChannelBuffer]]) = {
-        if (useReliable) {
+        if (_reliable) {
           Future.value(new ReliableDuplexClientFilter().andThen(service))
         } else {
           Future.value(service)
@@ -162,4 +164,8 @@ class DuplexStreamCodec(useReliable: Boolean)
       }
     }
   }
+}
+
+object DuplexStreamCodec {
+  def get() = DuplexStreamCodec()
 }

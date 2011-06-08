@@ -17,7 +17,7 @@ object Client {
 
   def apply(hosts: String): Client = {
     val service = ClientBuilder()
-      .codec(new Kestrel)
+      .codec(Kestrel())
       .hosts(hosts)
       .hostConnectionLimit(1)
       .buildFactory()

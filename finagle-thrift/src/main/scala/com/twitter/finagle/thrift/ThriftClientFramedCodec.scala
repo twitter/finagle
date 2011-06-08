@@ -30,10 +30,11 @@ object ThriftClientFramedCodec {
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodecFactory]]
    */
-  def apply() = ThriftClientFramedCodecFactory
+  def apply() = new ThriftClientFramedCodecFactory
+  def get() = apply()
 }
 
-object ThriftClientFramedCodecFactory
+class ThriftClientFramedCodecFactory
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
   /**

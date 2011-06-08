@@ -48,3 +48,8 @@ class Kestrel extends CodecFactory[Command, Response] {
     }
   }
 }
+
+object Kestrel {
+  def apply() = new Kestrel
+  def get() = apply()
+}

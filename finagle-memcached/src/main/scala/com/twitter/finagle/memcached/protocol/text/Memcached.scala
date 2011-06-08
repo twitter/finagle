@@ -10,7 +10,10 @@ import server.DecodingToCommand
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
 
-object Memcached extends Memcached
+object Memcached {
+  def apply() = new Memcached
+  def get() = apply()
+}
 
 class Memcached extends CodecFactory[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer](
@@ -52,3 +55,4 @@ class Memcached extends CodecFactory[Command, Response] {
     }
   }
 }
+

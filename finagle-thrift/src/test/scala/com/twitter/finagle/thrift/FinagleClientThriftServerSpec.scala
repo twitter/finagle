@@ -159,11 +159,11 @@ object FinagleClientThriftServerSpec extends Specification {
     }
 
     "framed transport" in {
-      doit(new TFramedTransport.Factory(), ThriftClientFramedCodecFactory)
+      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec())
     }
 
     "buffered transport" in {
-      doit(new TTransportFactory, ThriftClientBufferedCodecFactory)
+      doit(new TTransportFactory, ThriftClientBufferedCodec())
     }
   }
 }

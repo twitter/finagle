@@ -31,7 +31,7 @@ object Spritzer2Kestrel {
 
     // Connect to the Spritzer:
     val spritzerClient = ClientBuilder()
-      .codec(Stream)
+      .codec(Stream())
       .hosts("stream.twitter.com:80")
       .hostConnectionLimit(1)
       .build()

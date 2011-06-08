@@ -20,7 +20,7 @@ object InterpreterServiceSpec extends Specification {
       server.start()
       client = ClientBuilder()
         .hosts("localhost:" + address.getPort)
-        .codec(new Kestrel)
+        .codec(Kestrel())
         .hostConnectionLimit(1)
         .build()
     }

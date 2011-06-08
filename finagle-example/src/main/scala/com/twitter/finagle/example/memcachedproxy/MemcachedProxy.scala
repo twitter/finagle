@@ -18,7 +18,7 @@ object MemcachedProxy {
     assertMemcachedRunning()
 
     val client: Service[Command, Response] = ClientBuilder()
-      .codec(Memcached)
+      .codec(Memcached())
       .hosts(new InetSocketAddress(11211))
       .hostConnectionLimit(1)
       .build()
@@ -28,7 +28,7 @@ object MemcachedProxy {
     }
 
     val server: Server = ServerBuilder()
-      .codec(Memcached)
+      .codec(Memcached())
       .bindTo(new InetSocketAddress(8080))
       .name("memcachedproxy")
       .build(proxyService)
