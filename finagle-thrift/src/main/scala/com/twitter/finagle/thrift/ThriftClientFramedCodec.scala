@@ -152,7 +152,7 @@ private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isU
 
       new ThriftClientRequest(
         OutputBuffer.messageToArray(header) ++ request.message,
-        request.oneway)
+        request.oneway, request.tracer)
     } else {
       request
     }
