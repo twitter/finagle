@@ -129,7 +129,7 @@ private[thrift] class ThriftServerTracingFilter
           None,
           serviceName,
           Some(msg.name),
-          Some(Endpoint.fromSocketAddress(boundAddress)))
+          Some(Endpoint.fromSocketAddress(boundAddress).boundEndpoint))
         Trace.record(Event.ServerRecv())
 
         service(request) map { response =>
