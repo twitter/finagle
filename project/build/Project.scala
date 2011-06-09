@@ -142,7 +142,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     projectDependencies(
       "util" ~ "util-core",
-      "util" ~ "util-collection"
+      "util" ~ "util-collection",
+      "util" ~ "util-hashing"
     )
 
     // Testing:

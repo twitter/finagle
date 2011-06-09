@@ -319,11 +319,11 @@ class KetamaClient(clients: Map[(String, Int, Int), Client], keyHasher: KeyHashe
       val identifier = if (port == 11211) ip else ip + ":" + port
       KetamaNode(identifier, weight, client)
     }.toList
-    new KetamaDistributor(nodes, NUM_REPS, keyHasher)
+    new KetamaDistributor(nodes, NUM_REPS)
   }
 
   protected[memcached] def clientOf(key: String) = {
-    distributor.nodeForKey(key)
+    distributor.nodeForHash(keyHasher.hashKey(key))
   }
 
   def release() {
