@@ -6,25 +6,43 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{SimpleFilter, Service}
 
 object RetryingService {
-  def tries[Req, Rep](numTries: Int) =
-    new RetryingFilter[Req, Rep](new NumTriesRetryStrategy(numTries))
-}
-
-trait RetryStrategy {
-  def nextStrategy: Future[RetryStrategy]
+  /**
+   * Returns a filter that will retry numTries times, but only if encountering a 
+   * WriteException.
+   */
+  def tries[Req, Rep](numTries: Int, stats: StatsReceiver): SimpleFilter[Req, Rep] =
+    RetryingFilter[Req, Rep](new NumTriesRetryStrategy[Rep](numTries), stats) {
+      case Throw(ex: WriteException) => true
+    }
 }
 
 /**
- * The RetryingFilter attempts to replay a request in certain failure
- * conditions.  Currently we define *any* WriteError as a retriable
- * error, but nothing else. We cannot make broader assumptions without
- * application knowledge (eg. the request may be side effecting),
- * except to say that the message itself was not delivered. Any other
- * types of retries must be done in the service stack.
+  * RetryStrategies implement the "how" of retrying (immediate, exponential
+  * backoff, etc.) Given the current strategy, nextStrategy should return the
+  * next one. It's a Future so that you can do things like waiting for backoff
+  * (exponential or non).
+  */
+trait RetryStrategy[Rep] {
+  def nextStrategy: Future[Option[RetryStrategy[Rep]]]
+}
+
+object RetryingFilter {
+  def apply[Req, Rep](
+    retryStrategy: RetryStrategy[Rep],
+    statsReceiver: StatsReceiver = NullStatsReceiver
+    )(shouldRetry: PartialFunction[Try[Rep], Boolean]) =
+      new RetryingFilter[Req, Rep](retryStrategy, statsReceiver, shouldRetry)
+}
+
+/**
+ * RetryingFilter will coördinates retries. The classification of requests as
+ * retryable is done by the PartialFunction shouldRetry and the RetryStrategy
+ * will provide the retry implementation (backoff, immediate retry, etc.)
  */
 class RetryingFilter[Req, Rep](
-    retryStrategy: RetryStrategy,
-    statsReceiver: StatsReceiver = NullStatsReceiver)
+    retryStrategy: RetryStrategy[Rep],
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    shouldRetry: PartialFunction[Try[Rep], Boolean])
   extends SimpleFilter[Req, Rep]
 {
   private[this] val retriesStats = statsReceiver.stat("retries")
@@ -32,22 +50,24 @@ class RetryingFilter[Req, Rep](
   private[this] def dispatch(
     request: Req, service: Service[Req, Rep],
     replyPromise: Promise[Rep],
-    strategy: RetryStrategy, count: Int = 0
+    strategy: RetryStrategy[Rep],
+    count: Int = 0
   ) {
-    service(request) respond {
-      // Only write exceptions are retriable.
-      case t@Throw(cause) if cause.isInstanceOf[WriteException] =>
-        // Time to retry.
+    service(request) respond { res =>
+      if (shouldRetry.isDefinedAt(res) && shouldRetry(res)) {
         strategy.nextStrategy respond {
-          case Return(nextStrategy) =>
+          case Return(Some(nextStrategy)) =>
             dispatch(request, service, replyPromise, nextStrategy, count + 1)
+          case Return(None) =>
+            retriesStats.add(count)
+            replyPromise() = res
           case Throw(_) =>
-            replyPromise.updateIfEmpty(t)
+            replyPromise() = Throw(new IllegalStateException("failure in retry strategy"))
         }
-
-      case rv =>
-        if (count > 0) retriesStats.add(count)
-        replyPromise.updateIfEmpty(rv)
+      } else {
+        retriesStats.add(count)
+        replyPromise() = res
+      }
     }
   }
 
@@ -58,11 +78,11 @@ class RetryingFilter[Req, Rep](
   }
 }
 
-class NumTriesRetryStrategy(numTries: Int) extends RetryStrategy {
-  def nextStrategy = {
+class NumTriesRetryStrategy[Rep](numTries: Int) extends RetryStrategy[Rep] {
+  def nextStrategy: Future[Option[RetryStrategy[Rep]]] = Future.value {
     if (numTries > 0)
-      Future.value(new NumTriesRetryStrategy(numTries - 1))
+      Some(new NumTriesRetryStrategy[Rep](numTries - 1))
     else
-      Future.exception(new Exception)
+      None
   }
 }
