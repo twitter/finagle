@@ -20,6 +20,9 @@ private[channel] object DeadPermit extends Permit {
   def release() = ()
 }
 
+private[channel] object PlaceholderPermit extends Permit {
+  def release() = ()
+}
 class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   extends SimpleChannelHandler
 {
@@ -36,16 +39,27 @@ class ChannelSemaphoreHandler(semaphore: AsyncSemaphore)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    // Once a context transitions into DeadPermit, it never goes back.
+    // We short cut messages from channels that have excepted or
+    // closed.  It's possible to have a dead permit here because
+    // messages may be (and are in the netty read loop) delivered
+    // after exceptions are.
+    if (waiter(ctx).get eq DeadPermit) return
+
     semaphore.acquire() onSuccess { permit =>
       if (waiter(ctx).compareAndSet(null, permit)) {
         super.messageReceived(ctx, e)
       } else {
-        // Freak. Out.
-        // Don't release the permit that we didn't acquire.
         permit.release()
-        Channels.fireExceptionCaught(
-          ctx.getChannel,
-          new CodecException("Codec issued concurrent requests"))
+        if (waiter(ctx).get ne DeadPermit) {
+          // Freak.  Out.  Note that this won't catch the case where
+          // there is a race between more than one messageReceive
+          // calls and an exception is interleaved.  This is o.k.
+          // since the channel is anyway at that point dead.
+          Channels.fireExceptionCaught(
+            ctx.getChannel,
+            new CodecException("Codec issued concurrent requests"))
+        }
       }
     }
   }

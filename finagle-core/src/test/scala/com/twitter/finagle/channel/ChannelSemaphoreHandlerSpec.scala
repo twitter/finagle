@@ -24,7 +24,7 @@ object ChannelSemaphoreHandlerSpec extends Specification with Mockito {
     def getHandler = null
     def canHandleUpstream = true
     def canHandleDownstream = true
-    def sendUpstream(e: ChannelEvent) { println("UPSTREAM", e) }
+    def sendUpstream(e: ChannelEvent) {  }
     def sendDownstream(e: ChannelEvent) {}
     def getAttachment = _attachment
     def setAttachment(attachment: Object) { _attachment = attachment }
@@ -109,6 +109,15 @@ object ChannelSemaphoreHandlerSpec extends Specification with Mockito {
         
         // no additional events:
         there were two(ctx).sendUpstream(any[ChannelEvent])  // message + exc
+      }
+      
+      "ignore messages after an exception" in {  // and permit is released
+        handler.exceptionCaught(ctx, excEvent)
+        there were two(ctx).sendUpstream(any[ChannelEvent])  // message + exc
+        
+        // attempt to send another message
+        handler.messageReceived(ctx, makeUpstreamMessage(ctx))
+        there were two(ctx).sendUpstream(any[ChannelEvent])
       }
     }
   }
