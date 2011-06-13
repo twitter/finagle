@@ -10,7 +10,7 @@ class CancelledConnectionException extends RequestException
 class NoBrokersAvailableException  extends RequestException
 class ReplyCastException           extends RequestException
 
-abstract class NotServableException extends RequestException
+class NotServableException          extends RequestException
 class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
