@@ -1,6 +1,7 @@
 package com.twitter.finagle.kestrel
 
 import _root_.java.util.concurrent.atomic.AtomicBoolean
+import _root_.java.util.logging.{Logger, Level}
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.util.{Future, Duration, Time, Return, Throw}
 import com.twitter.conversions.time._
@@ -87,7 +88,11 @@ trait Client {
  *
  * @param underlying  a ServiceFactory[Command, Response].
  */
-protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) extends Client {
+protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Response])
+  extends Client
+{
+  private[this] val log = Logger.getLogger(getClass.getName)
+
   def flush(queueName: String) = {
     underlying.service(Flush(queueName))
   }
@@ -110,17 +115,20 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
 
   def from(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
     val result = new ChannelSource[ChannelBuffer]
-    var isRunning: AtomicBoolean = null
-    result.numObservers.respond { i: Int =>
+    val isRunning = new AtomicBoolean(false)
+    result.numObservers respond { i: Int =>
       i match {
         case 0 =>
           isRunning.set(false)
         case 1 =>
-          isRunning = new AtomicBoolean(true)
-          underlying.make() onSuccess { service =>
-            receive(isRunning, service, queueName, result, waitUpTo, collection.Set(Open()))
-          } onFailure { e =>
-            result.close()
+          // only start receiving if we weren't already running
+          if (!isRunning.getAndSet(true)) {
+            underlying.make() onSuccess { service =>
+              receive(isRunning, service, queueName, result, waitUpTo, collection.Set(Open()))
+            } onFailure { t =>
+              log.log(Level.WARNING, "Could not make service", t)
+              result.close()
+            }
           }
         case _ =>
       }
@@ -147,44 +155,54 @@ protected class ConnectedClient(underlying: ServiceFactory[Command, Response]) e
     waitUpTo: Duration,
     options: collection.Set[GetOption])
   {
+    def receiveAgain(options: collection.Set[GetOption]) {
+      receive(isRunning, service, queueName, channel, waitUpTo, options)
+    }
+
+    def cleanup() {
+      channel.close()
+      service.release()
+    }
+
     // serialize() because of the check(isRunning)-then-act(send) idiom.
     channel.serialized {
-      if (isRunning.get) {
+      if (isRunning.get && service.isAvailable) {
         val request = Get(queueName, collection.Set(Timeout(waitUpTo)) ++ options)
-        if (service.isAvailable)
         service(request) onSuccess {
           case Values(Seq(Value(key, item))) =>
             try {
               Future.join(channel.send(item)) onSuccess { _ =>
-                receive(isRunning, service, queueName, channel, waitUpTo, collection.Set(Close(), Open()))
-              } onFailure { e =>
-                service(Get(queueName, collection.Set(Abort())))
-                channel.close()
+                receiveAgain(collection.Set(Close(), Open()))
+              } onFailure { t =>
+                // abort if not all observers ack the send
+                service(Get(queueName, collection.Set(Abort()))) ensure { cleanup() }
               }
             }
-          case Values(Seq()) =>
-            receive(isRunning, service, queueName, channel, waitUpTo, collection.Set(Open()))
+          case Values(Seq()) => receiveAgain(collection.Set(Open()))
           case _ => throw new IllegalArgumentException
-        } onFailure { e =>
-          e.printStackTrace()
-          channel.close()
+        } onFailure { t =>
+          log.log(Level.WARNING, "service produced exception", t)
+          cleanup()
         }
       } else {
-        service.release()
+        cleanup()
       }
     }
   }
 
-  private[this] class ChannelSourceWithService(serviceFuture: Future[Service[Command, Response]]) extends ChannelSource[ChannelBuffer] {
-    serviceFuture handle {
-      case e =>
-        e.printStackTrace()
-        this.close()
+  private[this] class ChannelSourceWithService(serviceFuture: Future[Service[Command, Response]])
+    extends ChannelSource[ChannelBuffer]
+  {
+    private[this] val log = Logger.getLogger(getClass.getName)
+
+    serviceFuture handle { case t =>
+      log.log(Level.WARNING, "service produced exception", t)
+      this.close()
     }
 
     override def close() {
       try {
-        serviceFuture.foreach(_.release())
+        serviceFuture.foreach { _.release() }
       } finally {
         super.close()
       }

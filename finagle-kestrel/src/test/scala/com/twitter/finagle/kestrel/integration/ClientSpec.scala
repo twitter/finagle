@@ -29,7 +29,7 @@ object ClientSpec extends Specification {
       "set & get" in {
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
-        client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+        client.get("foo")() map { _.toString(CharsetUtil.UTF_8) } mustEqual Some("bar")
       }
 
       "from" in {
@@ -52,15 +52,22 @@ object ClientSpec extends Specification {
           result mustEqual List("bar", "baz", "boing")
         }
 
-        "transactionality in the presence of errors" in {
+        "transactionality preserved, channel closed in the presence of errors" in {
           client.set("foo", "bar")()
 
           var result: ChannelBuffer = null
+
           var channel = client.from("foo")
-          val latch = new CountDownLatch(1)
+          val latch = new CountDownLatch(2)
           val o1 = channel.respond { item =>
-            throw new Exception
+            Future {
+              throw new Exception
+            }
           }
+          channel.closes ensure {
+            latch.countDown()
+          }
+
           channel = client.from("foo")
           val o2 = channel.respond { item =>
             Future {
@@ -68,8 +75,10 @@ object ClientSpec extends Specification {
               latch.countDown()
             }
           }
+
           latch.within(1.second)
-          o1.dispose(); o2.dispose()
+          o1.dispose()
+          o2.dispose()
           result.toString(CharsetUtil.UTF_8) mustEqual "bar"
         }
       }
