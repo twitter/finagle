@@ -424,9 +424,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val idleTime      = config.hostConnectionIdleTime   getOrElse(5.seconds)
     val maxWaiters    = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
 
-    val cachingPool = new CachingPool(factory, idleTime)
+    val underlyingFactory = if (idleTime > 0.seconds)
+      new CachingPool(factory, idleTime)
+    else
+      factory
+
     new WatermarkPool[Req, Rep](
-      cachingPool, lowWatermark, highWatermark,
+      underlyingFactory, lowWatermark, highWatermark,
       statsReceiver, maxWaiters)
   }
 
