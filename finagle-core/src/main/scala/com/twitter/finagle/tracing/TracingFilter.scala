@@ -9,12 +9,14 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.{Service, SimpleFilter}
 
-class TracingFilter[Req, Rep](receiver: TraceReceiver)
+class TracingFilter[Req, Rep](tracer: Tracer)
   extends SimpleFilter[Req, Rep]
 {
   def apply(request: Req, service: Service[Req, Rep]) = {
-    service(request) ensure {
-      Trace.endSpan() foreach(receiver.receiveSpan)
+    Trace.unwind {
+      Trace.pushTracer(tracer)
+      Trace.pushId()
+      service(request)
     }
   }
 }

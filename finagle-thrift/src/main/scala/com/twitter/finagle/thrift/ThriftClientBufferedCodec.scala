@@ -5,8 +5,8 @@ import com.twitter.finagle.{Codec, CodecFactory, ClientCodecConfig}
 import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
 
 /**
- * ThriftClientFramedCodec implements a buffered thrift transport that
- * supports upgrading in order to provide TraceContexts across
+ * ThriftClientBufferedCodec implements a buffered thrift transport
+ * that supports upgrading in order to provide TraceContexts across
  * requests.
  */
 object ThriftClientBufferedCodec {

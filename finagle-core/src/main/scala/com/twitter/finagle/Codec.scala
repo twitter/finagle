@@ -35,7 +35,7 @@ object Codec {
       def getPipeline = makePipeline
     }
   }
-  
+
   def ofPipeline[Req, Rep](p: ChannelPipeline) = new Codec[Req, Rep] {
     def pipelineFactory = new ChannelPipelineFactory {
       def getPipeline = p
@@ -51,20 +51,20 @@ object Codec {
 /**
  * Clients
  */
-case class ClientCodecConfig(serviceName: Option[String])
+case class ClientCodecConfig(serviceName: String)
 
 
 /**
  * Servers
  */
-case class ServerCodecConfig(serviceName: Option[String], boundAddress: SocketAddress)
+case class ServerCodecConfig(serviceName: String, boundAddress: SocketAddress)
 
 /**
  * A combined codec factory provides both client and server codec
  * factories in one (when available).
  */
 trait CodecFactory[Req, Rep] {
-  type Client = ClientCodecConfig => Codec[Req, Rep] 
+  type Client = ClientCodecConfig => Codec[Req, Rep]
   type Server = ServerCodecConfig => Codec[Req, Rep]
 
   def client: Client

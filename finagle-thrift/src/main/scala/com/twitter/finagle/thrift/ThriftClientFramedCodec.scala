@@ -16,9 +16,8 @@ import com.twitter.util.Time
 import com.twitter.finagle._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.tracing.{Trace, Annotation, Event, Endpoint}
+import com.twitter.finagle.tracing.{Trace, Annotation}
 
-import conversions._
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**
@@ -94,15 +93,9 @@ private[thrift] class ThriftClientChannelBufferEncoder
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
       case request: ThriftClientRequest =>
-        if(request.tracer ne null) {
-          // Netty returns a SocketAddress, but it is useless and the only known subclass is
-          // InetSocketAddress, so we can always cast it
-          ctx.getChannel.getLocalAddress()  match {
-            case sockaddr: InetSocketAddress =>
-              request.tracer.mutate { _.copy(endpoint = Some(Endpoint.fromSocketAddress(sockaddr))) }
-            case _ => () // nothing
-          }
-
+        ctx.getChannel.getLocalAddress()  match {
+          case ia: InetSocketAddress => Trace.recordClientAddr(ia)
+          case _ => () // nothing
         }
 
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
@@ -132,7 +125,7 @@ private[thrift] class ThriftClientChannelBufferEncoder
  * @param isUpgraded Whether this connection is with a server that has tracing enabled
  */
 
-private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isUpgraded: Boolean)
+private[thrift] class ThriftClientTracingFilter(serviceName: String, isUpgraded: Boolean)
   extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
   def apply(
@@ -141,23 +134,22 @@ private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isU
   ) = {
     // Create a new span identifier for this request.
     val msg = new InputBuffer(request.message)().readMessageBegin()
-    val childTracer = Trace.addChild(serviceName, Some(msg.name), None)
-    request.tracer = childTracer
+    Trace.recordRpcname(serviceName, msg.name)
+
     val thriftRequest = if (isUpgraded) {
       val header = new thrift.TracedRequestHeader
-      header.setSpan_id(childTracer().id.toLong)
-      header.setTrace_id(childTracer().traceId.toLong)
-      childTracer().parentId foreach { parentId => header.setParent_span_id(parentId.toLong) }
-      header.setDebug(childTracer.isDebugging)
+      header.setSpan_id(Trace.id.spanId.toLong)
+      header.setParent_span_id(Trace.id.parentId.toLong)
+      header.setTrace_id(Trace.id.traceId.toLong)
 
       new ThriftClientRequest(
         OutputBuffer.messageToArray(header) ++ request.message,
-        request.oneway, request.tracer)
+        request.oneway)
     } else {
       request
     }
 
-    childTracer.record(Event.ClientSend())
+    Trace.record(Annotation.ClientSend())
     val reply = service(thriftRequest)
     if (thriftRequest.oneway) {
       // Oneway requests don't contain replies, and so they can't be
@@ -165,19 +157,11 @@ private[thrift] class ThriftClientTracingFilter(serviceName: Option[String], isU
       reply
     } else {
       reply map { response =>
-        childTracer.record(Event.ClientRecv())
+        Trace.record(Annotation.ClientRecv())
 
         if (isUpgraded) {
-          // Peel off the TracedResponseHeader and add any piggy-backed
-          // spans to our own transcript (if we're in debug mode).
-          val responseHeader = new thrift.TracedResponseHeader
-          val rest = InputBuffer.peelMessage(response, responseHeader)
-
-          if (childTracer.isDebugging && (responseHeader.spans ne null)) {
-            Trace.merge(responseHeader.spans map { _.toFinagleSpan })
-          }
-
-          rest
+          // Peel off the TracedResponseHeader.
+          InputBuffer.peelMessage(response, new thrift.TracedResponseHeader)
         } else {
           response
         }
