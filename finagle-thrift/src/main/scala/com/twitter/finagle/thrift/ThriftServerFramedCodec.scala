@@ -8,13 +8,11 @@ import org.jboss.netty.channel.{
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 
 import com.twitter.util.Future
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Event, SpanId, Endpoint}
-
-import conversions._
+import com.twitter.finagle.tracing.{Trace, Annotation, TraceId, SpanId}
 
 object ThriftServerFramedCodec {
   def apply() = ThriftServerFramedCodecFactory
@@ -41,8 +39,13 @@ class ThriftServerFramedCodec(config: ServerCodecConfig)
       }
     }
 
-  override def prepareService(service: Service[Array[Byte], Array[Byte]]) =
-    Future.value((new ThriftServerTracingFilter(config.serviceName, config.boundAddress)) andThen service)
+  override def prepareService(service: Service[Array[Byte], Array[Byte]]) = {
+    val ia = config.boundAddress match {
+      case ia: InetSocketAddress => ia
+      case _ => new InetSocketAddress(0)
+    }
+    Future.value((new ThriftServerTracingFilter(config.serviceName, ia)) andThen service)
+  }
 }
 
 private[thrift] class ThriftServerChannelBufferEncoder
@@ -60,48 +63,35 @@ private[thrift] class ThriftServerChannelBufferEncoder
   }
 }
 
-private[thrift] class ThriftServerTracingFilter
-(
-  serviceName: Option[String], boundAddress: SocketAddress
+private[thrift] class ThriftServerTracingFilter(
+  serviceName: String, boundAddress: InetSocketAddress
 ) extends SimpleFilter[Array[Byte], Array[Byte]]
 {
   // Concurrency is not an issue here since we have an instance per
   // channel, and receive only one request at a time (thrift does no
-  // pipelining). Furthermore, finagle will guarantee this by
+  // pipelining).  Furthermore, finagle will guarantee this by
   // serializing requests.
   private[this] var isUpgraded = false
 
-  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
+  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = Trace.unwind {
     // What to do on exceptions here?
     if (isUpgraded) {
       val header = new thrift.TracedRequestHeader
       val request_ = InputBuffer.peelMessage(request, header)
 
       val msg = new InputBuffer(request_)().readMessageBegin()
-      Trace.startSpan(
-        Some(SpanId(header.getSpan_id)),
+      val traceId = TraceId(
+        if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
-        Some(SpanId(header.getTrace_id)),
-        serviceName,
-        Some(msg.name),
-        Some(Endpoint.fromSocketAddress(boundAddress).boundEndpoint))
-
-      if (header.debug)
-        Trace.debug(true)  // (don't turn off when !header.debug)
-
-      Trace.record(Event.ServerRecv())
+        SpanId(header.getSpan_id))
+      Trace.pushId(traceId)
+      Trace.recordRpcname(serviceName, msg.name)
+      Trace.recordServerAddr(boundAddress)
+      Trace.record(Annotation.ServerRecv())
 
       service(request_) map { response =>
-        Trace.record(Event.ServerSend())
-
-        // Wrap some trace data.
+        Trace.record(Annotation.ServerSend())
         val responseHeader = new thrift.TracedResponseHeader
-
-        if (header.debug) {
-          // Piggy-back span data if we're in debug mode.
-          Trace().toThriftSpans foreach { responseHeader.addToSpans(_) }
-        }
-
         OutputBuffer.messageToArray(responseHeader) ++ response
       }
     } else {
@@ -123,17 +113,11 @@ private[thrift] class ThriftServerTracingFilter
         // to parse them out.
         Future.value(buffer.toArray)
       } else {
-        Trace.startSpan(
-          None,
-          None,
-          None,
-          serviceName,
-          Some(msg.name),
-          Some(Endpoint.fromSocketAddress(boundAddress).boundEndpoint))
-        Trace.record(Event.ServerRecv())
+        Trace.pushId()
+        Trace.record(Annotation.ServerRecv())
 
         service(request) map { response =>
-          Trace.record(Event.ServerSend())
+          Trace.record(Annotation.ServerSend())
           response
         }
       }

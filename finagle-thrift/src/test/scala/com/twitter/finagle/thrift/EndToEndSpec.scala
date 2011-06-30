@@ -15,11 +15,11 @@ import org.jboss.netty.channel.socket.nio._
 
 import com.twitter.test.{B, SomeStruct, AnException, F}
 import com.twitter.finagle.tracing
-import com.twitter.finagle.tracing.{Trace, Annotation, Event}
+import com.twitter.finagle.tracing.{Trace, BufferingTracer, Annotation, Record}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.silly.Silly
-import com.twitter.util.{Future, RandomSocket, Return, Promise}
+import com.twitter.util.{Future, RandomSocket, Return, Promise, Time}
 import com.twitter.util.TimeConversions._
 
 object EndToEndSpec extends Specification {
@@ -30,58 +30,94 @@ object EndToEndSpec extends Specification {
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
         Trace.record("hey it's me!")
-        new SomeStruct(123, Trace().parentId.get.toString)
+        new SomeStruct(123, Trace.id.parentId.toString)
       }
       def someway() = Future.void
     }
 
     val serverAddr = RandomSocket()
+    val serverTracer = new BufferingTracer
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(serverAddr)
       .name("ThriftServer")
+      .tracer(serverTracer)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     doAfter { server.close(20.milliseconds) }
 
+    val clientTracer = new BufferingTracer
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(1)
+      .tracer(clientTracer)
       .build()
 
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-    "work" in {
-      val future = client.multiply(10, 30)
-      future() must be_==(300)
-/*
-      Trace.debug(true)
-      Trace().children must beEmpty
+    "work" in Time.withCurrentTimeFrozen { tc =>
+      Trace.unwind {
+        Trace.pushId()  // push an ID so we don't use the default one
+        serverTracer must beEmpty
+        clientTracer must beEmpty
+        val future = client.multiply(10, 30)
+        future() must be_==(300)
+        clientTracer.size must be_>(0)
+        val idSet = Set() ++ (clientTracer map { _.traceId })
+        idSet must haveSize(1)
+        val theId = idSet.head
+        theId.parentId must be_==(Trace.id.spanId)
+        theId.traceId must be_==(Trace.id.traceId)
 
-      client.complex_return("a string")().arg_two must be_==(
-        "%s".format(Trace().id.toString))
+        val now = Time.now()
 
-      Trace().children must haveSize(1)
-      val childSpan = Trace().children.head
+        // verify the traces.
+        {
+          val trace = clientTracer.toSeq
+          trace must haveSize(4)
+          trace(0) must be_==(Record(theId, now, Annotation.Rpcname("client", "multiply")))
+          trace(1) must be_==(Record(theId, now, Annotation.ClientSend()))
+          trace(2) must beLike {
+            case Record(id, timestamp, Annotation.ClientAddr(_))
+            if (id == theId && timestamp == now) => true
+          }
+          trace(3) must be_==(Record(theId, now, Annotation.ClientRecv()))
+        }
 
-      childSpan.annotations must haveSize(5)
-      val events = childSpan.annotations map { _.event }
-      val texts = events collect { case Event.Message(text) => text }
-      texts must haveSize(1)
-      texts.head must be_==("hey it's me!")
-*/
-      client.add(1, 2)() must throwA[AnException]
-      client.add_one(1, 2)()  // don't block!
+        {
+          val trace = serverTracer.toSeq
 
-      client.someway()() must beNull  // don't block!
-    }
+          // ID is transferred
+          val idSet = Set() ++ (trace map { _.traceId })
+          idSet must haveSize(1)
+          idSet.head must be_==(theId)
 
-    "handle wrong interface" in {
-      val client = new F.ServiceToClient(service, new TBinaryProtocol.Factory())
-     
-      client.another_method(123)() must throwA(
-        new TApplicationException("Invalid method name: 'another_method'"))
+          trace must haveSize(4)
+          trace(0) must be_==(Record(theId, now, Annotation.Rpcname("ThriftServer", "multiply")))
+          trace(1) must beLike {
+            case Record(id, timestamp, Annotation.ServerAddr(_))
+            if (id == theId && timestamp == now) => true
+          }
+          trace(2) must be_==(Record(theId, now, Annotation.ServerRecv()))
+          trace(3) must be_==(Record(theId, now, Annotation.ServerSend()))
+        }
+
+        client.complex_return("a string")().arg_two must be_==(
+          "%s".format(Trace.id.spanId.toString))
+
+        client.add(1, 2)() must throwA[AnException]
+        client.add_one(1, 2)()  // don't block!
+
+        client.someway()() must beNull  // don't block!
+      }
+
+      "handle wrong interface" in {
+        val client = new F.ServiceToClient(service, new TBinaryProtocol.Factory())
+
+        client.another_method(123)() must throwA(
+          new TApplicationException("Invalid method name: 'another_method'"))
+      }
     }
   }
 

@@ -1,56 +1,126 @@
 package com.twitter.finagle.tracing
 
 import org.specs.Specification
-import scala.collection.Map
+import org.specs.mock.Mockito
 
-import java.nio.ByteBuffer
+import com.twitter.util.Time
+import com.twitter.conversions.time._
 
-object TraceSpec extends Specification {
+object TraceSpec extends Specification with Mockito {
   "Trace" should {
-    "start and end spans" in {
-      Trace.startSpan()
-      Trace.debug(true)
-      Trace.record(Event.ClientSend())
-      Trace.record("oh hey")
-      val span = Trace.endSpan()
-      val emptyMap = Map[String, ByteBuffer]()
+    doBefore { Trace.clear() }
 
-      span.get must beLike {
-        case Span(
-          None, None, None, _, None,
-          Seq(Annotation(_, Event.ClientSend(), _),
-              Annotation(_, Event.Message("oh hey"), _)),
-          emptyMap,
-          None,
-          Seq()) => true
-        case _ => false
-      }
-
-      Trace().annotations must beEmpty
+    val Seq(id0, id1, id2) = 0 until 3 map { i =>
+      TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i))
     }
 
-    "add child spans, updating the parent span" in {
-      Trace.startSpan()
-      Trace.record(Event.ClientSend())
-      val child = Trace.addChild(None, None, None)
-      child.record(Event.ClientRecv())
-      val span = Trace.endSpan().get
-      val emptyMap1 = Map[String, ByteBuffer]()
-      val emptyMap2 = Map[String, ByteBuffer]()
+    "have a default id without parents, etc." in {
+      Trace.id must beLike {
+        case TraceId(None, None, _) => true
+      }
+    }
 
-      span must beLike {
-        case Span(
-          None, None, None, _, None,
-          Seq(Annotation(_, Event.ClientSend(), _)),
-          emptyMap1,
-          None,
-          Seq(
-            Span(None, None, None, _, Some(span.id),
-                 Seq(Annotation(_, Event.ClientRecv(), _)),
-                 emptyMap2,
-                 None,
-                 Seq()))) => true
-        case _ => false
+    "keep ids in a stack" in {
+      Trace.pushId(id0)
+      Trace.id must be_==(id0)
+      Trace.pushId(id1)
+      Trace.id must be_==(id1)
+      Trace.pushId(id2)
+      Trace.id must be_==(id2)
+
+      Trace.popId()
+      Trace.id must be_==(id1)
+      Trace.popId()
+      Trace.id must be_==(id0)
+      Trace.popId()
+      Trace.id must beLike {  // back to default
+        case TraceId(None, None, _) => true
+      }
+    }
+
+    "Trace.pushId" in {
+      "push a fresh id when none exist" in {
+        Trace.idOption must beNone
+        val defaultId = Trace.id
+        Trace.pushId()
+        Trace.id must be_!=(defaultId)
+        Trace.id must beLike {
+          case TraceId(None, None, _) => true
+        }
+      }
+
+      "push a derived id when one exists" in {
+        Trace.pushId()
+        val topId = Trace.id
+        Trace.pushId()
+        Trace.id must beLike {
+          case TraceId(Some(traceId), Some(parentId), _)
+          if (traceId == topId.traceId && parentId == topId.spanId) => true
+        }
+      }
+    }
+
+    "Trace.unwind" in {
+      var didRun = false
+      val priorId = Trace.id
+      Trace.unwind {
+        Trace.pushId(id0)
+        Trace.id must be_==(id0)
+        didRun = true
+      }
+      didRun must beTrue
+      Trace.id must be_==(priorId)
+    }
+
+    "Trace.record" in {
+      val tracer1 = mock[Tracer]
+      val tracer2 = mock[Tracer]
+
+      "report topmost id to tracers below this id" in Time.withCurrentTimeFrozen { tc =>
+        Trace.pushId(id0)
+        Trace.pushTracer(tracer1)
+        val ann = Annotation.Message("hello")
+        Trace.record(ann)
+        there was no(tracer1).record(any)
+        Trace.pushId(id1)
+        Trace.record(ann)
+        there was one(tracer1).record(Record(id1, Time.now, ann))
+        tc.advance(1.second)
+        Trace.pushId(id2)
+        Trace.record(ann)
+        there was one(tracer1).record(Record(id2, Time.now, ann))
+        tc.advance(1.second)
+        Trace.pushTracer(tracer2)
+        Trace.pushId(id0)
+        Trace.record(ann)
+        there was one(tracer1).record(Record(id0, Time.now, ann))
+        there was one(tracer2).record(Record(id0, Time.now, ann))
+      }
+
+      "record IDs not in the stack to all tracers" in {
+        Trace.pushTracer(tracer1)
+        Trace.pushId(id0)
+        Trace.pushTracer(tracer2)
+        val rec1 = Record(id1, Time.now, Annotation.Message("wtf"))
+        Trace.record(rec1)
+        there was one(tracer1).record(rec1)
+        there was one(tracer2).record(rec1)
+        val rec0 = Record(id0, Time.now, Annotation.Message("wtf0"))
+        Trace.record(rec0)
+        there was one(tracer1).record(rec0)
+        there was no(tracer2).record(rec0)
+      }
+
+      "report to each unique tracer exactly once" in {
+        Trace.pushTracer(tracer1)
+        Trace.pushTracer(tracer2)
+        Trace.pushTracer(tracer1)
+        Trace.pushId(id0)
+        there was no(tracer1).record(any)
+        there was no(tracer2).record(any)
+        Trace.record("oh hey")
+        there was one(tracer1).record(any)
+        there was one(tracer2).record(any)
       }
     }
   }

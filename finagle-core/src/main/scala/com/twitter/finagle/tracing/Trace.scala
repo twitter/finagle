@@ -8,89 +8,157 @@ package com.twitter.finagle.tracing
  *   Stephenson, Manoj Plakal, Donald Beaver, Saul Jaspan, Chandan
  *   Shanbhag, 2010.
  *
- * It is meant to be general to whatever underlying RPC mechanism, and
- * it is up to the underlying codec to implement the transport.
+ * It is meant to be independent of whatever underlying RPC mechanism
+ * is being used, and it is up to the underlying codec to implement
+ * the transport.
  */
 
-import com.twitter.util.{Local, Time, RichU64String}
+import scala.util.Random
+import java.nio.ByteBuffer
+import java.net.InetSocketAddress
+
+import com.twitter.util.{Time, Local}
 
 /**
- * `Trace` specifies global mutable operations on traces.
+ * `Trace` maintains an interleaved stack of `TraceId`s and `Tracer`s.
+ * The semantics are as follows: when reporting, we always report the
+ * topmost `TraceId`.  That action is reported to all the `Tracer`s
+ * that are _below_ that point in the stack.
  */
-object Trace extends Tracer {
-  // The `Trace` implementation of `Tracer` assumes we're the root
-  // tracer.
-  private[this] val current = new Local[Tracer]
+object Trace {
+  private[this] type Stack = List[Either[TraceId, Tracer]]
+  private[this] val rng = new Random
 
-  private[this] def tracer(): Tracer = {
-    if (!current().isDefined)
-      current() = new RootRefTracer(Span())
-
-    current().get
-  }
-
-  def debug(onOrOff: Boolean) = tracer().debug(onOrOff)
-  def isDebugging = tracer().isDebugging
-
-  def mutate(f: Span => Span) {
-    tracer().mutate(f)
-  }
-
-  def apply(): Span = tracer()()
-
-  def addChildTracer(span: Span): Tracer =
-    tracer().addChildTracer(span)
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()))
+  private[this] val local = new Local[Stack]
 
   /**
-   * Clear the current span.
+   * Get the current trace identifier.  If no identifiers have been
+   * pushed, a default one is provided.
+   */
+  def id: TraceId = idOption getOrElse defaultId
+
+  /**
+   * Get the current identifier, if it exists.
+   */
+  def idOption: Option[TraceId] =
+    local() flatMap { stack =>
+      stack collect { case Left(id) => id } headOption
+    }
+
+  /**
+   * Completely clear the trace stack.
    */
   def clear() {
-    current.clear()
+    local.clear()
   }
 
   /**
-   * Adds a child tracer to the current tracer if it exists, otherwise creates a new tracer.
+   * Create a derivative TraceId and push it.  If there isn't a
+   * current ID, this becomes the root id.
    */
-  override def addChild(
-    serviceName: Option[String], name: Option[String], endpoint: Option[Endpoint]
-  ): Tracer = {
-    if (current().isDefined)
-      super.addChild(serviceName, name, endpoint)
-    else
-      new RootRefTracer(Span(None, None, None, serviceName, name, endpoint))
+  def pushId(): TraceId = {
+    val currentId = idOption
+    val nextId = TraceId(
+      currentId map { _.traceId },
+      currentId map { _.spanId },
+      SpanId(rng.nextLong()))
+    pushId(nextId)
   }
 
   /**
-   * Start a new span. When identifiers are specified, use those,
-   * otherwise they are generated for you.
+   * Push a new trace id.
    */
-  def startSpan(
-    id: Option[SpanId], parentId: Option[SpanId], traceId: Option[SpanId],
-    serviceName: Option[String], name: Option[String], endpoint: Option[Endpoint]
-  ) {
-    clear()
-    mutate { _ => Span(traceId, id, parentId, serviceName, name, endpoint) }
+  def pushId(traceId: TraceId): TraceId = {
+    // todo: should this to parent/trace management?
+    local() = Left(traceId) :: (local() getOrElse Nil)
+    traceId
   }
 
   /**
-   * Start a new span with random identifiers.
+   * Pop the topmost trace id and return it.
    */
-  def startSpan() {
-    startSpan(None, None, None, None, None, None)
-  }
-
-  /**
-   * End the span.
-   *
-   * @return The span that was just ended.
-   */
-  def endSpan(): Option[Span] = {
-    if (current().isDefined) {
-      val span = this()
-      clear()
-      Some(span)
-    } else {
-      None
+  def popId(): Option[TraceId] = {
+    local() match {
+      case None | Some(Nil) => None
+      case Some(Left(topmost@_) :: rest) =>
+        local() = rest
+        Some(topmost)
+      case Some(Right(_) :: rest) =>
+        local() = rest
+        popId()
     }
+  }
+
+  /**
+   * Push the given tracer.
+   */
+  def pushTracer(tracer: Tracer) {
+    local() = Right(tracer) :: (local() getOrElse Nil)
+  }
+
+  /**
+   * Invoke `f` and then unwind the stack to the starting point.
+   */
+  def unwind[T](f: => T): T = {
+    val saved = local()
+    try f finally local.set(saved)
+  }
+
+  /*
+   * Recording methods report the topmost trace id to every tracer
+   * lower in the stack.
+   */
+
+   /**
+    * Find the set of tracers appropriate for the given ID.
+    */
+   private[this] def tracers: (Stack, Option[TraceId], List[Tracer]) => Seq[Tracer] = {
+     case (Nil, _, ts) => (Set() ++ ts).toSeq
+     case (Left(stackId) :: rest, Some(lookId), _) if stackId == lookId => tracers(rest, None, Nil)
+     case (Left(_) :: rest, id, ts) => tracers(rest, id, ts)
+     case (Right(t) :: rest, id, ts) => tracers(rest, id, t :: ts)
+   }
+
+   /**
+    * Record a raw ''Record''.  This will record to a _unique_ set of
+    * tracers:
+    *
+    *  1.  if the ID specified is in the stack, the record will be
+    *  recorded to those traces _below_ the first ID entry with that
+    *  value in the stack.
+    *
+    *  2.  if the ID is *not* in the stack, we report it to all of the
+    *  tracers in the stack.
+    */
+   def record(rec: Record) {
+     tracers(local() getOrElse Nil, Some(rec.traceId), Nil) foreach { _.record(rec) }
+   }
+
+   /*
+    * Convenience methods that construct records of different kinds.
+    */
+  def record(ann: Annotation) {
+    record(Record(id, Time.now, ann))
+  }
+
+  def record(message: String) {
+    record(Annotation.Message(message))
+  }
+
+  def recordRpcname(service: String, rpc: String) {
+    record(Annotation.Rpcname(service, rpc))
+  }
+
+  def recordClientAddr(ia: InetSocketAddress) {
+    record(Annotation.ClientAddr(ia))
+  }
+
+  def recordServerAddr(ia: InetSocketAddress) {
+    record(Annotation.ServerAddr(ia))
+  }
+
+  def recordBinary(key: String, value: ByteBuffer) {
+    record(Annotation.BinaryAnnotation(key, value))
   }
 }

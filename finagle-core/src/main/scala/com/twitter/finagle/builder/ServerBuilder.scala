@@ -62,7 +62,7 @@ import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelOpenConnectionsHandler,
   OpenConnectionsHealthThresholds}
 import com.twitter.finagle.health.{HealthEvent, NullHealthEventCallback}
-import com.twitter.finagle.tracing.{TraceReceiver, TracingFilter, NullTraceReceiver}
+import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
@@ -135,7 +135,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _requestTimeout:                  Option[Duration]                        = None,
   private val _readTimeout:                     Option[Duration]                        = None,
   private val _writeCompletionTimeout:          Option[Duration]                        = None,
-  private val _traceReceiver:                   TraceReceiver                           = new NullTraceReceiver)
+  private val _tracer:                          Tracer                                  = NullTracer)
 {
   import ServerConfig._
 
@@ -164,7 +164,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val requestTimeout                  = _requestTimeout
   val readTimeout                     = _readTimeout
   val writeCompletionTimeout          = _writeCompletionTimeout
-  val traceReceiver                   = _traceReceiver
+  val tracer                          = _tracer
 
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
@@ -187,7 +187,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "requestTimeout"                  -> _requestTimeout,
     "readTimeout"                     -> _readTimeout,
     "writeCompletionTimeout"          -> _writeCompletionTimeout,
-    "traceReceiver"                   -> Some(_traceReceiver)
+    "tracer"                          -> Some(_tracer)
   )
 
   override def toString = {
@@ -309,8 +309,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def writeCompletionTimeout(howlong: Duration): This =
     withConfig(_.copy(_writeCompletionTimeout = Some(howlong)))
 
-  def traceReceiver(receiver: TraceReceiver): This =
-    withConfig(_.copy(_traceReceiver = receiver))
+  def tracer(receiver: Tracer): This =
+    withConfig(_.copy(_tracer = receiver))
 
   /**
    * Construct the Server, given the provided Service.
@@ -342,7 +342,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       config.statsReceiver map { sr => config.name map (sr.scope(_)) getOrElse sr }
 
     val codecConfig = ServerCodecConfig(
-      serviceName = config.name,
+      serviceName = config.name.get,
       boundAddress = config.bindTo.get)
     val codec = config.codecFactory.get(codecConfig)
 
@@ -502,7 +502,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         // This has to go last (ie. first in the stack) so that
         // protocol-specific trace support can override our generic
         // one here.
-        service = (new TracingFilter(config.traceReceiver)) andThen service
+        service = (new TracingFilter(config.tracer)) andThen service
 
         val channelHandler = new ServiceToChannelHandler(
           service, postponedService, serviceFactory, scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName))

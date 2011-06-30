@@ -67,7 +67,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
-import tracing.{NullTraceReceiver, TracingFilter, TraceReceiver}
+import tracing.{NullTracer, TracingFilter, Tracer}
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -151,7 +151,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _tls                       : Option[SSLContext]            = None,
   private val _startTls                  : Boolean                       = false,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
-  private val _traceReceiver             : TraceReceiver                 = new NullTraceReceiver,
+  private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
 {
   import ClientConfig._
@@ -185,7 +185,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val tls                       = _tls
   val startTls                  = _startTls
   val failureAccrualParams      = _failureAccrualParams
-  val traceReceiver             = _traceReceiver
+  val tracer                    = _tracer
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -211,7 +211,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "tls"                       -> _tls,
     "startTls"                  -> Some(_startTls),
     "failureAccrualParams"      -> _failureAccrualParams,
-    "traceReceiver"             -> Some(traceReceiver)
+    "tracer"                    -> Some(tracer)
   )
 
   override def toString = {
@@ -359,8 +359,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def startTls(value: Boolean): This =
     withConfig(_.copy(_startTls = true))
 
-  def traceReceiver(receiver: TraceReceiver): This =
-    withConfig(_.copy(_traceReceiver = receiver))
+  def tracer(tracer: Tracer): This =
+    withConfig(_.copy(_tracer = tracer))
 
   def logger(logger: Logger): This = withConfig(_.copy(_logger = Some(logger)))
 
@@ -469,7 +469,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     Timer.default.acquire()
 
     val cluster = config.cluster.get
-    val codec   = config.codecFactory.get(ClientCodecConfig(serviceName = config.name))
+    val codec   = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
 
     val hostFactories = cluster mkFactories { host =>
       // The per-host stack is as follows:
@@ -527,7 +527,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // stats. Logically these are service failures, but since the
     // requests are never dispatched to the underlying stack, they
     // don't get recorded there.
-    new StatsFactoryWrapper(loadbalanced, statsReceiver)
+    val statsFactoryWrapped = new StatsFactoryWrapper(loadbalanced, statsReceiver)
+    (new TracingFilter(config.tracer)) andThen statsFactoryWrapped
   }
 
   /**
@@ -548,7 +549,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       service = filter andThen service
     }
 
-    (new TracingFilter(config.traceReceiver)) andThen service
+    service
   }
 
   /**

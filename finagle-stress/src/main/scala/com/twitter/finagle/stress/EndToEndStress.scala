@@ -17,7 +17,6 @@ import com.twitter.finagle.http.Http
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.tracing.ConsoleTraceReceiver
 
 object EndToEndStress {
   private[this] object HttpService
