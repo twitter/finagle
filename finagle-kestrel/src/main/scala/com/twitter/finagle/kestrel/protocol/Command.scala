@@ -5,7 +5,17 @@ import com.twitter.util.{Time, Duration}
 
 sealed abstract class Command
 
-case class Get(queueName: ChannelBuffer, options: collection.Set[GetOption])                   extends Command
+sealed abstract class GetCommand extends Command {
+  val queueName: ChannelBuffer
+  val timeout: Option[Duration]
+}
+
+case class Get(val queueName: ChannelBuffer, val timeout: Option[Duration] = None)             extends GetCommand
+case class Open(val queueName: ChannelBuffer, val timeout: Option[Duration] = None)            extends GetCommand
+case class Close(val queueName: ChannelBuffer, val timeout: Option[Duration] = None)           extends GetCommand
+case class CloseAndOpen(val queueName: ChannelBuffer, val timeout: Option[Duration] = None)    extends GetCommand
+case class Abort(val queueName: ChannelBuffer, val timeout: Option[Duration] = None)           extends GetCommand
+case class Peek(val queueName: ChannelBuffer, val timeout: Option[Duration] = None)            extends GetCommand
 case class Set(queueName: ChannelBuffer, expiry: Time, value: ChannelBuffer)                   extends Command
 
 case class Delete(queueName: ChannelBuffer)                                                    extends Command
@@ -19,10 +29,3 @@ case class DumpConfig()                                                         
 case class Stats()                                                                             extends Command
 case class DumpStats()                                                                         extends Command
 
-sealed abstract class GetOption
-
-case class Timeout(duration: Duration) extends GetOption
-case class Open()                      extends GetOption
-case class Close()                     extends GetOption
-case class Abort()                     extends GetOption
-case class Peek()                      extends GetOption

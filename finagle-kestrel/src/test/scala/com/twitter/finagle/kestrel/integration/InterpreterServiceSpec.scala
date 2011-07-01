@@ -36,7 +36,7 @@ object InterpreterServiceSpec extends Specification {
       val result = for {
         _ <- client(Flush(queueName))
         _ <- client(Set(queueName, Time.now, value))
-        r <- client(Get(queueName, collection.Set.empty))
+        r <- client(Get(queueName))
       } yield r
       result(1.second) mustEqual Values(Seq(Value(queueName, value)))
     }
@@ -45,9 +45,9 @@ object InterpreterServiceSpec extends Specification {
       "set & get/open & get/abort" in {
         val result = for {
           _ <- client(Set(queueName, Time.now, value))
-          _ <- client(Get(queueName, collection.Set(Open())))
-          _ <- client(Get(queueName, collection.Set(Abort())))
-          r <- client(Get(queueName, collection.Set(Open())))
+          _ <- client(Open(queueName))
+          _ <- client(Abort(queueName))
+          r <- client(Open(queueName))
         } yield r
         result(1.second) mustEqual Values(Seq(Value(queueName, value)))
       }

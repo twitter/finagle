@@ -21,42 +21,42 @@ object InterpreterSpec extends Specification {
 
     "set & get" in {
       interpreter(Set("name", Time.now, "rawr"))
-      interpreter(Get("name", collection.Set.empty)) mustEqual
+      interpreter(Get("name")) mustEqual
         Values(Seq(Value("name", "rawr")))
     }
 
     "transactions" in {
       "set & get/open & get/open" in {
         interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Get("name", collection.Set(Open())))
-        interpreter(Get("name", collection.Set(Open()))) must throwA[InvalidStateTransition]
+        interpreter(Open("name"))
+        interpreter(Open("name")) must throwA[InvalidStateTransition]
       }
 
       "set & get/abort" in {
         interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Get("name", collection.Set(Abort()))) must throwA[InvalidStateTransition]
+        interpreter(Abort("name")) must throwA[InvalidStateTransition]
       }
 
       "set & get/open & get/open/abort" in {
         interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Get("name", collection.Set(Open())))
-        interpreter(Get("name", collection.Set(Open(), Abort()))) must throwA[InvalidStateTransition]
+        interpreter(Open("name"))
+        //interpreter(Get("name", collection.Set(Open(), Abort()))) must throwA[InvalidStateTransition]
       }
 
       "set & get/open & get/close" in {
         interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Get("name", collection.Set(Open()))) mustEqual
+        interpreter(Open("name")) mustEqual
           Values(Seq(Value("name", "rawr")))
-        interpreter(Get("name", collection.Set(Close()))) mustEqual Values(Seq())
-        interpreter(Get("name", collection.Set(Open()))) mustEqual Values(Seq())
+        interpreter(Close("name")) mustEqual Values(Seq())
+        interpreter(Open("name")) mustEqual Values(Seq())
       }
 
       "set & get/open & get/abort" in {
         interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Get("name", collection.Set(Open()))) mustEqual
+        interpreter(Open("name")) mustEqual
           Values(Seq(Value("name", "rawr")))
-        interpreter(Get("name", collection.Set(Abort()))) mustEqual Values(Seq())
-        interpreter(Get("name", collection.Set(Open()))) mustEqual
+        interpreter(Abort("name")) mustEqual Values(Seq())
+        interpreter(Open("name")) mustEqual
           Values(Seq(Value("name", "rawr")))
       }
     }
@@ -70,19 +70,19 @@ object InterpreterSpec extends Specification {
     "delete" in {
       interpreter(Set("name", Time.now, "rawr"))
       interpreter(Delete("name"))
-      interpreter(Get("name", collection.Set.empty)) mustEqual Values(Seq.empty)
+      interpreter(Get("name")) mustEqual Values(Seq.empty)
     }
 
     "flush" in {
       interpreter(Set("name", Time.now, "rawr"))
       interpreter(Flush("name"))
-      interpreter(Get("name", collection.Set.empty)) mustEqual Values(Seq.empty)
+      interpreter(Get("name")) mustEqual Values(Seq.empty)
     }
 
     "flushAll" in {
       interpreter(Set("name", Time.now, "rawr"))
       interpreter(FlushAll())
-      interpreter(Get("name", collection.Set.empty)) mustEqual Values(Seq.empty)
+      interpreter(Get("name")) mustEqual Values(Seq.empty)
     }
 
     "version" in {

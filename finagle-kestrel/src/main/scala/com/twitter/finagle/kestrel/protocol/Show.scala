@@ -50,18 +50,29 @@ private[kestrel] class CommandToEncoding extends OneToOneEncoder {
     message match {
       case Set(key, expiry, value) =>
         TokensWithData(Seq(SET, key, ZERO, expiry.inSeconds.toString), value)
-      case Get(queueName, options) =>
+      case Get(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII)
-        options foreach { option =>
-          val optionString = option match {
-            case Timeout(timeout) => "t=" + timeout.inMilliseconds.toString
-            case Open()  => OPEN
-            case Close() => CLOSE
-            case Abort() => ABORT
-            case Peek()  => PEEK
-          }
-          key += "/" + optionString
-        }
+        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        Tokens(Seq(GET, key))
+      case Open(queueName, timeout) =>
+        var key = queueName.toString(CharsetUtil.US_ASCII) + "/open"
+        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        Tokens(Seq(GET, key))
+      case Close(queueName, timeout) =>
+        var key = queueName.toString(CharsetUtil.US_ASCII) + "/close"
+        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        Tokens(Seq(GET, key))
+      case CloseAndOpen(queueName, timeout) =>
+        var key = queueName.toString(CharsetUtil.US_ASCII) + "/close/open"
+        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        Tokens(Seq(GET, key))
+      case Abort(queueName, timeout) =>
+        var key = queueName.toString(CharsetUtil.US_ASCII) + "/abort"
+        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        Tokens(Seq(GET, key))
+      case Peek(queueName, timeout) =>
+        var key = queueName.toString(CharsetUtil.US_ASCII) + "/peek"
+        timeout.map { key += "/t=" + _.inMilliseconds.toString }
         Tokens(Seq(GET, key))
       case Delete(key) =>
         Tokens(Seq(DELETE, key))

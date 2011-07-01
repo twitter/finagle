@@ -106,7 +106,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
   }
 
   def get(queueName: String, waitUpTo: Duration = 0.seconds) = {
-    underlying.service(Get(queueName, collection.Set(Timeout(waitUpTo)))) map {
+    underlying.service(Get(queueName, Some(waitUpTo))) map {
       case Values(Seq()) => None
       case Values(Seq(Value(key, value))) => Some(value)
       case _ => throw new IllegalArgumentException
@@ -124,7 +124,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
           // only start receiving if we weren't already running
           if (!isRunning.getAndSet(true)) {
             underlying.make() onSuccess { service =>
-              receive(isRunning, service, queueName, result, waitUpTo, collection.Set(Open()))
+              receive(isRunning, service, Open(queueName, Some(waitUpTo)), result)
             } onFailure { t =>
               log.log(Level.WARNING, "Could not make service", t)
               result.close()
@@ -150,13 +150,11 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
   private[this] def receive(
     isRunning: AtomicBoolean,
     service: Service[Command, Response],
-    queueName: String,
-    channel: ChannelSource[ChannelBuffer],
-    waitUpTo: Duration,
-    options: collection.Set[GetOption])
+    command: GetCommand,
+    channel: ChannelSource[ChannelBuffer])
   {
-    def receiveAgain(options: collection.Set[GetOption]) {
-      receive(isRunning, service, queueName, channel, waitUpTo, options)
+    def receiveAgain(command: GetCommand) {
+      receive(isRunning, service, command, channel)
     }
 
     def cleanup() {
@@ -167,19 +165,23 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     // serialize() because of the check(isRunning)-then-act(send) idiom.
     channel.serialized {
       if (isRunning.get && service.isAvailable) {
-        val request = Get(queueName, collection.Set(Timeout(waitUpTo)) ++ options)
-        service(request) onSuccess {
+        service(command) onSuccess {
           case Values(Seq(Value(key, item))) =>
             try {
               Future.join(channel.send(item)) onSuccess { _ =>
-                receiveAgain(collection.Set(Close(), Open()))
+                receiveAgain(CloseAndOpen(command.queueName, command.timeout))
               } onFailure { t =>
                 // abort if not all observers ack the send
-                service(Get(queueName, collection.Set(Abort()))) ensure { cleanup() }
+                service(Abort(command.queueName)) ensure { cleanup() }
               }
             }
-          case Values(Seq()) => receiveAgain(collection.Set(Open()))
-          case _ => throw new IllegalArgumentException
+
+          case Values(Seq()) =>
+            receiveAgain(Open(command.queueName, command.timeout))
+
+          case _ =>
+            throw new IllegalArgumentException
+
         } onFailure { t =>
           log.log(Level.WARNING, "service produced exception", t)
           cleanup()

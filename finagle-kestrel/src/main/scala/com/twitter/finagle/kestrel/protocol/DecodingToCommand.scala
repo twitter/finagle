@@ -3,7 +3,6 @@ package com.twitter.finagle.kestrel.protocol
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.protocol.{ClientError, NonexistentCommand}
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import scala.Function.tupled
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.server.AbstractDecodingToCommand
 
@@ -40,7 +39,7 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
     val commandName = tokens.head
     val args = tokens.tail
     commandName match {
-      case GET        => tupled(Get)(validateGetCommand(args))
+      case GET        => validateGetCommand(args)
       case DELETE     => Delete(validateDeleteCommand(args))
       case FLUSH      => Flush(validateDeleteCommand(args))
       case FLUSH_ALL  => FlushAll()
@@ -52,26 +51,21 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
     }
   }
 
-  private[this] def validateGetCommand(tokens: Seq[ChannelBuffer]) = {
+  private[this] def validateGetCommand(tokens: Seq[ChannelBuffer]): GetCommand = {
     if (tokens.size < 1) throw new ClientError("Key missing")
     if (tokens.size > 1) throw new ClientError("Too many arguments")
 
     val split = tokens.head.split("/")
     val queueName = split.head
-    val options: collection.Set[GetOption] = split.tail.map { option =>
-      parseGetOption(option)
-    }.toSet
 
-    (queueName, options)
-  }
-
-  private[this] def parseGetOption(option: ChannelBuffer) = {
-    option match {
-      case OPEN  => Open()
-      case CLOSE => Close()
-      case ABORT => Abort()
-      case PEEK  => Peek()
-      case _     => throw new NonexistentCommand(option.toString)
+    split.tail match {
+      case Seq()           => Get(queueName)
+      case Seq(OPEN)       => Open(queueName)
+      case Seq(CLOSE)      => Close(queueName)
+      case Seq(CLOSE,OPEN) => CloseAndOpen(queueName)
+      case Seq(ABORT)      => Abort(queueName)
+      case Seq(PEEK)       => Peek(queueName)
+      case _               => throw new NonexistentCommand(tokens.toString)
     }
   }
 }

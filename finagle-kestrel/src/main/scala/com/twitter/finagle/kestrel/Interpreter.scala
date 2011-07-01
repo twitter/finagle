@@ -16,40 +16,70 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
 
   def apply(command: Command): Response = {
     command match {
-      case Get(queueName, options) =>
+      case Get(queueName, timeout) =>
         state match {
           case NoTransaction() =>
-            if (options.contains(Abort())) throw new InvalidStateTransition("NoTransaction", "abort")
-            if (options.contains(Close())) throw new InvalidStateTransition("NoTransaction", "close")
-
-            val timeoutOption = options.find(_.isInstanceOf[Timeout]).asInstanceOf[Option[Timeout]]
-            val wait = timeoutOption.map(_.duration).getOrElse(0.seconds)
+            val wait = timeout.getOrElse(0.seconds)
             val item = queues(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
-
             if (item eq null)
               Values(Seq.empty)
-            else {
-              if (options.contains(Open()))
-                state = OpenTransaction(queueName, item)
+            else
               Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
-            }
+          case OpenTransaction(txnQueueName, item) =>
+            throw new InvalidStateTransition("Transaction", "get")
+        }
+      case Open(queueName, timeout) =>
+        state match {
+          case NoTransaction() =>
+            val wait = timeout.getOrElse(0.seconds)
+            val item = queues(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
+            state = OpenTransaction(queueName, item)
+            if (item eq null)
+              Values(Seq.empty)
+            else
+              Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
+          case OpenTransaction(txnQueueName, item) =>
+            throw new InvalidStateTransition("Transaction", "get/open")
+        }
+      case Close(queueName, timeout) =>
+        state match {
+          case NoTransaction() =>
+            throw new InvalidStateTransition("Transaction", "get/close")
+          case OpenTransaction(txnQueueName, _) =>
+            require(queueName == txnQueueName,
+              "Cannot operate on a different queue than the one for which you have an open transaction")
+            state = NoTransaction()
+            Values(Seq.empty)
+        }
+      case CloseAndOpen(queueName, timeout) =>
+        state match {
+          case NoTransaction() =>
+            throw new InvalidStateTransition("Transaction", "get/close/open")
+          case OpenTransaction(txnQueueName, _) =>
+            require(queueName == txnQueueName,
+              "Cannot operate on a different queue than the one for which you have an open transaction")
+            state = NoTransaction()
+            apply(Open(queueName, timeout))
+        }
+      case Abort(queueName, timeout) =>
+        state match {
+          case NoTransaction() =>
+            throw new InvalidStateTransition("Transaction", "get/abort")
           case OpenTransaction(txnQueueName, item) =>
             require(queueName == txnQueueName,
               "Cannot operate on a different queue than the one for which you have an open transaction")
 
-            if (options.contains(Close())) {
-              state = NoTransaction()
-              apply(Get(queueName, options - Close()))
-            } else if (options.contains(Abort())) {
-              if (options.contains(Open())) throw new InvalidStateTransition("OpenTransaction", "open")
-
-              queues(queueName).addFirst(item)
-              state = NoTransaction()
-              Values(Seq.empty)
-            } else {
-              throw new InvalidStateTransition("OpenTransaction", "get/" + options)
-            }
+            queues(queueName).addFirst(item)
+            state = NoTransaction()
+            Values(Seq.empty)
         }
+      case Peek(queueName, timeout) =>
+        val wait = timeout.getOrElse(0.seconds)
+        val item = queues(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
+        if (item eq null)
+          Values(Seq.empty)
+        else
+          Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
       case Set(queueName, expiry, value) =>
         queues(queueName).add(value)
         Stored()
