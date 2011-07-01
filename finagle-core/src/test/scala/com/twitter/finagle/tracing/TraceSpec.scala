@@ -11,12 +11,12 @@ object TraceSpec extends Specification with Mockito {
     doBefore { Trace.clear() }
 
     val Seq(id0, id1, id2) = 0 until 3 map { i =>
-      TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i))
+      TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i), false)
     }
 
     "have a default id without parents, etc." in {
       Trace.id must beLike {
-        case TraceId(None, None, _) => true
+        case TraceId(None, None, _, false) => true
       }
     }
 
@@ -34,7 +34,7 @@ object TraceSpec extends Specification with Mockito {
       Trace.id must be_==(id0)
       Trace.popId()
       Trace.id must beLike {  // back to default
-        case TraceId(None, None, _) => true
+        case TraceId(None, None, _, false) => true
       }
     }
 
@@ -45,7 +45,7 @@ object TraceSpec extends Specification with Mockito {
         Trace.pushId()
         Trace.id must be_!=(defaultId)
         Trace.id must beLike {
-          case TraceId(None, None, _) => true
+          case TraceId(None, None, _, false) => true
         }
       }
 
@@ -54,7 +54,7 @@ object TraceSpec extends Specification with Mockito {
         val topId = Trace.id
         Trace.pushId()
         Trace.id must beLike {
-          case TraceId(Some(traceId), Some(parentId), _)
+          case TraceId(Some(traceId), Some(parentId), _, false)
           if (traceId == topId.traceId && parentId == topId.spanId) => true
         }
       }

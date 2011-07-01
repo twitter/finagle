@@ -29,7 +29,7 @@ object Trace {
   private[this] type Stack = List[Either[TraceId, Tracer]]
   private[this] val rng = new Random
 
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()))
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), false)
   private[this] val local = new Local[Stack]
 
   /**
@@ -59,10 +59,28 @@ object Trace {
    */
   def pushId(): TraceId = {
     val currentId = idOption
-    val nextId = TraceId(
+    val nextIdTmp = TraceId(
       currentId map { _.traceId },
       currentId map { _.spanId },
-      SpanId(rng.nextLong()))
+      SpanId(rng.nextLong()),
+      false)
+
+    // TODO room for improvements, see if we can move this decision out of Trace and into the tracers
+
+    // decide if we should sample or not, based on previous trace id's sample status
+    // or if this is new trace, check what the tracers think we should do
+    val sampled = currentId match {
+      case Some(cid) => cid.sampled
+      case None => tracers(local() getOrElse Nil, Some(nextIdTmp), Nil)
+          .foldLeft(false)((prev, tracer) => prev | tracer.sampleTrace(nextIdTmp))
+    }
+
+    val nextId = TraceId(
+      nextIdTmp._traceId,
+      nextIdTmp._parentId,
+      nextIdTmp.spanId,
+      sampled)
+
     pushId(nextId)
   }
 

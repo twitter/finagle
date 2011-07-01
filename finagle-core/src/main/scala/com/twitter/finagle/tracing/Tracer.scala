@@ -33,10 +33,17 @@ object Annotation {
 
 trait Tracer {
   def record(record: Record)
+
+  /**
+   * Should we sample this trace or not? Could be decided
+   * that a percentage of all traces will be let through for example.
+   */
+  def sampleTrace(traceId: TraceId): Boolean
 }
 
 object NullTracer extends Tracer {
   def record(record: Record) {/*ignore*/}
+  def sampleTrace(traceId: TraceId): Boolean = false
 }
 
 class BufferingTracer extends Tracer with Iterable[Record] {
@@ -45,10 +52,14 @@ class BufferingTracer extends Tracer with Iterable[Record] {
   def record(record: Record) { buf += record }
   def iterator = buf.iterator
   def clear() = buf.clear()
+
+  def sampleTrace(traceId: TraceId): Boolean = false
 }
 
 object ConsoleTracer extends Tracer {
   def record(record: Record) {
     println(record)
   }
+
+  def sampleTrace(traceId: TraceId): Boolean = false
 }

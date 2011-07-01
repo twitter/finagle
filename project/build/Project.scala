@@ -114,11 +114,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    * finagle-b3 contains bindings for the B3, or BigBrotherBird, tracing
    * framework. Send messages via scribe that is collected, indexed and analyzed.
    */
-  /* disabled until it complies with the new tracing APIs
   val b3Project = project(
     "finagle-b3", "finagle-b3",
     new B3Project(_), coreProject, thriftProject)
-  */
 
   /**
    * finagle-commons-stats contains bindings for using finagle in java projects

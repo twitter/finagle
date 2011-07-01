@@ -19,6 +19,7 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.tracing.{Trace, Annotation}
 
 import java.net.{InetSocketAddress, SocketAddress}
+import scala.Option._
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -139,8 +140,13 @@ private[thrift] class ThriftClientTracingFilter(serviceName: String, isUpgraded:
     val thriftRequest = if (isUpgraded) {
       val header = new thrift.TracedRequestHeader
       header.setSpan_id(Trace.id.spanId.toLong)
-      header.setParent_span_id(Trace.id.parentId.toLong)
-      header.setTrace_id(Trace.id.traceId.toLong)
+      Trace.id._parentId foreach { id => header.setParent_span_id(id.toLong) }
+
+      // if the span is marked as sampled do not set the trace id
+      // this is how the downstream finagle code knows if the request is sampled or not
+      if(!Trace.id.sampled) {
+        header.setTrace_id(Trace.id.traceId.toLong)
+      }
 
       new ThriftClientRequest(
         OutputBuffer.messageToArray(header) ++ request.message,

@@ -83,7 +83,8 @@ private[thrift] class ThriftServerTracingFilter(
       val traceId = TraceId(
         if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
-        SpanId(header.getSpan_id))
+        SpanId(header.getSpan_id),
+        !header.isSetTrace_id)
       Trace.pushId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
       Trace.recordServerAddr(boundAddress)
@@ -113,7 +114,12 @@ private[thrift] class ThriftServerTracingFilter(
         // to parse them out.
         Future.value(buffer.toArray)
       } else {
+        // request from client without tracing support
         Trace.pushId()
+
+        Trace.recordServerAddr(boundAddress)
+        Trace.recordRpcname(serviceName, msg.name)
+
         Trace.record(Annotation.ServerRecv())
 
         service(request) map { response =>

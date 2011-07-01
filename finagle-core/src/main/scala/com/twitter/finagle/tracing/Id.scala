@@ -26,7 +26,8 @@ object SpanId {
 final case class TraceId(
   _traceId: Option[SpanId],
   _parentId: Option[SpanId],
-  spanId: SpanId)
+  spanId: SpanId,
+  sampled: Boolean) // if true this trace is not collected
 {
   def traceId = _traceId getOrElse parentId
   def parentId = _parentId getOrElse spanId
