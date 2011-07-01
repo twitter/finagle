@@ -51,12 +51,11 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
       val expected = new ArrayList[LogEntry]()
       expected.add(new LogEntry().setCategory("b3")
         .setMessage("CgABAAAAAAAAAHsLAAIAAAAHc2VydmljZQsAAwAAAAZtZXRob2QKAAQAAAAAAAAAewoABQ" +
-        "AAAAAAAAB7DwAGDAAAAAIKAAEAAAAAB1TUwAsAAgAAAAJjcwwAAwgAAawQkCYGAAIAewAACgABAAAAAAdU" +
-        "1MALAAIAAAACY3IMAAMIAAGsEJAmBgACAHsAAA0ABwsLAAAAAQAAAANrZXkAAAAFdmFsdWUA"))
+        "AAAAAAAAB7DwAGDAAAAAIKAAEAAAAAB1TUwAsAAgAAAAJjcwAKAAEAAAAAB1TUwAsAAgAAAAJjcgANAAcL" +
+        "CwAAAAEAAAADa2V5AAAABXZhbHVlAA=="))
       client.Log(anyObject()) returns Future(ResultCode.OK)
 
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpcname("service", "method")))
-      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientAddr(new InetSocketAddress(123))))
       tracer.record(Record(traceId, Time.fromSeconds(123),
         Annotation.BinaryAnnotation("key", ByteBuffer.wrap("value".getBytes()))))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
