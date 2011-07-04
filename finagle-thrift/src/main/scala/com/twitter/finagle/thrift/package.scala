@@ -22,10 +22,9 @@ package com.twitter.finagle
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle finagle thrift codegenerator]].
  *
  * {{{
- * val protocolFactory = new TBinaryProtocol.Factory()
  * val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()
  *   .hosts("foobar.com:123")
- *   .codec(new ThriftClientFramedCodec(protocolFactory))
+ *   .codec(ThriftClientFramedCodec())
  *   .build()
  *
  * // Wrap the raw Thrift transport in a Client decorator. The client
