@@ -159,7 +159,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift    = "thrift"    % "libthrift" % "0.5.0"
-    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.2" % "provided"
+    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
   }
 
   class MemcachedProject(info: ProjectInfo) extends StandardProject(info)
@@ -201,7 +201,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults with CompileThriftFinagle
   {
-    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.2" % "provided"
+    val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
   }
 
 
@@ -225,7 +225,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"      % "libthrift" % "0.5.0"
-    val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.2" % "provided"
+    val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
     val ostrich4 = "com.twitter" % "ostrich" % "4.5.1"
   }
 
@@ -234,7 +234,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift    = "thrift"    % "libthrift" % "0.5.0"
-    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.2" % "provided"
+    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
   }
 
   class CommonsStatsProject(info: ProjectInfo) extends StandardProject(info)
