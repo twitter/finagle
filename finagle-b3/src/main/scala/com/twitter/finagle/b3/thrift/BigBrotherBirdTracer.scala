@@ -10,7 +10,6 @@ import java.nio.ByteBuffer
 
 import com.twitter.conversions.time._
 import com.twitter.util.Base64StringEncoder
-import com.twitter.finagle.tracing
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
@@ -18,6 +17,7 @@ import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
 
 import collection.mutable.{ArrayBuffer, WeakHashMap}
 import scala.collection.JavaConversions._
+import com.twitter.finagle.{Service, SimpleFilter, tracing}
 
 object BigBrotherBirdTracer {
 
@@ -35,7 +35,9 @@ object BigBrotherBirdTracer {
           .codec(ThriftClientFramedCodec())
           .hostConnectionLimit(5)
           .build()
-        val client = new scribe.ServiceToClient(transport, new TBinaryProtocol.Factory())
+
+        val client = new scribe.ServiceToClient(new TracelessFilter andThen transport,
+          new TBinaryProtocol.Factory())
 
         new BigBrotherBirdTracer(client, statsReceiver)
     })
@@ -183,4 +185,18 @@ private[thrift] class BigBrotherBirdTracer(
     }
   }
 
+}
+
+/**
+ * Makes sure we don't trace the Scribe logging.
+ */
+private[thrift] class TracelessFilter[Req, Rep]()
+  extends SimpleFilter[Req, Rep]
+{
+  def apply(request: Req, service: Service[Req, Rep]) = {
+    Trace.unwind {
+      Trace.clear()
+      service(request)
+    }
+  }
 }
