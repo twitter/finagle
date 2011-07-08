@@ -15,7 +15,12 @@ class TracingFilter[Req, Rep](tracer: Tracer)
   def apply(request: Req, service: Service[Req, Rep]) = {
     Trace.unwind {
       Trace.pushTracer(tracer)
-      Trace.pushId()
+      val nextId = Trace.nextId
+      if (Trace.id.sampled || tracer.sampleTrace(nextId)) {
+        Trace.pushId(nextId.copy(sampled = true))
+      } else {
+        Trace.pushId(nextId)
+      }
       service(request)
     }
   }

@@ -115,7 +115,6 @@ private[thrift] class ThriftServerTracingFilter(
         Future.value(buffer.toArray)
       } else {
         // request from client without tracing support
-        Trace.pushId()
 
         Trace.recordServerAddr(boundAddress)
         Trace.recordRpcname(serviceName, msg.name)

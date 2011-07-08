@@ -53,34 +53,23 @@ object Trace {
     local.clear()
   }
 
+    /**
+   * Create a derivative TraceId. If there isn't a
+   * current ID, this becomes the root id.
+   */
+  def nextId: TraceId = {
+    val currentId = idOption
+    TraceId(currentId map { _.traceId },
+      currentId map { _.spanId },
+      SpanId(rng.nextLong()),
+      false)
+  }
+
   /**
    * Create a derivative TraceId and push it.  If there isn't a
    * current ID, this becomes the root id.
    */
   def pushId(): TraceId = {
-    val currentId = idOption
-    val nextIdTmp = TraceId(
-      currentId map { _.traceId },
-      currentId map { _.spanId },
-      SpanId(rng.nextLong()),
-      false)
-
-    // TODO room for improvements, see if we can move this decision out of Trace and into the tracers
-
-    // decide if we should sample or not, based on previous trace id's sample status
-    // or if this is new trace, check what the tracers think we should do
-    val sampled = currentId match {
-      case Some(cid) => cid.sampled
-      case None => tracers(local() getOrElse Nil, Some(nextIdTmp), Nil)
-          .foldLeft(false)((prev, tracer) => prev | tracer.sampleTrace(nextIdTmp))
-    }
-
-    val nextId = TraceId(
-      nextIdTmp._traceId,
-      nextIdTmp._parentId,
-      nextIdTmp.spanId,
-      sampled)
-
     pushId(nextId)
   }
 

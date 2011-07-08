@@ -6,7 +6,8 @@ import com.twitter.util.Future
 import org.specs.Specification
 import org.specs.mock.Mockito
 import org.apache.thrift.protocol.{TMessageType, TMessage}
-import com.twitter.finagle.tracing.{TraceId, Tracer, Trace}
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.Filter._
 
 class ThriftClientFramedCodecSpec extends Specification with Mockito {
 
@@ -17,8 +18,6 @@ class ThriftClientFramedCodecSpec extends Specification with Mockito {
       tracer.sampleTrace(any(classManifest[TraceId])) returns true
 
       Trace.clear()
-      Trace.pushTracer(tracer)
-      Trace.pushId()
 
       val filter = new ThriftClientTracingFilter("service", true)
       val buffer = new OutputBuffer()
@@ -28,12 +27,14 @@ class ThriftClientFramedCodecSpec extends Specification with Mockito {
       options.write(buffer())
       buffer().writeMessageEnd()
 
+      val tracing = new TracingFilter[ThriftClientRequest, Array[Byte]](tracer)
       val service = mock[Service[ThriftClientRequest, Array[Byte]]]
       val _request = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
-
       service(_request.capture) returns Future(Array[Byte]())
 
-      filter((new ThriftClientRequest(buffer.toArray, false)), service)
+      val stack = tracing andThen filter
+      stack(new ThriftClientRequest(buffer.toArray, false), service)
+
       val header = new thrift.TracedRequestHeader
       InputBuffer.peelMessage(_request.getValue.message, header)
 

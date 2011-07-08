@@ -15,7 +15,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
 
-import collection.mutable.{ArrayBuffer, WeakHashMap}
+import collection.mutable.{ArrayBuffer, HashMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 
@@ -23,11 +23,11 @@ object BigBrotherBirdTracer {
 
   // to make sure we only create one instance of the tracer
   // per host and port
-  private val map = WeakHashMap[String, BigBrotherBirdTracer]()
+  private val map = HashMap[String, BigBrotherBirdTracer]()
 
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
-            statsReceiver: StatsReceiver): BigBrotherBirdTracer = {
+            statsReceiver: StatsReceiver): BigBrotherBirdTracer = synchronized {
 
     map.getOrElseUpdate(scribeHost + ":" + scribePort, {
         val transport = ClientBuilder()
