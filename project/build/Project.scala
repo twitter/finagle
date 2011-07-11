@@ -4,10 +4,9 @@ import com.twitter.sbt._
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
   with ParentProjectDependencies
-  with TartifactoryRepos
+  with DefaultRepos
 {
   override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
-  override def proxyRepo = "open-source"
 
   val nettyRepo =
     "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
@@ -128,11 +127,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   trait Defaults
     extends ProjectDependencies
-    with TartifactoryRepos
+    with DefaultRepos
     with SubversionPublisher
-  {
-    override def proxyRepo = "open-source"
-  }
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults
