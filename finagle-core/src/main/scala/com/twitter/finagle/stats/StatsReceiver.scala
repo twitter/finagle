@@ -1,5 +1,7 @@
 package com.twitter.finagle.stats
 
+import com.twitter.util.{Future, Time}
+
 /**
  * A writeable Counter. Only sums are kept of Counters.  An example
  * Counter is "number of requests served".
@@ -25,6 +27,26 @@ object StatsReceiver {
 }
 
 trait StatsReceiver {
+  /**
+   * Time a given function in milliseconds
+   */
+  def time[T](name: String*)(f: => T): T = {
+    val start = Time.now
+    val result = f
+    stat(name: _*).add((Time.now - start).inMilliseconds)
+    result
+  }
+
+  /**
+   * Time a given future in milliseconds
+   */
+  def timeFuture[T](name: String*)(f: => Future[T]): Future[T] = {
+    val start = Time.now
+    f ensure {
+      stat(name: _*).add((Time.now - start).inMilliseconds)
+    }
+  }
+
   /**
    * Get a Counter with the description
    */
