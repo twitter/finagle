@@ -76,6 +76,19 @@ object RetryingFilterSpec extends Specification with Mockito {
       retryingService(123)() must be_==(321)
       there was no(stat).add(any[Int])
     }
+
+    "propagate cancellation" in {
+      val replyPromise = new Promise[Int]
+      service(123) returns replyPromise
+
+      val res = retryingService(123)
+      res.isDefined must beFalse
+      replyPromise.isCancelled must beFalse
+
+      res.cancel()
+      res.isDefined must beFalse
+      replyPromise.isCancelled must beTrue
+    }
   }
 
   "Backoff" should {

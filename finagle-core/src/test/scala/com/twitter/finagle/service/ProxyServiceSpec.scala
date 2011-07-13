@@ -60,5 +60,22 @@ object ProxyServiceSpec extends Specification with Mockito {
       f.isDefined must beTrue
       f() must throwA(new Exception("sad panda"))
     }
+
+    "proxy cancellation" in {
+      val promise = new Promise[Service[Int, Int]]
+      val proxy = new ProxyService(promise)
+
+      val f123 = proxy(123)
+
+      val replyPromise = new Promise[Int]
+      underlying(123) returns replyPromise
+
+      f123.cancel()
+
+      promise() = Return(underlying)
+
+      there was one(underlying)(123)
+      replyPromise.isCancelled must beTrue
+    }
   }
 }

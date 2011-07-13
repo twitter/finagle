@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.util
-import com.twitter.util.{Future, Duration, Throw}
+import com.twitter.util.{Future, Duration, Throw, TimeoutException}
 
 import com.twitter.finagle.TimedoutRequestException
 import com.twitter.finagle.util.Conversions._
@@ -16,8 +16,12 @@ class TimeoutFilter[Req, Rep](timeout: Duration, timer: util.Timer = Timer.defau
   extends Filter[Req, Rep, Req, Rep]
 {
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    service(request).timeout(timer, timeout) {
-      Throw(new TimedoutRequestException)
+    val res = service(request)
+
+    res.within(timer, timeout) rescue {
+      case _: TimeoutException =>
+        res.cancel()
+        Future.exception(new TimedoutRequestException)
     }
   }
 }

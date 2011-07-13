@@ -62,8 +62,21 @@ object WatermarkPoolSpec extends Specification with Mockito {
       there was no(service0).release()
     }
 
-    "make a new item if the returned item is unhealthy" in {
+    "throw CancelledConnectionException if an enqueued waiter is cancelled" in {
+      pool.make().isDefined must beTrue  // consume item
+      there was one(factory).make()
+
+      val f1 = pool.make()
+      f1.isDefined must beFalse
+
+      f1.cancel()
+      f1.isDefined must beTrue
+      f1() must throwA(new CancelledConnectionException)
+    }
+
+    "when giving an unhealthy item back" in {
       val service1 = mock[Service[Int, Int]]
+      val service1Promise = new Promise[Service[Int, Int]]
       service1(123) returns Future.value(111)
 
       val f0 = pool.make()
@@ -73,25 +86,36 @@ object WatermarkPoolSpec extends Specification with Mockito {
       val f1 = pool.make()
       f1.isDefined must beFalse
 
-      factory.make() returns Future.value(service1)
+      factory.make() returns service1Promise
       service0.isAvailable returns false
       service1.isAvailable returns true
 
-      f0().release()
-      there was one(service0).release()
-      there was one(service0).isAvailable
-      f1.isDefined must beTrue
-      there were two(factory).make()
-      f1()(123)() must be_==(111)
+      "make a new item" in {
+        service1Promise() = Return(service1)
+        f0().release()
+        there was one(service0).release()
+        there was one(service0).isAvailable
+        f1.isDefined must beTrue
+        there were two(factory).make()
+        f1()(123)() must be_==(111)
 
-      // Healthy again:
-      f1().release()
-      there was one(service1).isAvailable
-      // No additional disposes.
-      there was no(service1).release()
+        // Healthy again:
+        f1().release()
+        there was one(service1).isAvailable
+        // No additional disposes.
+        there was no(service1).release()
+      }
+
+      "propagate cancellation" in {
+        f0().release()
+        // now we're waiting.
+        service1Promise.isCancelled must beFalse
+        f1.cancel()
+        service1Promise.isCancelled must beTrue
+      }
     }
   }
-  
+
   "WatermarkPool (lowWatermark = 1, highWatermark = 1, maxWaiters = 2)" should {
     val factory = mock[ServiceFactory[Int, Int]]
     val service0 = mock[Service[Int, Int]]
@@ -101,25 +125,25 @@ object WatermarkPoolSpec extends Specification with Mockito {
     service0.isAvailable returns true
 
     val pool = new WatermarkPool(factory, 1, 1, maxWaiters = 2)
-    
+
     "throw TooManyWaitersException when the number of waiters exceeds 2" in {
       val f0 = pool.make()
       f0.isDefined must beTrue
       there was one(factory).make()
-      
+
       // one waiter. this is cool.
       val f1 = pool.make()
       f1.isDefined must beFalse
-      
+
       // two waiters. this is *still* cool.
       val f2 = pool.make()
       f2.isDefined must beFalse
-      
+
       // three waiters and i freak out.
       val f3 = pool.make()
       f3.isDefined must beTrue
       f3() must throwA[TooManyWaitersException]
-      
+
       // give back my original item, and f1 should still get something.
       f0().release()
 

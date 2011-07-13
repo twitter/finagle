@@ -38,7 +38,7 @@ object ChannelServiceSpec extends Specification with Mockito {
       there was one(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
       eventCaptor.getValue must haveClass[DownstreamMessageEvent]
       val messageEvent = eventCaptor.getValue.asInstanceOf[DownstreamMessageEvent]
-      
+
       "propagate the correct message" in {
         messageEvent.getMessage must be_==("hello")
       }
@@ -50,7 +50,7 @@ object ChannelServiceSpec extends Specification with Mockito {
 
       "silently ignore other errors after a downstream write failure" in {
         messageEvent.getFuture.setFailure(new Exception("doh."))
-        future() must throwA(new WriteException(new Exception("doh.")))        
+        future() must throwA(new WriteException(new Exception("doh.")))
 
         val stateEvent = mock[ChannelStateEvent]
         stateEvent.getState returns ChannelState.OPEN
@@ -59,6 +59,26 @@ object ChannelServiceSpec extends Specification with Mockito {
         val handler = pipeline.getLast.asInstanceOf[ChannelUpstreamHandler]
         handler.handleUpstream(context, stateEvent)
         // (setting the future twice would cause an exception)
+      }
+    }
+
+    "propagate cancellation" in {
+      val service = new ChannelService[String, String](channel, factory)
+      val future = service("hello")
+
+      future.isCancelled must beFalse
+
+      there was one(sink).eventSunk(Matchers.eq(pipeline), any)
+
+      // cancellation causes the channel to close
+      future.cancel()
+      val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
+      there were two(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
+      eventCaptor.getValue must beLike {
+        case stateEvent: DownstreamChannelStateEvent =>
+          stateEvent.getState must be_==(ChannelState.OPEN)
+          stateEvent.getValue must be_==(java.lang.Boolean.FALSE)
+          true
       }
     }
 

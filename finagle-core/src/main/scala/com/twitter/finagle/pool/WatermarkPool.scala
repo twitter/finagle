@@ -5,8 +5,9 @@ import scala.collection.mutable.Queue
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.{
-  Service, ServiceFactory, ServiceClosedException, 
-  TooManyWaitersException, ServiceProxy}
+  Service, ServiceFactory, ServiceClosedException,
+  TooManyWaitersException, ServiceProxy,
+  CancelledConnectionException}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
@@ -21,7 +22,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 class WatermarkPool[Req, Rep](
     factory: ServiceFactory[Req, Rep],
     lowWatermark: Int, highWatermark: Int = Int.MaxValue,
-    statsReceiver: StatsReceiver = NullStatsReceiver, 
+    statsReceiver: StatsReceiver = NullStatsReceiver,
     maxWaiters: Int = Int.MaxValue)
   extends ServiceFactory[Req, Rep]
 {
@@ -48,7 +49,8 @@ class WatermarkPool[Req, Rep](
         // waiter.
         if (numServices < highWatermark && !waiters.isEmpty) {
           val waiter = waiters.dequeue()
-          make() respond { waiter() = _ }
+          val res = make() respond { waiter() = _ }
+          waiter.linkTo(res)
         }
       } else if (!waiters.isEmpty) {
         val waiter = waiters.dequeue()
@@ -93,6 +95,11 @@ class WatermarkPool[Req, Rep](
       case None =>
         val promise = new Promise[Service[Req, Rep]]
         waiters += promise
+        promise onCancellation {
+          // remove ourselves from the waitlist if we're still there.
+          val dq = synchronized { waiters.dequeueFirst { _ eq promise } }
+          dq foreach { _() = Throw(new CancelledConnectionException) }
+        }
         promise
     }
   }

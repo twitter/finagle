@@ -4,30 +4,35 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import com.twitter.finagle.util.Timer
 import com.twitter.conversions.time._
-import com.twitter.util.Promise
-import com.twitter.finagle.TimedoutRequestException
-import com.twitter.finagle.Service
+import com.twitter.util.{Promise, Time}
+import com.twitter.finagle.{TimedoutRequestException, Service, MockTimer}
 
 object TimeoutFilterSpec extends Specification with Mockito {
   "TimeoutFilter" should {
-    val timer = Timer.default
-    timer.acquire()
-    doAfter { timer.stop() }
-
+    val timer = new MockTimer
     val promise = new Promise[String]
     val service = new Service[String, String] {
       def apply(request: String) = promise
     }
-    val timeoutFilter = new TimeoutFilter[String, String](1.second)
+    val timeoutFilter = new TimeoutFilter[String, String](1.second, timer)
     val timeoutService = timeoutFilter.andThen(service)
 
-    "cancels the request when the service succeeds" in {
+    "the request succeeds when the service succeeds" in {
       promise.setValue("1")
-      timeoutService("blah")(2.seconds) mustBe "1"
+      val res = timeoutService("blah")
+      res.isDefined must beTrue
+      res() mustBe "1"
     }
 
-    "times out a request that is not successful" in {
-      timeoutService("blah")(2.seconds) must throwA[TimedoutRequestException]
+    "times out a request that is not successful, cancels underlying" in Time.withCurrentTimeFrozen { tc =>
+      val res = timeoutService("blah")
+      res.isDefined must beFalse
+      promise.isCancelled must beFalse
+      tc.advance(2.seconds)
+      timer.tick()
+      res.isDefined must beTrue
+      promise.isCancelled must beTrue
+     res() must throwA[TimedoutRequestException]
     }
   }
 }

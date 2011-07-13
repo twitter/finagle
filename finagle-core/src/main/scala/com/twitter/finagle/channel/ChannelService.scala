@@ -28,7 +28,7 @@ private[finagle] class ChannelService[Req, Rep](
     log: Logger)
   extends Service[Req, Rep]
 {
-  def this(channel: Channel, factory: ChannelServiceFactory[Req, Rep]) = 
+  def this(channel: Channel, factory: ChannelServiceFactory[Req, Rep]) =
     this(channel, factory, Logger.getLogger(classOf[ChannelService[Req, Rep]].getName))
 
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
@@ -87,6 +87,12 @@ private[finagle] class ChannelService[Req, Rep](
           replyFuture.updateIfEmpty(Throw(new WriteException(ChannelException(cause))))
         case _ => ()
       }
+
+      replyFuture onCancellation {
+        // This will propagate to an error, etc.
+        Channels.close(channel)
+      }
+
       replyFuture
     } else {
       Future.exception(new TooManyConcurrentRequestsException)
@@ -106,7 +112,7 @@ private[finagle] class ChannelService[Req, Rep](
         true
       }
     }
-    
+
     if (doRelease) {
       if (channel.isOpen) channel.close()
       factory.channelReleased(this)
@@ -138,7 +144,13 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
     val begin = Time.now
 
     val promise = new Promise[Service[Req, Rep]]
-    bootstrap.connect() {
+    val connectFuture = bootstrap.connect()
+    promise onCancellation {
+      // propagate cancellations
+      connectFuture.cancel()
+    }
+
+    connectFuture {
       case Ok(channel) =>
         channelLatch.incr()
         connectLatencyStat.add(begin.untilNow.inMilliseconds)

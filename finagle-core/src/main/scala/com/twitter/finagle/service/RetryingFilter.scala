@@ -55,7 +55,7 @@ class RetryingFilter[Req, Rep](
     backoffs: Stream[Duration],
     count: Int = 0
   ) {
-    service(request) respond { res =>
+    val res = service(request) respond { res =>
       if (shouldRetry.isDefinedAt(res) && shouldRetry(res)) {
         backoffs match {
           case howlong #:: rest if howlong > 0.seconds =>
@@ -75,6 +75,7 @@ class RetryingFilter[Req, Rep](
         replyPromise() = res
       }
     }
+    replyPromise.linkTo(res)
   }
 
   def apply(request: Req, service: Service[Req, Rep]) = {

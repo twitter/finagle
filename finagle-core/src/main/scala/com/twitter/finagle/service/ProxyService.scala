@@ -22,7 +22,8 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
           r match {
             case Return(service) =>
               requestBuffer foreach { case (request, promise) =>
-                service(request) respond { promise() = _ }
+                val res = service(request) respond { promise() = _ }
+                promise.linkTo(res)
               }
 
               underlying = Some(service)
