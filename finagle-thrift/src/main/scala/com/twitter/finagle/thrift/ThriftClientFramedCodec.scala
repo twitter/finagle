@@ -46,10 +46,8 @@ class ThriftClientFramedCodecFactory
   }
 }
 
-private[thrift] class ThriftClientFramedCodec(
-  protocolFactory: TProtocolFactory, 
-  config: ClientCodecConfig
-) extends Codec[ThriftClientRequest, Array[Byte]]
+class ThriftClientFramedCodec(protocolFactory: TProtocolFactory, config: ClientCodecConfig)
+  extends Codec[ThriftClientRequest, Array[Byte]]
 {
   def pipelineFactory =
     new ChannelPipelineFactory {

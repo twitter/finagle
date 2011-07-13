@@ -25,7 +25,7 @@ object ThriftServerFramedCodecFactory
   def apply(config: ServerCodecConfig) = new ThriftServerFramedCodec(config)
 }
 
-private[thrift] class ThriftServerFramedCodec(config: ServerCodecConfig)
+class ThriftServerFramedCodec(config: ServerCodecConfig)
   extends Codec[Array[Byte], Array[Byte]]
 {
   def pipelineFactory =
