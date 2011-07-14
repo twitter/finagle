@@ -46,6 +46,7 @@ object ChannelException {
 class ServiceException             extends Exception
 class ServiceClosedException       extends ServiceException
 class ServiceNotAvailableException extends ServiceException
+class ServiceTimeoutException      extends ServiceException
 
 // Subclass this for application exceptions
 class ApplicationException extends Exception
