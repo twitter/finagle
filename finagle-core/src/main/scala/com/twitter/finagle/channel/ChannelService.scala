@@ -83,8 +83,11 @@ private[finagle] class ChannelService[Req, Rep](
     if (currentReplyFuture.compareAndSet(null, replyFuture)) {
       Channels.write(channel, request) {
         case Error(cause) =>
-          isHealthy = false
-          replyFuture.updateIfEmpty(Throw(new WriteException(ChannelException(cause))))
+          if (currentReplyFuture.compareAndSet(replyFuture, null)) {
+            isHealthy = false
+            if (channel.isOpen) Channels.close(channel)
+            replyFuture() = Throw(new WriteException(ChannelException(cause)))
+          }
         case _ => ()
       }
 

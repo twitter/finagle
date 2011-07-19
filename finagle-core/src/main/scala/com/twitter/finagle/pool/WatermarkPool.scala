@@ -26,7 +26,7 @@ class WatermarkPool[Req, Rep](
     maxWaiters: Int = Int.MaxValue)
   extends ServiceFactory[Req, Rep]
 {
-  private[this] val queue       = Queue[Service[Req, Rep]]()
+  private[this] val queue       = Queue[ServiceWrapper]()
   private[this] val waiters     = Queue[Promise[Service[Req, Rep]]]()
   private[this] var numServices = 0
   private[this] var isOpen      = true
@@ -70,8 +70,9 @@ class WatermarkPool[Req, Rep](
     } else {
       val service = queue.dequeue()
       if (!service.isAvailable) {
+        // Note: since these are ServiceWrappers, accounting is taken
+        // care of by ServiceWrapper.release()
         service.release()
-        numServices -= 1
         dequeue()
       } else {
         Some(service)
