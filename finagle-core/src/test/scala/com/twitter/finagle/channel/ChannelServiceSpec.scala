@@ -84,7 +84,9 @@ object ChannelServiceSpec extends Specification with Mockito {
 
     "receive replies" in {
       val service = new ChannelService[String, String](channel, factory)
+      service.isAvailable must beTrue
       val future = service("hello")
+      service.isAvailable must beFalse
       there was one(sink).eventSunk(Matchers.eq(pipeline), Matchers.any[ChannelEvent])
 
       val handler = pipeline.getLast.asInstanceOf[ChannelUpstreamHandler]
@@ -92,7 +94,6 @@ object ChannelServiceSpec extends Specification with Mockito {
       val event = mock[MessageEvent]
       event.getMessage returns "olleh"
       future.isDefined must beFalse
-      service.isAvailable must beTrue
 
       "on success" in {
         handler.handleUpstream(context, event)

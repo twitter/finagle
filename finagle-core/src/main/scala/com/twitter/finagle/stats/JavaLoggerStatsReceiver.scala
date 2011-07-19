@@ -17,7 +17,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: util.Timer)
 
   def stat(name: String*) = new Stat {
     def add(value: Float) {
-      logger.info("%s add %f (%d)".format(formatName(name), value))
+      logger.info("%s add %f".format(formatName(name), value))
     }
   }
 

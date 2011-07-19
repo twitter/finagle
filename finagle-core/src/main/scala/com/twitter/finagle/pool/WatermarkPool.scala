@@ -71,6 +71,7 @@ class WatermarkPool[Req, Rep](
       val service = queue.dequeue()
       if (!service.isAvailable) {
         service.release()
+        numServices -= 1
         dequeue()
       } else {
         Some(service)

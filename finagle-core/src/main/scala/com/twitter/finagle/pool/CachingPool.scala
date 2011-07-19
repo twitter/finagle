@@ -6,6 +6,7 @@ import com.twitter.util.{Future, Time, Duration}
 
 import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException}
 import com.twitter.finagle.util.Timer
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
  * A pool that temporarily caches items from the underlying one, up to
@@ -14,12 +15,17 @@ import com.twitter.finagle.util.Timer
 class CachingPool[Req, Rep](
   factory: ServiceFactory[Req, Rep],
   timeout: Duration,
-  timer: com.twitter.util.Timer = Timer.default)
+  timer: com.twitter.util.Timer = Timer.default,
+  statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
   private[this] val deathRow    = Queue[(Time, Service[Req, Rep])]()
   private[this] var isOpen      = true
   private[this] var isScheduled = false
+  private[this] val sizeGauge =
+    statsReceiver.addGauge("pool_cached") {
+      synchronized { deathRow.size }
+    }
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)

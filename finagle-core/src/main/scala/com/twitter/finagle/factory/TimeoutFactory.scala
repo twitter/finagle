@@ -26,6 +26,7 @@ class TimeoutFactory[Req, Rep](
     res.within(timer, timeout) rescue {
       case _: TimeoutException =>
         res.cancel()
+        res onSuccess { _.release() }
         Future.exception(new ServiceTimeoutException)
     }
   }

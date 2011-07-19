@@ -89,8 +89,11 @@ private[finagle] class ChannelService[Req, Rep](
       }
 
       replyFuture onCancellation {
-        // This will propagate to an error, etc.
-        Channels.close(channel)
+        if (currentReplyFuture.compareAndSet(replyFuture, null)) {
+          isHealthy = false
+          if (channel.isOpen) Channels.close(channel)
+          replyFuture() = Throw(new CancelledRequestException)
+        }
       }
 
       replyFuture
@@ -118,7 +121,15 @@ private[finagle] class ChannelService[Req, Rep](
       factory.channelReleased(this)
     }
   }
-  override def isAvailable = isHealthy && channel.isOpen
+
+  /**
+   * True when the channel has an outstanding request.
+   */
+  private[this] def isBusy = currentReplyFuture.get != null
+
+   // We only handle one request at a time -- don't expose upstream
+   // availability while we're still busy.
+  override def isAvailable = !isBusy && isHealthy && channel.isOpen
 }
 
 /**

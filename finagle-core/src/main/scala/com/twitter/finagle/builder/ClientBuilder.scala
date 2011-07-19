@@ -576,7 +576,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val maxWaiters    = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
 
     val underlyingFactory = if (idleTime > 0.seconds)
-      new CachingPool(factory, idleTime)
+      new CachingPool(factory, idleTime, statsReceiver = statsReceiver)
     else
       factory
 
@@ -698,10 +698,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     // We keep the retrying filter at the very bottom: this allows us
     // to retry across multiple hosts, etc.
-    config.retries map { numRetries =>
+    config.retries foreach { numRetries =>
       val filter = RetryingService.tries[Req, Rep](
-        numRetries,
-        statsReceiver)
+        numRetries, statsReceiver)
       service = filter andThen service
     }
 

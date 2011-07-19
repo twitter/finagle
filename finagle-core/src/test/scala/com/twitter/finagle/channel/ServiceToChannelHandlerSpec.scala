@@ -1,6 +1,6 @@
 package com.twitter.finagle.channel
 
-import java.util.logging.Logger
+import java.util.logging.{Logger, Level}
 
 import org.specs.Specification
 import org.specs.mock.Mockito
@@ -16,6 +16,13 @@ import com.twitter.finagle.{ClientConnection, Service}
 import com.twitter.finagle.stats.StatsReceiver
 
 object ServiceToChannelHandlerSpec extends Specification with Mockito {
+  def withLoggingOff[A](f: => A): A = {
+    val rootLogger = Logger.getLogger("")
+    val savedLevel = rootLogger.getLevel
+    rootLogger.setLevel(Level.OFF)
+    try f finally rootLogger.setLevel(savedLevel)
+  }
+
   "ServiceToChannelHandler" should {
     class Foo { def fooMethod() = "hey there" }
 
@@ -63,22 +70,26 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
 
     "service shutdown" in {
       "when sending an invalid message" in {
-        e.getMessage returns mock[Object]   // wrong type
-        handler.messageReceived(ctx, e)
+        withLoggingOff {
+          e.getMessage returns mock[Object]   // wrong type
+          handler.messageReceived(ctx, e)
 
-        // Unfortunately, we rely on catching the ClassCastError from
-        // the invocation of the service itself :-/
-        //   there was no(service)(Matchers.any[Foo])
-        there was one(service).release()
-        there was one(channel).close()
+          // Unfortunately, we rely on catching the ClassCastError from
+          // the invocation of the service itself :-/
+          //   there was no(service)(Matchers.any[Foo])
+          there was one(service).release()
+          there was one(channel).close()
+        }
       }
 
       "when the service handler throws" in {
-        service(request) returns Future.exception(new Exception("WTF"))
-        handler.messageReceived(ctx, e)
+        withLoggingOff {
+          service(request) returns Future.exception(new Exception("WTF"))
+          handler.messageReceived(ctx, e)
 
-        there was one(service).release()
-        there was one(channel).close()
+          there was one(service).release()
+          there was one(channel).close()
+        }
       }
     }
   }

@@ -38,6 +38,7 @@ object CancellationSpec extends Specification with IntegrationBase with Mockito 
       val f = client("123")
       f.isDefined must beFalse
       m.connectFuture.setSuccess()
+      m.channel.isOpen returns true
 
       // the request was sent.
       val meCaptor = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])

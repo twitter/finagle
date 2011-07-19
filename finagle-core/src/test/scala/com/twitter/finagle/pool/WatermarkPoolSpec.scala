@@ -74,6 +74,21 @@ object WatermarkPoolSpec extends Specification with Mockito {
       f1() must throwA(new CancelledConnectionException)
     }
 
+    "when item becomes unhealthy while pool is idle, it is returned" in {
+      val f0 = pool.make()
+      f0.isDefined must beTrue
+      f0().release()  // give it back
+      there was no(service0).release()  // it retained
+
+      val service1 = mock[Service[Int, Int]]
+      factory.make() returns Future.value(service1)
+      service0.isAvailable returns false
+
+      val f1 = pool.make()
+      there was one(service0).release()
+      f1.isDefined must beTrue
+    }
+
     "when giving an unhealthy item back" in {
       val service1 = mock[Service[Int, Int]]
       val service1Promise = new Promise[Service[Int, Int]]
