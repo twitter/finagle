@@ -1,0 +1,11 @@
+2011-07-18	1.7.2
+
+	* support end-to-end cancellation in finagle clients; fixes
+	possible pool starvation conditions, and allows clients to
+	cancel requests and reclaim resources
+	* end-to-end timeouts: introduce, .connectTimeout and
+	.timeout.  .connectTimeout is the end-to-end connection
+	timeout (includes acquisition & TCP time), .timeout is an
+	end-to-end request time: no requests will take longer
+	* some doc fixes
+	* misc. bug fixes
