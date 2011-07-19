@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
 import client.DecodingToResponse
-import com.twitter.finagle.{CodecFactory, Codec}
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.buffer.ChannelBuffer
@@ -9,6 +8,9 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import server.DecodingToCommand
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
+import com.twitter.finagle.{SimpleFilter, Service, CodecFactory, Codec}
+import com.twitter.finagle.tracing.{Annotation, Trace}
+import com.twitter.util.Future
 
 object Memcached {
   def apply() = new Memcached
@@ -52,6 +54,30 @@ class Memcached extends CodecFactory[Command, Response] {
           pipeline
         }
       }
+
+      // pass every request through a filter to create trace data
+      override def prepareService(underlying: Service[Command, Response]) = {
+        Future.value((new MemcachedTracingFilter()) andThen underlying)
+      }
+    }
+  }
+}
+
+/**
+ * Adds tracing information for each memcached request.
+ * Including command name, when request was sent and when it was received.
+ */
+private class MemcachedTracingFilter extends SimpleFilter[Command, Response]
+{
+  def apply(
+    request: Command,
+    service: Service[Command, Response]
+  ) = {
+    Trace.recordRpcname("memcached", request.getClass().getSimpleName())
+    Trace.record(Annotation.ClientSend())
+
+    service(request) onSuccess { _ =>
+      Trace.record(Annotation.ClientRecv())
     }
   }
 }
