@@ -184,7 +184,7 @@ All code that executes inside a Finagle client request, or Finagle server respon
       val result = client(request)()
     }
 
-To avoid placing these operations in the event loop, Finagle provides Futures. A blocking or long-running operation expressed as a Future allows Finagle to process other events as it waits for the operation to complete, and allows you to structure your code similar to how you would if the operations were happening sequentially and without interruption. See the section "Using Futures" below to learn how to use Futures and FuturePools to avoid remove blocking or long-running operations from the Finagle event dispatch loop. 
+To avoid placing these operations in the event loop, Finagle provides Futures. A blocking or long-running operation expressed as a Future allows Finagle to process other events as it waits for the operation to complete, and allows you to structure your code similarly to how you would if the operations were happening sequentially and without interruption. See the section "Using Futures" below to learn how to use Futures and FuturePools to avoid executing blocking or long-running operations in the Finagle event dispatch loop.
 
 Footnote: Strictly speaking, synchronization in the event loop is fine as long as contention and wait time are going to be low. But you should be sure you know what you're doing.
 
@@ -193,6 +193,7 @@ Footnote: Strictly speaking, synchronization in the event loop is fine as long a
 Another `Filter` typical of an RPC Service is authentication and authorization. Our `Service` wants to ensure that the user is authorized to perform addition:
 
 Notes:
+
 1. A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. It saves a little bit of typing.
 1. An exception can be returned asynchronously by calling `Future.exception`. See the section "Using Futures" for more information.
 
@@ -223,7 +224,7 @@ Finagle makes it easy to build RPC clients with connection pooling, load balanci
 Note that the `ClientBuilder` requires the definition of `codec`,
 `hosts` and `hostConnectionLimit`. In Scala, this requirement is
 statically typechecked.
-    
+
     val client = ClientBuilder()
         .codec(Http)
         .hosts("localhost:10000,localhost:10001,localhost:10003")
@@ -299,7 +300,7 @@ In the example below, we define a function `f` that takes an `Int` and returns a
       else throw new OddNumberException
     }
 
-    // 1) Wait 1 second the for computation to return
+    // 1) Wait 1 second for the computation to return
     try {
       println(myFuture(1.second))
     } catch {
@@ -475,7 +476,7 @@ That's it!
 - *memcache*: loosen type restrictions on passed-in builders, add TTL interface in the Java client
 - *tracing*: add support for binary key-value annotations
 - *streaming*: fix reconnect bug
-- *codec*: support codec _factories_. these produce codecs based on a configuration, allowing us to expose configured aspects of the builder and 
+- *codec*: support codec _factories_. these produce codecs based on a configuration, allowing us to expose configured aspects of the builder and
 - *lifecycle*: allow stopping a timer in the timerthread itself. this allows for the last client to be killed by a client (eg. connection expiration)
 http: fix race conditions in HTTP connection manager which caused heavy connection contention, and ConnectionClosed failures for many requests under heavy load.
 - *health*: add health callback with high/low watermark support.

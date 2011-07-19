@@ -9,7 +9,7 @@ import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ThriftClientRequest}
 object ThriftClient {
   def main(args: Array[String]) {
     // Create a raw Thrift client service. This implements the
-    // ThrfitClientRequest => Future[Array[Byte]] interface.
+    // ThriftClientRequest => Future[Array[Byte]] interface.
     val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()
       .hosts(new InetSocketAddress(8080))
       .codec(ThriftClientFramedCodec())
