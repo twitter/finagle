@@ -70,15 +70,42 @@ trait Client {
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
 
   /**
+   * Perform a CAS operation on the key, only if the value has not
+   * changed since the value was last retrieved, and `casUnique`
+   * extracted from a `gets` command.  We treat the "cas unique" token
+   * opaquely, but in reality it is a string-encoded u64.
+   *
+   * @return true if replaced, false if not
+   */
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer): Future[Boolean]
+
+  /**
    * Get a key from the server.
    */
   def get(key: String):                           Future[Option[ChannelBuffer]]
+
+  /**
+   * Get a key from the server, with a "cas unique" token.  The token
+   * is treated opaquely by the memcache client but is in reality a
+   * string-encoded u64.
+   */
+  def gets(key: String):                          Future[Option[(ChannelBuffer, ChannelBuffer)]]
 
   /**
    * Get a set of keys from the server.
    * @return a Map[String, ChannelBuffer] of all of the keys that the server had.
    */
   def get(keys: Iterable[String]):                Future[Map[String, ChannelBuffer]]
+
+  /**
+   * Get a set of keys from the server, together with a "cas unique"
+   * token.  The token is treated opaquely by the memcache client but
+   * is in reality a string-encoded u64.
+   *
+   * @return a Map[String, (ChannelBuffer, ChannelBuffer)] of all the
+   * keys the server had, together with their "cas unique" token
+   */
+  def gets(key: Iterable[String]):                Future[Map[String, (ChannelBuffer, ChannelBuffer)]]
 
   /**
    * Remove a key.
@@ -138,6 +165,17 @@ trait Client {
   def replace(key: String, value: ChannelBuffer): Future[Boolean] = replace(key, 0, Time.epoch, value)
 
   /**
+   * Perform a CAS operation on the key, only if the value has not
+   * changed since the value was last retrieved, and `casUnique`
+   * extracted from a `gets` command.  We treat the "cas unique" token
+   * opaquely, but in reality it is a string-encoded u64.
+   *
+   * @return true if replaced, false if not
+   */
+  def cas(key: String, value: ChannelBuffer, casUnique: ChannelBuffer): Future[Boolean] =
+    cas(key, 0, Time.epoch, value, casUnique)
+
+  /**
    * release the underlying service(s)
    */
   def release(): Unit
@@ -149,21 +187,11 @@ trait Client {
  * @param  underlying  the underlying Memcached Service.
  */
 protected class ConnectedClient(service: Service[Command, Response]) extends Client {
-  def get(key: String) = {
-    service(Get(Seq(key))) map {
-      case Values(values) =>
-        if (values.size > 0) Some(values.head.value)
-        else None
-      case Error(e) => throw e
-      case _        => throw new IllegalStateException
-    }
-  }
-
-  def get(keys: Iterable[String]) = {
-    service(Get(keys.toSeq)) map {
+  private[this] def rawGet(command: Command) = {
+    service(command) map {
       case Values(values) =>
         val tuples = values.map {
-          case Value(key, value) =>
+          case value@Value(key, _, _) =>
             (key.toString(CharsetUtil.UTF_8), value)
         }
         Map(tuples: _*)
@@ -172,9 +200,37 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
+  def get(key: String) = rawGet(Get(Seq(key))) map { m =>
+    m.values.headOption map { _.value }
+  }
+
+  def get(keys: Iterable[String]) = rawGet(Get(keys.toSeq)) map { m =>
+    m mapValues { value => value.value }
+  }
+
+  def gets(key: String) = rawGet(Gets(Seq(key))) map { m =>
+    m.values.headOption collect {
+      case Value(_, bytes, Some(casUnique)) => (bytes, casUnique)
+    }
+  }
+
+  def gets(keys: Iterable[String]) = rawGet(Gets(keys.toSeq)) map { m =>
+    m collect {
+      case (k, Value(_, bytes, Some(casUnique))) => (k, (bytes, casUnique))
+    }
+  }
+
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     service(Set(key, flags, expiry, value)) map {
       case Stored() => ()
+      case Error(e) => throw e
+      case _        => throw new IllegalStateException
+    }
+
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
+    service(Cas(key, flags, expiry, value, casUnique)) map {
+      case Stored() => true
+      case Exists() => false
       case Error(e) => throw e
       case _        => throw new IllegalStateException
     }
@@ -253,13 +309,15 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
 trait PartitionedClient extends Client {
   protected[memcached] def clientOf(key: String): Client
 
-  def get(key: String)                    = clientOf(key).get(key)
-  def get(keys: Iterable[String])         = {
+  private[this] def queryGrouped[A]
+    (keys: Iterable[String])
+    (f: (Client, Iterable[String]) => Future[Map[String, A]])
+  : Future[Map[String, A]] = {
     if (!keys.isEmpty) {
       val keysGroupedByClient = keys.groupBy(clientOf(_))
 
       val mapOfMaps = keysGroupedByClient.map { case (client, keys) =>
-        client.get(keys)
+        f(client, keys)
       }
 
       mapOfMaps.reduceLeft { (result, nextMap) =>
@@ -271,9 +329,14 @@ trait PartitionedClient extends Client {
         }
       }
     } else {
-      Future(Map[String, ChannelBuffer]())
+      Future(Map.empty)
     }
   }
+
+  def get(key: String)                    = clientOf(key).get(key)
+  def gets(key: String)                   = clientOf(key).gets(key)
+  def get(keys: Iterable[String])         = queryGrouped(keys) { (c, ks) => c.get(ks)  }
+  def gets(keys: Iterable[String])        = queryGrouped(keys) { (c, ks) => c.gets(ks) }
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     clientOf(key).set(key, flags, expiry, value)
@@ -285,6 +348,9 @@ trait PartitionedClient extends Client {
     clientOf(key).prepend(key, flags, expiry, value)
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     clientOf(key).replace(key, flags, expiry, value)
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
+    clientOf(key).cas(key, flags, expiry, value, casUnique)
+
 
   def delete(key: String)             = clientOf(key).delete(key)
   def incr(key: String)              = clientOf(key).incr(key)

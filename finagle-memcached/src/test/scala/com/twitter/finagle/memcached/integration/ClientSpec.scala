@@ -40,7 +40,7 @@ object ClientSpec extends Specification {
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
       }
 
-      "gets" in {
+      "get" in {
         client.set("foo", "bar")()
         client.set("baz", "boing")()
         val result = client.get(Seq("foo", "baz", "notthere"))()
@@ -49,6 +49,34 @@ object ClientSpec extends Specification {
           "foo" -> "bar",
           "baz" -> "boing"
         )
+      }
+
+      "gets" in {
+        client.set("foos", "xyz")()
+        client.set("bazs", "xyz")()
+        client.set("bazs", "zyx")()
+        val result = client.gets(Seq("foos", "bazs", "somethingelse"))()
+          .map { case (key, (value, casUnique)) =>
+            (key, (value.toString(CharsetUtil.UTF_8), casUnique.toString(CharsetUtil.UTF_8)))
+          }
+
+        result mustEqual Map(
+          "foos" -> ("xyz", "1"),  // the "cas unique" values are predictable from a fresh memcached
+          "bazs" -> ("zyx", "3")
+        )
+      }
+
+      "cas" in {
+        client.set("x", "y")()
+        val Some((value, casUnique)) = client.gets("x")()
+        value.toString(CharsetUtil.UTF_8) must be_==("y")
+        casUnique.toString(CharsetUtil.UTF_8) must be_==("1")
+
+        client.cas("x", "z", "2")() must beFalse
+        client.cas("x", "z", casUnique)() must beTrue
+        val res = client.get("x")()
+        res must beSomething
+        res.get.toString(CharsetUtil.UTF_8) must be_==("z")
       }
 
       "append & prepend" in {

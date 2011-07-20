@@ -31,7 +31,7 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
 
   def decode(ctx: ChannelHandlerContext, ch: Channel, m: AnyRef) = m match {
     case Tokens(tokens) => parseNonStorageCommand(tokens)
-    case TokensWithData(tokens, data) => parseStorageCommand(tokens, data)
+    case TokensWithData(tokens, data, _/*ignore CAS*/) => parseStorageCommand(tokens, data)
   }
 
   protected def parseNonStorageCommand(tokens: Seq[ChannelBuffer]): C

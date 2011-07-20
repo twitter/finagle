@@ -32,12 +32,23 @@ public abstract class Client {
    */
   abstract public Future<ChannelBuffer> get(String key);
 
+  /**
+   * Get a key from the server together with a "cas unique" token used
+   * in cas operations.
+   */
+  abstract public Future<ResultWithCAS> gets(String key);
 
   /**
    * Get a set of keys from the server.
    * @return a Map[String, ChannelBuffer] of all of the keys that the server had.
    */
   abstract public Future<Map<String, ChannelBuffer>> get(List<String> keys);
+
+  /**
+   * Get a set of keys from the server together with a "cas unique" token.
+   * @return a Map[String, ResultWithCAS] of all of the keys that the server had.
+   */
+  abstract public Future<Map<String, ResultWithCAS>> gets(List<String> keys);
 
   /**
    * Store a key. Override an existing value.
@@ -90,6 +101,30 @@ public abstract class Client {
    * @return true if stored, false if not stored
    */
   abstract public Future<Boolean> replace(String key, int flags, Time expiry, ChannelBuffer value);
+
+ /**
+   * Perform a compare-and-set operation.  This is like a replace,
+   * except a token identifying the value version to replace is
+   * provided.  Tokens are retrieved with "gets"
+   *
+   * @return true if stored, false if not stored
+   */
+
+  abstract public Future<Boolean> cas(
+    String key, int flags, Time expiry,
+    ChannelBuffer value, ChannelBuffer casUnique);
+
+  /**
+   * A version of cas with default flags & expiry paramters.
+   */
+  abstract public Future<Boolean> cas(String key, ChannelBuffer value, ChannelBuffer casUnique);
+
+  /**
+   * Convenience version of cas used to store string values.
+   */
+  public Future<Boolean> cas(String key, String value, ChannelBuffer casUnique) {
+    return this.cas(key, toChannelBuffer(value), casUnique);
+  }
 
   /**
    * Remove a key.

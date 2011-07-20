@@ -31,25 +31,33 @@ class Encoder extends OneToOneEncoder {
         }
         buffer.writeBytes(DELIMITER)
         buffer
-      case TokensWithData(tokens, data) =>
+      case TokensWithData(tokens, data, casUnique) =>
         val buffer = ChannelBuffers.dynamicBuffer(50 + data.readableBytes)
         tokens foreach { token =>
           buffer.writeBytes(token)
           buffer.writeBytes(SPACE)
         }
         buffer.writeBytes(data.readableBytes.toString.getBytes)
+        casUnique foreach { token =>
+          buffer.writeBytes(SPACE)
+          buffer.writeBytes(token)
+        }
         buffer.writeBytes(DELIMITER)
         buffer.writeBytes(data)
         buffer.writeBytes(DELIMITER)
         buffer
       case ValueLines(lines) =>
         val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
-        lines foreach { case TokensWithData(tokens, data) =>
+        lines foreach { case TokensWithData(tokens, data, casUnique) =>
           tokens foreach { token =>
             buffer.writeBytes(token)
             buffer.writeBytes(SPACE)
           }
           buffer.writeBytes(data.readableBytes.toString.getBytes)
+          casUnique foreach { token =>
+            buffer.writeBytes(SPACE)
+            buffer.writeBytes(token)
+          }
           buffer.writeBytes(DELIMITER)
           buffer.writeBytes(data)
           buffer.writeBytes(DELIMITER)
