@@ -470,24 +470,4 @@ That's it!
 
 # Changes
 
-## 1.4.3 (2011-05-17)
-
-- *LoadBalancer*: weight support in loadbalancers, better stats exporting and rollup, fix a rebalancing bug, decrement queue counts on factory failures, to avoid potential imbalance scenarios if there is imbalance in connection failures
-- *memcache*: loosen type restrictions on passed-in builders, add TTL interface in the Java client
-- *tracing*: add support for binary key-value annotations
-- *streaming*: fix reconnect bug
-- *codec*: support codec _factories_. these produce codecs based on a configuration, allowing us to expose configured aspects of the builder and
-- *lifecycle*: allow stopping a timer in the timerthread itself. this allows for the last client to be killed by a client (eg. connection expiration)
-http: fix race conditions in HTTP connection manager which caused heavy connection contention, and ConnectionClosed failures for many requests under heavy load.
-- *health*: add health callback with high/low watermark support.
-- *stats*: a new StatsReceiver for science-common stats
-- *builder*: set child channel buffer sizes properly (for servers)
-
-## 1.2.3 (2011-03-18)
-
-- A faster memcache codec (joint work with Arya from profiling rooster usage)
-- Fix a bug in memcache decoding of big responses (due to Arya)
-- More exported pool & connection statistics
-- Fix a bug in the CachingPool wherein connection accounting broke
-- Speed up leastqueued loadbalancer strategy
-- finagle-serversets is now included in the opensource distribution, instructions at https://github.com/twitter/finagle/blob/master/README.md
+See ChangeLog.
