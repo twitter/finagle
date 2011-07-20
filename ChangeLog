@@ -1,3 +1,15 @@
+2011-07-19	1.7.3
+
+	* fix: 1.7.2 introduced a regression in the pool that may,
+	under certain circumstances, admit connections beyond the high
+	watermark.
+	* quench exception for setting multiple Promise values when
+	racing with write errors.
+	* Adds tracing support for the Memcached client.  This only
+	creates the client side annotations, no support for passing
+	along ids and such to the memcached server.
+
+
 2011-07-18	1.7.2
 
 	* support end-to-end cancellation in finagle clients; fixes
