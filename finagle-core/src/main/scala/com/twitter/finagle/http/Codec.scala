@@ -4,13 +4,33 @@ package com.twitter.finagle.http
  * This puts it all together: The HTTP codec itself.
  */
 
-import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
+import org.jboss.netty.channel.{
+  Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, DownstreamMessageEvent}
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.StorageUnit
 import com.twitter.conversions.storage._
 
-import com.twitter.finagle.{Codec, CodecFactory}
+import com.twitter.finagle.{Codec, CodecFactory, CodecException}
+
+private[http] object BadRequestResponse
+  extends DefaultHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.BAD_REQUEST)
+
+
+class SafeHttpServerCodec extends HttpServerCodec {
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    try {
+     super.handleUpstream(ctx, e)
+    } catch {
+      case ex: Exception =>
+        val channel = ctx.getChannel()
+        super.handleDownstream(ctx, new DownstreamMessageEvent(
+          channel, Channels.future(channel), BadRequestResponse, channel.getRemoteAddress()))
+        throw new CodecException(ex.toString())
+    }
+  }
+}
 
 case class Http(
     _compressionLevel: Int = 0,
@@ -61,7 +81,7 @@ case class Http(
             pipeline.addLast(
               "channelBufferManager", new ChannelBufferManager(_channelBufferUsageTracker.get))
           }
-          pipeline.addLast("httpCodec", new HttpServerCodec)
+          pipeline.addLast("httpCodec", new SafeHttpServerCodec())
           if (_compressionLevel > 0) {
             pipeline.addLast(
               "httpCompressor",
