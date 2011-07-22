@@ -1,4 +1,10 @@
-2011-07-19	1.7.3
+1.7.4		2011/07/22
+
+	* http: convert codec exceptions into 4xx errors; report them
+	as such upstream
+	* memcache: `gets' and `cas' support.
+
+1.7.3		2011/07/19
 
 	* fix: 1.7.2 introduced a regression in the pool that may,
 	under certain circumstances, admit connections beyond the high
@@ -10,7 +16,7 @@
 	along ids and such to the memcached server.
 
 
-2011-07-18	1.7.2
+1.7.2		2011/07/18
 
 	* support end-to-end cancellation in finagle clients; fixes
 	possible pool starvation conditions, and allows clients to
