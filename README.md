@@ -325,7 +325,7 @@ Use the Finagle library to implement asynchronous Remote Procedure Call (RPC) cl
 
 Finagle extends the stream-oriented [Netty](http://www.jboss.org/netty) model to provide asynchronous requests and responses for remote procedure calls (RPC). Internally, Finagle manages a service stack to track outstanding requests, responses, and the events related to them. Finagle uses a Netty pipeline to manage connections between the streams underlying request and response messages. The following diagram shows the relationship between your RCP client or server, Finagle, Netty, and Java libraries: 
 
-![Relationship between your RCP client or server, Finagle, Netty, and Java Libraries](https://github.com/mccue/finagle/tree/master/doc/FinagleRelationship.png)
+![Relationship between your RCP client or server, Finagle, Netty, and Java Libraries (https://github.com/mccue/finagle/tree/master/doc/FinagleRelationship.png)](https://github.com/mccue/finagle/tree/master/doc/FinagleRelationship.png)
 
 Finagle manages a [Netty pipeline](http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html) for servers built on Finagle RCP services. Netty itself is built on the Java [NIO](http://download.oracle.com/javase/1.5.0/docs/api/java/nio/channels/package-summary.html#package_description) library, which supports asynchronous IO. While an understanding of Netty or NIO might be useful, you can use Finagle without this background information.
 
