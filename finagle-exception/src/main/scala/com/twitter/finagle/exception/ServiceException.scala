@@ -2,7 +2,6 @@ package com.twitter.finagle.exception
 
 import com.codahale.jerkson.Json.generate
 import com.twitter.util.Time
-import scala.collection.mutable.StringBuilder
 
 /**
  * Model classes for exception serialization to JSON
