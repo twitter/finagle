@@ -72,6 +72,7 @@ import com.twitter.concurrent.AsyncSemaphore
 import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphoreHandler}
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver}
+import exception._
 
 trait Server {
   /**
@@ -117,11 +118,12 @@ object ServerConfig {
 final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]   = None,
   private val _statsReceiver:                   Option[StatsReceiver]                   = None,
+  private val _exceptionReceiver:               Option[ServerExceptionReceiverBuilder]  = None,
   private val _name:                            Option[String]                          = None,
   private val _sendBufferSize:                  Option[Int]                             = None,
   private val _recvBufferSize:                  Option[Int]                             = None,
   private val _keepAlive:                       Option[Boolean]                         = None,
-  private val _backlog:                         Option[Int]                            = None,
+  private val _backlog:                         Option[Int]                             = None,
   private val _bindTo:                          Option[SocketAddress]                   = None,
   private val _logger:                          Option[Logger]                          = None,
   private val _tls:                             Option[(String, String)]                = None,
@@ -146,6 +148,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
    */
   val codecFactory                    = _codecFactory
   val statsReceiver                   = _statsReceiver
+  val exceptionReceiver               = _exceptionReceiver
   val name                            = _name
   val sendBufferSize                  = _sendBufferSize
   val recvBufferSize                  = _recvBufferSize
@@ -169,6 +172,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
     "statsReceiver"                   -> _statsReceiver,
+    "exceptionReceiver"               -> _exceptionReceiver,
     "name"                            -> _name,
     "sendBufferSize"                  -> _sendBufferSize,
     "recvBufferSize"                  -> _recvBufferSize,
@@ -308,6 +312,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def writeCompletionTimeout(howlong: Duration): This =
     withConfig(_.copy(_writeCompletionTimeout = Some(howlong)))
+
+  def exceptionReceiver(erFactory: ServerExceptionReceiverBuilder): This =
+    withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
 
   def tracer(receiver: Tracer): This =
     withConfig(_.copy(_tracer = receiver))
@@ -466,6 +473,18 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         var service: Service[Req, Rep] = {
           new ProxyService(postponedService flatMap { s => codec.prepareService(s) })
         }
+
+        // Add the exception service at the bottom layer
+        // This is not required, but argubably the best style
+        val exceptionFilter = new ExceptionFilter[Req, Rep] (
+          config.exceptionReceiver map {
+            _(config.name.get, config.bindTo.get)
+          } getOrElse {
+            NullExceptionReceiver
+          }
+        )
+
+        service = exceptionFilter andThen service
 
         statsFilter foreach { sf =>
           service = sf andThen service

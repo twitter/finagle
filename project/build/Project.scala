@@ -52,6 +52,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new ThriftProject(_), coreProject)
 
   /**
+   * finagle-exception implements an ExceptionReceiver for the yet-to-be-named
+   * (if at all) exception service.
+   */
+  val exceptionProject = project(
+    "finagle-exception", "finagle-exception",
+    new ExceptionProject(_), coreProject, thriftProject)
+
+  /**
    * finagle-memcached contains the memcached codec, ketama, and Java and Scala
    * friendly clients.
    */
@@ -200,7 +208,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
   }
 
-
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
@@ -231,6 +238,20 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift    = "thrift"    % "libthrift" % "0.5.0"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
+  }
+
+  class ExceptionProject(info: ProjectInfo) extends StandardProject(info)
+   with Defaults with CompileThriftFinagle
+  {
+    val codaRepo            = "Coda Hale's Repository" at "http://repo.codahale.com/"
+    override def compileOrder = CompileOrder.JavaThenScala
+
+    val thrift    = "thrift"    % "libthrift" % "0.5.0"
+    val jerkson  = "com.codahale" % "jerkson_2.8.1" % "0.1.4"
+    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
+
+    // Needed for spec testing only
+    val streamy = "com.twitter" % "streamyj_2.8.1" % "0.3.0"
   }
 
   class CommonsStatsProject(info: ProjectInfo) extends StandardProject(info)

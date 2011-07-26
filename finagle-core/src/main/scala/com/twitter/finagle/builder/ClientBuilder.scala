@@ -69,6 +69,8 @@ import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsR
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
+import exception._
+
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
  */
@@ -147,6 +149,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _readerIdleTimeout         : Option[Duration]              = None,
   private val _writerIdleTimeout         : Option[Duration]              = None,
   private val _statsReceiver             : Option[StatsReceiver]         = None,
+  private val _exceptionReceiver         : Option[ClientExceptionReceiverBuilder] = None,
   private val _name                      : Option[String]                = Some("client"),
   private val _sendBufferSize            : Option[Int]                   = None,
   private val _recvBufferSize            : Option[Int]                   = None,
@@ -173,6 +176,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val connectTimeout            = _connectTimeout
   val timeout                   = _timeout
   val statsReceiver             = _statsReceiver
+  val exceptionReceiver         = _exceptionReceiver
   val keepAlive                 = _keepAlive
   val readerIdleTimeout         = _readerIdleTimeout
   val writerIdleTimeout         = _writerIdleTimeout
@@ -205,6 +209,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "readerIdleTimeout"         -> Some(_readerIdleTimeout),
     "writerIdleTimeout"         -> Some(_writerIdleTimeout),
     "statsReceiver"             -> _statsReceiver,
+    "exceptionReceiver"         -> _exceptionReceiver,
     "name"                      -> _name,
     "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
     "hostConnectionLimit"       -> _hostConfig.hostConnectionLimit,
@@ -504,6 +509,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tracer(tracer: Tracer): This =
     withConfig(_.copy(_tracer = tracer))
 
+  def exceptionReceiver(erFactory: ClientExceptionReceiverBuilder): This =
+    withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
+
   /**
    * Log very detailed debug information to the given logger.
    */
@@ -655,9 +663,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       config.failureAccrualParams foreach { case (numFailures, markDeadFor) =>
         factory = new FailureAccrualFactory(factory, numFailures, markDeadFor)
       }
-
+      
+      val exceptionFilter = new ExceptionFilter[Req, Rep](
+        config.exceptionReceiver map {
+          _(config.name.get)
+        } getOrElse {
+          NullExceptionReceiver
+        }
+      )
       val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
-      factory = statsFilter andThen factory
+      factory = exceptionFilter andThen statsFilter andThen factory
 
       factory
     }
