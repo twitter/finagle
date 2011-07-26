@@ -15,7 +15,8 @@ import com.twitter.util.Time
  *
  * TraceId is from BigBrotherBird.
  */
-sealed private[exception] case class ServiceException private[ServiceException] (jsonValue: Map[String,Any]) {
+sealed private[exception] case class ServiceException private[ServiceException] (
+  private val jsonValue: Map[String,Any]) {
 
   /**
    * Create a map with all of the elements required by a chickadee service.
