@@ -1,8 +1,287 @@
-# Finagle
+<a name="Top"></a>
 
-Finagle is a library for building *asynchronous* RPC servers and clients in Java, Scala, or any JVM language. Built atop [Netty](http://www.jboss.org/netty), Finagle provides a rich set of tools that are protocol independent.
+# Finagle Developer Guide (July 24, 2011 Draft)
 
-Finagle is flexible enough to support a variety of RPC styles, including request-response, streaming, and pipelining (e.g., HTTP pipelining and Redis pipelining). It also makes it easy to work with stateful RPC styles (e.g., those requiring authentication and those that support transactions).
+* <a href="#Quick Start">Quick Start</a>
+  - <a href="#Simple HTTP Server">Simple HTTP Server</a>
+  - <a href="#Simple HTTP Client">Simple HTTP Client</a>
+  - <a href="#Simple Client and Server for Thrift">Simple Client and Server for Thrift</a>
+* <a href="#Finagle Overview">Finagle Overview</a>
+  - <a href="#Client Features">Client Features</a>
+  - <a href="#Server Features">Server Features</a>
+  - <a href="#Supported Protocols">Supported Protocols</a>
+* <a href="#Architecture">Architecture</a>
+  - <a href="#Future Objects">Future Objects</a>
+  - <a href="#Service Objects">Service Objects</a>
+  - <a href="#Filter Objects">Filter Objects</a>
+  - <a href="#Codec Objects">Codec Objects</a>
+  - <a href="#Servers">Servers</a>
+  - <a href="#Clients">Clients</a>
+  - <a href="#Threading Model">Threading Model</a>
+  - <a href="#Starting and Stopping Services">Starting and Stopping Servers</a>
+  - <a href="#Exception Handling">Exception Handling</a>
+* <a href="#Finagle Projects and Packages">Finagle Projects and Packages</a>
+* <a href="#Using Future Objects">Using Future Objects</a>
+  - <a href="#Future Callbacks">Future Callbacks</a>
+  - <a href="#Future Timeouts">Future Timeouts</a>
+  - <a href="#Future Exceptions">Future Exceptions</a>
+  - <a href="#Promises">Promises</a>
+  - <a href="#Using Future map and flatMap Operations">Using Future map and flatMap Operations</a>
+  - <a href="#Using Future in Scatter/Gather Patterns">Using Future in Scatter/Gather Patterns</a>
+  - <a href="#Using Future Pools">Using Future Pools</a>
+* <a href="#Using Future Objects With Java">Using Future Objects With Java</a>
+  - <a href="#Imperative Java Style">Imperative Java Style</a>
+  - <a href="#Functional Java Style">Functional Java Style</a>
+* <a href="#Creating a Service">Creating a Service</a>
+* <a href="#Creating Simple Filters">Creating Filters</a>
+* <a href="#Building a Robust Server">Building a Robust Server</a>
+* <a href="#Building a Robust Client">Building a Robust Client</a>
+* <a href="#Creating Filters to Transform Requests and Responses">Creating Filters to Transform Requests and Responses</a>
+* <a href="#Using ServerSet Objects">Using ServerSet Objects</a>
+* <a href="#Additional Samples">Additional Samples</a>
+* <a href="#API Reference Documentation">API Reference Documentation</a>
+* <a href="#Revision History">Revision History</a>
+  - <a href="#1.4.3 (2011-05-17)">1.4.3 (2011-05-17)</a>
+  - <a href="#1.2.3 (2011-03-18)">1.2.3 (2011-03-18)</a>
+
+<a name="Quick Start"></a>
+
+## Quick Start
+
+Finagle is an asynchronous network stack for the JVM that you can use to build *asynchronous* Remote Procedure Call (RPC) clients and servers in Java, Scala, or any JVM-hosted language. Finagle provides a rich set of tools that are protocol independent. 
+
+The following Quick Start sections show how to implement simple RPC servers and clients in Scala and Java. The first example shows the creation a simple HTTP server and corresponding client. The second example shows the creation of a Thrift server and client. You can use these examples to get started quickly and have something that works in just a few lines of code. For a more detailed description of Finagle and its features, start with <a href="#Finagle Overview">Finagle Overview</a> and come back to Quick Start later.
+
+[Top](#Top)
+
+<a name="Simple HTTP Server"></a>
+
+### Simple HTTP Server
+
+Consider a very simple implementation of an HTTP server and client in which clients make HTTP GET requests and the server responds to each one with an HTTP 200 OK response. 
+
+The following server, which is shown in both Scala and Java, responds to a client's HTTP request with an HTTP 200 OK response:
+
+##### Scala HTTP Server Implementation
+
+    val service: Service[HttpRequest, HttpResponse] = new Service[HttpRequest, HttpResponse] { // 1
+      def apply(request: HttpRequest) = Future(new DefaultHttpResponse(HTTP_1_1, OK))          // 2	
+    }
+
+    val address: SocketAddress = new InetSocketAddress(10000)                                  // 3
+
+    val server: Server[HttpRequest, HttpResponse] = ServerBuilder()                            // 4
+      .codec(Http)
+      .bindTo(address)
+      .build(service)
+      .name("HttpServer"));
+
+##### Java HTTP Server Implementation
+
+    Service<HttpRequest, HttpResponse> service = new Service<HttpRequest, HttpResponse>() {    // 1
+      public Future<HttpResponse> apply(HttpRequest request) {
+        return Future.value(                                                                   // 2
+	        new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)); 
+      }
+    };
+
+    ServerBuilder.safeBuild(service, ServerBuilder.get()                                       // 4
+      .codec(Http.get())
+      .bindTo(new InetSocketAddress("localhost", 10000))                                       // 3
+      .name("HttpServer"));
+
+
+##### HTTP Server Code Annotations
+
+1. Create a new Service that handles HTTP requests and responses. 
+2. For each request, respond asynchronously with an HTTP 200 OK response. A Future instance represents an asynchronous operation that may be performed later.
+3. Specify the socket addresses on which your server responds; in this case, on port 10000 of localhost.
+4. Build a server that responds to HTTP requests on the socket and associate it with your service. In this case, the Server builder specifies
+  - an HTTP codec, which ensures that only valid HTTP requests are received by the server
+  - the host socket that listens for requests
+  - the association between the server and the service, which is specified by `.build` in Scala and the first argument to `safeBuild` in Java
+  - the name of the service
+
+[Top](#Top)
+
+<a name="Simple HTTP Client"></a>
+
+### Simple HTTP Client
+
+The client, which is shown in both Scala and Java, connects to the server, and issues a simple HTTP GET request:
+
+##### Scala HTTP Client Implementation
+
+    val client: Service[HttpRequest, HttpResponse] = ClientBuilder()                           // 1
+      .codec(Http)
+      .hosts(address)
+      .build()
+
+    // Issue a request, get a response:
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")                      // 2
+    val responseFuture: Future[HttpResponse] = client(request)                                 // 3
+      onSuccess { response => println("Received response: " + response)                        // 4
+	  }
+
+##### Java HTTP Client Implementation
+
+    Service<HttpRequest, HttpResponse> client = ClientBuilder.safeBuild(ClientBuilder.get()    // 1
+      .codec(Http.get())
+      .hosts("localhost:10000")
+      .hostConnectionLimit(1));
+
+    // Issue a request, get a response:
+    HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");   // 2
+    client.apply(request).addEventListener(new FutureEventListener<HttpResponse>() {           // 3
+      public void onSuccess(HttpResponse response) {                                           // 4
+        System.out.println("received response: " + response);
+      }
+      public void onFailure(Throwable cause) {
+        System.out.println("failed with cause: " + cause);
+      }
+    });
+
+##### HTTP Client Code Annotations
+
+1. Build a client that sends an HTTP request to the host identified by its socket address. In this case, the Client builder specifies
+  - an HTTP request filter, which ensures that only valid HTTP requests are sent to the server
+  - a list of the server's hosts that can process requests
+  - to build this client service
+2. Create an HTTP GET request.
+3. Make the request to the host identified in your client.
+4. Specify a callback, `onSuccess`, that Finagle executes when the response arrives.
+
+Note: Although the example shows building the client and execution of the built client on the same thread, you should build your clients only once and execute them separately. There is no requirement to maintain a 1:1 relationship between building a client and executing a client.
+
+[Top](#Top)
+
+<a name="Simple Client and Server for Thrift"></a>
+
+### Simple Client and Server for Thrift
+
+Apache Thrift is a binary communication protocol that defines available methods using an interface definition language (IDL). Consider the following Thrift IDL definition for a `Hello` service that defines only one method, `hi`:
+
+    service Hello {
+      string hi();
+    }
+
+#### Simple Thrift Server
+
+In this Finagle example, the `ThriftServer` object implements the `Hello` service defined using the Thrift IDL.
+
+##### Scala Thrift Server Implementation
+
+    object ThriftServer {
+      def main(args: Array[String]) {
+        // Implement the Thrift Interface
+        val processor = new Hello.ServiceIface {                                 // 1
+        def hi() = Future.value("hi")                                            // 2
+      }
+
+      val service = new Hello.Service(processor, new TBinaryProtocol.Factory())  // 3
+
+      val server: Server = ServerBuilder()                                       // 4
+        .name("HelloService")
+        .bindTo(new InetSocketAddress(8080))
+        .codec(ThriftServerFramedCodec())
+        .build(service)
+      }
+    }
+
+##### Java Thrift Server Implementation
+
+    Hello.ServiceIface processor = new Hello.ServiceIface() {                    // 1
+    public Future<String> hi() {                                                 // 2
+      return Future.value("hi");
+      }
+    }  
+
+    ServerBuilder.safeBuild(                                                     // 4
+      new Hello.Service(processor, new TBinaryProtocol.Factory()),               // 3
+      ServerBuilder.get()                                                          
+        .name("HelloService")
+        .codec(ThriftServerFramedCodecFactory$.MODULE$)
+        .bindTo(new InetSocketAddress(8080));
+
+##### Thrift Server Code Annotations
+
+1. Create a Thrift processor that implements the Thrift service interface, which is `Hello` in this example. 
+2. Implement the service interface. In this case, the only method in the interface is `hi`, which only returns the string `"hi"`. The returned value must be a `Future` to conform the signature of a Finagle `Service`. (In a more robust example, the Thrift service might perform asynchronous communication.)
+3. Create an adapter from the Thrift processor to a Finagle service. In this case, the `Hello` Thrift service uses `TBinaryProtocol` as the Thrift protocol.
+4. Build a server that responds to Thrift requests on the socket and associate it with your service. In this case, the Server builder specifies
+  - the name of the service
+  - the host addresses that can receive requests
+  - the Finagle-provided `ThriftServerFramedCodec` codec, which ensures that only valid Thrift requests are received by the server
+  - the association between the server and the service
+
+#### Simple Thrift Client
+
+In this Finagle example, the `ThriftClient` object creates a Finagle client that executes the methods defined in the `Hello` Thrift service.
+
+##### Scala Thrift Client Implementation
+
+    object ThriftClient {
+      def main(args: Array[String]) {
+        // Create a raw Thrift client service. This implements the
+        // ThriftClientRequest => Future[Array[Byte]] interface.
+        val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()               // 1
+          .hosts(new InetSocketAddress(8080))
+          .codec(ThriftClientFramedCodec())
+          .hostConnectionLimit(1)
+          .build()
+
+        // Wrap the raw Thrift service in a Client decorator. The client provides
+        // a convenient procedural interface for accessing the Thrift server.
+        val client = new Hello.ServiceToClient(service, new TBinaryProtocol.Factory())         // 2
+
+        client.hi() onSuccess { response =>                                                    // 3
+          println("Received response: " + response)
+        } ensure {
+          service.release()                                                                    // 4
+        }
+      }
+    }
+
+##### Java Thrift Client Implementation
+
+    Service<ThriftClientRequest, byte[]> client = ClientBuilder.safeBuild(ClientBuilder.get()  // 1
+      .hosts(new InetSocketAddress(8080))
+      .codec(new ThriftClientFramedCodecFactory())
+      .hostConnectionLimit(1));
+
+    Hello.ServiceIface client = 
+      new Hello.ServiceToClient(client, new TBinaryProtocol.Factory());                        // 2
+
+    client.hi().addEventListener(new FutureEventListener<String>() {
+    public void onSuccess(String s) {                                                          // 3
+      System.out.println(s);
+    }
+
+    public void onFailure(Throwable t) {
+      System.out.println("Exception! ", t.toString());
+    });
+
+##### Thrift Client Code Annotation
+
+1. Build a client that sends a Thrift protocol-based request to the host identified by its socket address. In this case, the Client builder specifies
+	- the host addresses that can receive requests
+	- the Finagle-provided `ThriftServerFramedCodec` codec, which ensures that only valid Thrift requests are received by the server
+	- to build this client service
+2. Make a remote procedure call to the `Hello` Thrift service's `Hi` method. This returns a `Future` that represents the eventual arrival of a response.
+3. When the response arrives, the `onSuccess` callback executes to print the result.
+4. Release resources acquired by the client.
+
+[Top](#Top)
+
+<a name="Finagle Overview"></a>
+
+## Finagle Overview
+
+Use the Finagle library to implement asynchronous Remote Procedure Call (RPC) clients and servers. Finagle is flexible enough to support a variety of RPC styles, including request-response, streaming, and pipelining; for example, HTTP pipelining and Redis pipelining. It also makes it easy to work with stateful RPC styles; for example, RPCs that require authentication and those that support transactions.
+
+[Top](#Top)
+
+<a name="Client Features"></a>
 
 ### Client Features
 
@@ -13,7 +292,11 @@ Finagle is flexible enough to support a variety of RPC styles, including request
 * Distributed Tracing (a la [Dapper](http://research.google.com/pubs/pub36356.html))
 * Service Discovery (e.g., via Zookeeper)
 * Rich Statistics
-* Native OpenSSL bindings
+* Native OpenSSL Bindings
+
+[Top](#Top)
+
+<a name="Server Features"></a>
 
 ### Server Features
 
@@ -21,6 +304,10 @@ Finagle is flexible enough to support a variety of RPC styles, including request
 * Service Registration (e.g., via Zookeeper)
 * Distributed Tracing
 * Native OpenSSL bindings
+
+[Top](#Top)
+
+<a name="Supported Protocols"></a>
 
 ### Supported Protocols
 
@@ -30,135 +317,431 @@ Finagle is flexible enough to support a variety of RPC styles, including request
 * Memcached/Kestrel
 * More to come!
 
-## How do I start?
+[Top](#Top)
 
-### API Documentation
+<a name="Architecture"></a>
 
-Links to the Scaladoc is available [here](http://twitter.github.com/finagle/)
+## Architecture
 
-### Examples
+Finagle extends the stream-oriented [Netty](http://www.jboss.org/netty) model to provide asynchronous requests and responses for remote procedure calls (RPC). Internally, Finagle manages a service stack to track outstanding requests, responses, and the events related to them. Finagle uses a Netty pipeline to manage connections between the streams underlying request and response messages. The following diagram shows the relationship between your RCP client or server, Finagle, Netty, and Java libraries: 
 
-I think the best way to start is to look at examples:
+![Relationship between your RCP client or server, Finagle, Netty, and Java Libraries (doc/FinagleRelationship.png)](https://github.com/twitter/finagle/tree/master/doc/FinagleRelationship.png)
 
-* [Echo](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/echo) - A simple echo client and server using a newline-delimited protocol. Illustrates the basics of asynchronous control-flow.
-* [Http](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/http) - An advanced HTTP client and server that illustrates the use of Filters to compositionally organize your code. Filters are used here to isolate authentication and error handling concerns.
-* [Memcached Proxy](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/memcachedproxy) - A simple proxy supporting the Memcached protocol.
-* [Stream](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stream) - An illustration of Channels, the abstraction for Streaming protocols.
-* [Spritzer 2 Kestrel](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel) - An illustration of Channels, the abstraction for Streaming protocols. Here the Twitter Firehose is "piped" into a Kestrel message queue, illustrating some of the compositionality of Channels.
-* [Stress](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stress) - A high-throughput HTTP client for driving stressful traffic to an HTTP server. Illustrates more advanced asynchronous control-flow.
-* [Thrift](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/thrift) - A simple client and server for a Thrift protocol.
+Finagle manages a [Netty pipeline](http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html) for servers built on Finagle RCP services. Netty itself is built on the Java [NIO](http://download.oracle.com/javase/1.5.0/docs/api/java/nio/channels/package-summary.html#package_description) library, which supports asynchronous IO. While an understanding of Netty or NIO might be useful, you can use Finagle without this background information.
 
-But a great way to start might be to read the following conceptual overview:
+Finagle objects are the building blocks of RCP clients and servers:
 
-### Conceptual Overview
+- <a href="#Future Objects">Future objects</a> enable asynchronous operations required by a service
+- <a href="#Service Objects">Service objects</a> perform the work associated with a remote procedure call
+- <a href="#Filter Objects">Filter objects</a> enable you to transform data or act on messages before or after the data or messages are processed by a service
+- <a href="#Codec Objects">Codec objects</a> decode messages in a specific protocol before they are handled by a service and encode messages before they are transported to a client or server.
 
-Here is a simple HTTP server and client. The server returns a simple HTTP 200 response:
+You combine these objects to create:
 
-### Scala
+- <a href="#Servers">Servers</a>
+- <a href="#Clients">Clients</a>
 
-    val service: Service[HttpRequest, HttpResponse] = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future(new DefaultHttpResponse(HTTP_1_1, OK))
-    }
+Finagle provides a `ServerBuilder` and a `ClientBuilder` object, which enable you to configure <a href="#Servers">servers</a> and <a href="#Clients">clients</a>, respectively.
 
-    val address: SocketAddress = new InetSocketAddress(10000)
+[Top](#Top)
 
-    val server: Server[HttpRequest, HttpResponse] = ServerBuilder()
-      .codec(Http)
-      .bindTo(address)
-      .build(service)
+<a name="Future Objects"></a>
 
-The client connects to the server, and issues a simple HTTP GET request:
+### Future Objects
 
+<<<<<<< HEAD
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
       .codec(Http)
       .hosts(address)
       .hostConnectionLimit(1)
       .build()
+=======
+In Finagle, `Future` objects are the unifying abstraction for all asynchronous computation. A `Future` represents a computation that has not yet completed, which can either succeed or fail. The two most basic ways to use a `Future` are to 
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
-    // Issue a request, get a response:
-    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
-    val responseFuture: Future[HttpResponse] = client(request)
+* block and wait for the computation to return
+* register a callback to be invoked when the computation eventually succeeds or fails
 
-    // all done!
-    client.close()
-    server.close()
+For more information about `Future` objects, see <a href="#Using Future Objects">Using Future Objects</a>.
 
-Note that the variable `responseFuture` in this example is of type `Future[HttpResponse]`, which represents an asynchronous HTTP response (i.e., a response that will arrive sometime later). With a `Future` object, you can express your program in either a synchronous or asynchronous style: the program can either 1) block, awaiting the response, or 2) provide a callback to be invoked when a response is available. For example,
+<!-- Future has methods, such as `times`, `parallel`, and `whileDo` that implement advanced control-flow patterns. -->
 
-### Scala
+[Top](#Top)
 
-     // (1) Synchronously await the response for up to 1 second, then print:
-     println(responseFuture(1.second))
+<a name="Service Objects"></a>
 
-     // (2) Alternatively, when the response arrives, invoke the callback, then print:
-     responseFuture onSuccess { response =>
-       println(response)
-     }
+### Service Objects
 
-`Futures` allow the programmer to easily express a number of powerful idioms such as pipelining, scatter-gather, timeouts, and error handling. See the section "Using Futures" for more information.
+A `Service` is simply a function that receives a request and returns a `Future` object as a response. You extend the abstract `Service` class to implement your service; specifically, you must define an `apply` method that transforms the request into the future response. 
 
-## Services
+[Top](#Top)
 
-In Finagle, RPC Servers are built out of `Services` and `Filters`. A `Service` is a simply a function that receives a request and returns a `Future` of a response. For example, here is a service that increments a number by one.
+<a name="Filter Objects"></a>
 
-### Scala
+### Filter Objects
 
-    val plusOneService = new Service[Int, Int] {
-      def apply(request: Int) = Future { request + 1 }                                  // (1)
-    }
+It is useful to isolate distinct phases of your application into a pipeline. For example, you may need to handle exceptions, authorization, and other phases before your service responds to a request. A `Filter` provides an easy way to decouple the protocol handling code from the implementation of the business rules. A `Filter` wraps a `Service` and, potentially, converts the input and output types of the service to other types. For an example of a filter, see <a href="#Creating Filters to Transform Requests and Responses">Creating Filters to Transform Requests and Responses</a>. 
 
-Note that `plusOneService` acts as if it were asynchronous despite that it is not doing any asynchronous work. It adheres to the `Service[Req, Rep]` contract by wrapping the synchronously computed response in a "constant" `Future` of type `Future[Int]`.
+A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. For an example of a simple filter, see <a href="#Creating Filters">Creating Filters</a>.
 
-More sophisticated `Services` than `plusOneService` might make truly asynchronous calls (e.g., by making further RPC calls or by scheduling work in a queue), and `apply` having a return type of `Future[Rep]` is general enough to handle most cases.
+[Top](#Top)
 
-Once you have defined your `Service`, it can be bound to a SocketAddress, thus becoming an RPC Server:
+<a name="Codec Objects"></a>
 
+<<<<<<< HEAD
     ServerBuilder()
       .bindTo(address)
       .codec(...)
       .name("servicename")
       .build(plusOneService)
+=======
+### Codec Objects
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
-### Filters
+A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, Twitter streaming, and generic multiplexeror protocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
 
-However, an RPC Server must speak a specific codec/protocol. One nice way to design an RPC Server is to decouple the protocol handling code from the implementation of the business rules. For example, we can have an adding service exposed via HTTP and Thrift. A `Filter` provides a easy way to do this.
+[Top](#Top)
 
-Here is a `Filter` that adapts the `HttpRequest => HttpResponse` protocol to the `Int => Int` `plusOneService`:
+<!--
+<a name="Channel Objects"></a>
 
-### Scala
+### Channel Objects
 
-    val httpToIntFilter = new Filter[HttpRequest, HttpResponse, Int, Int] {              // (1)
-      def apply(httpRequest: HttpRequest, intService: Service[Int, Int]) = {
-        val intRequest = httpRequest.getContent.toString(CharsetUtil.UTF_8).toInt
-        intService(intRequest) map { intResponse =>                                      // (2)
-          val httpResponse = new DefaultHttpResponse(HTTP_1_1, OK)
-          httpResponse.setContent(intResponse.toString.getBytes)
-          httpResponse
-        }
-      }
-    }
+Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalization of `Future` called `Channel`. A `Channel` represents a stream of events that can be listened to. Every `Channel` has a sub-channel that indicates when a responder subscribes or unsubscribes to the channel.
 
-    val httpPlusOneService: Service[HttpRequest, HttpResponse] =
-      httpToIntFilter.andThen(plusOneService)                                            // (3)
+[Top](#Top)
+-->
 
-This example illustrates three important concepts:
+<a name="Servers"></a>
 
-1. A `Filter` wraps a `Service` and (potentially) converts the input and output types of the service to other types. Here `Int => Int` is mapped to `HttpRequest => HttpResponse`.
-1. The result of a `Future[A]` computation can be converted to a `Future[B]` computation by calling the `map` function. This function is applied asynchronously and is analogous to the `map` function on sequences used in many programming languages. See the section "Using Futures" for more information.
-1. A `Filter` is wrapped around a `Service` by calling the `andThen` function. Any number of `Filters` can be composed using `andThen`, as we will see shortly.
+### Servers
 
-Let's consider a more involved example. Often it is nice to isolate distinct phases of your application into a pipeline, and `Filters` provide a great way to accomplish this. In order to prevent `Integer Overflow` errors, our `Service` will check that the request is `< 2**32 - 1`:
+In Finagle, RPC servers are built out of a `Service` and zero or more `Filter` objects. You apply filters to the service request after which you execute the service itself:
 
-### Scala
+![Relationship between a service and filters (doc/Filters.png)](https://github.com/twitter/finagle/tree/master/doc/Filters.png)
 
-    val preventOverflowFilter = new SimpleFilter[Int, Int] {                             // (1)
-      def apply(request: Int, continue: Service[Int, Int]) =
-        if (request < Int.MaxValue)
-          continue(request)
-        else
-          Future.exception(new OverflowException)                                        // (2)
-    }
+Typically, you use a `ServerBuilder` to create your server. A `ServerBuilder` enables you to specify the following general attributes:
 
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>codec</td>
+<td>Object to handle encoding and decoding of the service's request/response protocol</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>statsReceiver</td>
+<td>Statistics receiver object, which enables logging of important events and statistics</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>name</td>
+<td>Name of the service</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>bindTo</td>
+<td>The IP host:port pairs on which to listen for requests; <CODE>localhost</CODE> is assumed if the host is not specified</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>logger</td>
+<td>Logger object</td>
+<td><I>None</I></td>
+</tr>
+</tbody>
+</table>
+
+You can specify the following attributes to handle fault tolerance and manage clients:
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>maxConcurrentRequests</td>
+<td>Maximum number of requests that can be handled concurrently by the server</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>hostConnectionMaxIdleTime</td>
+<td>Maximum time that this server can be idle before the connection is closed</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>hostConnectionMaxLifeTime</td>
+<td>Maximum time that this server can be connected before the connection is closed</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>requestTimeout</td>
+<td>Maximum time to complete a request</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>readTimeout</td>
+<td>Maximum time to wait for the first byte to be read</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>writeCompletionTimeout</td>
+<td>Maximum time to wait for notification of write completion from a client</td>
+<td><I>None</I></td>
+</tr>
+</tbody>
+</table>
+
+You can specify the following attributes to manage TCP connections:
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>sendBufferSize</td>
+<td>Requested TCP buffer size for responses</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>recvBufferSize</td>
+<td>Actual TCP buffer size for requests</td>
+<td><I>None</I></td>
+</tr>
+</tbody>
+</table>
+
+You can also specify these attributes:
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>tls</td>
+<td>The kind of transport layer security</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>startTls</td>
+<td>Whether to start transport layer security</td>
+<td><B>false</B></td>
+</tr>
+<tr>
+<td>channelFactory</td>
+<td>Channel service factory object</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>traceReceiver</td>
+<td>Trace receiver object</td>
+<td>new <CODE>NullTraceReceiver</CODE> object</td>
+</tr>
+</tbody>
+</table>
+
+Once you have defined your `Service`, it can be bound to an IP socket address, thus becoming an RPC server. 
+
+[Top](#Top)
+
+<a name="Clients"></a>
+
+### Clients
+
+Finagle makes it easy to build RPC clients with connection pooling, load balancing, logging, and statistics reporting. The balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to _least connections_ in other load balancers. The load-balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. 
+
+Your code should separate building the client from invocation of the client. A client, once built, can be used with _lazy binding_, saving the resources required to build a client. Note: The examples, which show the creation of the client and its first execution together, represent the first-execution scenario. Typically, subsequent execution of the client does not require rebuilding. 
+
+Finagle will retry the request in the event of an error, up to the number of times specified; however, Finagle **does not assume your RPC service is Idempotent**. Retries occur only when the request is known to be idempotent, such as in the event of TCP-related `WriteException` errors, for which the RPC has not been transmitted to the remote server.
+
+A robust way to use RPC clients is to have an upper-bound on how long to wait for a response to arrive. With `Future` objects, you can 
+
+* block, waiting for a response to arrive and throw an exception if it does not arrive in time.
+* register a callback to handle the result if it arrives in time, and register another callback to invoke if the result does not arrive in time
+
+A client is a `Service` and can be wrapped by `Filter` objects. Typically, you call `ClientBuilder` to create your client service. `ClientBuilder` enables you to specify the following general attributes:
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>name</td>
+<td>Name of the service</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>codec</td>
+<td>Object to handle encoding and decoding of the service's request/response protocol</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>statsReceiver</td>
+<td>Statistics receiver object, which enables logging of important events and statistics</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>loadStatistics</td>
+<td>How often to load statistics from the server</td>
+<td><B>(60, 10.seconds)</B></td>
+</tr>
+<tr>
+<td>logger</td>
+<td>A <CODE>Logger</CODE> object with which to log Finagle messages</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>retries</td>
+<td>Number of retries per request (only applies to recoverable errors)</td>
+<td><I>None</I></td>
+</tr>
+</tbody>
+</table>
+
+You can specify the following attributes to manage the host connection:
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>connectionTimeout</td>
+<td>Time allowed to establish a connection</td>
+<td><B>10.milliseconds</B></td>
+</tr>
+<tr>
+<td>requestTimeout</td>
+<td>Request timeout</td>
+<td><I>None</I>, meaning it waits forever</td>
+</tr>
+<tr>
+<td>hostConnectionLimit</td>
+<td>Number of connections allowed from this client to the host</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>hostConnectionCoresize</td>
+<td>Host connection's cache allocation</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>hostConnectionIdleTime</td>
+<td> </td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>hostConnectionMaxIdleTime</td>
+<td>Maximum time that the client can be idle until the connection is closed</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>hostConnectionMaxLifeTime</td>
+<td>Maximum time that client can be connected before the connection is closed</td>
+<td><I>None</I></td>
+</tr>
+</tbody>
+</table>
+
+You can specify the following attributes to manage TCP connections:
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tr>
+<td>sendBufferSize</td>
+<td>Requested TCP buffer size for responses</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>recvBufferSize</td>
+<td>Actual TCP buffer size for requests</td>
+<td><I>None</I></td>
+</tr>
+</tbody>
+</table>
+
+You can also specify these attributes:
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default Value</th>
+</tr>
+<tr>
+<td>cluster</td>
+<td>The cluster connections associated with the client</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>channelFactory</td>
+<td>Channel factory associated with this client</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>tls</td>
+<td>The kind of transport layer security</td>
+<td><I>None</I></td>
+</tr>
+<tr>
+<td>startTls</td>
+<td>Whether to start transport layer security</td>
+<td><B>false</B></td>
+</tr>
+</table>
+ 
+If you are using _stateful protocols_, such as those used for transaction processing or authentication, you should call `buildFactory`, which creates a `ServiceFactory` to support stateful connections.
+
+[Top](#Top)
+
+<a name="Threading Model"></a>
+
+### Threading Model
+
+The Finagle threading model requires that you avoid blocking operations in the Finagle event loop. Finagle-provided methods do not block; however, you could inadvertently implement a client, service or a `Future` callback that blocks. 
+
+Blocking events include but are not limited to
+
+* network calls
+* system calls
+* database calls
+* any operation that synchronizes resources
+
+Note: You do not need to be concerned with long-running or CPU intensive operations if they do not block. Examples of these operations include image processing operations, public key cryptography, or anything that might take a non-trivial amount of clock time to perform. Only operations that block in Finagle are of concern. Because Finagle and its event loop use a relatively low number of threads, blocked threads can cause performance issues.
+
+Consider the following diagram, which shows how a client uses the Finagle event loop: 
+
+<<<<<<< HEAD
 ### Threading Model
 
 Finagle is capable of handling many connections concurrently. Finagle works by placing events from the connections onto a queue, and then continuously looping, executing the code corresponding to each event in turn. This loop is called the event dispatch loop. Using this technique, a single thread can dispatch events for many connections, which yields certain performance advantages. (Under the hood, Finagle maintains multiple queues and multiple threads, but the details of which threads handle which connections are hidden from you, as is the exact sequence in which events are processed.)
@@ -189,38 +772,44 @@ To avoid placing these operations in the event loop, Finagle provides Futures. A
 Footnote: Strictly speaking, synchronization in the event loop is fine as long as contention and wait time are going to be low. But you should be sure you know what you're doing.
 
 ### An authorization filter
+=======
+![Relationship between your threads and Finagle (doc/ThreadEx.png)](https://github.com/twitter/finagle/tree/master/doc/ThreadEx.png)
 
-Another `Filter` typical of an RPC Service is authentication and authorization. Our `Service` wants to ensure that the user is authorized to perform addition:
+Your threads, which are shown on the left, are allowed to block. When you call a Finagle method or Finagle calls a method for you, it dispatches execution of these methods to its internal threads. Thus, the Finagle event loop and its threads cannot block without degrading the performance of other clients and servers that use the same Finagle instance.
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
+In complex RCP operations, it may be necessary to perform blocking operations. In these cases, you must set up your own thread pool and use `Future` or `FuturePool` objects to execute the blocking operation on your own thread. Consider the following diagram: 
+
+<<<<<<< HEAD
 Notes:
 
 1. A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. It saves a little bit of typing.
 1. An exception can be returned asynchronously by calling `Future.exception`. See the section "Using Futures" for more information.
 
 ### Scala
+=======
+![Handling operations that block (doc/ThreadExNonBlockingServer.png)](https://github.com/twitter/finagle/tree/master/doc/ThreadExNonBlockingServer.png)
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
-    val ensureAuthorizedFilter = new SimpleFilter[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest, continue: Service[Int, Int]) =
-        if (request.getHeader("Authorization") == "Basic ...")
-          continue(request)
-        else
-          Future.exception(new UnauthorizedException)
-    }
+In this example, you can use a `FuturePool` object to provide threads for blocking operations outside of Finagle. Finagle can then dispatch the blocking operation to your thread. For more information about `FuturePool` objects, see <a href="#Using Future Pools">Using Future Pools</a>.
 
+<<<<<<< HEAD
 Finally, all of the `Filters` can be composed with our `Service` in the following way:
+=======
+[Top](#Top)
 
-    val myService =
-      ensureAuthorizedFilter andThen
-      httpToIntFilter        andThen
-      preventOverflowFilter  andThen
-      plusOneService
+<a name="Starting and Stopping Servers"></a>
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
-## Building a robust RPC client
+### Starting and Stopping Servers
 
-Finagle makes it easy to build RPC clients with connection pooling, load balancing, logging, and statistics reporting:
+A server automatically starts when you call `build` on the server after assigning the IP address on which it runs. To stop a server, call it's `close` method. The server will immediately stop accepting requests; however, the server will continue to process outstanding requests until all have been handled or until a specific duration has elapsed. You specify the duration when you call `close`. In this way, the server is allowed to drain out outstanding requests but will not run indefinitely. You are responsible for releasing all resources when the server is no longer needed.
 
-### Scala
+[Top](#Top)
 
+<a name="Exception Handling"></a>
+
+<<<<<<< HEAD
 Note that the `ClientBuilder` requires the definition of `codec`,
 `hosts` and `hostConnectionLimit`. In Scala, this requirement is
 statically typechecked.
@@ -234,95 +823,152 @@ statically typechecked.
         .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
         .logger(Logger.getLogger("http"))
         .build()
+=======
+### Exception Handling
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
-This creates a load balanced HTTP client that balances requests among 3 (local) endpoints. The balancing strategy is to pick the endpoint with the least number of outstanding requests (this is similar to "least connections" in other load balancers). The load-balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. **In general a lot of thought has gone into making robust load-balancing and failover.**
+As soon as an exception occurs, it is executed. If more than one exception handler is defined, the first exception to occur executes its handler. Casting the exception as a `Future` means that the exception will not block; however, Finagle does not allow the thread causing the exception to continue. For an example, see <a href="#Future Exceptions">Future Exceptions</a>.
 
-### Notes
+[Top](#Top)
 
-1. If retries are specified (using `retries(n: Int)`), Finagle will retry the request in the event of an error, up to the number of times specified. Finagle **does not assume your RPC service is Idempotent**. Retries occur only in the event of TCP-related `WriteExceptions`, where we are certain the RPC has not been transmitted to the remote server.
+<a name="Finagle Projects and Packages"></a>
 
-Once you have constructed a client, a request is issued like this:
+## Finagle Projects and Packages
 
-### Scala
+The `Core` project contains the execution framework, Finagle classes, and supporting classes, whose objects are only of use within Finagle. The `Core` project includes the following packages:
 
-    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, Get, "/")
-    val futureResponse: Future[HttpResponse] = client(request)
+* `builder` - contains `ClientBuilder`, `ServerBuilder`
+* `channel`
+* `http`
+* `loadbalancer`
+* `pool`
+* `service`
+* `stats`
+* `tracing`
+* `util`
 
-### Java
+It also contains packages to support remote procedure calls over Kestrel, Thrift, streams, clusters, and provides statistics collection (Ostrich).
 
-    HttpRequest request = new DefaultHttpRequest(HTTP_1_1, Get, "/")
-    Future<HttpResponse> futureResponse = client.apply(request)
+The `Util` project contains classes, such as `Future`, which are both generally useful and specifically useful to Finagle.
 
-### Timeouts
+[Top](#Top)
 
-A robust way to use RPC clients is to have an upper-bound on how long to wait for a response to arrive. With `Futures`, there are two ways to do this: synchronously and asynchrously. 1) The synchronous technique is to block, waiting for a response to arrive, and throw an exception if it does not arrive in time. 2) The asynchronous way is to register a callback to handle the result if it arrives in time, and invoke another callback if it fails.
+<a name="Using Future Objects"></a>
 
-### Scala
+## Using Future Objects
 
-    // (1) synchronous timeouts
-    try {
-      val response = futureResponse(1.second)
-    } catch {
-      case e: TimeoutException => ...
+In the simplest case, you can use `Future` to block for a request to complete. Consider an example that blocks for an HTTP GET request:
+
+	// Issue a request, get a response:
+	val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
+	val responseFuture: Future[HttpResponse] = client(request)
+	
+In this example, a client issuing the request will wait forever for a response unless you specified a value for the `requestTimeout` attribute when you built the <a href="#Clients">client</a>. 
+
+Consider another example:
+
+	val responseFuture: Future[String] = executor.schedule(job)
+	
+In this example, the value of `responseFuture` is not available until after the scheduled job has finished executing and the caller will block until `responseFuture` has a value.
+
+[Top](#Top)
+
+<a name="Future Callbacks"></a>
+
+### Future Callbacks
+
+In cases where you want to continue execution immediately, you can specify a callback. The callback is identified by the `onSuccess` keyword:
+
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
+    val responseFuture: Future[HttpResponse] = client(request)
+    responseFuture onSuccess { responseFuture =>
+      println(responseFuture)
     }
 
-    // (2) asynchronous timeouts require an (implicit) Timer object
-    import com.twitter.finagle.util.Timer._
+[Top](#Top)
 
-    futureResponse.within(1.second) onSuccess { response =>
-      println("yay it worked: " + response)
+<a name="Future Timeouts"></a>
+
+### Future Timeouts
+
+In cases where you want to continue execution after some amount of elapsed time, you can specify the length of time to wait in the `Future` object. The following example waits 1 second before displaying the value of the response:
+
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
+    val responseFuture: Future[HttpResponse] = client(request)
+    println(responseFuture(1.second))
+	
+In the above example, you do not know whether the response timed out before the request was satisfied. To determine what kind of response you actually received, you can provide two callbacks, one to handle `onSuccess` conditions and one for `onFailure` conditions. You  use the `within` method of `Future` to specify how long to wait for the response. Finagle also creates a `Timer` thread on which to wait until one of the conditions are satisfied. Consider the following example:
+
+    import com.twitter.finagle.util.Timer._
+    ...
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
+    val responseFuture: Future[HttpResponse] = client(request)
+    responseFuture.within(1.second) onSuccess { response =>
+      println("responseFuture)
     } onFailure {
       case e: TimeoutException => ...
     }
 
-## Using Futures
-
-Finagle uses `com.twitter.util.Futures` as the unifying abstraction for all asynchronous computation. A `Future` represents a computation that has not yet completed, and that can succeed or fail. The two most basic ways to use a `Future` is to 1) wait for the computation to return, or 2) register a callback to be invoked when the computation eventually succeeds or fails.
-
-In the example below, we define a function `f` that takes an `Int` and returns a `Future[Int]`. It errors if given an odd number.
-
-[See the Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Future.html)
-
-### Scala
-
-    def f(a: Int): Future[Int] =
-      if (a % 2 == 0)
-        Future.value(a)
-      else
-        Future.exception(new OddNumberException)
-
-    val myFuture: Future[Int] = f(2)
-
-    // an alternative way to define the function `f`:
-
-    def f(a: Int): Future[Int] = Future {
-      if (a % 2 == 0) a
-      else throw new OddNumberException
-    }
-
+<<<<<<< HEAD
     // 1) Wait 1 second for the computation to return
+=======
+If a timeout occurs, Finagle takes the `onFailure` path. You can use a `TimeoutException` object to display a message or take other actions.
+
+[Top](#Top)
+
+<a name="Future Exceptions"></a>
+
+### Future Exceptions
+
+To set up an exception, specify the action in a `try` block and handle failures in a `catch` block. Consider an example that handles `Future` timeouts as an exception:
+
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
+    val responseFuture: Future[HttpResponse] = client(request)
+>>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
     try {
-      println(myFuture(1.second))
+      println(responseFuture(1.second))
     } catch {
-      case e: TimeoutException   => ...
-      case e: OddNumberException => ...
+      case e: TimeoutException => ...
     }
 
-    // 2) Invoke a callback when the computation succeeds or fails
-    myFuture onSuccess { i =>
-      println(i)
-    } onFailure { e =>
-      println("uh oh!")
-    } ensure {
-      externalResources.release()
+In this example, after 1 second, either the HTTP response is displayed or the `TimeoutException` is thrown.
+
+[Top](#Top)
+
+<a name="Promises"></a>
+
+### Promises
+
+`Promise` is a subclass of `Future`. Although a `Future`  can only be read, a `Promise` can be both read and written.
+Usually a producer makes a `Promise` and casts it to a `Future` before giving it to the consumer. The following example shows how this might be useful in the case where you intend to make a `Future` service but need to anticipate errors:
+
+    def make() = {
+    ...
+    val promise = new Promise[Service[Req, Rep]]
+    ... {
+      case Ok(myObject) =>
+        ...
+        promise() = myConfiguredObject
+      case Error(cause) =>
+        promise() = Throw(new ...Exception(cause))
+      case Cancelled =>
+        promise() = Throw(new WriteException(new ...Exception))
+      }
+      promise
     }
+
+[Top](#Top)
+
+<a name="Using Future map and flatMap Operations"></a>
+
+### Using Future map and flatMap Operations
 
 In addition to waiting for results to return, `Futures` can be transformed in interesting ways. For instance, it is possible to convert a `Future[String]` to a `Future[Int]` by using `map`:
 
     val stringFuture: Future[String] = Future("1")
     val intFuture: Future[Int] = stringFuture map (_.toInt)
 
-Similar to `map`, there is `flatMap`. This allows you to easily "pipeline" a sequence of `Futures`:
+Similar to `map`, you can use `flatMap` to easily _pipeline_ a sequence of `Futures`:
 
     val authenticateUser: Future[User] = User.authenticate(email, password)
     val lookupTweets: Future[Seq[Tweet]] = authenticateUser flatMap { user =>
@@ -331,13 +977,30 @@ Similar to `map`, there is `flatMap`. This allows you to easily "pipeline" a seq
 
 In this example, `Tweet.findAllByUser(user)` is a function of type `User => Future[Seq[Tweet]]`.
 
-As a final example of `Futures` let's consider the problem of scatter/gather patterns. The challenge is to issue a series of requests in parallel and wait for all of them to arrive. Suppose for example, we have a sequence of `Futures`. To wait for all to return, we do like so:
+<!-- 
+
+[Top](#Top)
+
+<a name="Using Future handle and rescue Operations"></a>
+
+### Using Future handle and rescue Operations
+
+// TODO
+
+-->
+
+[Top](#Top)
+
+<a name="Using Future in Scatter/Gather Patterns"></a>
+
+### Using Future in Scatter/Gather Patterns
+
+For scatter/gather patterns, the challenge is to issue a series of requests in parallel and wait for all of them to arrive. To wait for a sequence of `Future` objects to return, you can define a sequence to hold the objects and use the `Future.collect` method to wait for them, as follows:
 
     val myFutures: Seq[Future[Int]] = ...
-
     val waitTillAllComplete: Future[Seq[Int]] = Future.collect(myFutures)
 
-A more complex variation of scatter/gather is to perform a sequence of asynchronous operations and harvest only those that return within a certain time -- using a default value for those that don't return. A concrete example might be to issue a set of parallel requests to N partitions of a search index; those that don't return in time we consider to have returned the empty set.
+A more complex variation of scatter/gather pattern is to perform a sequence of asynchronous operations and harvest only those that return within a certain time, ignoring those that don't return within the specified time. For example, you might want to issue a set of parallel requests to _N_ partitions of a search index; those that don't return in time are assumed to be empty. The following example allows 1 second for the query to return:
 
     import com.twitter.finagle.util.Timer._
 
@@ -348,108 +1011,262 @@ A more complex variation of scatter/gather is to perform a sequence of asynchron
     }
     val allResults: Future[Seq[Result]] = Future.collect(timedResults)
 
-    // Process the results asynchronously.
-    // Note: this takes no longer than 1 second.
     allResults onSuccess { results =>
       println(results)
     }
 
-## Streaming Protocols
+[Top](#Top)
 
-Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalization of `Futures` called `Channels`. `Channels` represent a stream of events that can be listened to. To publish and subscribe to a `Channel`, do the following:
+<a name="Using Future Pools"></a>
 
-[See the Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Channel.html)
+### Using Future Pools
 
-    // a ChannelSource is a readable-writable stream of messages, whereas a Channel is only readable.
-    val source = new ChannelSource[Int]
-    val sink: Channel = source
+A `FuturePool` object enables you to place a blocking operation on its own thread. In the following example, a service's `apply` method, which executes in the Finagle event loop, creates the `FuturePool` object and places the blocking operation on a thread associated with the `FuturePool` object. The `apply` method returns immediately without blocking.
 
-    // start listening for messages:
-    val observer1 = sink respond { message =>
-      Future { println("1: " + message) }                              // (1)
-    }
-    val observer2 = sink respond { message =>                          // (2)
-      Future { println("2: " + message) }
-    }
+    class ThriftFileReader extends Service[String, Array[Byte]] {
+      val diskIoFuturePool = FuturePool(Executors.newFixedThreadPool(4))
 
-    // send some messages on the channel
-    source.send(1)
-    source.send(2)
-    // etc.
-
-    // stop listening for messages:
-    observer1.dispose()
-
-### Notes
-
-1. Subscribers must return a `Future` indicating when processing of the received message is complete. This allows consumers to exhibit backpressure to producers.
-1. Just as with `Futures` there can be any number of responders to a `Channel`.
-
-`Channels` have some of the usual sequence operations such as `map` and `filter`:
-
-    val channel = new ChannelSource[Int]
-    val evenChannel = channel filter (_ % 2 == 0)
-    val stringChannel = channel map (_.toString)
-
-Most of the tricky issues concerning `Channels` involve data-loss and backpressure. In order to ensure that no data is lost, a typical pattern is not to broadcast on a `Channel` until there is at least one subscriber. This is easily accomplished:
-
-    channel.responds.first { _ =>                                       // (1) (2)
-      // the first responder has arrived, start sending!
-      // ...
-    }
-
-### Notes
-
-1. `channel.responds` is a `Channel` itself. In other words, every `Channel` has a sub-channel indicating when subscribers subscribe (and unsubscribe!).
-1. `channel.first` is a `Future` indicating when the first message arrives on that `Channel`.
-
-However, a more robust producer stops producing when all consumers `dispose()`. This is easily accomplished.
-
-    channel.numObservers.respond { i =>
-      i match {
-        case 0 => start()
-        case 1 => stop()
-        case _ => // continue
+      def apply(path: String) = {
+        val blockingOperation = {
+          scala.Source.fromFile(path) // potential to block
+        }    
+        // give this blockingOperation to the future pool to execute
+        diskIoFuturePool(blockingOperation)
+        // returns immediately while the future pool executes the operation on a different thread
       }
-      Future.Done
     }
 
-Backpressure (that is, slowing down production if consumers get backed up) is also easily accomplished. The `channel.send` method returns a `Seq[Future[Unit]]` -- a sequence of `Futures` indicating when all consumers have processed the message. You can use `Future.join` to slow down production in the following way:
+[Top](#Top)
 
-    Future.join(channel.send(1)) onSuccess { _ =>
-      Future.join(channel.send(2)) onSuccess { ... }
+<a name="Using Future Objects With Java"></a>
+
+## Using Future Objects With Java
+
+A `Future` object in Java is defined as `Future<`_Type_`>`, as in the following example:
+	
+    Future<String> future = executor.schedule(job);
+
+You must explicitly call the object's `apply` method:
+
+    // Wait indefinitely for result
+    String result = future.apply();
+
+Arguments to the `apply` method are passed as functions:
+
+    // Wait up to 1 second for result 
+    String result = future.apply(Duration.apply(1, SECOND));
+
+There are two styles you can use to wait for a value. The _imperative_ style is the traditional Java programming style. The _functional_ style uses functions as objects and is the basis for Scala. You can use whichever style suits you best.
+
+[Top](#Top)
+
+<a name="Imperative Java Style"></a>
+
+### Imperative Java Style
+
+The following example shows the _imperative_ style, which uses an event listener that responds to a change in the `Future` object and calls the appropriate method:
+
+    Future<String> future = executor.schedule(job);
+    future.addEventListener( 
+      new FutureEventListener<String>() {
+        public void onSuccess(String value) { 
+          println(value);
+        }
+        public void onFailure(Throwable t) ...
+      }
+    )
+
+[Top](#Top)
+
+<a name="Functional Java Style"></a>
+
+### Functional Java Style
+
+
+The following example shows the _functional_ style, which is similar to the way in which you write Scala code:
+
+    Future<String> future = executor.schedule(job);
+      future.onSuccess( new Function<String, Void>() {
+        public Void apply(String value) { System.out.println(value);
+      } ).onFailure(...).ensure(...);
+
+The following example shows the _functional_ style for the `map` method:
+
+    Future<String> future = executor.schedule(job);
+    Future<Integer> result = future.map(new Function<String, Integer>() {
+      public Integer apply(String value) { return Integer.valueOf(value);
+      }
+
+[Top](#Top)
+
+<a name="Creating a Service"></a>
+
+## Creating a Service
+
+The following example extends the `Service` class to respond to an HTTP request:
+
+    class Respond extends Service[HttpRequest, HttpResponse] {
+      def apply(request: HttpRequest) = {
+        val response = new DefaultHttpResponse(HTTP_1_1, OK)
+        response.setContent(copiedBuffer(myContent, UTF_8))
+        Future.value(response)
+      }
+    }
+	
+[Top](#Top)
+
+<a name="Creating Simple Filters"></a>
+
+## Creating Simple Filters
+
+The following example extends the `SimpleFilter` class to throw an exception if the HTTP authorization header contains a different value than the specified string:
+
+    class Authorize extends SimpleFilter[HttpRequest, HttpResponse] {
+      def apply(request: HttpRequest, continue: Service[HttpRequest, HttpResponse]) = {
+        if ("shared secret" == request.getHeader("Authorization")) {
+          continue(request)
+        } else {
+          Future.exception(new IllegalArgumentException("You don't know the secret"))
+        }
+      }
     }
 
-You can use recursion to send 10 messages, throttled by consumer performance. Additionally, Future provides a number of control flow constructs that are useful:
+The following example extends the `SimpleFilter`class to set the HTTP response code if an error occurs and return the error and stack trace in the response:
 
-    val i = new AtomicInteger(0)
-    Future.times(10) { channel.send(i.getAndIncrement()) } // (1)
+    class HandleExceptions extends SimpleFilter[HttpRequest, HttpResponse] {
+      def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
+        service(request) handle { case error =>
+          val statusCode = error match {
+            case _: IllegalArgumentException =>
+              FORBIDDEN
+            case _ =>
+              INTERNAL_SERVER_ERROR
+            }
+						
+          val errorResponse = new DefaultHttpResponse(HTTP_1_1, statusCode)
+          errorResponse.setContent(copiedBuffer(error.getStackTraceString, UTF_8))
 
-### Notes
+          errorResponse
+        }
+      }
+    }
+	
+[Top](#Top)
 
-1. Future has methods like times(), parallel(), and whileDo() that implement advanced control-flow patterns.
+<a name="Building a Robust Server"></a>
 
-With `Channels`, building a streaming RPC service is straightforward. You will need a codec that supports streaming (such as HTTP with chunked encoding). Then, build a `Service` that returns a `Channel`:
+## Building a Robust Server
 
-    val channel = new ChannelSource[ChannelBuffer]
-    val myService = new Service[HttpRequest, Channel[ChannelBuffer]] {
-      def apply(request: HttpRequest) = Future.value(channel)
+The following example encapsulates the filters and service in the previous examples and defines the execution order of the filters, followed by the service. The `ServerBuilder` object specifies the service that indicates the execution order along with the codec and IP address on which to bind the service:
+
+    object HttpServer {
+      class HandleExceptions extends SimpleFilter[HttpRequest, HttpResponse] {...}
+      class Authorize extends SimpleFilter[HttpRequest, HttpResponse] {...}
+      class Respond extends Service[HttpRequest, HttpResponse] {... }
+		
+
+      def main(args: Array[String]) {
+        val handleExceptions = new HandleExceptions
+        val authorize = new Authorize
+        val respond = new Respond
+
+      val myService: Service[HttpRequest, HttpResponse] 
+        = handleExceptions andThen authorize andThen respond
+
+      val server: Server = ServerBuilder()
+        .codec(Http)
+        .bindTo(new InetSocketAddress(8080))
+        .build(myService)
+      }
     }
 
-Some incomplete API documentation is available: See [scaladoc](http://twitter.github.com/finagle/).
+In this example, the `HandleExceptions` filter is executed before the `authorize` filter. All filters are executed before the service. The server is robust not because of its complexity; rather, it is robust because it uses filters to remove issues before the service executes.
 
-## Serversets
+[Top](#Top)
+
+<a name="Building a Robust Client"></a>
+
+## Building a Robust Client
+
+A robust client has little to do with the lines of code (SLOC) that goes into it; rather, the robustness depends on how you configure the client and the testing you put into it. Consider the following HTTP client: 
+
+    val client = ClientBuilder()
+      .codec(Http)
+      .hosts("localhost:10000,localhost:10001,localhost:10003")
+      .connectionTimeout(1.second)        // max time to spend establishing a TCP connection.
+      .retries(2)                         // (1) per-request retries
+      .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
+      .logger(Logger.getLogger("http"))
+      .build()
+
+The `ClientBuilder` object creates and configures a load balanced HTTP client that balances requests among 3 (local) endpoints. The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
+
+The following examples show how to invoke this client from Scala and Java, respectively:
+
+##### Scala Client Invocation
+
+    val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, Get, "/")
+    val futureResponse: Future[HttpResponse] = client(request)
+
+##### Java Client Invocation
+
+    HttpRequest request = new DefaultHttpRequest(HTTP_1_1, Get, "/")
+    Future<HttpResponse> futureResponse = client.apply(request)
+
+For information about using `Future` objects with Java, see <a href="#Using Future Objects With Java">Using Future Objects With Java</a>.
+
+[Top](#Top)
+
+<a name="Creating Filters to Transform Requests and Responses"></a>
+
+## Creating Filters to Transform Requests and Responses
+
+The following example extends the `Filter` class to authenticate requests. The request is transformed into an HTTP response before being handled by the `AuthResult` service. In this case, the `RequireAuthentication` filter does not transform the resulting HTTP response: 
+
+    class RequireAuthentication(val p: ...)
+      extends Filter[Request, HttpResponse, AuthenticatedRequest, HttpResponse]
+      {
+        def apply(request: Request, service: Service[AuthenticatedRequest, HttpResponse]) = {
+          p.authenticate(request) flatMap {
+            case AuthResult(AuthResultCode.OK, Some(passport: OAuthPassport), _, _) =>
+              service(AuthenticatedRequest(request, passport))
+            case AuthResult(AuthResultCode.OK, Some(passport: SessionPassport), _, _) =>
+              service(AuthenticatedRequest(request, passport))
+            case ar: AuthResult =>
+              Trace.record("Authentication failed with " + ar)
+              Future.exception(new RequestUnauthenticated(ar.resultCode))
+        }
+      }
+    }
+
+In this example, the `flatMap` object enables pipelining of the requests.
+
+[Top](#Top)
+
+<!--
+
+<a name="Creating Combinators to Distribute Processing Tasks"></a>
+
+## Creating Combinators to Distribute Processing Tasks
+
+// TODO
+
+[Top](#Top)
+
+-->
+
+<a name="Using ServerSet Objects"></a>
+
+## Using ServerSet Objects
 
 `finagle-serversets` is an implementation of the Finagle Cluster interface using `com.twitter.com.zookeeper` [ServerSets](http://twitter.github.com/commons/pants.doc/index.html#com.twitter.common.zookeeper.ServerSet).
 
-Here's how to use it:
+You can instantiate a `ServerSet` object as follows:
 
-### Instantiate a ServerSet and a Cluster
-
-    val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+    val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/...")
     val cluster = new ZookeeperServerSetCluster(serverSet)
 
-### If you're a Server, join the Cluster:
+Servers join a cluster, as in the following example:
 
     val serviceAddress = new InetSocketAddress(...)
     val server = ServerBuilder()
@@ -458,16 +1275,44 @@ Here's how to use it:
 
     cluster.join(serviceAddress)
 
-### If you're a Client,
+A client can access a cluster, as follows:
 
     val client = ClientBuilder()
-      .cluster(cluster) // check this out!!
+      .cluster(cluster)
       .codec(new StringCodec)
       .hostConnectionLimit(1)
       .build()
 
-That's it!
+[Top](#Top)
 
-# Changes
+<a name="Additional Samples"></a>
+
+## Additional Samples
+
+* [Echo](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/echo) - A simple echo client and server using a newline-delimited protocol. Illustrates the basics of asynchronous control-flow.
+* [Http](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/http) - An advanced HTTP client and server that illustrates the use of Filters to compositionally organize your code. Filters are used here to isolate authentication and error handling concerns.
+* [Memcached Proxy](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/memcachedproxy) - A simple proxy supporting the Memcached protocol.
+* [Stream](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stream) - An illustration of Channels, the abstraction for Streaming protocols.
+* [Spritzer 2 Kestrel](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel) - An illustration of Channels, the abstraction for Streaming protocols. Here the Twitter Firehose is "piped" into a Kestrel message queue, illustrating some of the compositionality of Channels.
+* [Stress](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stress) - A high-throughput HTTP client for driving stressful traffic to an HTTP server. Illustrates more advanced asynchronous control-flow.
+* [Thrift](https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/thrift) - A simple client and server for a Thrift protocol.
+
+[Top](#Top)
+
+<a name="API Reference Documentation"></a>
+
+## API Reference Documentation
+
+* [Builders](http://twitter.github.com/finagle/finagle-core/target/doc/main/api/com/twitter/finagle/builder/package.html)
+* [Service](http://twitter.github.com/finagle/finagle-core/target/doc/main/api/com/twitter/finagle/Service.html)
+* [Future](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Future.html)
+* [Complete Core Project Scaladoc](http://twitter.github.com/finagle/finagle-core/target/doc/main/api/index.html)
+* [Complete Util Project Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/)
+
+[Top](#Top)
+
+<a name="Revision History"></a>
 
 See ChangeLog.
+
+[Top](#Top)
