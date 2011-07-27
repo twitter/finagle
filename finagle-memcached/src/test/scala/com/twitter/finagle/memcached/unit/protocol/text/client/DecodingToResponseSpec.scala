@@ -6,7 +6,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.protocol.text.Tokens
 import com.twitter.finagle.memcached.protocol
-import com.twitter.finagle.memcached.protocol.{ClientError, Stored, NonexistentCommand, NotFound}
+import com.twitter.finagle.memcached.protocol.{ClientError, Stored, NonexistentCommand, NotFound, Exists}
 
 object DecodingToResponseSpec extends Specification {
   "DecodingToResponse" should {
@@ -21,6 +21,11 @@ object DecodingToResponseSpec extends Specification {
       "STORED" in {
         val buffer = Tokens(Seq[ChannelBuffer]("STORED"))
         decodingToResponse.decode(null, null, buffer) mustEqual Stored()
+      }
+
+      "EXISTS" in {
+        val buffer = Tokens(Seq[ChannelBuffer]("EXISTS"))
+        decodingToResponse.decode(null, null, buffer) mustEqual Exists()
       }
 
       "ERROR" in {

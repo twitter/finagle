@@ -22,5 +22,10 @@ public class ClientTest {
     client.delete("foo").get();
     client.set("foo", "bar").get();
     assert(client.get("foo").get().toString(Charset.defaultCharset()) == "bar");
+    ResultWithCAS res = client.gets("foo").get();
+    assert(client.cas("foo", "baz", res.casUnique).get());
+    assert(client.get("foo").get().toString(Charset.defaultCharset()) == "baz");
+    System.err.println("passed.");
+    service.release();
   }
 }

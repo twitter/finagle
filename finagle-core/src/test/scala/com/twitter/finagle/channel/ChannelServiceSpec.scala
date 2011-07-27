@@ -233,5 +233,14 @@ object ChannelServiceSpec extends Specification with Mockito {
       factory.close()
       there was one(bootstrap).releaseExternalResources()
     }
+
+    "encode bootstrap exceptions" in {
+      val e = new ChannelPipelineException("sad panda")
+      bootstrap.connect() throws e
+
+      val f = factory.make()
+      f.isDefined must beTrue
+      f() must throwA(e)
+    }
   }
 }

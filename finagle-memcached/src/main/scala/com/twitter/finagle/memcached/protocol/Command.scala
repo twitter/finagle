@@ -15,6 +15,8 @@ case class Add(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffe
 case class Replace(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer) extends StorageCommand(key, flags, expiry, value)
 case class Append(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)  extends StorageCommand(key, flags, expiry, value)
 case class Prepend(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer) extends StorageCommand(key, flags, expiry, value)
+case class Cas(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer)
+  extends StorageCommand(key, flags, expiry, value)
 
 case class Get(keys: Seq[ChannelBuffer])                                              extends RetrievalCommand(keys)
 case class Gets(keys: Seq[ChannelBuffer])                                             extends RetrievalCommand(keys)

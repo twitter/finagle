@@ -1,87 +1,66 @@
 package com.twitter.finagle.pool
 
 import collection.mutable.Queue
+import scala.annotation.tailrec
 
 import com.twitter.util.{Future, Time, Duration}
 
 import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException}
-import com.twitter.finagle.util.Timer
+import com.twitter.finagle.util.{Timer, Cache}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
  * A pool that temporarily caches items from the underlying one, up to
  * the given timeout amount of time.
  */
-class CachingPool[Req, Rep](
+private[finagle] class CachingPool[Req, Rep](
   factory: ServiceFactory[Req, Rep],
-  timeout: Duration,
+  cacheSize: Int,
+  ttl: Duration,
   timer: com.twitter.util.Timer = Timer.default,
   statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
-  private[this] val deathRow    = Queue[(Time, Service[Req, Rep])]()
-  private[this] var isOpen      = true
-  private[this] var isScheduled = false
+  private[this] val cache =
+    new Cache[Service[Req, Rep]](cacheSize, ttl, timer, Some(_.release()))
+  @volatile private[this] var isOpen = true
   private[this] val sizeGauge =
-    statsReceiver.addGauge("pool_cached") {
-      synchronized { deathRow.size }
-    }
+    statsReceiver.addGauge("pool_cached") { cache.size }
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def release() = CachingPool.this.synchronized {
-      if (underlying.isAvailable && isOpen) {
-        deathRow += ((Time.now, underlying))
-        if (!isScheduled) {
-          isScheduled = true
-          timer.schedule(timeout.fromNow) { collect() }
-        }
-      } else {
+    override def release() =
+      if (this.isAvailable && CachingPool.this.isOpen)
+        cache.put(underlying)
+      else
         underlying.release()
-      }
-    }
   }
 
-  private[this] def collect(): Unit = synchronized {
-    val now = Time.now
-    val dequeued = deathRow dequeueAll { case (timestamp, _) =>
-      timestamp.until(now) >= timeout
-    }
-
-    dequeued foreach { case (_, service) =>
-      service.release()
-    }
-
-    if (!deathRow.isEmpty) {
-      // TODO: what happens if an event is scheduled in the past?
-      timer.schedule(deathRow.head._1 + timeout)(collect)
-    } else {
-      isScheduled = false
+  @tailrec
+  private[this] def get(): Option[Service[Req, Rep]] = {
+    cache.get() match {
+      case s@Some(service) if service.isAvailable => s
+      case Some(service) /* unavailable */ => service.release(); get()
+      case None => None
     }
   }
 
   def make(): Future[Service[Req, Rep]] = synchronized {
-    if (!isOpen)
-      return Future.exception(new ServiceClosedException)
-
-    while (!deathRow.isEmpty) {
-      val (_, service) = deathRow.dequeue()
-      if (service.isAvailable)
-        return Future.value(new WrappedService(service))
-      else
-        service.release()
+    if (!isOpen) Future.exception(new ServiceClosedException) else {
+      get() match {
+        case Some(service) =>
+          Future.value(new WrappedService(service))
+        case None =>
+          factory.make() map { new WrappedService(_) }
+      }
     }
-
-    factory.make() map { new WrappedService(_) }
   }
 
   def close() = synchronized {
     isOpen = false
 
-    deathRow foreach { case (_, service) => service.release() }
-    deathRow.clear()
-
+    cache.evictAll()
     factory.close()
   }
 

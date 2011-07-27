@@ -11,6 +11,7 @@ object AbstractDecodingToResponse {
   private[finagle] val STORED        = "STORED":          ChannelBuffer
   private[finagle] val NOT_FOUND     = "NOT_FOUND":       ChannelBuffer
   private[finagle] val NOT_STORED    = "NOT_STORED":      ChannelBuffer
+  private[finagle] val EXISTS        = "EXISTS":          ChannelBuffer
   private[finagle] val DELETED       = "DELETED":         ChannelBuffer
   private[finagle] val ERROR         = "ERROR":           ChannelBuffer
   private[finagle] val CLIENT_ERROR  = "CLIENT_ERROR":    ChannelBuffer
@@ -38,6 +39,7 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
       case NOT_FOUND    => NotFound()
       case STORED       => Stored()
       case NOT_STORED   => NotStored()
+      case EXISTS       => Exists()
       case DELETED      => Deleted()
       case ERROR        => Error(new NonexistentCommand(""))
       case CLIENT_ERROR => Error(new ClientError(""))
@@ -49,8 +51,8 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   protected def parseValues(valueLines: Seq[TokensWithData]) = {
     val values = valueLines.map { valueLine =>
       val tokens = valueLine.tokens
-//      val cas = if (tokens.length == 4) Some(tokens(4).toInt) else None
-      Value(tokens(1), valueLine.data)
+      val casUnique = if (tokens.length == 5) Some(tokens(4)) else None
+      Value(tokens(1), valueLine.data, casUnique)
     }
     Values(values)
   }

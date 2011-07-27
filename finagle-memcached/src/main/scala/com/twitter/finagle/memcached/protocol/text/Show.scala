@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.channel._
 
-
 class ResponseToEncoding extends OneToOneEncoder {
   private[this] val ZERO          = "0"
   private[this] val VALUE         = "VALUE"
@@ -21,13 +20,17 @@ class ResponseToEncoding extends OneToOneEncoder {
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
     case Stored()       => Tokens(Seq(STORED))
     case NotStored()    => Tokens(Seq(NOT_STORED))
+    case Exists()       => Tokens(Seq(EXISTS))
     case Deleted()      => Tokens(Seq(DELETED))
     case NotFound()     => Tokens(Seq(NOT_FOUND))
     case Number(value)  => Tokens(Seq(value.toString))
     case Values(values) =>
       val buffer = ChannelBuffers.dynamicBuffer(100 * values.size)
-      val tokensWithData = values map { case Value(key, value) =>
-        TokensWithData(Seq(VALUE, key, ZERO), value)
+      val tokensWithData = values map {
+        case Value(key, value, Some(casUnique)) =>
+          TokensWithData(Seq(VALUE, key, ZERO, casUnique.toString), value)
+        case Value(key, value, None) =>
+          TokensWithData(Seq(VALUE, key, ZERO), value)
       }
       ValueLines(tokensWithData)
   }
@@ -35,6 +38,7 @@ class ResponseToEncoding extends OneToOneEncoder {
 
 class CommandToEncoding extends OneToOneEncoder {
   private[this] val GET           = "get"
+  private[this] val GETS          = "gets"
   private[this] val DELETE        = "delete"
   private[this] val INCR          = "incr"
   private[this] val DECR          = "decr"
@@ -44,6 +48,7 @@ class CommandToEncoding extends OneToOneEncoder {
   private[this] val APPEND        = "append"
   private[this] val PREPEND       = "prepend"
   private[this] val REPLACE       = "replace"
+  private[this] val CAS           = "cas"
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
     case Add(key, flags, expiry, value) =>
@@ -56,10 +61,12 @@ class CommandToEncoding extends OneToOneEncoder {
       TokensWithData(Seq(APPEND, key, flags.toString, expiry.inSeconds.toString), value)
     case Prepend(key, flags, expiry, value) =>
       TokensWithData(Seq(PREPEND, key, flags.toString, expiry.inSeconds.toString), value)
+    case Cas(key, flags, expiry, value, casUnique) =>
+      TokensWithData(Seq(CAS, key, flags.toString, expiry.inSeconds.toString), value, Some(casUnique))
     case Get(keys) =>
       encode(ctx, ch, Gets(keys))
     case Gets(keys) =>
-      Tokens(Seq[ChannelBuffer](GET) ++ keys)
+      Tokens(Seq[ChannelBuffer](GETS) ++ keys)
     case Incr(key, amount) =>
       Tokens(Seq(INCR, key, amount.toString))
     case Decr(key, amount) =>

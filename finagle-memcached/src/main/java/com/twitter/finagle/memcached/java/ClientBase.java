@@ -5,6 +5,7 @@ import com.twitter.util.Future;
 import com.twitter.util.Time;
 import org.jboss.netty.buffer.ChannelBuffer;
 import scala.Option;
+import scala.Tuple2;
 import scala.collection.JavaConversions;
 import com.twitter.util.Function;
 
@@ -31,12 +32,51 @@ public class ClientBase extends Client {
     });
   }
 
+  public Future<ResultWithCAS> gets(String key) {
+    Future<Option<Tuple2<ChannelBuffer, ChannelBuffer>>> result = underlying.gets(key);
+    return result.map(new Function<Option<Tuple2<ChannelBuffer, ChannelBuffer>>, ResultWithCAS>() {
+      public ResultWithCAS apply(Option<Tuple2<ChannelBuffer, ChannelBuffer>> value) {
+        if (value.isDefined()) {
+          ResultWithCAS result = new ResultWithCAS();
+          result.value = value.get()._1();
+          result.casUnique = value.get()._2();
+          return result;
+        } else {
+          return null;
+        }
+      }
+    });
+  }
+
   public Future<Map<String, ChannelBuffer>> get(List<String> keys) {
     Future<scala.collection.immutable.Map<String, ChannelBuffer>> result =
       underlying.get(JavaConversions.asScalaBuffer(keys));
     return result.map(new Function<scala.collection.immutable.Map<String, ChannelBuffer>, Map<String, ChannelBuffer>>() {
       public Map<String, ChannelBuffer> apply(scala.collection.immutable.Map<String, ChannelBuffer> underlying) {
         return JavaConversions.asJavaMap(underlying);
+      }
+    });
+  }
+
+  public Future<Map<String, ResultWithCAS>> gets(List<String> keys) {
+    Future<scala.collection.immutable.Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>> result =
+      underlying.gets(JavaConversions.asScalaBuffer(keys));
+    return result.map(new Function<
+      scala.collection.immutable.Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>,
+      Map<String, ResultWithCAS>>() {
+      public Map<String, ResultWithCAS> apply(
+        scala.collection.immutable.Map<String, Tuple2<ChannelBuffer, ChannelBuffer>> underlying)
+      {
+        return JavaConversions.asJavaMap(
+          underlying.mapValues(new Function<Tuple2<ChannelBuffer, ChannelBuffer>, ResultWithCAS>() {
+            public ResultWithCAS apply(Tuple2<ChannelBuffer, ChannelBuffer> tuple) {
+              ResultWithCAS result = new ResultWithCAS();
+              result.value = tuple._1();
+              result.casUnique = tuple._2();
+              return result;
+            }
+          })
+        );
       }
     });
   }
@@ -81,6 +121,16 @@ public class ClientBase extends Client {
 
   public Future<Boolean> replace(String key, int flags, Time expiry, ChannelBuffer value) {
     return underlying.replace(key, flags, expiry, value);
+  }
+
+  public Future<Boolean> cas(String key, ChannelBuffer value, ChannelBuffer casUnique) {
+    return underlying.cas(key, value, casUnique);
+  }
+
+  public Future<Boolean> cas(
+    String key, int flags, Time expiry,
+    ChannelBuffer value, ChannelBuffer casUnique) {
+    return underlying.cas(key, flags, expiry, value, casUnique);
   }
 
   public Future<Boolean> delete(String key) {

@@ -154,32 +154,35 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
     channelLatch.decr()
   }
 
-  def make() = {
+  def make(): Future[Service[Req, Rep]] = {
     val begin = Time.now
 
-    val promise = new Promise[Service[Req, Rep]]
-    val connectFuture = bootstrap.connect()
-    promise onCancellation {
-      // propagate cancellations
-      connectFuture.cancel()
+    // bootstrap.connect() can throw in certain circumstances (not
+    // all failures are encoded by the returned future).
+    Future { bootstrap.connect() } flatMap { connectFuture =>
+      val promise = new Promise[Service[Req, Rep]]
+      promise onCancellation {
+        // propagate cancellations
+        connectFuture.cancel()
+      }
+
+      connectFuture {
+        case Ok(channel) =>
+          channelLatch.incr()
+          connectLatencyStat.add(begin.untilNow.inMilliseconds)
+          prepareChannel(new ChannelService[Req, Rep](channel, this)) proxyTo promise
+
+        case Error(cause) =>
+          failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)
+          promise() = Throw(new WriteException(cause))
+
+        case Cancelled =>
+          cancelledConnects.incr()
+          promise() = Throw(new WriteException(new CancelledConnectionException))
+      }
+
+      promise
     }
-
-    connectFuture {
-      case Ok(channel) =>
-        channelLatch.incr()
-        connectLatencyStat.add(begin.untilNow.inMilliseconds)
-        prepareChannel(new ChannelService[Req, Rep](channel, this)) proxyTo promise
-
-      case Error(cause) =>
-        failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)
-        promise() = Throw(new WriteException(cause))
-
-      case Cancelled =>
-        cancelledConnects.incr()
-        promise() = Throw(new WriteException(new CancelledConnectionException))
-    }
-
-    promise
   }
 
   override def close() {
