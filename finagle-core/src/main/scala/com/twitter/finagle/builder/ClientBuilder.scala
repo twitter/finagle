@@ -423,7 +423,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * The maximum number of connections that are allowed per host.
-   * Required.
+   * Required.  Finagle guarantees to to never have more active
+   * connections than this limit.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionLimit = Some(value))))
@@ -583,10 +584,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val idleTime      = config.hostConnectionIdleTime   getOrElse(5.seconds)
     val maxWaiters    = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
 
-    val underlyingFactory = if (idleTime > 0.seconds)
-      new CachingPool(factory, idleTime, statsReceiver = statsReceiver)
-    else
+    val underlyingFactory = if (idleTime > 0.seconds && highWatermark > lowWatermark) {
+      new CachingPool(
+        factory,
+        highWatermark - lowWatermark,
+        idleTime,
+        statsReceiver = statsReceiver)
+    } else {
       factory
+    }
 
     new WatermarkPool[Req, Rep](
       underlyingFactory, lowWatermark, highWatermark,
