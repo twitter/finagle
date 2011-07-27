@@ -1,0 +1,251 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.memcached</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>memcached</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">memcached</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.Client">
+      <a id="Client:Client"></a>
+      <h4 class="signature"><a href="Client.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Client</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A friendly client to talk to a Memcached server.</p>
+    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.memcached.ConnectedClient">
+      <a id="ConnectedClient:ConnectedClient"></a>
+      <h4 class="signature"><a href="ConnectedClient.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ConnectedClient</span>
+        
+        
+        <span class="result"> extends Client</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A Client connected to an individual Memcached server.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.Interpreter">
+      <a id="Interpreter:Interpreter"></a>
+      <h4 class="signature"><a href="Interpreter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Interpreter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Evalutes a given Memcached operation and returns the result.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.InterpreterService">
+      <a id="InterpreterService:InterpreterService"></a>
+      <h4 class="signature"><a href="InterpreterService.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">InterpreterService</span>
+        
+        
+        <span class="result"> extends Service[Command, Response]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.KetamaClient">
+      <a id="KetamaClient:KetamaClient"></a>
+      <h4 class="signature"><a href="KetamaClient.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">KetamaClient</span>
+        
+        
+        <span class="result"> extends PartitionedClient</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.KetamaClientBuilder">
+      <a id="KetamaClientBuilder:KetamaClientBuilder"></a>
+      <h4 class="signature"><a href="KetamaClientBuilder.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">KetamaClientBuilder</span>
+        
+        <span class="params">(<span name="_nodes">_nodes: Seq[(String, Int, Int)]</span>, <span name="_hashName">_hashName: Option[String]</span>, <span name="_clientBuilder">_clientBuilder: Option[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.PartitionedClient">
+      <a id="PartitionedClient:PartitionedClient"></a>
+      <h4 class="signature"><a href="PartitionedClient.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">PartitionedClient</span>
+        
+        
+        <span class="result"> extends Client</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A partitioned client is a client that delegates to an actual client based on
+the key value.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.RubyMemCacheClient">
+      <a id="RubyMemCacheClient:RubyMemCacheClient"></a>
+      <h4 class="signature"><a href="RubyMemCacheClient.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RubyMemCacheClient</span>
+        
+        
+        <span class="result"> extends PartitionedClient</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Ruby memcache-client (MemCache) compatible client.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.RubyMemCacheClientBuilder">
+      <a id="RubyMemCacheClientBuilder:RubyMemCacheClientBuilder"></a>
+      <h4 class="signature"><a href="RubyMemCacheClientBuilder.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">RubyMemCacheClientBuilder</span>
+        
+        <span class="params">(<span name="_nodes">_nodes: Seq[(String, Int, Int)]</span>, <span name="_clientBuilder">_clientBuilder: Option[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Builder for memcache-client (MemCache) compatible client.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.Server">
+      <a id="Server:Server"></a>
+      <h4 class="signature"><a href="Server.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Server</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.Client">
+      <a id="Client:Client"></a>
+      <h4 class="signature"><a href="Client$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Client</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.PartitionedClient">
+      <a id="PartitionedClient:PartitionedClient"></a>
+      <h4 class="signature"><a href="PartitionedClient$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">PartitionedClient</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.java">
+      <a id="java:java"></a>
+      <h4 class="signature"><a href="java/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">java</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol">
+      <a id="protocol:protocol"></a>
+      <h4 class="signature"><a href="protocol/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">protocol</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.util">
+      <a id="util:util"></a>
+      <h4 class="signature"><a href="util/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">util</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

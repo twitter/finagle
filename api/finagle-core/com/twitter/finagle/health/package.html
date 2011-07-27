@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.health</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>health</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">health</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="true" name="com.twitter.finagle.health.HealthEvent">
+      <a id="HealthEvent:HealthEvent"></a>
+      <h4 class="signature"><a href="HealthEvent.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">HealthEvent</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">a HealthEvent is used to indicate a state change between a healthy server
+and an unhealthy one.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.health.Healthy">
+      <a id="Healthy:Healthy"></a>
+      <h4 class="signature"><a href="Healthy.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Healthy</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends HealthEvent with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.health.Unhealthy">
+      <a id="Unhealthy:Unhealthy"></a>
+      <h4 class="signature"><a href="Unhealthy.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Unhealthy</span>
+        
+        <span class="params">(<span name="reason">reason: Value</span>)</span>
+        <span class="result"> extends HealthEvent with Product</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.health.NullHealthEventCallback">
+      <a id="NullHealthEventCallback:NullHealthEventCallback"></a>
+      <h4 class="signature"><a href="NullHealthEventCallback$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">NullHealthEventCallback</span>
+        
+        
+        <span class="result"> extends (HealthEvent) ⇒ Unit</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A HealthEventCallback is added to the ServerBuilder to allow the server
+to communicate HealthEvents to the calling code.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.health.UnhealthyReason">
+      <a id="UnhealthyReason:UnhealthyReason"></a>
+      <h4 class="signature"><a href="UnhealthyReason$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">UnhealthyReason</span>
+        
+        
+        <span class="result"> extends Enumeration</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">specifies why a server is unhealthy.</p>
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

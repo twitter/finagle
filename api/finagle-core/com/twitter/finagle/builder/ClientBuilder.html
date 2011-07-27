@@ -1,0 +1,1488 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.builder.ClientBuilder</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="type" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.builder">builder</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/class_big.png" />
+        <h1>ClientBuilder</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ClientBuilder</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"><div class="block">
+            go to: <a href="ClientBuilder$.html">companion</a>
+          </div><div class="block">
+            linear super types: AnyRef, <span class="extype" name="scala.Any">Any</span>
+          </div></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          <div id="order">
+                <span class="filtertype">Ordering</span>
+                <ol><li class="alpha in">Alphabetic</li><li class="inherit out">By inheritance</li></ol>
+              </div>
+          <div id="ancestors">
+                <span class="filtertype">Inherited</span>
+                <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
+                <ol id="linearization"><li class="in" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+              </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#FullySpecifiedConfig">
+      <a id="FullySpecifiedConfig:FullySpecifiedConfig"></a>
+      <h4 class="signature">
+      <span class="kind">type</span>
+      <span class="symbol">
+        <span class="name">FullySpecifiedConfig</span>
+        
+        
+        <span class="result"> = <a href="ClientConfig.html" class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</a>[Req, Rep, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#This">
+      <a id="This:This"></a>
+      <h4 class="signature">
+      <span class="kind">type</span>
+      <span class="symbol">
+        <span class="name">This</span>
+        
+        
+        <span class="result"> = <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#ThisConfig">
+      <a id="ThisConfig:ThisConfig"></a>
+      <h4 class="signature">
+      <span class="kind">type</span>
+      <span class="symbol">
+        <span class="name">ThisConfig</span>
+        
+        
+        <span class="result"> = <a href="ClientConfig.html" class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</a>[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="scala.AnyRef#!=">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#!=">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o != arg0</code> is the same as <code>!(o == (arg0))</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o != arg0</code> is the same as <code>!(o == (arg0))</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for dis-equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>false</code> if the receiver object is equivalent to the argument; <code>true</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef###">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">##</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef → Any
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$asInstanceOf">
+      <a id="$asInstanceOf[T0]():T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">$asInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">()</span>
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$isInstanceOf">
+      <a id="$isInstanceOf[T0]():Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">$isInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#==">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o == arg0</code> is the same as <code>if (o eq null) arg0 eq null else o.equals(arg0)</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o == arg0</code> is the same as <code>if (o eq null) arg0 eq null else o.equals(arg0)</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#==">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o == arg0</code> is the same as <code>o.equals(arg0)</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o == arg0</code> is the same as <code>o.equals(arg0)</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#asInstanceOf">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to cast the receiver object to be of type <code>T0</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to cast the receiver object to be of type <code>T0</code>.</p><p>Note that the success of a cast at runtime is modulo Scala's erasure semantics.  Therefore the expression<code>1.asInstanceOf[String]</code> will throw a <code>ClassCastException</code> at runtime, while the expression<code>List(1).asInstanceOf[List[String]]</code> will not.  In the latter example, because the type argument is erased as
+part of compilation it is not possible to check whether the contents of the list are of the requested typed.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the receiver object.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#build">
+      <a id="build()(=:=[ThisConfig, FullySpecifiedConfig]):Service[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">build</span>
+        
+        <span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[ThisConfig, FullySpecifiedConfig]</span>)</span>
+        <span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Construct a Service.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Construct a Service.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#buildFactory">
+      <a id="buildFactory()(=:=[ThisConfig, FullySpecifiedConfig]):ServiceFactory[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">buildFactory</span>
+        
+        <span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[ThisConfig, FullySpecifiedConfig]</span>)</span>
+        <span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Construct a ServiceFactory.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Construct a ServiceFactory. This is useful for stateful protocols
+(e.g., those that support transactions or authentication).
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#channelFactory">
+      <a id="channelFactory(ReferenceCountedChannelFactory):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">channelFactory</span>
+        
+        <span class="params">(<span name="cf">cf: <a href="ReferenceCountedChannelFactory.html" class="extype" name="com.twitter.finagle.builder.ReferenceCountedChannelFactory">ReferenceCountedChannelFactory</a></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Use the given channel factory instead of the default.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Use the given channel factory instead of the default. Note that
+when using a non-default ChannelFactory, finagle can't
+meaningfully reference count factory usage, and so the caller is
+responsible for calling <code></code>releaseExternalResources()<i>.
+</i></p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">clone</span>
+        
+        <span class="params">()</span>
+        <span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method creates and returns a copy of the receiver object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method creates and returns a copy of the receiver object.</p><p>The default implementation of the <code>clone</code> method is platform dependent.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a copy of the receiver object.</p></dd></dl><div class="block">
+          attributes: protected 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#cluster">
+      <a id="cluster(Cluster):ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">cluster</span>
+        
+        <span class="params">(<span name="cluster">cluster: <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a></span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req, Rep, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Specify a cluster directly.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Specify a cluster directly.  A
+com.twitter.finagle.builder.Cluster]</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#codec">
+      <a id="codec[Req1, Rep1]((ClientCodecConfig) ⇒ Codec[Req1, Rep1]):ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">codec</span>
+        <span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span>
+        <span class="params">(<span name="codecFactory">codecFactory: (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[Req1, Rep1]</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req1, Rep1, HasCluster, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">A variation of codec for codecs that support only client-codecs.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>A variation of codec for codecs that support only client-codecs.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#codec">
+      <a id="codec[Req1, Rep1](CodecFactory[Req1, Rep1]):ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">codec</span>
+        <span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span>
+        <span class="params">(<span name="codecFactory">codecFactory: <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[Req1, Rep1]</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req1, Rep1, HasCluster, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">A variation of {{codec}} that supports codec factories.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>A variation of {{codec}} that supports codec factories.  This is
+used by codecs that need dynamic construction, but should be
+transparent to the user.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#codec">
+      <a id="codec[Req1, Rep1](Codec[Req1, Rep1]):ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">codec</span>
+        <span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span>
+        <span class="params">(<span name="codec">codec: <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[Req1, Rep1]</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req1, Rep1, HasCluster, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Specify the codec.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Specify the codec. The codec implements the network protocol
+used by the client, and consequently determines the {{Req}} and {{Rep}}
+type variables. One of the codec variations is required.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#connectTimeout">
+      <a id="connectTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">connectTimeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The connect timeout is the timeout applied to the acquisition of
+a Service.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The connect timeout is the timeout applied to the acquisition of
+a Service.  This includes both queueing time (eg.  because we
+cannot create more connections due to {{hostConnectionLimit}} and
+there are more than {{hostConnectionLimit}} requests outstanding)
+as well as physical connection time.  Futures returned from
+{{factory.make()}} will always be satisfied within this timeout.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#connectionTimeout">
+      <a id="connectionTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name deprecated">connectionTimeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block"><ol>deprecated:
+          <li><p>Use tcpConnectTimeout instead</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#copy">
+      <a id="copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](ClientConfig[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">copy</span>
+        <span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span>
+        <span class="params">(<span name="config">config: <a href="ClientConfig.html" class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#eq">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">eq</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to test whether the argument (<code>arg0</code>) is a reference to the
+receiver object (<code>this</code>).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the argument (<code>arg0</code>) is a reference to the
+receiver object (<code>this</code>).</p><p>The <code>eq</code> method implements an [http://en.wikipedia.org/wiki/Equivalence_relation equivalence relation] on
+non-null instances of <code>AnyRef</code>:
+ * It is reflexive: for any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(x)</code> returns <code>true</code>.
+ * It is symmetric: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, <code>x.eq(y)</code> returns <code>true</code> if and
+   only if <code>y.eq(x)</code> returns <code>true</code>.
+ * It is transitive: for any non-null instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.eq(y)</code> returns <code>true</code>   and <code>y.eq(z)</code> returns <code>true</code>, then <code>x.eq(z)</code> returns <code>true</code>.</p><p>Additionally, the <code>eq</code> method has three other properties.
+ * It is consistent: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, multiple invocations of
+   <code>x.eq(y)</code> consistently returns <code>true</code> or consistently returns <code>false</code>.
+ * For any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(null)</code> and <code>null.eq(x)</code> returns <code>false</code>.
+ * <code>null.eq(null)</code> returns <code>true</code>.</p><p>When overriding the <code>equals</code> or <code>hashCode</code> methods, it is important to ensure that their behavior is
+consistent with reference equality.  Therefore, if two objects are references to each other (<code>o1 eq o2</code>), they
+should be equal to each other (<code>o1 == o2</code>) and they should hash to the same value (<code>o1.hashCode == o2.hashCode</code>).
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for reference equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the argument is a reference to the receiver object; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#equals">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">equals</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to compare the receiver object (<code>this</code>) with the argument object (<code>arg0</code>) for equivalence.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to compare the receiver object (<code>this</code>) with the argument object (<code>arg0</code>) for equivalence.</p><p>The default implementations of this method is an [http://en.wikipedia.org/wiki/Equivalence_relation equivalence
+relation]:
+ * It is reflexive: for any instance <code>x</code> of type <code>Any</code>, <code>x.equals(x)</code> should return <code>true</code>.
+ * It is symmetric: for any instances <code>x</code> and <code>y</code> of type <code>Any</code>, <code>x.equals(y)</code> should return <code>true</code> if and
+   only if <code>y.equals(x)</code> returns <code>true</code>.
+ * It is transitive: for any instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.equals(y)</code> returns <code>true</code> and
+   <code>y.equals(z)</code> returns <code>true</code>, then <code>x.equals(z)</code> should return <code>true</code>.</p><p>If you override this method, you should verify that your implementation remains an equivalence relation.
+Additionally, when overriding this method it is often necessary to override <code>hashCode</code> to ensure that objects
+that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same 
+scala.Int
+(<code>o1.hashCode.equals(o2.hashCode)</code>).
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          definition classes: AnyRef → Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#exceptionReceiver">
+      <a id="exceptionReceiver(ClientExceptionReceiverBuilder):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">exceptionReceiver</span>
+        
+        <span class="params">(<span name="erFactory">erFactory: ClientExceptionReceiverBuilder</span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#failureAccrualParams">
+      <a id="failureAccrualParams((Int, Duration)):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">failureAccrualParams</span>
+        
+        <span class="params">(<span name="params">params: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="com.twitter.util.Duration">Duration</span>)</span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Use the given paramters for failure accrual.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Use the given paramters for failure accrual.  The first parameter
+is the number of *successive* failures that are required to mark
+a host failed.  The second paramter specifies how long the host
+is dead for, once marked.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">finalize</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is called by the garbage collector on the receiver object when garbage collection determines that
+there are no more references to the object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is called by the garbage collector on the receiver object when garbage collection determines that
+there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
+          attributes: protected 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#getClass">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getClass</span>
+        
+        <span class="params">()</span>
+        <span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Returns a representation that corresponds to the dynamic class of the receiver object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Returns a representation that corresponds to the dynamic class of the receiver object.</p><p>The nature of the representation is platform dependent.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a representation that corresponds to the dynamic class of the receiver object.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#hashCode">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hashCode</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Returns a hash code value for the object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Returns a hash code value for the object.</p><p>The default hashing algorithm is platform dependent.</p><p>Note that it is allowed for two objects to have identical hash codes (<code>o1.hashCode.equals(o2.hashCode)</code>) yet
+not be equal (<code>o1.equals(o2)</code> returns <code>false</code>).  A degenerate implementation could always return <code>0</code>.
+However, it is required that if two objects are equal (<code>o1.equals(o2)</code> returns <code>true</code>) that they have
+identical hash codes (<code>o1.hashCode.equals(o2.hashCode)</code>).  Therefore, when overriding this method, be sure
+to verify that the behavior is consistent with the <code>equals</code> method.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the hash code value for the object.</p></dd></dl><div class="block">
+          definition classes: AnyRef → Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hostConnectionCoresize">
+      <a id="hostConnectionCoresize(Int):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hostConnectionCoresize</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The core size of the connection pool: the pool is not shrinked below this limit.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The core size of the connection pool: the pool is not shrinked below this limit.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hostConnectionIdleTime">
+      <a id="hostConnectionIdleTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hostConnectionIdleTime</span>
+        
+        <span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The amount of time a connection is allowed to linger (when it
+otherwise would have been closed by the pool) before being
+closed.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The amount of time a connection is allowed to linger (when it
+otherwise would have been closed by the pool) before being
+closed.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hostConnectionLimit">
+      <a id="hostConnectionLimit(Int):ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hostConnectionLimit</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req, Rep, HasCluster, HasCodec, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The maximum number of connections that are allowed per host.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The maximum number of connections that are allowed per host.
+Required.  Finagle guarantees to to never have more active
+connections than this limit.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxIdleTime">
+      <a id="hostConnectionMaxIdleTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hostConnectionMaxIdleTime</span>
+        
+        <span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The maximum time a connection is allowed to linger unused.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to linger unused.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxLifeTime">
+      <a id="hostConnectionMaxLifeTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hostConnectionMaxLifeTime</span>
+        
+        <span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The maximum time a connection is allowed to exist, regardless of occupancy.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to exist, regardless of occupancy.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxWaiters">
+      <a id="hostConnectionMaxWaiters(Int):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hostConnectionMaxWaiters</span>
+        
+        <span class="params">(<span name="nWaiters">nWaiters: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The maximum queue size for the connection pool.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The maximum queue size for the connection pool.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hosts">
+      <a id="hosts(SocketAddress):ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hosts</span>
+        
+        <span class="params">(<span name="address">address: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req, Rep, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">A convenience method for specifying a one-host
+java.net.SocketAddress
+ client.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>A convenience method for specifying a one-host
+java.net.SocketAddress
+ client.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hosts">
+      <a id="hosts(Seq[SocketAddress]):ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hosts</span>
+        
+        <span class="params">(<span name="addresses">addresses: Seq[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req, Rep, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">A variant of {{hosts}} that takes a sequence of
+java.net.SocketAddress
+ instead.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>A variant of {{hosts}} that takes a sequence of
+java.net.SocketAddress
+ instead.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#hosts">
+      <a id="hosts(String):ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hosts</span>
+        
+        <span class="params">(<span name="hostnamePortCombinations">hostnamePortCombinations: String</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req, Rep, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Specify the set of hosts to connect this client to.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Specify the set of hosts to connect this client to.  Requests
+will be load balanced across these.  This is a shorthand form for
+specifying a cluster.</p><p>One of the {{hosts}} variations or direct specification of the
+cluster (via {{cluster}}) is required.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#isInstanceOf">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p><p>Note that the test result of the test is modulo Scala's erasure semantics.  Therefore the expression<code>1.isInstanceOf[String]</code> will return <code>false</code>, while the expression <code>List(1).isInstanceOf[List[String]]</code> will
+return <code>true</code>.  In the latter example, because the type argument is erased as part of compilation it is not
+possible to check whether the contents of the list are of the requested typed.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is an instance of erasure of type <code>T0</code>; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#keepAlive">
+      <a id="keepAlive(Boolean):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">keepAlive</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#logger">
+      <a id="logger(Logger):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">logger</span>
+        
+        <span class="params">(<span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Log very detailed debug information to the given logger.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Log very detailed debug information to the given logger.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#name">
+      <a id="name(String):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">name</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Give a meaningful name to the client.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Give a meaningful name to the client. Required.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#ne">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">ne</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o.ne(arg0)</code> is the same as <code>!(o.eq(arg0))</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o.ne(arg0)</code> is the same as <code>!(o.eq(arg0))</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for reference dis-equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>false</code> if the argument is not a reference to the receiver object; <code>true</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notify">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">notify</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Wakes up a single thread that is waiting on the receiver object's monitor.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wakes up a single thread that is waiting on the receiver object's monitor.</p></div><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notifyAll">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">notifyAll</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Wakes up all threads that are waiting on the receiver object's monitor.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wakes up all threads that are waiting on the receiver object's monitor.</p></div><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout">
+      <a id="readerIdleTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">readerIdleTimeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The maximum time a connection may have received no data.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may have received no data.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#recvBufferSize">
+      <a id="recvBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">recvBufferSize</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Sets the TCP recv buffer size.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Sets the TCP recv buffer size.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#reportTo">
+      <a id="reportTo(StatsReceiver):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">reportTo</span>
+        
+        <span class="params">(<span name="receiver">receiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Report stats to the given {{StatsReceiver}}.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Report stats to the given {{StatsReceiver}}.  This will report
+verbose client statistics and counters, that in turn may be
+exported to monitoring applications.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#requestTimeout">
+      <a id="requestTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">requestTimeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The request timeout is the time given to a *single* request (if
+there are retries, they each get a fresh request timeout).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The request timeout is the time given to a *single* request (if
+there are retries, they each get a fresh request timeout).  The
+timeout is applied only after a connection has been acquired.
+That is: it is applied to the interval between the dispatch of
+the request and the receipt of the response.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#retries">
+      <a id="retries(Int):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">retries</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The number of retries applied.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The number of retries applied. Only applicable to service-builds ({{build()}})
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize">
+      <a id="sendBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">sendBufferSize</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Sets the TCP send buffer size.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Sets the TCP send buffer size.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#startTls">
+      <a id="startTls(Boolean):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">startTls</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Uses STARTTLS (attempt to upgrade a plaintext channel).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Uses STARTTLS (attempt to upgrade a plaintext channel).
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#synchronized">
+      <a id="synchronized[T0](T0):T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">synchronized</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">(<span name="arg0">arg0: T0</span>)</span>
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tcpConnectTimeout">
+      <a id="tcpConnectTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tcpConnectTimeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Specify the TCP connection timeout.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Specify the TCP connection timeout.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#timeout">
+      <a id="timeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">timeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Total request timeout.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Total request timeout.  This timeout is applied from the issuance
+of a request (through {{service(request)}}) until the
+satisfaction of that reply future.  No request will take longer
+than this.</p><p>Applicable only to service-builds ({{build()}})
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tls">
+      <a id="tls():This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tls</span>
+        
+        <span class="params">()</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Encrypt the connection with SSL.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tlsWithoutValidation">
+      <a id="tlsWithoutValidation():This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tlsWithoutValidation</span>
+        
+        <span class="params">()</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Do not perform TLS validation.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Do not perform TLS validation. Probably dangerous.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#toString">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">toString</span>
+        
+        <span class="params">()</span>
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Returns a string representation of the object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Returns a string representation of the object.</p><p>The default representation is platform dependent.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a string representation of the object.</p></dd></dl><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> → AnyRef → Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tracer">
+      <a id="tracer(Tracer):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tracer</span>
+        
+        <span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Specifies a tracer that receives trace events.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Specifies a tracer that receives trace events.
+See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.tracing">tracing</a> for details.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#unsafeBuild">
+      <a id="unsafeBuild():Service[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">unsafeBuild</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Construct a Service, with runtime checks for builder
+completeness.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Construct a Service, with runtime checks for builder
+completeness.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#unsafeBuildFactory">
+      <a id="unsafeBuildFactory():ServiceFactory[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">unsafeBuildFactory</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[Req, Rep]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Construct a ServiceFactory, with runtime checks for builder
+completeness.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Construct a ServiceFactory, with runtime checks for builder
+completeness.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">wait</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#withConfig">
+      <a id="withConfig[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]((ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]) ⇒ ClientConfig[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]):ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">withConfig</span>
+        <span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCluster1">HasCluster1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasHostConnectionLimit1">HasHostConnectionLimit1</span>]</span>
+        <span class="params">(<span name="f">f: (<a href="ClientConfig.html" class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</a>[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]) ⇒ <a href="ClientConfig.html" class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#writerIdleTimeout">
+      <a id="writerIdleTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">writerIdleTimeout</span>
+        
+        <span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">The maximum time a connection may not have sent any data.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may not have sent any data.
+</p></div>
+            
+            
+            
+          </div>
+          
+    </li></ol>
+            </div>
+
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from AnyRef</h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

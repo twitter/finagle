@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.channel</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>channel</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">channel</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelOpenConnectionsHandler">
+      <a id="ChannelOpenConnectionsHandler:ChannelOpenConnectionsHandler"></a>
+      <h4 class="signature"><a href="ChannelOpenConnectionsHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelOpenConnectionsHandler</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler with ConnectionLifecycleHandler</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">keeps track of open connections and invokes the OpenConnectionsHealthCallback
+when server transitions between healthy and unhealthy
+</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelSemaphoreHandler">
+      <a id="ChannelSemaphoreHandler:ChannelSemaphoreHandler"></a>
+      <h4 class="signature"><a href="ChannelSemaphoreHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelSemaphoreHandler</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelServiceReply">
+      <a id="ChannelServiceReply:ChannelServiceReply"></a>
+      <h4 class="signature"><a href="ChannelServiceReply.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ChannelServiceReply</span>
+        
+        <span class="params">(<span name="message">message: Any</span>, <span name="markDead">markDead: Boolean</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.ChannelStatsHandler">
+      <a id="ChannelStatsHandler:ChannelStatsHandler"></a>
+      <h4 class="signature"><a href="ChannelStatsHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelStatsHandler</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler with ConnectionLifecycleHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.IdleChannelHandler">
+      <a id="IdleChannelHandler:IdleChannelHandler"></a>
+      <h4 class="signature"><a href="IdleChannelHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">IdleChannelHandler</span>
+        
+        
+        <span class="result"> extends IdleStateAwareChannelHandler</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">This handler closes a channel if it receives an IDLE event.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.LeftFoldUpstreamHandler">
+      <a id="LeftFoldUpstreamHandler:LeftFoldUpstreamHandler"></a>
+      <h4 class="signature"><a href="LeftFoldUpstreamHandler.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">LeftFoldUpstreamHandler</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.channel.OpenConnectionsHealthThresholds">
+      <a id="OpenConnectionsHealthThresholds:OpenConnectionsHealthThresholds"></a>
+      <h4 class="signature"><a href="OpenConnectionsHealthThresholds.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">OpenConnectionsHealthThresholds</span>
+        
+        <span class="params">(<span name="highWaterMark">highWaterMark: Int</span>, <span name="lowWaterMark">lowWaterMark: Int</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A HealthHandler for open connections, based on high and low water marks.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

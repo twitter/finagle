@@ -1,0 +1,397 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.kestrel.protocol</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.kestrel">kestrel</a></p>
+
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <h1>protocol</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">protocol</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Abort">
+      <a id="Abort:Abort"></a>
+      <h4 class="signature"><a href="Abort.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Abort</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span>
+        <span class="result"> extends GetCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Close">
+      <a id="Close:Close"></a>
+      <h4 class="signature"><a href="Close.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Close</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span>
+        <span class="result"> extends GetCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.CloseAndOpen">
+      <a id="CloseAndOpen:CloseAndOpen"></a>
+      <h4 class="signature"><a href="CloseAndOpen.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">CloseAndOpen</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span>
+        <span class="result"> extends GetCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.kestrel.protocol.Command">
+      <a id="Command:Command"></a>
+      <h4 class="signature"><a href="Command.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Command</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Delete">
+      <a id="Delete:Delete"></a>
+      <h4 class="signature"><a href="Delete.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Delete</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>)</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Deleted">
+      <a id="Deleted:Deleted"></a>
+      <h4 class="signature"><a href="Deleted.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Deleted</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.DumpConfig">
+      <a id="DumpConfig:DumpConfig"></a>
+      <h4 class="signature"><a href="DumpConfig.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">DumpConfig</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.DumpStats">
+      <a id="DumpStats:DumpStats"></a>
+      <h4 class="signature"><a href="DumpStats.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">DumpStats</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Flush">
+      <a id="Flush:Flush"></a>
+      <h4 class="signature"><a href="Flush.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Flush</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>)</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.FlushAll">
+      <a id="FlushAll:FlushAll"></a>
+      <h4 class="signature"><a href="FlushAll.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">FlushAll</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Get">
+      <a id="Get:Get"></a>
+      <h4 class="signature"><a href="Get.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Get</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span>
+        <span class="result"> extends GetCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.kestrel.protocol.GetCommand">
+      <a id="GetCommand:GetCommand"></a>
+      <h4 class="signature"><a href="GetCommand.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">GetCommand</span>
+        
+        
+        <span class="result"> extends Command</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Kestrel">
+      <a id="Kestrel:Kestrel"></a>
+      <h4 class="signature"><a href="Kestrel.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Kestrel</span>
+        
+        
+        <span class="result"> extends CodecFactory[Command, Response]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.NotFound">
+      <a id="NotFound:NotFound"></a>
+      <h4 class="signature"><a href="NotFound.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">NotFound</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Open">
+      <a id="Open:Open"></a>
+      <h4 class="signature"><a href="Open.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Open</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span>
+        <span class="result"> extends GetCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Peek">
+      <a id="Peek:Peek"></a>
+      <h4 class="signature"><a href="Peek.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Peek</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span>
+        <span class="result"> extends GetCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Reload">
+      <a id="Reload:Reload"></a>
+      <h4 class="signature"><a href="Reload.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Reload</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.kestrel.protocol.Response">
+      <a id="Response:Response"></a>
+      <h4 class="signature"><a href="Response.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Response</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Set">
+      <a id="Set:Set"></a>
+      <h4 class="signature"><a href="Set.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Set</span>
+        
+        <span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.ShutDown">
+      <a id="ShutDown:ShutDown"></a>
+      <h4 class="signature"><a href="ShutDown.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ShutDown</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Stats">
+      <a id="Stats:Stats"></a>
+      <h4 class="signature"><a href="Stats.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Stats</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Stored">
+      <a id="Stored:Stored"></a>
+      <h4 class="signature"><a href="Stored.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Stored</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Value">
+      <a id="Value:Value"></a>
+      <h4 class="signature"><a href="Value.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Value</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Values">
+      <a id="Values:Values"></a>
+      <h4 class="signature"><a href="Values.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Values</span>
+        
+        <span class="params">(<span name="values">values: Seq[Value]</span>)</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Version">
+      <a id="Version:Version"></a>
+      <h4 class="signature"><a href="Version.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Version</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.protocol.Kestrel">
+      <a id="Kestrel:Kestrel"></a>
+      <h4 class="signature"><a href="Kestrel$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Kestrel</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.http</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>http</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">http</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.AggregateHttpChunks">
+      <a id="AggregateHttpChunks:AggregateHttpChunks"></a>
+      <h4 class="signature"><a href="AggregateHttpChunks.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">AggregateHttpChunks</span>
+        
+        <span class="params">(<span name="whenDone">whenDone: LeftFoldUpstreamHandler</span>, <span name="request">request: HttpRequest</span>, <span name="bufferBudget">bufferBudget: Int</span>, <span name="buffer">buffer: ChannelBuffer</span>)</span>
+        <span class="result"> extends LeftFoldUpstreamHandler with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.AggregateHttpRequest">
+      <a id="AggregateHttpRequest:AggregateHttpRequest"></a>
+      <h4 class="signature"><a href="AggregateHttpRequest.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">AggregateHttpRequest</span>
+        
+        
+        <span class="result"> extends LeftFoldUpstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.AnnotateCipher">
+      <a id="AnnotateCipher:AnnotateCipher"></a>
+      <h4 class="signature"><a href="AnnotateCipher.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">AnnotateCipher</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Extract the cipher from the SslCipherAttribution ChannelLocal variable and
+set it as a header on the HTTP request befor sending it upstream.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ChannelBufferManager">
+      <a id="ChannelBufferManager:ChannelBufferManager"></a>
+      <h4 class="signature"><a href="ChannelBufferManager.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelBufferManager</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ChannelBufferUsageTracker">
+      <a id="ChannelBufferUsageTracker:ChannelBufferUsageTracker"></a>
+      <h4 class="signature"><a href="ChannelBufferUsageTracker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ChannelBufferUsageTracker</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ConnectionManager">
+      <a id="ConnectionManager:ConnectionManager"></a>
+      <h4 class="signature"><a href="ConnectionManager.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ConnectionManager</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Http">
+      <a id="Http:Http"></a>
+      <h4 class="signature"><a href="Http.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Http</span>
+        
+        <span class="params">(<span name="_compressionLevel">_compressionLevel: Int</span>, <span name="_maxRequestSize">_maxRequestSize: StorageUnit</span>, <span name="_maxResponseSize">_maxResponseSize: StorageUnit</span>, <span name="_decompressionEnabled">_decompressionEnabled: Boolean</span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: Option[ChannelBufferUsageTracker]</span>, <span name="_annotateCipherHeader">_annotateCipherHeader: Option[String]</span>)</span>
+        <span class="result"> extends CodecFactory[HttpRequest, HttpResponse] with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.HttpFailure">
+      <a id="HttpFailure:HttpFailure"></a>
+      <h4 class="signature"><a href="HttpFailure.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">HttpFailure</span>
+        
+        
+        <span class="result"> extends LeftFoldUpstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.RespondToExpectContinue">
+      <a id="RespondToExpectContinue:RespondToExpectContinue"></a>
+      <h4 class="signature"><a href="RespondToExpectContinue.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RespondToExpectContinue</span>
+        
+        
+        <span class="result"> extends SimpleChannelUpstreamHandler</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.SafeHttpServerCodec">
+      <a id="SafeHttpServerCodec:SafeHttpServerCodec"></a>
+      <h4 class="signature"><a href="SafeHttpServerCodec.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SafeHttpServerCodec</span>
+        
+        
+        <span class="result"> extends HttpServerCodec</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ServerConnectionManager">
+      <a id="ServerConnectionManager:ServerConnectionManager"></a>
+      <h4 class="signature"><a href="ServerConnectionManager.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ServerConnectionManager</span>
+        
+        
+        <span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Deal with Http connection lifecycle wrt.</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Http">
+      <a id="Http:Http"></a>
+      <h4 class="signature"><a href="Http$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Http</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

@@ -1,0 +1,229 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.tracing</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>tracing</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">tracing</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="true" name="com.twitter.finagle.tracing.Annotation">
+      <a id="Annotation:Annotation"></a>
+      <h4 class="signature"><a href="Annotation.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Annotation</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.BufferingTracer">
+      <a id="BufferingTracer:BufferingTracer"></a>
+      <h4 class="signature"><a href="BufferingTracer.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BufferingTracer</span>
+        
+        
+        <span class="result"> extends Tracer with Iterable[Record]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Record">
+      <a id="Record:Record"></a>
+      <h4 class="signature"><a href="Record.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Record</span>
+        
+        <span class="params">(<span name="traceId">traceId: TraceId</span>, <span name="timestamp">timestamp: Time</span>, <span name="annotation">annotation: Annotation</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.SpanId">
+      <a id="SpanId:SpanId"></a>
+      <h4 class="signature"><a href="SpanId.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SpanId</span>
+        
+        
+        <span class="result"> extends Proxy</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.TraceId">
+      <a id="TraceId:TraceId"></a>
+      <h4 class="signature"><a href="TraceId.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">TraceId</span>
+        
+        <span class="params">(<span name="_traceId">_traceId: Option[SpanId]</span>, <span name="_parentId">_parentId: Option[SpanId]</span>, <span name="spanId">spanId: SpanId</span>, <span name="sampled">sampled: Boolean</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.tracing.Tracer">
+      <a id="Tracer:Tracer"></a>
+      <h4 class="signature"><a href="Tracer.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Tracer</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.TracingFilter">
+      <a id="TracingFilter:TracingFilter[Req, Rep]"></a>
+      <h4 class="signature"><a href="TracingFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">TracingFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[Req, Rep]</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Annotation">
+      <a id="Annotation:Annotation"></a>
+      <h4 class="signature"><a href="Annotation$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Annotation</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.ConsoleTracer">
+      <a id="ConsoleTracer:ConsoleTracer"></a>
+      <h4 class="signature"><a href="ConsoleTracer$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ConsoleTracer</span>
+        
+        
+        <span class="result"> extends Tracer</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.NullTracer">
+      <a id="NullTracer:NullTracer"></a>
+      <h4 class="signature"><a href="NullTracer$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">NullTracer</span>
+        
+        
+        <span class="result"> extends Tracer</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.SpanId">
+      <a id="SpanId:SpanId"></a>
+      <h4 class="signature"><a href="SpanId$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">SpanId</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Trace">
+      <a id="Trace:Trace"></a>
+      <h4 class="signature"><a href="Trace$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Trace</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt"><code>Trace</code> maintains an interleaved stack of <code>TraceId</code>s and <code>Tracer</code>s.</p>
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

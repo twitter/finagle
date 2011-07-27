@@ -1,0 +1,460 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.memcached.protocol</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></p>
+
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <h1>protocol</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">protocol</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Add">
+      <a id="Add:Add"></a>
+      <h4 class="signature"><a href="Add.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Add</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends StorageCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Append">
+      <a id="Append:Append"></a>
+      <h4 class="signature"><a href="Append.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Append</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends StorageCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.protocol.ArithmeticCommand">
+      <a id="ArithmeticCommand:ArithmeticCommand"></a>
+      <h4 class="signature"><a href="ArithmeticCommand.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ArithmeticCommand</span>
+        
+        
+        <span class="result"> extends NonStorageCommand</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Cas">
+      <a id="Cas:Cas"></a>
+      <h4 class="signature"><a href="Cas.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Cas</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>, <span name="casUnique">casUnique: ChannelBuffer</span>)</span>
+        <span class="result"> extends StorageCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.ClientError">
+      <a id="ClientError:ClientError"></a>
+      <h4 class="signature"><a href="ClientError.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ClientError</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.protocol.Command">
+      <a id="Command:Command"></a>
+      <h4 class="signature"><a href="Command.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Command</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Decr">
+      <a id="Decr:Decr"></a>
+      <h4 class="signature"><a href="Decr.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Decr</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: Long</span>)</span>
+        <span class="result"> extends ArithmeticCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Delete">
+      <a id="Delete:Delete"></a>
+      <h4 class="signature"><a href="Delete.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Delete</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>)</span>
+        <span class="result"> extends Command with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Deleted">
+      <a id="Deleted:Deleted"></a>
+      <h4 class="signature"><a href="Deleted.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Deleted</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Error">
+      <a id="Error:Error"></a>
+      <h4 class="signature"><a href="Error.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Error</span>
+        
+        <span class="params">(<span name="cause">cause: Exception</span>)</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Exists">
+      <a id="Exists:Exists"></a>
+      <h4 class="signature"><a href="Exists.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Exists</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Get">
+      <a id="Get:Get"></a>
+      <h4 class="signature"><a href="Get.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Get</span>
+        
+        <span class="params">(<span name="keys">keys: Seq[ChannelBuffer]</span>)</span>
+        <span class="result"> extends RetrievalCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Gets">
+      <a id="Gets:Gets"></a>
+      <h4 class="signature"><a href="Gets.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Gets</span>
+        
+        <span class="params">(<span name="keys">keys: Seq[ChannelBuffer]</span>)</span>
+        <span class="result"> extends RetrievalCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Incr">
+      <a id="Incr:Incr"></a>
+      <h4 class="signature"><a href="Incr.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Incr</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: Long</span>)</span>
+        <span class="result"> extends ArithmeticCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.protocol.NonStorageCommand">
+      <a id="NonStorageCommand:NonStorageCommand"></a>
+      <h4 class="signature"><a href="NonStorageCommand.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NonStorageCommand</span>
+        
+        
+        <span class="result"> extends Command</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.NonexistentCommand">
+      <a id="NonexistentCommand:NonexistentCommand"></a>
+      <h4 class="signature"><a href="NonexistentCommand.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NonexistentCommand</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.NotFound">
+      <a id="NotFound:NotFound"></a>
+      <h4 class="signature"><a href="NotFound.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">NotFound</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.NotStored">
+      <a id="NotStored:NotStored"></a>
+      <h4 class="signature"><a href="NotStored.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">NotStored</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Number">
+      <a id="Number:Number"></a>
+      <h4 class="signature"><a href="Number.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Number</span>
+        
+        <span class="params">(<span name="value">value: Long</span>)</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Prepend">
+      <a id="Prepend:Prepend"></a>
+      <h4 class="signature"><a href="Prepend.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Prepend</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends StorageCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Replace">
+      <a id="Replace:Replace"></a>
+      <h4 class="signature"><a href="Replace.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Replace</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends StorageCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.protocol.Response">
+      <a id="Response:Response"></a>
+      <h4 class="signature"><a href="Response.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Response</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: sealed abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.protocol.RetrievalCommand">
+      <a id="RetrievalCommand:RetrievalCommand"></a>
+      <h4 class="signature"><a href="RetrievalCommand.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RetrievalCommand</span>
+        
+        
+        <span class="result"> extends NonStorageCommand</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.ServerError">
+      <a id="ServerError:ServerError"></a>
+      <h4 class="signature"><a href="ServerError.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ServerError</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Set">
+      <a id="Set:Set"></a>
+      <h4 class="signature"><a href="Set.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Set</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span>
+        <span class="result"> extends StorageCommand with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.protocol.StorageCommand">
+      <a id="StorageCommand:StorageCommand"></a>
+      <h4 class="signature"><a href="StorageCommand.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">StorageCommand</span>
+        
+        
+        <span class="result"> extends Command</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Stored">
+      <a id="Stored:Stored"></a>
+      <h4 class="signature"><a href="Stored.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Stored</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Value">
+      <a id="Value:Value"></a>
+      <h4 class="signature"><a href="Value.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Value</span>
+        
+        <span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>, <span name="casUnique">casUnique: Option[ChannelBuffer]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.Values">
+      <a id="Values:Values"></a>
+      <h4 class="signature"><a href="Values.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Values</span>
+        
+        <span class="params">(<span name="values">values: Seq[Value]</span>)</span>
+        <span class="result"> extends Response with Product</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.protocol.text">
+      <a id="text:text"></a>
+      <h4 class="signature"><a href="text/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">text</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
