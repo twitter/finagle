@@ -1,6 +1,8 @@
 package com.twitter.finagle.memcached.java;
 
 import com.twitter.finagle.Service;
+import com.twitter.finagle.memcached.KetamaClientKey;
+import com.twitter.finagle.memcached.KetamaClient;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.util.Future;
@@ -25,6 +27,10 @@ public abstract class Client {
     com.twitter.finagle.memcached.Client schmemcachedClient =
       com.twitter.finagle.memcached.Client$.MODULE$.apply(finagleClient);
     return new com.twitter.finagle.memcached.java.ClientBase(schmemcachedClient);
+  }
+
+  public static KetamaClient newInstance(java.util.Map<KetamaClientKey, com.twitter.finagle.memcached.Client> input) {
+    return new com.twitter.finagle.memcached.KetamaClient(input);
   }
 
   /**

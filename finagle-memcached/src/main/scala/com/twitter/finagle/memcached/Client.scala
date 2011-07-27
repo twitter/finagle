@@ -372,10 +372,16 @@ object PartitionedClient {
       }
 }
 
+case class KetamaClientKey(host: String, port: Int, weight: Int) {
+  def toTuple = (host, port, weight)
+}
 
 class KetamaClient(clients: Map[(String, Int, Int), Client], keyHasher: KeyHasher = KeyHasher.KETAMA)
   extends PartitionedClient
 {
+  def this(clients: java.util.Map[KetamaClientKey, Client]) =
+      this((Map() ++ clients) map { case (k, v) => (k.toTuple, v) })
+
   require(!clients.isEmpty, "At least one client must be provided")
 
   private val NUM_REPS = 160
