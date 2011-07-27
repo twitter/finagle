@@ -1,9 +1,9 @@
 package com.twitter.finagle.exception
 
 import org.specs.Specification
-import com.twitter.util.Time
 import com.twitter.streamyj.Streamy
-import java.lang.Throwable
+import java.lang.{Throwable, StackTraceElement => javaSTE}
+import com.twitter.util.{GZIPStringEncoder, Time}
 
 /**
  * An object that generates a service exception and verifies its JSON representation.
@@ -16,7 +16,9 @@ private[exception] class TestServiceException(
   clientAddress: Option[String] = None,
   sourceAddress: Option[String] = None) {
 
+  private val ste = new javaSTE("badclass", "badmethod", "badfile", 42)
   val throwable = new Throwable(exceptionMessage)
+  throwable.setStackTrace(Array(ste,ste))
 
   private def constructServiceException = {
     var se = new ServiceException(serviceName, throwable, time.getOrElse(Time.now), traceId.getOrElse(0L))
@@ -25,7 +27,7 @@ private[exception] class TestServiceException(
     se
   }
 
-  val serviceException = constructServiceException
+  lazy val serviceException = constructServiceException
 
   def verifyJSON(json: String) = {
     def verify[T](actual: T, expected: T, message: String, previous: Boolean = false) = {
@@ -68,10 +70,7 @@ private[exception] class TestServiceException(
         s readObject {
           case "exceptionClass" => hasExceptionClass = verify(s.readString(), "java.lang.Throwable", "bad exception class", hasExceptionClass)
           case "message" => hasMessage = verify(s.readString(), exceptionMessage, "bad excepution message", hasMessage)
-          case "stacktrace" => {
-            s.readString()
-            hasStackTrace = true
-          }
+          case "stacktrace" => hasStackTrace = verify(GZIPStringEncoder.decodeString(s.readString()), ste.toString + "\n" + ste.toString, "bad stacktrace", hasStackTrace)
           case a => fail(a, "exception contents")
         }
       }

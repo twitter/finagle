@@ -1,7 +1,7 @@
 package com.twitter.finagle.exception
 
 import com.codahale.jerkson.Json.generate
-import com.twitter.util.Time
+import com.twitter.util.{GZIPStringEncoder, Time}
 
 /**
  * Model classes for exception serialization to JSON
@@ -58,7 +58,7 @@ sealed private[exception] case class ExceptionContents(e: Throwable) {
    * delimited by newline characters. The elements are in order with the stacktrace.
    */
   private def generateStackTrace(st: Array[java.lang.StackTraceElement]): String =
-    st mkString "\n"
+    GZIPStringEncoder.encodeString(st mkString "\n")
 
   val jsonValue = Map(
     "exceptionClass" -> e.getClass.getName,
