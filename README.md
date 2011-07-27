@@ -349,15 +349,7 @@ Finagle provides a `ServerBuilder` and a `ClientBuilder` object, which enable yo
 
 ### Future Objects
 
-<<<<<<< HEAD
-    val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
-      .codec(Http)
-      .hosts(address)
-      .hostConnectionLimit(1)
-      .build()
-=======
 In Finagle, `Future` objects are the unifying abstraction for all asynchronous computation. A `Future` represents a computation that has not yet completed, which can either succeed or fail. The two most basic ways to use a `Future` are to 
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
 * block and wait for the computation to return
 * register a callback to be invoked when the computation eventually succeeds or fails
@@ -388,15 +380,7 @@ A `SimpleFilter` is a kind of `Filter` that does not convert the request and res
 
 <a name="Codec Objects"></a>
 
-<<<<<<< HEAD
-    ServerBuilder()
-      .bindTo(address)
-      .codec(...)
-      .name("servicename")
-      .build(plusOneService)
-=======
 ### Codec Objects
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
 A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, Twitter streaming, and generic multiplexeror protocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
 
@@ -741,65 +725,19 @@ Note: You do not need to be concerned with long-running or CPU intensive operati
 
 Consider the following diagram, which shows how a client uses the Finagle event loop: 
 
-<<<<<<< HEAD
-### Threading Model
-
-Finagle is capable of handling many connections concurrently. Finagle works by placing events from the connections onto a queue, and then continuously looping, executing the code corresponding to each event in turn. This loop is called the event dispatch loop. Using this technique, a single thread can dispatch events for many connections, which yields certain performance advantages. (Under the hood, Finagle maintains multiple queues and multiple threads, but the details of which threads handle which connections are hidden from you, as is the exact sequence in which events are processed.)
-
-This design has an important consequence: while one event is being dispatched, all other queued events must wait. Because of this, if you write code that blocks, or if you perform a long-running operation within Finagle event dispatch code, all other connections handled by that thread will hang. This will harm your system's performance. Blocking operations include network calls, system calls, database calls, or anything that synchronizes around a shared resource. Long-running operations include image processing operations, public key cryptography, or anything that might take a non-trivial amount of clock time to perform.
-
-All code that executes inside a Finagle client request, or Finagle server response, is part of the Finagle event loop, and must avoid those operations. For example, a method that implements an RPC call in a Finagle Thrift server, or a method that communicates with a remote network server in a Finagle client, is part of the event loop. On the other hand, setup code, teardown code, and code explicitly placed on a separate thread is outside of Finagle's control and is not subject to these restrictions. Here's a simple example that illustrates which code lies in Fingle's event loop and which doesn't:
-
-    val service = new Service[Request, Response] {
-      def apply(request: Request): Future[Response] = {
-        /* this is executed in the event loop */
-      }
-    }
-    ServerBuilder()..build(service)
-
-    def main(args: Array[String]) {
-      val client: Service[..] = ..
-
-      /* i'm not in the event loop here */
-      client(request) map { result => /* this is executed in the event     loop */ }
-
-      /* but i can safely wait in my non-eventloop thread */
-      val result = client(request)()
-    }
-
-To avoid placing these operations in the event loop, Finagle provides Futures. A blocking or long-running operation expressed as a Future allows Finagle to process other events as it waits for the operation to complete, and allows you to structure your code similarly to how you would if the operations were happening sequentially and without interruption. See the section "Using Futures" below to learn how to use Futures and FuturePools to avoid executing blocking or long-running operations in the Finagle event dispatch loop.
-
-Footnote: Strictly speaking, synchronization in the event loop is fine as long as contention and wait time are going to be low. But you should be sure you know what you're doing.
-
-### An authorization filter
-=======
 ![Relationship between your threads and Finagle (doc/ThreadEx.png)](https://github.com/twitter/finagle/tree/master/doc/ThreadEx.png)
 
 Your threads, which are shown on the left, are allowed to block. When you call a Finagle method or Finagle calls a method for you, it dispatches execution of these methods to its internal threads. Thus, the Finagle event loop and its threads cannot block without degrading the performance of other clients and servers that use the same Finagle instance.
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
 In complex RCP operations, it may be necessary to perform blocking operations. In these cases, you must set up your own thread pool and use `Future` or `FuturePool` objects to execute the blocking operation on your own thread. Consider the following diagram: 
 
-<<<<<<< HEAD
-Notes:
-
-1. A `SimpleFilter` is a kind of `Filter` that does not convert the request and response types. It saves a little bit of typing.
-1. An exception can be returned asynchronously by calling `Future.exception`. See the section "Using Futures" for more information.
-
-### Scala
-=======
 ![Handling operations that block (doc/ThreadExNonBlockingServer.png)](https://github.com/twitter/finagle/tree/master/doc/ThreadExNonBlockingServer.png)
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
 In this example, you can use a `FuturePool` object to provide threads for blocking operations outside of Finagle. Finagle can then dispatch the blocking operation to your thread. For more information about `FuturePool` objects, see <a href="#Using Future Pools">Using Future Pools</a>.
 
-<<<<<<< HEAD
-Finally, all of the `Filters` can be composed with our `Service` in the following way:
-=======
 [Top](#Top)
 
 <a name="Starting and Stopping Servers"></a>
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
 ### Starting and Stopping Servers
 
@@ -809,23 +747,7 @@ A server automatically starts when you call `build` on the server after assignin
 
 <a name="Exception Handling"></a>
 
-<<<<<<< HEAD
-Note that the `ClientBuilder` requires the definition of `codec`,
-`hosts` and `hostConnectionLimit`. In Scala, this requirement is
-statically typechecked.
-
-    val client = ClientBuilder()
-        .codec(Http)
-        .hosts("localhost:10000,localhost:10001,localhost:10003")
-        .connectionTimeout(1.second)        // max time to spend establishing a TCP connection.
-        .hostConnectionLimit(1)
-        .retries(2)                         // (1) per-request retries
-        .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
-        .logger(Logger.getLogger("http"))
-        .build()
-=======
 ### Exception Handling
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
 
 As soon as an exception occurs, it is executed. If more than one exception handler is defined, the first exception to occur executes its handler. Casting the exception as a `Future` means that the exception will not block; however, Finagle does not allow the thread causing the exception to continue. For an example, see <a href="#Future Exceptions">Future Exceptions</a>.
 
@@ -909,9 +831,6 @@ In the above example, you do not know whether the response timed out before the 
       case e: TimeoutException => ...
     }
 
-<<<<<<< HEAD
-    // 1) Wait 1 second for the computation to return
-=======
 If a timeout occurs, Finagle takes the `onFailure` path. You can use a `TimeoutException` object to display a message or take other actions.
 
 [Top](#Top)
@@ -924,7 +843,6 @@ To set up an exception, specify the action in a `try` block and handle failures 
 
     val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")
     val responseFuture: Future[HttpResponse] = client(request)
->>>>>>> ca97df07744c349bdccfc21fe0cad7a24c8643b8
     try {
       println(responseFuture(1.second))
     } catch {
@@ -1280,7 +1198,6 @@ A client can access a cluster, as follows:
     val client = ClientBuilder()
       .cluster(cluster)
       .codec(new StringCodec)
-      .hostConnectionLimit(1)
       .build()
 
 [Top](#Top)
@@ -1311,8 +1228,3 @@ A client can access a cluster, as follows:
 
 [Top](#Top)
 
-<a name="Revision History"></a>
-
-See ChangeLog.
-
-[Top](#Top)
