@@ -26,9 +26,9 @@ object CommonsStatsReceiverSpec extends Specification {
     "work" in {
       val stat = (new CommonsStatsReceiver()).stat("bar")
 
-      assert(Stats.getVariable("bar_50th_percentile").read == 0.0f)
-      assert(Stats.getVariable("bar_95th_percentile").read == 0.0f)
-      assert(Stats.getVariable("bar_99th_percentile").read == 0.0f)
+      assert(Stats.getVariable("bar_50_0_percentile").read == 0.0f)
+      assert(Stats.getVariable("bar_95_0_percentile").read == 0.0f)
+      assert(Stats.getVariable("bar_99_0_percentile").read == 0.0f)
 
       for (i <- 0.until(10000)) {
         stat.add(i.toFloat)

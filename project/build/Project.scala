@@ -258,7 +258,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults with LibDirClasspath
   {
     override def compileOrder = CompileOrder.JavaThenScala
-    val commonsStats    = "com.twitter.common"    % "stats" % "0.0.15"
+    val commonsStats    = "com.twitter.common"    % "stats" % "0.0.16"
   }
 
 }
