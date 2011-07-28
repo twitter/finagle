@@ -2,8 +2,8 @@ package com.twitter.finagle.exception
 
 import org.specs.Specification
 import com.twitter.streamyj.Streamy
-import java.lang.{Throwable, StackTraceElement => javaSTE}
 import com.twitter.util.{GZIPStringEncoder, Time}
+import java.lang.{Throwable, StackTraceElement => javaSTE}
 
 /**
  * An object that generates a service exception and verifies its JSON representation.
@@ -14,7 +14,8 @@ private[exception] class TestServiceException(
   time: Option[Time] = None,
   traceId: Option[Long] = None,
   clientAddress: Option[String] = None,
-  sourceAddress: Option[String] = None) {
+  sourceAddress: Option[String] = None,
+  cardinality: Option[Int] = None) {
 
   private val ste = new javaSTE("badclass", "badmethod", "badfile", 42)
   val throwable = new Throwable(exceptionMessage)
@@ -24,6 +25,7 @@ private[exception] class TestServiceException(
     var se = new ServiceException(serviceName, throwable, time.getOrElse(Time.now), traceId.getOrElse(0L))
     clientAddress foreach (ca => se = se.withClient(ca))
     sourceAddress foreach (sa => se = se.withSource(sa))
+    cardinality foreach (c => se = se.incremented(c))
     se
   }
 
@@ -58,6 +60,7 @@ private[exception] class TestServiceException(
     var hasStackTrace = false
     var hasClient = false
     var hasSource = false
+    var hasCardinality = false
 
     s readObject {
       case "name" => hasName = verify(s.readString(), serviceName, "bad service name", hasName)
@@ -76,6 +79,7 @@ private[exception] class TestServiceException(
       }
       case "client" => hasClient = verifyOption(s.readString(), clientAddress, "client", hasClient)
       case "source" => hasSource = verifyOption(s.readString(), sourceAddress, "source", hasSource)
+      case "cardinality" => hasCardinality = verifyOption(s.readInt(), cardinality map { _+1 }, "cardinality", hasCardinality, false)
       case a => fail(a, "service exception")
     }
 
@@ -87,15 +91,29 @@ private[exception] class TestServiceException(
     assert(hasMessage, "no message")
     assert(hasStackTrace, "no stacktrace")
 
+    def optionalAssertDefined(o: Option[_], defined: Boolean, msg: String) {
+      if (o.isDefined) assert(defined, msg + " expected but not found")
+    }
+
+    optionalAssertDefined(clientAddress, hasClient, "client")
+    optionalAssertDefined(sourceAddress, hasSource, "source")
+    optionalAssertDefined(cardinality, hasCardinality, "cardinality")
+
     true
   }
 }
 
 object ServiceExceptionSpec extends Specification {
   "A ServiceException with no endpoint reporting" should {
-
     "serialize to JSON in the proper format" in {
       val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L))
+      tse.verifyJSON(tse.serviceException.toJson) mustBe true
+    }
+  }
+
+  "A ServiceException with no endpoint reporting with >1 cardinality" should {
+    "serialize to JSON in the proper format" in {
+      val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L), cardinality = Some(12))
       tse.verifyJSON(tse.serviceException.toJson) mustBe true
     }
   }
@@ -107,6 +125,13 @@ object ServiceExceptionSpec extends Specification {
     }
   }
 
+  "A ServiceException with client endpoint reporting with >1 cardinality" should {
+    "serialize to JSON in the proper format" in {
+      val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L), clientAddress = Some("myendpoint"), cardinality = Some(9))
+      tse.verifyJSON(tse.serviceException.toJson) mustBe true
+    }
+  }
+
   "A ServiceException with source endpoint reporting" should {
     "serialize to JSON in the proper format" in {
       val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L), sourceAddress = Some("myendpoint"))
@@ -114,9 +139,23 @@ object ServiceExceptionSpec extends Specification {
     }
   }
 
+  "A ServiceException with source endpoint reporting with >1 cardinality" should {
+    "serialize to JSON in the proper format" in {
+      val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L), sourceAddress = Some("myendpoint"), cardinality = Some(7))
+      tse.verifyJSON(tse.serviceException.toJson) mustBe true
+    }
+  }
+
   "A ServiceException with both client and source endpoint reporting" should {
     "serialize to JSON in the proper format" in {
       val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L), clientAddress = Some("myClientAddress"), sourceAddress = Some("mySourceAddress"))
+      tse.verifyJSON(tse.serviceException.toJson) mustBe true
+    }
+  }
+
+  "A ServiceException with both client and source endpoint reporting with >1 cardinality" should {
+    "serialize to JSON in the proper format" in {
+      val tse = new TestServiceException("service16", "my cool message", Some(Time.now), Some(124564L), clientAddress = Some("myClientAddress"), sourceAddress = Some("mySourceAddress"), cardinality = Some(8))
       tse.verifyJSON(tse.serviceException.toJson) mustBe true
     }
   }

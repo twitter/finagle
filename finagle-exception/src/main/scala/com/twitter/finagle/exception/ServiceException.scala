@@ -36,12 +36,20 @@ sealed private[exception] case class ServiceException private[ServiceException] 
   /**
    * Include a client address
    */
-  def withClient(address: String) = copy(jsonValue + ("client" -> address))
+  def withClient(address: String) = copy(jsonValue.updated("client", address))
 
   /**
    * Include a source (i.e. server) address
    */
-  def withSource(address: String) = copy(jsonValue + ("source" -> address))
+  def withSource(address: String) = copy(jsonValue.updated("source", address))
+
+  /**
+   * Increment the cardinality of the ServiceException, adding the element if it does not
+   * exist yet.
+   */
+  def incremented(cardinality: Int = 1) =
+    copy(jsonValue.updated("cardinality",
+      jsonValue.getOrElse("cardinality", 1).asInstanceOf[Int] + cardinality))
 
   /**
    * Generate a json representation of this using jerkson
