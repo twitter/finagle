@@ -1,15 +1,19 @@
 package com.twitter.finagle.memcached
 
+import scala.collection.JavaConversions._
+
+import _root_.java.util.{Map => JMap}
+
+import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import org.jboss.netty.util.CharsetUtil
-import org.jboss.netty.buffer.ChannelBuffer
-import scala.collection.JavaConversions._
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
-import text.Memcached
 import com.twitter.finagle.Service
-import com.twitter.util.{Time, Future}
 import com.twitter.hashing._
+import com.twitter.util.{Time, Future}
+
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.util.CharsetUtil
 
 object Client {
   /**
@@ -379,7 +383,7 @@ case class KetamaClientKey(host: String, port: Int, weight: Int) {
 class KetamaClient(clients: Map[(String, Int, Int), Client], keyHasher: KeyHasher = KeyHasher.KETAMA)
   extends PartitionedClient
 {
-  def this(clients: java.util.Map[KetamaClientKey, Client]) =
+  def this(clients: JMap[KetamaClientKey, Client]) =
       this((Map() ++ clients) map { case (k, v) => (k.toTuple, v) })
 
   require(!clients.isEmpty, "At least one client must be provided")
