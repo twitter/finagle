@@ -5,31 +5,66 @@ package com.twitter.finagle.http
  */
 
 import org.jboss.netty.channel.{
-  Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, DownstreamMessageEvent}
+  Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, UpstreamMessageEvent}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.util.StorageUnit
+import com.twitter.util.{StorageUnit, Future}
 import com.twitter.conversions.storage._
 
-import com.twitter.finagle.{Codec, CodecFactory, CodecException}
+import com.twitter.finagle.{Codec, CodecFactory, CodecException, Service, SimpleFilter}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+
+private[http] class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
+  extends DefaultHttpRequest(httpVersion, method, uri)
+
+private[http] object BadHttpRequest {
+  def apply(codecError: String) =
+    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", codecError)
+}
 
 private[http] object BadRequestResponse
   extends DefaultHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.BAD_REQUEST)
 
+private[http] class SafeHttpServerCodec extends HttpServerCodec {
 
-class SafeHttpServerCodec extends HttpServerCodec {
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    // this only catches Codec exceptions -- when a handler calls sendUpStream(), it
+    // rescues exceptions from the upstream handlers and calls notifyHandlerException(),
+    // which doesn't throw exceptions.
     try {
      super.handleUpstream(ctx, e)
     } catch {
       case ex: Exception =>
         val channel = ctx.getChannel()
-        super.handleDownstream(ctx, new DownstreamMessageEvent(
-          channel, Channels.future(channel), BadRequestResponse, channel.getRemoteAddress()))
-        throw new CodecException(ex.toString())
+        ctx.sendUpstream(new UpstreamMessageEvent(
+          channel, BadHttpRequest(ex.toString()), channel.getRemoteAddress()))
     }
   }
+}
+
+abstract class CheckRequestFilter[Req](statsReceiver: StatsReceiver = NullStatsReceiver)
+  extends SimpleFilter[Req, HttpResponse]
+{
+  private[this] val badRequestCount = statsReceiver.counter("bad_requests")
+
+  def apply(request: Req, service: Service[Req, HttpResponse]) = {
+    toHttpRequest(request) match {
+      case httpRequest: BadHttpRequest =>
+        badRequestCount.incr()
+        // BadRequstResponse will cause ServerConnectionManager to close the channel.
+        Future.value(BadRequestResponse)
+      case _ =>
+        service(request)
+    }
+  }
+
+  def toHttpRequest(request: Req): HttpRequest
+}
+
+class CheckHttpRequestFilter extends CheckRequestFilter[HttpRequest]
+{
+  def toHttpRequest(request: HttpRequest) = request
 }
 
 case class Http(
@@ -104,6 +139,13 @@ case class Http(
 
           pipeline
         }
+      }
+
+      override def prepareService(
+        underlying: Service[HttpRequest, HttpResponse]
+      ): Future[Service[HttpRequest, HttpResponse]] = {
+        val checkRequest = new CheckHttpRequestFilter
+        Future.value(checkRequest andThen underlying)
       }
     }
   }

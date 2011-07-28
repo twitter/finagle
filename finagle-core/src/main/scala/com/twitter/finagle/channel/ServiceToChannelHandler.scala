@@ -148,9 +148,6 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
       case e: WriteTimedOutException =>
         statsReceiver.counter("write_timeout").incr()
         Level.FINEST
-      case e: CodecException =>
-        statsReceiver.counter("codec_exception").incr()
-        Level.FINEST
       case e: java.io.IOException
       if (e.getMessage == "Connection reset by peer" ||
           e.getMessage == "Broken pipe") =>
