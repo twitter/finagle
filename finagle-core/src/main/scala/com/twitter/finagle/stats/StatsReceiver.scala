@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Future, Time, JavaSingleton}
 
 /**
  * A writeable Counter. Only sums are kept of Counters.  An example
@@ -141,7 +141,7 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
   def addGauge(name: String*)(f: => Float) = self.addGauge(translate(name): _*)(f)
 }
 
-object NullStatsReceiver extends StatsReceiver {
+object NullStatsReceiver extends StatsReceiver with JavaSingleton {
   def counter(name: String*) = new Counter {
     def incr(delta: Int) {}
   }
@@ -151,6 +151,4 @@ object NullStatsReceiver extends StatsReceiver {
   }
 
   def addGauge(name: String*)(f: => Float) = new Gauge { def remove() {} }
-
-  def get = this
 }
