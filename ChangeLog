@@ -1,3 +1,16 @@
+1.7.5		2011/07/29
+
+	* make it easier to use the NullStatsReceiver from java
+	* convert WriteException to a case class (github issue 25)
+	* add _root_. to java.util.Map import. reorder imports
+	* Upgrade finagle-common-stats to twitter-common-stats 0.0.16
+	* encode more HTTP codec errors
+	* adding cardinality to ServiceException
+	* finagle CachingPool: limit size to highWatermark - lowWatermark
+	* exception reporting: gzipping trace strings
+	* set ostrich version of finagle-ostrich4 to 4.7.3
+	* ChannelServiceFactory: encode exceptions from bootstrap.connect()
+
 1.7.4		2011/07/22
 
 	* http: convert codec exceptions into 4xx errors; report them
