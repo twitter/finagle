@@ -206,6 +206,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults with CompileThriftFinagle
   {
     val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
+
+    projectDependencies(
+      "util" ~ "util-codec"
+    )
   }
 
   class OstrichProject(info: ProjectInfo) extends StandardProject(info)
@@ -238,6 +242,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift    = "thrift"    % "libthrift" % "0.5.0"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
+
+    projectDependencies(
+      "util" ~ "util-codec"
+    )
   }
 
   class ExceptionProject(info: ProjectInfo) extends StandardProject(info)
@@ -252,6 +260,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     // Needed for spec testing only
     val streamy = "com.twitter" % "streamyj_2.8.1" % "0.3.0"
+
+    projectDependencies(
+      "util" ~ "util-codec"
+    )
   }
 
   class CommonsStatsProject(info: ProjectInfo) extends StandardProject(info)
