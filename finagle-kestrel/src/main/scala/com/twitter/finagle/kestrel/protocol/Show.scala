@@ -16,12 +16,14 @@ private[kestrel] class ResponseToEncoding extends OneToOneEncoder {
   private[this] val STORED        = "STORED"
   private[this] val NOT_FOUND     = "NOT_FOUND"
   private[this] val DELETED       = "DELETED"
+  private[this] val ERROR         = "ERROR"
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
     message match {
       case Stored()       => Tokens(Seq(STORED))
       case Deleted()      => Tokens(Seq(DELETED))
       case NotFound()     => Tokens(Seq(NOT_FOUND))
+      case Error()        => Tokens(Seq(ERROR))
       case Values(values) =>
         val buffer = ChannelBuffers.dynamicBuffer(100 * values.size)
         val tokensWithData = values map { case Value(key, value) =>

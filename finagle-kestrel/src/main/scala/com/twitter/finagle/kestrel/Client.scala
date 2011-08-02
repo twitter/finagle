@@ -3,13 +3,62 @@ package com.twitter.finagle.kestrel
 import _root_.java.util.concurrent.atomic.AtomicBoolean
 import _root_.java.util.logging.{Logger, Level}
 import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.util.{Future, Duration, Time, Return, Throw}
+import com.twitter.util.{
+  Future, Duration, Time,
+  Return, Throw, Promise,
+  Timer, NullTimer}
 import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.concurrent.{ChannelSource, Channel}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.{ServiceFactory, Service}
+import com.twitter.concurrent.{Offer, Broker}
+
+object ReadClosedException extends Exception
+object OutOfRetriesException extends Exception
+
+
+/**
+ * A message that has been read: consists of the message itself, and
+ * an offer to acknowledge.
+ */
+case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
+
+/**
+ * An ongoing transactional read (from {{read}}).
+ */
+trait ReadHandle {
+  /**
+   * An offer to synchronize on the next message.  A new message is
+   * available only when the previous one has been acknowledged.
+   */
+  val messages: Offer[ReadMessage]
+
+  /**
+   * Indicates an error in the read.
+   */
+  val error: Offer[Throwable]
+
+  /**
+   * Closes the read.  Closes are signaled as an error with
+   * {{ReadClosedException}} when the close has completed.
+   */
+  def close()
+}
+
+// A convenience constructor using an offer for closing.
+private[kestrel] object ReadHandle {
+  def apply(
+    _messages: Offer[ReadMessage],
+    _error: Offer[Throwable],
+    closeOf: Offer[Unit]
+  ) = new ReadHandle {
+    val messages = _messages
+    val error = _error
+    def close() = closeOf()
+  }
+}
 
 object Client {
   def apply(raw: ServiceFactory[Command, Response]): Client = {
@@ -34,7 +83,7 @@ trait Client {
    * Enqueue an item.
    *
    * @param  expiry  how long the item is valid for (Kestrel will delete the item
-   * if it isn't dequeued in time.
+   * if it isn't dequeued in time).
    */
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch): Future[Response]
 
@@ -74,6 +123,88 @@ trait Client {
    * @return  A ChannelSource that you can send items to.
    */
   def to(queueName: String): ChannelSource[ChannelBuffer]
+
+  /**
+   * Read indefinitely from the given queue with transactions.  Note
+   * that {{read}} will reserve a connection for the duration of the
+   * read.  Note that this does no buffering: we await acknowledment
+   * (through synchronizing on ReadMessage.ack) before acknowledging
+   * that message to the kestrel server & reading the next one.
+   *
+   * @return A read handle.
+   */
+  def read(queueName: String): ReadHandle
+
+  /**
+   * Read from a queue reliably: retry streaming reads on failure
+   * (which may indeed be backed by multiple kestrel hosts).  This
+   * presents to the user a virtual "reliable" stream of messages, and
+   * errors are transparent.
+   *
+   * @param queueName the queue to read from
+   * @param timer a timer used to delay retries
+   * @param retryBackoffs a (possibly infinite) stream of durations
+   * comprising a backoff policy
+   *
+   * Note: the use of call-by-name for the stream is in order to
+   * ensure that we do not suffer a space leak for infinite retries.
+   */
+  def readReliably(
+    queueName: String,
+    timer: Timer,
+    retryBackoffs: => Stream[Duration]
+  ): ReadHandle = {
+    val error = new Broker[Throwable]
+    val messages = new Broker[ReadMessage]
+    val close = new Broker[Unit]
+
+    def loop(handle: ReadHandle, backoffs: Stream[Duration]) {
+      Offer.select(
+        // proxy messages
+        handle.messages { m =>
+          messages ! m
+          // a succesful read always resets the backoffs
+          loop(handle, retryBackoffs)
+        },
+
+        // retry on error
+        handle.error { t =>
+          backoffs match {
+            case delay #:: rest =>
+              timer.schedule(delay.fromNow) { loop(read(queueName), rest) }
+            case _ =>
+              error ! OutOfRetriesException
+          }
+        },
+
+        // proxy the close, and close our reliable channel
+        close.recv { _=>
+          handle.close()
+          error ! ReadClosedException
+        }
+      )
+    }
+
+    loop(read(queueName), retryBackoffs)
+
+    ReadHandle(messages.recv, error.recv, close.send(()))
+  }
+
+  /**
+   * {{readReliably}} with infinite, 0-second backoff retries.
+   */
+  def readReliably(queueName: String): ReadHandle =
+    readReliably(queueName, new NullTimer, Stream.continually(0.seconds))
+
+  /*
+   * Write indefinitely to the given queue.  The given offer is
+   * synchronized on indefinitely, writing the items as they become
+   * available.  Unlike {{read}}, {{write}} does not reserve a
+   * connection.
+   *
+   * @return a Future indicating client failure.
+   */
+  def write(queueName: String, offer: Offer[ChannelBuffer]): Future[Throwable]
 
   /**
    * Close any consume resources such as TCP Connections. This should will not
@@ -145,6 +276,78 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
       }
     }
     to
+  }
+
+  // note: this implementation uses "GET" requests, not "MONITOR",
+  // so it will incur many roundtrips on quiet queues.
+  def read(queueName: String): ReadHandle = {
+    val error = new Broker[Throwable]  // this is sort of like a latch …
+    val messages = new Broker[ReadMessage]  // todo: buffer?
+    val close = new Broker[Unit]
+
+    val open = Open(queueName, None)
+    val closeAndOpen = CloseAndOpen(queueName, None)
+    val abort = Abort(queueName)
+
+    def recv(service: Service[Command, Response], command: GetCommand) {
+      val reply = service(command).toOffer
+      Offer.select(
+        reply {
+          case Return(Values(Seq(Value(_, item)))) =>
+            val ack = new Broker[Unit]
+            messages ! ReadMessage(item, ack.send(()))
+
+            Offer.select(
+              ack.recv { _ => recv(service, closeAndOpen) },
+              close.recv { t => service.release(); error ! ReadClosedException }
+            )
+
+          case Return(Values(Seq())) =>
+            recv(service, open)
+
+          case Return(_) =>
+            service.release()
+            error ! new IllegalArgumentException("invalid reply from kestrel")
+
+          case Throw(t) =>
+            service.release()
+            error ! t
+        },
+
+        close.recv { _ =>
+          reply andThen {
+            service(abort) ensure {
+              service.release()
+              error ! ReadClosedException
+            }
+          }
+        }
+      )
+    }
+
+    underlying.make() onSuccess { recv(_, open) } onFailure { error ! _ }
+
+    ReadHandle(messages.recv, error.recv, close.send(()))
+  }
+
+  def write(queueName: String, offer: Offer[ChannelBuffer]): Future[Throwable] = {
+    val closed = new Promise[Throwable]
+    write(queueName, offer, closed)
+    closed
+  }
+
+  private[this] def write(
+    queueName: String,
+    offer: Offer[ChannelBuffer],
+    closed: Promise[Throwable]
+  ) {
+    offer() foreach { item =>
+      set(queueName, item).unit onSuccess { _ =>
+        write(queueName, offer)
+      } onFailure { t =>
+        closed() = Return(t)
+      }
+    }
   }
 
   private[this] def receive(

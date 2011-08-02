@@ -12,6 +12,7 @@ private[kestrel] class DecodingToResponse extends AbstractDecodingToResponse[Res
       case NOT_FOUND  => NotFound()
       case STORED     => Stored()
       case DELETED    => Deleted()
+      case ERROR      => Error()
     }
   }
 

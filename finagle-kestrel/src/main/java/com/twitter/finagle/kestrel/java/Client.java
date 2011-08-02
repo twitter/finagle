@@ -2,16 +2,22 @@ package com.twitter.finagle.kestrel.java;
 
 import com.twitter.concurrent.Channel;
 import com.twitter.concurrent.ChannelSource;
+import com.twitter.concurrent.Offer;
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.kestrel.protocol.Command;
 import com.twitter.finagle.kestrel.protocol.Response;
+import com.twitter.finagle.kestrel.ReadHandle;
+import com.twitter.finagle.kestrel.ReadMessage;
 import com.twitter.util.Duration;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
+import com.twitter.util.Timer;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
+import java.util.Iterator;
 
 /**
  * A Java-friendly Client for interacting with Kestrel.
@@ -72,6 +78,45 @@ public abstract class Client {
    * @return a ChannelSource<ChannelBuffer>
    */
   abstract public ChannelSource<ChannelBuffer> source(String key);
+
+  /**
+   * Write indefinitely to the given queue.  The given offer is
+   * synchronized on indefinitely, writing the items as they become
+   * available.  Unlike {{read}}, {{write}} does not reserve a
+   * connection.
+   *
+   * @return a Future indicating client failure.
+   */
+  abstract public Future<Throwable> write(String queueName, Offer<ChannelBuffer> offer);
+
+  /**
+   * Read indefinitely from the given queue with transactions.  Note
+   * that {{read}} will reserve a connection for the duration of the
+   * read.  Note that this does no buffering: we await acknowledment
+   * (through synchronizing on ReadMessage.ack) before acknowledging
+   * that message to the kestrel server & reading the next one.
+   *
+   * @return A read handle.
+   */
+  abstract public ReadHandle read(String queueName);
+
+  /**
+   * Read from a queue reliably: retry streaming reads on failure
+   * (which may indeed be backed by multiple kestrel hosts).  This
+   * presents to the user a virtual "reliable" stream of messages, and
+   * errors are transparent.
+   *
+   * @param queueName the queue to read from
+   * @param timer a timer used to delay retries
+   * @param retryBackoffs a (possibly infinite) stream of durations
+   * comprising a backoff policy
+   */
+  abstract public ReadHandle readReliably(String queueName, Timer timer, Callable<Iterator<Duration>> backoffs);
+
+  /**
+   * {{readReliably}} with infinite, 0-second backoff retries.
+   */
+  abstract public ReadHandle readReliably(String queueName);
 
   /**
    * Release any resources (like threadpools) used by this client.
