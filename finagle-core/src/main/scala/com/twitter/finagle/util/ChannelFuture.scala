@@ -38,7 +38,7 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
       case Cancelled    => self.cancel()
     }
   }
-  
+
   def state: State =
     if (self.isSuccess)
       Ok(self.getChannel)
@@ -125,6 +125,13 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
     this {
       case Cancelled => ()
       case _ => f
+    }
+  }
+
+  def onCancellation(f: => Unit) {
+    this {
+      case Cancelled => f
+      case _ => ()
     }
   }
 

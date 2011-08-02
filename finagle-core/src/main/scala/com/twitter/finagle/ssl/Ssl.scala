@@ -1,4 +1,4 @@
-package com.twitter.finagle.builder
+package com.twitter.finagle.ssl
 
 import java.util.logging.{Level, Logger}
 import java.io._
@@ -252,12 +252,13 @@ object Ssl {
       }
     }
 
-    if (context != null)
+    if (context != null) {
       return context
-    else
+    } else {
       throw new NoSuitableSslProvider(
         "No SSL provider was suitable. Tried [%s].".format(
           contextFactories.map(_.getClass.getName).mkString(", ")))
+    }
   }
 
   /**

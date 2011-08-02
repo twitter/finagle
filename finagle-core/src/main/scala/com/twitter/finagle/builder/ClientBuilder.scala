@@ -67,6 +67,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
+import com.twitter.finagle.ssl.{Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
 import exception._
@@ -156,8 +157,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _retries                   : Option[Int]                   = None,
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
-  private val _tls                       : Option[SSLContext]            = None,
-  private val _startTls                  : Boolean                       = false,
+  private val _tls                       : Option[(SSLContext, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
   private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
@@ -194,7 +194,6 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val logger                    = _logger
   val channelFactory            = _channelFactory
   val tls                       = _tls
-  val startTls                  = _startTls
   val failureAccrualParams      = _failureAccrualParams
   val tracer                    = _tracer
 
@@ -223,7 +222,6 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
-    "startTls"                  -> Some(_startTls),
     "failureAccrualParams"      -> _failureAccrualParams,
     "tracer"                    -> Some(tracer)
   )
@@ -486,22 +484,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_channelFactory = Some(cf)))
 
   /**
-   * Encrypt the connection with SSL.
+   * Encrypt the connection with SSL.  Hostname verification will be
+   * provided against the given hostname.
    */
-  def tls(): This =
-    withConfig(_.copy(_tls = Some(Ssl.client())))
+  def tls(hostname: String): This =
+    withConfig(_.copy(_tls = Some(Ssl.client(), Some(hostname))))
 
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
   def tlsWithoutValidation(): This =
-    withConfig(_.copy(_tls = Some(Ssl.clientWithoutCertificateValidation())))
-
-  /**
-   * Uses STARTTLS (attempt to upgrade a plaintext channel).
-   */
-  def startTls(value: Boolean): This =
-    withConfig(_.copy(_startTls = true))
+    withConfig(_.copy(_tls = Some(Ssl.clientWithoutCertificateValidation(), None)))
 
   /**
    * Specifies a tracer that receives trace events.
@@ -548,11 +541,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
               TimeUnit.MILLISECONDS))
         }
 
-        for (ctx <- config.tls) {
+        for ((ctx, hostname) <- config.tls) {
           val sslEngine = ctx.createSSLEngine()
           sslEngine.setUseClientMode(true)
-          // sslEngine.setEnableSessionCreation(true) // XXX - need this?
-          pipeline.addFirst("ssl", new SslHandler(sslEngine, config.startTls))
+          sslEngine.setEnableSessionCreation(true)
+          val sslHandler = new SslHandler(sslEngine)
+          val verifier = hostname map {
+            SslConnectHandler.sessionHostnameVerifier(_) _
+          } getOrElse { Function.const(None) _ }
+
+          pipeline.addFirst("sslConnect",
+            new SslConnectHandler(sslHandler, verifier))
+          pipeline.addFirst("ssl", sslHandler)
         }
 
         for (logger <- config.logger) {
@@ -669,7 +669,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       config.failureAccrualParams foreach { case (numFailures, markDeadFor) =>
         factory = new FailureAccrualFactory(factory, numFailures, markDeadFor)
       }
-      
+
       val exceptionFilter = new ExceptionFilter[Req, Rep](
         config.exceptionReceiver map {
           _(config.name.get)

@@ -73,6 +73,7 @@ import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphore
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver}
 import exception._
+import ssl.Ssl
 
 trait Server {
   /**

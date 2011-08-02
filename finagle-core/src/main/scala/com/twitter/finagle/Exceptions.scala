@@ -21,7 +21,10 @@ class ChannelClosedException                extends ChannelException
 class SpuriousMessageException              extends ChannelException
 class IllegalMessageException               extends ChannelException
 class WriteTimedOutException                extends ChannelException
-class UnknownChannelException(e: Throwable) extends ChannelException {
+class InconsistentStateException            extends ChannelException
+case class SslHandshakeException(t: Throwable)             extends ChannelException
+case class SslHostVerificationException(principal: String) extends ChannelException
+case class UnknownChannelException(e: Throwable) extends ChannelException {
   override def toString = "%s: %s".format(super.toString, e.toString)
 }
 case class WriteException(e: Throwable)     extends ChannelException {
