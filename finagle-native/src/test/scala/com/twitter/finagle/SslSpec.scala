@@ -8,9 +8,10 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Ssl}
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.http.Http
-import com.twitter.finagle.builder.Ssl.ContextFactory
+import Ssl.ContextFactory
 
 import com.twitter.util.{Future, RandomSocket}
 import com.twitter.util.TimeConversions._
