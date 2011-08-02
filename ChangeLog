@@ -1,3 +1,11 @@
+1.8.0		2011/08/02
+
+	* SSL: perform hostname validation in the client.  this is the
+	reason for the minor bump: we change the .tls() ClientBuilder
+	signature
+	* introduce util-codec dependency for use of the apache
+	commons base 64 codec
+
 1.7.5		2011/07/29
 
 	* make it easier to use the NullStatsReceiver from java
