@@ -152,7 +152,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   /**
    * Chains a series of filters together:
    *
-   *    myModularService = handleExcetions.andThen(thrift2Pojo.andThen(parseString))
+   *    myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))
    *
    * @param  next  another filter to follow after this one
    *
