@@ -141,11 +141,11 @@ private[thrift] class ThriftClientTracingFilter(serviceName: String, isUpgraded:
       val header = new thrift.TracedRequestHeader
       header.setSpan_id(Trace.id.spanId.toLong)
       Trace.id._parentId foreach { id => header.setParent_span_id(id.toLong) }
+      header.setTrace_id(Trace.id.traceId.toLong)
 
-      // if the span is marked as sampled do not set the trace id
-      // this is how the downstream finagle code knows if the request is sampled or not
-      if(!Trace.id.sampled) {
-        header.setTrace_id(Trace.id.traceId.toLong)
+      Trace.id.sampled match {
+        case Some(s) => header.setSampled(s)
+        case None => header.unsetSampled()
       }
 
       new ThriftClientRequest(

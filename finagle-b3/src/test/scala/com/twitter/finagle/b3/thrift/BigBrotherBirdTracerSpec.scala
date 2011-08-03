@@ -5,19 +5,18 @@ import org.specs.mock.Mockito
 import java.util.ArrayList
 
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.Timer
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 import org.mockito.Matchers._
 import java.nio.ByteBuffer
 import java.net.InetSocketAddress
 
-
 object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
-  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), false)
+  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
   "BigBrotherBirdReceiver" should {
     "throw exception if illegal sample rate" in {
@@ -30,7 +29,7 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
       val tracer = new BigBrotherBirdTracer(null, NullStatsReceiver)
       tracer.setSampleRate(0)
       for (i <- 1 until 100) {
-        tracer.sampleTrace(TraceId(None, None, SpanId(i), false)) mustEqual true
+        tracer.sampleTrace(TraceId(None, None, SpanId(i), None)) mustEqual Some(false)
       }
     }
 
@@ -38,15 +37,29 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
       val tracer = new BigBrotherBirdTracer(null, NullStatsReceiver)
       tracer.setSampleRate(1f)
       for (i <- 1 until 100) {
-        tracer.sampleTrace(TraceId(None, None, SpanId(i), false)) mustEqual false
+        tracer.sampleTrace(TraceId(None, None, SpanId(i), None)) mustEqual Some(true)
       }
+    }
+
+    "make a decision if sampled None" in {
+      class TestTrace(client: scribe.ServiceToClient, statsReceiver: StatsReceiver = NullStatsReceiver)
+        extends BigBrotherBirdTracer(client, statsReceiver) {
+        var annotateCalled = false
+        protected override def annotate(record: Record, value: String) = {
+          annotateCalled = true
+        }
+      }
+      val tracer1 = new TestTrace(null, NullStatsReceiver)
+      tracer1.setSampleRate(1f)
+      tracer1.record(new Record(traceId, Time.now, Annotation.ClientSend()))
+      tracer1.annotateCalled mustEqual true
     }
 
     "send all traces to scribe" in {
       val client = mock[scribe.ServiceToClient]
 
       Timer.default.acquire()
-      val tracer = new BigBrotherBirdTracer(client, NullStatsReceiver).setSampleRate(0)
+      val tracer = new BigBrotherBirdTracer(client, NullStatsReceiver).setSampleRate(1)
 
       val expected = new ArrayList[LogEntry]()
       expected.add(new LogEntry().setCategory("b3")

@@ -13,9 +13,9 @@ class ThriftClientFramedCodecSpec extends Specification with Mockito {
 
   "ThriftClientFramedCodec" should {
 
-    "not set trace id if trace is sampled" in {
+    "set sampled boolean correctly" in {
       val tracer = mock[Tracer]
-      tracer.sampleTrace(any(classManifest[TraceId])) returns true
+      tracer.sampleTrace(any(classManifest[TraceId])) returns Some(true)
 
       Trace.clear()
 
@@ -38,7 +38,7 @@ class ThriftClientFramedCodecSpec extends Specification with Mockito {
       val header = new thrift.TracedRequestHeader
       InputBuffer.peelMessage(_request.getValue.message, header)
 
-      header.isSetTrace_id mustBe false
+      header.isSampled mustBe true
     }
   }
 }

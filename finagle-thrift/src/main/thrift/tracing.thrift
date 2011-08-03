@@ -45,10 +45,11 @@ struct Span {
  * a flag indicating whether the request is to be debugged.
  */
 struct TracedRequestHeader {
-  1: optional i64 trace_id, // If this is unset it means this Span has been sampled out upstream
+  1: i64 trace_id,
   2: i64  span_id,
   3: optional i64 parent_span_id,
-  4: bool debug
+  4: bool debug,
+  5: optional bool sampled // if true we should trace the request, if not set we have not decided.
 }
 
 /**

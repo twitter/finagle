@@ -14,7 +14,7 @@ class DeadlineSpanMapSpec extends Specification with Mockito {
       Timer.default.acquire()
       val map = new DeadlineSpanMap(tracer, 1.milliseconds)
 
-      val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), false)
+      val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
       val f = { span: Span =>
         span.copy(_name = Some("name"), _serviceName = Some("service"))
       }

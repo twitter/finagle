@@ -110,11 +110,11 @@ private[thrift] class BigBrotherBirdTracer(
 
   /**
    * Should we drop this particular trace or send it on to Scribe?
-   * True means drop.
-   * False means keep.
+   * True means keep.
+   * False means drop.
    */
-  def sampleTrace(traceId: TraceId): Boolean = {
-    math.abs(traceId.traceId.toLong) % 10000 >= sampleRate * 10000
+  def sampleTrace(traceId: TraceId): Option[Boolean] = {
+    Some(math.abs(traceId.traceId.toLong) % 10000 < sampleRate * 10000)
   }
 
   /**
@@ -135,7 +135,9 @@ private[thrift] class BigBrotherBirdTracer(
 
   def record(record: Record) {
     // if this trace is marked as sampled we just throw away all the records
-    if (!record.traceId.sampled) {
+    // if this trace is marked as None (no decision has been made), consult the sampleTrace impl
+    val shouldRecord = record.traceId.sampled.getOrElse(sampleTrace(record.traceId).get)
+    if (shouldRecord) {
       record.annotation match {
         case tracing.Annotation.ClientSend()   =>
           annotate(record, thrift.Constants.CLIENT_SEND)

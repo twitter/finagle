@@ -80,11 +80,15 @@ private[thrift] class ThriftServerTracingFilter(
       val request_ = InputBuffer.peelMessage(request, header)
 
       val msg = new InputBuffer(request_)().readMessageBegin()
+      val sampled = if (header.isSetSampled) Some(header.isSampled) else None
+      // if true, we trace this request. if None client does not trace, we get to decide
+
       val traceId = TraceId(
         if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
         SpanId(header.getSpan_id),
-        !header.isSetTrace_id)
+        sampled)
+
       Trace.pushId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
       Trace.recordServerAddr(boundAddress)

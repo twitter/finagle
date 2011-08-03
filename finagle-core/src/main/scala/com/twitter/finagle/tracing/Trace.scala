@@ -29,7 +29,7 @@ object Trace {
   private[this] type Stack = List[Either[TraceId, Tracer]]
   private[this] val rng = new Random
 
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), false)
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None)
   private[this] val local = new Local[Stack]
 
   /**
@@ -62,7 +62,7 @@ object Trace {
     TraceId(currentId map { _.traceId },
       currentId map { _.spanId },
       SpanId(rng.nextLong()),
-      false)
+      None)
   }
 
   /**

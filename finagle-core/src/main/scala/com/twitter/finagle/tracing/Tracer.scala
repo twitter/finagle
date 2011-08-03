@@ -37,13 +37,16 @@ trait Tracer {
   /**
    * Should we sample this trace or not? Could be decided
    * that a percentage of all traces will be let through for example.
+   * True: keep it
+   * False: false throw the data away
+   * None: i'm going to defer making a decision on this to the child service
    */
-  def sampleTrace(traceId: TraceId): Boolean
+  def sampleTrace(traceId: TraceId): Option[Boolean]
 }
 
 object NullTracer extends Tracer {
   def record(record: Record) {/*ignore*/}
-  def sampleTrace(traceId: TraceId): Boolean = false
+  def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
 
 class BufferingTracer extends Tracer with Iterable[Record] {
@@ -53,7 +56,7 @@ class BufferingTracer extends Tracer with Iterable[Record] {
   def iterator = buf.iterator
   def clear() = buf.clear()
 
-  def sampleTrace(traceId: TraceId): Boolean = false
+  def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
 
 object ConsoleTracer extends Tracer {
@@ -61,5 +64,5 @@ object ConsoleTracer extends Tracer {
     println(record)
   }
 
-  def sampleTrace(traceId: TraceId): Boolean = false
+  def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
