@@ -37,10 +37,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Tuple2<ChannelBuffer, ChannelBuffer>>, ResultWithCAS>() {
       public ResultWithCAS apply(Option<Tuple2<ChannelBuffer, ChannelBuffer>> value) {
         if (value.isDefined()) {
-          ResultWithCAS result = new ResultWithCAS();
-          result.value = value.get()._1();
-          result.casUnique = value.get()._2();
-          return result;
+          return new ResultWithCAS(value.get()._1(), value.get()._2());
         } else {
           return null;
         }
@@ -70,10 +67,7 @@ public class ClientBase extends Client {
         return JavaConversions.asJavaMap(
           underlying.mapValues(new Function<Tuple2<ChannelBuffer, ChannelBuffer>, ResultWithCAS>() {
             public ResultWithCAS apply(Tuple2<ChannelBuffer, ChannelBuffer> tuple) {
-              ResultWithCAS result = new ResultWithCAS();
-              result.value = tuple._1();
-              result.casUnique = tuple._2();
-              return result;
+              return new ResultWithCAS(tuple._1(), tuple._2());
             }
           })
         );
