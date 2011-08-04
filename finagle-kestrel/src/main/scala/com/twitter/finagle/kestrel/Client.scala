@@ -31,7 +31,8 @@ case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
 trait ReadHandle {
   /**
    * An offer to synchronize on the next message.  A new message is
-   * available only when the previous one has been acknowledged.
+   * available only when the previous one has been acknowledged
+   * (through {{ReadMessage.ack()}})
    */
   val messages: Offer[ReadMessage]
 
