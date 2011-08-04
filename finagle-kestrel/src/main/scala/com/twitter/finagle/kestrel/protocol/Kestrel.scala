@@ -1,13 +1,14 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.{Codec, CodecFactory}
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
-
+import com.twitter.finagle.{Service, SimpleFilter, Codec, CodecFactory}
+import com.twitter.finagle.tracing.ClientRequestTracingFilter
+import com.twitter.util.Future
 
 class Kestrel extends CodecFactory[Command, Response] {
   private[this] val storageCommands = collection.Set[ChannelBuffer]("set")
@@ -45,8 +46,22 @@ class Kestrel extends CodecFactory[Command, Response] {
           pipeline
         }
       }
+
+      // pass every request through a filter to create trace data
+      override def prepareService(underlying: Service[Command, Response]) = {
+        Future.value((new KestrelTracingFilter()) andThen underlying)
+      }
     }
   }
+}
+
+/**
+ * Adds tracing information for each kestrel request.
+ * Including command name, when request was sent and when it was received.
+ */
+private class KestrelTracingFilter extends ClientRequestTracingFilter[Command, Response] {
+  val serviceName = "kestrel"
+  def methodName(req: Command): String = req.getClass().getSimpleName()
 }
 
 object Kestrel {

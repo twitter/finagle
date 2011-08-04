@@ -9,7 +9,7 @@ import server.DecodingToCommand
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
 import com.twitter.finagle.{SimpleFilter, Service, CodecFactory, Codec}
-import com.twitter.finagle.tracing.{Annotation, Trace}
+import com.twitter.finagle.tracing.ClientRequestTracingFilter
 import com.twitter.util.Future
 
 object Memcached {
@@ -67,18 +67,7 @@ class Memcached extends CodecFactory[Command, Response] {
  * Adds tracing information for each memcached request.
  * Including command name, when request was sent and when it was received.
  */
-private class MemcachedTracingFilter extends SimpleFilter[Command, Response]
-{
-  def apply(
-    request: Command,
-    service: Service[Command, Response]
-  ) = {
-    Trace.recordRpcname("memcached", request.getClass().getSimpleName())
-    Trace.record(Annotation.ClientSend())
-
-    service(request) onSuccess { _ =>
-      Trace.record(Annotation.ClientRecv())
-    }
-  }
+private class MemcachedTracingFilter extends ClientRequestTracingFilter[Command, Response] {
+  val serviceName = "memcached"
+  def methodName(req: Command): String = req.getClass().getSimpleName()
 }
-
