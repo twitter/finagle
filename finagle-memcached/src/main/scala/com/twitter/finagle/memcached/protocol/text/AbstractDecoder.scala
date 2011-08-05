@@ -32,7 +32,6 @@ abstract class AbstractDecoder extends FrameDecoder {
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    e.getCause.printStackTrace()
     start()
     super.exceptionCaught(ctx, e)
   }

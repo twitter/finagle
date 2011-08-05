@@ -2,6 +2,7 @@ package com.twitter.finagle.channel
 
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Logger, Level}
+import java.net.SocketAddress
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel, Channels,
@@ -46,11 +47,10 @@ private[finagle] class ChannelService[Req, Rep](
       isHealthy = false
     }
 
-    val replyFuture = currentReplyFuture.getAndSet(null)
-    if (replyFuture ne null)
-      replyFuture.updateIfEmpty(message)
-    else  // spurious reply!
-      isHealthy = false
+    Option(currentReplyFuture.getAndSet(null)) match {
+      case Some(f) => f() = message
+      case None => isHealthy = false
+    }
 
     if (!isHealthy && channel.isOpen) {
       // This channel is doomed anyway, so proactively close the
@@ -157,9 +157,24 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
   def make(): Future[Service[Req, Rep]] = {
     val begin = Time.now
 
-    // bootstrap.connect() can throw in certain circumstances (not
-    // all failures are encoded by the returned future).
-    Future { bootstrap.connect() } flatMap { connectFuture =>
+    Future {
+      // We do our own connect (in lieu of bootstrap.connect()) so
+      // that we can establish the service before the connect event.
+      // This eliminates any race conditons.  No events will present
+      // in the pipeline without the ChannelService being there.
+      val addr = bootstrap.getOption("remoteAddress").asInstanceOf[SocketAddress]
+      val pipeline = bootstrap.getPipelineFactory.getPipeline
+      val ch = bootstrap.getFactory.newChannel(pipeline)
+      ch.getConfig.setOptions(bootstrap.getOptions)
+      bootstrap.getOption("localAddress") match {
+        case sa: SocketAddress if sa ne null =>
+          ch.bind(sa)
+        case _ => ()
+      }
+
+      val service = new ChannelService[Req, Rep](ch, this)
+      (ch.connect(addr), service)
+    } flatMap { case (connectFuture, service) =>
       val promise = new Promise[Service[Req, Rep]]
       promise onCancellation {
         // propagate cancellations
@@ -170,7 +185,7 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
         case Ok(channel) =>
           channelLatch.incr()
           connectLatencyStat.add(begin.untilNow.inMilliseconds)
-          prepareChannel(new ChannelService[Req, Rep](channel, this)) proxyTo promise
+          prepareChannel(service) proxyTo promise
 
         case Error(cause) =>
           failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)
