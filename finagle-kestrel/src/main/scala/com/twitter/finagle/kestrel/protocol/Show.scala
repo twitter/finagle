@@ -7,7 +7,7 @@ import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
 import com.twitter.finagle.kestrel.protocol._
 import org.jboss.netty.util.CharsetUtil
-
+import com.twitter.util.Duration
 
 private[kestrel] class ResponseToEncoding extends OneToOneEncoder {
   private[this] val ZERO          = "0"
@@ -48,33 +48,39 @@ private[kestrel] class CommandToEncoding extends OneToOneEncoder {
 
   private[this] val SET           = "set"
 
+  // kestrel supports only 32-bit timeouts
+  private[this] def encodeTimeout(timeout: Option[Duration]) =
+    timeout map { value =>
+      "/t=" + math.min(value.inMilliseconds, Int.MaxValue).toString
+    } getOrElse ""
+
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
     message match {
       case Set(key, expiry, value) =>
         TokensWithData(Seq(SET, key, ZERO, expiry.inSeconds.toString), value)
       case Get(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII)
-        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        key += encodeTimeout(timeout)
         Tokens(Seq(GET, key))
       case Open(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII) + "/open"
-        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        key += encodeTimeout(timeout)
         Tokens(Seq(GET, key))
       case Close(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII) + "/close"
-        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        key += encodeTimeout(timeout)
         Tokens(Seq(GET, key))
       case CloseAndOpen(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII) + "/close/open"
-        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        key += encodeTimeout(timeout)
         Tokens(Seq(GET, key))
       case Abort(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII) + "/abort"
-        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        key += encodeTimeout(timeout)
         Tokens(Seq(GET, key))
       case Peek(queueName, timeout) =>
         var key = queueName.toString(CharsetUtil.US_ASCII) + "/peek"
-        timeout.map { key += "/t=" + _.inMilliseconds.toString }
+        key += encodeTimeout(timeout)
         Tokens(Seq(GET, key))
       case Delete(key) =>
         Tokens(Seq(DELETE, key))

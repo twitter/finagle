@@ -286,11 +286,8 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     val messages = new Broker[ReadMessage]  // todo: buffer?
     val close = new Broker[Unit]
 
-    // kestrel seems to support 32-bit timestamps, so
-    // Duration.MaxValue yields an error.
-    val timeout = Some(Int.MaxValue.milliseconds)
-    val open = Open(queueName, timeout)
-    val closeAndOpen = CloseAndOpen(queueName, timeout)
+    val open = Open(queueName, Some(Duration.MaxValue))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
     val abort = Abort(queueName)
 
     def recv(service: Service[Command, Response], command: GetCommand) {
