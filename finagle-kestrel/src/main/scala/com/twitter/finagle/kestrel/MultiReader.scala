@@ -44,7 +44,7 @@ object MultiReader {
           Offer.choose(queues:_*) { m =>
             messages ! m
             loop()
-           },
+          },
           Offer.choose(errors:_*) { h =>
             underlying -= h
             loop()
