@@ -1,5 +1,8 @@
 package com.twitter.finagle.service
 
+import java.{util => ju}
+import scala.collection.JavaConversions._
+
 import com.twitter.util.{
   Future, Promise, Try, Return, Throw,
   Timer, TimerTask, Time, Duration}
@@ -102,4 +105,13 @@ object Backoff {
 
   def const(start: Duration) =
     Backoff(start)(Function.const(start))
+
+  /**
+   * Convert a {{Stream[Duration]}} into a Java-friendly representation.
+   */
+  def toJava(backoffs: Stream[Duration]): ju.concurrent.Callable[ju.Iterator[Duration]] = {
+    new ju.concurrent.Callable[ju.Iterator[Duration]] {
+      def call() = backoffs.toIterator
+    }
+  }
 }

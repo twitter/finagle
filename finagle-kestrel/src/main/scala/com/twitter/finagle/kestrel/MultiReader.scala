@@ -1,5 +1,8 @@
 package com.twitter.finagle.kestrel
 
+import scala.collection.JavaConversions._
+import _root_.java.{util => ju}
+
 import com.twitter.concurrent.{Offer, Broker}
 
 object AllHandlesDiedException extends Exception
@@ -14,6 +17,13 @@ object AllHandlesDiedException extends Exception
 object MultiReader {
   def apply(clients: Seq[Client], queueName: String): ReadHandle =
     apply(clients map { _.readReliably(queueName) })
+
+  /**
+   * A java friendly interface: we use scala's implicit conversions to
+   * feed in a {{java.util.Iterator<ReadHandle>}}
+   */
+  def apply(handles: ju.Iterator[ReadHandle]): ReadHandle =
+    apply(handles.toSeq)
 
   def apply(handles: Seq[ReadHandle]): ReadHandle = {
     val error = new Broker[Throwable]
