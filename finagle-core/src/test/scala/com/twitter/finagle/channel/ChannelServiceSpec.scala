@@ -1,5 +1,6 @@
 package com.twitter.finagle.channel
 
+import java.net.SocketAddress
 import scala.collection.JavaConversions._
 
 import org.specs.Specification
@@ -192,12 +193,23 @@ object ChannelServiceSpec extends Specification with Mockito {
   }
 
   "ChannelServiceFactory" should {
+    val address = mock[SocketAddress]
     val bootstrap = mock[ClientBootstrap]
     val pipeline = new DefaultChannelPipeline
+    val pipelineFactory = mock[ChannelPipelineFactory]
+    pipelineFactory.getPipeline returns pipeline
+    bootstrap.getPipelineFactory returns pipelineFactory
+    bootstrap.getOption("remoteAddress") returns address
     val channel = mock[Channel]
     channel.getPipeline returns pipeline
+    val channelConfig = mock[ChannelConfig]
+    channel.getConfig returns channelConfig
+    val channelFactory = mock[ChannelFactory]
+    channelFactory.newChannel(any) returns channel
+    bootstrap.getFactory returns channelFactory
+
     val channelFuture = Channels.future(channel)
-    bootstrap.connect() returns channelFuture
+    channel.connect(address) returns channelFuture
 
     val factory = new ChannelServiceFactory[Any, Any](bootstrap, Future.value(_))
 
@@ -208,6 +220,8 @@ object ChannelServiceSpec extends Specification with Mockito {
 
     "close the underlying bootstrap only after all channels are released" in {
       val f = factory.make()
+      there was one(channelFactory).newChannel(pipeline)
+      there was one(channel).connect(address)
       f.isDefined must beFalse
       channelFuture.setSuccess()
       f.isDefined must beTrue
@@ -222,7 +236,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     "propagate bootstrap errors" in {
       val f = factory.make()
       f.isDefined must beFalse
-      there was one(bootstrap).connect()
+      there was one(channel).connect(address)
 
       channelFuture.setFailure(new Exception("oh crap"))
 
@@ -236,7 +250,7 @@ object ChannelServiceSpec extends Specification with Mockito {
 
     "encode bootstrap exceptions" in {
       val e = new ChannelPipelineException("sad panda")
-      bootstrap.connect() throws e
+      channel.connect(address) throws e
 
       val f = factory.make()
       f.isDefined must beTrue
