@@ -1,3 +1,15 @@
+1.8.1		2011/08/05
+
+	* upgrade to netty 3.2.5.Final
+	* kestrel: fix visibility of ResultWithCAS
+	* kestrel: Client.{read,write}, Client.readReliably,
+	MultiReader: suite of kestrel streaming readers (including
+	grabby-hands replacements) using Offer/Broker
+	* kestrel: don't render timeouts > 2^31-1
+	* tracing: fix sampling bug
+	* tracing: trace the kestrel client
+	* quench unecessary error reporting
+
 1.8.0		2011/08/02
 
 	* SSL: perform hostname validation in the client.  this is the
