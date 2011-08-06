@@ -171,7 +171,6 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
           ch.bind(sa)
         case _ => ()
       }
-
       val service = new ChannelService[Req, Rep](ch, this)
       (ch.connect(addr), service)
     } flatMap { case (connectFuture, service) =>
