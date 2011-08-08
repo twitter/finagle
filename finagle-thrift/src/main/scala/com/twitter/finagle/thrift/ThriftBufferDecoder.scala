@@ -9,6 +9,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.replay.{ReplayingDecoder, VoidEnum}
 
 import org.apache.thrift.protocol.{TProtocolFactory, TProtocolUtil, TType}
+import org.apache.thrift.transport.TTransportException
 
 private[thrift] class ThriftBufferDecoder(protocolFactory: TProtocolFactory)
   extends ReplayingDecoder[VoidEnum]
@@ -34,4 +35,16 @@ private[thrift] class ThriftBufferDecoder(protocolFactory: TProtocolFactory)
 
     buffer.readSlice(endIndex - beginIndex)
   }
+
+  override def decodeLast(
+    ctx: ChannelHandlerContext,
+    channel: Channel,
+    buffer: ChannelBuffer,
+    state: VoidEnum
+  ) = try {
+    decode(ctx, channel, buffer, state)
+  } catch {
+    case _: TTransportException => null
+  }
+
 }

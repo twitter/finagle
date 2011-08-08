@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import collection.JavaConversions._
 
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TStruct}
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
@@ -112,6 +112,9 @@ private[thrift] class ThriftServerTracingFilter(
         val buffer = new OutputBuffer
         buffer().writeMessageBegin(
           new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
+        buffer().writeStructBegin(new TStruct())
+        buffer().writeFieldStop()
+        buffer().writeStructEnd()
         buffer().writeMessageEnd()
 
         // Note: currently there are no options, so there's no need
