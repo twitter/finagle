@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 import com.twitter.util.RandomSocket
 import collection.JavaConversions._
 
-object ExternalMemcached {
+object ExternalMemcached { self =>
   class MemcachedBinaryNotFound extends Exception
   private[this] var process: Process = null
   private[this] val forbiddenPorts = 11000.until(11900)
@@ -56,9 +56,9 @@ object ExternalMemcached {
   // Make sure the process is always killed eventually
   Runtime.getRuntime().addShutdownHook(new Thread {
     override def run() {
-      stop()
+      self.stop()
     }
-  })
+  });
 
   assertMemcachedBinaryPresent()
   findAddress()
