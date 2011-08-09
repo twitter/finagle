@@ -132,6 +132,14 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   val commonsStatsProject = project(
     "finagle-commons-stats", "finagle-commons-stats",
     new CommonsStatsProject(_), coreProject)
+    
+  /**
+   * finagle-scrooge contains runtime classes for scrooge generated
+   * thrift structs and services.
+   */
+  val scroogeProject = project(
+    "finagle-scrooge", "finagle-scrooge",
+    new ScroogeProject(_), thriftProject, ostrich4Project)
 
   trait Defaults
     extends ProjectDependencies
@@ -273,4 +281,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val commonsStats    = "com.twitter.common"    % "stats" % "0.0.16"
   }
 
+  class ScroogeProject(info: ProjectInfo) extends StandardProject(info)
+    with Defaults
 }
