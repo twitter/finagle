@@ -139,7 +139,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val scroogeProject = project(
     "finagle-scrooge", "finagle-scrooge",
-    new ScroogeProject(_), thriftProject, ostrich4Project)
+    new ScroogeProject(_), thriftProject)
 
   trait Defaults
     extends ProjectDependencies
