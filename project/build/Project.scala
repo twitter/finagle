@@ -132,7 +132,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   val commonsStatsProject = project(
     "finagle-commons-stats", "finagle-commons-stats",
     new CommonsStatsProject(_), coreProject)
-    
+
   /**
    * finagle-scrooge contains runtime classes for scrooge generated
    * thrift structs and services.
