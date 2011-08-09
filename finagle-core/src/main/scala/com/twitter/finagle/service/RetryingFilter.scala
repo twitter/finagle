@@ -51,7 +51,7 @@ class RetryingFilter[Req, Rep](
   extends SimpleFilter[Req, Rep]
 {
   private[this] val retriesStat = statsReceiver.stat("retries")
-  private[this] val retriesFailedStat = statsReceiver.stat("retries_failed")
+  private[this] val retriesExhaustedStat = statsReceiver.stat("retries_exhausted")
 
   private[this] def dispatch(
     request: Req, service: Service[Req, Rep],
@@ -72,7 +72,7 @@ class RetryingFilter[Req, Rep](
 
           case _ =>
             retriesStat.add(count)
-            retriesFailedStat.add(1)
+            retriesExhaustedStat.add(1)
             replyPromise() = res
         }
       } else {
