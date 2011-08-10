@@ -1,9 +1,12 @@
 package com.twitter.finagle
 
 // Request failures (eg. for request behavior changing brokers.)
-class RequestException             extends Exception
+class RequestException(cause: Throwable) extends Exception(cause) {
+  def this() = this(null)
+}
+
 class TimedoutRequestException     extends RequestException
-class RetryFailureException        extends RequestException
+class RetryFailureException(cause: Throwable)        extends RequestException(cause)
 class CancelledRequestException    extends RequestException
 class TooManyWaitersException      extends RequestException
 class CancelledConnectionException extends RequestException

@@ -1,28 +1,23 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.{MockTimer, RetryFailureException, Service, WriteException}
+import com.twitter.finagle.stats.{StatsReceiver, Stat}
+import com.twitter.util._
 import org.specs.Specification
 import org.specs.mock.Mockito
-
-import com.twitter.util.{Promise, Future, Return, Throw, Try, Time}
-import com.twitter.conversions.time._
-
-import com.twitter.finagle.{Service, WriteException, MockTimer}
-import com.twitter.finagle.stats.{StatsReceiver, Stat}
 
 object RetryingFilterSpec extends Specification with Mockito {
   "RetryingFilter" should {
     val backoffs = Stream(1.second, 2.seconds, 3.seconds)
     val stats = mock[StatsReceiver]
     val retriesStat = mock[Stat]
-    var retriesExhaustedStat = mock[Stat]
     val timer = new MockTimer
     stats.stat("retries") returns retriesStat
-    stats.stat("retries_exhausted") returns retriesExhaustedStat
     val shouldRetry = mock[PartialFunction[Try[Int], Boolean]]
     shouldRetry.isDefinedAt(any) returns true
     shouldRetry(any[Try[Int]]) answers {
-      case Throw(_:WriteException) =>
-        true
+      case Throw(_: WriteException) => true
       case _ => false
     }
     val filter = new RetryingFilter[Int, Int](backoffs, stats, shouldRetry, timer)
@@ -34,7 +29,6 @@ object RetryingFilterSpec extends Specification with Mockito {
       retryingService(123)() must be_==(321)
       there was one(service)(123)
       there was one(retriesStat).add(0)
-      there was no(retriesExhaustedStat).add(1)
     }
 
     "when failed with a WriteException, consult the retry strategy" in Time.withCurrentTimeFrozen { tc =>
@@ -49,7 +43,6 @@ object RetryingFilterSpec extends Specification with Mockito {
 
       there were two(service)(123)
       there was one(retriesStat).add(1)
-      there was no(retriesExhaustedStat).add(1)
       f() must be_==(321)
     }
 
@@ -64,10 +57,9 @@ object RetryingFilterSpec extends Specification with Mockito {
       }
 
       there was one(retriesStat).add(3)
-      there was one(retriesExhaustedStat).add(1)
       f.isDefined must beTrue
       f.isThrow must beTrue
-      f() must throwA(new WriteException(new Exception("i'm exhausted")))
+      f() must throwA(new RetryFailureException(new WriteException(new Exception("i'm exhausted"))))
     }
 
     "when failed with a non-WriteException, fail immediately" in {
@@ -76,14 +68,12 @@ object RetryingFilterSpec extends Specification with Mockito {
       there was one(service)(123)
       timer.tasks must beEmpty
       there was one(retriesStat).add(0)
-      there was no(retriesExhaustedStat).add(1)
     }
 
     "when no retry occurs, no stat update" in {
       service(123) returns Future(321)
       retryingService(123)() must be_==(321)
       there was one(retriesStat).add(0)
-      there was no(retriesExhaustedStat).add(1)
     }
 
     "propagate cancellation" in {
