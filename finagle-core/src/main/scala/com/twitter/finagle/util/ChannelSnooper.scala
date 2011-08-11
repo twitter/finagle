@@ -4,7 +4,7 @@ import java.io.PrintStream
 import java.nio.charset.Charset
 
 import org.jboss.netty.channel._
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandler {
   val name: String
@@ -13,12 +13,12 @@ trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandle
     (new PrintStream(System.out, true, "UTF-8")).println(message)
   }
 
-  def print(id: Integer, indicator: String, message: String) {
+  def print(id: java.lang.Integer, indicator: String, message: String) {
     printer("%08x %6s %s %s".format(id, name, indicator, message))
   }
 
-  val upIndicator = "↑"
-  val downIndicator = "↓"
+  val upIndicator = "^"
+  val downIndicator = "v"
 
   def printUp(ch: Channel, message: String) = print(ch.getId, upIndicator, message)
   def printDown(ch: Channel, message: String) = print(ch.getId, downIndicator, message)
@@ -56,16 +56,19 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
   def dump(printer: (Channel, String) => Unit, ch: Channel, buf: ChannelBuffer) {
     val rawStr = buf.toString(buf.readerIndex, buf.readableBytes, Charset.forName("UTF-8"))
     val str = rawStr.replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n")
+    val asciiStr = str map { c =>
+      if (c >= 32 && c < 128)
+        c
+      else
+        '?'
+    }
 
-    for (i <- 0 until str.length by 60)
-      printer(ch, str.slice(i, i + 60).lines.mkString("\\n"))
+    for (i <- 0 until asciiStr.length by 60)
+      printer(ch, asciiStr.slice(i, i + 60).lines.mkString("\\n"))
   }
 }
 
 class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
-  override val upIndicator = "^"
-  override val downIndicator = "v"
-
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     printUp(ctx.getChannel, e.toString)
     if (e.isInstanceOf[ExceptionEvent])
@@ -82,7 +85,7 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
 
 object ChannelSnooper {
   def apply(name: String)(thePrinter: String => Unit) =
-    new SimpleChannelSnooper(name) {
+    new ChannelBufferSnooper(name) {
       override def printer(message: String) = thePrinter(message)
     }
 
