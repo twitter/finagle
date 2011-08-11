@@ -197,9 +197,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
         <exclude module="jms"/>
         <exclude module="jmxtools"/>
         <exclude module="jmxri"/>
+        <override org="commons-codec" rev="1.5"/>
       </dependencies>
 
-    val commonsZookeeper = "com.twitter.common" % "zookeeper" % "0.0.14"
+    val commonsZookeeper = "com.twitter.common" % "zookeeper" % "0.0.24"
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
