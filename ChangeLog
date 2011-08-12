@@ -1,3 +1,15 @@
+1.8.3		2011/08/12
+
+	* thrift: add a server-side buffered codec; fix tracing issue
+	in buffered codec
+	* http: workaround hole in netty logic to guarantee
+	maxRequestSize
+	* serversets: don't block on ClientBuilder construction
+	* ostrich4: update to ostrich 4.8.2
+	* streaming: reimplement HTTP chunked streaming in terms of
+	offer/broker
+	* kestrel: buffered & merging of ReadHandles
+
 1.8.1		2011/08/05
 
 	* upgrade to netty 3.2.5.Final
