@@ -1220,11 +1220,13 @@ A client can access a cluster, as follows:
 
 ## API Reference Documentation
 
-* [Builders](http://twitter.github.com/finagle/finagle-core/target/doc/main/api/com/twitter/finagle/builder/package.html)
-* [Service](http://twitter.github.com/finagle/finagle-core/target/doc/main/api/com/twitter/finagle/Service.html)
+* [Builders](http://twitter.github.com/finagle/api/finagle-core/com/twitter/finagle/builder/package.html)
+* [Service](http://twitter.github.com/finagle/api/finagle-core/com/twitter/finagle/Service.html)
 * [Future](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Future.html)
-* [Complete Core Project Scaladoc](http://twitter.github.com/finagle/finagle-core/target/doc/main/api/index.html)
+* [Complete Core Project Scaladoc](http://twitter.github.com/finagle/api/finagle-core/)
 * [Complete Util Project Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/)
+
+See the [finagle homepage](http://twitter.github.com/finagle/) for more information.
 
 [Top](#Top)
 
