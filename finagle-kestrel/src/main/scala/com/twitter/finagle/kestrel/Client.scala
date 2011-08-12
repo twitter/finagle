@@ -1,5 +1,6 @@
 package com.twitter.finagle.kestrel
 
+import scala.collection.JavaConversions._
 import _root_.java.util.concurrent.atomic.AtomicBoolean
 import _root_.java.util.logging.{Logger, Level}
 import org.jboss.netty.buffer.ChannelBuffer
@@ -46,11 +47,65 @@ trait ReadHandle {
    * {{ReadClosedException}} when the close has completed.
    */
   def close()
+
+  /**
+   * A copy of this {{ReadHandle}} that is buffered: it will make
+   * available {{howmany}} messages at once, proactively acknowledging
+   * them.  This allows a consumer to process {{howmany}} items in
+   * parallel from one handle.
+   */
+  def buffered(howmany: Int): ReadHandle = {
+    val out = new Broker[ReadMessage]
+    val ack = new Broker[Unit]
+    val closeReq = new Broker[Unit]
+    def loop(nwait: Int, closed: Boolean) {
+      // we're done if we're closed, and
+      // we're not awaiting any acks.
+      if (closed && nwait == 0) {
+        close()
+        return
+      }
+
+      Offer.select(
+        if (nwait < howmany && !closed) {
+          messages { m =>
+            m.ack()
+            out ! m.copy(ack = ack.send(()))
+            loop(nwait + 1, closed)
+          }
+        } else {
+          Offer.never
+        },
+
+        ack.recv { _ =>
+          loop(nwait - 1, closed)
+        },
+
+        closeReq.recv { _ =>
+          loop(nwait, true)
+        }
+      )
+    }
+
+    loop(0, false)
+
+    val underlying = this
+    new ReadHandle {
+      val messages = out.recv
+      // todo: should errors be sequenced
+      // with respect to messages here, or
+      // just (as is now) be propagated
+      // immediately.
+      val error = underlying.error
+      def close() = closeReq ! ()
+    }
+  }
 }
 
-// A convenience constructor using an offer for closing.
-private[kestrel] object ReadHandle {
-  def apply(
+
+object ReadHandle {
+  // A convenience constructor using an offer for closing.
+  private[kestrel] def apply(
     _messages: Offer[ReadMessage],
     _error: Offer[Throwable],
     closeOf: Offer[Unit]
@@ -59,6 +114,23 @@ private[kestrel] object ReadHandle {
     val error = _error
     def close() = closeOf()
   }
+
+  /**
+   * Provide a merged ReadHandle, combining the messages & errors of
+   * the given underlying handles.  Closing this handle will close all
+   * of the underlying ones.
+   */
+  def merged(handles: Seq[ReadHandle]): ReadHandle = new ReadHandle {
+    val messages = Offer.choose(handles map { _.messages } toSeq:_*)
+    val error = Offer.choose(handles map { _.error } toSeq:_*)
+    def close() = handles foreach { _.close() }
+  }
+
+  /**
+   * A java-friendly interface to {{merged}}
+   */
+  def merged(handles: _root_.java.util.Iterator[ReadHandle]): ReadHandle =
+    merged(handles.toSeq)
 }
 
 object Client {
