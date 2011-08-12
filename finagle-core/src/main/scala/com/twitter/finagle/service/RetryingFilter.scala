@@ -66,10 +66,7 @@ class RetryingFilter[Req, Rep](
 
           case _ =>
             retriesStat.add(count)
-            replyPromise() = res match {
-              case Throw(e) => Throw(new RetryFailureException(e))
-              case x => x
-            }
+            replyPromise() = res rescue { case e => Throw(new RetryFailureException(e)) }
         }
       } else {
         retriesStat.add(count)
