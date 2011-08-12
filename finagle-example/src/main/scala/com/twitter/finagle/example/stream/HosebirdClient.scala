@@ -28,7 +28,7 @@ object HosebirdClient {
     val clientFactory: ServiceFactory[HttpRequest, StreamResponse] = ClientBuilder()
       .codec(Stream())
       .hosts(hostAndPort)
-      .connectionTimeout(1.microsecond)
+      .tcpConnectTimeout(1.microsecond)
       .hostConnectionLimit(1)
       .buildFactory()
 
