@@ -325,7 +325,7 @@ Use the Finagle library to implement asynchronous Remote Procedure Call (RPC) cl
 
 Finagle extends the stream-oriented [Netty](http://www.jboss.org/netty) model to provide asynchronous requests and responses for remote procedure calls (RPC). Internally, Finagle manages a service stack to track outstanding requests, responses, and the events related to them. Finagle uses a Netty pipeline to manage connections between the streams underlying request and response messages. The following diagram shows the relationship between your RCP client or server, Finagle, Netty, and Java libraries: 
 
-![Relationship between your RCP client or server, Finagle, Netty, and Java Libraries (doc/FinagleRelationship.png)](https://github.com/twitter/finagle/tree/master/doc/FinagleRelationship.png)
+![Relationship between your RCP client or server, Finagle, Netty, and Java Libraries (doc/FinagleRelationship.png)](https://github.com/twitter/finagle/raw/master/doc/FinagleRelationship.png)
 
 Finagle manages a [Netty pipeline](http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html) for servers built on Finagle RCP services. Netty itself is built on the Java [NIO](http://download.oracle.com/javase/1.5.0/docs/api/java/nio/channels/package-summary.html#package_description) library, which supports asynchronous IO. While an understanding of Netty or NIO might be useful, you can use Finagle without this background information.
 
@@ -402,7 +402,7 @@ Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalizat
 
 In Finagle, RPC servers are built out of a `Service` and zero or more `Filter` objects. You apply filters to the service request after which you execute the service itself:
 
-![Relationship between a service and filters (doc/Filters.png)](https://github.com/twitter/finagle/tree/master/doc/Filters.png)
+![Relationship between a service and filters (doc/Filters.png)](https://github.com/twitter/finagle/raw/master/doc/Filters.png)
 
 Typically, you use a `ServerBuilder` to create your server. A `ServerBuilder` enables you to specify the following general attributes:
 
@@ -725,13 +725,13 @@ Note: You do not need to be concerned with long-running or CPU intensive operati
 
 Consider the following diagram, which shows how a client uses the Finagle event loop: 
 
-![Relationship between your threads and Finagle (doc/ThreadEx.png)](https://github.com/twitter/finagle/tree/master/doc/ThreadEx.png)
+![Relationship between your threads and Finagle (doc/ThreadEx.png)](https://github.com/twitter/finagle/raw/master/doc/ThreadEx.png)
 
 Your threads, which are shown on the left, are allowed to block. When you call a Finagle method or Finagle calls a method for you, it dispatches execution of these methods to its internal threads. Thus, the Finagle event loop and its threads cannot block without degrading the performance of other clients and servers that use the same Finagle instance.
 
 In complex RCP operations, it may be necessary to perform blocking operations. In these cases, you must set up your own thread pool and use `Future` or `FuturePool` objects to execute the blocking operation on your own thread. Consider the following diagram: 
 
-![Handling operations that block (doc/ThreadExNonBlockingServer.png)](https://github.com/twitter/finagle/tree/master/doc/ThreadExNonBlockingServer.png)
+![Handling operations that block (doc/ThreadExNonBlockingServer.png)](https://github.com/twitter/finagle/raw/master/doc/ThreadExNonBlockingServer.png)
 
 In this example, you can use a `FuturePool` object to provide threads for blocking operations outside of Finagle. Finagle can then dispatch the blocking operation to your thread. For more information about `FuturePool` objects, see <a href="#Using Future Pools">Using Future Pools</a>.
 
