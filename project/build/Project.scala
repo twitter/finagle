@@ -13,6 +13,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     
   val reflectionsRepo =
     "reflections.googlecode.com" at "http://reflections.googlecode.com/svn/repo"
+    
+  val codahaleRepo =
+    "repo.codahale.com" at "http://repo.codahale.com"
 
   val twitterRepo = "twitter.com" at "http://maven.twttr.com/"
 
