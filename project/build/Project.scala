@@ -10,10 +10,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
   val nettyRepo =
     "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
-    
+
   val reflectionsRepo =
     "reflections.googlecode.com" at "http://reflections.googlecode.com/svn/repo"
-    
+
   val codahaleRepo =
     "repo.codahale.com" at "http://repo.codahale.com"
 
