@@ -1,5 +1,5 @@
 
-        * core: expose stats on failed retries
+	* core: expose stats on failed retries
 
 1.8.3		2011/08/12
 
