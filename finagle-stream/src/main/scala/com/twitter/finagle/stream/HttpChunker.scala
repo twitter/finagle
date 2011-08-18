@@ -22,6 +22,11 @@ class HttpChunker extends BrokerChannelHandler {
     res: StreamResponse,
     ack: Option[Offer[Try[Unit]]] = None)
   {
+    def close() {
+      res.release()
+      if (ctx.getChannel.isOpen) ctx.getChannel.close()
+      proxyUpstream()
+    }
     Offer.select(
       ack match {
         // if we're awaiting an ack, don't offer to synchronize
@@ -31,9 +36,7 @@ class HttpChunker extends BrokerChannelHandler {
             case Return(_) =>
               write(ctx, res, None)
             case Throw(_) =>
-              res.release()
-              ctx.getChannel.close()
-              proxyUpstream()
+              close()
           }
 
         case None =>
@@ -48,15 +51,17 @@ class HttpChunker extends BrokerChannelHandler {
      res.error { _ =>
        val future = Channels.future(ctx.getChannel)
        Channels.write(ctx, future, new DefaultHttpChunkTrailer)
-       ctx.getChannel.close()
-       proxyUpstream()
+       future {
+         // Close only after we sucesfully write the trailer.
+         // todo: can this be a source of resource leaks?
+         case _ => close()
+       }
      },
 
      upstreamEvent {
        case e@(Closed(_, _) | Disconnected(_, _)) =>
-         res.release()
          e.sendUpstream()
-         proxyUpstream()
+         close()
        case e =>
          e.sendUpstream()
          write(ctx, res)
