@@ -73,8 +73,8 @@ The following server, which is shown in both Scala and Java, responds to a clien
     val server: Server[HttpRequest, HttpResponse] = ServerBuilder()                            // 4
       .codec(Http)
       .bindTo(address)
+      .name("HttpServer")
       .build(service)
-      .name("HttpServer"));
 
 ##### Java HTTP Server Implementation
 
@@ -87,8 +87,8 @@ The following server, which is shown in both Scala and Java, responds to a clien
 
     ServerBuilder.safeBuild(service, ServerBuilder.get()                                       // 4
       .codec(Http.get())
-      .bindTo(new InetSocketAddress("localhost", 10000))                                       // 3
-      .name("HttpServer"));
+      .name("HttpServer")
+      .bindTo(new InetSocketAddress("localhost", 10000)));                                     // 3
 
 
 ##### HTTP Server Code Annotations
@@ -201,7 +201,7 @@ In this Finagle example, the `ThriftServer` object implements the `Hello` servic
       ServerBuilder.get()                                                          
         .name("HelloService")
         .codec(ThriftServerFramedCodecFactory$.MODULE$)
-        .bindTo(new InetSocketAddress(8080));
+        .bindTo(new InetSocketAddress(8080)));
 
 ##### Thrift Server Code Annotations
 
