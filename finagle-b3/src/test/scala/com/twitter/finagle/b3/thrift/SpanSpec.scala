@@ -11,7 +11,7 @@ class SpanSpec extends Specification with Mockito {
       val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
       val span = Span(traceId, Some("service"), Some("name"), Seq(), Map(), Some(Endpoint(123, 123)))
 
-      val tspan = span.toThrift()
+      val tspan = span.toThrift
       tspan.isSetAnnotations mustEqual false
       tspan.isSetService_name mustEqual true
       tspan.isSetName mustEqual true

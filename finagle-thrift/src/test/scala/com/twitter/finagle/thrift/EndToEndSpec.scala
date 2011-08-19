@@ -70,7 +70,7 @@ object EndToEndSpec extends Specification {
         theId.parentId must be_==(Trace.id.spanId)
         theId.traceId must be_==(Trace.id.traceId)
 
-        val now = Time.now()
+        val now = Time.now
 
         // verify the traces.
         {

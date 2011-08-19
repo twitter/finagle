@@ -75,8 +75,8 @@ object DuplexStreamSpec extends Specification {
           }
           Future.Unit
         }
-        (outbound send "hello")()
-        (outbound send "world")()
+        (outbound send "hello")
+        (outbound send "world")
         bufferToString(first()) mustEqual "done"
         count mustEqual 2
       }
