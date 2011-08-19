@@ -143,24 +143,17 @@ object Ssl {
   object OpenSSL {
     type MapOfStrings = java.util.Map[java.lang.String, java.lang.String]
 
-    def classNamed(name: String): Class[_] = {
-      log.info("load '%s'".format(name))
+    private[this] def classNamed(name: String): Class[_] =
       Class.forName(name)
-    }
-
-    val classBase = "org.apache.tomcat.jni."
-    val bufferPoolClass    = classNamed(classBase + "ssl.DirectBufferPool")
-    val bufferPoolCtor     = bufferPoolClass.getConstructor(classOf[Int])
-    val bufferPoolCapacity = 5000.asInstanceOf[AnyRef]
-    // make this configurable -- should realistically be 30k.
-    val bufferPool         = bufferPoolCtor.newInstance(bufferPoolCapacity).asInstanceOf[AnyRef]
-
-    private[this] val defaultCiphers = "AES128-SHA:RC4:AES:!ADH:!aNULL:!DH:!EDH:!PSK:!ECDH:!eNULL:!LOW:!SSLv2:!EXP:!NULL"
 
     // For flagging global initialization of APR and OpenSSL
     private[this] val initializedLibrary = new AtomicBoolean(false)
 
+    private[this] var bufferPool: AnyRef = null
+    private[this] val defaultCiphers = "AES128-SHA:RC4:AES:!ADH:!aNULL:!DH:!EDH:!PSK:!ECDH:!eNULL:!LOW:!SSLv2:!EXP:!NULL"
+
     class Linker {
+      val classBase = "org.apache.tomcat.jni."
       val aprClass = classNamed(classBase + "Library")
       val aprInitMethod = aprClass.getMethod("initialize", classOf[String])
       val sslClass = classNamed(classBase + "SSL")
@@ -176,11 +169,14 @@ object Ssl {
       val sslEngineClass     = classNamed(classBase + "ssl.OpenSSLEngine")
       val sslEngineCtor      = sslEngineClass.getConstructor(contextHolderClass, bufferPoolClass)
 
+      val bufferPoolClass    = classNamed(classBase + "ssl.DirectBufferPool")
+      val bufferPoolCtor     = bufferPoolClass.getConstructor(classOf[Int])
+      val bufferPoolCapacity = 5000.asInstanceOf[AnyRef]
+
       if (initializedLibrary.compareAndSet(false, true)) {
         aprInitMethod.invoke(aprClass, null)
-        log.info("Initialized APR")
         sslInitMethod.invoke(sslClass, null)
-        log.info("Initialized OpenSSL")
+        bufferPool = bufferPoolCtor.newInstance(bufferPoolCapacity).asInstanceOf[AnyRef]
       }
     }
 
@@ -197,8 +193,6 @@ object Ssl {
           return None
         }
 
-      val key = List(certificatePath, keyPath, caPath, ciphers).mkString("-")
-
       def makeContextHolder = {
         val configMap = new java.util.HashMap[java.lang.String, java.lang.String]
         configMap.put("ssl.cert_path", certificatePath)
@@ -209,11 +203,15 @@ object Ssl {
           configMap.put("ssl.ca_path", caPath)
 
         val config = linker.configurationCtor.newInstance(configMap.asInstanceOf[MapOfStrings])
+
+        log.finest("OpenSSL context instantiated for certificate '%s'".format(certificatePath))
+
         linker.contextHolderCtor.newInstance(config.asInstanceOf[AnyRef]).asInstanceOf[AnyRef]
       }
 
+      val key = "%s-%s-%s-%s".format(certificatePath, keyPath, caPath, ciphers)
       val contextHolder = if (contextCacheEnabled)
-        contextHolderCache.getOrElseUpdate(key, makeContextHolder)
+        contextHolderCache.getOrElseUpdate(certificatePath, makeContextHolder)
       else
         makeContextHolder
 
@@ -227,8 +225,6 @@ object Ssl {
     private[this] val contextCache: MutableMap[String, SSLContext] = MutableMap.empty
 
     def server(certificatePath: String, keyPath: String): Option[SSLEngine] = {
-      val key = List(certificatePath, keyPath).mkString("-")
-
       def makeContext: SSLContext = {
         fileMustExist(certificatePath)
         fileMustExist(keyPath)
@@ -237,9 +233,12 @@ object Ssl {
         val kms = PEMEncodedKeyManager(certificatePath, keyPath)
         context.init(kms, null, null)
 
+        log.finest("JSSE context instantiated for certificate '%s'".format(certificatePath))
+
         context
       }
 
+      val key = "%s-%s".format(certificatePath, keyPath)
       val context: SSLContext =
         if (contextCacheEnabled)
           contextCache.getOrElseUpdate(key, makeContext)
@@ -313,8 +312,6 @@ object Ssl {
         throw new RuntimeException("Could not create an SSLEngine")
       }
     }
-
-    log.info("SSL provider for certificate '%s' is %s".format(certificatePath, engine.getClass.getName))
 
     engine
   }
