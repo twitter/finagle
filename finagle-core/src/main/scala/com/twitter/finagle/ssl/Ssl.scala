@@ -160,6 +160,10 @@ object Ssl {
       val sslInitMethod = sslClass.getMethod("initialize", classOf[String])
 
       // OpenSSLEngine-specific configuration classes
+      val bufferPoolClass    = classNamed(classBase + "ssl.DirectBufferPool")
+      val bufferPoolCtor     = bufferPoolClass.getConstructor(classOf[Int])
+      val bufferPoolCapacity = 5000.asInstanceOf[AnyRef]
+
       val configurationClass = classNamed(classBase + "ssl.SSLConfiguration")
       val configurationCtor  = configurationClass.getConstructor(classOf[MapOfStrings])
 
@@ -169,9 +173,6 @@ object Ssl {
       val sslEngineClass     = classNamed(classBase + "ssl.OpenSSLEngine")
       val sslEngineCtor      = sslEngineClass.getConstructor(contextHolderClass, bufferPoolClass)
 
-      val bufferPoolClass    = classNamed(classBase + "ssl.DirectBufferPool")
-      val bufferPoolCtor     = bufferPoolClass.getConstructor(classOf[Int])
-      val bufferPoolCapacity = 5000.asInstanceOf[AnyRef]
 
       if (initializedLibrary.compareAndSet(false, true)) {
         aprInitMethod.invoke(aprClass, null)
@@ -188,7 +189,7 @@ object Ssl {
         if (linker == null)
           linker = new Linker()
       } catch { case e: Exception =>
-        log.warning("APR/OpenSSL could not be loaded: " + e.getMessage())
+        log.warning("APR/OpenSSL could not be loaded: " + e.getClass().getName() + ": " + e.getMessage())
           e.printStackTrace()
           return None
         }
