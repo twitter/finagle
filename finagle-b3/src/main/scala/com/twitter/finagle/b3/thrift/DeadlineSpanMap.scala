@@ -27,7 +27,7 @@ class DeadlineSpanMap(tracer: BigBrotherBirdTracer, deadline: Duration) {
 
         // if this new span isn't triggered by a natural end we
         // send off what we have anyway
-        timer.schedule(deadline) {
+        timer.schedule(deadline.fromNow) {
           remove(traceId) foreach { tracer.logSpan(_) }
         }
 
