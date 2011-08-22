@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
  * Provides a class for specifying a collection of servers.
  * e.g. `finagle-serversets` is an implementation of the Finagle Cluster interface using
  * [[com.twitter.com.zookeeper.ServerSets] (
- * http://twitter.github.com/commons/pants.doc/index.html#com.twitter.common.zookeeper.ServerSet),
+ * http://twitter.github.com/commons/apidocs/#com.twitter.common.zookeeper.ServerSet),
  * {{{
  *   val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
  *   val cluster = new ZookeeperServerSetCluster(serverSet)

@@ -59,7 +59,7 @@ private[thrift] class BigBrotherBirdTracer(
   private[this] val TraceCategory = "b3" // scribe category
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
-  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds)
+  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver)
   private[this] var sampleRate = 0.001f // default sample rate 0.1%. Max is 1, min 0.
 
   /**
@@ -89,7 +89,7 @@ private[thrift] class BigBrotherBirdTracer(
       val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray)
       msgs = msgs :+ new LogEntry().setCategory(TraceCategory).setMessage(serializedBase64Span)
     } catch {
-      case e => statsReceiver.counter("create_log_entries_%s".format(e.toString)).incr()
+      case e => statsReceiver.counter("error_create_log_entries_%s".format(e.toString)).incr()
     }
 
     msgs
@@ -104,7 +104,7 @@ private[thrift] class BigBrotherBirdTracer(
       case ResultCode.TRY_LATER => statsReceiver.counter("log_span_try_later").incr()
       case _ => () /* ignore */
     } onFailure {
-      case e => statsReceiver.counter("log_span_%s".format(e.toString)).incr()
+      case e => statsReceiver.counter("error_log_span_%s".format(e.toString)).incr()
     }
   }
 
