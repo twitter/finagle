@@ -27,9 +27,9 @@ object ChannelServiceSpec extends Specification with Mockito {
     pipeline.attach(channel, sink)
 
     "installs channel handler" in {
-      pipeline.toMap.keySet must haveSize(0)
+      pipeline.toMap.keySet.size() mustEqual 0
       new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
-      pipeline.toMap.keySet must haveSize(1)
+      pipeline.toMap.keySet.size() mustEqual 1
     }
 
     "write requests to the underlying channel" in {
