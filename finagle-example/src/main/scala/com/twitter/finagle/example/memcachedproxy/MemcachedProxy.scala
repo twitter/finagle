@@ -39,7 +39,7 @@ object MemcachedProxy {
       new Socket("localhost", 11211)
     } catch {
       case e: ConnectException =>
-        println("Error: Kestrel must be running on port 22133")
+        println("Error: memcached must be running on port 11211")
         System.exit(1)
     }
 
