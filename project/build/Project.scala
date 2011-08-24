@@ -82,12 +82,19 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new KestrelProject(_), coreProject, memcachedProject)
 
   /**
+   * finagle-http contains an http codec.
+   */
+  val httpProject = project(
+    "finagle-http", "finagle-http",
+    new HttpProject(_), coreProject)
+
+  /**
    * finagle-native contains native code aimed to increase platform fluency
    * and provide capabilities not available in the JVM
    */
   val nativeProject = project(
     "finagle-native", "finagle-native",
-    new NativeProject(_), coreProject)
+    new NativeProject(_), coreProject, httpProject)
 
   /**
    * finagle-stream contains a streaming http codec identical to
@@ -112,7 +119,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   val exampleProject = project(
     "finagle-example", "finagle-example",
     new ExampleProject(_),
-    coreProject, streamProject, thriftProject,
+    coreProject, httpProject, streamProject, thriftProject,
     memcachedProject, kestrelProject)
 
   /**
@@ -121,7 +128,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val stressProject = project(
     "finagle-stress", "finagle-stress",
-    new StressProject(_), coreProject, ostrich4Project, thriftProject)
+    new StressProject(_), coreProject, ostrich4Project, thriftProject, httpProject)
 
   /**
    * finagle-b3 contains bindings for the B3, or BigBrotherBird, tracing
@@ -187,6 +194,16 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
+  }
+
+  class HttpProject(info: ProjectInfo) extends StandardProject(info)
+    with Defaults
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+
+    projectDependencies("util" ~ "util-logging")
+
+    val commonsLang = "commons-lang" % "commons-lang" % "2.6" // for FastDateFormat
   }
 
   class StreamProject(info: ProjectInfo) extends StandardProject(info)
