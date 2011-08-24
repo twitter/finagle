@@ -1,3 +1,6 @@
+X 
+	* http: new http library
+
 1.8.4   2011/08/23
 	* tracing: fixed space leak
 	* ssl: integrate openssl sslengine
