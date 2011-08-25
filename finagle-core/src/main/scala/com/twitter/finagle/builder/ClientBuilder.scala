@@ -48,7 +48,7 @@ package com.twitter.finagle.builder
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
 import java.util.concurrent.{Executors, TimeUnit}
-import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLEngine
 
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
@@ -157,7 +157,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _retries                   : Option[Int]                   = None,
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
-  private val _tls                       : Option[(SSLContext, Option[String])] = None,
+  private val _tls                       : Option[(SSLEngine, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
   private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
@@ -541,11 +541,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
               TimeUnit.MILLISECONDS))
         }
 
-        for ((ctx, hostname) <- config.tls) {
-          val sslEngine = ctx.createSSLEngine()
-          sslEngine.setUseClientMode(true)
-          sslEngine.setEnableSessionCreation(true)
-          val sslHandler = new SslHandler(sslEngine)
+        for ((engine, hostname) <- config.tls) {
+          engine.setUseClientMode(true)
+          engine.setEnableSessionCreation(true)
+          val sslHandler = new SslHandler(engine)
           val verifier = hostname map {
             SslConnectHandler.sessionHostnameVerifier(_) _
           } getOrElse { Function.const(None) _ }

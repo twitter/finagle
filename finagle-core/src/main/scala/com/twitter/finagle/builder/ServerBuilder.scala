@@ -117,28 +117,28 @@ object ServerConfig {
  * A configuration object that represents what shall be built.
  */
 final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
-  private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]   = None,
-  private val _statsReceiver:                   Option[StatsReceiver]                   = None,
-  private val _exceptionReceiver:               Option[ServerExceptionReceiverBuilder]  = None,
-  private val _name:                            Option[String]                          = None,
-  private val _sendBufferSize:                  Option[Int]                             = None,
-  private val _recvBufferSize:                  Option[Int]                             = None,
-  private val _keepAlive:                       Option[Boolean]                         = None,
-  private val _backlog:                         Option[Int]                             = None,
-  private val _bindTo:                          Option[SocketAddress]                   = None,
-  private val _logger:                          Option[Logger]                          = None,
-  private val _tls:                             Option[(String, String)]                = None,
-  private val _startTls:                        Boolean                                 = false,
-  private val _channelFactory:                  ReferenceCountedChannelFactory          = ServerBuilder.defaultChannelFactory,
-  private val _maxConcurrentRequests:           Option[Int]                             = None,
-  private val _healthEventCallback:             HealthEvent => Unit                     = NullHealthEventCallback,
-  private val _hostConnectionMaxIdleTime:       Option[Duration]                        = None,
-  private val _hostConnectionMaxLifeTime:       Option[Duration]                        = None,
-  private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds] = None,
-  private val _requestTimeout:                  Option[Duration]                        = None,
-  private val _readTimeout:                     Option[Duration]                        = None,
-  private val _writeCompletionTimeout:          Option[Duration]                        = None,
-  private val _tracer:                          Tracer                                  = NullTracer)
+  private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]    = None,
+  private val _statsReceiver:                   Option[StatsReceiver]                    = None,
+  private val _exceptionReceiver:               Option[ServerExceptionReceiverBuilder]   = None,
+  private val _name:                            Option[String]                           = None,
+  private val _sendBufferSize:                  Option[Int]                              = None,
+  private val _recvBufferSize:                  Option[Int]                              = None,
+  private val _keepAlive:                       Option[Boolean]                          = None,
+  private val _backlog:                         Option[Int]                              = None,
+  private val _bindTo:                          Option[SocketAddress]                    = None,
+  private val _logger:                          Option[Logger]                           = None,
+  private val _tls:                             Option[(String, String, String, String)] = None,
+  private val _startTls:                        Boolean                                  = false,
+  private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
+  private val _maxConcurrentRequests:           Option[Int]                              = None,
+  private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
+  private val _hostConnectionMaxIdleTime:       Option[Duration]                         = None,
+  private val _hostConnectionMaxLifeTime:       Option[Duration]                         = None,
+  private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]  = None,
+  private val _requestTimeout:                  Option[Duration]                         = None,
+  private val _readTimeout:                     Option[Duration]                         = None,
+  private val _writeCompletionTimeout:          Option[Duration]                         = None,
+  private val _tracer:                          Tracer                                   = NullTracer)
 {
   import ServerConfig._
 
@@ -284,11 +284,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def logger(logger: Logger): This =
     withConfig(_.copy(_logger = Some(logger)))
 
-  def tls(certificatePath: String, keyPath: String): This =
-    withConfig(_.copy(_tls = Some(certificatePath, keyPath)))
+  def tls(certificatePath: String, keyPath: String,
+          caCertificatePath: String = null, ciphers: String = null): This =
+    withConfig(_.copy(_tls = Some(certificatePath, keyPath, caCertificatePath, ciphers)))
 
   def startTls(value: Boolean): This =
-    withConfig(_.copy(_startTls = true))
+    withConfig(_.copy(_startTls = value))
 
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
@@ -441,13 +442,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
-        config.tls foreach { case (certificatePath, keyPath) =>
-          val ctx = Ssl.server(certificatePath, keyPath)
-          val sslEngine = ctx.createSSLEngine()
-          sslEngine.setUseClientMode(false)
-          sslEngine.setEnableSessionCreation(true)
+        config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers) =>
+          val engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers)
+          engine.setUseClientMode(false)
+          engine.setEnableSessionCreation(true)
 
-          pipeline.addFirst("ssl", new SslHandler(sslEngine, config.startTls))
+          pipeline.addFirst("ssl", new SslHandler(engine, config.startTls))
         }
 
         // Serialization keeps the codecs honest.

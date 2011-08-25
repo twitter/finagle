@@ -1,13 +1,14 @@
 package com.twitter.finagle.ssl
 
-import java.util.logging.{Level, Logger}
 import java.io._
-import java.security.{KeyFactory, KeyStore, Security, Provider, PrivateKey}
 import java.security.cert.X509Certificate
 import java.security.cert.{Certificate, CertificateFactory}
 import java.security.spec._
-import javax.net.ssl._
+import java.security.{KeyFactory, KeyStore, Security, Provider, PrivateKey}
 import java.util.Random
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.logging.{Level, Logger}
+import javax.net.ssl._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.{Map => MutableMap}
@@ -15,14 +16,6 @@ import scala.util.control.Breaks._
 
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext, ChannelLocal,
                                 MessageEvent, SimpleChannelHandler}
-
-/**
- * Store the files necessary to configure an SSL
- */
-case class SslServerConfiguration(
-  val certificatePath: String,
-  val keyPath: String)
-
 
 /**
  * Creates KeyManagers for PEM files.
@@ -68,10 +61,10 @@ object PEMEncodedKeyManager {
     buf.toByteArray
   }
 
-  private[this] def readCertAndKey(config: SslServerConfiguration): EncodedCertAndKey =
+  private[this] def readCertAndKey(certificatePath: String, keyPath: String): EncodedCertAndKey =
     new EncodedCertAndKey(
-      readFileToBytes(config.certificatePath),
-      readFileToBytes(config.keyPath))
+      readFileToBytes(certificatePath),
+      readFileToBytes(keyPath))
 
   private[this] def importKeystore(d: EncodedCertAndKey): Array[KeyManager] = {
     val path = privatePath()
@@ -135,189 +128,205 @@ object PEMEncodedKeyManager {
     t
   }
 
-  def apply(config: SslServerConfiguration): Array[KeyManager] =
-    importKeystore(readCertAndKey(config))
+  def apply(certificatePath: String, keyPath: String): Array[KeyManager] =
+    importKeystore(readCertAndKey(certificatePath: String, keyPath: String))
 }
 
 object Ssl {
+  private[this] val contextCacheEnabled = true
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val defaultProtocol = "TLS"
-
-  def isNativeProviderAvailable(): Boolean =
-    try {
-      val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider"
-      Class.forName(name)
-      true
-    } catch {
-      case c: ClassNotFoundException =>
-        false
-    }
-
-  object DefaultJSSEConfig {
-    type StringPredicate = (String) => (Boolean)
-
-    private[this] def filterCipherSuites(ctx: SSLContext,
-                                         filters: Seq[StringPredicate]) {
-      val params = ctx.getDefaultSSLParameters
-      for (filter <- filters)
-        params.setCipherSuites(params.getCipherSuites().filter(filter))
-    }
-
-    private[this] def disableAnonCipherSuites(ctx: SSLContext) {
-      val excludeDHAnon = ((s: String) => s.indexOf("DH_anon") != -1)
-      filterCipherSuites(ctx, Seq(excludeDHAnon))
-    }
-
-    def apply(ctx: SSLContext) {
-      disableAnonCipherSuites(ctx)
-    }
-  }
-
-  object NativeJSSEContextFactory extends ContextFactory {
-    def name() = "Native (Apache Harmony OpenSSL) Provider"
-
-    def context(certificatePath: String, keyPath: String) = {
-      val ctx = SSLContext.getInstance(protocol(), provider())
-      val kms = Array(keyManager(certificatePath, keyPath))
-      ctx.init(kms, null, null)
-      ctx
-    }
-
-    private[this] def provider(): Provider = {
-      val name = "org.apache.harmony.xnet.provider.jsse.JSSEProvider"
-      Class.forName(name).newInstance().asInstanceOf[Provider]
-    }
-
-    private[this] def keyManager(certificatePath: String, keyPath: String): KeyManager = {
-      val name = "org.apache.harmony.xnet.provider.jsse.CertAndKeyPathKeyManager"
-      val constructor = Class.forName(name).getConstructor(classOf[String], classOf[String])
-      constructor.newInstance(certificatePath, keyPath).asInstanceOf[KeyManager]
-    }
-  }
-
-  object DefaultJSSEContextFactory extends ContextFactory {
-    def name() = "JSSE Default Provider"
-
-    def context(certificatePath: String, keyPath: String) = {
-      val ctx = SSLContext.getInstance(protocol())
-      val kms = PEMEncodedKeyManager(new SslServerConfiguration(certificatePath, keyPath))
-      ctx.init(kms, null, null)
-      Ssl.DefaultJSSEConfig(ctx)
-      ctx
-    }
-  }
-
-  trait ContextFactory {
-    def name(): String
-    def context(certificatePath: String, keyPath: String): SSLContext
-  }
-
-  val contextFactories: Seq[ContextFactory] =
-    Seq(NativeJSSEContextFactory, DefaultJSSEContextFactory)
-
-  class NoSuitableSslProvider(message: String) extends Exception(message: String)
 
   private[this] def fileMustExist(path: String) =
     require(new File(path).exists(), "File '%s' does not exist.".format(path))
 
-  private[this] val sslContexts: MutableMap[String, SSLContext] = MutableMap.empty
+  object OpenSSL {
+    type MapOfStrings = java.util.Map[java.lang.String, java.lang.String]
 
-  /**
-   * Get a server context, using the native provider if available.
-   * @param certificatePath The path to the PEM encoded certificate file
-   * @param keyPath The path to the PEM encoded key file corresponding to the certificate
-   * @throws a NoSuitableSslProvider if no provider could be initialized
-   * @returns an SSLContext
-   */
-  def server(certificatePath: String, keyPath: String): SSLContext =
-    synchronized {
-      sslContexts.getOrElseUpdate(certificatePath,
-                                  { mkServer(certificatePath, keyPath) })
-    }
+    private[this] def classNamed(name: String): Class[_] =
+      Class.forName(name)
 
-  private[this] def mkServer(certificatePath: String, keyPath: String): SSLContext = {
-    log.info("Initializing SSL context for cert '%s'".format(certificatePath))
-    fileMustExist(certificatePath)
-    fileMustExist(keyPath)
-    var context: SSLContext = null
+    // For flagging global initialization of APR and OpenSSL
+    private[this] val initializedLibrary = new AtomicBoolean(false)
 
-    for (factory <- contextFactories)
-    if (context == null) {
-      try {
-        context = factory.context(certificatePath, keyPath)
-      } catch {
-        case e: Throwable =>
-          log.log(Level.FINE, "Provider '%s' not suitable".format(factory.name()))
-          log.log(Level.FINEST, e.getMessage, e)
+    private[this] var bufferPool: AnyRef = null
+    private[this] val defaultCiphers = "AES128-SHA:RC4:AES:!ADH:!aNULL:!DH:!EDH:!PSK:!ECDH:!eNULL:!LOW:!SSLv2:!EXP:!NULL"
+
+    class Linker {
+      val classBase = "org.apache.tomcat.jni."
+      val aprClass = classNamed(classBase + "Library")
+      val aprInitMethod = aprClass.getMethod("initialize", classOf[String])
+      val sslClass = classNamed(classBase + "SSL")
+      val sslInitMethod = sslClass.getMethod("initialize", classOf[String])
+
+      // OpenSSLEngine-specific configuration classes
+      val bufferPoolClass    = classNamed(classBase + "ssl.DirectBufferPool")
+      val bufferPoolCtor     = bufferPoolClass.getConstructor(classOf[Int])
+      val bufferPoolCapacity = 5000.asInstanceOf[AnyRef]
+
+      val configurationClass = classNamed(classBase + "ssl.SSLConfiguration")
+      val configurationCtor  = configurationClass.getConstructor(classOf[MapOfStrings])
+
+      val contextHolderClass = classNamed(classBase + "ssl.SSLContextHolder")
+      val contextHolderCtor  = contextHolderClass.getConstructor(configurationClass)
+
+      val sslEngineClass     = classNamed(classBase + "ssl.OpenSSLEngine")
+      val sslEngineCtor      = sslEngineClass.getConstructor(contextHolderClass, bufferPoolClass)
+
+
+      if (initializedLibrary.compareAndSet(false, true)) {
+        aprInitMethod.invoke(aprClass, null)
+        sslInitMethod.invoke(sslClass, null)
+        bufferPool = bufferPoolCtor.newInstance(bufferPoolCapacity).asInstanceOf[AnyRef]
       }
     }
 
-    if (context != null) {
-      return context
-    } else {
-      throw new NoSuitableSslProvider(
-        "No SSL provider was suitable. Tried [%s].".format(
-          contextFactories.map(_.getClass.getName).mkString(", ")))
+    private[this] val contextHolderCache: MutableMap[String, Object] = MutableMap.empty
+    private[this] var linker: Linker = null
+
+    def server(certificatePath: String, keyPath: String, caPath: String, ciphers: String): Option[SSLEngine] = {
+      try {
+        if (linker == null)
+          linker = new Linker()
+      } catch { case e: Exception =>
+        log.warning("APR/OpenSSL could not be loaded: " + e.getClass().getName() + ": " + e.getMessage())
+          e.printStackTrace()
+          return None
+        }
+
+      def makeContextHolder = {
+        val configMap = new java.util.HashMap[java.lang.String, java.lang.String]
+        configMap.put("ssl.cert_path", certificatePath)
+        configMap.put("ssl.key_path", keyPath)
+        configMap.put("ssl.cipher_spec", Option(ciphers).getOrElse { defaultCiphers })
+
+        if (caPath != null)
+          configMap.put("ssl.ca_path", caPath)
+
+        val config = linker.configurationCtor.newInstance(configMap.asInstanceOf[MapOfStrings])
+
+        log.finest("OpenSSL context instantiated for certificate '%s'".format(certificatePath))
+
+        linker.contextHolderCtor.newInstance(config.asInstanceOf[AnyRef]).asInstanceOf[AnyRef]
+      }
+
+      val key = "%s-%s-%s-%s".format(certificatePath, keyPath, caPath, ciphers)
+      val contextHolder = if (contextCacheEnabled)
+        contextHolderCache.getOrElseUpdate(certificatePath, makeContextHolder)
+      else
+        makeContextHolder
+
+      val engine: SSLEngine = linker.sslEngineCtor.newInstance(contextHolder, bufferPool).asInstanceOf[SSLEngine]
+      Some(engine)
     }
   }
 
-  /**
-   * @returns the protocol used to create SSLContext instances
-   */
-  def protocol() = defaultProtocol
+  object JSSE {
+    private[this] def protocol() = defaultProtocol
+    private[this] val contextCache: MutableMap[String, SSLContext] = MutableMap.empty
+
+    def server(certificatePath: String, keyPath: String): Option[SSLEngine] = {
+      def makeContext: SSLContext = {
+        fileMustExist(certificatePath)
+        fileMustExist(keyPath)
+
+        val context = SSLContext.getInstance(protocol())
+        val kms = PEMEncodedKeyManager(certificatePath, keyPath)
+        context.init(kms, null, null)
+
+        log.finest("JSSE context instantiated for certificate '%s'".format(certificatePath))
+
+        context
+      }
+
+      val key = "%s-%s".format(certificatePath, keyPath)
+      val context: SSLContext =
+        if (contextCacheEnabled)
+          contextCache.getOrElseUpdate(key, makeContext)
+        else
+          makeContext
 
 
-  /**
-   * @returns an SSLContext provisioned to be a client
-   */
-  private[this] def clientContext =
-    SSLContext.getInstance(protocol())
+      Some(context.createSSLEngine())
+    }
 
-  /**
-   * Create a client. Always uses the default Sun JSSE implementation.
-   */
-  def client(): SSLContext = {
-    val ctx = clientContext
-    ctx.init(null, null, null)
-    DefaultJSSEConfig(ctx)
-    ctx
+    /**
+     * @returns the protocol used to create SSLContext instances
+     */
+
+    /**
+     * A trust manager that does not validate anything
+     */
+    private[this] class IgnorantTrustManager extends X509TrustManager {
+      def getAcceptedIssuers(): Array[X509Certificate] =
+        new Array[X509Certificate](0)
+
+      def checkClientTrusted(certs: Array[X509Certificate],
+                             authType: String) {
+        // Do nothing.
+      }
+
+      def checkServerTrusted(certs: Array[X509Certificate],
+                             authType: String) {
+        // Do nothing.
+      }
+    }
+
+    /**
+     * @returns a trust manager chain that does not validate certificates
+     */
+    private[this] def trustAllCertificates(): Array[TrustManager] =
+      Array(new IgnorantTrustManager)
+
+    private[this] def clientContext =
+      SSLContext.getInstance(protocol())
+
+    private[this] def client(trustManagers: Array[TrustManager]): SSLEngine = {
+      val ctx = clientContext
+      ctx.init(null, trustManagers, null)
+      ctx.createSSLEngine()
+    }
+
+    def client(): SSLEngine = client(null)
+    def clientWithoutCertificateValidation(): SSLEngine = client(trustAllCertificates())
   }
 
   /**
-   * Create a client with a trust manager that does not validate certificates.
+   * Get a server engine, using the native OpenSSL provider if available.
    *
-   * Obviously, this is insecure, but is included as it is useful for testing.
+   * @param certificatePath The path to the PEM encoded certificate file
+   * @param keyPath The path to the PEM encoded key file corresponding to the certificate
+   * @param caCertPath The path to the optional PEM encoded CA certificate (use only for OpenSSL)
+   * @param cipherSpec The cipher spec (use only for OpenSSL)
+   * @throws RuntimeException if no provider could be initialized
+   * @returns an SSLEngine
    */
-  def clientWithoutCertificateValidation(): SSLContext = {
-    val ctx = clientContext
-    ctx.init(null, trustAllCertificates(), null)
-    DefaultJSSEConfig(ctx)
-    ctx
-  }
+  def server(certificatePath: String, keyPath: String, caCertPath: String, ciphers: String): SSLEngine = {
+    val engine = OpenSSL.server(certificatePath, keyPath, caCertPath, ciphers).getOrElse {
+      if (caCertPath != null)
+        throw new RuntimeException("'CA Certificate' parameter has no effect; unsupported with JSSE")
 
-  /**
-   * A trust manager that does not validate anything
-   */
-  private[this] class IgnorantTrustManager extends X509TrustManager {
-    def getAcceptedIssuers(): Array[X509Certificate] =
-      new Array[X509Certificate](0)
+      if (ciphers != null)
+        throw new RuntimeException("'Ciphers' parameter has no effect; unsupported with JSSE")
 
-    def checkClientTrusted(certs: Array[X509Certificate],
-                           authType: String) {
-      // Do nothing.
+      JSSE.server(certificatePath, keyPath).getOrElse {
+        throw new RuntimeException("Could not create an SSLEngine")
+      }
     }
 
-    def checkServerTrusted(certs: Array[X509Certificate],
-                           authType: String) {
-      // Do nothing.
-    }
+    engine
   }
 
+
   /**
-   * @returns a trust manager chain that does not validate certificates
+   * Get a client engine
    */
-  private[this] def trustAllCertificates(): Array[TrustManager] =
-    Array(new IgnorantTrustManager)
+  def client(): SSLEngine = JSSE.client()
+
+  /**
+   * Get a client engine without certificate validation
+   */
+  def clientWithoutCertificateValidation(): SSLEngine = JSSE.clientWithoutCertificateValidation()
 }
 
 object TemporaryDirectory {

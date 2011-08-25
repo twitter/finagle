@@ -5,6 +5,7 @@ import org.specs.mock.Mockito
 import com.twitter.finagle.tracing.{TraceId, SpanId}
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.Timer
+import com.twitter.finagle.stats.NullStatsReceiver
 
 class DeadlineSpanMapSpec extends Specification with Mockito {
 
@@ -12,7 +13,7 @@ class DeadlineSpanMapSpec extends Specification with Mockito {
     "expire and log spans" in {
       val tracer = mock[BigBrotherBirdTracer]
       Timer.default.acquire()
-      val map = new DeadlineSpanMap(tracer, 1.milliseconds)
+      val map = new DeadlineSpanMap(tracer, 1.milliseconds, NullStatsReceiver)
 
       val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
       val f = { span: Span =>
