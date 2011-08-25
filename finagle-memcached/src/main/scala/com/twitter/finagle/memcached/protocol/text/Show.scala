@@ -28,7 +28,7 @@ class ResponseToEncoding extends OneToOneEncoder {
       val buffer = ChannelBuffers.dynamicBuffer(100 * values.size)
       val tokensWithData = values map {
         case Value(key, value, Some(casUnique)) =>
-          TokensWithData(Seq(VALUE, key, ZERO, casUnique.toString), value)
+          TokensWithData(Seq(VALUE, key, ZERO), value, Some(casUnique))
         case Value(key, value, None) =>
           TokensWithData(Seq(VALUE, key, ZERO), value)
       }
