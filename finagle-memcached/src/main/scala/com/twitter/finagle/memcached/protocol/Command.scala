@@ -24,3 +24,5 @@ case class Gets(keys: Seq[ChannelBuffer])                                       
 case class Delete(key: ChannelBuffer)                                                 extends Command
 case class Incr(key: ChannelBuffer, value: Long)                                       extends ArithmeticCommand(key, value)
 case class Decr(key: ChannelBuffer, value: Long)                                       extends ArithmeticCommand(key, -value)
+
+case class Quit() extends Command

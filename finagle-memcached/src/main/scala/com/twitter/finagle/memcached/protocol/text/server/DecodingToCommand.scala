@@ -24,6 +24,7 @@ object DecodingToCommand {
   private val DELETE  = copiedBuffer("delete" .getBytes)
   private val INCR    = copiedBuffer("incr"   .getBytes)
   private val DECR    = copiedBuffer("decr"   .getBytes)
+  private val QUIT    = copiedBuffer("quit"   .getBytes)
 }
 
 abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
@@ -38,7 +39,11 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
   protected def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer): C
 
   protected def validateStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
-    (tokens(0), tokens(1).toInt, tokens(2).toInt.seconds.fromNow, data)
+    val expiry = tokens(2).toInt match {
+      case 0 => 0.seconds.afterEpoch
+      case n: Int => n.seconds.fromNow
+    }
+    (tokens(0), tokens(1).toInt, expiry, data)
   }
 
   protected def validateDeleteCommand(tokens: Seq[ChannelBuffer]) = {
@@ -71,7 +76,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
       case REPLACE   => tupled(Replace)(validateStorageCommand(args, data))
       case APPEND    => tupled(Append)(validateStorageCommand(args, data))
       case PREPEND   => tupled(Prepend)(validateStorageCommand(args, data))
-      case _         => throw new NonexistentCommand(commandName.toString)
+      case _         => throw new NonexistentCommand(commandName.toString(CharsetUtil.UTF_8))
     }
   }
 
@@ -84,7 +89,8 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
       case DELETE  => Delete(validateDeleteCommand(args))
       case INCR    => tupled(Incr)(validateArithmeticCommand(args))
       case DECR    => tupled(Decr)(validateArithmeticCommand(args))
-      case _       => throw new NonexistentCommand(commandName.toString)
+      case QUIT    => Quit()
+      case _       => throw new NonexistentCommand(commandName.toString(CharsetUtil.UTF_8))
     }
   }
 }
