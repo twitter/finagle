@@ -38,7 +38,11 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
   protected def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer): C
 
   protected def validateStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
-    (tokens(0), tokens(1).toInt, tokens(2).toInt.seconds.fromNow, data)
+    val expiry = tokens(2).toInt match {
+      case 0 => 0.seconds.afterEpoch
+      case n: Int => n.seconds.fromNow
+    }
+    (tokens(0), tokens(1).toInt, expiry, data)
   }
 
   protected def validateDeleteCommand(tokens: Seq[ChannelBuffer]) = {
