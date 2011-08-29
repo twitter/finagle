@@ -220,6 +220,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
         <exclude module="jms"/>
         <exclude module="jmxtools"/>
         <exclude module="jmxri"/>
+        <exclude module="google-collections"/> // is subset of guava, which is also included
         <override org="commons-codec" rev="1.5"/>
       </dependencies>
 
