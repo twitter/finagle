@@ -1,7 +1,9 @@
-X 
+1.8.5		2011/08/29
+
 	* http: new http library
 
-1.8.4   2011/08/23
+1.8.4		2011/08/23
+
 	* tracing: fixed space leak
 	* ssl: integrate openssl sslengine
 	* thrift: update to sbt-thrift 2.0.1
