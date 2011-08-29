@@ -2,7 +2,7 @@ package com.twitter.finagle.util
 
 import java.net.InetSocketAddress
 
-private[finagle] object InetSocketAddressUtil {
+object InetSocketAddressUtil {
   /**
    * Parses a comma or space-delimited string of hostname and port pairs. For example,
    *

@@ -163,7 +163,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val maxConcurrentRequests           = _maxConcurrentRequests
   val healthEventCallback             = _healthEventCallback
   val hostConnectionMaxIdleTime       = _hostConnectionMaxIdleTime
-  val hostConnectionMaxLifeTime       = _hostConnectionMaxIdleTime
+  val hostConnectionMaxLifeTime       = _hostConnectionMaxLifeTime
   val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
   val requestTimeout                  = _requestTimeout
   val readTimeout                     = _readTimeout
