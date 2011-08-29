@@ -31,7 +31,7 @@ object ProxySpec extends Specification {
 
     doBefore {
       ExternalMemcached.start();
-      Thread.sleep(550) // On my box the 100ms sleep wasn't long enough
+      Thread.sleep(150) // On my box the 100ms sleep wasn't long enough
       proxyClient = ClientBuilder()
         .hosts(Seq(ExternalMemcached.address.get))
         .codec(Memcached())

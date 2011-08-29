@@ -103,8 +103,6 @@ class Interpreter(map: AtomicMap[ChannelBuffer, ChannelBuffer]) {
         map.lock(key) { data =>
           apply(Incr(key, -value))
         }
-      case Quit() =>
-        NoOp()
     }
   }
 }
