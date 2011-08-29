@@ -50,10 +50,10 @@ object ProxySpec extends Specification {
     }
 
     doAfter {
-      externalClient.release
+      externalClient.release()
       server.close(0.seconds)
-      proxyService.release
-      proxyClient.release
+      proxyService.release()
+      proxyClient.release()
       ExternalMemcached.stop()
     }
 
