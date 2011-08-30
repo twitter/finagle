@@ -9,6 +9,7 @@ case class NotStored()                    extends Response
 case class Exists()                       extends Response
 case class Deleted()                      extends Response
 case class Error(cause: Exception)        extends Response
+case class NoOp()                         extends Response
 
 case class Values(values: Seq[Value]) extends Response
 case class Number(value: Long)         extends Response

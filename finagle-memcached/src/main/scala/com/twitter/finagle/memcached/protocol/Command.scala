@@ -18,9 +18,11 @@ case class Prepend(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelB
 case class Cas(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer)
   extends StorageCommand(key, flags, expiry, value)
 
-case class Get(keys: Seq[ChannelBuffer])                                              extends RetrievalCommand(keys)
-case class Gets(keys: Seq[ChannelBuffer])                                             extends RetrievalCommand(keys)
+case class Get(keys: Seq[ChannelBuffer])                                               extends RetrievalCommand(keys)
+case class Gets(keys: Seq[ChannelBuffer])                                              extends RetrievalCommand(keys)
 
-case class Delete(key: ChannelBuffer)                                                 extends Command
+case class Delete(key: ChannelBuffer)                                                  extends Command
 case class Incr(key: ChannelBuffer, value: Long)                                       extends ArithmeticCommand(key, value)
 case class Decr(key: ChannelBuffer, value: Long)                                       extends ArithmeticCommand(key, -value)
+
+case class Quit()                                                                      extends Command
