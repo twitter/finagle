@@ -35,16 +35,20 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._
 
   protected def parseResponse(tokens: Seq[ChannelBuffer]) = {
-    tokens.head match {
-      case NOT_FOUND    => NotFound()
-      case STORED       => Stored()
-      case NOT_STORED   => NotStored()
-      case EXISTS       => Exists()
-      case DELETED      => Deleted()
-      case ERROR        => Error(new NonexistentCommand(""))
-      case CLIENT_ERROR => Error(new ClientError(""))
-      case SERVER_ERROR => Error(new ServerError(""))
-      case ds         => Number(ds.toLong)
+    tokens.length match {
+      case 0 => NoOp()
+      case n =>
+        tokens.head match {
+          case NOT_FOUND    => NotFound()
+          case STORED       => Stored()
+          case NOT_STORED   => NotStored()
+          case EXISTS       => Exists()
+          case DELETED      => Deleted()
+          case ERROR        => Error(new NonexistentCommand(""))
+          case CLIENT_ERROR => Error(new ClientError(""))
+          case SERVER_ERROR => Error(new ServerError(""))
+          case ds           => Number(ds.toLong)
+        }
     }
   }
 

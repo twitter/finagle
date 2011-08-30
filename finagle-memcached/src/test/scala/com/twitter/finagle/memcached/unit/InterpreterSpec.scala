@@ -21,5 +21,9 @@ class InterpreterSpec extends Specification {
       interpreter(Set(key, 0, Time.epoch, value))
       interpreter(Get(Seq(key))) mustEqual Values(Seq(Value(key, value)))
     }
+
+    "quit" in {
+      interpreter(Quit()) mustEqual NoOp()
+    }
   }
 }

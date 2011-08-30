@@ -44,7 +44,7 @@ object InterpreterServiceSpec extends Specification {
 
     "quit" in {
       val result = client(Quit())
-      client.isAvailable must beFalse
+      result() mustEqual NoOp()
     }
 
   }
