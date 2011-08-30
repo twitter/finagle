@@ -180,6 +180,16 @@ trait Client {
     cas(key, 0, Time.epoch, value, casUnique)
 
   /**
+   * Send a quit command to the server. Alternative to release, for
+   * protocol compatability.
+   * @return none
+   */
+  def quit(): Future[Void] = {
+    release()
+    Future.void
+  }
+
+  /**
    * release the underlying service(s)
    */
   def release(): Unit
