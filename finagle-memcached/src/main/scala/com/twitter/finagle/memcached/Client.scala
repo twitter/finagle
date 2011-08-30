@@ -184,10 +184,7 @@ trait Client {
    * protocol compatability.
    * @return none
    */
-  def quit(): Future[Void] = {
-    release()
-    Future.void
-  }
+  def quit(): Future[Unit] = Future(release())
 
   /**
    * release the underlying service(s)
