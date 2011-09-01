@@ -266,11 +266,13 @@ abstract class Message extends HttpMessage {
 
 
 object Message {
-  val MediaTypeJson      = "application/json"
-  val MediaTypeWwwForm   = "application/x-www-form-urlencoded"
-  val CharsetUtf8        = "charset=utf-8"
-  val ContentTypeJson    = MediaTypeJson + ";" + CharsetUtf8
-  val ContentTypeWwwFrom = MediaTypeWwwForm + ";" + CharsetUtf8
+  val MediaTypeJson         = "application/json"
+  val MediaTypeJavascript   = "application/javascript"
+  val MediaTypeWwwForm      = "application/x-www-form-urlencoded"
+  val CharsetUtf8           = "charset=utf-8"
+  val ContentTypeJson       = MediaTypeJson + ";" + CharsetUtf8
+  val ContentTypeJavascript = MediaTypeJavascript + ";" + CharsetUtf8
+  val ContentTypeWwwFrom    = MediaTypeWwwForm + ";" + CharsetUtf8
 
   private val HttpDateFormat = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss",
                                                           TimeZone.getTimeZone("GMT"))

@@ -20,13 +20,15 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
     getCallback(request) match {
       case Some(callback) =>
         service(request) onSuccess { response =>
-          if (response.mediaType == Some(Message.MediaTypeJson))
+          if (response.mediaType == Some(Message.MediaTypeJson)) {
             response.content =
               ChannelBuffers.wrappedBuffer(
                 ChannelBuffers.wrappedBuffer(callback.getBytes("UTF-8")),
                 ChannelBuffers.wrappedBuffer(JsonpFilter.LeftParen),
                 response.getContent,
                 ChannelBuffers.wrappedBuffer(JsonpFilter.RightParenSemicolon))
+            response.mediaType = Message.MediaTypeJavascript
+          }
         }
       case None =>
         service(request)
@@ -34,6 +36,7 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
   }
 
   def getCallback(request: Request): Option[String] = {
+    // Ignore HEAD, though in practice this should be behind the HeadFilter
     if (request.method != Method.Head)
       request.params.get("callback") flatMap { callback =>
         val sanitizedCallback = JsonpFilter.SanitizerRegex.replaceAllIn(callback, "")
