@@ -39,6 +39,13 @@ object InterpreterServiceSpec extends Specification {
         r <- client(Get(Seq(key)))
       } yield r
       result(1.second) mustEqual Values(Seq(Value(key, value)))
+      client.isAvailable must beTrue
     }
+
+    "quit" in {
+      val result = client(Quit())
+      result() mustEqual NoOp()
+    }
+
   }
 }

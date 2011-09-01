@@ -10,6 +10,7 @@ import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceClosedException
 import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
 import com.twitter.util.RandomSocket
 
@@ -65,6 +66,13 @@ object ProxySpec extends Specification {
       foo must beSome
       foo.get.toString(CharsetUtil.UTF_8) mustEqual "bar"
     }
+
+    "quit is supported" in {
+      externalClient.get("foo")() // do nothing
+      externalClient.quit()()
+      externalClient.get("foo")() must throwA[ServiceClosedException]
+    }
+
   }
 
 }
