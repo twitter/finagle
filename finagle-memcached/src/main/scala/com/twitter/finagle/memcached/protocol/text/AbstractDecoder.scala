@@ -45,7 +45,7 @@ abstract class AbstractDecoder extends FrameDecoder {
       buffer.skipBytes(frameLength + DelimiterLength)
 
       val tokens = frame.split
-      val bytesNeeded = needsData(tokens)
+      val bytesNeeded = if (tokens.length > 0) needsData(tokens) else None
       if (bytesNeeded.isDefined) {
         awaitData(tokens, bytesNeeded.get)
         needMoreData
