@@ -246,7 +246,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
-    val ostrich = "com.twitter" % "ostrich" % "4.8.2"
+    val ostrich = "com.twitter" % "ostrich" % "4.9.0"
   }
 
   class NativeProject(info: ProjectInfo) extends StandardProject(info)
