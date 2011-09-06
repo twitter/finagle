@@ -66,7 +66,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy}
+import com.twitter.finagle.loadbalancer.{
+  LoadBalancedFactory, LeastQueuedStrategy,
+  HeapBalancer}
 import com.twitter.finagle.ssl.{Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
@@ -682,14 +684,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
-    var factory: ServiceFactory[Req, Rep] = new LoadBalancedFactory(
-      hostFactories,
-      statsReceiver.scope("loadbalancer"),
-      new LeastQueuedStrategy(statsReceiver.scope("least_queued_strategy")))
-    {
-      override def close() = {
-        super.close()
-        Timer.default.stop()
+    var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
+      new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
+    } else {
+      new LoadBalancedFactory(
+        hostFactories,
+        statsReceiver.scope("loadbalancer"),
+        new LeastQueuedStrategy(statsReceiver.scope("least_queued_strategy")))
+      {
+        override def close() = {
+          super.close()
+          Timer.default.stop()
+        }
       }
     }
 

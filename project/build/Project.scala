@@ -220,6 +220,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
         <exclude module="jms"/>
         <exclude module="jmxtools"/>
         <exclude module="jmxri"/>
+        <exclude module="google-collections"/> // is subset of guava, which is also included
         <override org="commons-codec" rev="1.5"/>
       </dependencies>
 
@@ -245,7 +246,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
-    val ostrich = "com.twitter" % "ostrich" % "4.8.2"
+    val ostrich = "com.twitter" % "ostrich" % "4.9.0"
   }
 
   class NativeProject(info: ProjectInfo) extends StandardProject(info)

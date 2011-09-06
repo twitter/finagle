@@ -25,7 +25,7 @@ object JsonpFilterSpec extends Specification {
       val request = Request("/test.json", "callback" -> "mycallback")
 
       val response = JsonpFilter(request, dummyService)()
-      response.contentType   must_== Some("application/json;charset=utf-8")
+      response.contentType   must_== Some("application/javascript;charset=utf-8")
       response.contentString must_== "mycallback({});"
     }
 
@@ -35,6 +35,7 @@ object JsonpFilterSpec extends Specification {
       val response = JsonpFilter(request, dummyService)()
       response.mediaType     must_== Some("not_json")
       response.contentString must_== "{}"
+      response.contentType   must_== Some("not_json;charset=utf-8")
     }
 
     "ignore HEAD" in {
