@@ -5,6 +5,7 @@ import org.specs.mock.Mockito
 
 import com.twitter.util.Time
 import com.twitter.conversions.time._
+import java.nio.ByteBuffer
 
 object TraceSpec extends Specification with Mockito {
   "Trace" should {
@@ -109,6 +110,15 @@ object TraceSpec extends Specification with Mockito {
         Trace.record(rec0)
         there was one(tracer1).record(rec0)
         there was no(tracer2).record(rec0)
+      }
+
+      "record binary annotations" in Time.withCurrentTimeFrozen { tc  =>
+        Trace.pushTracer(tracer1)
+        Trace.pushId(id0)
+        val rec1 = Record(id0, Time.now,
+          Annotation.BinaryAnnotation("key", ByteBuffer.wrap("test".getBytes)))
+        Trace.recordBinary("key", "test")
+        there was one(tracer1).record(rec1)
       }
 
       "report to each unique tracer exactly once" in {

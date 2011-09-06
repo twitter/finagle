@@ -168,4 +168,8 @@ object Trace {
   def recordBinary(key: String, value: ByteBuffer) {
     record(Annotation.BinaryAnnotation(key, value))
   }
+
+  def recordBinary(key: String, value: String) {
+    record(Annotation.BinaryAnnotation(key, ByteBuffer.wrap(value.getBytes)))
+  }
 }
