@@ -76,6 +76,14 @@ abstract class Request extends Message with HttpRequestProxy {
   def getParam(name: String, default: String): String =
     params.get(name).getOrElse(default)
 
+  /** Get Short param.  Returns value or 0. */
+  def getShortParam(name: String): Short =
+    params.getShortOrElse(name, 0)
+
+  /** Get Short param.  Returns value or default. */
+  def getShortParam(name: String, default: Short): Short =
+    params.getShortOrElse(name, default)
+
   /** Get Int param.  Returns value or 0. */
   def getIntParam(name: String): Int =
     params.getIntOrElse(name, 0)

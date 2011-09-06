@@ -9,7 +9,24 @@ object StringUtil {
   private val SomeIntRegex = """\A\s*(-?\d+).*\Z""".r
 
   /**
-   * Convert s to an Integer liberally: initial whitespace and zeros are
+   * Convert s to a Int liberally: initial whitespace and zeros are
+   * skipped, non-digits after the number are ignored, and the default is 0.
+   */
+  def toSomeShort(s: String): Short = {
+    SomeIntRegex.findFirstMatchIn(s) match {
+      case Some(sMatch) =>
+        try {
+          sMatch.group(1).toShort
+        } catch {
+          case e: NumberFormatException => 0
+        }
+      case None =>
+        0
+    }
+  }
+
+  /**
+   * Convert s to an Int liberally: initial whitespace and zeros are
    * skipped, non-digits after the number are ignored, and the default is 0.
    */
   def toSomeInt(s: String): Int = {

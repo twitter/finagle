@@ -59,29 +59,37 @@ class ParamMap(val request: Request)
   def getOrElse(name: String, default: String): String =
     get(name).getOrElse(default)
 
+  /** Get Short value.  Uses forgiving StringUtil.toSomeShort to parse. */
+  def getShort(name: String): Option[Short] =
+    get(name) map { StringUtil.toSomeShort(_) }
+
+  /** Get Short value or default.  Equivalent to getShort(name).getOrElse(default). */
+  def getShortOrElse(name: String, default: Short): Short =
+    getShort(name) getOrElse default
+
   /** Get Int value.  Uses forgiving StringUtil.toSomeInt to parse. */
   def getInt(name: String): Option[Int] =
-    get(name).map { StringUtil.toSomeInt(_) }
+    get(name) map { StringUtil.toSomeInt(_) }
 
   /** Get Int value or default.  Equivalent to getInt(name).getOrElse(default). */
-  def getIntOrElse(name: String, default: Int=0): Int =
-    getInt(name).getOrElse(default)
+  def getIntOrElse(name: String, default: Int): Int =
+    getInt(name) getOrElse default
 
   /** Get Long value.  Uses forgiving StringUtil.toLong to parse. */
   def getLong(name: String): Option[Long] =
-    get(name).map { StringUtil.toSomeLong(_) }
+    get(name) map { StringUtil.toSomeLong(_) }
 
   /** Get Long value or default.  Equivalent to getLong(name).getOrElse(default). */
-  def getLongOrElse(name: String, default: Long=0L): Long =
-    getLong(name).getOrElse(default)
+  def getLongOrElse(name: String, default: Long): Long =
+    getLong(name) getOrElse default
 
   /** Get Boolean value.  True is "1" or "true", false is all other values. */
   def getBoolean(name: String): Option[Boolean] =
     get(name) map { _.toLowerCase } map { v => v == "1" || v == "t" || v == "true" }
 
   /** Get Boolean value or default. Equivalent to getBoolean(name).getOrElse(default). */
-  def getBooleanOrElse(name: String, default: Boolean=false): Boolean =
-    getBoolean(name).getOrElse(default)
+  def getBooleanOrElse(name: String, default: Boolean): Boolean =
+    getBoolean(name) getOrElse default
 
   def getAll(name: String): Iterable[String] =
     jgetAll(postParams, name) ++ jgetAll(getParams, name)
@@ -90,12 +98,12 @@ class ParamMap(val request: Request)
     jiterator(postParams) ++ jiterator(getParams)
 
   def +[B >: String](kv: (String, B)): Map[String, B] =
-    Map[String, B]() ++ iterator + kv
+    Map.empty ++ iterator + kv
 
   def -(name: String): Map[String, String] =
-    Map[String, String]() ++ iterator - name
+    Map.empty ++ iterator - name
 
-  def empty = Map[String, String]()
+  def empty = Map.empty
 
   override def toString = {
     val encoder = new QueryStringEncoder("", Charset.forName("utf-8"))
@@ -106,40 +114,44 @@ class ParamMap(val request: Request)
   }
 
   // Get value from JMap, which might be null
-  private def jget(params: JMap[String, JList[String]], name: String): Option[String] =
-    if (params ne null) {
-      val values = params.get(name)
-      if (values ne null) {
-        if (!values.isEmpty)
-          Some(values.get(0))
-        else
-          None
-      } else
-        None
-    } else
+  private def jget(params: JMap[String, JList[String]], name: String): Option[String] = {
+    if (params == null) {
+      return None
+    }
+    val values = params.get(name)
+    if (values == null) {
+      return None
+    }
+    if (!values.isEmpty) {
+      Some(values.get(0))
+    } else {
       None
+    }
+  }
 
   // Get values from JMap, which might be null
-  private def jgetAll(params: JMap[String, JList[String]], name: String): Iterable[String] =
-    if (params ne null) {
-      val values = params.get(name)
-      if (values ne null)
-        values
-      else
-        Nil
-    } else
+  private def jgetAll(params: JMap[String, JList[String]], name: String): Iterable[String] = {
+    if (params == null) {
+      return None
+    }
+    val values = params.get(name)
+    if (values != null) {
+      values
+    } else {
       Nil
+    }
+  }
 
   // Get iterable for JMap, which might be null
   private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] =
-    if (params ne null)
-      params.entrySet.map { entry =>
-        entry.getValue.toList.map { value =>
+    if (params != null)
+      params.entrySet flatMap { entry =>
+        entry.getValue.toList map { value =>
           (entry.getKey, value)
         }
-      }.flatten.toIterator
+      } toIterator
    else
-     Iterator[(String, String)]()
+     Iterator.empty
 }
 
 

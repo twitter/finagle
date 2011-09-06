@@ -20,6 +20,19 @@ object ParamsMapSpec extends Specification {
       request.params.get("q") must_== Some("twitter")
     }
 
+    "getShort" in {
+      Request("?x=1").params.getShort("x")       must_== Some(1.toShort)
+      Request("?x=0").params.getShort("x")       must_== Some(0.toShort)
+      Request("?x=-1").params.getShort("x")      must_== Some((-1).toShort)
+      Request("?x=32767").params.getShort("x")   must_== Some(32767.toShort)
+      Request("?x=-32768").params.getShort("x")  must_== Some((-32768).toShort)
+      Request("?x=32768").params.getShort("x")   must_== Some(0.toShort)
+      Request("?x=-32769").params.getShort("x")  must_== Some(0.toShort)
+      Request("?x=garbage").params.getShort("x") must_== Some(0.toShort)
+      Request("?x=").params.getShort("x")        must_== Some(0.toShort)
+      Request("?y=2").params.getShort("x")       must_== None
+    }
+
     "getInt" in {
       Request("?x=1").params.getInt("x")           must_== Some(1)
       Request("?x=0").params.getInt("x")           must_== Some(0)

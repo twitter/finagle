@@ -8,6 +8,12 @@ import org.specs.Specification
 object StringUtilSpec extends Specification {
 
   "StringUtilSpec" should {
+    "toSomeShort" in {
+      StringUtil.toSomeShort("0")             must be_==(0)
+      StringUtil.toSomeShort("blarg")         must be_==(0)
+      StringUtil.toSomeShort("1000000000000") must be_==(0)
+    }
+
     "toSomeInt" in {
       StringUtil.toSomeInt("0")             must be_==(0)
       StringUtil.toSomeInt("blarg")         must be_==(0)
