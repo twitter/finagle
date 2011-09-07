@@ -7,6 +7,7 @@ import com.twitter.finagle.TimedoutRequestException
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.{Filter, Service}
+import com.twitter.finagle.tracing.Trace
 
 /**
  * A filter to apply a global timeout to the request. This allows,
@@ -21,6 +22,7 @@ class TimeoutFilter[Req, Rep](timeout: Duration, timer: util.Timer = Timer.defau
     res.within(timer, timeout) rescue {
       case _: TimeoutException =>
         res.cancel()
+        Trace.record("Request timed out")
         Future.exception(new TimedoutRequestException)
     }
   }
