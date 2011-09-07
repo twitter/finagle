@@ -39,7 +39,7 @@ object BigBrotherBirdTracer {
         val client = new scribe.ServiceToClient(new TracelessFilter andThen transport,
           new TBinaryProtocol.Factory())
 
-        new BigBrotherBirdTracer(client, statsReceiver)
+        new BigBrotherBirdTracer(client, statsReceiver.scope("b3"))
     })
   }
 
@@ -89,7 +89,8 @@ private[thrift] class BigBrotherBirdTracer(
       val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray)
       msgs = msgs :+ new LogEntry().setCategory(TraceCategory).setMessage(serializedBase64Span)
     } catch {
-      case e => statsReceiver.counter("error_create_log_entries_%s".format(e.toString)).incr()
+      case e => statsReceiver.scope("create_log_entries").scope("error").
+        counter("%s".format(e.toString)).incr()
     }
 
     msgs
@@ -100,11 +101,11 @@ private[thrift] class BigBrotherBirdTracer(
    */
   def logSpan(span: Span) {
     client.Log(createLogEntries(span)) onSuccess {
-      case ResultCode.OK => statsReceiver.counter("log_span_ok").incr()
-      case ResultCode.TRY_LATER => statsReceiver.counter("log_span_try_later").incr()
+      case ResultCode.OK => statsReceiver.scope("log_span").counter("ok").incr()
+      case ResultCode.TRY_LATER => statsReceiver.scope("log_span").counter("try_later").incr()
       case _ => () /* ignore */
     } onFailure {
-      case e => statsReceiver.counter("error_log_span_%s".format(e.toString)).incr()
+      case e => statsReceiver.scope("log_span").scope("error").counter("%s".format(e.toString)).incr()
     }
   }
 
