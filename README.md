@@ -1,6 +1,6 @@
 <a name="Top"></a>
 
-# Finagle Developer Guide (July 24, 2011 Draft)
+# Finagle Developer Guide (September 8, 2011 Draft)
 
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
