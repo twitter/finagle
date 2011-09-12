@@ -124,7 +124,7 @@ object ClientSpec extends Specification {
         server2.stop()
       }
 
-      val client = (new KetamaClientBuilder())
+      val client = KetamaClientBuilder()
         .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
         .build()
 

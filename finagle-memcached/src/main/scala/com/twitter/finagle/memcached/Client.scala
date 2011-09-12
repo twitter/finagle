@@ -419,11 +419,13 @@ case class KetamaClientBuilder(
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
 
+  @deprecated("Use `KetamaClientBuilder()` instead")
   def this() = this(
     Nil,            // nodes
     Some("ketama"), // hashName
     None            // clientBuilder
   )
+
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
     copy(_nodes = nodes)
@@ -448,6 +450,11 @@ case class KetamaClientBuilder(
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
     new KetamaClient(clients, keyHasher)
   }
+}
+
+object KetamaClientBuilder {
+  def apply(): KetamaClientBuilder = KetamaClientBuilder(Nil, Some("ketama"), None)
+  def get() = apply()
 }
 
 
