@@ -103,7 +103,7 @@ class ParamMap(val request: Request)
   def -(name: String): Map[String, String] =
     Map.empty ++ iterator - name
 
-  def empty = Map.empty
+  def empty = Map.empty[String, String]
 
   override def toString = {
     val encoder = new QueryStringEncoder("", Charset.forName("utf-8"))
@@ -115,15 +115,8 @@ class ParamMap(val request: Request)
 
   // Get value from JMap, which might be null
   private def jget(params: JMap[String, JList[String]], name: String): Option[String] = {
-    if (params == null) {
-      return None
-    }
-    val values = params.get(name)
-    if (values == null) {
-      return None
-    }
-    if (!values.isEmpty) {
-      Some(values.get(0))
+    if (params != null) {
+      Option(params.get(name)) flatMap { _.headOption }
     } else {
       None
     }
@@ -131,27 +124,25 @@ class ParamMap(val request: Request)
 
   // Get values from JMap, which might be null
   private def jgetAll(params: JMap[String, JList[String]], name: String): Iterable[String] = {
-    if (params == null) {
-      return None
-    }
-    val values = params.get(name)
-    if (values != null) {
-      values
+    if (params != null) {
+      Option(params.get(name).toList) getOrElse Nil
     } else {
-      Nil
+      None
     }
   }
 
   // Get iterable for JMap, which might be null
-  private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] =
-    if (params != null)
+  private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] = {
+    if (params != null) {
       params.entrySet flatMap { entry =>
         entry.getValue.toList map { value =>
           (entry.getKey, value)
         }
       } toIterator
-   else
-     Iterator.empty
+    } else {
+      Iterator.empty
+    }
+  }
 }
 
 
