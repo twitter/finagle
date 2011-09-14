@@ -9,25 +9,28 @@ namespace java com.twitter.finagle.thrift.thrift
  *   http://j.mp/fZZnyD
  */
 
+// these are the annotations we always expect to find in a span
 const string CLIENT_SEND = "cs"
 const string CLIENT_RECV = "cr"
 const string SERVER_SEND = "ss"
 const string SERVER_RECV = "sr"
 
+// this represents a host and port in a network
 struct Endpoint {
   1: optional i32 ipv4,
-  2: optional i16 port
+  2: optional i16 port                      // beware that this will give us negative ports. some conversion needed
+  3: optional string service_name           // which service did this operation happen on?
 }
 
+// some event took place, either one by the framework or by the user
 struct Annotation {
-  1: optional i64 timestamp,
-  2: optional string value,
-  3: optional Endpoint host
+  1: optional i64 timestamp                 // microseconds from epoch
+  2: optional string value                  // what happened at the timestamp?
+  3: optional Endpoint host                 // host this happened on
 }
 
 struct Span {
   1: optional i64 trace_id                  // unique trace id, use for all spans in trace
-  2: optional string service_name,          // which service did this operation happen on?
   3: optional string name,                  // span name, rpc method for example
   4: optional i64 id,                       // unique span id, only used for this span
   5: optional i64 parent_id,                // parent span id

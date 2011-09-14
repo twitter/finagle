@@ -12,7 +12,7 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 import org.mockito.Matchers._
 import java.nio.ByteBuffer
-import java.net.InetSocketAddress
+import java.net.{Inet4Address, InetAddress, InetSocketAddress}
 
 object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
@@ -63,11 +63,14 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
       val expected = new ArrayList[LogEntry]()
       expected.add(new LogEntry().setCategory("b3")
-        .setMessage("CgABAAAAAAAAAHsLAAIAAAAHc2VydmljZQsAAwAAAAZtZXRob2QKAAQAAAAAAAAAewoABQ" +
-        "AAAAAAAAB7DwAGDAAAAAIKAAEAAAAAB1TUwAsAAgAAAAJjcwAKAAEAAAAAB1TUwAsAAgAAAAJjcgANAAcL" +
-        "CwAAAAEAAAADa2V5AAAABXZhbHVlAA=="))
+        .setMessage("CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew8ABgwAAAACCgAB" +
+        "AAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAACgABAAAAAAdU1MALAAIAAAAC" +
+        "Y3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAADQAHCwsAAAABAAAAA2tleQAAAAV2YWx1ZQA="))
       client.Log(anyObject()) returns Future(ResultCode.OK)
 
+      val inetAddress = InetAddress.getByAddress(Array.fill(4) {1})
+      tracer.record(Record(traceId, Time.fromSeconds(123),
+        Annotation.ClientAddr(new InetSocketAddress(inetAddress, 1))))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpcname("service", "method")))
       tracer.record(Record(traceId, Time.fromSeconds(123),
         Annotation.BinaryAnnotation("key", ByteBuffer.wrap("value".getBytes()))))
