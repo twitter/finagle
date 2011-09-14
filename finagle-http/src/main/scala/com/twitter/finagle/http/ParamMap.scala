@@ -125,9 +125,9 @@ class ParamMap(val request: Request)
   // Get values from JMap, which might be null
   private def jgetAll(params: JMap[String, JList[String]], name: String): Iterable[String] = {
     if (params != null) {
-      Option(params.get(name).toList) getOrElse Nil
+      Option(params.get(name)) map { _.toList } getOrElse Nil
     } else {
-      None
+      Nil
     }
   }
 
