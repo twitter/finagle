@@ -22,7 +22,7 @@ class TimeoutFilter[Req, Rep](timeout: Duration, timer: util.Timer = Timer.defau
     res.within(timer, timeout) rescue {
       case _: TimeoutException =>
         res.cancel()
-        Trace.record("Request timed out")
+        Trace.record("finagle.timeout")
         Future.exception(new TimedoutRequestException)
     }
   }

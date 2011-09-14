@@ -59,12 +59,12 @@ class RetryingFilter[Req, Rep](
         backoffs match {
           case howlong #:: rest if howlong > 0.seconds =>
             timer.schedule(Time.now + howlong) {
-              Trace.record("Retrying request")
+              Trace.record("finagle.retry")
               dispatch(request, service, replyPromise, rest, count + 1)
             }
 
           case howlong #:: rest =>
-            Trace.record("Retrying request")
+            Trace.record("finagle.retry")
             dispatch(request, service, replyPromise, rest, count + 1)
 
           case _ =>

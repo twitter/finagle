@@ -2,6 +2,7 @@ package com.twitter.finagle.exception
 
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.util.Future
+import com.twitter.finagle.tracing.Trace
 
 /**
  * A filter that resides in both the client- and server-side finagle service stacks and
@@ -16,6 +17,7 @@ class ExceptionFilter[Req, Rep](exceptionReceiver: ExceptionReceiver)
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     service(request) onFailure { e =>
       exceptionReceiver.receive(e)
+      Trace.recordBinary("finagle.exception", e.toString)
     }
   }
 }
