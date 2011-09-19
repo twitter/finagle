@@ -30,7 +30,6 @@ class RoutingService[REQUEST <: Request](
     val service = requestToService(request)
     service(request)
   }
-
 }
 
 
