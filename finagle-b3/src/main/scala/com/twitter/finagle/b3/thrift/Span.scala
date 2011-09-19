@@ -58,10 +58,10 @@ case class Span(
     span.setTrace_id(traceId.traceId.toLong)
     span.setName(name)
 
-    annotations map { annotation => annotation.toThrift } foreach (a => {
+    annotations map ( _.toThrift ) foreach { a =>
       if (a.isSetHost) a.getHost().setService_name(serviceName)
       span.addToAnnotations(a)
-    })
+    }
 
     if (!bAnnotations.isEmpty) span.setBinary_annotations(bAnnotations)
     span

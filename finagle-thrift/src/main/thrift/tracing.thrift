@@ -17,25 +17,25 @@ const string SERVER_RECV = "sr"
 
 // this represents a host and port in a network
 struct Endpoint {
-  1: optional i32 ipv4,
-  2: optional i16 port                      // beware that this will give us negative ports. some conversion needed
-  3: optional string service_name           // which service did this operation happen on?
+  1: i32 ipv4,
+  2: i16 port                      // beware that this will give us negative ports. some conversion needed
+  3: string service_name           // which service did this operation happen on?
 }
 
 // some event took place, either one by the framework or by the user
 struct Annotation {
-  1: optional i64 timestamp                 // microseconds from epoch
-  2: optional string value                  // what happened at the timestamp?
+  1: i64 timestamp                 // microseconds from epoch
+  2: string value                  // what happened at the timestamp?
   3: optional Endpoint host                 // host this happened on
 }
 
 struct Span {
-  1: optional i64 trace_id                  // unique trace id, use for all spans in trace
-  3: optional string name,                  // span name, rpc method for example
-  4: optional i64 id,                       // unique span id, only used for this span
+  1: i64 trace_id                  // unique trace id, use for all spans in trace
+  3: string name,                  // span name, rpc method for example
+  4: i64 id,                       // unique span id, only used for this span
   5: optional i64 parent_id,                // parent span id
-  6: optional list<Annotation> annotations, // list of all annotations/events that occured
-  7: optional map<string, binary> binary_annotations // any binary annotations
+  6: list<Annotation> annotations, // list of all annotations/events that occured
+  7: map<string, binary> binary_annotations // any binary annotations
 }
 
 /**
