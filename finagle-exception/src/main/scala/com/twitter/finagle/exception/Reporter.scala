@@ -9,7 +9,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
 import org.apache.thrift.protocol.TBinaryProtocol
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-
+import com.twitter.util.GZIPStringEncoder
 /**
  * A collection of methods to construct an ExceptionReceiver that logs to a ScribeHandler
  * specifically for the chickadee exception reporting service. These methods are not generic
@@ -108,7 +108,7 @@ sealed case class Reporter(
     sourceAddress foreach { sa => se = se withSource sa }
     clientAddress foreach { ca => se = se withClient ca }
 
-    new LogEntry(Reporter.scribeCategory, se.toJson)
+    new LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
   }
 
   /**
