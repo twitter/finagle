@@ -1,3 +1,16 @@
+1.9.1		2011/09/28
+
+	* memcached: new interface for partial results (ie. retrieval
+	failures + successes)
+	* tracing: set service name in the endpoint instead of the
+	span
+	* more idiomatic KetamaClientBuilder constructor
+	* tracing: convenience methods to add binary annotations
+	* finagle-http: misc. fixes
+	* HeapBalancer - a new lg n load balancer (asymptotically
+	more efficient!)
+	* upgrade to ostrich 4.9.0
+
 1.9.0		2011/08/29
 
 	* http: new http library
