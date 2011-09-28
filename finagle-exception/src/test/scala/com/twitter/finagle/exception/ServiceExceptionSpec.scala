@@ -31,6 +31,10 @@ private[exception] class TestServiceException(
 
   lazy val serviceException = constructServiceException
 
+  def verifyCompressedJSON(json: String) = {
+    verifyJSON(GZIPStringEncoder.decodeString(json))
+  }
+
   def verifyJSON(json: String) = {
     def verify[T](actual: T, expected: T, message: String, previous: Boolean = false) = {
       assert(!previous, message + ": variable already set")

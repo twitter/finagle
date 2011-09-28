@@ -31,7 +31,7 @@ object ReporterSpec extends Specification with Mockito {
       val es = captor.getValue
       es.size mustEqual 1
 
-      tse.verifyJSON(es.get(0).getMessage)
+      tse.verifyCompressedJSON(es.get(0).getMessage)
     }
   }
 
@@ -56,7 +56,7 @@ object ReporterSpec extends Specification with Mockito {
       val es = captor.getValue
       es.size mustEqual 1
 
-      tse.verifyJSON(es.get(0).getMessage)
+      tse.verifyCompressedJSON(es.get(0).getMessage)
     }
   }
 
@@ -84,7 +84,7 @@ object ReporterSpec extends Specification with Mockito {
       val es = captor.getValue
       es.size mustEqual 1
 
-      tse.verifyJSON(es.get(0).getMessage)
+      tse.verifyCompressedJSON(es.get(0).getMessage)
     }
   }
 }
