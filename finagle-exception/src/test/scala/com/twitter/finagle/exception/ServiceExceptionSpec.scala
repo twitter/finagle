@@ -73,11 +73,11 @@ private[exception] class TestServiceException(
         s readObject {
           case "exceptionClass" => hasExceptionClass = verify(s.readString(), "java.lang.Throwable", "bad exception class", hasExceptionClass)
           case "message" => hasMessage = verify(s.readString(), exceptionMessage, "bad excepution message", hasMessage)
-          case "stacktrace" => hasStackTrace = verify(GZIPStringEncoder.decodeString(s.readString()), ste.toString + "\n" + ste.toString, "bad stacktrace", hasStackTrace)
+          case "stacktrace" => hasStackTrace = verify(s.readString(), ste.toString + "\n" + ste.toString, "bad stacktrace", hasStackTrace)
           case a => fail(a, "exception contents")
         }
       }
-      case "client" => hasClient = verifyOption(s.readString(), clientAddress, "client", hasClient)
+      case "peer" => hasClient = verifyOption(s.readString(), clientAddress, "peer", hasClient)
       case "source" => hasSource = verifyOption(s.readString(), sourceAddress, "source", hasSource)
       case "cardinality" => hasCardinality = verifyOption(s.readInt(), cardinality map { _+1 }, "cardinality", hasCardinality, false)
       case a => fail(a, "service exception")
@@ -95,7 +95,7 @@ private[exception] class TestServiceException(
       if (o.isDefined) assert(defined, msg + " expected but not found")
     }
 
-    optionalAssertDefined(clientAddress, hasClient, "client")
+    optionalAssertDefined(clientAddress, hasClient, "peer")
     optionalAssertDefined(sourceAddress, hasSource, "source")
     optionalAssertDefined(cardinality, hasCardinality, "cardinality")
 
