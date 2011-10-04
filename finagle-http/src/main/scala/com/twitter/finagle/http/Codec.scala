@@ -17,16 +17,16 @@ import com.twitter.finagle.http.codec._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 
-private[http] class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
+class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
 
-private[http] object BadHttpRequest {
+object BadHttpRequest {
   def apply(codecError: String) =
     new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", codecError)
 }
 
 /** Convert exceptions to BadHttpRequests */
-private[http] class SafeHttpServerCodec(
+class SafeHttpServerCodec(
     maxInitialLineLength: Int,
     maxHeaderSize: Int,
     maxChunkSize: Int)
