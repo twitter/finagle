@@ -201,7 +201,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     override def compileOrder = CompileOrder.ScalaThenJava
 
-    projectDependencies("util" ~ "util-logging")
+    projectDependencies(
+      "util" ~ "util-codec",
+      "util" ~ "util-logging"
+    )
 
     val commonsLang = "commons-lang" % "commons-lang" % "2.6" // for FastDateFormat
   }
