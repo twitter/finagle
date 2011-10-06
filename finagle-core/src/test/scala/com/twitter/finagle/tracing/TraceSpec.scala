@@ -132,6 +132,23 @@ object TraceSpec extends Specification with Mockito {
         there was one(tracer1).record(any)
         there was one(tracer2).record(any)
       }
+
+      "not report when tracing turned off" in {
+        try {
+          Trace.disable
+          Trace.pushTracer(tracer1)
+          Trace.pushTracer(tracer2)
+          Trace.pushId(id0)
+          there was no(tracer1).record(any)
+          there was no(tracer2).record(any)
+          Trace.record("oh hey")
+          there was no(tracer1).record(any)
+          there was no(tracer2).record(any)
+        } finally {
+          Trace.enable
+        }
+      }
+
     }
   }
 }
