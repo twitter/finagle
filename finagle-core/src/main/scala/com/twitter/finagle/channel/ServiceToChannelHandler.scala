@@ -40,6 +40,8 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
 
   private[this] def shutdown() =
     if (state.getAndSet(Shutdown) != Shutdown) {
+      currentResponse foreach { _.cancel() }
+      currentResponse = None
       close() onSuccessOrFailure { onShutdownPromise() = Return(()) }
       service.release()
     }
@@ -121,8 +123,6 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    currentResponse foreach { _.cancel() }
-    currentResponse = None
     shutdown()
   }
 
