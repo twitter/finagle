@@ -67,7 +67,7 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
     } while (continue)
   }
 
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val channel = ctx.getChannel
     val message = e.getMessage
 
@@ -87,26 +87,24 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
     }
 
     try {
-      val promise = service(message.asInstanceOf[Req]) respond {
+      val promise = service(message.asInstanceOf[Req])
+      currentResponse = Some(promise)
+      promise respond {
         case Return(value) =>
-          currentResponse = None
           Channels.write(channel, value)
         case Throw(e: Throwable) =>
-          currentResponse = None
           log.log(Level.WARNING, "service exception", e)
           shutdown()
+      } ensure {
+        currentResponse = None
       }
-      currentResponse = Some(promise)
-      promise
     } catch {
       case e: ClassCastException =>
         log.log(
           Level.SEVERE,
           "Got ClassCastException while processing a " +
           "message. This is a codec bug. %s".format(e))
-
         shutdown()
-
       case e =>
         Channels.fireExceptionCaught(channel, e)
     }
