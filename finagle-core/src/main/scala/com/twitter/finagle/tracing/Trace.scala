@@ -31,6 +31,7 @@ object Trace {
 
   private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None)
   private[this] val local = new Local[Stack]
+  @volatile private[this] var tracingEnabled = true
 
   /**
    * Get the current trace identifier.  If no identifiers have been
@@ -52,6 +53,16 @@ object Trace {
   def clear() {
     local.clear()
   }
+
+  /**
+   * Turn trace recording on.
+   */
+  def enable() = tracingEnabled = true
+
+  /**
+   * Turn trace recording off.
+   */
+  def disable() = tracingEnabled = false
 
     /**
    * Create a derivative TraceId. If there isn't a
@@ -139,7 +150,8 @@ object Trace {
     *  tracers in the stack.
     */
    def record(rec: Record) {
-     tracers(local() getOrElse Nil, Some(rec.traceId), Nil) foreach { _.record(rec) }
+     if (tracingEnabled)
+       tracers(local() getOrElse Nil, Some(rec.traceId), Nil) foreach { _.record(rec) }
    }
 
    /*
