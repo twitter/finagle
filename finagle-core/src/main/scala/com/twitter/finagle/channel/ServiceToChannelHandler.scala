@@ -121,7 +121,7 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    currentResponse.map { _.cancel() }
+    currentResponse foreach { _.cancel() }
     currentResponse = None
     shutdown()
   }
