@@ -20,12 +20,14 @@ object RequeatBuilderSpec extends Specification {
     "set the HOST header" in {
       val get = RequestBuilder().url(URL0).buildGet
       val head = RequestBuilder().url(URL0).buildHead
+      val delete = RequestBuilder().url(URL0).buildDelete
       val put = RequestBuilder().url(URL0).buildPut(BODY0)
       val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
       val expected = "www.google.com:77"
       get.getHeader(HttpHeaders.Names.HOST) must_== expected
       head.getHeader(HttpHeaders.Names.HOST) must_== expected
+      delete.getHeader(HttpHeaders.Names.HOST) must_== expected
       put.getHeader(HttpHeaders.Names.HOST) must_== expected
       post.getHeader(HttpHeaders.Names.HOST) must_== expected
     }
@@ -35,6 +37,8 @@ object RequeatBuilderSpec extends Specification {
       val req1 = RequestBuilder().url(URL1).buildGet
       val req2 = RequestBuilder().url(URL0).buildHead
       val req3 = RequestBuilder().url(URL1).buildHead
+      val req8 = RequestBuilder().url(URL0).buildDelete
+      val req9 = RequestBuilder().url(URL1).buildDelete
       val req4 = RequestBuilder().url(URL0).buildPut(BODY0)
       val req5 = RequestBuilder().url(URL1).buildPut(BODY0)
       val req6 = RequestBuilder().url(URL0).buildPost(BODY0)
@@ -45,6 +49,8 @@ object RequeatBuilderSpec extends Specification {
       req1.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
       req2.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
       req3.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req8.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
+      req9.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
       req4.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
       req5.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
       req6.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
@@ -70,6 +76,9 @@ object RequeatBuilderSpec extends Specification {
       val head0 = RequestBuilder().url(u0).buildHead
       val head1 = RequestBuilder().url(u1).buildHead
       val head2 = RequestBuilder().url(u2).buildHead
+      val del0 = RequestBuilder().url(u0).buildDelete
+      val del1 = RequestBuilder().url(u1).buildDelete
+      val del2 = RequestBuilder().url(u2).buildDelete
       val put0 = RequestBuilder().url(u0).buildPut(BODY0)
       val put1 = RequestBuilder().url(u1).buildPut(BODY0)
       val put2 = RequestBuilder().url(u2).buildPut(BODY0)
@@ -83,6 +92,9 @@ object RequeatBuilderSpec extends Specification {
       head0.getUri must_== "/"
       head1.getUri must_== "/"
       head2.getUri must_== "/?abc=def"
+      del0.getUri must_== "/"
+      del1.getUri must_== "/"
+      del2.getUri must_== "/?abc=def"
       put0.getUri must_== "/"
       put1.getUri must_== "/"
       put2.getUri must_== "/?abc=def"
@@ -102,6 +114,9 @@ object RequeatBuilderSpec extends Specification {
       val head0 = RequestBuilder().url(u0).buildHead
       val head1 = RequestBuilder().url(u1).buildHead
       val head2 = RequestBuilder().url(u2).buildHead
+      val del0 = RequestBuilder().url(u0).buildDelete
+      val del1 = RequestBuilder().url(u1).buildDelete
+      val del2 = RequestBuilder().url(u2).buildDelete
       val put0 = RequestBuilder().url(u0).buildPut(BODY0)
       val put1 = RequestBuilder().url(u1).buildPut(BODY0)
       val put2 = RequestBuilder().url(u2).buildPut(BODY0)
@@ -115,6 +130,9 @@ object RequeatBuilderSpec extends Specification {
       head0.getUri must_== "/"
       head1.getUri must_== "/"
       head2.getUri must_== "/"
+      del0.getUri must_== "/"
+      del1.getUri must_== "/"
+      del2.getUri must_== "/"
       put0.getUri must_== "/"
       put1.getUri must_== "/"
       put2.getUri must_== "/"
@@ -128,6 +146,8 @@ object RequeatBuilderSpec extends Specification {
       val get1 = RequestBuilder().url(URL0).http10.buildGet
       val head0 = RequestBuilder().url(URL0).buildHead
       val head1 = RequestBuilder().url(URL0).http10.buildHead
+      val del0 = RequestBuilder().url(URL0).buildDelete
+      val del1 = RequestBuilder().url(URL0).http10.buildDelete
       val put0 = RequestBuilder().url(URL0).buildPut(BODY0)
       val put1 = RequestBuilder().url(URL0).http10.buildPut(BODY0)
       val post0 = RequestBuilder().url(URL0).buildPost(BODY0)
@@ -137,6 +157,8 @@ object RequeatBuilderSpec extends Specification {
       get1.getProtocolVersion must_== HttpVersion.HTTP_1_0
       head0.getProtocolVersion must_== HttpVersion.HTTP_1_1
       head1.getProtocolVersion must_== HttpVersion.HTTP_1_0
+      del0.getProtocolVersion must_== HttpVersion.HTTP_1_1
+      del1.getProtocolVersion must_== HttpVersion.HTTP_1_0
       put0.getProtocolVersion must_== HttpVersion.HTTP_1_1
       put1.getProtocolVersion must_== HttpVersion.HTTP_1_0
       post0.getProtocolVersion must_== HttpVersion.HTTP_1_1
@@ -146,11 +168,13 @@ object RequeatBuilderSpec extends Specification {
     "set the correct method" in {
       val get = RequestBuilder().url(URL0).buildGet
       val head = RequestBuilder().url(URL0).buildHead
+      val del = RequestBuilder().url(URL0).buildDelete
       val put = RequestBuilder().url(URL0).buildPut(BODY0)
       val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
       get.getMethod must_== HttpMethod.GET
       head.getMethod must_== HttpMethod.HEAD
+      del.getMethod must_== HttpMethod.DELETE
       put.getMethod must_== HttpMethod.PUT
       post.getMethod must_== HttpMethod.POST
     }
@@ -166,6 +190,7 @@ object RequeatBuilderSpec extends Specification {
 
       builder0.buildGet.getHeader(A) must_== B
       builder0.buildHead.getHeader(A) must_== B
+      builder0.buildDelete.getHeader(A) must_== B
       builder0.buildPut(BODY0).getHeader(A) must_== B
       builder0.buildPost(BODY0).getHeader(A) must_== B
 
@@ -174,6 +199,7 @@ object RequeatBuilderSpec extends Specification {
 
       builder1.buildGet.getHeader(A) must_== C
       builder1.buildHead.getHeader(A) must_== C
+      builder1.buildDelete.getHeader(A) must_== C
       builder1.buildPut(BODY0).getHeader(A) must_== C
       builder1.buildPost(BODY0).getHeader(A) must_== C
 
@@ -182,6 +208,7 @@ object RequeatBuilderSpec extends Specification {
 
       builder2.buildGet.getHeader(A) must beNull
       builder2.buildHead.getHeader(A) must beNull
+      builder2.buildDelete.getHeader(A) must beNull
       builder2.buildPut(BODY0).getHeader(A) must beNull
       builder2.buildPost(BODY0).getHeader(A) must beNull
 
@@ -191,6 +218,7 @@ object RequeatBuilderSpec extends Specification {
       val pair = Seq(B,C).asJava
       builder3.buildGet.getHeaders(A) must_== pair
       builder3.buildHead.getHeaders(A) must_== pair
+      builder3.buildDelete.getHeaders(A) must_== pair
       builder3.buildPut(BODY0).getHeaders(A) must_== pair
       builder3.buildPost(BODY0).getHeaders(A) must_== pair
 
@@ -200,6 +228,7 @@ object RequeatBuilderSpec extends Specification {
       val triple = Seq(B,C, D).asJava
       builder4.buildGet.getHeaders(A) must_== triple
       builder4.buildHead.getHeaders(A) must_== triple
+      builder4.buildDelete.getHeaders(A) must_== triple
       builder4.buildPut(BODY0).getHeaders(A) must_== triple
       builder4.buildPost(BODY0).getHeaders(A) must_== triple
     }

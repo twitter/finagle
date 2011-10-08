@@ -64,6 +64,12 @@ object RequestBuilder {
     builder.buildHead()
 
   /**
+   * Provides a typesafe `buildDelete` for Java.
+   */
+  def safeBuildDelete(builder: Complete): HttpRequest =
+    builder.buildDelete()
+
+  /**
    * Provides a typesafe `buildPut` for Java.
    */
   def safeBuidlPut(builder: Complete, content: ChannelBuffer): HttpRequest =
@@ -206,6 +212,13 @@ class RequestBuilder[HasUrl] private[http](
   def buildHead()(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: ThisConfig =:= FullySpecifiedConfig
   ): HttpRequest = withoutContent(HttpMethod.HEAD)
+
+  /**
+   * Construct an HTTP DELETE request.
+   */
+  def buildDelete()(
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: ThisConfig =:= FullySpecifiedConfig
+  ): HttpRequest = withoutContent(HttpMethod.DELETE)
 
   /**
    * Construct an HTTP POST request.
