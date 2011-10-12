@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.http.{Message, Method, Request, Response}
+import com.twitter.finagle.http.{MediaType, Method, Request, Response}
 import com.twitter.util.Future
 import java.io.{ByteArrayOutputStream, PrintWriter}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -20,14 +20,14 @@ class JsonpFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
     getCallback(request) match {
       case Some(callback) =>
         service(request) onSuccess { response =>
-          if (response.mediaType == Some(Message.MediaTypeJson)) {
+          if (response.mediaType == Some(MediaType.Json)) {
             response.content =
               ChannelBuffers.wrappedBuffer(
                 ChannelBuffers.wrappedBuffer(callback.getBytes("UTF-8")),
                 ChannelBuffers.wrappedBuffer(JsonpFilter.LeftParen),
                 response.getContent,
                 ChannelBuffers.wrappedBuffer(JsonpFilter.RightParenSemicolon))
-            response.mediaType = Message.MediaTypeJavascript
+            response.mediaType = MediaType.Javascript
           }
         }
       case None =>
