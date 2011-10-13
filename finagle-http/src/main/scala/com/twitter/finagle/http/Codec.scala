@@ -3,19 +3,20 @@ package com.twitter.finagle.http
 /**
  * This puts it all together: The HTTP codec itself.
  */
+import java.net.InetSocketAddress
 
 import org.jboss.netty.channel.{
   Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, UpstreamMessageEvent}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
-import com.twitter.util.{StorageUnit, Future}
 import com.twitter.conversions.storage._
 
-import com.twitter.finagle.{Codec, CodecFactory, CodecException, Service, SimpleFilter}
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-
+import com.twitter.finagle.tracing._
+import com.twitter.finagle._
+import com.twitter.util.{Try, StorageUnit, Future}
 
 class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
@@ -87,7 +88,8 @@ case class Http(
     _maxResponseSize: StorageUnit = 1.megabyte,
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
-    _annotateCipherHeader: Option[String] = None)
+    _annotateCipherHeader: Option[String] = None,
+    _enableTracing: Boolean = false)
   extends CodecFactory[HttpRequest, HttpResponse]
 {
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
@@ -97,8 +99,9 @@ case class Http(
   def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
     copy(_channelBufferUsageTracker = Some(usageTracker))
   def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
+  def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
 
-  def client = Function.const {
+  def client = { config =>
     new Codec[HttpRequest, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
@@ -118,10 +121,19 @@ case class Http(
           pipeline
         }
       }
+
+      override def prepareService(
+        underlying: Service[HttpRequest, HttpResponse]
+      ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
+        if (_enableTracing)
+          new HttpClientTracingFilter(config.serviceName) andThen underlying
+        else
+          underlying
+      }
     }
   }
 
-  def server = Function.const {
+  def server = { config =>
     new Codec[HttpRequest, HttpResponse] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
@@ -164,9 +176,17 @@ case class Http(
 
       override def prepareService(
         underlying: Service[HttpRequest, HttpResponse]
-      ): Future[Service[HttpRequest, HttpResponse]] = {
+      ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
         val checkRequest = new CheckHttpRequestFilter
-        Future.value(checkRequest andThen underlying)
+        if (_enableTracing) {
+          val ia = config.boundAddress match {
+            case ia: InetSocketAddress => ia
+            case _ => new InetSocketAddress(0)
+          }
+          new HttpServerTracingFilter(config.serviceName, ia) andThen checkRequest andThen underlying
+        } else {
+          checkRequest andThen underlying
+        }
       }
     }
   }
@@ -176,6 +196,91 @@ object Http {
   def get() = new Http()
 }
 
+private[http] object HttpTracing {
+  object Header {
+    val TraceId = "X-B3-TraceId"
+    val SpanId = "X-B3-SpanId"
+    val ParentSpanId = "X-B3-ParentSpanId"
+    val Sampled = "X-B3-Sampled"
+
+    val All = Seq(TraceId, SpanId, ParentSpanId, Sampled)
+    val Required = Seq(TraceId, SpanId)
+  }
+}
+
+/**
+ * Pass along headers with the required tracing information.
+ */
+class HttpClientTracingFilter(serviceName: String)
+  extends SimpleFilter[HttpRequest, HttpResponse]
+{
+  import HttpTracing._
+
+  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = Trace.unwind {
+    Header.All foreach { request.removeHeader(_) }
+
+    request.addHeader(Header.TraceId, Trace.id.traceId.toString)
+    request.addHeader(Header.SpanId, Trace.id.spanId.toString)
+    // no parent id set means this is the root span
+    Trace.id._parentId foreach { id =>
+      request.addHeader(Header.ParentSpanId, id.toString)
+    }
+    // three states of sampled, yes, no or none (let the server decide)
+    Trace.id.sampled foreach { sampled =>
+      request.addHeader(Header.Sampled, sampled.toString)
+    }
+
+    Trace.recordBinary("http.uri", request.getUri)
+    Trace.recordRpcname(serviceName, request.getMethod.getName)
+
+    Trace.record(Annotation.ClientSend())
+    service(request) map { response =>
+      Trace.record(Annotation.ClientRecv())
+      response
+    }
+  }
+}
+
+/**
+ * Adds tracing annotations for each http request we receive.
+ * Including uri, when request was sent and when it was received.
+ */
+class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddress)
+  extends SimpleFilter[HttpRequest, HttpResponse]
+{
+  import HttpTracing._
+
+  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = Trace.unwind {
+
+    if (Header.Required.forall { request.containsHeader(_) }) {
+      val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
+      val spanId = SpanId.fromString(request.getHeader(Header.SpanId))
+      val parentSpanId = SpanId.fromString(request.getHeader(Header.ParentSpanId))
+
+      val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
+        Try(sampled.toBoolean).toOption
+      }
+
+      spanId foreach { sid =>
+        Trace.pushId(TraceId(traceId, parentSpanId, sid, sampled))
+      }
+    }
+
+    // remove so the header is not visible to users
+    Header.All foreach { request.removeHeader(_) }
+
+    // even if no trace id was passed from the client we log the annotations
+    // with a locally generated id
+    Trace.recordBinary("http.uri", request.getUri)
+    Trace.recordRpcname(serviceName, request.getMethod.getName)
+
+    Trace.record(Annotation.ServerRecv())
+    service(request) map { response =>
+      Trace.record(Annotation.ServerSend())
+      response
+    }
+  }
+}
 
 /**
  * Http codec for rich Request/Response objects.
