@@ -44,14 +44,29 @@ case class GetResult private[memcached](
   failures: Map[String, Throwable] = Map.empty
 ) {
   lazy val values = hits mapValues { _.value }
-  lazy val valuesWithTokens = hits mapValues { v => (v.value, v.casUnique.get) }
 
   def ++(o: GetResult) = GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
+}
+
+case class GetsResult(getResult: GetResult) {
+  def hits = getResult.hits
+  def misses = getResult.misses
+  def failures = getResult.failures
+  def values = getResult.values
+  lazy val valuesWithTokens = hits mapValues { v => (v.value, v.casUnique.get) }
+  def ++(o: GetsResult) = GetsResult(getResult ++ o.getResult)
 }
 
 object GetResult {
   private[memcached] def merged(results: Seq[GetResult]): GetResult = {
     results.foldLeft(GetResult()) { _ ++ _ }
+  }
+
+  private[memcached] def merged(results: Seq[GetsResult]) = {
+    val unwrapped = results map { _.getResult }
+    GetsResult(
+      unwrapped.foldLeft(GetResult()) { _ ++ _ }
+    )
   }
 }
 
@@ -63,20 +78,20 @@ trait Client {
    * Store a key. Override an existing value.
    * @return true
    */
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Unit]
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Unit]
 
   /**
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Boolean]
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
 
   /**
    * Append bytes to the end of an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer):  Future[Boolean]
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
 
   /**
    * Prepend bytes to the beginning of an existing key. If the key doesn't
@@ -100,7 +115,9 @@ trait Client {
    *
    * @return true if replaced, false if not
    */
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer): Future[Boolean]
+  def cas(
+    key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer
+  ): Future[Boolean]
 
 
   /**
@@ -132,34 +149,41 @@ trait Client {
    * keys the server had, together with their "cas unique" token
    */
   def gets(keys: Iterable[String]): Future[Map[String, (ChannelBuffer, ChannelBuffer)]] =
-    getResult(keys) map { _.valuesWithTokens }
+    getsResult(keys) map { _.valuesWithTokens }
 
 
   /**
    * Get a set of keys from the server. Returns a Future[GetResult] that
    * encapsulates hits, misses and failures.
    */
-  def getResult(keys: Iterable[String]):          Future[GetResult]
+  def getResult(keys: Iterable[String]): Future[GetResult]
+
+  /**
+   * Get a set of keys from the server. Returns a Future[GetsResult] that
+   * encapsulates hits, misses and failures. This variant includes the casToken
+   * from memcached.
+   */
+  def getsResult(keys: Iterable[String]): Future[GetsResult]
 
   /**
    * Remove a key.
    * @return true if deleted, false if not found
    */
-  def delete(key: String):                        Future[Boolean]
+  def delete(key: String): Future[Boolean]
 
   /**
    * Increment a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def incr(key: String):                         Future[Option[Long]]
-  def incr(key: String, delta: Long):            Future[Option[Long]]
+  def incr(key: String): Future[Option[Long]]
+  def incr(key: String, delta: Long): Future[Option[Long]]
 
   /**
    * Decrement a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def decr(key: String):                         Future[Option[Long]]
-  def decr(key: String, delta: Long):            Future[Option[Long]]
+  def decr(key: String): Future[Option[Long]]
+  def decr(key: String, delta: Long): Future[Option[Long]]
 
   /**
    * Store a key. Override an existing values.
@@ -247,7 +271,9 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
-  def getResult(keys: Iterable[String]) = rawGet(Gets(keys.toSeq))
+  def getResult(keys: Iterable[String]) = rawGet(Get(keys.toSeq))
+  def getsResult(keys: Iterable[String]) =
+    rawGet(Gets(keys.toSeq)) map { GetsResult(_) }
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     service(Set(key, flags, expiry, value)) map {
@@ -338,17 +364,31 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
 trait PartitionedClient extends Client {
   protected[memcached] def clientOf(key: String): Client
 
+  private[this] def withKeysGroupedByClient[A](
+    keys: Iterable[String])(f: (Client, Iterable[String]) => Future[A]
+  ): Future[Seq[A]] = {
+    Future.collect(
+      keys groupBy(clientOf(_)) map Function.tupled(f) toSeq
+    )
+  }
+
   def getResult(keys: Iterable[String]) = {
-    if (!keys.isEmpty) {
-      val keysGroupedByClient = keys.groupBy(clientOf(_))
-
-      val results = keysGroupedByClient map { case (client, keys) =>
-        client.getResult(keys)
-      }
-
-      Future.collect(results.toSeq) map { GetResult.merged(_) }
+    if (keys.nonEmpty) {
+      withKeysGroupedByClient(keys) {
+        _.getResult(_)
+      } map { GetResult.merged(_) }
     } else {
       Future.value(GetResult())
+    }
+  }
+
+  def getsResult(keys: Iterable[String]) = {
+    if (keys.nonEmpty) {
+      withKeysGroupedByClient(keys) {
+         _.getsResult(_)
+      } map { GetResult.merged(_) }
+    } else {
+      Future.value(GetsResult(GetResult()))
     }
   }
 
