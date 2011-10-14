@@ -1,6 +1,6 @@
 <a name="Top"></a>
 
-# Finagle Developer Guide (July 24, 2011 Draft)
+# Finagle Developer Guide (September 8, 2011 Draft)
 
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
@@ -40,9 +40,6 @@
 * <a href="#Using ServerSet Objects">Using ServerSet Objects</a>
 * <a href="#Additional Samples">Additional Samples</a>
 * <a href="#API Reference Documentation">API Reference Documentation</a>
-* <a href="#Revision History">Revision History</a>
-  - <a href="#1.4.3 (2011-05-17)">1.4.3 (2011-05-17)</a>
-  - <a href="#1.2.3 (2011-03-18)">1.2.3 (2011-03-18)</a>
 
 <a name="Quick Start"></a>
 
@@ -200,7 +197,8 @@ In this Finagle example, the `ThriftServer` object implements the `Hello` servic
       new Hello.Service(processor, new TBinaryProtocol.Factory()),               // 3
       ServerBuilder.get()
         .name("HelloService")
-        .codec(ThriftServerFramedCodecFactory$.MODULE$)
+        .codec(ThriftServerFramedCodec.get())
+     // .codec(ThriftServerFramedCodecFactory$.MODULE$) previously
         .bindTo(new InetSocketAddress(8080)));
 
 ##### Thrift Server Code Annotations
@@ -323,13 +321,13 @@ Use the Finagle library to implement asynchronous Remote Procedure Call (RPC) cl
 
 ## Architecture
 
-Finagle extends the stream-oriented [Netty](http://www.jboss.org/netty) model to provide asynchronous requests and responses for remote procedure calls (RPC). Internally, Finagle manages a service stack to track outstanding requests, responses, and the events related to them. Finagle uses a Netty pipeline to manage connections between the streams underlying request and response messages. The following diagram shows the relationship between your RCP client or server, Finagle, Netty, and Java libraries:
+Finagle extends the stream-oriented [Netty](http://www.jboss.org/netty) model to provide asynchronous requests and responses for remote procedure calls (RPC). Internally, Finagle manages a service stack to track outstanding requests, responses, and the events related to them. Finagle uses a Netty pipeline to manage connections between the streams underlying request and response messages. The following diagram shows the relationship between your RPC client or server, Finagle, Netty, and Java libraries:
 
-![Relationship between your RCP client or server, Finagle, Netty, and Java Libraries (doc/FinagleRelationship.png)](https://github.com/twitter/finagle/raw/master/doc/FinagleRelationship.png)
+![Relationship between your RPC client or server, Finagle, Netty, and Java Libraries (doc/FinagleRelationship.png)](https://github.com/twitter/finagle/raw/master/doc/FinagleRelationship.png)
 
-Finagle manages a [Netty pipeline](http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html) for servers built on Finagle RCP services. Netty itself is built on the Java [NIO](http://download.oracle.com/javase/1.5.0/docs/api/java/nio/channels/package-summary.html#package_description) library, which supports asynchronous IO. While an understanding of Netty or NIO might be useful, you can use Finagle without this background information.
+Finagle manages a [Netty pipeline](http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html) for servers built on Finagle RPC services. Netty itself is built on the Java [NIO](http://download.oracle.com/javase/1.5.0/docs/api/java/nio/channels/package-summary.html#package_description) library, which supports asynchronous IO. While an understanding of Netty or NIO might be useful, you can use Finagle without this background information.
 
-Finagle objects are the building blocks of RCP clients and servers:
+Finagle objects are the building blocks of RPC clients and servers:
 
 - <a href="#Future Objects">Future objects</a> enable asynchronous operations required by a service
 - <a href="#Service Objects">Service objects</a> perform the work associated with a remote procedure call
@@ -729,7 +727,7 @@ Consider the following diagram, which shows how a client uses the Finagle event 
 
 Your threads, which are shown on the left, are allowed to block. When you call a Finagle method or Finagle calls a method for you, it dispatches execution of these methods to its internal threads. Thus, the Finagle event loop and its threads cannot block without degrading the performance of other clients and servers that use the same Finagle instance.
 
-In complex RCP operations, it may be necessary to perform blocking operations. In these cases, you must set up your own thread pool and use `Future` or `FuturePool` objects to execute the blocking operation on your own thread. Consider the following diagram:
+In complex RPC operations, it may be necessary to perform blocking operations. In these cases, you must set up your own thread pool and use `Future` or `FuturePool` objects to execute the blocking operation on your own thread. Consider the following diagram:
 
 ![Handling operations that block (doc/ThreadExNonBlockingServer.png)](https://github.com/twitter/finagle/raw/master/doc/ThreadExNonBlockingServer.png)
 
@@ -1226,7 +1224,8 @@ A client can access a cluster, as follows:
 * [Complete Core Project Scaladoc](http://twitter.github.com/finagle/api/finagle-core/)
 * [Complete Util Project Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/)
 
-See the [finagle homepage](http://twitter.github.com/finagle/) for more information.
+For the software revision history, see the [Finagle change log](https://github.com/twitter/finagle/blob/master/ChangeLog).
+For additional information about Finagle, see the [Finagle homepage](http://twitter.github.com/finagle/).
 
 [Top](#Top)
 
