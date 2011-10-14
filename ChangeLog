@@ -1,3 +1,10 @@
+1.9.2		2011/10/14
+
+	* tracing: Change SpanId to use RichU64String
+	* tracing: Trace.{enable,disable}
+	* http: http.RequestBuilder
+	* http: add common media types
+
 1.9.1		2011/09/28
 
 	* memcached: new interface for partial results (ie. retrieval
