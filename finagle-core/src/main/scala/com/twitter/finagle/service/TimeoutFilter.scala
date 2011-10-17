@@ -23,7 +23,11 @@ class TimeoutFilter[Req, Rep](timeout: Duration, timer: util.Timer = Timer.defau
       case _: TimeoutException =>
         res.cancel()
         Trace.record("finagle.timeout")
-        Future.exception(new TimedoutRequestException)
+        Future.exception(TimeoutFilter.timedoutRequestException)
     }
   }
+}
+
+private object TimeoutFilter {
+  private val timedoutRequestException = new TimedoutRequestException
 }
