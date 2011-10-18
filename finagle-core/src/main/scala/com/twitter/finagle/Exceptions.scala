@@ -1,12 +1,18 @@
 package com.twitter.finagle
 
+trait NoStacktrace extends Exception {
+  override def fillInStackTrace = this
+}
+
 // Request failures (eg. for request behavior changing brokers.)
-class RequestException(cause: Throwable) extends Exception(cause) {
+class RequestException(cause: Throwable) extends Exception(cause) with NoStacktrace {
   def this() = this(null)
+  override def getStackTrace = if (cause != null) cause.getStackTrace else super.getStackTrace
 }
 
 class TimedoutRequestException     extends RequestException
-class RetryFailureException(cause: Throwable)        extends RequestException(cause)
+class RetryFailureException(cause: Throwable)
+  extends RequestException(cause)
 class CancelledRequestException    extends RequestException
 class TooManyWaitersException      extends RequestException
 class CancelledConnectionException extends RequestException
@@ -18,17 +24,20 @@ class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException            (underlying: Throwable)              extends Exception(underlying)
-class ConnectionFailedException   (underlying: Throwable)              extends ChannelException(underlying)
-class ChannelClosedException      (underlying: Throwable)              extends ChannelException(underlying) {
+class ChannelException            (underlying: Throwable) extends Exception(underlying)
+class ConnectionFailedException   (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace
+class ChannelClosedException      (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
   def this() = this(null)
 }
-class SpuriousMessageException    (underlying: Throwable)              extends ChannelException(underlying)
-class IllegalMessageException     (underlying: Throwable)              extends ChannelException(underlying)
-class WriteTimedOutException                                           extends ChannelException(null)
-class InconsistentStateException                                       extends ChannelException(null)
-case class UnknownChannelException(underlying: Throwable)              extends ChannelException(underlying)
-case class WriteException         (underlying: Throwable)              extends ChannelException(underlying)
+class SpuriousMessageException    (underlying: Throwable) extends ChannelException(underlying)
+class IllegalMessageException     (underlying: Throwable) extends ChannelException(underlying)
+class WriteTimedOutException extends ChannelException(null)
+class InconsistentStateException extends ChannelException(null)
+case class UnknownChannelException(underlying: Throwable) extends ChannelException(underlying)
+case class WriteException (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
+  override def fillInStackTrace = this
+  override def getStackTrace = underlying.getStackTrace
+}
 case class SslHandshakeException  (underlying: Throwable)              extends ChannelException(underlying)
 case class SslHostVerificationException(principal: String)             extends ChannelException(null)
 
