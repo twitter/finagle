@@ -18,32 +18,30 @@ class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException                      extends Exception
-class ConnectionFailedException             extends ChannelException
-class ChannelClosedException                extends ChannelException
-class SpuriousMessageException              extends ChannelException
-class IllegalMessageException               extends ChannelException
-class WriteTimedOutException                extends ChannelException
-class InconsistentStateException            extends ChannelException
-case class SslHandshakeException(t: Throwable)             extends ChannelException
-case class SslHostVerificationException(principal: String) extends ChannelException
-case class UnknownChannelException(e: Throwable) extends ChannelException {
-  override def toString = "%s: %s".format(super.toString, e.toString)
+class ChannelException            (underlying: Throwable)              extends Exception(underlying)
+class ConnectionFailedException   (underlying: Throwable)              extends ChannelException(underlying)
+class ChannelClosedException      (underlying: Throwable)              extends ChannelException(underlying) {
+  def this() = this(null)
 }
-case class WriteException(e: Throwable)     extends ChannelException {
-  override def toString = "%s: %s".format(super.toString, e.toString)
-}
+class SpuriousMessageException    (underlying: Throwable)              extends ChannelException(underlying)
+class IllegalMessageException     (underlying: Throwable)              extends ChannelException(underlying)
+class WriteTimedOutException                                           extends ChannelException(null)
+class InconsistentStateException                                       extends ChannelException(null)
+case class UnknownChannelException(underlying: Throwable)              extends ChannelException(underlying)
+case class WriteException         (underlying: Throwable)              extends ChannelException(underlying)
+case class SslHandshakeException  (underlying: Throwable)              extends ChannelException(underlying)
+case class SslHostVerificationException(principal: String)             extends ChannelException(null)
 
 object ChannelException {
   def apply(cause: Throwable) = {
     cause match {
       case exc: ChannelException => exc
-      case _: java.net.ConnectException                    => new ConnectionFailedException
-      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
-      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException
-      case e: java.io.IOException if "Connection reset by peer" == e.getMessage =>
-        new ChannelClosedException
-      case e                                               => new UnknownChannelException(e)
+      case _: java.net.ConnectException                    => new ConnectionFailedException(cause)
+      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException(cause)
+      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause)
+      case e: java.io.IOException
+        if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause)
+      case e                                               => new UnknownChannelException(cause)
     }
   }
 }
