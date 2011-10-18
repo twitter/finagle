@@ -35,7 +35,8 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   private[this] val state = new AtomicReference[State](Idle)
   private[this] val onShutdownPromise = new Promise[Unit]
 
-  // we know there's only one outstanding request at a time because ServerBuilder adds it in a separate layer.
+  // we know there's only one outstanding request at a time because
+  // ServerBuilder adds it in a separate layer.
   @volatile private[this] var currentResponse: Option[Future[Rep]] = None
 
   private[this] def shutdown() =
@@ -91,12 +92,11 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
       currentResponse = Some(promise)
       promise respond {
         case Return(value) =>
+          currentResponse = None
           Channels.write(channel, value)
         case Throw(e: Throwable) =>
           log.log(Level.WARNING, "service exception", e)
           shutdown()
-      } ensure {
-        currentResponse = None
       }
     } catch {
       case e: ClassCastException =>
