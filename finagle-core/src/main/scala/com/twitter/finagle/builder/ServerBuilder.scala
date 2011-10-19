@@ -1,43 +1,4 @@
 package com.twitter.finagle.builder
-/**
- * Provides a class for building servers.
- * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
- * {{{
- * ServerBuilder()
- *   .codec(Http)
- *   .hostConnectionMaxLifeTime(5.minutes)
- *   .readTimeout(2.minutes)
- *   .name("servicename")
- *   .bindTo(new InetSocketAddress(serverPort))
- *   .build(plusOneService)
- * }}}
- *
- * The `ServerBuilder` requires the definition of `codec`, `bindTo`
- * and `name`. In Scala, these are statically type
- * checked, and in Java the lack of any of the above causes a runtime
- * error.
- *
- * The `build` method uses an implicit argument to statically
- * typecheck the builder (to ensure completeness, see above). The Java
- * compiler cannot provide such implicit, so we provide a separate
- * function in Java to accomplish this. Thus, the Java code for the
- * above is
- *
- * {{{
- * ServerBuilder.safeBuild(
- *  plusOneService,
- *  ServerBuilder.get()
- *   .codec(Http)
- *   .hostConnectionMaxLifeTime(5.minutes)
- *   .readTimeout(2.minutes)
- *   .name("servicename")
- *   .bindTo(new InetSocketAddress(serverPort)));
- * }}}
- *
- * Alternatively, using the `unsafeBuild` method on `ServerBuilder`
- * verifies the builder dynamically, resulting in a runtime error
- * instead of a compiler error.
- */
 
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
@@ -217,6 +178,43 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
  * A handy Builder for constructing Servers (i.e., binding Services to
  * a port).  This class is subclassable. Override copy() and build()
  * to do your own dirty work.
+ * 
+ * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
+ * {{{
+ * ServerBuilder()
+ *   .codec(Http)
+ *   .hostConnectionMaxLifeTime(5.minutes)
+ *   .readTimeout(2.minutes)
+ *   .name("servicename")
+ *   .bindTo(new InetSocketAddress(serverPort))
+ *   .build(plusOneService)
+ * }}}
+ *
+ * The `ServerBuilder` requires the definition of `codec`, `bindTo`
+ * and `name`. In Scala, these are statically type
+ * checked, and in Java the lack of any of the above causes a runtime
+ * error.
+ *
+ * The `build` method uses an implicit argument to statically
+ * typecheck the builder (to ensure completeness, see above). The Java
+ * compiler cannot provide such implicit, so we provide a separate
+ * function in Java to accomplish this. Thus, the Java code for the
+ * above is
+ *
+ * {{{
+ * ServerBuilder.safeBuild(
+ *  plusOneService,
+ *  ServerBuilder.get()
+ *   .codec(Http)
+ *   .hostConnectionMaxLifeTime(5.minutes)
+ *   .readTimeout(2.minutes)
+ *   .name("servicename")
+ *   .bindTo(new InetSocketAddress(serverPort)));
+ * }}}
+ *
+ * Alternatively, using the `unsafeBuild` method on `ServerBuilder`
+ * verifies the builder dynamically, resulting in a runtime error
+ * instead of a compiler error.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   val config: ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
