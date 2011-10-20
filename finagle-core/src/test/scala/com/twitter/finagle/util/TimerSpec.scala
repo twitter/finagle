@@ -3,7 +3,11 @@ package com.twitter.finagle.util
 import org.specs.Specification
 import org.specs.mock.Mockito
 
-import com.twitter.util.{CountDownLatch, Time}
+import java.util.concurrent.TimeUnit
+import org.jboss.netty.{util => nu}
+import com.twitter.util.{
+  CountDownLatch, Time, TimerTask,
+  ReferenceCountedTimer}
 import com.twitter.conversions.time._
 
 object TimerSpec extends Specification with Mockito {
@@ -28,6 +32,90 @@ object TimerSpec extends Specification with Mockito {
     "not execute the task if it has been cancelled" in {
       task.cancel()
       latch.await(2.seconds) must beFalse
+    }
+  }
+}
+
+object TimerToNettyTimerSpec extends Specification with Mockito {
+  // We have to jump through a lot of hoops here just
+  // to make assertions about Timer#schedule calls.
+  class MockReferenceCountedTimer(underlying: Timer)
+    extends ReferenceCountedTimer(() => underlying)
+  {
+    val scheduled =
+      new collection.mutable.ArrayBuffer[(Time, () => Unit, TimerTask)]
+    override def schedule(when: Time)(f: => Unit) = {
+      val tt = mock[TimerTask]
+      scheduled.append((when, () => f, tt))
+      tt
+    }
+  }
+
+  "TimerToNettyTimer" should {
+    val underlyingTimer = mock[Timer]
+    val underlying = spy(
+      new MockReferenceCountedTimer(underlyingTimer))
+    val nettyTimer = new TimerToNettyTimer(underlying)
+    var ran: Option[nu.Timeout] = None
+
+    def schedule() = nettyTimer.newTimeout(
+      new nu.TimerTask {
+        def run(to: nu.Timeout) {
+          ran = Some(to)
+        }
+      }, 10, TimeUnit.SECONDS)
+
+
+    "Adding a timeout" in {
+      there was no(underlying).acquire()
+      underlying.scheduled must beEmpty
+
+      "schedule on underlying timer" in Time.withCurrentTimeFrozen { tc =>
+        schedule()
+        there was one(underlying).acquire()
+        underlying.scheduled must haveSize(1)
+        underlying.scheduled(0) must beLike {
+          case (t, _, _) if t == 10.seconds.fromNow => true
+        }
+        ran must beNone
+        there was no(underlying).stop()
+      }
+
+      "when running" in {
+        "dereference the timer" in {
+          schedule()
+          val (_, f, _) = underlying.scheduled(0)
+          f()
+          there was one(underlying).stop()
+        }
+
+        "set expired on the task" in {
+          val task = schedule()
+          task.isExpired must beFalse
+          val (_, f, _) = underlying.scheduled(0)
+          f()
+          task.isExpired must beTrue
+        }
+      }
+
+      "when cancelling" in {
+        "cancel the underlying task" in {
+          val task = schedule()
+          val (_, _, tt) = underlying.scheduled(0)
+          there was no(tt).cancel()
+          task.cancel()
+          there was one(tt).cancel()
+          there was one(underlying).stop()
+        }
+
+        "sets cancelled/expired on task" in {
+          val task = schedule()
+          task.isCancelled must beFalse
+          task.cancel()
+          task.isCancelled must beTrue
+          task.isExpired must beTrue
+        }
+      }
     }
   }
 }

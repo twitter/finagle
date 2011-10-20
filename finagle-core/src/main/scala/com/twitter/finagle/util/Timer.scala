@@ -4,7 +4,8 @@ import collection.mutable.HashSet
 
 import java.util.concurrent.{TimeUnit, Executors}
 import java.util.concurrent.atomic.AtomicReference
-import org.jboss.netty.util.{HashedWheelTimer, Timeout}
+import org.jboss.netty.util.{HashedWheelTimer}
+import org.jboss.netty.{util => nu}
 
 import com.twitter.util.{
   Time, Duration, TimerTask,
@@ -47,38 +48,46 @@ private[finagle] object Timer {
  * a Netty timer.
  */
 private[finagle] class TimerToNettyTimer(underlying: ReferenceCountedTimer)
-  extends org.jboss.netty.util.Timer
+  extends nu.Timer
 {
   private[this] object State extends Enumeration {
     type State = Value
     val Pending, Expired, Cancelled = Value
   }
 
-  def newTimeout(task: org.jboss.netty.util.TimerTask, delay: Long, unit: TimeUnit) = {
-    val timeout = new Timeout {
+  def newTimeout(task: nu.TimerTask, delay: Long, unit: TimeUnit) = {
+    @volatile var underlyingTask: TimerTask = null
+    val timeout = new nu.Timeout {
       import State._
       private[this] val state = new AtomicReference[State](Pending)
-      private[this] def transition(targetState: State) {
-        if (state.compareAndSet(Pending, targetState)) {
-          if (targetState == Expired)
-            task.run(this)
+      private[this] def transition(newState: State)(onSucc: => Unit) {
+        if (state.compareAndSet(Pending, newState)) {
+          onSucc
           underlying.stop()
         }
       }
 
-      def cancel()    = transition(Cancelled)
       def isCancelled = state.get == Cancelled
-      def getTask()   = task
-      def getTimer    = TimerToNettyTimer.this
-      def isExpired   = state.get == Expired || isCancelled
-      def run()       = transition(Expired)
+      def getTask() = task
+      def getTimer = TimerToNettyTimer.this
+      def isExpired = state.get == Expired || isCancelled
+
+      def cancel() {
+        transition(Cancelled) {
+          underlyingTask.cancel()
+        }
+      }
+
+      def run() {
+        transition(Expired) {
+          task.run(this)
+        }
+      }
     }
 
     underlying.acquire()
-    underlying.schedule(Time.now + Duration.fromTimeUnit(delay, unit)) {
-      timeout.run()
-    }
-
+    val when = Time.now + Duration.fromTimeUnit(delay, unit)
+    underlyingTask = underlying.schedule(when) { timeout.run() }
     timeout
   }
 
@@ -92,10 +101,10 @@ private[finagle] class TimerToNettyTimer(underlying: ReferenceCountedTimer)
  * Implements a [[com.twitter.util.Timer]] in terms of a
  * [[org.jboss.netty.util.Timer]].
  */
-class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Timer {
+class Timer(underlying: nu.Timer) extends com.twitter.util.Timer {
   def schedule(when: Time)(f: => Unit): TimerTask = {
-    val timeout = underlying.newTimeout(new org.jboss.netty.util.TimerTask {
-      def run(to: Timeout) {
+    val timeout = underlying.newTimeout(new nu.TimerTask {
+      def run(to: nu.Timeout) {
         if (!to.isCancelled) f
       }
     }, (when - Time.now).inMilliseconds max 0, TimeUnit.MILLISECONDS)
@@ -111,7 +120,7 @@ class Timer(underlying: org.jboss.netty.util.Timer) extends com.twitter.util.Tim
 
   def stop() { underlying.stop() }
 
-  private[this] def toTimerTask(task: Timeout) = new TimerTask {
+  private[this] def toTimerTask(task: nu.Timeout) = new TimerTask {
     def cancel() { task.cancel() }
   }
 }
