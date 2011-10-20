@@ -142,13 +142,11 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
 }
 
 object NullStatsReceiver extends StatsReceiver with JavaSingleton {
-  def counter(name: String*) = new Counter {
-    def incr(delta: Int) {}
-  }
+  private[this] val NullCounter = new Counter { def incr(delta: Int) {} }
+  private[this] val NullStat = new Stat { def add(value: Float) {}}
+  private[this] val NullGauge = new Gauge { def remove() {} }
 
-  def stat(name: String*) = new Stat {
-    def add(value: Float) {}
-  }
-
-  def addGauge(name: String*)(f: => Float) = new Gauge { def remove() {} }
+  def counter(name: String*) = NullCounter
+  def stat(name: String*) = NullStat
+  def addGauge(name: String*)(f: => Float) = NullGauge
 }
