@@ -177,7 +177,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
 /**
  * A handy Builder for constructing Servers (i.e., binding Services to
  * a port).  This class is subclassable. Override copy() and build()
- * to do your own dirty work.
+ * to do your own dirty work. 
  * 
  * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
  * {{{
