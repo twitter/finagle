@@ -30,7 +30,7 @@ package com.twitter
   *    .hostConnectionLimit(1)  // 1 connection per host
   *    .build()                 // build the client 
   *
-  * // Issue a request, get a response:
+  * // Issue a request, get a response: 
   * val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, "/")                      
   * val responseFuture: Future[HttpResponse] = client(request)           // response to request is a Future, which enables async execution
   *   onSuccess { response => println("Received response: " + response)  // Finagle calls onSuccess when the response becomes available
