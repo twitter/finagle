@@ -273,6 +273,7 @@ class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddre
     // with a locally generated id
     Trace.recordBinary("http.uri", request.getUri)
     Trace.recordRpcname(serviceName, request.getMethod.getName)
+    Trace.recordServerAddr(boundAddress)
 
     Trace.record(Annotation.ServerRecv())
     service(request) map { response =>
