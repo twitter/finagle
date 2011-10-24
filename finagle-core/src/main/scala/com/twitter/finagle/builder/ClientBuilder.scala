@@ -686,6 +686,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
       new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
+      {
+        override def close() = {
+          super.close()
+          Timer.default.stop()
+        }
+      }
     } else {
       new LoadBalancedFactory(
         hostFactories,
