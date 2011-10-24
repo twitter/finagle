@@ -1,7 +1,7 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.channel._
+import com.twitter.util.Duration
 
 case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
@@ -16,7 +16,7 @@ case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
  * - if above high watermark: collect (close) idle connections, and refuse/accept the
  *   connection depending if we managed to close an idle connection.
  */
-class ChannelLimitHandler(thresholds: OpenConnectionsThresholds, idleTimeout : Long, nbOfConnectionToClose : Int = 5)
+class ChannelLimitHandler(thresholds: OpenConnectionsThresholds, idleTimeoutDuration : Duration, nbOfConnectionToClose : Int = 5)
     extends SimpleChannelHandler
     with LifeCycleAwareChannelHandler
 {
@@ -24,6 +24,7 @@ class ChannelLimitHandler(thresholds: OpenConnectionsThresholds, idleTimeout : L
 
   private[this] var connectionCount = 0
   private[this] val activeConnections = mutable.HashMap.empty[Channel,Long]
+  private[this] val idleTimeout = idleTimeoutDuration.inMilliseconds
 
   def openConnections = connectionCount
 

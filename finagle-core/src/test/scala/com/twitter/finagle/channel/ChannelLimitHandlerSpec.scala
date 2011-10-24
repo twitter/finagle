@@ -3,6 +3,8 @@ package com.twitter.finagle.channel
 import org.specs.Specification
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
+import com.twitter.conversions.time._
+
 
 object ChannelLimitHandlerSpec extends Specification with Mockito {
   "ChannelLimitHandlerSpec" should {
@@ -31,7 +33,7 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
     }
 
     val thresholds = OpenConnectionsThresholds(5, 10)
-    val idleTimeout = 100
+    val idleTimeout = 100 milliseconds
     val handler = new ChannelLimitHandler(thresholds, idleTimeout, 1)
 
     "correctly count connections" in {
