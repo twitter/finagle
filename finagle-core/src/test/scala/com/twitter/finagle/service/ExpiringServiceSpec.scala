@@ -17,27 +17,29 @@ object ExpiringServiceSpec extends Specification with Mockito {
       val promise = new Promise[Int]
       underlying(123) returns promise
       underlying.isAvailable returns true
-      
-      "have release-once semantics" in {
+
+      "releasing" in {
         val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer)
         there was no(underlying).release()
-        
-        "when calling service.release() multiple times" in {
+
+        "cancel timers on release" in {
+          val count = timer.tasks.size
+          val service = new ExpiringService[Any, Any](
+            underlying, Some(10.seconds), Some(5.seconds), timer)
+          timer.tasks.size mustEqual count + 2
           service.release()
-          there was one(underlying).release()
-          service.release()
-          there was one(underlying).release()
+          timer.tasks.size mustEqual count
         }
-        
+
         "after expiring" in {
           timeControl.advance(10.seconds)
           timer.tick()
-          
+
           there was one(underlying).release()
-          
+
           // Now attempt to release it once more:
           service.release()
-          there was one(underlying).release()
+          there were two(underlying).release()
         }
       }
 
@@ -47,12 +49,10 @@ object ExpiringServiceSpec extends Specification with Mockito {
         "expire after the given idle time" in {
           // For some reason, this complains of different types:
           //   timer.tasks.head.when must be_==(Time.now + 10.seconds)
-          service.isAvailable must beTrue
 
           timeControl.advance(10.seconds)
           timer.tick()
 
-          service.isAvailable must beFalse
           there was one(underlying).release()
 
           timer.tasks must beEmpty
@@ -88,19 +88,17 @@ object ExpiringServiceSpec extends Specification with Mockito {
           service(132)() must throwA[WriteException]
         }
       }
-      
+
       "life time of a connection" in {
         val service = new ExpiringService[Any, Any](underlying, None, Some(10.seconds), timer)
         timer.tasks must haveSize(1)
         "expire after the given idle time" in {
           // For some reason, this complains of different types:
           //   timer.tasks.head.when must be_==(Time.now + 10.seconds)
-          service.isAvailable must beTrue
 
           timeControl.advance(10.seconds)
           timer.tick()
 
-          service.isAvailable must beFalse
           there was one(underlying).release()
 
           timer.tasks must beEmpty
@@ -111,7 +109,7 @@ object ExpiringServiceSpec extends Specification with Mockito {
           timer.tasks must haveSize(1)
           timer.tasks.head.isCancelled must beFalse
         }
-        
+
         "throw an write exception if we attempt to use an expired service" in {
           timeControl.advance(10.seconds)
           timer.tick()
@@ -119,42 +117,40 @@ object ExpiringServiceSpec extends Specification with Mockito {
           service(132)() must throwA[WriteException]
         }
       }
-      
+
       "idle timer fires before life timer fires" in {
         val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(1.minute), timer)
         timer.tasks must haveSize(2)
-        
+
         "expire after the given idle time" in {
           // For some reason, this complains of different types:
           //   timer.tasks.head.when must be_==(Time.now + 10.seconds)
-          service.isAvailable must beTrue
 
           timeControl.advance(10.seconds)
           timer.tick()
 
-          service.isAvailable must beFalse
           there was one(underlying).release()
 
           timer.tasks must beEmpty
-        }                
+        }
       }
-      
+
       "life timer fires before idle timer fires" in {
         val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(15.seconds), timer)
         timer.tasks must haveSize(2)
         timer.tasks forall(!_.isCancelled) must beTrue
-        
+
         "expire after the given life time" in {
           service(123)
           timer.tasks must haveSize(1)
           timer.tasks.head.isCancelled must beFalse
-         
+
           timeControl.advance(8.seconds)
           timer.tick()
 
           timer.tasks must haveSize(1)
           timer.tasks.head.isCancelled must beFalse
-          
+
           promise() = Return(321)
           timer.tasks must haveSize(2)
           timer.tasks forall(!_.isCancelled) must beTrue
@@ -164,34 +160,7 @@ object ExpiringServiceSpec extends Specification with Mockito {
           timer.tick()
 
           timer.tasks must beEmpty
-          service.isAvailable must beFalse
           there was one(underlying).release()
-        }
-      }
-      
-      "life timer fires while there are requests" in {
-        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(5.seconds), timer)
-        timer.tasks must haveSize(2)
-        timer.tasks forall(!_.isCancelled) must beTrue
-        
-        "expire after the given life time" in {
-          service(123)
-          timer.tasks must haveSize(1)
-          timer.tasks.head.isCancelled must beFalse
-         
-          timeControl.advance(8.seconds)
-          timer.tick()
-
-          timer.tasks must beEmpty
-          service.isAvailable must beFalse
-          there was no(underlying).release()
-          
-          promise() = Return(321)
-          timer.tasks must beEmpty
-          service.isAvailable must beFalse
-          there was one(underlying).release()
-          
-          service(132)() must throwA[WriteException]
         }
       }
     }

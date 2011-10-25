@@ -511,7 +511,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
               config.hostConnectionMaxIdleTime,
               config.hostConnectionMaxLifeTime
             ) {
-              override def didExpire() { closingHandler.close() }
+              override def expired() { closingHandler.close() }
             }
         }
 
