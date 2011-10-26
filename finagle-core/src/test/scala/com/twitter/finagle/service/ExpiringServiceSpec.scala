@@ -5,12 +5,19 @@ import org.specs.mock.Mockito
 
 import com.twitter.finagle.{Service, WriteException}
 import com.twitter.finagle.MockTimer
+import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 
 import com.twitter.util.{Time, Promise, Return}
 import com.twitter.conversions.time._
 
 object ExpiringServiceSpec extends Specification with Mockito {
   "ExpiringService" should {
+    val stats = mock[StatsReceiver]
+    val idleCounter = mock[Counter]
+    val lifeCounter = mock[Counter]
+    stats.counter("idle") returns idleCounter
+    stats.counter("lifetime") returns lifeCounter
+
     Time.withCurrentTimeFrozen { timeControl =>
       val timer = new MockTimer
       val underlying = mock[Service[Any, Any]]
@@ -56,6 +63,14 @@ object ExpiringServiceSpec extends Specification with Mockito {
           there was one(underlying).release()
 
           timer.tasks must beEmpty
+        }
+
+        "increments the counter when the timer fires" in {
+          val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer, stats)
+          timeControl.advance(10.seconds)
+          timer.tick()
+          there was one(idleCounter).incr()
+          there was no(lifeCounter).incr()
         }
 
         "cancel the timer when a request is issued" in {
@@ -136,7 +151,7 @@ object ExpiringServiceSpec extends Specification with Mockito {
       }
 
       "life timer fires before idle timer fires" in {
-        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(15.seconds), timer)
+        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(15.seconds), timer, stats)
         timer.tasks must haveSize(2)
         timer.tasks forall(!_.isCancelled) must beTrue
 
@@ -162,6 +177,14 @@ object ExpiringServiceSpec extends Specification with Mockito {
           timer.tasks must beEmpty
           there was one(underlying).release()
         }
+      }
+
+      "increments the counter when the timer fires" in {
+        val service = new ExpiringService[Any, Any](underlying, None, Some(10.seconds), timer, stats)
+        timeControl.advance(10.seconds)
+        timer.tick()
+        there was one(lifeCounter).incr()
+        there was no(idleCounter).incr()
       }
     }
   }

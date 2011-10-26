@@ -509,7 +509,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
             new ExpiringService(
               service,
               config.hostConnectionMaxIdleTime,
-              config.hostConnectionMaxLifeTime
+              config.hostConnectionMaxLifeTime,
+              Timer.default,
+              scopedOrNullStatsReceiver.scope("expired")
             ) {
               override def expired() { closingHandler.close() }
             }

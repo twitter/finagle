@@ -7,7 +7,7 @@ import com.twitter.finagle.util.{Timer, AsyncLatch}
 import com.twitter.finagle.{
   ChannelClosedException, Service, ServiceClosedException,
   ServiceProxy, WriteException}
-
+import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 /**
  * A service wrapper that expires the self service after a
  * certain amount of idle time. By default, expiring calls
@@ -18,23 +18,28 @@ class ExpiringService[Req, Rep](
   self: Service[Req, Rep],
   maxIdleTime: Option[Duration],
   maxLifeTime: Option[Duration],
-  timer: util.Timer = Timer.default)
+  timer: util.Timer = Timer.default,
+  stats: StatsReceiver = NullStatsReceiver)
   extends ServiceProxy[Req, Rep](self)
 {
   private[this] var active = true
   private[this] val latch = new AsyncLatch
 
-  private[this] var idleTask = startTimer(maxIdleTime)
-  private[this] var lifeTask = startTimer(maxLifeTime)
+  private[this] val idleCounter = stats.counter("idle")
+  private[this] val lifeCounter = stats.counter("lifetime")
+  private[this] var idleTask = startTimer(maxIdleTime, idleCounter)
+  private[this] var lifeTask = startTimer(maxLifeTime, lifeCounter)
 
-  private[this] def startTimer(duration: Option[Duration]) =
+  private[this] def startTimer(duration: Option[Duration], counter: Counter) =
     duration map { t: Duration =>
-      timer.schedule(t.fromNow) { expire() }
+      timer.schedule(t.fromNow) { expire(counter) }
     } getOrElse { NullTimerTask }
 
-  private[this] def expire() = latch.await {
-    if (deactivate())
+  private[this] def expire(counter: Counter) = latch.await {
+    if (deactivate()) {
       expired()
+      counter.incr()
+    }
   }
 
   private[this] def deactivate(): Boolean = synchronized {
@@ -68,7 +73,7 @@ class ExpiringService[Req, Rep](
         val n = latch.decr()
         synchronized {
           if (n == 0 && active)
-            idleTask = startTimer(maxIdleTime)
+            idleTask = startTimer(maxIdleTime, idleCounter)
         }
       }
     } else {
