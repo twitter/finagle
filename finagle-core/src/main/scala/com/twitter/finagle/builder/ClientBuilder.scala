@@ -706,6 +706,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     }
 
+    /*
+     * Everything above this point in the stack (load balancer, pool)
+     * expect that the we only release after the last request is done.
+     * Thus, the Refcounted factory serves as a rectifier.
+     */
+    factory = new RefcountedFactory(factory)
+
     if (config.connectTimeout < Duration.MaxValue)
       factory = new TimeoutFactory(
         factory,

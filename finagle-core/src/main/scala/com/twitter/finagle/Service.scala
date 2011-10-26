@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import java.net.SocketAddress
-import com.twitter.finagle.service.RefcountedService
 import com.twitter.util.Future
 import org.jboss.netty.channel.Channel
 
@@ -177,11 +176,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    *
    */
   def andThen(service: Service[ReqOut, RepIn]) = new Service[ReqIn, RepOut] {
-    private[this] val refcounted = new RefcountedService(service)
-
-    def apply(request: ReqIn) = Filter.this.apply(request, refcounted)
-    override def release() = refcounted.release()
-    override def isAvailable = refcounted.isAvailable
+    def apply(request: ReqIn) = Filter.this.apply(request, service)
+    override def release() = service.release()
+    override def isAvailable = service.isAvailable
   }
 
   def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
