@@ -1,5 +1,19 @@
+1.9.4		2011/10/24
+
 	* Service: response Future will now be cancelled if the client
           disconnects
+	* use static exceptions for TimedOutRequestException
+	* kestrel: Cancel request Future on close in kestrel ReadHandle
+	* exception cleanup: wrap all Channel exceptions with their
+	underlying exception.  This makes UnknownChannelExceptions in
+	particular easier to debug
+	* Friendlier exceptions: In order to give very specific error
+	messages to timeouts in finagle (so beginners know which
+	settings in the client and server builder caused them), I'm
+	adding lots of human-readable messages to the various
+	TimeoutExceptions.
+	* some timer bug fixes, particularly: TimerToNettyTimer:
+	actually cancel underlying task.
 
 1.9.2		2011/10/14
 

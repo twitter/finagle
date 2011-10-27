@@ -85,7 +85,9 @@ trait Server {
  */
 object ServerBuilder {
 
-  type Complete[Req, Rep] = ServerBuilder[Req, Rep, ServerConfig.Yes, ServerConfig.Yes, ServerConfig.Yes]
+  type Complete[Req, Rep] = ServerBuilder[
+    Req, Rep, ServerConfig.Yes,
+    ServerConfig.Yes, ServerConfig.Yes]
 
   def apply() = new ServerBuilder()
   def get() = apply()
@@ -322,7 +324,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def build(service: Service[Req, Rep]) (
      implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
        ThisConfig =:= FullySpecifiedConfig
-   ): Server = build(() => service)
+   ): Server = build { () =>
+     new ServiceProxy[Req, Rep](service) {
+       // release() is meaningless on connectionless services.
+       override def release() = ()
+     }
+   }
 
   /**
    * Construct the Server, given the provided Service factory.
@@ -341,7 +348,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Server = {
-
     val scopedStatsReceiver =
       config.statsReceiver map { sr => config.name map (sr.scope(_)) getOrElse sr }
 
@@ -391,9 +397,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val channels = new HashSet[ChannelHandle]
 
     // We share some filters & handlers for cumulative stats.
-    val statsFilter                   = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
-    val channelStatsHandler           = scopedStatsReceiver map { new ChannelStatsHandler(_) }
-    val channelRequestStatsHandler    = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
+    val statsFilter = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
+    val channelStatsHandler = scopedStatsReceiver map { new ChannelStatsHandler(_) }
+    val channelRequestStatsHandler = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
 
     // health-measuring handler
     val channelOpenConnectionsHandler = config.openConnectionsHealthThresholds map {
@@ -513,14 +519,17 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
             new ExpiringService(
               service,
               config.timeoutCfg.hostConnectionMaxIdleTime,
-              config.timeoutCfg.hostConnectionMaxLifeTime
+              config.timeoutCfg.hostConnectionMaxLifeTime,
+              Timer.default,
+              scopedOrNullStatsReceiver.scope("expired")
             ) {
-              override def didExpire() { closingHandler.close() }
+              override def expired() { closingHandler.close() }
             }
         }
 
         config.timeoutCfg.requestTimeout foreach { duration =>
-          service = (new TimeoutFilter(duration)) andThen service
+          val e = new IndividualRequestTimeoutException(duration)
+          service = (new TimeoutFilter(duration, e)) andThen service
         }
 
         // This has to go last (ie. first in the stack) so that
@@ -529,7 +538,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         service = (new TracingFilter(config.tracer)) andThen service
 
         val channelHandler = new ServiceToChannelHandler(
-          service, postponedService, serviceFactory, scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName))
+          service, postponedService, serviceFactory,
+          scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName))
 
         /*
          * Register the channel so we can wait for them for a drain. We close the socket but wait

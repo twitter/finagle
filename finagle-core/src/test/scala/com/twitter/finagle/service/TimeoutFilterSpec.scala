@@ -5,7 +5,7 @@ import org.specs.mock.Mockito
 import com.twitter.finagle.util.Timer
 import com.twitter.conversions.time._
 import com.twitter.util.{Promise, Time}
-import com.twitter.finagle.{TimedoutRequestException, Service, MockTimer}
+import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
 
 object TimeoutFilterSpec extends Specification with Mockito {
   "TimeoutFilter" should {
@@ -14,7 +14,9 @@ object TimeoutFilterSpec extends Specification with Mockito {
     val service = new Service[String, String] {
       def apply(request: String) = promise
     }
-    val timeoutFilter = new TimeoutFilter[String, String](1.second, timer)
+    val timeout = 1.second
+    val exception = new IndividualRequestTimeoutException(timeout)
+    val timeoutFilter = new TimeoutFilter[String, String](timeout, exception, timer)
     val timeoutService = timeoutFilter.andThen(service)
 
     "the request succeeds when the service succeeds" in {
@@ -32,7 +34,7 @@ object TimeoutFilterSpec extends Specification with Mockito {
       timer.tick()
       res.isDefined must beTrue
       promise.isCancelled must beTrue
-     res() must throwA[TimedoutRequestException]
+     res() must throwA(exception)
     }
   }
 }
