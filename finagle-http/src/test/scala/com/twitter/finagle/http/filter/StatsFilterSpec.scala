@@ -12,6 +12,7 @@ import scala.collection.mutable
 object StatsFilterSpec extends Specification {
 
   class InMemoryStatsReceiver extends StatsReceiver {
+    val repr = StatsFilterSpec.this
     val counters = mutable.Map[String, Int]()
     val stats    = mutable.Map[String, List[Float]]()
     val gauges   = mutable.Map[String, () => Float]()

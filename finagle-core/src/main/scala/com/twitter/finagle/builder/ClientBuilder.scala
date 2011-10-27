@@ -65,7 +65,7 @@ import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
-import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy, HeapBalancer}
 import com.twitter.finagle.ssl.{Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
@@ -631,6 +631,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       ThisConfig =:= FullySpecifiedConfig
   ): ServiceFactory[Req, Rep] = {
     Timer.default.acquire()
+
+    GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
     val cluster = config.cluster.get
     val codec   = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))

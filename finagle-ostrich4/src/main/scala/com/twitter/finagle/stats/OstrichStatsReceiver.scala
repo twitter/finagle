@@ -3,6 +3,8 @@ package com.twitter.finagle.stats
 import com.twitter.ostrich.stats.Stats
 
 class OstrichStatsReceiver extends StatsReceiverWithCumulativeGauges {
+  val repr = Stats
+
   protected[this] def registerGauge(name: Seq[String], f: => Float) {
     Stats.addGauge(variableName(name)) { f.toDouble }
   }
