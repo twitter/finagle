@@ -268,6 +268,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     } handle {
       case t: RequestException => GetResult(failures = (keys map { (_, t) }).toMap)
       case t: ChannelException => GetResult(failures = (keys map { (_, t) }).toMap)
+      case t: ServiceException => GetResult(failures = (keys map { (_, t) }).toMap)
     }
   }
 
