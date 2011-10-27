@@ -5,7 +5,7 @@ import scala.collection.immutable
 
 import _root_.java.util.{Map => JMap}
 
-import com.twitter.finagle.{ChannelException, RequestException}
+import com.twitter.finagle.{ChannelException, RequestException, ServiceException}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
