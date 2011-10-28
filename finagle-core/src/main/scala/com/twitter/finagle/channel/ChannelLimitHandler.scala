@@ -23,7 +23,7 @@ trait IdleConnectionHandler {
 trait PreciseIdleConnectionHandler extends IdleConnectionHandler {
   private[this] val activeConnections = mutable.HashMap.empty[Channel,Long]
 
-  def getIdleConnection : Option[Channel] = activeConnections synchronized {
+  def getIdleConnection : Option[Channel] = synchronized {
     val now = System.currentTimeMillis()
 
     var oldestChannel : Option[Channel] = None
@@ -37,11 +37,11 @@ trait PreciseIdleConnectionHandler extends IdleConnectionHandler {
     oldestChannel
   }
 
-  def markChannelAsActive( channel : Channel ) = activeConnections synchronized {
+  def markChannelAsActive( channel : Channel ) = synchronized {
     activeConnections += (channel -> System.currentTimeMillis())
   }
 
-  def removeChannel( channel : Channel ) = activeConnections synchronized {
+  def removeChannel( channel : Channel ) = synchronized {
     activeConnections -= channel
   }
 }
@@ -57,38 +57,38 @@ trait PreciseIdleConnectionHandler extends IdleConnectionHandler {
 trait BucketIdleConnectionHandler extends IdleConnectionHandler {
   private[this] val bucketSize = idleTimeout.inMilliseconds
   private[this] val bucketNumber = 3
-  private[this] val activeConnections = (1 to bucketNumber).map{ _ => mutable.HashSet.empty[Channel] }
+  private[this] val activeConnections = (1 to bucketNumber).map{ _ => mutable.HashSet.empty[Channel] }.toArray
 
-  private[this] def currentBucketIndex = (System.currentTimeMillis() / bucketSize).toInt
+  private[this] def currentBucketIndex = System.currentTimeMillis() / bucketSize
   private[this] var lastBucketIndex = currentBucketIndex
 
-  private[this] def getBucket(i : Int, currentNewIndex : Int) = synchronized {
+  private[this] def getBucket(i : Int, currentNewIndex : Long) = synchronized {
     val index = currentNewIndex + i
 
-    def move( fromIndex : Int , toIndex : Int ) {
-      activeConnections( toIndex % bucketNumber ) ++= activeConnections(fromIndex % bucketNumber)
-      activeConnections( fromIndex % bucketNumber ).clear()
+    def move( fromIndex : Long , toIndex : Long ) {
+      activeConnections( (toIndex % bucketNumber).toInt ) ++= activeConnections( (fromIndex % bucketNumber).toInt )
+      activeConnections( (fromIndex % bucketNumber).toInt ).clear()
     }
 
     val res = (currentNewIndex - lastBucketIndex) match {
-      case 0 =>
-        activeConnections(index % bucketNumber)
-      case 1 =>
+      case 0L =>
+        activeConnections((index % bucketNumber).toInt)
+      case 1L =>
         move(currentNewIndex, currentNewIndex + 1)
         lastBucketIndex = currentNewIndex
-        activeConnections(index % bucketNumber)
+        activeConnections((index % bucketNumber).toInt)
       case _ =>
         move(currentNewIndex, currentNewIndex + 1)
         move(currentNewIndex - 1, currentNewIndex + 1)
         lastBucketIndex = currentNewIndex
-        activeConnections(index % bucketNumber)
+        activeConnections((index % bucketNumber).toInt)
     }
     res
   }
 
-  private[this] def newestBucket(currentNewIndex : Int) = getBucket(0, currentNewIndex)
-  private[this] def intermediateBucket(currentNewIndex : Int) = getBucket(-1, currentNewIndex)
-  private[this] def oldestBucket(currentNewIndex : Int) = getBucket(-2, currentNewIndex)
+  private[this] def newestBucket(currentNewIndex : Long) = getBucket(0, currentNewIndex)
+  private[this] def intermediateBucket(currentNewIndex : Long) = getBucket(-1, currentNewIndex)
+  private[this] def oldestBucket(currentNewIndex : Long) = getBucket(-2, currentNewIndex)
 
   def getIdleConnection : Option[Channel] = synchronized {
     val currentNewIndex = currentBucketIndex
@@ -144,6 +144,7 @@ class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeout
       else
         markChannelAsActive(ctx.getChannel)
     }
+    super.channelOpen(ctx, e)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
