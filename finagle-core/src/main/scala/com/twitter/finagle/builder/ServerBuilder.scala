@@ -315,7 +315,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tracer(receiver: Tracer): This =
     withConfig(_.copy(_tracer = receiver))
 
-  def openConnectionsThreashold(thresholds : OpenConnectionsThresholds): This =
+  def openConnectionsThresholds(thresholds : OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
 
   /**
@@ -418,10 +418,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         config.logger foreach { logger =>
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(config.name getOrElse "server")(logger.info))
-        }
-
-        channelLimitHandler foreach { handler =>
-          pipeline.addFirst("channelLimitHandler", handler)
         }
 
         channelOpenConnectionsHandler foreach { handler =>
@@ -563,6 +559,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
 
         pipeline.addLast("channelHandler", channelHandler)
+
+        // Connection limiting system comes first
+        channelLimitHandler foreach { handler =>
+          pipeline.addFirst("channelLimitHandler", handler)
+        }
+
         pipeline
       }
     })
