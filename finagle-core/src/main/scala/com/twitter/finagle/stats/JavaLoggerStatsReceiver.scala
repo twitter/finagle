@@ -11,6 +11,7 @@ import com.twitter.finagle.util.Timer
 class JavaLoggerStatsReceiver(logger: Logger, timer: util.Timer)
   extends StatsReceiverWithCumulativeGauges
 {
+  val repr = logger
   var timerTasks = new HashMap[Seq[String], util.TimerTask]
 
   def this(logger: Logger) = this(logger, Timer.default)

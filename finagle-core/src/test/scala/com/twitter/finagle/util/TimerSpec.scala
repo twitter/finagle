@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 import org.jboss.netty.{util => nu}
 import com.twitter.util.{
   CountDownLatch, Time, TimerTask,
-  ReferenceCountedTimer}
+  ReferenceCountingTimer, MockTimer}
 import com.twitter.conversions.time._
 
 object TimerSpec extends Specification with Mockito {
@@ -39,8 +39,8 @@ object TimerSpec extends Specification with Mockito {
 object TimerToNettyTimerSpec extends Specification with Mockito {
   // We have to jump through a lot of hoops here just
   // to make assertions about Timer#schedule calls.
-  class MockReferenceCountedTimer(underlying: Timer)
-    extends ReferenceCountedTimer(() => underlying)
+  class MockReferenceCountingTimer(underlying: Timer)
+    extends ReferenceCountingTimer(() => underlying)
   {
     val scheduled =
       new collection.mutable.ArrayBuffer[(Time, () => Unit, TimerTask)]
@@ -54,7 +54,7 @@ object TimerToNettyTimerSpec extends Specification with Mockito {
   "TimerToNettyTimer" should {
     val underlyingTimer = mock[Timer]
     val underlying = spy(
-      new MockReferenceCountedTimer(underlyingTimer))
+      new MockReferenceCountingTimer(underlyingTimer))
     val nettyTimer = new TimerToNettyTimer(underlying)
     var ran: Option[nu.Timeout] = None
 
@@ -116,6 +116,49 @@ object TimerToNettyTimerSpec extends Specification with Mockito {
           task.isExpired must beTrue
         }
       }
+    }
+  }
+
+  "CountingTimer" should {
+    val underlying = new MockTimer
+    val timer = new CountingTimer(underlying)
+    "count when run" in Time.withCurrentTimeFrozen { tc =>
+      timer.count must be_==(0)
+      1 until 100 foreach { i =>
+        timer.schedule(10.seconds.fromNow) {/*nada*/}
+        timer.count must be_==(i)
+      }
+      tc.advance(10.seconds)
+      underlying.tick()
+      timer.count must be_==(0)
+    }
+
+    "count when cancelled" in Time.withCurrentTimeFrozen { tc =>
+      timer.count must be_==(0)
+      val tasks = 1 until 100 map { i =>
+        val t = timer.schedule(10.seconds.fromNow) {/*nada*/}
+        timer.count must be_==(i)
+        t
+      }
+
+      tasks.zipWithIndex.reverse foreach { case (t, i) =>
+        t.cancel()
+        timer.count must be_==(i)
+      }
+    }
+
+    "run when ran" in Time.withCurrentTimeFrozen { tc =>
+      var ran = 0
+      1 until 100 foreach { i =>
+        timer.schedule(i.seconds.fromNow) {ran += 1}
+        timer.count must be_==(i)
+      }
+      1 until 100 foreach { i =>
+        tc.advance(1.second)
+        underlying.tick()
+        ran must be_==(i)
+      }
+      timer.count must be_==(0)
     }
   }
 }

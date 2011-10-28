@@ -5,7 +5,7 @@ import scala.collection.immutable
 
 import _root_.java.util.{Map => JMap}
 
-import com.twitter.finagle.{ChannelException, RequestException}
+import com.twitter.finagle.{ChannelException, RequestException, ServiceException}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
@@ -268,6 +268,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     } handle {
       case t: RequestException => GetResult(failures = (keys map { (_, t) }).toMap)
       case t: ChannelException => GetResult(failures = (keys map { (_, t) }).toMap)
+      case t: ServiceException => GetResult(failures = (keys map { (_, t) }).toMap)
     }
   }
 

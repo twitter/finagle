@@ -67,7 +67,7 @@ import com.twitter.util.{Future, Promise}
 import com.twitter.concurrent.AsyncSemaphore
 
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
-import stats.{StatsReceiver, NullStatsReceiver}
+import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
 import exception._
 import ssl.Ssl
 
@@ -348,6 +348,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Server = {
+    config.statsReceiver foreach { sr =>
+      GlobalStatsReceiver.register(sr.scope("finagle"))
+    }
+
     val scopedStatsReceiver =
       config.statsReceiver map { sr => config.name map (sr.scope(_)) getOrElse sr }
 
