@@ -137,8 +137,15 @@ trait Client {
    * Get a set of keys from the server.
    * @return a Map[String, ChannelBuffer] of all of the keys that the server had.
    */
-  def get(keys: Iterable[String]): Future[Map[String, ChannelBuffer]] =
-    getResult(keys) map { _.values }
+  def get(keys: Iterable[String]): Future[Map[String, ChannelBuffer]] = {
+    getResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.values)
+      }
+    }
+  }
 
   /**
    * Get a set of keys from the server, together with a "cas unique"
@@ -148,8 +155,15 @@ trait Client {
    * @return a Map[String, (ChannelBuffer, ChannelBuffer)] of all the
    * keys the server had, together with their "cas unique" token
    */
-  def gets(keys: Iterable[String]): Future[Map[String, (ChannelBuffer, ChannelBuffer)]] =
-    getsResult(keys) map { _.valuesWithTokens }
+  def gets(keys: Iterable[String]): Future[Map[String, (ChannelBuffer, ChannelBuffer)]] = {
+    getsResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.valuesWithTokens)
+      }
+    }
+  }
 
 
   /**
