@@ -35,10 +35,12 @@ class ExpiringService[Req, Rep](
       timer.schedule(t.fromNow) { expire(counter) }
     } getOrElse { NullTimerTask }
 
-  private[this] def expire(counter: Counter) = latch.await {
+  private[this] def expire(counter: Counter) {
     if (deactivate()) {
-      expired()
-      counter.incr()
+      latch.await {
+        expired()
+        counter.incr()
+      }
     }
   }
 
