@@ -256,5 +256,32 @@ object ChannelServiceSpec extends Specification with Mockito {
       f.isDefined must beTrue
       f() must throwA(e)
     }
+
+    "prepareChannel" in {
+      val preparedPromise = new Promise[Service[Any, Any]]
+      val prepareChannel = mock[Service[Any, Any] => Future[Service[Any, Any]]]
+      val underlyingService = mock[Service[Any, Any]]
+      prepareChannel(any) returns preparedPromise
+      val factory = new ChannelServiceFactory[Any, Any](bootstrap, prepareChannel) {
+        override protected def mkService(ch: Channel) = underlyingService
+      }
+
+      "be called on new services" in {
+        val p = factory.make()
+        there was no(prepareChannel)(any)
+        channelFuture.setSuccess()
+        there was one(prepareChannel)(any)
+      }
+
+      "when failed, underlying service should be released" in {
+        val exc = new Exception("sad panda")
+        prepareChannel(any) returns Future.exception(exc)
+        there was no(underlyingService).release
+        val p = factory.make()
+        channelFuture.setSuccess()
+        p.poll must beSome(Throw(exc))
+        there was one(underlyingService).release()
+      }
+    }
   }
 }
