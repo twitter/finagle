@@ -21,6 +21,15 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
       def idleTimeout: Duration = 100.milliseconds
     }
 
+    "Don't find a random idle connection amoung fresh connection" in {
+      handler.getIdleConnection mustEqual None
+      (1 to 10).foreach{ _ =>
+        val channel = mock[Channel]
+        handler.markChannelAsActive(channel)
+      }
+      handler.getIdleConnection mustEqual None
+    }
+
     "Consider oldest connection as the idlest one" in {
       val channels = (1 to 5).map{ _ => mock[Channel] }
       channels.foreach{ channel =>
@@ -37,6 +46,16 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
 
     val handler = new BucketIdleConnectionHandler {
       def idleTimeout: Duration = 100.milliseconds
+    }
+
+    "Don't find a random idle connection amoung fresh connection" in {
+      handler.getIdleConnection mustEqual None
+
+      (1 to 10).foreach{ _ =>
+        val channel = mock[Channel]
+        handler.markChannelAsActive(channel)
+      }
+      handler.getIdleConnection mustEqual None
     }
 
     "Find a random idle connection" in {
@@ -97,62 +116,6 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
       // clean-up
       handler.removeChannel(channel)
       handler.getIdleConnection mustEq None
-    }
-  }
-
-  "BenchMark" should {
-
-    def doBenchMark( handlerBuilder : Duration => IdleConnectionHandler ) = {
-      def benchMark( size : Int , timeout : Duration) = {
-        val handler = handlerBuilder(timeout)
-        val channels = (1 to size).map{ _ => mock[Channel] }
-        val (part1,tail) = channels.splitAt(size / 3)
-        val (part2,part3) = tail.splitAt(size / 2)
-
-        val (_,markElapsedTime) = time(part1.foreach{ handler.markChannelAsActive(_) })
-        Thread.sleep(handler.idleTimeout.inMilliseconds / 2)
-
-        part2.foreach{ handler.markChannelAsActive(_) }
-        Thread.sleep(handler.idleTimeout.inMilliseconds / 2)
-
-        part3.foreach{ handler.markChannelAsActive(_) }
-        Thread.sleep(handler.idleTimeout.inMilliseconds / 2)
-
-        val (_,getIdleConnectionElapseTime) = time(handler.getIdleConnection)
-        (markElapsedTime, getIdleConnectionElapseTime)
-      }
-
-      // Warm-up
-      (1 to 10).foreach{ _ => benchMark(1000,10.milliseconds) }
-
-      // Benchmark
-      val benchMarkSize = 10
-      val results = (1 to benchMarkSize).map{ _ => benchMark(100000,100.milliseconds) }
-      val sums = results.foldLeft( (0L,0L) ){
-        case ((markSum,getIdleSum),(mark,getIdle)) =>
-          (markSum + mark, getIdleSum + getIdle)
-      }
-      val avgMark = sums._1 / benchMarkSize
-      val avgGetIdle = sums._2 / benchMarkSize
-      println( "Avg 'mark as active' time is %d ms, avg 'getIdleConnection' is %d ms".format(avgMark, avgGetIdle) )
-      (avgMark, avgGetIdle)
-
-    }
-
-    "PreciseIdleConnectionHandler Have decent performance" in {
-      val (avgMark, avgGetIdle) = doBenchMark( timeout => new PreciseIdleConnectionHandler {
-        def idleTimeout: Duration = timeout
-      })
-      avgMark must lessThan(50L)
-      avgGetIdle must lessThan(50L)
-    }
-
-    "BucketIdleConnectionHandler Have decent performance" in {
-      val (avgMark, avgGetIdle) = doBenchMark( timeout => new BucketIdleConnectionHandler {
-        def idleTimeout: Duration = timeout
-      })
-      avgMark must lessThan(50L)
-      avgGetIdle must lessThan(50L)
     }
   }
 }

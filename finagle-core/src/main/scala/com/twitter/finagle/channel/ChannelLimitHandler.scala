@@ -1,7 +1,7 @@
 package com.twitter.finagle.channel
 
 import org.jboss.netty.channel._
-import com.twitter.util.Duration
+import com.twitter.util.{Duration,Time}
 import collection._
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -9,11 +9,16 @@ case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
+/*
+* Trait defining a class responsible for managing IdleConnection
+* This class is notified everytime a connection receive activity or when it is closed
+* You also can retrieved from this class an idle connection.
+*/
 trait IdleConnectionHandler {
-  def getIdleConnection : Option[Channel]
-  def markChannelAsActive( channel : Channel ) : Unit
-  def removeChannel( channel : Channel ) : Unit
-  def idleTimeout : Duration
+  def getIdleConnection: Option[Channel]
+  def markChannelAsActive(channel: Channel): Unit
+  def removeChannel(channel: Channel): Unit
+  def idleTimeout: Duration
 }
 
 
@@ -21,27 +26,22 @@ trait IdleConnectionHandler {
 * Always return the most idle connection
 */
 trait PreciseIdleConnectionHandler extends IdleConnectionHandler {
-  private[this] val activeConnections = mutable.HashMap.empty[Channel,Long]
+  private[this] val activeConnections = mutable.HashMap.empty[Channel,Time]
 
-  def getIdleConnection : Option[Channel] = synchronized {
-    val now = System.currentTimeMillis()
-
-    var oldestChannel : Option[Channel] = None
-    var oldestActivityDate = Long.MaxValue
-    for( (channel,lastActivityDate) <- activeConnections ) {
-      if( lastActivityDate < oldestActivityDate && idleTimeout.inMillis < now - lastActivityDate ) {
-          oldestChannel = Some(channel)
-          oldestActivityDate = lastActivityDate
-      }
-    }
-    oldestChannel
+  def getIdleConnection: Option[Channel] = synchronized {
+    val now = Time.now
+    val idleConnections = activeConnections.view.filter{ case (_, ts) => idleTimeout < now - ts }
+    if(idleConnections.isEmpty)
+      None
+    else
+      Some(idleConnections.min(Ordering.by[(Channel,Time),Time]{ case (_, ts) => ts })._1)
   }
 
-  def markChannelAsActive( channel : Channel ) = synchronized {
-    activeConnections += (channel -> System.currentTimeMillis())
+  def markChannelAsActive(channel: Channel) = synchronized {
+    activeConnections += (channel -> Time.now)
   }
 
-  def removeChannel( channel : Channel ) = synchronized {
+  def removeChannel(channel: Channel) = synchronized {
     activeConnections -= channel
   }
 }
@@ -59,15 +59,16 @@ trait BucketIdleConnectionHandler extends IdleConnectionHandler {
   private[this] val bucketNumber = 3
   private[this] val activeConnections = (1 to bucketNumber).map{ _ => mutable.HashSet.empty[Channel] }.toArray
 
-  private[this] def currentBucketIndex = System.currentTimeMillis() / bucketSize
+  private[this] def currentBucketIndex = Time.now.inMilliseconds / bucketSize
   private[this] var lastBucketIndex = currentBucketIndex
 
-  private[this] def getBucket(i : Int, currentNewIndex : Long) = synchronized {
+  private[this] def getBucket(i: Int, currentNewIndex: Long) = synchronized {
     val index = currentNewIndex + i
 
-    def move( fromIndex : Long , toIndex : Long ) {
-      activeConnections( (toIndex % bucketNumber).toInt ) ++= activeConnections( (fromIndex % bucketNumber).toInt )
-      activeConnections( (fromIndex % bucketNumber).toInt ).clear()
+    def move(fromIndex: Long , toIndex: Long) {
+      activeConnections((toIndex % bucketNumber).toInt) ++=
+        activeConnections((fromIndex % bucketNumber).toInt)
+      activeConnections((fromIndex % bucketNumber).toInt).clear()
     }
 
     val res = (currentNewIndex - lastBucketIndex) match {
@@ -86,23 +87,26 @@ trait BucketIdleConnectionHandler extends IdleConnectionHandler {
     res
   }
 
-  private[this] def newestBucket(currentNewIndex : Long) = getBucket(0, currentNewIndex)
-  private[this] def intermediateBucket(currentNewIndex : Long) = getBucket(-1, currentNewIndex)
-  private[this] def oldestBucket(currentNewIndex : Long) = getBucket(-2, currentNewIndex)
+  private[this] def newestBucket(currentNewIndex: Long) = getBucket(0, currentNewIndex)
+  private[this] def intermediateBucket(currentNewIndex: Long) = getBucket(-1, currentNewIndex)
+  private[this] def oldestBucket(currentNewIndex: Long) = getBucket(-2, currentNewIndex)
 
-  def getIdleConnection : Option[Channel] = synchronized {
+  def getIdleConnection: Option[Channel] = synchronized {
     val currentNewIndex = currentBucketIndex
-    oldestBucket(currentNewIndex).headOption // orElse intermediateBucket(currentNewIndex).headOption
+    oldestBucket(currentNewIndex).headOption
   }
 
-  def markChannelAsActive( channel : Channel ) = synchronized {
+  def markChannelAsActive(channel: Channel) = synchronized {
     val currentNewIndex = currentBucketIndex
-    (! oldestBucket(currentNewIndex).remove(channel) ) && (! intermediateBucket(currentNewIndex).remove(channel) )
-    newestBucket(currentNewIndex).add( channel )
+    if(! oldestBucket(currentNewIndex).remove(channel))
+      intermediateBucket(currentNewIndex).remove(channel)
+    newestBucket(currentNewIndex).add(channel)
   }
-  def removeChannel( channel : Channel ) = synchronized {
+  def removeChannel(channel: Channel) = synchronized {
     val currentNewIndex = currentBucketIndex
-    (! oldestBucket(currentNewIndex).remove(channel) ) && (! intermediateBucket(currentNewIndex).remove(channel) ) && (! newestBucket(currentNewIndex).remove(channel) )
+    if(! oldestBucket(currentNewIndex).remove(channel))
+      if(! intermediateBucket(currentNewIndex).remove(channel))
+        newestBucket(currentNewIndex).remove(channel)
   }
 }
 
@@ -116,35 +120,44 @@ trait BucketIdleConnectionHandler extends IdleConnectionHandler {
  * - if above high watermark: collect (close) idle connections, and refuse/accept the
  *   connection depending if we managed to close an idle connection.
  */
-class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeoutDuration : Duration)
-    extends SimpleChannelHandler
-    with LifeCycleAwareChannelHandler
+class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeoutDuration: Duration)
+  extends SimpleChannelHandler
 {
-  this : IdleConnectionHandler =>
+  this: IdleConnectionHandler =>
 
   private val connectionCounter = new AtomicInteger(0)
   override val idleTimeout = idleTimeoutDuration
 
   def openConnections = connectionCounter.get()
 
-  def closeIdleConnections() = getIdleConnection.map( _.close() )
+  def closeIdleConnections() = {
+    var hasClosedAConnection = false
+    getIdleConnection.foreach{ c =>
+      c.close()
+      hasClosedAConnection = true
+    }
+    hasClosedAConnection
+  }
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    val connectionCount = connectionCounter.incrementAndGet()
-    if( thresholds.highWaterMark < connectionCount ) {
-      // Try to close idle connections, if we don't find any, then we refuse the connection
-      if( closeIdleConnections().isEmpty )
-        ctx.getChannel.close()
+    def accept() = {
+      markChannelAsActive(ctx.getChannel)
+      connectionCounter.incrementAndGet()
+      super.channelOpen(ctx, e)
+    }
+
+    val connectionCount = connectionCounter.get()
+    if(connectionCount < thresholds.lowWaterMark)
+      accept()
+    else if(connectionCount < thresholds.highWaterMark) {
+      closeIdleConnections()
+      accept()
     }
     else {
-      if( thresholds.lowWaterMark < connectionCount ){
-        closeIdleConnections()
-        markChannelAsActive(ctx.getChannel)
-      }
-      else
-        markChannelAsActive(ctx.getChannel)
+      // Try to close idle connections, if we don't find any, then we refuse the connection
+      if(closeIdleConnections())
+        accept()
     }
-    super.channelOpen(ctx, e)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
@@ -158,10 +171,5 @@ class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeout
     markChannelAsActive(ctx.getChannel)
     super.messageReceived(ctx,e)
   }
-
-  override def beforeAdd(ctx: ChannelHandlerContext)    {/*nop*/}
-  override def afterAdd(ctx: ChannelHandlerContext)     {/*nop*/}
-  override def beforeRemove(ctx: ChannelHandlerContext) {/*nop*/}
-  override def afterRemove(ctx: ChannelHandlerContext)  {/*nop*/}
 }
 

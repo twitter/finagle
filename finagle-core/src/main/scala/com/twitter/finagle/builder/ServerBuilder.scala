@@ -111,13 +111,18 @@ object ServerConfig {
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 }
 
-case class BufferSize( sendBufferSize : Option[Int] = None , recvBufferSize : Option[Int] = None )
-case class TimeoutCfg( hostConnectionMaxIdleTime : Option[Duration] = None,
-                    hostConnectionMaxLifeTime : Option[Duration] = None,
-                    requestTimeout : Option[Duration] = None,
-                    readTimeout : Option[Duration] = None,
-                    writeCompletionTimeout : Option[Duration] = None
-                  )
+case class BufferSize(
+  send: Option[Int] = None,
+  recv: Option[Int] = None
+)
+
+case class TimeoutConfig(
+  hostConnectionMaxIdleTime: Option[Duration] = None,
+  hostConnectionMaxLifeTime: Option[Duration] = None,
+  requestTimeout: Option[Duration] = None,
+  readTimeout: Option[Duration] = None,
+  writeCompletionTimeout: Option[Duration] = None
+)
 
 /**
  * A configuration object that represents what shall be built.
@@ -137,7 +142,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
-  private val _timeoutCfg:                      TimeoutCfg                               = TimeoutCfg(),
+  private val _timeoutCfg:                      TimeoutConfig                               = TimeoutConfig(),
   private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]  = None,
   private val _tracer:                          Tracer                                   = NullTracer,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None)
@@ -149,6 +154,14 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
    * Nevertheless, we want a friendly public API so we create delegators without
    * underscores.
    */
+
+case class TimeoutConfig(
+  hostConnectionMaxIdleTime: Option[Duration] = None,
+  hostConnectionMaxLifeTime: Option[Duration] = None,
+  requestTimeout: Option[Duration] = None,
+  readTimeout: Option[Duration] = None,
+  writeCompletionTimeout: Option[Duration] = None
+)
   val codecFactory                    = _codecFactory
   val statsReceiver                   = _statsReceiver
   val exceptionReceiver               = _exceptionReceiver
@@ -163,7 +176,12 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val channelFactory                  = _channelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
   val healthEventCallback             = _healthEventCallback
-  val timeoutCfg                      = _timeoutCfg
+  val hostConnectionMaxIdleTime       = _timeoutCfg.hostConnectionMaxIdleTime
+  val hostConnectionMaxLifeTime       = _timeoutCfg.hostConnectionMaxLifeTime
+  val requestTimeout                  = _timeoutCfg.requestTimeout
+  val readTimeout                     = _timeoutCfg.readTimeout
+  val writeCompletionTimeout          = _timeoutCfg.writeCompletionTimeout
+  val timeoutConfig                   = _timeoutCfg
   val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
   val tracer                          = _tracer
   val openConnectionsThresholds       = _openConnectionsThresholds
@@ -183,7 +201,11 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "channelFactory"                  -> Some(_channelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
     "healthEventCallback"             -> _healthEventCallback,
-    "timeoutCfg"                      -> _timeoutCfg,
+    "hostConnectionMaxIdleTime"       -> _timeoutCfg.hostConnectionMaxIdleTime,
+    "hostConnectionMaxLifeTime"       -> _timeoutCfg.hostConnectionMaxLifeTime,
+    "requestTimeout"                  -> _timeoutCfg.requestTimeout,
+    "readTimeout"                     -> _timeoutCfg.readTimeout,
+    "writeCompletionTimeout"          -> _timeoutCfg.writeCompletionTimeout,
     "openConnectionsHealthThresholds" -> _openConnectionsHealthThresholds,
     "tracer"                          -> Some(_tracer),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
@@ -258,10 +280,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     withConfig(_.copy(_name = Some(value)))
 
   def sendBufferSize(value: Int): This =
-    withConfig(_.copy(_bufferSize = config.bufferSize.copy(sendBufferSize = Some(value))))
+    withConfig(_.copy(_bufferSize = config.bufferSize.copy(send = Some(value))))
 
   def recvBufferSize(value: Int): This =
-    withConfig(_.copy(_bufferSize = config.bufferSize.copy(recvBufferSize = Some(value))))
+    withConfig(_.copy(_bufferSize = config.bufferSize.copy(recv = Some(value))))
 
   def keepAlive(value: Boolean): This =
     withConfig(_.copy(_keepAlive = Some(value)))
@@ -292,22 +314,22 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     withConfig(_.copy(_healthEventCallback = callback))
 
   def hostConnectionMaxIdleTime(howlong: Duration): This =
-    withConfig(_.copy(_timeoutCfg = config.timeoutCfg.copy(hostConnectionMaxIdleTime = Some(howlong))))
+    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(hostConnectionMaxIdleTime = Some(howlong))))
 
   def hostConnectionMaxLifeTime(howlong: Duration): This =
-    withConfig(_.copy(_timeoutCfg = config.timeoutCfg.copy(hostConnectionMaxLifeTime = Some(howlong))))
+    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(hostConnectionMaxLifeTime = Some(howlong))))
 
   def openConnectionsHealthThresholds(thresholds: OpenConnectionsHealthThresholds): This =
     withConfig(_.copy(_openConnectionsHealthThresholds = Some(thresholds)))
 
   def requestTimeout(howlong: Duration): This =
-    withConfig(_.copy(_timeoutCfg = config.timeoutCfg.copy(requestTimeout = Some(howlong))))
+    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(requestTimeout = Some(howlong))))
 
   def readTimeout(howlong: Duration): This =
-    withConfig(_.copy(_timeoutCfg = config.timeoutCfg.copy(readTimeout = Some(howlong))))
+    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(readTimeout = Some(howlong))))
 
   def writeCompletionTimeout(howlong: Duration): This =
-    withConfig(_.copy(_timeoutCfg = config.timeoutCfg.copy(writeCompletionTimeout = Some(howlong))))
+    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(writeCompletionTimeout = Some(howlong))))
 
   def exceptionReceiver(erFactory: ServerExceptionReceiverBuilder): This =
     withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
@@ -315,7 +337,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tracer(receiver: Tracer): This =
     withConfig(_.copy(_tracer = receiver))
 
-  def openConnectionsThresholds(thresholds : OpenConnectionsThresholds): This =
+  def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
 
   /**
@@ -369,8 +391,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     bs.setOption("child.tcpNoDelay", true)
     config.backlog.foreach { s => bs.setOption("backlog", s) }
-    config.bufferSize.sendBufferSize foreach { s => bs.setOption("child.sendBufferSize", s) }
-    config.bufferSize.recvBufferSize foreach { s => bs.setOption("child.receiveBufferSize", s) }
+    config.bufferSize.send foreach { s => bs.setOption("child.send", s) }
+    config.bufferSize.recv foreach { s => bs.setOption("child.receiveBufferSize", s) }
     config.keepAlive.foreach { s => bs.setOption("child.keepAlive", s) }
 
     // TODO: we need something akin to a max queue depth.
@@ -411,8 +433,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     }
 
     // connection-limiting system
-    val channelLimitHandler = config.openConnectionsThresholds.map{ threshold =>
-      new ChannelLimitHandler(threshold, config.timeoutCfg.hostConnectionMaxIdleTime.getOrElse(30000 milliseconds)) with BucketIdleConnectionHandler
+    val channelLimitHandler = config.openConnectionsThresholds map { threshold =>
+      val idleTimeout = config.hostConnectionMaxIdleTime.getOrElse(30000 milliseconds)
+      new ChannelLimitHandler(threshold, idleTimeout) with BucketIdleConnectionHandler
     }
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
@@ -438,14 +461,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         // Note that the timeout is *after* request decoding. This
         // prevents death from clients trying to DoS by slowly
         // trickling in bytes to our (accumulating) codec.
-        config.timeoutCfg.readTimeout foreach { howlong =>
+        config.readTimeout foreach { howlong =>
           val (timeoutValue, timeoutUnit) = howlong.inTimeUnit
           pipeline.addLast(
             "readTimeout",
             new ReadTimeoutHandler(Timer.defaultNettyTimer, timeoutValue, timeoutUnit))
         }
 
-        config.timeoutCfg.writeCompletionTimeout foreach { howlong =>
+        config.writeCompletionTimeout foreach { howlong =>
           pipeline.addLast(
             "writeCompletionTimeout",
             new WriteCompletionTimeoutHandler(Timer.default, howlong))
@@ -513,13 +536,13 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
 
-        if (config.timeoutCfg.hostConnectionMaxIdleTime.isDefined ||
-            config.timeoutCfg.hostConnectionMaxLifeTime.isDefined) {
+        if (config.hostConnectionMaxIdleTime.isDefined ||
+            config.hostConnectionMaxLifeTime.isDefined) {
           service =
             new ExpiringService(
               service,
-              config.timeoutCfg.hostConnectionMaxIdleTime,
-              config.timeoutCfg.hostConnectionMaxLifeTime,
+              config.hostConnectionMaxIdleTime,
+              config.hostConnectionMaxLifeTime,
               Timer.default,
               scopedOrNullStatsReceiver.scope("expired")
             ) {
@@ -527,7 +550,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
             }
         }
 
-        config.timeoutCfg.requestTimeout foreach { duration =>
+        config.requestTimeout foreach { duration =>
           val e = new IndividualRequestTimeoutException(duration)
           service = (new TimeoutFilter(duration, e)) andThen service
         }
