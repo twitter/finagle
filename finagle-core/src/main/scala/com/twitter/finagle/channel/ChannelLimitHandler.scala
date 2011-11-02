@@ -4,6 +4,7 @@ import org.jboss.netty.channel._
 import com.twitter.util.{Duration,Time}
 import collection._
 import java.util.concurrent.atomic.AtomicInteger
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
@@ -15,6 +16,8 @@ case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
 * You also can retrieved from this class an idle connection.
 */
 trait IdleConnectionHandler {
+  def countIdleConnections: Int = getIdleConnections.size
+  def getIdleConnections: Iterable[Channel]
   def getIdleConnection: Option[Channel]
   def markChannelAsActive(channel: Channel): Unit
   def removeChannel(channel: Channel): Unit
@@ -27,6 +30,11 @@ trait IdleConnectionHandler {
 */
 trait PreciseIdleConnectionHandler extends IdleConnectionHandler {
   private[this] val activeConnections = mutable.HashMap.empty[Channel,Time]
+
+  def getIdleConnections = synchronized {
+    val now = Time.now
+    activeConnections.view.filter{ case (_, ts) => idleTimeout < now - ts }.map(_._1)
+  }
 
   def getIdleConnection: Option[Channel] = synchronized {
     val now = Time.now
@@ -91,6 +99,11 @@ trait BucketIdleConnectionHandler extends IdleConnectionHandler {
   private[this] def intermediateBucket(currentNewIndex: Long) = getBucket(-1, currentNewIndex)
   private[this] def oldestBucket(currentNewIndex: Long) = getBucket(-2, currentNewIndex)
 
+  def getIdleConnections: Iterable[Channel] = synchronized {
+    val currentNewIndex = currentBucketIndex
+    oldestBucket(currentNewIndex)
+  }
+
   def getIdleConnection: Option[Channel] = synchronized {
     val currentNewIndex = currentBucketIndex
     oldestBucket(currentNewIndex).headOption
@@ -120,14 +133,25 @@ trait BucketIdleConnectionHandler extends IdleConnectionHandler {
  * - if above high watermark: collect (close) idle connections, and refuse/accept the
  *   connection depending if we managed to close an idle connection.
  */
-class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeoutDuration: Duration)
+class ChannelLimitHandler(
+    val thresholds: OpenConnectionsThresholds,
+    idleTimeoutDuration: Duration,
+    val statsReceiver : StatsReceiver = NullStatsReceiver)
   extends SimpleChannelHandler
 {
   this: IdleConnectionHandler =>
 
   private val connectionCounter = new AtomicInteger(0)
-  override val idleTimeout = idleTimeoutDuration
+  private val refusedConnectionCounter = new AtomicInteger(0)
+  private val startDate = Time.now
 
+  statsReceiver.addGauge("idle_connections_closed") { countIdleConnections }
+  statsReceiver.addGauge("idle_active_connections_ratio") { countIdleConnections.toFloat / connectionCounter.get }
+  statsReceiver.addGauge("connections_refused") { refusedConnectionCounter.get }
+  statsReceiver.addGauge("connection_refused_sec") { refusedConnectionCounter.get / startDate.untilNow.inSeconds.toInt }
+
+  override val idleTimeout = idleTimeoutDuration
+  
   def openConnections = connectionCounter.get()
 
   def closeIdleConnections() = {
@@ -157,8 +181,10 @@ class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeout
       // Try to close idle connections, if we don't find any, then we refuse the connection
       if(closeIdleConnections())
         accept()
-      else
+      else {
+        refusedConnectionCounter.incrementAndGet()
         ctx.getChannel.close()
+      }
     }
   }
 
