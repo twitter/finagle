@@ -28,6 +28,20 @@ case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
 
 /**
  * An ongoing transactional read (from {{read}}).
+ *
+ * A common usage pattern is to attach asynchronous handlers to `messages` and `error`
+ * by invoking `Offer.foreach` on them. For example:
+ * {{{
+ * val readHandle: ReadHandle = ...
+ * readHandle.messages foreach { msg =>
+ *   try {
+ *     System.out.println(msg.bytes.toString("UTF-8"))
+ *   } finally {
+ *     msg.ack() // if we don't do this, no more msgs will come to us
+ *   }
+ * }
+ * readHandle.error foreach { System.error.println("zomg! got an error " + _.getMessage) }
+ * }}}
  */
 trait ReadHandle {
   /**
