@@ -139,17 +139,17 @@ class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeout
     hasClosedAConnection
   }
 
+
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    def accept() = {
+    def accept() {
       markChannelAsActive(ctx.getChannel)
-      connectionCounter.incrementAndGet()
-      super.channelOpen(ctx, e)
+      ctx.sendUpstream(e)
     }
 
-    val connectionCount = connectionCounter.get()
-    if(connectionCount < thresholds.lowWaterMark)
+    val connectionCount = connectionCounter.incrementAndGet()
+    if(connectionCount <= thresholds.lowWaterMark)
       accept()
-    else if(connectionCount < thresholds.highWaterMark) {
+    else if(connectionCount <= thresholds.highWaterMark) {
       closeIdleConnections()
       accept()
     }
@@ -157,13 +157,14 @@ class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeout
       // Try to close idle connections, if we don't find any, then we refuse the connection
       if(closeIdleConnections())
         accept()
+      else
+        ctx.getChannel.close()
     }
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     removeChannel(ctx.getChannel)
     connectionCounter.decrementAndGet()
-
     super.channelClosed(ctx, e)
   }
 
@@ -171,5 +172,9 @@ class ChannelLimitHandler(val thresholds: OpenConnectionsThresholds, idleTimeout
     markChannelAsActive(ctx.getChannel)
     super.messageReceived(ctx,e)
   }
-}
 
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    markChannelAsActive(ctx.getChannel)
+    super.writeRequested(ctx,e)
+  }
+}
