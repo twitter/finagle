@@ -13,20 +13,26 @@ class RequestException(cause: Throwable) extends Exception(cause) with NoStacktr
 }
 
 trait TimeoutException { self: Exception =>
+  val serviceName: String
   protected val timeout: Duration
   protected val explanation: String
 
-  override def getMessage = "exceeded %s while %s".format(timeout, explanation)
+  override def getMessage = "exceeded %s while %s (%s)".format(timeout, explanation, serviceName)
 }
 
-class RequestTimeoutException(protected val timeout: Duration, protected val explanation: String)
-  extends RequestException with TimeoutException
-class IndividualRequestTimeoutException(timeout: Duration)
+class RequestTimeoutException(
+  val serviceName: String,
+  protected val timeout: Duration,
+  protected val explanation: String
+) extends RequestException with TimeoutException
+class IndividualRequestTimeoutException(serviceName: String, timeout: Duration)
   extends RequestTimeoutException(
+    serviceName,
     timeout,
     "waiting for a response for an individual request, excluding retries")
-class GlobalRequestTimeoutException(timeout: Duration)
+class GlobalRequestTimeoutException(serviceName: String, timeout: Duration)
   extends RequestTimeoutException(
+    serviceName,
     timeout,
     "waiting for a response for the request, including retries (if applicable)")
 
@@ -78,6 +84,7 @@ class ServiceException                                         extends Exception
 class ServiceClosedException                                   extends ServiceException
 class ServiceNotAvailableException                             extends ServiceException
 class ServiceTimeoutException(
+    val serviceName: String,
     protected val timeout: Duration)
     extends ServiceException
     with TimeoutException {

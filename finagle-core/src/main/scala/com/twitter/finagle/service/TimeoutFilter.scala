@@ -16,7 +16,7 @@ class TimeoutFilter[Req, Rep](
     exception: RequestTimeoutException,
     timer: util.Timer = Timer.default)
     extends Filter[Req, Rep, Req, Rep] {
-  def this(timeout: Duration) = this(timeout, new IndividualRequestTimeoutException(timeout))
+  def this(timeout: Duration) = this(timeout, new IndividualRequestTimeoutException("unspecified", timeout))
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val res = service(request)
