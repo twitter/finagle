@@ -62,6 +62,30 @@ object WatermarkPoolSpec extends Specification with Mockito {
       there was no(service0).release()
     }
 
+    "retry an enqueued request if the underlying factory fails" in {
+      val p = new Promise[Service[Int, Int]]
+      factory.make() returns p
+
+      val f0 = pool.make()
+      f0.isDefined must beFalse
+      there was one(factory).make()
+
+      // The second one will be enqueued
+      val f1 = pool.make()
+      f1.isDefined must beFalse
+      there was one(factory).make()
+
+      // Fail the request, which should dequeue
+      // the queued one.
+      factory.make() returns Future.value(service0)
+      val exc = new Exception
+      p() = Throw(exc)
+      f0.poll must beSome(Throw(exc))
+
+      there were two(factory).make()
+      f1.poll must beSome(Return(service0))
+    }
+
     "throw CancelledConnectionException if an enqueued waiter is cancelled" in {
       pool.make().isDefined must beTrue  // consume item
       there was one(factory).make()

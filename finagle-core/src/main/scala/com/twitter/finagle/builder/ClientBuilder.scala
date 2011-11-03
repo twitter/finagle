@@ -665,7 +665,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       if (config.requestTimeout < Duration.MaxValue) {
         val filter = new TimeoutFilter[Req, Rep](
           config.requestTimeout,
-          new IndividualRequestTimeoutException(config.requestTimeout))
+          new IndividualRequestTimeoutException(config.name.get, config.requestTimeout))
 
         factory = filter andThen factory
       }
@@ -719,7 +719,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory = new TimeoutFactory(
         factory,
         config.connectTimeout,
-        new ServiceTimeoutException(config.connectTimeout))
+        new ServiceTimeoutException(config.name.get, config.connectTimeout))
 
     // We maintain a separate log of factory failures here so that
     // factory failures are captured in the service failure
@@ -752,7 +752,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     if (config.timeout < Duration.MaxValue) {
       val filter = new TimeoutFilter[Req, Rep](
         config.timeout,
-        new GlobalRequestTimeoutException(config.timeout))
+        new GlobalRequestTimeoutException(config.name.get, config.timeout))
       service = filter andThen service
     }
 

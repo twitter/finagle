@@ -154,6 +154,11 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
     channelLatch.decr()
   }
 
+  /**
+   * Abstracted only for testing.
+   */
+  protected def mkService(ch: Channel): Service[Req, Rep] = new ChannelService(ch, this)
+
   def make(): Future[Service[Req, Rep]] = {
     val begin = Time.now
 
@@ -171,7 +176,7 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
           ch.bind(sa)
         case _ => ()
       }
-      val service = new ChannelService[Req, Rep](ch, this)
+      val service = mkService(ch)
       (ch.connect(addr), service)
     } flatMap { case (connectFuture, service) =>
       val promise = new Promise[Service[Req, Rep]]
@@ -184,7 +189,10 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
         case Ok(channel) =>
           channelLatch.incr()
           connectLatencyStat.add(begin.untilNow.inMilliseconds)
-          prepareChannel(service) proxyTo promise
+
+          prepareChannel(service) onFailure { _ =>
+            service.release()
+          } proxyTo promise
 
         case Error(cause) =>
           failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)

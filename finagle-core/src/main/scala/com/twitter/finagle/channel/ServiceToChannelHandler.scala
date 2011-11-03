@@ -157,7 +157,11 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
         Level.FINEST
       case e: java.io.IOException
       if (e.getMessage == "Connection reset by peer" ||
-          e.getMessage == "Broken pipe") =>
+          e.getMessage == "Broken pipe" ||
+           e.getMessage == "Connection timed out" ||
+          e.getMessage == "No route to host") =>
+        Level.FINEST
+      case e: javax.net.ssl.SSLException =>
         Level.FINEST
       case e: Throwable =>
         Level.WARNING
