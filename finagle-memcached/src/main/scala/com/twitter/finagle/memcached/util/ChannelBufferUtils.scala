@@ -49,6 +49,19 @@ private[finagle] object ChannelBufferUtils {
 
   }
 
+  def bytesToChannelBuffer(value: Array[Byte]): ChannelBuffer =
+    ChannelBuffers.wrappedBuffer(value)
+
+  def channelBufferToBytes(channelBuffer: ChannelBuffer): Array[Byte] = {
+    val length = channelBuffer.readableBytes()
+    val bytes = new Array[Byte](length)
+    channelBuffer.getBytes(channelBuffer.readerIndex(), bytes, 0, length)
+    bytes
+  }
+
+  def channelBufferToString(channelBuffer: ChannelBuffer): String =
+    new String(channelBufferToBytes(channelBuffer))
+
   implicit def channelBufferToRichChannelBuffer(buffer: ChannelBuffer) =
     new RichChannelBuffer(buffer)
 
