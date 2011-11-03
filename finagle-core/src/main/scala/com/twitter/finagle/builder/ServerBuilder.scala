@@ -435,7 +435,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     // connection-limiting system
     val channelLimitHandler = config.openConnectionsThresholds map { threshold =>
       val idleTimeout = config.hostConnectionMaxIdleTime.getOrElse(30.seconds)
-      new ChannelLimitHandler(threshold, idleTimeout, scopedOrNullStatsReceiver) with BucketIdleConnectionHandler
+      val idleConnectionHandler = new BucketIdleConnectionHandler(idleTimeout)
+      new ChannelLimitHandler(threshold, idleConnectionHandler, scopedOrNullStatsReceiver)
     }
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
