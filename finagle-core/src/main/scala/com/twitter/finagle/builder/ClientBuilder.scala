@@ -159,7 +159,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[(SSLEngine, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
-  private val _tracer                    : Tracer                        = NullTracer,
+  private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
 {
   import ClientConfig._
@@ -195,7 +195,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val channelFactory            = _channelFactory
   val tls                       = _tls
   val failureAccrualParams      = _failureAccrualParams
-  val tracer                    = _tracer
+  val tracerFactory             = _tracerFactory
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -223,7 +223,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
     "failureAccrualParams"      -> _failureAccrualParams,
-    "tracer"                    -> Some(tracer)
+    "tracerFactory"             -> Some(_tracerFactory)
   )
 
   override def toString = {
@@ -500,8 +500,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
    */
+  def tracerFactory(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
+  def tracer(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
   def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracer = tracer))
+    withConfig(_.copy(_tracerFactory = () => tracer))
 
   def exceptionReceiver(erFactory: ClientExceptionReceiverBuilder): This =
     withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
@@ -687,12 +695,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
+    val tracer = config.tracerFactory()
     var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
       new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
       {
         override def close() = {
           super.close()
           Timer.default.stop()
+          tracer.release()
         }
       }
     } else {
@@ -704,6 +714,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         override def close() = {
           super.close()
           Timer.default.stop()
+          tracer.release()
         }
       }
     }
@@ -727,7 +738,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // requests are never dispatched to the underlying stack, they
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
-    factory = (new TracingFilter(config.tracer)) andThen factory
+    factory = (new TracingFilter(tracer)) andThen factory
 
     factory
   }

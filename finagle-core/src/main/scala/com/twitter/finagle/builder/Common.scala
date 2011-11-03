@@ -1,9 +1,5 @@
 package com.twitter.finagle.builder
 
-import scala.collection.mutable.HashSet
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.Timer
-
 /**
  * Used by builder to throw exceptions if the specification is incomplete.
  * {{{

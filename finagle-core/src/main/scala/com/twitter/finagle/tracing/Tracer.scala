@@ -31,6 +31,10 @@ object Annotation {
   case class BinaryAnnotation(key: String, value: ByteBuffer) extends Annotation
 }
 
+object Tracer {
+  type Factory = () => Tracer
+}
+
 trait Tracer {
   def record(record: Record)
 
@@ -42,6 +46,8 @@ trait Tracer {
    * None: i'm going to defer making a decision on this to the child service
    */
   def sampleTrace(traceId: TraceId): Option[Boolean]
+
+  def release() {}
 }
 
 object NullTracer extends Tracer {
@@ -49,7 +55,9 @@ object NullTracer extends Tracer {
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
 
-class BufferingTracer extends Tracer with Iterable[Record] {
+class BufferingTracer extends Tracer
+  with Iterable[Record]
+{
   private[this] val buf = new ArrayBuffer[Record]
 
   def record(record: Record) { buf += record }
@@ -66,3 +74,4 @@ object ConsoleTracer extends Tracer {
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
+

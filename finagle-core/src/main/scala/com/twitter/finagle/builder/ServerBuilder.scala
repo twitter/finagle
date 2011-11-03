@@ -140,7 +140,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _requestTimeout:                  Option[Duration]                         = None,
   private val _readTimeout:                     Option[Duration]                         = None,
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
-  private val _tracer:                          Tracer                                   = NullTracer)
+  private val _tracerFactory:                   Tracer.Factory                           = () => NullTracer)
 {
   import ServerConfig._
 
@@ -170,7 +170,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val requestTimeout                  = _requestTimeout
   val readTimeout                     = _readTimeout
   val writeCompletionTimeout          = _writeCompletionTimeout
-  val tracer                          = _tracer
+  val tracerFactory                   = _tracerFactory
 
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
@@ -194,7 +194,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "requestTimeout"                  -> _requestTimeout,
     "readTimeout"                     -> _readTimeout,
     "writeCompletionTimeout"          -> _writeCompletionTimeout,
-    "tracer"                          -> Some(_tracer)
+    "tracerFactory"                   -> Some(_tracerFactory)
   )
 
   override def toString = {
@@ -320,8 +320,16 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def exceptionReceiver(erFactory: ServerExceptionReceiverBuilder): This =
     withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
 
-  def tracer(receiver: Tracer): This =
-    withConfig(_.copy(_tracer = receiver))
+  def tracerFactory(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
+  def tracer(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
+  def tracer(tracer: Tracer): This =
+    withConfig(_.copy(_tracerFactory = () => tracer))
 
   /**
    * Construct the Server, given the provided Service.
@@ -414,6 +422,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val channelOpenConnectionsHandler = config.openConnectionsHealthThresholds map {
       new ChannelOpenConnectionsHandler(_, config.healthEventCallback, scopedOrNullStatsReceiver)
     }
+
+    val tracer = config.tracerFactory()
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
@@ -535,7 +545,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         // This has to go last (ie. first in the stack) so that
         // protocol-specific trace support can override our generic
         // one here.
-        service = (new TracingFilter(config.tracer)) andThen service
+        service = (new TracingFilter(tracer)) andThen service
 
         val channelHandler = new ServiceToChannelHandler(
           service, postponedService, serviceFactory,
@@ -607,6 +617,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         bs.releaseExternalResources()
         Timer.default.stop()
+        tracer.release()
       }
 
       override def toString = "Server(%s)".format(config.toString)
