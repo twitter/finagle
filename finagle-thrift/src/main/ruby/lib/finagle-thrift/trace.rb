@@ -45,7 +45,7 @@ module Trace
       end
     end
 
-    def to_s; @value.to_s(16); end
+    def to_s; "%016x" % @value; end
     def to_i; @i64; end
   end
 end
