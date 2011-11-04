@@ -1,11 +1,17 @@
 package com.twitter.finagle.stream
 
+import java.util.concurrent.atomic.AtomicBoolean
+
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
+import org.jboss.netty.handler.codec.http.{
+  HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
+
 import com.twitter.concurrent.Channel
+import com.twitter.util.Future
+
 import com.twitter.finagle.{
   Codec, CodecFactory, Service, ServiceProxy}
-import com.twitter.util.Future
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
-import org.jboss.netty.handler.codec.http.{HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
+import com.twitter.finagle.ServiceNotAvailableException
 
 object Stream {
   def apply(): Stream = new Stream()
@@ -47,18 +53,14 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
   private class UseOnceService(underlying: Service[HttpRequest, StreamResponse])
     extends ServiceProxy[HttpRequest, StreamResponse](underlying)
   {
-    @volatile private[this] var used = false
+    private[this] val used = new AtomicBoolean(false)
 
     override def apply(request: HttpRequest) = {
-      synchronized {
-        require(used == false)
-        used = true
+      if (used.compareAndSet(false, true)) underlying(request) else {
+        Future.exception(new ServiceNotAvailableException)
       }
-      underlying(request)
     }
 
-    override def isAvailable = {
-      !synchronized(used) && underlying.isAvailable
-    }
+    override def isAvailable = !used.get && underlying.isAvailable
   }
 }
