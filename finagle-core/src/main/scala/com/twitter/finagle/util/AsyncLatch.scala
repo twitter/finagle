@@ -38,13 +38,18 @@ class AsyncLatch(initialCount: Int = 0) {
       if (count == 0) {
         val pending = waiters
         waiters = new ArrayBuffer[() => Unit]
-        pending
+        Left(pending)
       } else {
-        Seq()
+        Right(count)
       }
     }
 
-    pendingTasks foreach { _() }
+    pendingTasks match {
+      case Left(tasks) =>
+        tasks foreach { _() }; 0
+      case Right(count) =>
+        count
+    }
   }
 
   def getCount = count

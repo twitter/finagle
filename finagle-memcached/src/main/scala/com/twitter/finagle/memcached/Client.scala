@@ -5,14 +5,14 @@ import scala.collection.immutable
 
 import _root_.java.util.{Map => JMap}
 
-import com.twitter.finagle.{ChannelException, RequestException}
+import com.twitter.finagle.{ChannelException, RequestException, ServiceException}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.Service
 import com.twitter.hashing._
-import com.twitter.util.{Time, Future}
+import com.twitter.util.{Time, Future, Bijection}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil
@@ -44,53 +44,70 @@ case class GetResult private[memcached](
   failures: Map[String, Throwable] = Map.empty
 ) {
   lazy val values = hits mapValues { _.value }
-  lazy val valuesWithTokens = hits mapValues { v => (v.value, v.casUnique.get) }
 
   def ++(o: GetResult) = GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
+}
+
+case class GetsResult(getResult: GetResult) {
+  def hits = getResult.hits
+  def misses = getResult.misses
+  def failures = getResult.failures
+  def values = getResult.values
+  lazy val valuesWithTokens = hits mapValues { v => (v.value, v.casUnique.get) }
+  def ++(o: GetsResult) = GetsResult(getResult ++ o.getResult)
 }
 
 object GetResult {
   private[memcached] def merged(results: Seq[GetResult]): GetResult = {
     results.foldLeft(GetResult()) { _ ++ _ }
   }
+
+  private[memcached] def merged(results: Seq[GetsResult]) = {
+    val unwrapped = results map { _.getResult }
+    GetsResult(
+      unwrapped.foldLeft(GetResult()) { _ ++ _ }
+    )
+  }
 }
 
 /**
  * A friendly client to talk to a Memcached server.
  */
-trait Client {
+trait BaseClient[T] {
+  def channelBufferToType(a: ChannelBuffer): T
+
   /**
    * Store a key. Override an existing value.
    * @return true
    */
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Unit]
+  def set(key: String, flags: Int, expiry: Time, value: T): Future[Unit]
 
   /**
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer):     Future[Boolean]
+  def add(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
 
   /**
    * Append bytes to the end of an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer):  Future[Boolean]
+  def append(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
 
   /**
    * Prepend bytes to the beginning of an existing key. If the key doesn't
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
+  def prepend(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
 
   /**
    * Replace bytes on an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[Boolean]
+  def replace(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
 
   /**
    * Perform a CAS operation on the key, only if the value has not
@@ -100,79 +117,102 @@ trait Client {
    *
    * @return true if replaced, false if not
    */
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer): Future[Boolean]
-
+  def cas(
+    key: String, flags: Int, expiry: Time, value: T, casUnique: ChannelBuffer
+  ): Future[Boolean]
 
   /**
    * Get a key from the server.
    */
-  def get(key: String): Future[Option[ChannelBuffer]] = get(Seq(key))  map { _.values.headOption }
+  def get(key: String): Future[Option[T]] = get(Seq(key))  map { _.values.headOption }
 
   /**
    * Get a key from the server, with a "cas unique" token.  The token
    * is treated opaquely by the memcache client but is in reality a
    * string-encoded u64.
    */
-  def gets(key: String): Future[Option[(ChannelBuffer, ChannelBuffer)]] =
+  def gets(key: String): Future[Option[(T, ChannelBuffer)]] =
     gets(Seq(key)) map { _.values.headOption }
 
   /**
    * Get a set of keys from the server.
-   * @return a Map[String, ChannelBuffer] of all of the keys that the server had.
+   * @return a Map[String, T] of all of the keys that the server had.
    */
-  def get(keys: Iterable[String]): Future[Map[String, ChannelBuffer]] =
-    getResult(keys) map { _.values }
+  def get(keys: Iterable[String]): Future[Map[String, T]] = {
+    getResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.values mapValues { channelBufferToType(_) })
+      }
+    }
+  }
 
   /**
    * Get a set of keys from the server, together with a "cas unique"
    * token.  The token is treated opaquely by the memcache client but
    * is in reality a string-encoded u64.
    *
-   * @return a Map[String, (ChannelBuffer, ChannelBuffer)] of all the
+   * @return a Map[String, (T, ChannelBuffer)] of all the
    * keys the server had, together with their "cas unique" token
    */
-  def gets(keys: Iterable[String]): Future[Map[String, (ChannelBuffer, ChannelBuffer)]] =
-    getResult(keys) map { _.valuesWithTokens }
-
+  def gets(keys: Iterable[String]): Future[Map[String, (T, ChannelBuffer)]] = {
+    getsResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.valuesWithTokens mapValues {
+          case (v, u) => (channelBufferToType(v), u)
+        })
+      }
+    }
+  }
 
   /**
    * Get a set of keys from the server. Returns a Future[GetResult] that
    * encapsulates hits, misses and failures.
    */
-  def getResult(keys: Iterable[String]):          Future[GetResult]
+  def getResult(keys: Iterable[String]): Future[GetResult]
+
+  /**
+   * Get a set of keys from the server. Returns a Future[GetsResult] that
+   * encapsulates hits, misses and failures. This variant includes the casToken
+   * from memcached.
+   */
+  def getsResult(keys: Iterable[String]): Future[GetsResult]
 
   /**
    * Remove a key.
    * @return true if deleted, false if not found
    */
-  def delete(key: String):                        Future[Boolean]
+  def delete(key: String): Future[Boolean]
 
   /**
    * Increment a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def incr(key: String):                         Future[Option[Long]]
-  def incr(key: String, delta: Long):            Future[Option[Long]]
+  def incr(key: String, delta: Long): Future[Option[Long]]
+  def incr(key: String): Future[Option[Long]] = incr(key, 1L)
 
   /**
    * Decrement a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def decr(key: String):                         Future[Option[Long]]
-  def decr(key: String, delta: Long):            Future[Option[Long]]
+  def decr(key: String, delta: Long): Future[Option[Long]]
+  def decr(key: String): Future[Option[Long]] = decr(key, 1L)
 
   /**
    * Store a key. Override an existing values.
    * @return true
    */
-  def set(key: String, value: ChannelBuffer): Future[Unit] =
+  def set(key: String, value: T): Future[Unit] =
     set(key, 0, Time.epoch, value)
 
   /**
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, value: ChannelBuffer): Future[Boolean] =
+  def add(key: String, value: T): Future[Boolean] =
     add(key, 0, Time.epoch, value)
 
   /**
@@ -180,7 +220,7 @@ trait Client {
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, value: ChannelBuffer): Future[Boolean] =
+  def append(key: String, value: T): Future[Boolean] =
     append(key, 0, Time.epoch, value)
 
   /**
@@ -188,7 +228,7 @@ trait Client {
    * doesn't exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def prepend(key: String, value: ChannelBuffer): Future[Boolean] =
+  def prepend(key: String, value: T): Future[Boolean] =
     prepend(key, 0, Time.epoch, value)
 
   /**
@@ -196,7 +236,7 @@ trait Client {
    * effect.
    * @return true if stored, false if not stored
    */
-  def replace(key: String, value: ChannelBuffer): Future[Boolean] = replace(key, 0, Time.epoch, value)
+  def replace(key: String, value: T): Future[Boolean] = replace(key, 0, Time.epoch, value)
 
   /**
    * Perform a CAS operation on the key, only if the value has not
@@ -206,7 +246,7 @@ trait Client {
    *
    * @return true if replaced, false if not
    */
-  def cas(key: String, value: ChannelBuffer, casUnique: ChannelBuffer): Future[Boolean] =
+  def cas(key: String, value: T, casUnique: ChannelBuffer): Future[Boolean] =
     cas(key, 0, Time.epoch, value, casUnique)
 
   /**
@@ -220,6 +260,29 @@ trait Client {
    * release the underlying service(s)
    */
   def release(): Unit
+}
+
+trait Client extends BaseClient[ChannelBuffer] {
+  def channelBufferToType(v: ChannelBuffer) = v
+
+  def adapt[T](bijection: Bijection[ChannelBuffer, T]): BaseClient[T] =
+    new ClientAdaptor[T](this, bijection)
+
+  /** Adaptor to use String as values */
+  def withStrings: BaseClient[String] = adapt(
+    new Bijection[ChannelBuffer, String] {
+      def apply(a: ChannelBuffer): String  = channelBufferToString(a)
+      def invert(b: String): ChannelBuffer = stringToChannelBuffer(b)
+    }
+  )
+
+  /** Adaptor to use Array[Byte] as values */
+  def withBytes: BaseClient[Array[Byte]] = adapt(
+    new Bijection[ChannelBuffer, Array[Byte]] {
+      def apply(a: ChannelBuffer): Array[Byte]  = channelBufferToBytes(a)
+      def invert(b: Array[Byte]): ChannelBuffer = bytesToChannelBuffer(b)
+    }
+  )
 }
 
 /**
@@ -244,10 +307,13 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     } handle {
       case t: RequestException => GetResult(failures = (keys map { (_, t) }).toMap)
       case t: ChannelException => GetResult(failures = (keys map { (_, t) }).toMap)
+      case t: ServiceException => GetResult(failures = (keys map { (_, t) }).toMap)
     }
   }
 
-  def getResult(keys: Iterable[String]) = rawGet(Gets(keys.toSeq))
+  def getResult(keys: Iterable[String]) = rawGet(Get(keys.toSeq))
+  def getsResult(keys: Iterable[String]) =
+    rawGet(Gets(keys.toSeq)) map { GetsResult(_) }
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
     service(Set(key, flags, expiry, value)) map {
@@ -304,10 +370,6 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
       case _            => throw new IllegalStateException
     }
 
-  def incr(key: String) = incr(key, 1L)
-
-  def decr(key: String) = decr(key, 1L)
-
   def incr(key: String, delta: Long): Future[Option[Long]] = {
     service(Incr(key, delta)) map {
       case Number(value) => Some(value)
@@ -338,17 +400,31 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
 trait PartitionedClient extends Client {
   protected[memcached] def clientOf(key: String): Client
 
+  private[this] def withKeysGroupedByClient[A](
+    keys: Iterable[String])(f: (Client, Iterable[String]) => Future[A]
+  ): Future[Seq[A]] = {
+    Future.collect(
+      keys groupBy(clientOf(_)) map Function.tupled(f) toSeq
+    )
+  }
+
   def getResult(keys: Iterable[String]) = {
-    if (!keys.isEmpty) {
-      val keysGroupedByClient = keys.groupBy(clientOf(_))
-
-      val results = keysGroupedByClient map { case (client, keys) =>
-        client.getResult(keys)
-      }
-
-      Future.collect(results.toSeq) map { GetResult.merged(_) }
+    if (keys.nonEmpty) {
+      withKeysGroupedByClient(keys) {
+        _.getResult(_)
+      } map { GetResult.merged(_) }
     } else {
       Future.value(GetResult())
+    }
+  }
+
+  def getsResult(keys: Iterable[String]) = {
+    if (keys.nonEmpty) {
+      withKeysGroupedByClient(keys) {
+         _.getsResult(_)
+      } map { GetResult.merged(_) }
+    } else {
+      Future.value(GetsResult(GetResult()))
     }
   }
 
@@ -367,9 +443,7 @@ trait PartitionedClient extends Client {
 
 
   def delete(key: String)            = clientOf(key).delete(key)
-  def incr(key: String)              = clientOf(key).incr(key)
   def incr(key: String, delta: Long) = clientOf(key).incr(key, delta)
-  def decr(key: String)              = clientOf(key).decr(key)
   def decr(key: String, delta: Long) = clientOf(key).decr(key, delta)
 }
 

@@ -3,6 +3,7 @@
  */
 
 namespace java com.twitter.finagle.thrift.thrift
+namespace rb FinagleThrift
 
 /**
  * The following is from BigBrotherBird:
@@ -69,3 +70,8 @@ struct TracedResponseHeader {
  * upgrade. (Intentionally left blank: for future use).
  */
 struct TraceOptions {}
+
+/**
+ * This is the struct that a successful upgrade will reply with.
+ */
+struct UpgradeReply {}  

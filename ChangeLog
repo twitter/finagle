@@ -1,3 +1,47 @@
+1.9.5		2011/11/04
+
+	* ExpiringService: add stats for idle and lifetime expiration.
+	Deactivate() regardless of latch counter
+	* Filters: don't apply refcounts on composition, do it only
+	(and always) in the builder
+	* Count pending timeouts, and export them
+	* ChannelService: release services when `prepareChannel`
+	fails.  This fixes a connection leak
+	* WatermarkPool: flush waiters on creation failure.  This
+	fixes a condition wherein we'd keep waiters unnecessarily.
+	* Timeout exceptions: include service name
+	* Suppress excessive logging of the exceptions that mostly
+	caused by unreliable client connections.
+	* memcached: Add generic type support (via Client.adapt), and
+	Array[Byte] and String instances
+	* finagle-stream: do not admit concurrent requests
+	* Tracing: Add release method to Tracer trait, add
+	tracerFactory to builders, deprecate tracer on builders
+
+1.9.4		2011/10/24
+
+	* Service: response Future will now be cancelled if the client
+          disconnects
+	* use static exceptions for TimedOutRequestException
+	* kestrel: Cancel request Future on close in kestrel ReadHandle
+	* exception cleanup: wrap all Channel exceptions with their
+	underlying exception.  This makes UnknownChannelExceptions in
+	particular easier to debug
+	* Friendlier exceptions: In order to give very specific error
+	messages to timeouts in finagle (so beginners know which
+	settings in the client and server builder caused them), I'm
+	adding lots of human-readable messages to the various
+	TimeoutExceptions.
+	* some timer bug fixes, particularly: TimerToNettyTimer:
+	actually cancel underlying task.
+
+1.9.2		2011/10/14
+
+	* tracing: Change SpanId to use RichU64String
+	* tracing: Trace.{enable,disable}
+	* http: http.RequestBuilder
+	* http: add common media types
+
 1.9.1		2011/09/28
 
 	* memcached: new interface for partial results (ie. retrieval

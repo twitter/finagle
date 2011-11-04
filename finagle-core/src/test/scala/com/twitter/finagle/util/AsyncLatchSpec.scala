@@ -41,5 +41,15 @@ object AsyncLatchSpec extends Specification {
       count0 must be_==(1)
       count1 must be_==(1)
     }
+
+    "return count on increment" in {
+      val latch = new AsyncLatch(0)
+      latch.incr() mustEqual 1
+    }
+
+    "return count on decrement" in {
+      val latch = new AsyncLatch(1)
+      latch.decr() mustEqual 0
+    }
   }
 }

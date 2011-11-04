@@ -1,58 +1,96 @@
 package com.twitter.finagle
 
-// Request failures (eg. for request behavior changing brokers.)
-class RequestException(cause: Throwable) extends Exception(cause) {
-  def this() = this(null)
+import com.twitter.util.Duration
+
+trait NoStacktrace extends Exception {
+  override def fillInStackTrace = this
 }
 
-class TimedoutRequestException     extends RequestException
+// Request failures (eg. for request behavior changing brokers.)
+class RequestException(cause: Throwable) extends Exception(cause) with NoStacktrace {
+  def this() = this(null)
+  override def getStackTrace = if (cause != null) cause.getStackTrace else super.getStackTrace
+}
+
+trait TimeoutException { self: Exception =>
+  val serviceName: String
+  protected val timeout: Duration
+  protected val explanation: String
+
+  override def getMessage = "exceeded %s while %s (%s)".format(timeout, explanation, serviceName)
+}
+
+class RequestTimeoutException(
+  val serviceName: String,
+  protected val timeout: Duration,
+  protected val explanation: String
+) extends RequestException with TimeoutException
+class IndividualRequestTimeoutException(serviceName: String, timeout: Duration)
+  extends RequestTimeoutException(
+    serviceName,
+    timeout,
+    "waiting for a response for an individual request, excluding retries")
+class GlobalRequestTimeoutException(serviceName: String, timeout: Duration)
+  extends RequestTimeoutException(
+    serviceName,
+    timeout,
+    "waiting for a response for the request, including retries (if applicable)")
+
 class RetryFailureException(cause: Throwable)        extends RequestException(cause)
-class CancelledRequestException    extends RequestException
-class TooManyWaitersException      extends RequestException
-class CancelledConnectionException extends RequestException
-class NoBrokersAvailableException  extends RequestException
-class ReplyCastException           extends RequestException
+class CancelledRequestException                      extends RequestException
+class TooManyWaitersException                        extends RequestException
+class CancelledConnectionException                   extends RequestException
+class NoBrokersAvailableException                    extends RequestException
+class ReplyCastException                             extends RequestException
 
 class NotServableException          extends RequestException
 class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException                      extends Exception
-class ConnectionFailedException             extends ChannelException
-class ChannelClosedException                extends ChannelException
-class SpuriousMessageException              extends ChannelException
-class IllegalMessageException               extends ChannelException
-class WriteTimedOutException                extends ChannelException
-class InconsistentStateException            extends ChannelException
-case class SslHandshakeException(t: Throwable)             extends ChannelException
-case class SslHostVerificationException(principal: String) extends ChannelException
-case class UnknownChannelException(e: Throwable) extends ChannelException {
-  override def toString = "%s: %s".format(super.toString, e.toString)
+class ChannelException            (underlying: Throwable) extends Exception(underlying)
+class ConnectionFailedException   (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace
+class ChannelClosedException      (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
+  def this() = this(null)
 }
-case class WriteException(e: Throwable)     extends ChannelException {
-  override def toString = "%s: %s".format(super.toString, e.toString)
+class SpuriousMessageException    (underlying: Throwable) extends ChannelException(underlying)
+class IllegalMessageException     (underlying: Throwable) extends ChannelException(underlying)
+class WriteTimedOutException extends ChannelException(null)
+class InconsistentStateException extends ChannelException(null)
+case class UnknownChannelException(underlying: Throwable) extends ChannelException(underlying)
+case class WriteException (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
+  override def fillInStackTrace = this
+  override def getStackTrace = underlying.getStackTrace
 }
+case class SslHandshakeException  (underlying: Throwable)              extends ChannelException(underlying)
+case class SslHostVerificationException(principal: String)             extends ChannelException(null)
 
 object ChannelException {
   def apply(cause: Throwable) = {
     cause match {
       case exc: ChannelException => exc
-      case _: java.net.ConnectException                    => new ConnectionFailedException
-      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException
-      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException
-      case e: java.io.IOException if "Connection reset by peer" == e.getMessage =>
-        new ChannelClosedException
-      case e                                               => new UnknownChannelException(e)
+      case _: java.net.ConnectException                    => new ConnectionFailedException(cause)
+      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException(cause)
+      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause)
+      case e: java.io.IOException
+        if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause)
+      case e                                               => new UnknownChannelException(cause)
     }
   }
 }
 
 // Service layer errors.
-class ServiceException             extends Exception
-class ServiceClosedException       extends ServiceException
-class ServiceNotAvailableException extends ServiceException
-class ServiceTimeoutException      extends ServiceException
+class ServiceException                                         extends Exception
+class ServiceClosedException                                   extends ServiceException
+class ServiceNotAvailableException                             extends ServiceException
+class ServiceTimeoutException(
+    val serviceName: String,
+    protected val timeout: Duration)
+    extends ServiceException
+    with TimeoutException {
+  protected val explanation =
+    "creating a service/connection or reserving a service/connection from the service/connection pool"
+}
 
 // Subclass this for application exceptions
 class ApplicationException extends Exception

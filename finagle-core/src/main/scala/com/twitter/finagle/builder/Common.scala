@@ -1,4 +1,5 @@
 package com.twitter.finagle.builder
+
 /**
  * Used by builder to throw exceptions if the specification is incomplete.
  * {{{

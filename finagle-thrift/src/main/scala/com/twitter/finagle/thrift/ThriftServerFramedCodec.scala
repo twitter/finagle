@@ -112,9 +112,8 @@ private[thrift] class ThriftServerTracingFilter(
         val buffer = new OutputBuffer
         buffer().writeMessageBegin(
           new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, msg.seqid))
-        buffer().writeStructBegin(new TStruct())
-        buffer().writeFieldStop()
-        buffer().writeStructEnd()
+        val upgradeReply = new thrift.UpgradeReply
+        upgradeReply.write(buffer())
         buffer().writeMessageEnd()
 
         // Note: currently there are no options, so there's no need

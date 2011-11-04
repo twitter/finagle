@@ -34,6 +34,18 @@ class WatermarkPool[Req, Rep](
   private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { waiters.size }
   private[this] val sizeStat = statsReceiver.addGauge("pool_size") { numServices }
 
+  /**
+   * Flush waiters by creating new services for them. This must
+   * be called whenever we decrease the service count.
+   */
+  private[this] def flushWaiters() = synchronized {
+    while (numServices < highWatermark && !waiters.isEmpty) {
+      val waiter = waiters.dequeue()
+      val res = make() respond { waiter() = _ }
+      waiter.linkTo(res)
+    }
+  }
+
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
@@ -47,11 +59,7 @@ class WatermarkPool[Req, Rep](
         // If we just disposed of an service, and this bumped us beneath
         // the high watermark, then we are free to satisfy the first
         // waiter.
-        if (numServices < highWatermark && !waiters.isEmpty) {
-          val waiter = waiters.dequeue()
-          val res = make() respond { waiter() = _ }
-          waiter.linkTo(res)
-        }
+        flushWaiters()
       } else if (!waiters.isEmpty) {
         val waiter = waiters.dequeue()
         waiter() = Return(this)
@@ -89,9 +97,12 @@ class WatermarkPool[Req, Rep](
         Future.value(service)
       case None if numServices < highWatermark =>
         numServices += 1
-        factory.make() map { new ServiceWrapper(_) } onFailure { f =>
-          WatermarkPool.this.synchronized { numServices -= 1 }
-        }
+        factory.make() onFailure { _ =>
+          synchronized {
+            numServices -= 1
+            flushWaiters()
+          }
+        } map { new ServiceWrapper(_) }
       case None if waiters.size >= maxWaiters =>
         Future.exception(new TooManyWaitersException)
       case None =>

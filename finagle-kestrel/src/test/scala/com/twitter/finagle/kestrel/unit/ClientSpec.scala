@@ -1,16 +1,19 @@
-package com.twitter.finagle.kestrel.unit
+package com.twitter.finagle.kestrel
+package unit
 
 import org.specs.Specification
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.concurrent.{ChannelSource, Channel}
-import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer}
+import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer, Promise}
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 
+import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 
 // all this so we can spy() on a client.
 class MockClient extends Client {
@@ -115,6 +118,30 @@ object ClientSpec extends Specification with Mockito {
       there was no(rh).close()
       h.close()
       there was one(rh).close()
+    }
+  }
+
+  "ConnectedClient.read" should {
+    val queueName = "foo"
+    val factory = mock[ServiceFactory[Command, Response]]
+    val service = mock[Service[Command, Response]]
+    val client = new ConnectedClient(factory)
+    val open = Open(queueName, Some(Duration.MaxValue))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
+    val abort = Abort(queueName)
+
+    "cancel current request on close" in {
+      factory.make returns Future(service)
+      val promise = new Promise[Response]()
+      service(open) returns promise
+      service(closeAndOpen) returns promise
+      service(abort) returns Future(Values(Seq()))
+
+      val rh = client.read(queueName)
+
+      promise.isCancelled must beFalse
+      rh.close()
+      promise.isCancelled must beTrue
     }
   }
 }

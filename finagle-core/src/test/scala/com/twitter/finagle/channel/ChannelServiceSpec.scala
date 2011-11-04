@@ -46,12 +46,12 @@ object ChannelServiceSpec extends Specification with Mockito {
 
       "cause write errors if the downstream write fails" in {
         messageEvent.getFuture.setFailure(new Exception("doh."))
-        future() must throwA(new WriteException(new Exception("doh.")))
+        future() must throwA[WriteException]
       }
 
       "silently ignore other errors after a downstream write failure" in {
         messageEvent.getFuture.setFailure(new Exception("doh."))
-        future() must throwA(new WriteException(new Exception("doh.")))
+        future() must throwA[WriteException]
 
         val stateEvent = mock[ChannelStateEvent]
         stateEvent.getState returns ChannelState.OPEN
@@ -255,6 +255,33 @@ object ChannelServiceSpec extends Specification with Mockito {
       val f = factory.make()
       f.isDefined must beTrue
       f() must throwA(e)
+    }
+
+    "prepareChannel" in {
+      val preparedPromise = new Promise[Service[Any, Any]]
+      val prepareChannel = mock[Service[Any, Any] => Future[Service[Any, Any]]]
+      val underlyingService = mock[Service[Any, Any]]
+      prepareChannel(any) returns preparedPromise
+      val factory = new ChannelServiceFactory[Any, Any](bootstrap, prepareChannel) {
+        override protected def mkService(ch: Channel) = underlyingService
+      }
+
+      "be called on new services" in {
+        val p = factory.make()
+        there was no(prepareChannel)(any)
+        channelFuture.setSuccess()
+        there was one(prepareChannel)(any)
+      }
+
+      "when failed, underlying service should be released" in {
+        val exc = new Exception("sad panda")
+        prepareChannel(any) returns Future.exception(exc)
+        there was no(underlyingService).release
+        val p = factory.make()
+        channelFuture.setSuccess()
+        p.poll must beSome(Throw(exc))
+        there was one(underlyingService).release()
+      }
     }
   }
 }
