@@ -48,7 +48,6 @@ package com.twitter.finagle.builder
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
 import java.util.concurrent.{Executors, TimeUnit}
-import javax.net.ssl.SSLEngine
 
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
@@ -65,9 +64,11 @@ import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
-import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
+import com.twitter.finagle.stats.{
+  StatsReceiver, RollupStatsReceiver, NullStatsReceiver, GlobalStatsReceiver
+}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy, HeapBalancer}
-import com.twitter.finagle.ssl.{Ssl, SslConnectHandler}
+import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
 import exception._
@@ -157,7 +158,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _retries                   : Option[Int]                   = None,
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
-  private val _tls                       : Option[(SSLEngine, Option[String])] = None,
+  private val _tls                       : Option[(Engine, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
   private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
@@ -550,9 +551,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         }
 
         for ((engine, hostname) <- config.tls) {
-          engine.setUseClientMode(true)
-          engine.setEnableSessionCreation(true)
-          val sslHandler = new SslHandler(engine)
+          engine.self.setUseClientMode(true)
+          engine.self.setEnableSessionCreation(true)
+          val sslHandler = new SslHandler(engine.self)
           val verifier = hostname map {
             SslConnectHandler.sessionHostnameVerifier(_) _
           } getOrElse { Function.const(None) _ }

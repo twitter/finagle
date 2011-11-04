@@ -34,7 +34,7 @@ import channel.{ChannelClosingHandler, ServiceToChannelHandler, ChannelSemaphore
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
 import exception._
-import ssl.Ssl
+import ssl.{Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 
 trait Server {
   /**
@@ -91,7 +91,6 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _bindTo:                          Option[SocketAddress]                    = None,
   private val _logger:                          Option[Logger]                           = None,
   private val _tls:                             Option[(String, String, String, String)] = None,
-  private val _startTls:                        Boolean                                  = false,
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
@@ -121,7 +120,6 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val bindTo                          = _bindTo
   val logger                          = _logger
   val tls                             = _tls
-  val startTls                        = _startTls
   val channelFactory                  = _channelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
   val healthEventCallback             = _healthEventCallback
@@ -145,7 +143,6 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "bindTo"                          -> _bindTo,
     "logger"                          -> _logger,
     "tls"                             -> _tls,
-    "startTls"                        -> Some(_startTls),
     "channelFactory"                  -> Some(_channelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
     "healthEventCallback"             -> _healthEventCallback,
@@ -287,9 +284,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tls(certificatePath: String, keyPath: String,
           caCertificatePath: String = null, ciphers: String = null): This =
     withConfig(_.copy(_tls = Some(certificatePath, keyPath, caCertificatePath, ciphers)))
-
-  def startTls(value: Boolean): This =
-    withConfig(_.copy(_startTls = value))
 
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
@@ -461,11 +455,38 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         // SSL comes first so that ChannelSnooper gets plaintext
         config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers) =>
-          val engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers)
-          engine.setUseClientMode(false)
-          engine.setEnableSessionCreation(true)
+          val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers)
+          engine.self.setUseClientMode(false)
+          engine.self.setEnableSessionCreation(true)
 
-          pipeline.addFirst("ssl", new SslHandler(engine, config.startTls))
+          val handler = new SslHandler(engine.self)
+
+          // Certain engine implementations need to handle renegotiation internally,
+          // as Netty's TLS protocol parser implementation confuses renegotiation and
+          // notification events. Renegotiation will be enabled for those Engines with
+          // a true handlesRenegotiation value.
+          handler.setEnableRenegotiation(engine.handlesRenegotiation)
+
+          pipeline.addFirst("ssl", handler)
+
+          // Netty's SslHandler does not provide SSLEngine implementations any hints that they
+          // are no longer needed (namely, upon disconnection.) Since some engine implementations
+          // make use of objects that are not managed by the JVM's memory manager, we need to
+          // know when memory can be released. The SslShutdownHandler will invoke the shutdown
+          // method on implementations that define shutdown(): Unit.
+          pipeline.addFirst(
+            "sslShutdown",
+            new SslShutdownHandler(engine)
+          )
+
+          // Information useful for debugging SSL issues, such as the certificate, cipher spec,
+          // remote address is provided to the SSLEngine implementation by the SslIdentifierHandler.
+          // The SslIdentifierHandler will invoke the setIdentifier method on implementations
+          // that define setIdentifier(String): Unit.
+          pipeline.addFirst(
+            "sslIdentifier",
+            new SslIdentifierHandler(engine, certificatePath, ciphers)
+          )
         }
 
         // Serialization keeps the codecs honest.
