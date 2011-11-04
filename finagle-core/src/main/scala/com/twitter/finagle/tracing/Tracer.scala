@@ -51,6 +51,7 @@ trait Tracer {
 }
 
 object NullTracer extends Tracer {
+  val factory: Tracer.Factory = () => this
   def record(record: Record) {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
