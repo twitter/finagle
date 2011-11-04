@@ -16,8 +16,6 @@ class SslShutdownHandler(o: Object) extends SimpleChannelUpstreamHandler {
       case _: NoSuchMethodException => None
     }
 
-  printf("SslShutdownHandler: Hooked method %s\n", shutdownMethod)
-
   private[this] def shutdownAfterChannelClosure() {
     shutdownMethod foreach { method: Method =>
       method.invoke(o)
