@@ -1,3 +1,23 @@
+1.9.5		2011/11/04
+
+	* ExpiringService: add stats for idle and lifetime expiration.
+	Deactivate() regardless of latch counter
+	* Filters: don't apply refcounts on composition, do it only
+	(and always) in the builder
+	* Count pending timeouts, and export them
+	* ChannelService: release services when `prepareChannel`
+	fails.  This fixes a connection leak
+	* WatermarkPool: flush waiters on creation failure.  This
+	fixes a condition wherein we'd keep waiters unnecessarily.
+	* Timeout exceptions: include service name
+	* Suppress excessive logging of the exceptions that mostly
+	caused by unreliable client connections.
+	* memcached: Add generic type support (via Client.adapt), and
+	Array[Byte] and String instances
+	* finagle-stream: do not admit concurrent requests
+	* Tracing: Add release method to Tracer trait, add
+	tracerFactory to builders, deprecate tracer on builders
+
 1.9.4		2011/10/24
 
 	* Service: response Future will now be cancelled if the client
