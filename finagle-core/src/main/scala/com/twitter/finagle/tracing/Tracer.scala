@@ -69,6 +69,8 @@ class BufferingTracer extends Tracer
 }
 
 object ConsoleTracer extends Tracer {
+  val factory: Tracer.Factory = () => this
+
   def record(record: Record) {
     println(record)
   }
