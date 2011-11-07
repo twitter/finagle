@@ -181,7 +181,7 @@ private[thrift] class ThriftClientTracingFilter(
         Trace.record(Annotation.ClientRecv())
 
         if (isUpgraded) {
-          // Peel off the TracedResponseHeader.
+          // Peel off the ResponseHeader.
           InputBuffer.peelMessage(response, new thrift.ResponseHeader)
         } else {
           response

@@ -115,7 +115,7 @@ private[thrift] class ThriftServerTracingFilter(
         ClientId.set(extractClientId(header))
         service(request_) map { response =>
           Trace.record(Annotation.ServerSend())
-          val responseHeader = new thrift.TracedResponseHeader
+          val responseHeader = new thrift.ResponseHeader
           OutputBuffer.messageToArray(responseHeader) ++ response
         }
       } finally {
