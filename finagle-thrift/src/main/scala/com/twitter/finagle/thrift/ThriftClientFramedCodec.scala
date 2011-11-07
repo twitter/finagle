@@ -28,26 +28,32 @@ import scala.Option._
  */
 object ThriftClientFramedCodec {
   /**
-   * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodecFactory]]
+   * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodecFactory]].
+   * Passing a ClientId will propagate that information to the server iff the server is a finagle
+   * server.
    */
-  def apply() = new ThriftClientFramedCodecFactory
+  def apply(clientId: Option[ClientId] = None) = new ThriftClientFramedCodecFactory(clientId)
+
   def get() = apply()
 }
 
-class ThriftClientFramedCodecFactory
+class ThriftClientFramedCodecFactory(clientId: Option[ClientId])
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
    */
-  def apply(config: ClientCodecConfig) = {
-    new ThriftClientFramedCodec(new TBinaryProtocol.Factory(), config)
-  }
+  def apply(config: ClientCodecConfig) =
+    new ThriftClientFramedCodec(new TBinaryProtocol.Factory(), config, clientId)
+
 }
 
-class ThriftClientFramedCodec(protocolFactory: TProtocolFactory, config: ClientCodecConfig)
-  extends Codec[ThriftClientRequest, Array[Byte]]
+class ThriftClientFramedCodec(
+  protocolFactory: TProtocolFactory,
+  config: ClientCodecConfig,
+  clientId: Option[ClientId] = None
+) extends Codec[ThriftClientRequest, Array[Byte]]
 {
   def pipelineFactory =
     new ChannelPipelineFactory {
@@ -66,8 +72,10 @@ class ThriftClientFramedCodec(protocolFactory: TProtocolFactory, config: ClientC
     val buffer = new OutputBuffer()
     buffer().writeMessageBegin(
       new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
-    val options = new thrift.TraceOptions
+
+    val options = new thrift.ConnectionOptions
     options.write(buffer())
+
     buffer().writeMessageEnd()
 
     underlying(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
@@ -77,7 +85,8 @@ class ThriftClientFramedCodec(protocolFactory: TProtocolFactory, config: ClientC
 
       (new ThriftClientTracingFilter(
         config.serviceName,
-        reply.`type` != TMessageType.EXCEPTION
+        reply.`type` != TMessageType.EXCEPTION,
+        clientId
       )) andThen underlying
     }
   }
@@ -126,7 +135,9 @@ private[thrift] class ThriftClientChannelBufferEncoder
  * @param isUpgraded Whether this connection is with a server that has tracing enabled
  */
 
-private[thrift] class ThriftClientTracingFilter(serviceName: String, isUpgraded: Boolean)
+private[thrift] class ThriftClientTracingFilter(
+  serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId]
+)
   extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
   def apply(
@@ -138,10 +149,14 @@ private[thrift] class ThriftClientTracingFilter(serviceName: String, isUpgraded:
     Trace.recordRpcname(serviceName, msg.name)
 
     val thriftRequest = if (isUpgraded) {
-      val header = new thrift.TracedRequestHeader
+      val header = new thrift.RequestHeader
       header.setSpan_id(Trace.id.spanId.toLong)
       Trace.id._parentId foreach { id => header.setParent_span_id(id.toLong) }
       header.setTrace_id(Trace.id.traceId.toLong)
+
+      clientId foreach { clientId =>
+        header.setClient_id(clientId.toThrift)
+      }
 
       Trace.id.sampled match {
         case Some(s) => header.setSampled(s)
@@ -167,7 +182,7 @@ private[thrift] class ThriftClientTracingFilter(serviceName: String, isUpgraded:
 
         if (isUpgraded) {
           // Peel off the TracedResponseHeader.
-          InputBuffer.peelMessage(response, new thrift.TracedResponseHeader)
+          InputBuffer.peelMessage(response, new thrift.ResponseHeader)
         } else {
           response
         }

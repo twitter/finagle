@@ -19,7 +19,7 @@ class ThriftClientFramedCodecSpec extends Specification with Mockito {
 
       Trace.clear()
 
-      val filter = new ThriftClientTracingFilter("service", true)
+      val filter = new ThriftClientTracingFilter("service", true, None)
       val buffer = new OutputBuffer()
       buffer().writeMessageBegin(
         new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))

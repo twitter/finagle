@@ -14,8 +14,8 @@ object ThriftServerBufferedCodec {
   def apply() = new ThriftServerBufferedCodecFactory
 }
 
-class ThriftServerBufferedCodecFactory extends
-  CodecFactory[Array[Byte], Array[Byte]]#Server
+class ThriftServerBufferedCodecFactory
+  extends CodecFactory[Array[Byte], Array[Byte]]#Server
 {
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodec]]
@@ -26,7 +26,10 @@ class ThriftServerBufferedCodecFactory extends
   }
 }
 
-class ThriftServerBufferedCodec(protocolFactory: TProtocolFactory, config: ServerCodecConfig)
+class ThriftServerBufferedCodec(
+  protocolFactory: TProtocolFactory,
+  config: ServerCodecConfig
+)
   extends ThriftServerFramedCodec(config)
 {
   override def pipelineFactory = {
