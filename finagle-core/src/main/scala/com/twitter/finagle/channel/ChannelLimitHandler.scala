@@ -10,11 +10,11 @@ case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
-/*
-* Trait defining a class responsible for managing IdleConnection
-* This class is notified everytime a connection receive activity or when it is closed
-* You also can retrieved from this class an idle connection.
-*/
+/**
+ * Trait defining a class responsible for managing IdleConnection
+ * This class is notified everytime a connection receive activity or when it is closed
+ * You also can retrieved from this class an idle connection.
+ */
 trait IdleConnectionHandler {
   def getIdleConnections: Iterable[Channel]
   def getIdleConnection: Option[Channel]
@@ -25,26 +25,26 @@ trait IdleConnectionHandler {
 }
 
 
-/*
-* Always return the most idle connection
-*/
+/**
+ * Always return the most idle connection
+ */
 class PreciseIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionHandler {
-  private[this] val activeConnections = mutable.HashMap.empty[Channel,Time]
+  private[this] val activeConnections = mutable.HashMap.empty[Channel, Time]
 
   def getIdleTimeout = idleTimeout
 
   def getIdleConnections = synchronized {
     val now = Time.now
-    activeConnections.view.filter{ case (_, ts) => idleTimeout < now - ts }.map(_._1)
+    activeConnections filter { case (_, ts) => idleTimeout < now - ts } map { case (fst, _) => fst }
   }
 
   def getIdleConnection: Option[Channel] = synchronized {
     val now = Time.now
-    val idleConnections = activeConnections.filter{ case (_, ts) => idleTimeout < now - ts }
-    if(idleConnections.isEmpty)
+    val idleConnections = activeConnections filter{ case (_, ts) => idleTimeout < now - ts }
+    if (idleConnections.isEmpty)
       None
     else
-      Some(idleConnections.min(Ordering.by[(Channel,Time),Time]{ case (_, ts) => ts })._1)
+      Some(idleConnections.min(Ordering.by[(Channel, Time), Time]{ case (_, ts) => ts })._1)
   }
 
   def markChannelAsActive(channel: Channel) = synchronized {
@@ -57,17 +57,20 @@ class PreciseIdleConnectionHandler(idleTimeout: Duration) extends IdleConnection
 }
 
 
-/*
- * Keep track of active connection using 3 buckets in a circular buffer way, every time some activity
- * happens on a connection, we move the channel from the corresponding bucket to the most recent one
- * So, if we need a idle connection, we just have to choose randomly from the oldest bucket
+/**
+ * Keep track of active connections using 3 buckets in a circular buffer way, every time some
+ * activity happens on a connection, we move the channel from the corresponding bucket to the most
+ * recent one. So, if we need a idle connection, we just have to choose randomly from the oldest
+ * bucket
  * NB: This implementation doesn't guarantee that connections that have been idle during exactly
  * idleTimeout will be detected as idle, it may take at most 2 times idleTimeout to be detected
  */
 class BucketIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionHandler {
   private[this] val bucketSize = idleTimeout.inMilliseconds
   private[this] val bucketNumber = 3
-  private[this] val activeConnections = (1 to bucketNumber).map{ _ => mutable.HashSet.empty[Channel] }.toArray
+  private[this] val activeConnections = (1 to bucketNumber).map{ _ =>
+    mutable.HashSet.empty[Channel]
+  }.toArray
 
   private[this] def currentBucketIndex = Time.now.inMilliseconds / bucketSize
   private[this] var lastBucketIndex = currentBucketIndex
@@ -105,7 +108,7 @@ class BucketIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionH
 
   def getIdleConnections: Iterable[Channel] = synchronized {
     val currentNewIndex = currentBucketIndex
-    oldestBucket(currentNewIndex)
+    oldestBucket(currentNewIndex).clone()
   }
 
   def getIdleConnection: Option[Channel] = synchronized {
@@ -115,14 +118,14 @@ class BucketIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionH
 
   def markChannelAsActive(channel: Channel) = synchronized {
     val currentNewIndex = currentBucketIndex
-    if(! oldestBucket(currentNewIndex).remove(channel))
+    if (! oldestBucket(currentNewIndex).remove(channel))
       intermediateBucket(currentNewIndex).remove(channel)
     newestBucket(currentNewIndex).add(channel)
   }
   def removeChannel(channel: Channel) = synchronized {
     val currentNewIndex = currentBucketIndex
-    if(! oldestBucket(currentNewIndex).remove(channel))
-      if(! intermediateBucket(currentNewIndex).remove(channel))
+    if (! oldestBucket(currentNewIndex).remove(channel))
+      if (! intermediateBucket(currentNewIndex).remove(channel))
         newestBucket(currentNewIndex).remove(channel)
   }
 }
@@ -138,57 +141,52 @@ class BucketIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionH
  *   connection depending if we managed to close an idle connection.
  */
 class ChannelLimitHandler(
-    val thresholds: OpenConnectionsThresholds,
+    thresholds: OpenConnectionsThresholds,
     idleConnectionHandler: IdleConnectionHandler,
-    val statsReceiver : StatsReceiver = NullStatsReceiver)
+    statsReceiver : StatsReceiver = NullStatsReceiver)
   extends SimpleChannelHandler
 {
   private[this] val connectionCounter = new AtomicInteger(0)
-  private[this] val refusedConnectionCounter = new AtomicInteger(0)
-  private[this] val startDate = Time.now
-
-  statsReceiver.addGauge("idle_connections_closed") { idleConnectionHandler.countIdleConnections }
-  statsReceiver.addGauge("idle_active_connections_ratio") {
+  private[this] val closedGauge = statsReceiver.addGauge("idle_connections_closed") {
+    idleConnectionHandler.countIdleConnections
+  }
+  private[this] val ratioGauge = statsReceiver.addGauge("idle_active_connections_ratio") {
     idleConnectionHandler.countIdleConnections.toFloat / connectionCounter.get
   }
-  statsReceiver.addGauge("connections_refused") { refusedConnectionCounter.get }
-  statsReceiver.addGauge("connection_refused_sec") {
-    refusedConnectionCounter.get / startDate.untilNow.inSeconds.toInt
-  }
+  private[this] val refusedConnectionCounter = statsReceiver.counter("connections_refused")
 
   def openConnections = connectionCounter.get()
 
-  def closeIdleConnections() = {
-    var hasClosedAConnection = false
-    idleConnectionHandler.getIdleConnection.foreach{ c =>
-      c.close()
-      hasClosedAConnection = true
+  def closeIdleConnections() =
+    idleConnectionHandler.getIdleConnection match {
+      case Some(conn) =>
+        conn.close(); true
+      case None =>
+        false
     }
-    hasClosedAConnection
-  }
-
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    def accept() {
-      idleConnectionHandler.markChannelAsActive(ctx.getChannel)
-      ctx.sendUpstream(e)
+    val connectionCount = connectionCounter.incrementAndGet()
+    val accept = if (connectionCount <= thresholds.lowWaterMark)
+      true
+    else if (connectionCount <= thresholds.highWaterMark) {
+      closeIdleConnections()
+      true
+    } else {
+      // Try to close idle connections, if we don't find any, then we refuse the connection
+      if (closeIdleConnections())
+        true
+      else {
+        refusedConnectionCounter.incr()
+        false
+      }
     }
 
-    val connectionCount = connectionCounter.incrementAndGet()
-    if(connectionCount <= thresholds.lowWaterMark)
-      accept()
-    else if(connectionCount <= thresholds.highWaterMark) {
-      closeIdleConnections()
-      accept()
-    }
-    else {
-      // Try to close idle connections, if we don't find any, then we refuse the connection
-      if(closeIdleConnections())
-        accept()
-      else {
-        refusedConnectionCounter.incrementAndGet()
-        ctx.getChannel.close()
-      }
+    if (accept) {
+      idleConnectionHandler.markChannelAsActive(ctx.getChannel)
+      super.channelOpen(ctx, e)
+    } else {
+      ctx.getChannel.close()
     }
   }
 

@@ -142,7 +142,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
-  private val _timeoutCfg:                      TimeoutConfig                               = TimeoutConfig(),
+  private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
   private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]  = None,
   private val _tracer:                          Tracer                                   = NullTracer,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None)
@@ -176,12 +176,12 @@ case class TimeoutConfig(
   val channelFactory                  = _channelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
   val healthEventCallback             = _healthEventCallback
-  val hostConnectionMaxIdleTime       = _timeoutCfg.hostConnectionMaxIdleTime
-  val hostConnectionMaxLifeTime       = _timeoutCfg.hostConnectionMaxLifeTime
-  val requestTimeout                  = _timeoutCfg.requestTimeout
-  val readTimeout                     = _timeoutCfg.readTimeout
-  val writeCompletionTimeout          = _timeoutCfg.writeCompletionTimeout
-  val timeoutConfig                   = _timeoutCfg
+  val hostConnectionMaxIdleTime       = _timeoutConfig.hostConnectionMaxIdleTime
+  val hostConnectionMaxLifeTime       = _timeoutConfig.hostConnectionMaxLifeTime
+  val requestTimeout                  = _timeoutConfig.requestTimeout
+  val readTimeout                     = _timeoutConfig.readTimeout
+  val writeCompletionTimeout          = _timeoutConfig.writeCompletionTimeout
+  val timeoutConfig                   = _timeoutConfig
   val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
   val tracer                          = _tracer
   val openConnectionsThresholds       = _openConnectionsThresholds
@@ -201,11 +201,11 @@ case class TimeoutConfig(
     "channelFactory"                  -> Some(_channelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
     "healthEventCallback"             -> _healthEventCallback,
-    "hostConnectionMaxIdleTime"       -> _timeoutCfg.hostConnectionMaxIdleTime,
-    "hostConnectionMaxLifeTime"       -> _timeoutCfg.hostConnectionMaxLifeTime,
-    "requestTimeout"                  -> _timeoutCfg.requestTimeout,
-    "readTimeout"                     -> _timeoutCfg.readTimeout,
-    "writeCompletionTimeout"          -> _timeoutCfg.writeCompletionTimeout,
+    "hostConnectionMaxIdleTime"       -> _timeoutConfig.hostConnectionMaxIdleTime,
+    "hostConnectionMaxLifeTime"       -> _timeoutConfig.hostConnectionMaxLifeTime,
+    "requestTimeout"                  -> _timeoutConfig.requestTimeout,
+    "readTimeout"                     -> _timeoutConfig.readTimeout,
+    "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "openConnectionsHealthThresholds" -> _openConnectionsHealthThresholds,
     "tracer"                          -> Some(_tracer),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
@@ -314,22 +314,22 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     withConfig(_.copy(_healthEventCallback = callback))
 
   def hostConnectionMaxIdleTime(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(hostConnectionMaxIdleTime = Some(howlong))))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(hostConnectionMaxIdleTime = Some(howlong))))
 
   def hostConnectionMaxLifeTime(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(hostConnectionMaxLifeTime = Some(howlong))))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(hostConnectionMaxLifeTime = Some(howlong))))
 
   def openConnectionsHealthThresholds(thresholds: OpenConnectionsHealthThresholds): This =
     withConfig(_.copy(_openConnectionsHealthThresholds = Some(thresholds)))
 
   def requestTimeout(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(requestTimeout = Some(howlong))))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(requestTimeout = Some(howlong))))
 
   def readTimeout(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(readTimeout = Some(howlong))))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(readTimeout = Some(howlong))))
 
   def writeCompletionTimeout(howlong: Duration): This =
-    withConfig(c => c.copy(_timeoutCfg = c.timeoutConfig.copy(writeCompletionTimeout = Some(howlong))))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(writeCompletionTimeout = Some(howlong))))
 
   def exceptionReceiver(erFactory: ServerExceptionReceiverBuilder): This =
     withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
