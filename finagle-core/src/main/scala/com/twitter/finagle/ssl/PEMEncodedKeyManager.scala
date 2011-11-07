@@ -73,7 +73,7 @@ object PEMEncodedKeyManager {
     Shell.run(
       Array(
         "keytool",
-        "-makeKeystore",
+        "-importkeystore",
         "-srckeystore",  p12Path,
         "-srcstoretype", "PKCS12",
         "-destkeystore", jksPath,
