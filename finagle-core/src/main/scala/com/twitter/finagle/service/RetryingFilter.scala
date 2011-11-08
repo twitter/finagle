@@ -8,20 +8,49 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.finagle.tracing.Trace
 
+trait RetryPolicy[-A] extends ((A) => Option[(Duration, RetryPolicy[A])])
+
+object RetryPolicy {
+  def tries(numTries: Int) = {
+    backoff[Try[Nothing]](Backoff.const(0.second) take (numTries - 1)) {
+      case Throw(_: WriteException) => true
+    }
+  }
+
+  def backoff[A](
+    backoffs: Stream[Duration]
+  )(shouldRetry: PartialFunction[A, Boolean]): RetryPolicy[A] = {
+    new RetryPolicy[A] {
+      def apply(e: A) = {
+        if (shouldRetry.isDefinedAt(e) && shouldRetry(e)) {
+          backoffs match {
+            case howlong #:: rest =>
+              Some((howlong, backoff(rest)(shouldRetry)))
+            case _ =>
+              None
+          }
+        } else {
+          None
+        }
+      }
+    }
+  }
+}
+
 object RetryingService {
   /**
    * Returns a filter that will retry numTries times, but only if encountering a
    * WriteException.
    */
   def tries[Req, Rep](numTries: Int, stats: StatsReceiver): SimpleFilter[Req, Rep] = {
-    implicit val fakeTimer = new Timer {
+    val fakeTimer = new Timer {
       def schedule(when: Time)(f: => Unit): TimerTask = throw new Exception("illegal use!")
       def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = throw new Exception("illegal use!")
       def stop() { throw new Exception("illegal use!") }
     }
-    RetryingFilter[Req, Rep](Backoff.const(0.second) take (numTries - 1), stats) {
-      case Throw(ex: WriteException) => true
-    }
+
+    val policy = RetryPolicy.tries(numTries)
+    new RetryingFilter[Req, Rep](policy, fakeTimer, stats)
   }
 }
 
@@ -30,60 +59,60 @@ object RetryingFilter {
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
   )(shouldRetry: PartialFunction[Try[Rep], Boolean])(implicit timer: Timer) =
-    new RetryingFilter[Req, Rep](backoffs, statsReceiver, shouldRetry, timer)
+    new RetryingFilter[Req, Rep](RetryPolicy.backoff(backoffs)(shouldRetry), timer, statsReceiver)
 }
 
 /**
- * RetryingFilter will coördinate retries. The classification of
+ * RetryingFilter will coordinate retries. The classification of
  * requests as retryable is done by the PartialFunction shouldRetry
  * and the stream of backoffs. This stream is consulted to get the
  * next backoff (Duration) after it has been determined a request must
  * be retried.
  */
 class RetryingFilter[Req, Rep](
-  backoffs: Stream[Duration],
-  statsReceiver: StatsReceiver = NullStatsReceiver,
-  shouldRetry: PartialFunction[Try[Rep], Boolean],
-  timer: Timer
+  retryPolicy: RetryPolicy[Try[Nothing]],
+  timer: Timer,
+  statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends SimpleFilter[Req, Rep] {
   private[this] val retriesStat = statsReceiver.stat("retries")
 
+
+  @inline
+  private[this] def schedule(d: Duration)(f: => Future[Rep]) = {
+    if (d > 0.seconds) {
+      val promise = new Promise[Rep]
+      timer.schedule(Time.now + d) {
+        val rep = f
+        promise.linkTo(rep)
+        rep.proxyTo(promise)
+      }
+      promise
+    } else f
+  }
+
   private[this] def dispatch(
-    request: Req, service: Service[Req, Rep],
-    replyPromise: Promise[Rep],
-    backoffs: Stream[Duration],
+    req: Req,
+    service: Service[Req, Rep],
+    policy: RetryPolicy[Try[Nothing]],
     count: Int = 0
-  ) {
-    val res = service(request) respond { res =>
-      if (shouldRetry.isDefinedAt(res) && shouldRetry(res)) {
-        backoffs match {
-          case howlong #:: rest if howlong > 0.seconds =>
-            timer.schedule(Time.now + howlong) {
-              Trace.record("finagle.retry")
-              dispatch(request, service, replyPromise, rest, count + 1)
-            }
-
-          case howlong #:: rest =>
+  ): Future[Rep] = {
+    service(req) onSuccess { _ =>
+      retriesStat.add(count)
+    } rescue { case e =>
+      policy(Throw(e)) match {
+        case Some((howlong, nextPolicy)) =>
+          schedule(howlong) {
             Trace.record("finagle.retry")
-            dispatch(request, service, replyPromise, rest, count + 1)
-
-          case _ =>
-            retriesStat.add(count)
-            replyPromise() = res rescue { case e => Throw(new RetryFailureException(e)) }
-        }
-      } else {
-        retriesStat.add(count)
-        replyPromise() = res
+            dispatch(req, service, nextPolicy, count + 1)
+          }
+        case None =>
+          retriesStat.add(count)
+          Future.exception(e)
       }
     }
-    replyPromise.linkTo(res)
   }
 
-  def apply(request: Req, service: Service[Req, Rep]) = {
-    val promise = new Promise[Rep]
-    dispatch(request, service, promise, backoffs)
-    promise
-  }
+  def apply(request: Req, service: Service[Req, Rep]) = dispatch(request, service, retryPolicy)
 }
 
 /**

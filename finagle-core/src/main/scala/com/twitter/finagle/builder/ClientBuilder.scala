@@ -55,7 +55,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 
-import com.twitter.util.{Future, Duration, Throw, Return}
+import com.twitter.util.{Future, Duration, Throw, Return, Try}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -155,7 +155,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _name                      : Option[String]                = Some("client"),
   private val _sendBufferSize            : Option[Int]                   = None,
   private val _recvBufferSize            : Option[Int]                   = None,
-  private val _retries                   : Option[Int]                   = None,
+  private val _retryPolicy               : Option[RetryPolicy[Try[Nothing]]]  = None,
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[(Engine, Option[String])] = None,
@@ -191,7 +191,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val hostConfig                = _hostConfig
   val sendBufferSize            = _sendBufferSize
   val recvBufferSize            = _recvBufferSize
-  val retries                   = _retries
+  val retryPolicy               = _retryPolicy
   val logger                    = _logger
   val channelFactory            = _channelFactory
   val tls                       = _tls
@@ -219,7 +219,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
-    "retries"                   -> _retries,
+    "retryPolicy"               -> _retryPolicy,
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
@@ -464,7 +464,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The number of retries applied. Only applicable to service-builds ({{build()}})
    */
   def retries(value: Int): This =
-    withConfig(_.copy(_retries = Some(value)))
+    retryPolicy(RetryPolicy.tries(value))
+
+  def retryPolicy(value: RetryPolicy[Try[Nothing]]): This =
+    withConfig(_.copy(_retryPolicy = Some(value)))
 
   /**
    * Sets the TCP send buffer size.
@@ -755,9 +758,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     // We keep the retrying filter at the very bottom: this allows us
     // to retry across multiple hosts, etc.
-    config.retries foreach { numRetries =>
-      val filter = RetryingService.tries[Req, Rep](
-        numRetries, statsReceiver)
+    config.retryPolicy foreach { retryPolicy =>
+      val filter = new RetryingFilter[Req, Rep](retryPolicy, Timer.default, statsReceiver)
       service = filter andThen service
     }
 
