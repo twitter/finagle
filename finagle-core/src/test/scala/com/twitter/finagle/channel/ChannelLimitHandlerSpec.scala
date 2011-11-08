@@ -6,6 +6,68 @@ import org.jboss.netty.channel._
 import com.twitter.conversions.time._
 import com.twitter.util.{Time, Duration}
 
+object GenerationalQueueSpec extends Specification with Mockito {
+
+  def genericGenerationalQueueTest[A](queue: GenerationalQueue[String], timeout: Duration) {
+
+    "Don't collect fresh data" in {
+      Time.withCurrentTimeFrozen { _ =>
+        queue.add("foo")
+        queue.add("bar")
+        val collectedValue = queue.collect(timeout)
+        collectedValue mustBe None
+      }
+    }
+
+    "Don't collect old data recently refreshed" in {
+      var t = Time.now
+      Time.withTimeAt(t) { _ => queue.add("foo") }
+      t += timeout * 3
+      Time.withTimeAt(t) { _ => queue.add("bar") }
+      t += timeout * 3
+      Time.withTimeAt(t) { _ => queue.touch("foo") }
+      t += timeout * 3
+      Time.withTimeAt(t) { _ =>
+        val collectedValue = queue.collect(timeout)
+        collectedValue mustNotBe None
+        collectedValue mustEqual Some("bar")
+      }
+    }
+
+    "collectAll old data" in {
+      var t = Time.now
+      Time.withTimeAt(t) { _ =>
+        queue.add("foo")
+        queue.add("bar")
+      }
+      t += timeout
+      Time.withTimeAt(t) { _ =>
+        queue.add("foo2")
+        queue.add("bar2")
+      }
+      t += timeout
+      Time.withTimeAt(t) { _ =>
+        val collectedValues = queue.collectAll(timeout + 1.millisecond)
+        collectedValues.size mustEqual 2
+        collectedValues mustContain "foo"
+        collectedValues mustContain "bar"
+      }
+    }
+  }
+
+  "ExactGenerationalQueue" should {
+    val queue = new ExactGenerationalQueue[String]()
+    genericGenerationalQueueTest(queue, 100.milliseconds)
+  }
+
+  "BucketGenerationalQueue" should {
+    val timeout = 100.milliseconds
+    val queue = new BucketGenerationalQueue[String](timeout)
+    genericGenerationalQueueTest(queue, timeout)
+  }
+
+}
+
 object IdleConnectionHandlerSpec extends Specification with Mockito {
 
   def time[A]( f : => A ) = {
@@ -126,7 +188,7 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
       }
 
       (1 to 5).foreach{ _ =>
-        t += handler.getIdleTimeout - 1.milliseconds
+        t += handler.getIdleTimeout / 2
         Time.withTimeAt(t) { _ =>
           handler.getIdleConnection mustEqual None
           handler.markChannelAsActive(channel)
@@ -276,17 +338,17 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
         }
       }
 
-      // open all connections (every ms, so that we know which one will be detected as idle)
-      contexts.map{ ctx =>
-        val e = mock[ChannelStateEvent]
-        Time.withTimeAt(t) { _ => handler.channelOpen(ctx, e) }
-        t += 1.millisecond
+      Time.withTimeAt(t) { _ =>
+        contexts.map{ ctx =>
+          val e = mock[ChannelStateEvent]
+          handler.channelOpen(ctx, e)
+        }
       }
 
       Time.withTimeAt(t) { _ => handler.openConnections mustEqual thresholds.highWaterMark }
 
       // Wait a little
-      t += idleTimeout - 1.millisecond
+      t += idleTimeout / 2
 
       // Generate activity on the 5 first connections
       Time.withTimeAt(t) { _ =>
