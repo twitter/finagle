@@ -1,3 +1,13 @@
+1.9.6		2011/11/08
+
+	* SSL: make native provider bootstrapping code work; refactor
+	'Ssl' singleton
+	* tracing: Update configurations and libraries to use tracer
+	factory introduced to make it possible to release resources
+	properly in tracers
+	* finagle-thrift: connection options + client id
+	* a more flexible retry filter
+
 1.9.5		2011/11/04
 
 	* ExpiringService: add stats for idle and lifetime expiration.
