@@ -600,6 +600,57 @@ possible to check whether the contents of the list are of the requested typed.
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.java.ClientBase#read">
+      <a id="read(String):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">read</span>
+        
+        <span class="params">(<span name="queueName">queueName: <span class="extype" name="java.lang.String">String</span></span>)</span>
+        <span class="result">: <a href="../ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandle</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.java.ClientBase#readReliably">
+      <a id="readReliably(String,Timer,Callable[Iterator[Duration]]):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">readReliably</span>
+        
+        <span class="params">(<span name="queueName">queueName: <span class="extype" name="java.lang.String">String</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="backoffs">backoffs: <span class="extype" name="java.util.concurrent.Callable">Callable</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]]</span>)</span>
+        <span class="result">: <a href="../ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandle</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.java.ClientBase#readReliably">
+      <a id="readReliably(String):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">readReliably</span>
+        
+        <span class="params">(<span name="queueName">queueName: <span class="extype" name="java.lang.String">String</span></span>)</span>
+        <span class="result">: <a href="../ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandle</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a>
+        </div></div>
+          
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.java.ClientBase#set">
       <a id="set(String,ChannelBuffer,Time):Future[Response]"></a>
       <h4 class="signature">
@@ -815,6 +866,23 @@ possible to check whether the contents of the list are of the requested typed.
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.java.ClientBase#write">
+      <a id="write(String,Offer[ChannelBuffer]):Future[Throwable]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">write</span>
+        
+        <span class="params">(<span name="queueName">queueName: <span class="extype" name="java.lang.String">String</span></span>, <span name="offer">offer: <span class="extype" name="com.twitter.concurrent.Offer">Offer</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span>
+        <span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Throwable">Throwable</span>]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a>
         </div></div>
           
     </li></ol>

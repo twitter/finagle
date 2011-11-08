@@ -236,10 +236,10 @@ part of compilation it is not possible to check whether the contents of the list
             
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stream.StreamResponse#channel">
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.StreamResponse#channel">
       <a id="channel:Channel[ChannelBuffer]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
+      <span class="kind">lazy val</span>
       <span class="symbol">
         <span class="name">channel</span>
         
@@ -248,15 +248,10 @@ part of compilation it is not possible to check whether the contents of the list
       </span>
       </h4>
       
-            <p class="shortcomment cmt">As data arrives, it is published via this channel.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>As data arrives, it is published via this channel.
-</p></div><div class="block">
-          attributes: abstract 
-        </div>
             
-            
-            
-          </div>
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div></div>
           
     </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
       <a id="clone():AnyRef"></a>
@@ -351,6 +346,29 @@ scala.Int
             
           </div>
           
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stream.StreamResponse#error">
+      <a id="error:Offer[Throwable]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">error</span>
+        
+        
+        <span class="result">: <span class="extype" name="com.twitter.concurrent.Offer">Offer</span>[Throwable]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">An offer for the error.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>An offer for the error.  When this enables, the stream is closed
+(no more messages will be sent)
+</p></div><div class="block">
+          attributes: abstract 
+        </div>
+            
+            
+            
+          </div>
+          
     </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -438,10 +456,17 @@ to verify that the behavior is consistent with the <code>equals</code> method.
       </span>
       </h4>
       
-            
-            <div class="fullcomment"><div class="block">
+            <p class="shortcomment cmt">This represents the actual HTTP reply (response headers) for this
+response.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This represents the actual HTTP reply (response headers) for this
+response.
+</p></div><div class="block">
           attributes: abstract 
-        </div></div>
+        </div>
+            
+            
+            
+          </div>
           
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.StreamResponse#inputStream">
       <a id="inputStream:InputStream"></a>
@@ -475,6 +500,28 @@ possible to check whether the contents of the list are of the requested typed.
           attributes: final 
         </div><div class="block">
           definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stream.StreamResponse#messages">
+      <a id="messages:Offer[ChannelBuffer]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">messages</span>
+        
+        
+        <span class="result">: <span class="extype" name="com.twitter.concurrent.Offer">Offer</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">An Offer for the next message in the stream.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>An Offer for the next message in the stream.
+</p></div><div class="block">
+          attributes: abstract 
         </div>
             
             

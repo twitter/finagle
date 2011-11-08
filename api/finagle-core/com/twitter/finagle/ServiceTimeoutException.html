@@ -27,11 +27,11 @@
         <span class="name">ServiceTimeoutException</span>
         
         
-        <span class="result"> extends <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a></span>
+        <span class="result"> extends <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a></span>
       </span>
       </h4>
       <div class="fullcomment" id="comment"><div class="block">
-            linear super types: <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, AnyRef, <span class="extype" name="scala.Any">Any</span>
+            linear super types: <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a>, <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, AnyRef, <span class="extype" name="scala.Any">Any</span>
           </div></div>
 
       <div id="template">
@@ -45,7 +45,7 @@
           <div id="ancestors">
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
-                <ol id="linearization"><li class="in" name="com.twitter.finagle.ServiceTimeoutException">ServiceTimeoutException</li><li class="in" name="com.twitter.finagle.ServiceException">ServiceException</li><li class="in" name="java.lang.Exception">Exception</li><li class="in" name="java.lang.Throwable">Throwable</li><li class="in" name="java.io.Serializable">Serializable</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+                <ol id="linearization"><li class="in" name="com.twitter.finagle.ServiceTimeoutException">ServiceTimeoutException</li><li class="in" name="com.twitter.finagle.TimeoutException">TimeoutException</li><li class="in" name="com.twitter.finagle.ServiceException">ServiceException</li><li class="in" name="java.lang.Exception">Exception</li><li class="in" name="java.lang.Throwable">Throwable</li><li class="in" name="java.io.Serializable">Serializable</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -66,7 +66,7 @@
       <span class="symbol">
         <span class="name">ServiceTimeoutException</span>
         
-        <span class="params">()</span>
+        <span class="params">(<span name="serviceName">serviceName: String</span>, <span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
         
       </span>
       </h4>
@@ -344,6 +344,25 @@ scala.Int
             
           </div>
           
+    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.ServiceTimeoutException#explanation">
+      <a id="explanation:String"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">explanation</span>
+        
+        
+        <span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected 
+        </div><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.ServiceTimeoutException">ServiceTimeoutException</a> → <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a>
+        </div></div>
+          
     </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#fillInStackTrace">
       <a id="fillInStackTrace():Throwable"></a>
       <h4 class="signature">
@@ -444,21 +463,21 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: Throwable
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#getMessage">
-      <a id="getMessage():String"></a>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.TimeoutException#getMessage">
+      <a id="getMessage:String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">getMessage</span>
         
-        <span class="params">()</span>
-        <span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        
+        <span class="result">: String</span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: Throwable
+          definition classes: <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a>
         </div></div>
           
     </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#getStackTrace">
@@ -668,6 +687,23 @@ possible to check whether the contents of the list are of the requested typed.
           definition classes: Throwable
         </div></div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.ServiceTimeoutException#serviceName">
+      <a id="serviceName:String"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">serviceName</span>
+        
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.ServiceTimeoutException">ServiceTimeoutException</a> → <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a>
+        </div></div>
+          
     </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#setStackTrace">
       <a id="setStackTrace(Array[StackTraceElement]):Unit"></a>
       <h4 class="signature">
@@ -702,6 +738,25 @@ possible to check whether the contents of the list are of the requested typed.
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.ServiceTimeoutException#timeout">
+      <a id="timeout:Duration"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">timeout</span>
+        
+        
+        <span class="result">: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected 
+        </div><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.ServiceTimeoutException">ServiceTimeoutException</a> → <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a>
         </div></div>
           
     </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#toString">
@@ -786,7 +841,9 @@ possible to check whether the contents of the list are of the requested typed.
     </li></ol>
             </div>
 
-        <div class="parent" name="com.twitter.finagle.ServiceException">
+        <div class="parent" name="com.twitter.finagle.TimeoutException">
+              <h3>Inherited from <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.ServiceException">
               <h3>Inherited from <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a></h3>
             </div><div class="parent" name="java.lang.Exception">
               <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>

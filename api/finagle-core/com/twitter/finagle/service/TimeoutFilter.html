@@ -74,7 +74,19 @@ e.g., for a server to apply a global request timeout.
       <span class="symbol">
         <span class="name">TimeoutFilter</span>
         
-        <span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> =<span class="symbol"></span></span>)</span>
+        <span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.TimeoutFilter#this">
+      <a id="this:TimeoutFilter[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="kind">new</span>
+      <span class="symbol">
+        <span class="name">TimeoutFilter</span>
+        
+        <span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="exception">exception: <a href="../RequestTimeoutException.html" class="extype" name="com.twitter.finagle.RequestTimeoutException">RequestTimeoutException</a></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> =<span class="symbol"></span></span>)</span>
         
       </span>
       </h4>
@@ -286,7 +298,7 @@ e.g., for a server to apply a global request timeout.
       </h4>
       
             <p class="shortcomment cmt">Chains a series of filters together:</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExcetions.andThen(thrift2Pojo.andThen(parseString))
+            <div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))
 </p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><div class="block">
           definition classes: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>
         </div>

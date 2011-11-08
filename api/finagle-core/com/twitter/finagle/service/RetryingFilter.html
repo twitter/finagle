@@ -30,9 +30,9 @@
         <span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[Req, Rep]</span>
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="comment cmt"><p>RetryingFilter will coördinates retries.  The classification of
+      <div class="fullcomment" id="comment"><div class="comment cmt"><p>RetryingFilter will coordinate retries. The classification of
 requests as retryable is done by the PartialFunction shouldRetry
-and the stream of backoffs.  This stream is consulted to get the
+and the stream of backoffs. This stream is consulted to get the
 next backoff (Duration) after it has been determined a request must
 be retried.
 </p></div><div class="block">
@@ -77,7 +77,7 @@ be retried.
       <span class="symbol">
         <span class="name">RetryingFilter</span>
         
-        <span class="params">(<span name="backoffs">backoffs: Stream[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> =<span class="symbol"></span></span>, <span name="shouldRetry">shouldRetry: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="com.twitter.util.Try">Try</span>[Rep], <span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>)</span>
+        <span class="params">(<span name="retryPolicy">retryPolicy: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="scala.Nothing">Nothing</span>]]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="statsReceiver">statsReceiver: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> =<span class="symbol"></span></span>)</span>
         
       </span>
       </h4>
@@ -289,7 +289,7 @@ be retried.
       </h4>
       
             <p class="shortcomment cmt">Chains a series of filters together:</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExcetions.andThen(thrift2Pojo.andThen(parseString))
+            <div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))
 </p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><div class="block">
           definition classes: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>
         </div>
@@ -323,14 +323,14 @@ on a configuration file, for instance.
           </div>
           
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RetryingFilter#apply">
-      <a id="apply(Req,Service[Req, Rep]):Promise[Rep]"></a>
+      <a id="apply(Req,Service[Req, Rep]):Future[Rep]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">apply</span>
         
         <span class="params">(<span name="request">request: Req</span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep]</span>)</span>
-        <span class="result">: <span class="extype" name="com.twitter.util.Promise">Promise</span>[Rep]</span>
+        <span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[Rep]</span>
       </span>
       </h4>
       

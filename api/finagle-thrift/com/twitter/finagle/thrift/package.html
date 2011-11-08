@@ -75,7 +75,19 @@ generator.
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftCall">
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ClientId">
+      <a id="ClientId:ClientId"></a>
+      <h4 class="signature"><a href="ClientId.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ClientId</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftCall">
       <a id="ThriftCall:ThriftCall[A, R]"></a>
       <h4 class="signature"><a href="ThriftCall.html">
       <span class="kind">class</span>
@@ -172,6 +184,30 @@ channel.</p>
       </span>
       </a></h4>
       <p class="comment cmt">Encapsulates the result of a call to a Thrift service.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerBufferedCodec">
+      <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
+      <h4 class="signature"><a href="ThriftServerBufferedCodec.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftServerBufferedCodec</span>
+        
+        
+        <span class="result"> extends ThriftServerFramedCodec</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory">
+      <a id="ThriftServerBufferedCodecFactory:ThriftServerBufferedCodecFactory"></a>
+      <h4 class="signature"><a href="ThriftServerBufferedCodecFactory.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftServerBufferedCodecFactory</span>
+        
+        
+        <span class="result"> extends (ServerCodecConfig) ⇒ Codec[Array[Byte], Array[Byte]]</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">
       <a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
       <h4 class="signature"><a href="ThriftServerFramedCodec.html">
@@ -184,12 +220,36 @@ channel.</p>
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerFramedCodecFactory">
+      <a id="ThriftServerFramedCodecFactory:ThriftServerFramedCodecFactory"></a>
+      <h4 class="signature"><a href="ThriftServerFramedCodecFactory.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ThriftServerFramedCodecFactory</span>
+        
+        
+        <span class="result"> extends (ServerCodecConfig) ⇒ Codec[Array[Byte], Array[Byte]]</span>
+      </span>
+      </a></h4>
+      
     </li></ol>
             </div>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientBufferedCodec">
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ClientId">
+      <a id="ClientId:ClientId"></a>
+      <h4 class="signature"><a href="ClientId$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ClientId</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt"><code>ClientId</code> provides the client identification of the incoming request if available.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientBufferedCodec">
       <a id="ThriftClientBufferedCodec:ThriftClientBufferedCodec"></a>
       <h4 class="signature"><a href="ThriftClientBufferedCodec$.html">
       <span class="kind">object</span>
@@ -217,6 +277,18 @@ requests.</p>
       <p class="comment cmt">ThriftClientFramedCodec implements a framed thrift transport that
 supports upgrading in order to provide TraceContexts across
 requests.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerBufferedCodec">
+      <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
+      <h4 class="signature"><a href="ThriftServerBufferedCodec$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ThriftServerBufferedCodec</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">ThriftServerBufferedCodec implements a buffered thrift transport.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">
       <a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
       <h4 class="signature"><a href="ThriftServerFramedCodec$.html">
@@ -226,18 +298,6 @@ requests.</p>
         
         
         <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftServerFramedCodecFactory">
-      <a id="ThriftServerFramedCodecFactory:ThriftServerFramedCodecFactory"></a>
-      <h4 class="signature"><a href="ThriftServerFramedCodecFactory$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">ThriftServerFramedCodecFactory</span>
-        
-        
-        <span class="result"> extends (ServerCodecConfig) ⇒ Codec[Array[Byte], Array[Byte]]</span>
       </span>
       </a></h4>
       

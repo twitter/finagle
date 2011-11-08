@@ -81,6 +81,18 @@
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.tracing.ClientRequestTracingFilter">
+      <a id="ClientRequestTracingFilter:ClientRequestTracingFilter[Req, Res]"></a>
+      <h4 class="signature"><a href="ClientRequestTracingFilter.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ClientRequestTracingFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>, <span name="Res">Res</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[Req, Res]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Adds the basic tracing information to a request.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Record">
       <a id="Record:Record"></a>
       <h4 class="signature"><a href="Record.html">
@@ -104,12 +116,7 @@
         <span class="result"> extends Proxy</span>
       </span>
       </a></h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          attributes: final 
-        </div></div>
-          
+      <p class="comment cmt">Defines trace identifiers.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.TraceId">
       <a id="TraceId:TraceId"></a>
       <h4 class="signature"><a href="TraceId.html">
@@ -117,7 +124,7 @@
       <span class="symbol">
         <span class="name">TraceId</span>
         
-        <span class="params">(<span name="_traceId">_traceId: Option[SpanId]</span>, <span name="_parentId">_parentId: Option[SpanId]</span>, <span name="spanId">spanId: SpanId</span>, <span name="sampled">sampled: Boolean</span>)</span>
+        <span class="params">(<span name="_traceId">_traceId: Option[SpanId]</span>, <span name="_parentId">_parentId: Option[SpanId]</span>, <span name="spanId">spanId: SpanId</span>, <span name="sampled">sampled: Option[Boolean]</span>)</span>
         <span class="result"> extends Product</span>
       </span>
       </a></h4>
@@ -216,6 +223,18 @@
       </span>
       </a></h4>
       <p class="comment cmt"><code>Trace</code> maintains an interleaved stack of <code>TraceId</code>s and <code>Tracer</code>s.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Tracer">
+      <a id="Tracer:Tracer"></a>
+      <h4 class="signature"><a href="Tracer$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Tracer</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
     </li></ol>
             </div>
 

@@ -650,6 +650,84 @@ possible to check whether the contents of the list are of the requested typed.
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.ConnectedClient#read">
+      <a id="read(String):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">read</span>
+        
+        <span class="params">(<span name="queueName">queueName: String</span>)</span>
+        <span class="result">: <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandle</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Read indefinitely from the given queue with transactions.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Read indefinitely from the given queue with transactions.  Note
+that {{read}} will reserve a connection for the duration of the
+read.  Note that this does no buffering: we await acknowledment
+(through synchronizing on ReadMessage.ack) before acknowledging
+that message to the kestrel server &amp; reading the next one.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A read handle.
+</p></dd></dl><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.ConnectedClient">ConnectedClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.Client">Client</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.Client#readReliably">
+      <a id="readReliably(String):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">readReliably</span>
+        
+        <span class="params">(<span name="queueName">queueName: String</span>)</span>
+        <span class="result">: <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandle</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">{{readReliably}} with infinite, 0-second backoff retries.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>{{readReliably}} with infinite, 0-second backoff retries.
+</p></div><div class="block">
+          definition classes: <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.Client">Client</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.Client#readReliably">
+      <a id="readReliably(String,Timer,⇒ Stream[Duration]):ReadHandle"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">readReliably</span>
+        
+        <span class="params">(<span name="queueName">queueName: String</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="retryBackoffs">retryBackoffs: ⇒ Stream[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span>
+        <span class="result">: <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandle</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Read from a queue reliably: retry streaming reads on failure
+(which may indeed be backed by multiple kestrel hosts).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Read from a queue reliably: retry streaming reads on failure
+(which may indeed be backed by multiple kestrel hosts).  This
+presents to the user a virtual &quot;reliable&quot; stream of messages, and
+errors are transparent.
+</p></div><dl class="paramcmts block"><dt class="param">queueName</dt><dd class="cmt"><p>the queue to read from</p></dd><dt class="param">timer</dt><dd class="cmt"><p>a timer used to delay retries</p></dd><dt class="param">retryBackoffs</dt><dd class="cmt"><p>a (possibly infinite) stream of durations
+comprising a backoff policy</p><p>Note: the use of call-by-name for the stream is in order to
+ensure that we do not suffer a space leak for infinite retries.
+</p></dd></dl><div class="block">
+          definition classes: <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.Client">Client</a>
+        </div>
+            
+            
+            
+          </div>
+          
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.ConnectedClient#set">
       <a id="set(String,ChannelBuffer,Time):Future[Response]"></a>
       <h4 class="signature">
@@ -665,7 +743,7 @@ possible to check whether the contents of the list are of the requested typed.
             <p class="shortcomment cmt">Enqueue an item.</p>
             <div class="fullcomment"><div class="comment cmt"><p>Enqueue an item.
 </p></div><dl class="paramcmts block"><dt class="param">expiry</dt><dd class="cmt"><p>how long the item is valid for (Kestrel will delete the item
-if it isn't dequeued in time.
+if it isn't dequeued in time).
 </p></dd></dl><div class="block">
           definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.ConnectedClient">ConnectedClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.Client">Client</a>
         </div>
@@ -794,6 +872,23 @@ if it isn't dequeued in time.
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.ConnectedClient#write">
+      <a id="write(String,Offer[ChannelBuffer]):Future[Throwable]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">write</span>
+        
+        <span class="params">(<span name="queueName">queueName: String</span>, <span name="offer">offer: <span class="extype" name="com.twitter.concurrent.Offer">Offer</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span>
+        <span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[Throwable]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.kestrel.ConnectedClient">ConnectedClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.Client">Client</a>
         </div></div>
           
     </li></ol>

@@ -27,13 +27,13 @@
         <span class="name">RequestException</span>
         
         
-        <span class="result"> extends <span class="extype" name="java.lang.Exception">Exception</span></span>
+        <span class="result"> extends <span class="extype" name="java.lang.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></span>
       </span>
       </h4>
       <div class="fullcomment" id="comment"><div class="block">
-            linear super types: <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, AnyRef, <span class="extype" name="scala.Any">Any</span>
+            linear super types: <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, AnyRef, <span class="extype" name="scala.Any">Any</span>
           </div><div class="block">
-            known subclasses: <a href="TooManyWaitersException.html" class="extype" name="com.twitter.finagle.TooManyWaitersException">TooManyWaitersException</a>, <a href="TimedoutRequestException.html" class="extype" name="com.twitter.finagle.TimedoutRequestException">TimedoutRequestException</a>, <a href="NotServableException.html" class="extype" name="com.twitter.finagle.NotServableException">NotServableException</a>, <a href="ShardNotAvailableException.html" class="extype" name="com.twitter.finagle.ShardNotAvailableException">ShardNotAvailableException</a>, <a href="RetryFailureException.html" class="extype" name="com.twitter.finagle.RetryFailureException">RetryFailureException</a>, <a href="ReplyCastException.html" class="extype" name="com.twitter.finagle.ReplyCastException">ReplyCastException</a>, <a href="NotShardableException.html" class="extype" name="com.twitter.finagle.NotShardableException">NotShardableException</a>, <a href="NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a>, <a href="CancelledRequestException.html" class="extype" name="com.twitter.finagle.CancelledRequestException">CancelledRequestException</a>, <a href="CancelledConnectionException.html" class="extype" name="com.twitter.finagle.CancelledConnectionException">CancelledConnectionException</a>
+            known subclasses: <a href="TooManyWaitersException.html" class="extype" name="com.twitter.finagle.TooManyWaitersException">TooManyWaitersException</a>, <a href="NotServableException.html" class="extype" name="com.twitter.finagle.NotServableException">NotServableException</a>, <a href="ShardNotAvailableException.html" class="extype" name="com.twitter.finagle.ShardNotAvailableException">ShardNotAvailableException</a>, <a href="RetryFailureException.html" class="extype" name="com.twitter.finagle.RetryFailureException">RetryFailureException</a>, <a href="RequestTimeoutException.html" class="extype" name="com.twitter.finagle.RequestTimeoutException">RequestTimeoutException</a>, <a href="ReplyCastException.html" class="extype" name="com.twitter.finagle.ReplyCastException">ReplyCastException</a>, <a href="NotShardableException.html" class="extype" name="com.twitter.finagle.NotShardableException">NotShardableException</a>, <a href="NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a>, <a href="IndividualRequestTimeoutException.html" class="extype" name="com.twitter.finagle.IndividualRequestTimeoutException">IndividualRequestTimeoutException</a>, <a href="GlobalRequestTimeoutException.html" class="extype" name="com.twitter.finagle.GlobalRequestTimeoutException">GlobalRequestTimeoutException</a>, <a href="CancelledRequestException.html" class="extype" name="com.twitter.finagle.CancelledRequestException">CancelledRequestException</a>, <a href="CancelledConnectionException.html" class="extype" name="com.twitter.finagle.CancelledConnectionException">CancelledConnectionException</a>
           </div></div>
 
       <div id="template">
@@ -47,7 +47,7 @@
           <div id="ancestors">
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
-                <ol id="linearization"><li class="in" name="com.twitter.finagle.RequestException">RequestException</li><li class="in" name="java.lang.Exception">Exception</li><li class="in" name="java.lang.Throwable">Throwable</li><li class="in" name="java.io.Serializable">Serializable</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+                <ol id="linearization"><li class="in" name="com.twitter.finagle.RequestException">RequestException</li><li class="in" name="com.twitter.finagle.NoStacktrace">NoStacktrace</li><li class="in" name="java.lang.Exception">Exception</li><li class="in" name="java.lang.Throwable">Throwable</li><li class="in" name="java.io.Serializable">Serializable</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -69,6 +69,18 @@
         <span class="name">RequestException</span>
         
         <span class="params">()</span>
+        
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.RequestException#this">
+      <a id="this:RequestException"></a>
+      <h4 class="signature">
+      <span class="kind">new</span>
+      <span class="symbol">
+        <span class="name">RequestException</span>
+        
+        <span class="params">(<span name="cause">cause: Throwable</span>)</span>
         
       </span>
       </h4>
@@ -346,21 +358,21 @@ scala.Int
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#fillInStackTrace">
-      <a id="fillInStackTrace():Throwable"></a>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.NoStacktrace#fillInStackTrace">
+      <a id="fillInStackTrace():NoStacktrace"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">fillInStackTrace</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="java.lang.Throwable">Throwable</span></span>
+        <span class="result">: <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: Throwable
+          definition classes: <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> → Throwable
         </div></div>
           
     </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
@@ -463,7 +475,7 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: Throwable
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="java.lang.Throwable#getStackTrace">
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.RequestException#getStackTrace">
       <a id="getStackTrace():Array[StackTraceElement]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -477,7 +489,7 @@ there are no more references to the object.</p><p>The details of when and if the
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: Throwable
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> → Throwable
         </div></div>
           
     </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#hashCode">
@@ -788,7 +800,9 @@ possible to check whether the contents of the list are of the requested typed.
     </li></ol>
             </div>
 
-        <div class="parent" name="java.lang.Exception">
+        <div class="parent" name="com.twitter.finagle.NoStacktrace">
+              <h3>Inherited from <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></h3>
+            </div><div class="parent" name="java.lang.Exception">
               <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>
             </div><div class="parent" name="java.lang.Throwable">
               <h3>Inherited from <span class="extype" name="java.lang.Throwable">Throwable</span></h3>

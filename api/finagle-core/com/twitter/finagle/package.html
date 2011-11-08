@@ -30,7 +30,36 @@
         
       </span>
       </h4>
-      <div class="fullcomment" id="comment"></div>
+      <div class="fullcomment" id="comment"><div class="comment cmt"><h3>Finagle Introduction</h3><p>Start with <a href="" class="extype" name="com.twitter.finagle">finagle</a>. Both clients and and servers are services <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, which are typically created with the ClientBuilder <a href="builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> and ServerBuilder <a href="builder/ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> class, respectively.</p><p>The following example shows how to build a simple HTTP server:</p><pre>
+val service: Service[HttpRequest, HttpResponse] = new Service[HttpRequest, HttpResponse] {
+  def apply(request: HttpRequest) = Future(new DefaultHttpResponse(HTTP_1_1, OK))
+}
+
+val address: SocketAddress = new InetSocketAddress(10000)
+
+val server: Server[HttpRequest, HttpResponse] = ServerBuilder()
+  .codec(Http)         // HTTP codec, defined in Netty
+  .bindTo(address)     // one or more hosts; localhost:10000 in this example
+  .name(&quot;HttpServer&quot;)  // name of your service
+  .build(service)      // build the server
+</pre><p>The following example shows how to build a simple HTTP client, which handles asynchronous responses:</p><pre>
+val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
+   .codec(Http)             // HTTP codec, defined in Netty
+   .hosts(address)          // one or more hosts; localhost:10000 in this example
+   .hostConnectionLimit(1)  // 1 connection per host
+   .build()                 // build the client
+
+// Issue a request, get a response:
+val request: HttpRequest = new DefaultHttpRequest(HTTP_1_1, GET, &quot;/&quot;)
+val responseFuture: Future[HttpResponse] = client(request)           // response to request is a Future, which enables async execution
+  onSuccess { response =&gt; println(&quot;Received response: &quot; + response)  // Finagle calls onSuccess when the response becomes available
+                                                                     // onFailure could be defined to catch exceptions
+}
+</pre><p>For information about the Future class, which is essential for most RPC applications, see the <a href="http://twitter.github.com/util/util-core/target/site/doc/main/api/">scaladoc for Util</a>.</p><p>For exceptions you can catch, see <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> and <a href="ApiException.html" class="extype" name="com.twitter.finagle.ApiException">ApiException</a>.</p><p>For imports and more ideas of how to use Finagle, see the <a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example">examples</a>.</p></div>
+            
+            
+            
+          </div>
 
       <div id="template">
 
@@ -120,7 +149,7 @@
         <span class="name">ChannelClosedException</span>
         
         
-        <span class="result"> extends ChannelException</span>
+        <span class="result"> extends ChannelException with NoStacktrace</span>
       </span>
       </a></h4>
       
@@ -207,7 +236,7 @@ factories in one (when available).</p>
         <span class="name">ConnectionFailedException</span>
         
         
-        <span class="result"> extends ChannelException</span>
+        <span class="result"> extends ChannelException with NoStacktrace</span>
       </span>
       </a></h4>
       
@@ -235,6 +264,18 @@ factories in one (when available).</p>
       </span>
       </a></h4>
       <p class="comment cmt"> A Filter acts as a decorator/transformer of a service.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.GlobalRequestTimeoutException">
+      <a id="GlobalRequestTimeoutException:GlobalRequestTimeoutException"></a>
+      <h4 class="signature"><a href="GlobalRequestTimeoutException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">GlobalRequestTimeoutException</span>
+        
+        
+        <span class="result"> extends RequestTimeoutException</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.IllegalMessageException">
       <a id="IllegalMessageException:IllegalMessageException"></a>
       <h4 class="signature"><a href="IllegalMessageException.html">
@@ -244,6 +285,30 @@ factories in one (when available).</p>
         
         
         <span class="result"> extends ChannelException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.InconsistentStateException">
+      <a id="InconsistentStateException:InconsistentStateException"></a>
+      <h4 class="signature"><a href="InconsistentStateException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">InconsistentStateException</span>
+        
+        
+        <span class="result"> extends ChannelException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.IndividualRequestTimeoutException">
+      <a id="IndividualRequestTimeoutException:IndividualRequestTimeoutException"></a>
+      <h4 class="signature"><a href="IndividualRequestTimeoutException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">IndividualRequestTimeoutException</span>
+        
+        
+        <span class="result"> extends RequestTimeoutException</span>
       </span>
       </a></h4>
       
@@ -268,6 +333,18 @@ factories in one (when available).</p>
         
         
         <span class="result"> extends RequestException</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.NoStacktrace">
+      <a id="NoStacktrace:NoStacktrace"></a>
+      <h4 class="signature"><a href="NoStacktrace.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">NoStacktrace</span>
+        
+        
+        <span class="result"> extends Exception</span>
       </span>
       </a></h4>
       
@@ -327,7 +404,19 @@ factories in one (when available).</p>
         <span class="name">RequestException</span>
         
         
-        <span class="result"> extends Exception</span>
+        <span class="result"> extends Exception with NoStacktrace</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.RequestTimeoutException">
+      <a id="RequestTimeoutException:RequestTimeoutException"></a>
+      <h4 class="signature"><a href="RequestTimeoutException.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RequestTimeoutException</span>
+        
+        
+        <span class="result"> extends RequestException with TimeoutException</span>
       </span>
       </a></h4>
       
@@ -454,7 +543,7 @@ ServiceFactory.</p>
         <span class="name">ServiceTimeoutException</span>
         
         
-        <span class="result"> extends ServiceException</span>
+        <span class="result"> extends ServiceException with TimeoutException</span>
       </span>
       </a></h4>
       
@@ -499,15 +588,39 @@ ServiceFactory.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.TimedoutRequestException">
-      <a id="TimedoutRequestException:TimedoutRequestException"></a>
-      <h4 class="signature"><a href="TimedoutRequestException.html">
-      <span class="kind">class</span>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.SslHandshakeException">
+      <a id="SslHandshakeException:SslHandshakeException"></a>
+      <h4 class="signature"><a href="SslHandshakeException.html">
+      <span class="kind">case class</span>
       <span class="symbol">
-        <span class="name">TimedoutRequestException</span>
+        <span class="name">SslHandshakeException</span>
+        
+        <span class="params">(<span name="underlying">underlying: Throwable</span>)</span>
+        <span class="result"> extends ChannelException with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.SslHostVerificationException">
+      <a id="SslHostVerificationException:SslHostVerificationException"></a>
+      <h4 class="signature"><a href="SslHostVerificationException.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">SslHostVerificationException</span>
+        
+        <span class="params">(<span name="principal">principal: String</span>)</span>
+        <span class="result"> extends ChannelException with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.TimeoutException">
+      <a id="TimeoutException:TimeoutException"></a>
+      <h4 class="signature"><a href="TimeoutException.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">TimeoutException</span>
         
         
-        <span class="result"> extends RequestException</span>
+        <span class="result"> extends AnyRef</span>
       </span>
       </a></h4>
       
@@ -538,24 +651,24 @@ ServiceFactory.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.UnknownChannelException">
       <a id="UnknownChannelException:UnknownChannelException"></a>
       <h4 class="signature"><a href="UnknownChannelException.html">
-      <span class="kind">class</span>
+      <span class="kind">case class</span>
       <span class="symbol">
         <span class="name">UnknownChannelException</span>
         
-        
-        <span class="result"> extends ChannelException</span>
+        <span class="params">(<span name="underlying">underlying: Throwable</span>)</span>
+        <span class="result"> extends ChannelException with Product</span>
       </span>
       </a></h4>
       
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.WriteException">
       <a id="WriteException:WriteException"></a>
       <h4 class="signature"><a href="WriteException.html">
-      <span class="kind">class</span>
+      <span class="kind">case class</span>
       <span class="symbol">
         <span class="name">WriteException</span>
         
-        
-        <span class="result"> extends ChannelException</span>
+        <span class="params">(<span name="underlying">underlying: Throwable</span>)</span>
+        <span class="result"> extends ChannelException with NoStacktrace with Product</span>
       </span>
       </a></h4>
       
@@ -636,6 +749,18 @@ ServiceFactory.</p>
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.core">
+      <a id="core:core"></a>
+      <h4 class="signature"><a href="core/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">core</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.exception">
       <a id="exception:exception"></a>
       <h4 class="signature"><a href="exception/package.html">
@@ -647,7 +772,7 @@ ServiceFactory.</p>
         
       </span>
       </a></h4>
-      
+      <p class="comment cmt">For exceptions you can catch, see <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> and <a href="ApiException.html" class="extype" name="com.twitter.finagle.ApiException">ApiException</a>.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.factory">
       <a id="factory:factory"></a>
       <h4 class="signature"><a href="factory/package.html">
@@ -666,30 +791,6 @@ ServiceFactory.</p>
       <span class="kind">package</span>
       <span class="symbol">
         <span class="name">health</span>
-        
-        
-        
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http">
-      <a id="http:http"></a>
-      <h4 class="signature"><a href="http/package.html">
-      <span class="kind">package</span>
-      <span class="symbol">
-        <span class="name">http</span>
-        
-        
-        
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.javaapi">
-      <a id="javaapi:javaapi"></a>
-      <h4 class="signature"><a href="javaapi/package.html">
-      <span class="kind">package</span>
-      <span class="symbol">
-        <span class="name">javaapi</span>
         
         
         
@@ -726,6 +827,18 @@ ServiceFactory.</p>
       <span class="kind">package</span>
       <span class="symbol">
         <span class="name">service</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.ssl">
+      <a id="ssl:ssl"></a>
+      <h4 class="signature"><a href="ssl/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">ssl</span>
         
         
         

@@ -221,19 +221,22 @@ requests.
           </div>
           
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.thrift.ThriftClientFramedCodec#apply">
-      <a id="apply():ThriftClientFramedCodecFactory"></a>
+      <a id="apply(Option[ClientId]):ThriftClientFramedCodecFactory"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">apply</span>
         
-        <span class="params">()</span>
+        <span class="params">(<span name="clientId">clientId: <span class="extype" name="scala.Option">Option</span>[<a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>] =<span class="symbol">None</span></span>)</span>
         <span class="result">: <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></span>
       </span>
       </h4>
       
-            <p class="shortcomment cmt">Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></p>
-            <div class="fullcomment"><div class="comment cmt"><p>Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></p></div>
+            <p class="shortcomment cmt">Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a>.
+Passing a ClientId will propagate that information to the server iff the server is a finagle
+server.
+</p></div>
             
             
             

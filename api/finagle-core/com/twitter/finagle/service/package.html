@@ -151,6 +151,18 @@ deemed unhealthy according to its parameterization.</p>
       </a></h4>
       <p class="comment cmt">A service that simply proxies requests to an underlying service
 yielded through a Future.</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.service.RetryPolicy">
+      <a id="RetryPolicy:RetryPolicy[A]"></a>
+      <h4 class="signature"><a href="RetryPolicy.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">RetryPolicy</span>
+        <span class="tparams">[<span name="A">-A</span>]</span>
+        
+        <span class="result"> extends (A) ⇒ Option[(Duration, RetryPolicy[A])]</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RetryingFilter">
       <a id="RetryingFilter:RetryingFilter[Req, Rep]"></a>
       <h4 class="signature"><a href="RetryingFilter.html">
@@ -162,7 +174,7 @@ yielded through a Future.</p>
         <span class="result"> extends SimpleFilter[Req, Rep]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">RetryingFilter will coördinates retries.</p>
+      <p class="comment cmt">RetryingFilter will coordinate retries.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.ShardingService">
       <a id="ShardingService:ShardingService[Req, Rep]"></a>
       <h4 class="signature"><a href="ShardingService.html">
@@ -228,6 +240,18 @@ yielded through a Future.</p>
       </span>
       </a></h4>
       <p class="comment cmt">Implements various backoff strategies.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RetryPolicy">
+      <a id="RetryPolicy:RetryPolicy"></a>
+      <h4 class="signature"><a href="RetryPolicy$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">RetryPolicy</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.RetryingFilter">
       <a id="RetryingFilter:RetryingFilter"></a>
       <h4 class="signature"><a href="RetryingFilter$.html">

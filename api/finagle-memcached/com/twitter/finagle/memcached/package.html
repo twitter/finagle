@@ -52,7 +52,19 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.Client">
+              <ol><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.BaseClient">
+      <a id="BaseClient:BaseClient[T]"></a>
+      <h4 class="signature"><a href="BaseClient.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">BaseClient</span>
+        <span class="tparams">[<span name="T">T</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A friendly client to talk to a Memcached server.</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.Client">
       <a id="Client:Client"></a>
       <h4 class="signature"><a href="Client.html">
       <span class="kind">trait</span>
@@ -60,10 +72,22 @@
         <span class="name">Client</span>
         
         
-        <span class="result"> extends AnyRef</span>
+        <span class="result"> extends BaseClient[ChannelBuffer]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">A friendly client to talk to a Memcached server.</p>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.ClientAdaptor">
+      <a id="ClientAdaptor:ClientAdaptor[T]"></a>
+      <h4 class="signature"><a href="ClientAdaptor.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ClientAdaptor</span>
+        <span class="tparams">[<span name="T">T</span>]</span>
+        
+        <span class="result"> extends BaseClient[T] with Proxy</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.memcached.ConnectedClient">
       <a id="ConnectedClient:ConnectedClient"></a>
       <h4 class="signature"><a href="ConnectedClient.html">
@@ -76,6 +100,30 @@
       </span>
       </a></h4>
       <p class="comment cmt">A Client connected to an individual Memcached server.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.GetResult">
+      <a id="GetResult:GetResult"></a>
+      <h4 class="signature"><a href="GetResult.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">GetResult</span>
+        
+        <span class="params">(<span name="hits">hits: Map[String, Value]</span>, <span name="misses">misses: Set[String]</span>, <span name="failures">failures: Map[String, Throwable]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.GetsResult">
+      <a id="GetsResult:GetsResult"></a>
+      <h4 class="signature"><a href="GetsResult.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">GetsResult</span>
+        
+        <span class="params">(<span name="getResult">getResult: GetResult</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.Interpreter">
       <a id="Interpreter:Interpreter"></a>
       <h4 class="signature"><a href="Interpreter.html">
@@ -124,6 +172,32 @@
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.KetamaClientKey">
+      <a id="KetamaClientKey:KetamaClientKey"></a>
+      <h4 class="signature"><a href="KetamaClientKey.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">KetamaClientKey</span>
+        
+        <span class="params">(<span name="host">host: String</span>, <span name="port">port: Int</span>, <span name="weight">weight: Int</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.MockClient">
+      <a id="MockClient:MockClient"></a>
+      <h4 class="signature"><a href="MockClient.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">MockClient</span>
+        
+        
+        <span class="result"> extends Client</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Map-based mock client for testing
+Note: The cas method checks if value is same as previous value, if not, do a swap and return true
+</p>
     </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.memcached.PartitionedClient">
       <a id="PartitionedClient:PartitionedClient"></a>
       <h4 class="signature"><a href="PartitionedClient.html">
@@ -184,6 +258,30 @@ the key value.</p>
       <span class="kind">object</span>
       <span class="symbol">
         <span class="name">Client</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.GetResult">
+      <a id="GetResult:GetResult"></a>
+      <h4 class="signature"><a href="GetResult$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">GetResult</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.memcached.KetamaClientBuilder">
+      <a id="KetamaClientBuilder:KetamaClientBuilder"></a>
+      <h4 class="signature"><a href="KetamaClientBuilder$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">KetamaClientBuilder</span>
         
         
         <span class="result"> extends AnyRef</span>

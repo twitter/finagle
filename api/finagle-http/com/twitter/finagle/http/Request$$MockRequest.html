@@ -1,0 +1,2933 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.http.Request.MockRequest</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="type" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.http">http</a>.<a href="Request$.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/class_big.png" />
+        <h1>MockRequest</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">MockRequest</span>
+        
+        
+        <span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"><div class="block">
+          attributes: protected 
+        </div><div class="block">
+            linear super types: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a>, <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span>, AnyRef, <span class="extype" name="scala.Any">Any</span>
+          </div></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          <div id="order">
+                <span class="filtertype">Ordering</span>
+                <ol><li class="alpha in">Alphabetic</li><li class="inherit out">By inheritance</li></ol>
+              </div>
+          <div id="ancestors">
+                <span class="filtertype">Inherited</span>
+                <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
+                <ol id="linearization"><li class="in" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</li><li class="in" name="com.twitter.finagle.http.Request">Request</li><li class="in" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</li><li class="in" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</li><li class="in" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</li><li class="in" name="com.twitter.finagle.http.Message">Message</li><li class="in" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+              </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        <div class="members" id="constructors">
+              <h3>Instance constructors</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#this">
+      <a id="this:MockRequest"></a>
+      <h4 class="signature">
+      <span class="kind">new</span>
+      <span class="symbol">
+        <span class="name">MockRequest</span>
+        
+        <span class="params">()</span>
+        
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="scala.AnyRef#!=">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#!=">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o != arg0</code> is the same as <code>!(o == (arg0))</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o != arg0</code> is the same as <code>!(o == (arg0))</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for dis-equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>false</code> if the receiver object is equivalent to the argument; <code>true</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef###">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">##</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef → Any
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$asInstanceOf">
+      <a id="$asInstanceOf[T0]():T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">$asInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">()</span>
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$isInstanceOf">
+      <a id="$isInstanceOf[T0]():Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">$isInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#==">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o == arg0</code> is the same as <code>if (o eq null) arg0 eq null else o.equals(arg0)</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o == arg0</code> is the same as <code>if (o eq null) arg0 eq null else o.equals(arg0)</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#==">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o == arg0</code> is the same as <code>o.equals(arg0)</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o == arg0</code> is the same as <code>o.equals(arg0)</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#accept">
+      <a id="accept:Seq[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">accept</span>
+        
+        
+        <span class="result">: Seq[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Accept header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Accept header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#acceptMediaTypes">
+      <a id="acceptMediaTypes:Seq[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">acceptMediaTypes</span>
+        
+        
+        <span class="result">: Seq[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Accept header media types (normalized, no parameters)</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Accept header media types (normalized, no parameters)</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#accept_=">
+      <a id="accept_=(Iterable[String]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">accept_=</span>
+        
+        <span class="params">(<span name="values">values: Iterable[String]</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Accept header with list of values</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Accept header with list of values</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#accept_=">
+      <a id="accept_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">accept_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Accept header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Accept header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#addCookie">
+      <a id="addCookie(Cookie):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">addCookie</span>
+        
+        <span class="params">(<span name="cookie">cookie: <span class="extype" name="org.jboss.netty.handler.codec.http.Cookie">Cookie</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Add a cookie</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Add a cookie</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#addHeader">
+      <a id="addHeader(String,AnyRef):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">addHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#allow">
+      <a id="allow:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">allow</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Allow header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Allow header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#allow_=">
+      <a id="allow_=(Iterable[HttpMethod]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">allow_=</span>
+        
+        <span class="params">(<span name="values">values: Iterable[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span>]</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Authorization header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Authorization header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#allow_=">
+      <a id="allow_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">allow_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Authorization header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Authorization header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#asInstanceOf">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to cast the receiver object to be of type <code>T0</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to cast the receiver object to be of type <code>T0</code>.</p><p>Note that the success of a cast at runtime is modulo Scala's erasure semantics.  Therefore the expression<code>1.asInstanceOf[String]</code> will throw a <code>ClassCastException</code> at runtime, while the expression<code>List(1).asInstanceOf[List[String]]</code> will not.  In the latter example, because the type argument is erased as
+part of compilation it is not possible to check whether the contents of the list are of the requested typed.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the receiver object.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#authorization">
+      <a id="authorization:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">authorization</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Authorization header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Authorization header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#authorization_=">
+      <a id="authorization_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">authorization_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Authorization header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Authorization header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#cacheControl">
+      <a id="cacheControl:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">cacheControl</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Cache-Control header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Cache-Control header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#cacheControl_=">
+      <a id="cacheControl_=(Duration):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">cacheControl_=</span>
+        
+        <span class="params">(<span name="maxAge">maxAge: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Cache-Control header with a max-age (and must-revalidate).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Cache-Control header with a max-age (and must-revalidate).</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#cacheControl_=">
+      <a id="cacheControl_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">cacheControl_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Cache-Control header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Cache-Control header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#clearContent">
+      <a id="clearContent():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">clearContent</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Clear content (set to &quot;&quot;).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Clear content (set to &quot;&quot;).</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#clearHeaders">
+      <a id="clearHeaders():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">clearHeaders</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">clone</span>
+        
+        <span class="params">()</span>
+        <span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method creates and returns a copy of the receiver object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method creates and returns a copy of the receiver object.</p><p>The default implementation of the <code>clone</code> method is platform dependent.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a copy of the receiver object.</p></dd></dl><div class="block">
+          attributes: protected 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#containsHeader">
+      <a id="containsHeader(String):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">containsHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#containsParam">
+      <a id="containsParam(String):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">containsParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Check if parameter exists.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Check if parameter exists.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#content">
+      <a id="content:ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">content</span>
+        
+        
+        <span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#contentLength">
+      <a id="contentLength:Option[Long]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">contentLength</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Long">Long</span>]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Content-Length header.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Content-Length header.  Use length to get the length of actual content.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#contentLength_=">
+      <a id="contentLength_=(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">contentLength_=</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Content-Length header.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Content-Length header.  Normally, this is automatically set by the
+Codec, but this method allows you to override that.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#contentString">
+      <a id="contentString:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">contentString</span>
+        
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get the content as a string.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get the content as a string.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#contentString_=">
+      <a id="contentString_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">contentString_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set the content as a string.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set the content as a string.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#contentType">
+      <a id="contentType:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">contentType</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Content-Type header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Content-Type header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#contentType_=">
+      <a id="contentType_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">contentType_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Content-Type header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#content_=">
+      <a id="content_=(ChannelBuffer):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">content_=</span>
+        
+        <span class="params">(<span name="content">content: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#cookies">
+      <a id="cookies:CookieSet"></a>
+      <h4 class="signature">
+      <span class="kind">lazy val</span>
+      <span class="symbol">
+        <span class="name">cookies</span>
+        
+        
+        <span class="result">: <a href="CookieSet.html" class="extype" name="com.twitter.finagle.http.CookieSet">CookieSet</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#eq">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">eq</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to test whether the argument (<code>arg0</code>) is a reference to the
+receiver object (<code>this</code>).</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the argument (<code>arg0</code>) is a reference to the
+receiver object (<code>this</code>).</p><p>The <code>eq</code> method implements an [http://en.wikipedia.org/wiki/Equivalence_relation equivalence relation] on
+non-null instances of <code>AnyRef</code>:
+ * It is reflexive: for any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(x)</code> returns <code>true</code>.
+ * It is symmetric: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, <code>x.eq(y)</code> returns <code>true</code> if and
+   only if <code>y.eq(x)</code> returns <code>true</code>.
+ * It is transitive: for any non-null instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.eq(y)</code> returns <code>true</code>   and <code>y.eq(z)</code> returns <code>true</code>, then <code>x.eq(z)</code> returns <code>true</code>.</p><p>Additionally, the <code>eq</code> method has three other properties.
+ * It is consistent: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, multiple invocations of
+   <code>x.eq(y)</code> consistently returns <code>true</code> or consistently returns <code>false</code>.
+ * For any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(null)</code> and <code>null.eq(x)</code> returns <code>false</code>.
+ * <code>null.eq(null)</code> returns <code>true</code>.</p><p>When overriding the <code>equals</code> or <code>hashCode</code> methods, it is important to ensure that their behavior is
+consistent with reference equality.  Therefore, if two objects are references to each other (<code>o1 eq o2</code>), they
+should be equal to each other (<code>o1 == o2</code>) and they should hash to the same value (<code>o1.hashCode == o2.hashCode</code>).
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for reference equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the argument is a reference to the receiver object; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#equals">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">equals</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to compare the receiver object (<code>this</code>) with the argument object (<code>arg0</code>) for equivalence.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to compare the receiver object (<code>this</code>) with the argument object (<code>arg0</code>) for equivalence.</p><p>The default implementations of this method is an [http://en.wikipedia.org/wiki/Equivalence_relation equivalence
+relation]:
+ * It is reflexive: for any instance <code>x</code> of type <code>Any</code>, <code>x.equals(x)</code> should return <code>true</code>.
+ * It is symmetric: for any instances <code>x</code> and <code>y</code> of type <code>Any</code>, <code>x.equals(y)</code> should return <code>true</code> if and
+   only if <code>y.equals(x)</code> returns <code>true</code>.
+ * It is transitive: for any instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.equals(y)</code> returns <code>true</code> and
+   <code>y.equals(z)</code> returns <code>true</code>, then <code>x.equals(z)</code> should return <code>true</code>.</p><p>If you override this method, you should verify that your implementation remains an equivalence relation.
+Additionally, when overriding this method it is often necessary to override <code>hashCode</code> to ensure that objects
+that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same 
+scala.Int
+(<code>o1.hashCode.equals(o2.hashCode)</code>).
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          definition classes: AnyRef → Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#expires">
+      <a id="expires:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">expires</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Expires header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Expires header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#expires_=">
+      <a id="expires_=(Date):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">expires_=</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="java.util.Date">Date</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Expires header by Date</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Expires header by Date</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#expires_=">
+      <a id="expires_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">expires_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Expires header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Expires header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#external">
+      <a id="external:MockRequest {...}"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">external</span>
+        
+        
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</a> {...}</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#fileExtension">
+      <a id="fileExtension:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">fileExtension</span>
+        
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">File extension.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>File extension.  Empty string if none.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">finalize</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is called by the garbage collector on the receiver object when garbage collection determines that
+there are no more references to the object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is called by the garbage collector on the receiver object when garbage collection determines that
+there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
+          attributes: protected 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getBooleanParam">
+      <a id="getBooleanParam(String,Boolean):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getBooleanParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="default">default: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Boolean param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Boolean param.  Returns value or default.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getBooleanParam">
+      <a id="getBooleanParam(String):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getBooleanParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Boolean param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Boolean param.  Returns value or false.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#getClass">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getClass</span>
+        
+        <span class="params">()</span>
+        <span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Returns a representation that corresponds to the dynamic class of the receiver object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Returns a representation that corresponds to the dynamic class of the receiver object.</p><p>The nature of the representation is platform dependent.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a representation that corresponds to the dynamic class of the receiver object.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getContent">
+      <a id="getContent():ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getContent</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getContentLength">
+      <a id="getContentLength(Long):Long"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name deprecated">getContentLength</span>
+        
+        <span class="params">(<span name="defaultValue">defaultValue: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div><div class="block"><ol>deprecated:
+          <li><p>deprecated in netty</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getContentLength">
+      <a id="getContentLength():Long"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name deprecated">getContentLength</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div><div class="block"><ol>deprecated:
+          <li><p>deprecated in netty</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#getContentString">
+      <a id="getContentString():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getContentString</span>
+        
+        <span class="params">()</span>
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#getCookies">
+      <a id="getCookies():Iterator[Cookie]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getCookies</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.jboss.netty.handler.codec.http.Cookie">Cookie</span>]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get iterator over Cookies</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get iterator over Cookies</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeader">
+      <a id="getHeader(String):String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaderNames">
+      <a id="getHeaderNames():Set[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getHeaderNames</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.util.Set">Set</span>[String]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders">
+      <a id="getHeaders():List[Entry[String, String]]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getHeaders</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.util.Map.Entry">Entry</span>[String, String]]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHeaders">
+      <a id="getHeaders(String):List[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getHeaders</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="java.util.List">List</span>[String]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getHttpMessage">
+      <a id="getHttpMessage():HttpMessage"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getHttpMessage</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpRequestProxy#getHttpRequest">
+      <a id="getHttpRequest():HttpRequest"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getHttpRequest</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#getInputStream">
+      <a id="getInputStream():InputStream"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getInputStream</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.io.InputStream">InputStream</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get InputStream for content.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get InputStream for content.  Caller must close.  (Java interface.  Scala
+users should use withInputStream.)
+</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getIntParam">
+      <a id="getIntParam(String,Int):Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getIntParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="default">default: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Int param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Int param.  Returns value or default.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getIntParam">
+      <a id="getIntParam(String):Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getIntParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Int param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Int param.  Returns value or 0.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#getLength">
+      <a id="getLength():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getLength</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getLongParam">
+      <a id="getLongParam(String,Long):Long"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getLongParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="default">default: <span class="extype" name="scala.Long">Long</span> =<span class="symbol">0L</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Long param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Long param.  Returns value or default.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getLongParam">
+      <a id="getLongParam(String):Long"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getLongParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Long param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Long param.  Returns value or 0.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpRequestProxy#getMethod">
+      <a id="getMethod():HttpMethod"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getMethod</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getParam">
+      <a id="getParam(String,String):String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="default">default: String</span>)</span>
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get parameter value.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get parameter value.  Returns value or default.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getParam">
+      <a id="getParam(String):String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get parameter value.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get parameter value.  Returns value or null.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getParamNames">
+      <a id="getParamNames():Set[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getParamNames</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.util.Set">Set</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get parameters names.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get parameters names.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getParams">
+      <a id="getParams():List[Entry[String, String]]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getParams</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.util.Map.Entry">Entry</span>[String, String]]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get all parameters.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get all parameters.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getParams">
+      <a id="getParams(String):List[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getParams</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="java.util.List">List</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get all values of parameter.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get all values of parameter.  Returns list of values.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#getProtocolVersion">
+      <a id="getProtocolVersion():HttpVersion"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getProtocolVersion</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#getReader">
+      <a id="getReader():Reader"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getReader</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.io.Reader">Reader</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Reader for content.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Reader for content.  (Java interface.  Scala users should use withReader.)</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getResponse">
+      <a id="getResponse():Response"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getResponse</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get response associated with request.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get response associated with request.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getShortParam">
+      <a id="getShortParam(String,Short):Short"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getShortParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="default">default: <span class="extype" name="scala.Short">Short</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Short">Short</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Short param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Short param.  Returns value or default.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#getShortParam">
+      <a id="getShortParam(String):Short"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getShortParam</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Short">Short</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Short param.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Short param.  Returns value or 0.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpRequestProxy#getUri">
+      <a id="getUri():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">getUri</span>
+        
+        <span class="params">()</span>
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#hashCode">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">hashCode</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Returns a hash code value for the object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Returns a hash code value for the object.</p><p>The default hashing algorithm is platform dependent.</p><p>Note that it is allowed for two objects to have identical hash codes (<code>o1.hashCode.equals(o2.hashCode)</code>) yet
+not be equal (<code>o1.equals(o2)</code> returns <code>false</code>).  A degenerate implementation could always return <code>0</code>.
+However, it is required that if two objects are equal (<code>o1.equals(o2)</code> returns <code>true</code>) that they have
+identical hash codes (<code>o1.hashCode.equals(o2.hashCode)</code>).  Therefore, when overriding this method, be sure
+to verify that the behavior is consistent with the <code>equals</code> method.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the hash code value for the object.</p></dd></dl><div class="block">
+          definition classes: AnyRef → Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#headers">
+      <a id="headers:HeaderMap"></a>
+      <h4 class="signature">
+      <span class="kind">lazy val</span>
+      <span class="symbol">
+        <span class="name">headers</span>
+        
+        
+        <span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#httpMessage">
+      <a id="httpMessage:HttpMessage"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">httpMessage</span>
+        
+        
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</a> → <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#httpRequest">
+      <a id="httpRequest:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">httpRequest</span>
+        
+        
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</a> → <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#internal">
+      <a id="internal:MockRequest {...}"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">internal</span>
+        
+        
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</a> {...}</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#isChunked">
+      <a id="isChunked():Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">isChunked</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.Any#isInstanceOf">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p><p>Note that the test result of the test is modulo Scala's erasure semantics.  Therefore the expression<code>1.isInstanceOf[String]</code> will return <code>false</code>, while the expression <code>List(1).isInstanceOf[List[String]]</code> will
+return <code>true</code>.  In the latter example, because the type argument is erased as part of compilation it is not
+possible to check whether the contents of the list are of the requested typed.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is an instance of erasure of type <code>T0</code>; <code>false</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#isKeepAlive">
+      <a id="isKeepAlive():Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name deprecated">isKeepAlive</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div><div class="block"><ol>deprecated:
+          <li><p>deprecated in netty</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#isRequest">
+      <a id="isRequest:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">isRequest</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#isResponse">
+      <a id="isResponse:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">isResponse</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#length">
+      <a id="length:Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">length</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get length of content.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get length of content.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#location">
+      <a id="location:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">location</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Location header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Location header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#location_=">
+      <a id="location_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">location_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Location header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Location header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#mediaType">
+      <a id="mediaType:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">mediaType</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get media-type from Content-Type header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get media-type from Content-Type header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#mediaType_=">
+      <a id="mediaType_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">mediaType_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set media-type in Content-Type heaer</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set media-type in Content-Type heaer</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#method">
+      <a id="method:HttpMethod"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">method</span>
+        
+        
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#method_=">
+      <a id="method_=(HttpMethod):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">method_=</span>
+        
+        <span class="params">(<span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#ne">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">ne</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt"><code>o.ne(arg0)</code> is the same as <code>!(o.eq(arg0))</code>.</p>
+            <div class="fullcomment"><div class="comment cmt"><p><code>o.ne(arg0)</code> is the same as <code>!(o.eq(arg0))</code>.
+</p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for reference dis-equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>false</code> if the argument is not a reference to the receiver object; <code>true</code> otherwise.</p></dd></dl><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notify">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">notify</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Wakes up a single thread that is waiting on the receiver object's monitor.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wakes up a single thread that is waiting on the receiver object's monitor.</p></div><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notifyAll">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">notifyAll</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Wakes up all threads that are waiting on the receiver object's monitor.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wakes up all threads that are waiting on the receiver object's monitor.</p></div><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#params">
+      <a id="params:ParamMap"></a>
+      <h4 class="signature">
+      <span class="kind">lazy val</span>
+      <span class="symbol">
+        <span class="name">params</span>
+        
+        
+        <span class="result">: <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#path">
+      <a id="path:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">path</span>
+        
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Path from URI.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Path from URI.</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#referer">
+      <a id="referer:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">referer</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Referer [sic] header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Referer [sic] header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#referer_=">
+      <a id="referer_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">referer_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Referer [sic] header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Referer [sic] header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#remoteAddress">
+      <a id="remoteAddress:InetAddress"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">remoteAddress</span>
+        
+        
+        <span class="result">: <span class="extype" name="java.net.InetAddress">InetAddress</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Remote InetAddress</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Remote InetAddress</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#remoteHost">
+      <a id="remoteHost:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">remoteHost</span>
+        
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Remote host - a dotted quad</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Remote host - a dotted quad</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#remotePort">
+      <a id="remotePort:Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">remotePort</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Remote port</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Remote port</p></div><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#remoteSocketAddress">
+      <a id="remoteSocketAddress:InetSocketAddress"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">remoteSocketAddress</span>
+        
+        
+        <span class="result">: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Remote InetSocketAddress</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Remote InetSocketAddress</p></div><div class="block">
+          definition classes: <a href="" class="extype" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#removeCookie">
+      <a id="removeCookie(Cookie):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">removeCookie</span>
+        
+        <span class="params">(<span name="cookie">cookie: <span class="extype" name="org.jboss.netty.handler.codec.http.Cookie">Cookie</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Remove a cookie</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Remove a cookie</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#removeHeader">
+      <a id="removeHeader(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">removeHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#response">
+      <a id="response:Response"></a>
+      <h4 class="signature">
+      <span class="kind">lazy val</span>
+      <span class="symbol">
+        <span class="name">response</span>
+        
+        
+        <span class="result">: <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#retryAfter">
+      <a id="retryAfter:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">retryAfter</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get Retry-After header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get Retry-After header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#retryAfter_=">
+      <a id="retryAfter_=(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">retryAfter_=</span>
+        
+        <span class="params">(<span name="value">value: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Retry-After header by seconds</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Retry-After header by seconds</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#retryAfter_=">
+      <a id="retryAfter_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">retryAfter_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Retry-After header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Retry-After header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#setChunked">
+      <a id="setChunked(Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setChunked</span>
+        
+        <span class="params">(<span name="chunked">chunked: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#setContent">
+      <a id="setContent(ChannelBuffer):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setContent</span>
+        
+        <span class="params">(<span name="content">content: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#setContentString">
+      <a id="setContentString(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setContentString</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#setContentType">
+      <a id="setContentType(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setContentType</span>
+        
+        <span class="params">(<span name="mediaType">mediaType: String</span>, <span name="charset">charset: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Content-Type header by media-type and charset</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header by media-type and charset</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#setContentTypeJson">
+      <a id="setContentTypeJson():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setContentTypeJson</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set Content-Type header to application/json;charset=utf-8</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header to application/json;charset=utf-8</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader">
+      <a id="setHeader(String,java.lang.Iterable[_]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="values">values: java.lang.Iterable[_]</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#setHeader">
+      <a id="setHeader(String,AnyRef):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setHeader</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="value">value: AnyRef</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpRequestProxy#setMethod">
+      <a id="setMethod(HttpMethod):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setMethod</span>
+        
+        <span class="params">(<span name="method">method: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpMessageProxy#setProtocolVersion">
+      <a id="setProtocolVersion(HttpVersion):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setProtocolVersion</span>
+        
+        <span class="params">(<span name="version">version: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a> → HttpMessage
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty.HttpRequestProxy#setUri">
+      <a id="setUri(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setUri</span>
+        
+        <span class="params">(<span name="uri">uri: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a> → HttpRequest
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#synchronized">
+      <a id="synchronized[T0](T0):T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">synchronized</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">(<span name="arg0">arg0: T0</span>)</span>
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#toString">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">toString</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Returns a string representation of the object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Returns a string representation of the object.</p><p>The default representation is platform dependent.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a string representation of the object.</p></dd></dl><div class="block">
+          definition classes: AnyRef → Any
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#uri">
+      <a id="uri:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">uri</span>
+        
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request#uri_=">
+      <a id="uri_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">uri_=</span>
+        
+        <span class="params">(<span name="uri">uri: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#userAgent">
+      <a id="userAgent:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">userAgent</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get User-Agent header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get User-Agent header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#userAgent_=">
+      <a id="userAgent_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">userAgent_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set User-Agent header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set User-Agent header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#version">
+      <a id="version:HttpVersion"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">version</span>
+        
+        
+        <span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#version_=">
+      <a id="version_=(HttpVersion):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">version_=</span>
+        
+        <span class="params">(<span name="version">version: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">wait</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: final 
+        </div><div class="block">
+          definition classes: AnyRef
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#withInputStream">
+      <a id="withInputStream((InputStream) ⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">withInputStream</span>
+        
+        <span class="params">(<span name="f">f: (<span class="extype" name="java.io.InputStream">InputStream</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Use content as InputStream.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Use content as InputStream.  The underlying channel buffer's reader
+index is advanced.  (Scala interface.  Java users can use getInputStream().)
+</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request.MockRequest#withIp">
+      <a id="withIp(String):MockRequest {...}"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">withIp</span>
+        
+        <span class="params">(<span name="ip">ip: String</span>)</span>
+        <span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.Request.MockRequest">MockRequest</a> {...}</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#withOutputStream">
+      <a id="withOutputStream((OutputStream) ⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">withOutputStream</span>
+        
+        <span class="params">(<span name="f">f: (<span class="extype" name="java.io.OutputStream">OutputStream</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Use content as OutputStream.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Use content as OutputStream.  Content is replaced with stream contents.
+(Java users can use this with a Function, or use Netty's ChannelBufferOutputStream
+and then call setContent() with the underlying buffer.)
+</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#withReader">
+      <a id="withReader((Reader) ⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">withReader</span>
+        
+        <span class="params">(<span name="f">f: (<span class="extype" name="java.io.Reader">Reader</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Use content as Reader.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Use content as Reader.  (Scala interface.  Java usrs can use getReader().)</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#withWriter">
+      <a id="withWriter((Writer) ⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">withWriter</span>
+        
+        <span class="params">(<span name="f">f: (<span class="extype" name="java.io.Writer">Writer</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Use as a Writer.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Use as a Writer.  Content is replaced with writer contents.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#write">
+      <a id="write(ChannelBuffer):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">write</span>
+        
+        <span class="params">(<span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Append ChannelBuffer to content.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Append ChannelBuffer to content.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#write">
+      <a id="write(Array[Byte]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">write</span>
+        
+        <span class="params">(<span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Append bytes to content.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Append bytes to content.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#write">
+      <a id="write(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">write</span>
+        
+        <span class="params">(<span name="string">string: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Append string to content.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Append string to content.</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#xForwardedFor">
+      <a id="xForwardedFor:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">xForwardedFor</span>
+        
+        
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Get X-Forwarded-For header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Get X-Forwarded-For header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message#xForwardedFor_=">
+      <a id="xForwardedFor_=(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">xForwardedFor_=</span>
+        
+        <span class="params">(<span name="value">value: String</span>)</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Set X-Forwarded-For header</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Set X-Forwarded-For header</p></div><div class="block">
+          definition classes: <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li></ol>
+            </div>
+
+        <div class="parent" name="com.twitter.finagle.http.Request">
+              <h3>Inherited from <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.http.netty.HttpRequestProxy">
+              <h3>Inherited from <a href="netty/HttpRequestProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.http.netty.HttpMessageProxy">
+              <h3>Inherited from <a href="netty/HttpMessageProxy.html" class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</a></h3>
+            </div><div class="parent" name="org.jboss.netty.handler.codec.http.HttpRequest">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.http.Message">
+              <h3>Inherited from <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></h3>
+            </div><div class="parent" name="org.jboss.netty.handler.codec.http.HttpMessage">
+              <h3>Inherited from <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from AnyRef</h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

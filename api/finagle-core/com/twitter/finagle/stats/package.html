@@ -76,6 +76,19 @@
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.GlobalStatsReceiver">
+      <a id="GlobalStatsReceiver:GlobalStatsReceiver"></a>
+      <h4 class="signature"><a href="GlobalStatsReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">GlobalStatsReceiver</span>
+        
+        
+        <span class="result"> extends NullStatsReceiver</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Note: currently supports only gauges, will throw
+away other types.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">
       <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
       <h4 class="signature"><a href="JavaLoggerStatsReceiver.html">
@@ -105,6 +118,18 @@
           attributes: abstract 
         </div></div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.NullStatsReceiver">
+      <a id="NullStatsReceiver:NullStatsReceiver"></a>
+      <h4 class="signature"><a href="NullStatsReceiver.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">NullStatsReceiver</span>
+        
+        
+        <span class="result"> extends StatsReceiver with JavaSingleton</span>
+      </span>
+      </a></h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.RollupStatsReceiver">
       <a id="RollupStatsReceiver:RollupStatsReceiver"></a>
       <h4 class="signature"><a href="RollupStatsReceiver.html">
@@ -171,7 +196,19 @@
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.GlobalStatsReceiver">
+      <a id="GlobalStatsReceiver:GlobalStatsReceiver"></a>
+      <h4 class="signature"><a href="GlobalStatsReceiver$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">GlobalStatsReceiver</span>
+        
+        
+        <span class="result"> extends GlobalStatsReceiver</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver">
       <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
       <h4 class="signature"><a href="JavaLoggerStatsReceiver$.html">
       <span class="kind">object</span>
@@ -191,7 +228,7 @@
         <span class="name">NullStatsReceiver</span>
         
         
-        <span class="result"> extends StatsReceiver</span>
+        <span class="result"> extends NullStatsReceiver</span>
       </span>
       </a></h4>
       

@@ -1,0 +1,509 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.http</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
+
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <h1>http</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">http</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.BadHttpRequest">
+      <a id="BadHttpRequest:BadHttpRequest"></a>
+      <h4 class="signature"><a href="BadHttpRequest.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BadHttpRequest</span>
+        
+        
+        <span class="result"> extends DefaultHttpRequest</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.http.CheckRequestFilter">
+      <a id="CheckRequestFilter:CheckRequestFilter[Req]"></a>
+      <h4 class="signature"><a href="CheckRequestFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">CheckRequestFilter</span>
+        <span class="tparams">[<span name="Req">Req</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[Req, HttpResponse]</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: abstract 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.CookieSet">
+      <a id="CookieSet:CookieSet"></a>
+      <h4 class="signature"><a href="CookieSet.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">CookieSet</span>
+        
+        
+        <span class="result"> extends SetLike[Cookie, Set[Cookie]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Adapt cookies of a Message to a mutable Set.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.HeaderMap">
+      <a id="HeaderMap:HeaderMap"></a>
+      <h4 class="signature"><a href="HeaderMap.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">HeaderMap</span>
+        
+        
+        <span class="result"> extends MapLike[String, String, Map[String, String]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Adapt headers of an HttpMessage to a mutable Map.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Http">
+      <a id="Http:Http"></a>
+      <h4 class="signature"><a href="Http.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Http</span>
+        
+        <span class="params">(<span name="_compressionLevel">_compressionLevel: Int</span>, <span name="_maxRequestSize">_maxRequestSize: StorageUnit</span>, <span name="_maxResponseSize">_maxResponseSize: StorageUnit</span>, <span name="_decompressionEnabled">_decompressionEnabled: Boolean</span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: Option[ChannelBufferUsageTracker]</span>, <span name="_annotateCipherHeader">_annotateCipherHeader: Option[String]</span>, <span name="_enableTracing">_enableTracing: Boolean</span>)</span>
+        <span class="result"> extends CodecFactory[HttpRequest, HttpResponse] with Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.HttpClientTracingFilter">
+      <a id="HttpClientTracingFilter:HttpClientTracingFilter"></a>
+      <h4 class="signature"><a href="HttpClientTracingFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">HttpClientTracingFilter</span>
+        
+        
+        <span class="result"> extends SimpleFilter[HttpRequest, HttpResponse]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Pass along headers with the required tracing information.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.HttpServerTracingFilter">
+      <a id="HttpServerTracingFilter:HttpServerTracingFilter"></a>
+      <h4 class="signature"><a href="HttpServerTracingFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">HttpServerTracingFilter</span>
+        
+        
+        <span class="result"> extends SimpleFilter[HttpRequest, HttpResponse]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Adds tracing annotations for each http request we receive.</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.http.Message">
+      <a id="Message:Message"></a>
+      <h4 class="signature"><a href="Message.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Message</span>
+        
+        
+        <span class="result"> extends HttpMessage</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Rich HttpMessage</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.MockResponse">
+      <a id="MockResponse:MockResponse"></a>
+      <h4 class="signature"><a href="MockResponse.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">MockResponse</span>
+        
+        
+        <span class="result"> extends Response</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ParamMap">
+      <a id="ParamMap:ParamMap"></a>
+      <h4 class="signature"><a href="ParamMap.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ParamMap</span>
+        
+        
+        <span class="result"> extends MapLike[String, String, Map[String, String]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Adapt params of a Request to a mutable Map.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ProxyCredentials">
+      <a id="ProxyCredentials:ProxyCredentials"></a>
+      <h4 class="signature"><a href="ProxyCredentials.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ProxyCredentials</span>
+        
+        <span class="params">(<span name="username">username: String</span>, <span name="password">password: String</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.http.Request">
+      <a id="Request:Request"></a>
+      <h4 class="signature"><a href="Request.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Request</span>
+        
+        
+        <span class="result"> extends Message with HttpRequestProxy</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Rich HttpRequest.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.RequestBuilder">
+      <a id="RequestBuilder:RequestBuilder[HasUrl]"></a>
+      <h4 class="signature"><a href="RequestBuilder.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RequestBuilder</span>
+        <span class="tparams">[<span name="HasUrl">HasUrl</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.http.RequestProxy">
+      <a id="RequestProxy:RequestProxy"></a>
+      <h4 class="signature"><a href="RequestProxy.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">RequestProxy</span>
+        
+        
+        <span class="result"> extends Request</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Proxy for Request.</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.http.Response">
+      <a id="Response:Response"></a>
+      <h4 class="signature"><a href="Response.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Response</span>
+        
+        
+        <span class="result"> extends Message with HttpResponseProxy</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Rich HttpResponse
+</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.RichHttp">
+      <a id="RichHttp:RichHttp[REQUEST]"></a>
+      <h4 class="signature"><a href="RichHttp.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">RichHttp</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        <span class="params">(<span name="httpFactory">httpFactory: CodecFactory[HttpRequest, HttpResponse]</span>)</span>
+        <span class="result"> extends CodecFactory[REQUEST, Response] with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Http codec for rich Request/Response objects.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.SafeHttpServerCodec">
+      <a id="SafeHttpServerCodec:SafeHttpServerCodec"></a>
+      <h4 class="signature"><a href="SafeHttpServerCodec.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SafeHttpServerCodec</span>
+        
+        
+        <span class="result"> extends HttpServerCodec</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Convert exceptions to BadHttpRequests</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.BadHttpRequest">
+      <a id="BadHttpRequest:BadHttpRequest"></a>
+      <h4 class="signature"><a href="BadHttpRequest$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">BadHttpRequest</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Http">
+      <a id="Http:Http"></a>
+      <h4 class="signature"><a href="Http$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Http</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.MediaType">
+      <a id="MediaType:MediaType"></a>
+      <h4 class="signature"><a href="MediaType$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">MediaType</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Message">
+      <a id="Message:Message"></a>
+      <h4 class="signature"><a href="Message$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Message</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Method">
+      <a id="Method:Method"></a>
+      <h4 class="signature"><a href="Method$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Method</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Scala aliases for HttpMethod.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ParamMap">
+      <a id="ParamMap:ParamMap"></a>
+      <h4 class="signature"><a href="ParamMap$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ParamMap</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.ProxyCredentials">
+      <a id="ProxyCredentials:ProxyCredentials"></a>
+      <h4 class="signature"><a href="ProxyCredentials$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ProxyCredentials</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Request">
+      <a id="Request:Request"></a>
+      <h4 class="signature"><a href="Request$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Request</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.RequestBuilder">
+      <a id="RequestBuilder:RequestBuilder"></a>
+      <h4 class="signature"><a href="RequestBuilder$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">RequestBuilder</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Factory for <a href="RequestBuilder.html" class="extype" name="com.twitter.finagle.http.RequestBuilder">RequestBuilder</a> instances
+</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.RequestConfig">
+      <a id="RequestConfig:RequestConfig"></a>
+      <h4 class="signature"><a href="RequestConfig$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">RequestConfig</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Response">
+      <a id="Response:Response"></a>
+      <h4 class="signature"><a href="Response$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Response</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Status">
+      <a id="Status:Status"></a>
+      <h4 class="signature"><a href="Status$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Status</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Scala aliases for HttpResponseStatus.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.Version">
+      <a id="Version:Version"></a>
+      <h4 class="signature"><a href="Version$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Version</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Scala aliases for HttpVersion.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.codec">
+      <a id="codec:codec"></a>
+      <h4 class="signature"><a href="codec/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">codec</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter">
+      <a id="filter:filter"></a>
+      <h4 class="signature"><a href="filter/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">filter</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.netty">
+      <a id="netty:netty"></a>
+      <h4 class="signature"><a href="netty/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">netty</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.path">
+      <a id="path:path"></a>
+      <h4 class="signature"><a href="path/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">path</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.service">
+      <a id="service:service"></a>
+      <h4 class="signature"><a href="service/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">service</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.util">
+      <a id="util:util"></a>
+      <h4 class="signature"><a href="util/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">util</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

@@ -100,6 +100,31 @@
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.kestrel.ReadHandle">
+      <a id="ReadHandle:ReadHandle"></a>
+      <h4 class="signature"><a href="ReadHandle.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ReadHandle</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An ongoing transactional read (from {{read}}).</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.ReadMessage">
+      <a id="ReadMessage:ReadMessage"></a>
+      <h4 class="signature"><a href="ReadMessage.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ReadMessage</span>
+        
+        <span class="params">(<span name="bytes">bytes: ChannelBuffer</span>, <span name="ack">ack: Offer[Unit]</span>)</span>
+        <span class="result"> extends Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A message that has been read: consists of the message itself, and
+an offer to acknowledge.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.Server">
       <a id="Server:Server"></a>
       <h4 class="signature"><a href="Server.html">
@@ -117,12 +142,73 @@
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.Client">
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.AllHandlesDiedException">
+      <a id="AllHandlesDiedException:AllHandlesDiedException"></a>
+      <h4 class="signature"><a href="AllHandlesDiedException$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">AllHandlesDiedException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.Client">
       <a id="Client:Client"></a>
       <h4 class="signature"><a href="Client$.html">
       <span class="kind">object</span>
       <span class="symbol">
         <span class="name">Client</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.MultiReader">
+      <a id="MultiReader:MultiReader"></a>
+      <h4 class="signature"><a href="MultiReader$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">MultiReader</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.OutOfRetriesException">
+      <a id="OutOfRetriesException:OutOfRetriesException"></a>
+      <h4 class="signature"><a href="OutOfRetriesException$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">OutOfRetriesException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.ReadClosedException">
+      <a id="ReadClosedException:ReadClosedException"></a>
+      <h4 class="signature"><a href="ReadClosedException$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ReadClosedException</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.kestrel.ReadHandle">
+      <a id="ReadHandle:ReadHandle"></a>
+      <h4 class="signature"><a href="ReadHandle$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ReadHandle</span>
         
         
         <span class="result"> extends AnyRef</span>

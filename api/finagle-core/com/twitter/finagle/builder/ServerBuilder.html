@@ -32,7 +32,31 @@
       </h4>
       <div class="fullcomment" id="comment"><div class="comment cmt"><p>A handy Builder for constructing Servers (i.e., binding Services to
 a port).  This class is subclassable. Override copy() and build()
-to do your own dirty work.
+to do your own dirty work.</p><p>The main class to use is <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>, as so</p><pre>
+ServerBuilder()
+  .codec(Http)
+  .hostConnectionMaxLifeTime(5.minutes)
+  .readTimeout(2.minutes)
+  .name(&quot;servicename&quot;)
+  .bindTo(new InetSocketAddress(serverPort))
+  .build(plusOneService)
+</pre><p>The <code>ServerBuilder</code> requires the definition of <code>codec</code>, <code>bindTo</code>and <code>name</code>. In Scala, these are statically type
+checked, and in Java the lack of any of the above causes a runtime
+error.</p><p>The <code>build</code> method uses an implicit argument to statically
+typecheck the builder (to ensure completeness, see above). The Java
+compiler cannot provide such implicit, so we provide a separate
+function in Java to accomplish this. Thus, the Java code for the
+above is</p><pre>
+ServerBuilder.safeBuild(
+ plusOneService,
+ ServerBuilder.get()
+  .codec(Http)
+  .hostConnectionMaxLifeTime(5.minutes)
+  .readTimeout(2.minutes)
+  .name(&quot;servicename&quot;)
+  .bindTo(new InetSocketAddress(serverPort)));
+</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ServerBuilder</code>verifies the builder dynamically, resulting in a runtime error
+instead of a compiler error.
 </p></div><div class="block">
             go to: <a href="ServerBuilder$.html">companion</a>
           </div><div class="block">
@@ -879,18 +903,6 @@ possible to check whether the contents of the list are of the requested typed.
       </span>
       </h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder#startTls">
-      <a id="startTls(Boolean):This"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">startTls</span>
-        
-        <span class="params">(<span name="value">value: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: This</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#synchronized">
       <a id="synchronized[T0](T0):T0"></a>
       <h4 class="signature">
@@ -911,13 +923,13 @@ possible to check whether the contents of the list are of the requested typed.
         </div></div>
           
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder#tls">
-      <a id="tls(String,String):This"></a>
+      <a id="tls(String,String,String,String):This"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">tls</span>
         
-        <span class="params">(<span name="certificatePath">certificatePath: String</span>, <span name="keyPath">keyPath: String</span>)</span>
+        <span class="params">(<span name="certificatePath">certificatePath: String</span>, <span name="keyPath">keyPath: String</span>, <span name="caCertificatePath">caCertificatePath: String =<span class="symbol">null</span></span>, <span name="ciphers">ciphers: String =<span class="symbol">null</span></span>)</span>
         <span class="result">: This</span>
       </span>
       </h4>
@@ -949,9 +961,43 @@ possible to check whether the contents of the list are of the requested typed.
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">tracer</span>
+        <span class="name deprecated">tracer</span>
         
-        <span class="params">(<span name="receiver">receiver: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span>
+        <span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block"><ol>deprecated:
+          <li><p>Use tracerFactory instead</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder#tracer">
+      <a id="tracer(Factory):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name deprecated">tracer</span>
+        
+        <span class="params">(<span name="factory">factory: Factory</span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block"><ol>deprecated:
+          <li><p>Use tracerFactory instead</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder#tracerFactory">
+      <a id="tracerFactory(Factory):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tracerFactory</span>
+        
+        <span class="params">(<span name="factory">factory: Factory</span>)</span>
         <span class="result">: This</span>
       </span>
       </h4>

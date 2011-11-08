@@ -1148,6 +1148,18 @@ the request and the receipt of the response.
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">
+      <a id="retryPolicy(RetryPolicy[Try[Nothing]]):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">retryPolicy</span>
+        
+        <span class="params">(<span name="value">value: <a href="../service/RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="scala.Nothing">Nothing</span>]]</span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize">
       <a id="sendBufferSize(Int):This"></a>
       <h4 class="signature">
@@ -1162,26 +1174,6 @@ the request and the receipt of the response.
       
             <p class="shortcomment cmt">Sets the TCP send buffer size.</p>
             <div class="fullcomment"><div class="comment cmt"><p>Sets the TCP send buffer size.
-</p></div>
-            
-            
-            
-          </div>
-          
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#startTls">
-      <a id="startTls(Boolean):This"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">startTls</span>
-        
-        <span class="params">(<span name="value">value: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: This</span>
-      </span>
-      </h4>
-      
-            <p class="shortcomment cmt">Uses STARTTLS (attempt to upgrade a plaintext channel).</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Uses STARTTLS (attempt to upgrade a plaintext channel).
 </p></div>
             
             
@@ -1251,19 +1243,20 @@ than this.</p><p>Applicable only to service-builds ({{build()}})
           </div>
           
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tls">
-      <a id="tls():This"></a>
+      <a id="tls(String):This"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">tls</span>
         
-        <span class="params">()</span>
+        <span class="params">(<span name="hostname">hostname: String</span>)</span>
         <span class="result">: This</span>
       </span>
       </h4>
       
             <p class="shortcomment cmt">Encrypt the connection with SSL.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.
+            <div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  Hostname verification will be
+provided against the given hostname.
 </p></div>
             
             
@@ -1317,9 +1310,43 @@ than this.</p><p>Applicable only to service-builds ({{build()}})
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">tracer</span>
+        <span class="name deprecated">tracer</span>
         
         <span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block"><ol>deprecated:
+          <li><p>Use tracerFactory instead</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tracer">
+      <a id="tracer(Factory):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name deprecated">tracer</span>
+        
+        <span class="params">(<span name="factory">factory: Factory</span>)</span>
+        <span class="result">: This</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block"><ol>deprecated:
+          <li><p>Use tracerFactory instead</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ClientBuilder#tracerFactory">
+      <a id="tracerFactory(Factory):This"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tracerFactory</span>
+        
+        <span class="params">(<span name="factory">factory: Factory</span>)</span>
         <span class="result">: This</span>
       </span>
       </h4>

@@ -1,0 +1,288 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.http.filter</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.http">http</a></p>
+
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <h1>filter</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">filter</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.CommonLogFormatter">
+      <a id="CommonLogFormatter:CommonLogFormatter"></a>
+      <h4 class="signature"><a href="CommonLogFormatter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">CommonLogFormatter</span>
+        
+        
+        <span class="result"> extends LogFormatter</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Apache-style common log formatter</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.ExceptionFilter">
+      <a id="ExceptionFilter:ExceptionFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="ExceptionFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ExceptionFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">General purpose exception filter.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.HeadFilter">
+      <a id="HeadFilter:HeadFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="HeadFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">HeadFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">HEAD filter.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.JsonpFilter">
+      <a id="JsonpFilter:JsonpFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="JsonpFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">JsonpFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">JSONP (callback) filter</p>
+    </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.http.filter.LogFormatter">
+      <a id="LogFormatter:LogFormatter"></a>
+      <h4 class="signature"><a href="LogFormatter.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LogFormatter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.LoggingFilter">
+      <a id="LoggingFilter:LoggingFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="LoggingFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">LoggingFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt"> Logging filter.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.MethodRequiredFilter">
+      <a id="MethodRequiredFilter:MethodRequiredFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="MethodRequiredFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">MethodRequiredFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Method required filter.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.StatsFilter">
+      <a id="StatsFilter:StatsFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="StatsFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">StatsFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Statistic filter.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.SuppressResponseCodesFilter">
+      <a id="SuppressResponseCodesFilter:SuppressResponseCodesFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="SuppressResponseCodesFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SuppressResponseCodesFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Suppress response codes filter.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.ValidateRequestFilter">
+      <a id="ValidateRequestFilter:ValidateRequestFilter[REQUEST]"></a>
+      <h4 class="signature"><a href="ValidateRequestFilter.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ValidateRequestFilter</span>
+        <span class="tparams">[<span name="REQUEST">REQUEST &lt;: Request</span>]</span>
+        
+        <span class="result"> extends SimpleFilter[REQUEST, Response]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Validate request filter:
+  400 Bad Request is the request is /bad-http-request - Finagle sets this if the
+     request is malformed.</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.ExceptionFilter">
+      <a id="ExceptionFilter:ExceptionFilter"></a>
+      <h4 class="signature"><a href="ExceptionFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ExceptionFilter</span>
+        
+        
+        <span class="result"> extends ExceptionFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.HeadFilter">
+      <a id="HeadFilter:HeadFilter"></a>
+      <h4 class="signature"><a href="HeadFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">HeadFilter</span>
+        
+        
+        <span class="result"> extends HeadFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.JsonpFilter">
+      <a id="JsonpFilter:JsonpFilter"></a>
+      <h4 class="signature"><a href="JsonpFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">JsonpFilter</span>
+        
+        
+        <span class="result"> extends JsonpFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.LogFormatter">
+      <a id="LogFormatter:LogFormatter"></a>
+      <h4 class="signature"><a href="LogFormatter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">LogFormatter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.LoggingFilter">
+      <a id="LoggingFilter:LoggingFilter"></a>
+      <h4 class="signature"><a href="LoggingFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">LoggingFilter</span>
+        
+        
+        <span class="result"> extends LoggingFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.MethodRequiredFilter">
+      <a id="MethodRequiredFilter:MethodRequiredFilter"></a>
+      <h4 class="signature"><a href="MethodRequiredFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">MethodRequiredFilter</span>
+        
+        
+        <span class="result"> extends MethodRequiredFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.SuppressResponseCodesFilter">
+      <a id="SuppressResponseCodesFilter:SuppressResponseCodesFilter"></a>
+      <h4 class="signature"><a href="SuppressResponseCodesFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">SuppressResponseCodesFilter</span>
+        
+        
+        <span class="result"> extends SuppressResponseCodesFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.http.filter.ValidateRequestFilter">
+      <a id="ValidateRequestFilter:ValidateRequestFilter"></a>
+      <h4 class="signature"><a href="ValidateRequestFilter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ValidateRequestFilter</span>
+        
+        
+        <span class="result"> extends ValidateRequestFilter[Request]</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

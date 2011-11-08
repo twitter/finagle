@@ -44,7 +44,7 @@ deals with POJOs:</p><p>[ThriftIn -&gt; (String  -&gt;  Int) -&gt; ThriftOut]</p
           </div><div class="block">
             linear super types: (ReqIn, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[ReqOut, RepIn]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[RepOut], AnyRef, <span class="extype" name="scala.Any">Any</span>
           </div><div class="block">
-            known subclasses: <a href="SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>, <a href="tracing/TracingFilter.html" class="extype" name="com.twitter.finagle.tracing.TracingFilter">TracingFilter</a>, <a href="service/TimeoutFilter.html" class="extype" name="com.twitter.finagle.service.TimeoutFilter">TimeoutFilter</a>, <a href="service/StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">StatsFilter</a>, <a href="service/RetryingFilter.html" class="extype" name="com.twitter.finagle.service.RetryingFilter">RetryingFilter</a>, <a href="service/OptionallyServableFilter.html" class="extype" name="com.twitter.finagle.service.OptionallyServableFilter">OptionallyServableFilter</a>, <a href="exception/ExceptionFilter.html" class="extype" name="com.twitter.finagle.exception.ExceptionFilter">ExceptionFilter</a>
+            known subclasses: <a href="SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>, <a href="tracing/TracingFilter.html" class="extype" name="com.twitter.finagle.tracing.TracingFilter">TracingFilter</a>, <a href="tracing/ClientRequestTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientRequestTracingFilter">ClientRequestTracingFilter</a>, <a href="service/TimeoutFilter.html" class="extype" name="com.twitter.finagle.service.TimeoutFilter">TimeoutFilter</a>, <a href="service/StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">StatsFilter</a>, <a href="service/RetryingFilter.html" class="extype" name="com.twitter.finagle.service.RetryingFilter">RetryingFilter</a>, <a href="service/OptionallyServableFilter.html" class="extype" name="com.twitter.finagle.service.OptionallyServableFilter">OptionallyServableFilter</a>, <a href="exception/ExceptionFilter.html" class="extype" name="com.twitter.finagle.exception.ExceptionFilter">ExceptionFilter</a>
           </div>
             
             
@@ -288,7 +288,7 @@ deals with POJOs:</p><p>[ThriftIn -&gt; (String  -&gt;  Int) -&gt; ThriftOut]</p
       </h4>
       
             <p class="shortcomment cmt">Chains a series of filters together:</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExcetions.andThen(thrift2Pojo.andThen(parseString))
+            <div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))
 </p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl>
             
             

@@ -75,7 +75,7 @@ customizable.
       <span class="symbol">
         <span class="name">ExpiringService</span>
         
-        <span class="params">(<span name="self">self: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep]</span>, <span name="maxIdleTime">maxIdleTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="maxLifeTime">maxLifeTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> =<span class="symbol"></span></span>)</span>
+        <span class="params">(<span name="self">self: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[Req, Rep]</span>, <span name="maxIdleTime">maxIdleTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="maxLifeTime">maxLifeTime: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> =<span class="symbol"></span></span>, <span name="stats">stats: <a href="../stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> =<span class="symbol"></span></span>)</span>
         
       </span>
       </h4>
@@ -259,7 +259,7 @@ customizable.
       <span class="symbol">
         <span class="name">apply</span>
         
-        <span class="params">(<span name="request">request: Req</span>)</span>
+        <span class="params">(<span name="req">req: Req</span>)</span>
         <span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[Rep]</span>
       </span>
       </h4>
@@ -298,40 +298,6 @@ part of compilation it is not possible to check whether the contents of the list
             
             
           </div>
-          
-    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.service.ExpiringService#cancelIdleTimer">
-      <a id="cancelIdleTimer():Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">cancelIdleTimer</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          attributes: protected 
-        </div></div>
-          
-    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.service.ExpiringService#cancelLifeTimer">
-      <a id="cancelLifeTimer():Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">cancelLifeTimer</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          attributes: protected 
-        </div></div>
           
     </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
       <a id="clone():AnyRef"></a>
@@ -372,23 +338,6 @@ part of compilation it is not possible to check whether the contents of the list
             
             <div class="fullcomment"><div class="block">
           definition classes: Function1
-        </div></div>
-          
-    </li><li visbl="prt" data-isabs="false" name="com.twitter.finagle.service.ExpiringService#didExpire">
-      <a id="didExpire():Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">didExpire</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          attributes: protected 
         </div></div>
           
     </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#eq">
@@ -460,6 +409,18 @@ scala.Int
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.ExpiringService#expired">
+      <a id="expired():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">expired</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -535,7 +496,7 @@ to verify that the behavior is consistent with the <code>equals</code> method.
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.service.ExpiringService#isAvailable">
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.ServiceProxy#isAvailable">
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -552,7 +513,7 @@ with a reasonable likelihood of success).</p>
             <div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
 with a reasonable likelihood of success).
 </p></div><div class="block">
-          definition classes: <a href="" class="extype" name="com.twitter.finagle.service.ExpiringService">ExpiringService</a> → <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>
+          definition classes: <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>
         </div>
             
             

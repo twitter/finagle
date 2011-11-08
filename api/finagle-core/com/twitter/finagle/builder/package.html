@@ -83,7 +83,7 @@
       <span class="symbol">
         <span class="name">ClientConfig</span>
         <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
-        <span class="params">(<span name="_cluster">_cluster: Option[Cluster]</span>, <span name="_codecFactory">_codecFactory: Option[(ClientCodecConfig) ⇒ Codec[Req, Rep]]</span>, <span name="_tcpConnectTimeout">_tcpConnectTimeout: Duration</span>, <span name="_connectTimeout">_connectTimeout: Duration</span>, <span name="_requestTimeout">_requestTimeout: Duration</span>, <span name="_timeout">_timeout: Duration</span>, <span name="_keepAlive">_keepAlive: Option[Boolean]</span>, <span name="_readerIdleTimeout">_readerIdleTimeout: Option[Duration]</span>, <span name="_writerIdleTimeout">_writerIdleTimeout: Option[Duration]</span>, <span name="_statsReceiver">_statsReceiver: Option[StatsReceiver]</span>, <span name="_exceptionReceiver">_exceptionReceiver: Option[ClientExceptionReceiverBuilder]</span>, <span name="_name">_name: Option[String]</span>, <span name="_sendBufferSize">_sendBufferSize: Option[Int]</span>, <span name="_recvBufferSize">_recvBufferSize: Option[Int]</span>, <span name="_retries">_retries: Option[Int]</span>, <span name="_logger">_logger: Option[Logger]</span>, <span name="_channelFactory">_channelFactory: Option[ReferenceCountedChannelFactory]</span>, <span name="_tls">_tls: Option[SSLContext]</span>, <span name="_startTls">_startTls: Boolean</span>, <span name="_failureAccrualParams">_failureAccrualParams: Option[(Int, Duration)]</span>, <span name="_tracer">_tracer: Tracer</span>, <span name="_hostConfig">_hostConfig: ClientHostConfig</span>)</span>
+        <span class="params">(<span name="_cluster">_cluster: Option[Cluster]</span>, <span name="_codecFactory">_codecFactory: Option[(ClientCodecConfig) ⇒ Codec[Req, Rep]]</span>, <span name="_tcpConnectTimeout">_tcpConnectTimeout: Duration</span>, <span name="_connectTimeout">_connectTimeout: Duration</span>, <span name="_requestTimeout">_requestTimeout: Duration</span>, <span name="_timeout">_timeout: Duration</span>, <span name="_keepAlive">_keepAlive: Option[Boolean]</span>, <span name="_readerIdleTimeout">_readerIdleTimeout: Option[Duration]</span>, <span name="_writerIdleTimeout">_writerIdleTimeout: Option[Duration]</span>, <span name="_statsReceiver">_statsReceiver: Option[StatsReceiver]</span>, <span name="_exceptionReceiver">_exceptionReceiver: Option[ClientExceptionReceiverBuilder]</span>, <span name="_name">_name: Option[String]</span>, <span name="_sendBufferSize">_sendBufferSize: Option[Int]</span>, <span name="_recvBufferSize">_recvBufferSize: Option[Int]</span>, <span name="_retryPolicy">_retryPolicy: Option[RetryPolicy[Try[Nothing]]]</span>, <span name="_logger">_logger: Option[Logger]</span>, <span name="_channelFactory">_channelFactory: Option[ReferenceCountedChannelFactory]</span>, <span name="_tls">_tls: Option[(Engine, Option[String])]</span>, <span name="_failureAccrualParams">_failureAccrualParams: Option[(Int, Duration)]</span>, <span name="_tracerFactory">_tracerFactory: Factory</span>, <span name="_hostConfig">_hostConfig: ClientHostConfig</span>)</span>
         <span class="result"> extends Product</span>
       </span>
       </a></h4>
@@ -186,7 +186,7 @@ ChannelFactories after they have been released.</p>
       <span class="symbol">
         <span class="name">ServerConfig</span>
         <span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span>
-        <span class="params">(<span name="_codecFactory">_codecFactory: Option[(ServerCodecConfig) ⇒ Codec[Req, Rep]]</span>, <span name="_statsReceiver">_statsReceiver: Option[StatsReceiver]</span>, <span name="_exceptionReceiver">_exceptionReceiver: Option[ServerExceptionReceiverBuilder]</span>, <span name="_name">_name: Option[String]</span>, <span name="_sendBufferSize">_sendBufferSize: Option[Int]</span>, <span name="_recvBufferSize">_recvBufferSize: Option[Int]</span>, <span name="_keepAlive">_keepAlive: Option[Boolean]</span>, <span name="_backlog">_backlog: Option[Int]</span>, <span name="_bindTo">_bindTo: Option[SocketAddress]</span>, <span name="_logger">_logger: Option[Logger]</span>, <span name="_tls">_tls: Option[(String, String)]</span>, <span name="_startTls">_startTls: Boolean</span>, <span name="_channelFactory">_channelFactory: ReferenceCountedChannelFactory</span>, <span name="_maxConcurrentRequests">_maxConcurrentRequests: Option[Int]</span>, <span name="_healthEventCallback">_healthEventCallback: (HealthEvent) ⇒ Unit</span>, <span name="_hostConnectionMaxIdleTime">_hostConnectionMaxIdleTime: Option[Duration]</span>, <span name="_hostConnectionMaxLifeTime">_hostConnectionMaxLifeTime: Option[Duration]</span>, <span name="_openConnectionsHealthThresholds">_openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]</span>, <span name="_requestTimeout">_requestTimeout: Option[Duration]</span>, <span name="_readTimeout">_readTimeout: Option[Duration]</span>, <span name="_writeCompletionTimeout">_writeCompletionTimeout: Option[Duration]</span>, <span name="_tracer">_tracer: Tracer</span>)</span>
+        <span class="params">(<span name="_codecFactory">_codecFactory: Option[(ServerCodecConfig) ⇒ Codec[Req, Rep]]</span>, <span name="_statsReceiver">_statsReceiver: Option[StatsReceiver]</span>, <span name="_exceptionReceiver">_exceptionReceiver: Option[ServerExceptionReceiverBuilder]</span>, <span name="_name">_name: Option[String]</span>, <span name="_sendBufferSize">_sendBufferSize: Option[Int]</span>, <span name="_recvBufferSize">_recvBufferSize: Option[Int]</span>, <span name="_keepAlive">_keepAlive: Option[Boolean]</span>, <span name="_backlog">_backlog: Option[Int]</span>, <span name="_bindTo">_bindTo: Option[SocketAddress]</span>, <span name="_logger">_logger: Option[Logger]</span>, <span name="_tls">_tls: Option[(String, String, String, String)]</span>, <span name="_channelFactory">_channelFactory: ReferenceCountedChannelFactory</span>, <span name="_maxConcurrentRequests">_maxConcurrentRequests: Option[Int]</span>, <span name="_healthEventCallback">_healthEventCallback: (HealthEvent) ⇒ Unit</span>, <span name="_hostConnectionMaxIdleTime">_hostConnectionMaxIdleTime: Option[Duration]</span>, <span name="_hostConnectionMaxLifeTime">_hostConnectionMaxLifeTime: Option[Duration]</span>, <span name="_openConnectionsHealthThresholds">_openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]</span>, <span name="_requestTimeout">_requestTimeout: Option[Duration]</span>, <span name="_readTimeout">_readTimeout: Option[Duration]</span>, <span name="_writeCompletionTimeout">_writeCompletionTimeout: Option[Duration]</span>, <span name="_tracerFactory">_tracerFactory: Factory</span>)</span>
         <span class="result"> extends Product</span>
       </span>
       </a></h4>
@@ -203,19 +203,6 @@ ChannelFactories after they have been released.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.SslServerConfiguration">
-      <a id="SslServerConfiguration:SslServerConfiguration"></a>
-      <h4 class="signature"><a href="SslServerConfiguration.html">
-      <span class="kind">case class</span>
-      <span class="symbol">
-        <span class="name">SslServerConfiguration</span>
-        
-        <span class="params">(<span name="certificatePath">certificatePath: String</span>, <span name="keyPath">keyPath: String</span>)</span>
-        <span class="result"> extends Product</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Store the files necessary to configure an SSL
-</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Stats4J">
       <a id="Stats4J:Stats4J"></a>
       <h4 class="signature"><a href="Stats4J.html">
@@ -258,18 +245,6 @@ ChannelFactories after they have been released.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.PEMEncodedKeyManager">
-      <a id="PEMEncodedKeyManager:PEMEncodedKeyManager"></a>
-      <h4 class="signature"><a href="PEMEncodedKeyManager$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">PEMEncodedKeyManager</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Creates KeyManagers for PEM files.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.ServerBuilder">
       <a id="ServerBuilder:ServerBuilder"></a>
       <h4 class="signature"><a href="ServerBuilder$.html">
@@ -295,18 +270,6 @@ ChannelFactories after they have been released.</p>
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Ssl">
-      <a id="Ssl:Ssl"></a>
-      <h4 class="signature"><a href="Ssl$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">Ssl</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
-      </span>
-      </a></h4>
-      
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.Stats4J">
       <a id="Stats4J:Stats4J"></a>
       <h4 class="signature"><a href="Stats4J$.html">
@@ -316,18 +279,6 @@ ChannelFactories after they have been released.</p>
         
         
         <span class="result"> extends </span>
-      </span>
-      </a></h4>
-      
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.builder.TemporaryDirectory">
-      <a id="TemporaryDirectory:TemporaryDirectory"></a>
-      <h4 class="signature"><a href="TemporaryDirectory$.html">
-      <span class="kind">object</span>
-      <span class="symbol">
-        <span class="name">TemporaryDirectory</span>
-        
-        
-        <span class="result"> extends AnyRef</span>
       </span>
       </a></h4>
       

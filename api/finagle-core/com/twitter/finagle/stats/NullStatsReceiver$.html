@@ -27,11 +27,13 @@
         <span class="name">NullStatsReceiver</span>
         
         
-        <span class="result"> extends <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>
+        <span class="result"> extends <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a></span>
       </span>
       </h4>
       <div class="fullcomment" id="comment"><div class="block">
-            linear super types: <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>, AnyRef, <span class="extype" name="scala.Any">Any</span>
+            go to: <a href="NullStatsReceiver.html">companion</a>
+          </div><div class="block">
+            linear super types: <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a>, <span class="extype" name="com.twitter.util.JavaSingleton">JavaSingleton</span>, <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>, AnyRef, <span class="extype" name="scala.Any">Any</span>
           </div></div>
 
       <div id="template">
@@ -45,7 +47,7 @@
           <div id="ancestors">
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
-                <ol id="linearization"><li class="in" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</li><li class="in" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+                <ol id="linearization"><li class="in" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</li><li class="in" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</li><li class="in" name="com.twitter.util.JavaSingleton">JavaSingleton</li><li class="in" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -236,7 +238,7 @@ caller. Immortal measurements are made with <code></code>provideGauge</i>. As
 with <code></code>provideGauge<i>, gauges with equal names are added
 together.
 </i></p></div><div class="block">
-          definition classes: <a href="" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
+          definition classes: <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
         </div>
             
             
@@ -308,7 +310,7 @@ part of compilation it is not possible to check whether the contents of the list
 </p>
             <div class="fullcomment"><div class="comment cmt"><p>Get a Counter with the description
 </p></div><div class="block">
-          definition classes: <a href="" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
+          definition classes: <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
         </div>
             
             
@@ -408,6 +410,23 @@ there are no more references to the object.</p><p>The details of when and if the
             
             
           </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.util.JavaSingleton#get">
+      <a id="get:JavaSingleton"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">get</span>
+        
+        
+        <span class="result">: <span class="extype" name="com.twitter.util.JavaSingleton">JavaSingleton</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: JavaSingleton
+        </div></div>
           
     </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#getClass">
       <a id="getClass():java.lang.Class[_]"></a>
@@ -579,6 +598,30 @@ together.
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.NullStatsReceiver#repr">
+      <a id="repr:NullStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">repr</span>
+        
+        
+        <span class="result">: <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Specifies the representative receiver.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Specifies the representative receiver.  This is in order to
+expose an object we can use for comparison so that global stats
+are only reported once per receiver.
+</p></div><div class="block">
+          definition classes: <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
+        </div>
+            
+            
+            
+          </div>
+          
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stats.StatsReceiver#scope">
       <a id="scope(String):NameTranslatingStatsReceiver"></a>
       <h4 class="signature">
@@ -618,7 +661,7 @@ together.
 </p>
             <div class="fullcomment"><div class="comment cmt"><p>Get a Gauge with the description
 </p></div><div class="block">
-          definition classes: <a href="" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
+          definition classes: <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a> → <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a>
         </div>
             
             
@@ -795,7 +838,11 @@ together.
     </li></ol>
             </div>
 
-        <div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
+        <div class="parent" name="com.twitter.finagle.stats.NullStatsReceiver">
+              <h3>Inherited from <a href="NullStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.NullStatsReceiver">NullStatsReceiver</a></h3>
+            </div><div class="parent" name="com.twitter.util.JavaSingleton">
+              <h3>Inherited from <span class="extype" name="com.twitter.util.JavaSingleton">JavaSingleton</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
               <h3>Inherited from <a href="StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from AnyRef</h3>

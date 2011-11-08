@@ -65,23 +65,7 @@ Codec uses HTTP Chunks and newline delimited items.
 
         
 
-        <div class="types members" id="types">
-              <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.example.stream.StreamServer.ProducerThread">
-      <a id="ProducerThread:ProducerThread"></a>
-      <h4 class="signature"><a href="StreamServer$$ProducerThread.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ProducerThread</span>
         
-        
-        <span class="result"> extends Thread</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">Issue messages on the Channel so long as clients are connected
-</p>
-    </li></ol>
-            </div>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
@@ -233,6 +217,18 @@ Codec uses HTTP Chunks and newline delimited items.
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.example.stream.StreamServer#addBroker">
+      <a id="addBroker:Broker[Broker[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">addBroker</span>
+        
+        
+        <span class="result">: <span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" data-isabs="false" name="scala.Any#asInstanceOf">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -258,18 +254,6 @@ part of compilation it is not possible to check whether the contents of the list
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.example.stream.StreamServer#channelSource">
-      <a id="channelSource:ChannelSource[ChannelBuffer]"></a>
-      <h4 class="signature">
-      <span class="kind">val</span>
-      <span class="symbol">
-        <span class="name">channelSource</span>
-        
-        
-        <span class="result">: <span class="extype" name="com.twitter.concurrent.ChannelSource">ChannelSource</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -476,6 +460,18 @@ possible to check whether the contents of the list are of the requested typed.
       </span>
       </h4>
       
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.example.stream.StreamServer#messages">
+      <a id="messages:Broker[ChannelBuffer]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol">
+        <span class="name">messages</span>
+        
+        
+        <span class="result">: <span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#ne">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -546,15 +542,15 @@ possible to check whether the contents of the list are of the requested typed.
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.example.stream.StreamServer#producer">
-      <a id="producer:ProducerThread"></a>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.example.stream.StreamServer#remBroker">
+      <a id="remBroker:Broker[Broker[ChannelBuffer]]"></a>
       <h4 class="signature">
-      <span class="kind">var</span>
+      <span class="kind">val</span>
       <span class="symbol">
-        <span class="name">producer</span>
+        <span class="name">remBroker</span>
         
         
-        <span class="result">: <a href="StreamServer$$ProducerThread.html" class="extype" name="com.twitter.finagle.example.stream.StreamServer.ProducerThread">ProducerThread</a></span>
+        <span class="result">: <span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<span class="extype" name="com.twitter.concurrent.Broker">Broker</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
       </span>
       </h4>
       

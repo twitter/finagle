@@ -31,6 +31,8 @@
       </span>
       </h4>
       <div class="fullcomment" id="comment"><div class="block">
+            go to: <a href="Tracer$.html">companion</a>
+          </div><div class="block">
             linear super types: AnyRef, <span class="extype" name="scala.Any">Any</span>
           </div><div class="block">
             known subclasses: <a href="NullTracer$.html" class="extype" name="com.twitter.finagle.tracing.NullTracer">NullTracer</a>, <a href="ConsoleTracer$.html" class="extype" name="com.twitter.finagle.tracing.ConsoleTracer">ConsoleTracer</a>, <a href="BufferingTracer.html" class="extype" name="com.twitter.finagle.tracing.BufferingTracer">BufferingTracer</a>
@@ -519,15 +521,27 @@ possible to check whether the contents of the list are of the requested typed.
           attributes: abstract 
         </div></div>
           
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.tracing.Tracer#release">
+      <a id="release():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">release</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.tracing.Tracer#sampleTrace">
-      <a id="sampleTrace(TraceId):Boolean"></a>
+      <a id="sampleTrace(TraceId):Option[Boolean]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">sampleTrace</span>
         
         <span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>
       </span>
       </h4>
       
@@ -535,6 +549,9 @@ possible to check whether the contents of the list are of the requested typed.
 that a percentage of all traces will be let through for example.</p>
             <div class="fullcomment"><div class="comment cmt"><p>Should we sample this trace or not? Could be decided
 that a percentage of all traces will be let through for example.
+True: keep it
+False: false throw the data away
+None: i'm going to defer making a decision on this to the child service
 </p></div><div class="block">
           attributes: abstract 
         </div>

@@ -52,19 +52,7 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.ChannelToHttpChunk">
-      <a id="ChannelToHttpChunk:ChannelToHttpChunk"></a>
-      <h4 class="signature"><a href="ChannelToHttpChunk.html">
-      <span class="kind">class</span>
-      <span class="symbol">
-        <span class="name">ChannelToHttpChunk</span>
-        
-        
-        <span class="result"> extends SimpleChannelHandler</span>
-      </span>
-      </a></h4>
-      <p class="comment cmt">A Netty Channel Handler that adapts Twitter Channels to Netty Channels.</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.ClientBufferToChannelCodec">
+              <ol><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.ClientBufferToChannelCodec">
       <a id="ClientBufferToChannelCodec:ClientBufferToChannelCodec"></a>
       <h4 class="signature"><a href="ClientBufferToChannelCodec.html">
       <span class="kind">class</span>
@@ -100,18 +88,30 @@
       </span>
       </a></h4>
       <p class="comment cmt">A DuplexStreamCodec exposes two <code>Channel[ChannelBuffer]</code> (inbound and outbound).</p>
-    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.HttpChunkToChannel">
-      <a id="HttpChunkToChannel:HttpChunkToChannel"></a>
-      <h4 class="signature"><a href="HttpChunkToChannel.html">
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.HttpChunker">
+      <a id="HttpChunker:HttpChunker"></a>
+      <h4 class="signature"><a href="HttpChunker.html">
       <span class="kind">class</span>
       <span class="symbol">
-        <span class="name">HttpChunkToChannel</span>
+        <span class="name">HttpChunker</span>
         
         
-        <span class="result"> extends SimpleChannelUpstreamHandler</span>
+        <span class="result"> extends BrokerChannelHandler</span>
       </span>
       </a></h4>
-      <p class="comment cmt">Client handler for a streaming protocol.</p>
+      <p class="comment cmt">Convert a StreamResponse into a chunked (streaming) HTTP response.</p>
+    </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.HttpDechunker">
+      <a id="HttpDechunker:HttpDechunker"></a>
+      <h4 class="signature"><a href="HttpDechunker.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">HttpDechunker</span>
+        
+        
+        <span class="result"> extends BrokerChannelHandler</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Convert a streaming HTTP response into a StreamResponse.</p>
     </li><li visbl="pub" data-isabs="true" name="com.twitter.finagle.stream.MessageType">
       <a id="MessageType:MessageType"></a>
       <h4 class="signature"><a href="MessageType.html">
@@ -244,6 +244,18 @@ acknowledges the send.</p>
       </span>
       </a></h4>
       
+    </li><li visbl="pub" data-isabs="false" name="_root_.EOF">
+      <a id="EOF:EOF"></a>
+      <h4 class="signature"><a href="../../../../EOF$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">EOF</span>
+        
+        
+        <span class="result"> extends Exception</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Indicates that a stream has ended.</p>
     </li><li visbl="pub" data-isabs="false" name="com.twitter.finagle.stream.MessageType">
       <a id="MessageType:MessageType"></a>
       <h4 class="signature"><a href="MessageType$.html">

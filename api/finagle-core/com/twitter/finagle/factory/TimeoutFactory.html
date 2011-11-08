@@ -30,11 +30,17 @@
         <span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[Req, Rep]</span>
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="block">
+      <div class="fullcomment" id="comment"><div class="comment cmt"><p>A factory wrapper that times out the service acquisition after the
+given time.
+</p></div><div class="block">
             go to: <a href="TimeoutFactory$.html">companion</a>
           </div><div class="block">
             linear super types: <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[Req, Rep], <span class="extype" name="scala.Proxy">Proxy</span>, <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[Req, Rep], AnyRef, <span class="extype" name="scala.Any">Any</span>
-          </div></div>
+          </div>
+            
+            
+            
+          </div>
 
       <div id="template">
 
@@ -68,7 +74,7 @@
       <span class="symbol">
         <span class="name">TimeoutFactory</span>
         
-        <span class="params">(<span name="self">self: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[Req, Rep]</span>, <span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> =<span class="symbol"></span></span>)</span>
+        <span class="params">(<span name="self">self: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[Req, Rep]</span>, <span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="exception">exception: <a href="../ServiceTimeoutException.html" class="extype" name="com.twitter.finagle.ServiceTimeoutException">ServiceTimeoutException</a></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> =<span class="symbol"></span></span>)</span>
         
       </span>
       </h4>
