@@ -8,7 +8,7 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.finagle.tracing.Trace
 
-trait RetryPolicy[-A] extends ((A) => Option[(Duration, RetryPolicy[A])])
+trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
 object RetryPolicy {
   def tries(numTries: Int) = {
