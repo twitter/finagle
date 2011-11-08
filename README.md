@@ -1,6 +1,6 @@
 <a name="Top"></a>
 
-# Finagle Developer Guide (September 8, 2011 Draft)
+# Finagle Developer Guide (October 21, 2011 Draft)
 
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
@@ -29,15 +29,19 @@
   - <a href="#Using Future map and flatMap Operations">Using Future map and flatMap Operations</a>
   - <a href="#Using Future in Scatter/Gather Patterns">Using Future in Scatter/Gather Patterns</a>
   - <a href="#Using Future Pools">Using Future Pools</a>
-* <a href="#Using Future Objects With Java">Using Future Objects With Java</a>
-  - <a href="#Imperative Java Style">Imperative Java Style</a>
-  - <a href="#Functional Java Style">Functional Java Style</a>
 * <a href="#Creating a Service">Creating a Service</a>
 * <a href="#Creating Simple Filters">Creating Filters</a>
 * <a href="#Building a Robust Server">Building a Robust Server</a>
 * <a href="#Building a Robust Client">Building a Robust Client</a>
 * <a href="#Creating Filters to Transform Requests and Responses">Creating Filters to Transform Requests and Responses</a>
 * <a href="#Using ServerSet Objects">Using ServerSet Objects</a>
+* <a href="#Java Design Patterns for Finagle">Java Design Patterns for Finagle</a>
+  - <a href="#Using Future Objects With Java">Using Future Objects With Java</a>
+  - <a href="#Imperative Java Style">Imperative Java Style</a>
+  - <a href="#Functional Java Style">Functional Java Style</a>
+  - <a href="#Building a Server in Java">Building a Server in Java</a>
+  - <a href="#Building a Client in Java">Building a Client in Java</a>
+  - <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 * <a href="#Additional Samples">Additional Samples</a>
 * <a href="#API Reference Documentation">API Reference Documentation</a>
 
@@ -48,6 +52,8 @@
 Finagle is an asynchronous network stack for the JVM that you can use to build *asynchronous* Remote Procedure Call (RPC) clients and servers in Java, Scala, or any JVM-hosted language. Finagle provides a rich set of tools that are protocol independent.
 
 The following Quick Start sections show how to implement simple RPC servers and clients in Scala and Java. The first example shows the creation a simple HTTP server and corresponding client. The second example shows the creation of a Thrift server and client. You can use these examples to get started quickly and have something that works in just a few lines of code. For a more detailed description of Finagle and its features, start with <a href="#Finagle Overview">Finagle Overview</a> and come back to Quick Start later.
+
+**Note:** The examples in this section include both Scala and Java implementations. Other sections show only Scala examples. For more information about Java, see <a href="#Java Design Patterns for Finagle">Java Design Patterns for Finagle</a>.
 
 [Top](#Top)
 
@@ -99,6 +105,8 @@ The following server, which is shown in both Scala and Java, responds to a clien
   - the association between the server and the service, which is specified by `.build` in Scala and the first argument to `safeBuild` in Java
   - the name of the service
 
+**Note:** For more information about the Java implementation, see <a href="#Java Design Patterns for Finagle">Java Design Patterns for Finagle</a>.
+
 [Top](#Top)
 
 <a name="Simple HTTP Client"></a>
@@ -112,6 +120,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()                           // 1
       .codec(Http)
       .hosts(address)
+      .hostConnectionLimit(1)
       .build()
 
     // Issue a request, get a response:
@@ -143,12 +152,13 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 1. Build a client that sends an HTTP request to the host identified by its socket address. In this case, the Client builder specifies
   - an HTTP request filter, which ensures that only valid HTTP requests are sent to the server
   - a list of the server's hosts that can process requests
+  - maximum number of connections from the client to the host
   - to build this client service
 2. Create an HTTP GET request.
 3. Make the request to the host identified in your client.
 4. Specify a callback, `onSuccess`, that Finagle executes when the response arrives.
 
-Note: Although the example shows building the client and execution of the built client on the same thread, you should build your clients only once and execute them separately. There is no requirement to maintain a 1:1 relationship between building a client and executing a client.
+**Note:** Although the example shows building the client and execution of the built client on the same thread, you should build your clients only once and execute them separately. There is no requirement to maintain a 1:1 relationship between building a client and executing a client.
 
 [Top](#Top)
 
@@ -251,12 +261,13 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
       new Hello.ServiceToClient(client, new TBinaryProtocol.Factory());                        // 2
 
     client.hi().addEventListener(new FutureEventListener<String>() {
-    public void onSuccess(String s) {                                                          // 3
-      System.out.println(s);
-    }
+      public void onSuccess(String s) {                                                        // 3
+        System.out.println(s);
+      }
 
-    public void onFailure(Throwable t) {
-      System.out.println("Exception! ", t.toString());
+      public void onFailure(Throwable t) {
+        System.out.println("Exception! ", t.toString());
+      }
     });
 
 ##### Thrift Client Code Annotation
@@ -791,6 +802,8 @@ Consider another example:
 
 In this example, the value of `responseFuture` is not available until after the scheduled job has finished executing and the caller will block until `responseFuture` has a value.
 
+**Note:** For examples of using Finagle `Future` objects in Java, see <a href="#Using Future Objects With Java">Using Future Objects With Java</a>.
+
 [Top](#Top)
 
 <a name="Future Callbacks"></a>
@@ -879,7 +892,7 @@ Usually a producer makes a `Promise` and casts it to a `Future` before giving it
 
 ### Using Future map and flatMap Operations
 
-In addition to waiting for results to return, `Futures` can be transformed in interesting ways. For instance, it is possible to convert a `Future[String]` to a `Future[Int]` by using `map`:
+In addition to waiting for results to return, `Future` can be transformed in interesting ways. For instance, it is possible to convert a `Future[String]` to a `Future[Int]` by using `map`:
 
     val stringFuture: Future[String] = Future("1")
     val intFuture: Future[Int] = stringFuture map (_.toInt)
@@ -952,66 +965,7 @@ A `FuturePool` object enables you to place a blocking operation on its own threa
       }
     }
 
-[Top](#Top)
-
-<a name="Using Future Objects With Java"></a>
-
-## Using Future Objects With Java
-
-A `Future` object in Java is defined as `Future<`_Type_`>`, as in the following example:
-
-    Future<String> future = executor.schedule(job);
-
-You must explicitly call the object's `apply` method:
-
-    // Wait indefinitely for result
-    String result = future.apply();
-
-Arguments to the `apply` method are passed as functions:
-
-    // Wait up to 1 second for result
-    String result = future.apply(Duration.apply(1, SECOND));
-
-There are two styles you can use to wait for a value. The _imperative_ style is the traditional Java programming style. The _functional_ style uses functions as objects and is the basis for Scala. You can use whichever style suits you best.
-
-[Top](#Top)
-
-<a name="Imperative Java Style"></a>
-
-### Imperative Java Style
-
-The following example shows the _imperative_ style, which uses an event listener that responds to a change in the `Future` object and calls the appropriate method:
-
-    Future<String> future = executor.schedule(job);
-    future.addEventListener(
-      new FutureEventListener<String>() {
-        public void onSuccess(String value) {
-          println(value);
-        }
-        public void onFailure(Throwable t) ...
-      }
-    )
-
-[Top](#Top)
-
-<a name="Functional Java Style"></a>
-
-### Functional Java Style
-
-
-The following example shows the _functional_ style, which is similar to the way in which you write Scala code:
-
-    Future<String> future = executor.schedule(job);
-      future.onSuccess( new Function<String, Void>() {
-        public Void apply(String value) { System.out.println(value);
-      } ).onFailure(...).ensure(...);
-
-The following example shows the _functional_ style for the `map` method:
-
-    Future<String> future = executor.schedule(job);
-    Future<Integer> result = future.map(new Function<String, Integer>() {
-      public Integer apply(String value) { return Integer.valueOf(value);
-      }
+**Note:** For an example implementation of a thread pool in Java, see <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>.
 
 [Top](#Top)
 
@@ -1109,7 +1063,8 @@ A robust client has little to do with the lines of code (SLOC) that goes into it
     val client = ClientBuilder()
       .codec(Http)
       .hosts("localhost:10000,localhost:10001,localhost:10003")
-      .connectionTimeout(1.second)        // max time to spend establishing a TCP connection.
+      .hostConnectionLimit(1)             // max number of connections at a time to a host
+      .connectionTimeout(1.second)        // max time to spend establishing a TCP connection
       .retries(2)                         // (1) per-request retries
       .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
       .logger(Logger.getLogger("http"))
@@ -1195,8 +1150,409 @@ A client can access a cluster, as follows:
 
     val client = ClientBuilder()
       .cluster(cluster)
+      .hostConnectionLimit(1)
       .codec(new StringCodec)
       .build()
+
+[Top](#Top)
+
+<a name="Java Design Patterns for Finagle"></a>
+
+## Java Design Patterns for Finagle
+
+The implementations of RPC servers and clients in Java are similar to Scala implementations. You can write your Java services in the _imperative_ style, which is the traditional Java programming style, or you can write in the _functional_ style, which uses functions as objects and is the basis for Scala. Most differences between Java and Scala implementations are related to exception handling.  
+
+[Top](#Top)
+
+<a name="Using Future Objects With Java"></a>
+
+### Using Future Objects With Java
+
+A `Future` object in Java is defined as `Future<`_Type_`>`, as in the following example:
+
+    Future<String> future = executor.schedule(job);
+
+**Note:** The `Future` class is defined in `com.twitter.util.Future` and is not the same as the Java `Future` class.
+
+You can explicitly call the `Future` object's `get` method to retrieve the contents of a `Future` object:
+
+    // Wait indefinitely for result
+    String result = future.get();
+
+Calling `get` is the more common pattern because you can more easily perform exception handling. See <a href="#Handling Synchronous Responses With Exception Handling">Handling Synchronous Responses With Exception Handling</a> for more information.
+
+You can alternatively call the `Future` object's `apply` method. Arguments to the `apply` method are passed as functions:
+
+    // Wait up to 1 second for result
+    String result = future.apply(Duration.apply(1, SECOND));
+
+This technique is most appropriate when exception handling is not an issue.
+
+[Top](#Top)
+
+<a name="Imperative Java Style"></a>
+
+### Imperative Java Style
+
+The following example shows the _imperative_ style, which uses an event listener that responds to a change in the `Future` object and calls the appropriate method:
+
+    Future<String> future = executor.schedule(job);
+    future.addEventListener(
+      new FutureEventListener<String>() {
+        public void onSuccess(String value) {
+          println(value);
+        }
+        public void onFailure(Throwable t) ...
+      }
+    )
+
+[Top](#Top)
+
+<a name="Functional Java Style"></a>
+
+### Functional Java Style
+
+
+The following example shows the _functional_ style, which is similar to the way in which you write Scala code:
+
+    Future<String> future = executor.schedule(job);
+      future.onSuccess( new Function<String, Void>() {
+        public Void apply(String value) { System.out.println(value);
+      } ).onFailure(...).ensure(...);
+
+The following example shows the _functional_ style for the `map` method:
+
+    Future<String> future = executor.schedule(job);
+    Future<Integer> result = future.map(new Function<String, Integer>() {
+      public Integer apply(String value) { return Integer.valueOf(value);
+      }
+
+[Top](#Top)
+
+<a name="Building a Server in Java"></a>
+
+### Building a Server in Java
+
+When you create a server in Java, you have several options. You can create a server that processes requests synchronously or asynchronously. You must also choose an appropriate level of exception handling. In all cases, either a `Future` or an exception is returned.This section shows several techniques that are relevant for servers written in Java:
+
+* <a href="#Server Imports">Server Imports</a>
+* <a href="#Performing Synchronous Operations">Performing Synchronous Operations</a>
+* <a href="#Performing Asynchronous Operations">Performing Asynchronous Operations</a>
+* <a href="#Invoking the Server">Invoking the Server</a>
+
+[Top](#Top)
+
+<a name="Server Imports"></a>
+
+#### Server Imports
+
+As you write a server in Java, you will become familiar with the following packages and classes. Some `netty` classes are specifically related to HTTP. Most of the classes you will use are defined in the `com.twitter.finagle` and `com.twitter.util` packages.
+
+    import java.net.InetSocketAddress;
+
+    import org.jboss.netty.buffer.ChannelBuffers;
+    import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+    import org.jboss.netty.handler.codec.http.HttpRequest;
+    import org.jboss.netty.handler.codec.http.HttpResponse;
+    import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+    import org.jboss.netty.handler.codec.http.HttpVersion;
+
+    import com.twitter.finagle.Service;
+    import com.twitter.finagle.builder.ServerBuilder;
+    import com.twitter.finagle.http.Http;
+    import com.twitter.util.Future;
+    import com.twitter.util.FutureEventListener;
+    import com.twitter.util.Promise;
+
+[Top](#Top)
+
+<a name="Performing Synchronous Operations"></a>
+
+#### Performing Synchronous Operations
+
+If your server can respond synchronously, you can use the following pattern to implement your service:
+
+    public class HTTPServer extends Service<HttpRequest, HttpResponse> {
+      public Future<HttpResponse> apply(HttpRequest request) {
+      // If I can generate the response synchronously, then I just do this.
+      try {
+        HttpResponse response = processRequest(request);
+        return Future.value(response);
+      } catch (MyException e) {
+        return Future.exception(e);
+      }
+
+In this example, the `try` `catch` block causes the server to either return a response or an exception.
+
+[Top](#Top)
+
+<a name="Performing Asynchronous Operations"></a>
+
+#### Performing Asynchronous Operations
+
+In Java, asynchronous operations are often implemented with `Promise` objects. You add a `FutureEventListener` object to the `Future` object whose result you need. Finagle either invokes your `onSuccess` method if the `Future` object receives a value, or it invokes your `onFailure` method if an exception occurs. A `Throwable` object is provided when an exception occurs to communicate information about the kind of exception. 
+
+You should assign either the `Future` value or a `Throwable` exception to the `Promise` object, which is implicitly cast as a `Future` object on return. The following example shows this pattern:
+
+    public class HTTPServer extends Service<HttpRequest, HttpResponse> {
+      final Promise<HttpResponse> responsePromise = new Promise<HttpResponse>();
+      Future<String> contentFuture = getContentAsync(request);
+      contentFuture.addEventListener(new FutureEventListener<String>() {
+        @Override
+        public void onSuccess(String content) {
+        HttpResponse httpResponse =
+          new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        httpResponse.setContent(ChannelBuffers.wrappedBuffer(content.getBytes()));
+        responsePromise.setValue(httpResponse);
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+          responsePromise.setException(throwable);
+        }
+      });
+      return responsePromise;
+    }
+
+[Top](#Top)
+
+<a name="Invoking the Server"></a>
+
+#### Invoking the Server
+
+The following example shows the instantiation and invocation of the server. Calling the `ServerBuilder`'s `safeBuild` method statically checks arguments to `ServerBuilder`, which prevents a runtime error if a required argument is missing:
+
+      public static void main(String[] args) {
+        ServerBuilder.safeBuild(new HTTPServer(),
+                                ServerBuilder.get()
+                                             .codec(Http.get())
+                                             .name("HTTPServer")
+                                             .bindTo(new InetSocketAddress("localhost", 8080)));
+
+      }
+    }
+
+
+[Top](#Top)
+
+<a name="Building a Client in Java"></a>
+
+### Building a Client in Java
+
+When you create a client in Java, you have several options. You can create a client that processes responses synchronously or asynchronously. You must also choose an appropriate level of exception handling. This section shows several techniques that are relevant for clients written in Java:
+
+* <a href="#Client Imports">Client Imports</a>
+* <a href="#Creating the Client">Creating the Client</a>
+* <a href="#Handling Synchronous Responses">Handling Synchronous Responses</a>
+* <a href="#Handling Synchronous Responses With Timeouts">Handling Synchronous Responses With Timeouts</a>
+* <a href="#Handling Synchronous Responses With Exception Handling">Handling Synchronous Responses With Exception Handling</a>
+* <a href="#Handling Asynchronous Responses">Handling Asynchronous Responses</a>
+
+[Top](#Top)
+
+<a name="Client Imports"></a>
+
+#### Client Imports
+
+As you write a client in Java, you will become familiar with the following packages and classes. Some `netty` classes are specifically related to HTTP. Most of the classes you will use are defined in the `com.twitter.finagle` and `com.twitter.util` packages.
+
+    import java.net.InetSocketAddress;
+    import java.util.concurrent.TimeUnit;
+
+    import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+    import org.jboss.netty.handler.codec.http.HttpMethod;
+    import org.jboss.netty.handler.codec.http.HttpRequest;
+    import org.jboss.netty.handler.codec.http.HttpResponse;
+    import org.jboss.netty.handler.codec.http.HttpVersion;
+
+    import com.twitter.finagle.Service;
+    import com.twitter.finagle.builder.ClientBuilder;
+    import com.twitter.finagle.http.Http;
+    import com.twitter.util.Duration;
+    import com.twitter.util.FutureEventListener;
+    import com.twitter.util.Throw;
+    import com.twitter.util.Try;
+
+
+[Top](#Top)
+
+<a name="Creating the Client"></a>
+
+#### Creating the Client
+
+The following example shows the instantiation and invocation of a client. Calling the `ClientBuilder`'s `safeBuild` method statically checks arguments to `ClientBuilder`, which prevents a runtime error if a required argument is missing:
+
+    public class HTTPClient {
+      public static void main(String[] args) {
+        Service<HttpRequest, HttpResponse> httpClient =
+          ClientBuilder.safeBuild(
+            ClientBuilder.get()
+                         .codec(Http.get())
+                         .hosts(new InetSocketAddress(8080))
+                         .hostConnectionLimit(1));
+
+**Note:** Choosing a value of 1 for `hostConnectionLimit` eliminates contention for a host.
+
+[Top](#Top)
+
+<a name="Handling Synchronous Responses"></a>
+
+#### Handling Synchronous Responses
+
+In the simplest case, you can wait for a response, potentially forever. Typically, you should handle both a valid response and an exception:
+
+        HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+
+        try {
+          HttpResponse response1 = httpClient.apply(request).apply();
+        } catch (Exception e) {
+            ...
+        }
+
+[Top](#Top)
+
+<a name="Handling Synchronous Responses With Timeouts"></a>
+
+#### Handling Synchronous Responses With Timeouts
+
+To avoid waiting forever for a response, you can specify a duration, which throws an exception if the duration expires. The following example sets a duration of 1 second:
+
+        try {
+          HttpResponse response2 = httpClient.apply(request).apply(
+            new Duration(TimeUnit.SECONDS.toNanos(1)));
+        } catch (Exception e) {
+            ...
+        }
+
+[Top](#Top)
+
+<a name="Handling Synchronous Responses With Exception Handling"></a>
+
+#### Handling Synchronous Responses With Exception Handling
+
+Use the `Try` and `Throw` classes in `com.twitter.util` to implement a more general approach to exception handling for synchronous responses. In addition to specifying a timeout duration, which can throw an exception, other exceptions can also be thrown.
+
+        Try<HttpResponse> responseTry = httpClient.apply(request).get(
+          new Duration(TimeUnit.SECONDS.toNanos(1)));
+        if (responseTry.isReturn()) {
+          // Cool, I have a response! Get it and do something
+          HttpResponse response3 = responseTry.get();
+          ...
+        } else {
+	        // Throw an exception
+          Throwable throwable = ((Throw)responseTry).e();
+          System.out.println("Exception thrown by client: " +  throwable);
+        }
+
+**Note:** You must call the request's `get` method instead of the `apply` method to retrieve the `Try` object.
+
+[Top](#Top)
+
+<a name="Handling Asynchronous Responses"></a>
+
+#### Handling Asynchronous Responses
+
+To handle asynchronous responses, you add a `FutureEventListener` to listen for a response. Finagle invokes the `onSuccess` method when a response arrives or invokes `onFailure` for an exception: 
+
+        httpClient.apply(request).addEventListener(new FutureEventListener<HttpResponse>() {
+          @Override
+          public void onSuccess(HttpResponse response4) {
+            // Cool, I have a response, do something with it!
+            ...
+          }
+
+          @Override
+          public void onFailure(Throwable throwable) {
+            System.out.println("Exception thrown by client: " +  throwable);
+          }
+        });
+      }
+    }
+
+[Top](#Top)
+
+<a name="Implementing a Pool for Blocking Operations in Java"></a>
+
+### Implementing a Thread Pool for Blocking Operations in Java
+
+To prevent blocking operations from executing on the main Finagle thread, you must wrap the blocking operation in a Scala closure and execute the closure on the Java thread that you create. Typically, your Java thread is part of a thread pool. The following sections show how to wrap your blocking operation, set up a thread pool, and execute the blocking operation on a thread in your pool:
+
+* <a href="#Wrapping the Blocking Operation">Wrapping the Blocking Operation</a>
+* <a href="#Setting Up Your Thread Pool">Setting Up Your Thread Pool</a>
+* <a href="#Invoking the Blocking Operation">Invoking the Blocking Operation</a>
+
+**Note:** Jakob Homan provides an example implementation of a thread pool that executes Scala closures on <a href="https://github.com/jghoman/finagle-java-example">GitHub</a>. 
+
+[Top](#Top)
+
+<a name="Wrapping the Blocking Operation"></a>
+
+#### Wrapping the Blocking Operation
+
+The `Util` project contains a `Function0` class that represents a Scala closure. You can override the `apply` method to wrap your blocking operation:
+
+    public static class BlockingOperation extends com.twitter.util.Function0<Integer> {
+      public Integer apply() {
+        // Implement your blocking operation here
+        ...
+      }
+    }
+
+[Top](#Top)
+
+<a name="Setting Up Your Thread Pool"></a>
+
+#### Setting Up Your Thread Pool
+
+The following example shows a Thrift server that places the blocking operation defined in the `Future0` object's `apply` method in the Java thread pool, where it will eventually execute and return a result:
+
+    public static class HelloServer implements Hello.ServiceIface {
+      ExecutorService pool = Executors.newFixedThreadPool(4);                        // Java thread pool
+      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(threads); // Java Future thread pool
+		
+      public Future<Integer> blockingOperation() {  
+	      Function0<Integer> blockingWork = new BlockingOperation();
+        return futurePool.apply(blockingWork);
+      }
+
+      public static void main(String[] args) {
+        Hello.ServiceIface processor = new Hello.ServiceIface();
+
+        ServerBuilder.safeBuild(
+          new Hello.Service(processor, new TBinaryProtocol.Factory()),
+          ServerBuilder.get()
+                       .name("HelloService")
+                       .codec(ThriftServerFramedCodec.get())
+                       .bindTo(new InetSocketAddress(8080))
+          );
+        )
+      )
+    )
+
+[Top](#Top)
+
+<a name="Invoking the Blocking Operation"></a>
+
+#### Invoking the Blocking Operation
+
+To invoke the blocking operation, you call the method that wraps your blocking operation and add an event listener that waits for either success or failure:
+
+		  Service<ThriftClientRequest, byte[]> client = ClientBuilder.safeBuild(ClientBuilder.get()
+		    .hosts(new InetSocketAddress(8080))
+		    .codec(new ThriftClientFramedCodecFactory())
+		    .hostConnectionLimit(100)); // Must be more than 1 to enable parallel execution
+
+		  Hello.ServiceIface client =
+		    new Hello.ServiceToClient(client, new TBinaryProtocol.Factory());
+
+		  client.blockingOperation().addEventListener(new FutureEventListener<Integer>() {
+		    public void onSuccess(Integer i) {
+		      System.out.println(i);
+		    }
+
+		  public void onFailure(Throwable t) {
+		    System.out.println("Exception! ", t.toString());
+		  });
 
 [Top](#Top)
 

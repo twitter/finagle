@@ -14,13 +14,14 @@ object RetryingFilterSpec extends Specification with Mockito {
     val retriesStat = mock[Stat]
     val timer = new MockTimer
     stats.stat("retries") returns retriesStat
-    val shouldRetry = mock[PartialFunction[Try[Int], Boolean]]
+    val shouldRetry = mock[PartialFunction[Try[Nothing], Boolean]]
     shouldRetry.isDefinedAt(any) returns true
-    shouldRetry(any[Try[Int]]) answers {
+    shouldRetry(any[Try[Nothing]]) answers {
       case Throw(_: WriteException) => true
       case _ => false
     }
-    val filter = new RetryingFilter[Int, Int](backoffs, stats, shouldRetry, timer)
+    val policy = RetryPolicy.backoff(backoffs)(shouldRetry)
+    val filter = new RetryingFilter[Int, Int](policy, timer, stats)
     val service = mock[Service[Int, Int]]
     val retryingService = filter andThen service
 
@@ -59,7 +60,7 @@ object RetryingFilterSpec extends Specification with Mockito {
       there was one(retriesStat).add(3)
       f.isDefined must beTrue
       f.isThrow must beTrue
-      f() must throwA(new RetryFailureException(new WriteException(new Exception("i'm exhausted"))))
+      f() must throwA(new WriteException(new Exception("i'm exhausted")))
     }
 
     "when failed with a non-WriteException, fail immediately" in {

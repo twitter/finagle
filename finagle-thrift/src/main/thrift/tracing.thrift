@@ -3,6 +3,7 @@
  */
 
 namespace java com.twitter.finagle.thrift.thrift
+namespace rb FinagleThrift
 
 /**
  * The following is from BigBrotherBird:
@@ -38,34 +39,51 @@ struct Span {
   7: map<string, binary> binary_annotations // any binary annotations
 }
 
+
+/**
+ * At connection time, we can let the server know who we are so
+ * they can book keep and optionally reject unknown clients.
+ */
+struct ClientId {
+  1: string name
+}
+
 /**
  * The following are for finagle-thrift specific tracing headers &
  * negotiation.
  */
 
 /**
- * TracedRequest defines trace headers. These carry the span data, and
+ * RequestHeader defines headers for the request. These carry the span data, and
  * a flag indicating whether the request is to be debugged.
  */
-struct TracedRequestHeader {
+struct RequestHeader {
   1: i64 trace_id,
   2: i64  span_id,
   3: optional i64 parent_span_id,
   4: bool debug,
   5: optional bool sampled // if true we should trace the request, if not set we have not decided.
+  6: optional ClientId client_id
 }
 
 /**
- * The TracedResponse carries a reply header for tracing. These are
+ * The Response carries a reply header for tracing. These are
  * empty unless the request is being debugged, in which case a
  * transcript is copied.
  */
-struct TracedResponseHeader {
+struct ResponseHeader {
   1: list<Span> spans
 }
 
 /**
- * These are connection-level trace options negotiated during protocol
- * upgrade. (Intentionally left blank: for future use).
+ * These are connection-level options negotiated during protocol
+ * upgrade.
  */
-struct TraceOptions {}
+struct ConnectionOptions {
+}
+
+/**
+ * This is the struct that a successful upgrade will reply with.
+ */
+struct UpgradeReply {
+}

@@ -48,7 +48,6 @@ package com.twitter.finagle.builder
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
 import java.util.concurrent.{Executors, TimeUnit}
-import javax.net.ssl.SSLEngine
 
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
@@ -56,7 +55,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 
-import com.twitter.util.{Future, Duration, Throw, Return}
+import com.twitter.util.{Future, Duration, Throw, Return, Try}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -65,9 +64,11 @@ import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
-import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
+import com.twitter.finagle.stats.{
+  StatsReceiver, RollupStatsReceiver, NullStatsReceiver, GlobalStatsReceiver
+}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy, HeapBalancer}
-import com.twitter.finagle.ssl.{Ssl, SslConnectHandler}
+import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
 import exception._
@@ -154,12 +155,12 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _name                      : Option[String]                = Some("client"),
   private val _sendBufferSize            : Option[Int]                   = None,
   private val _recvBufferSize            : Option[Int]                   = None,
-  private val _retries                   : Option[Int]                   = None,
+  private val _retryPolicy               : Option[RetryPolicy[Try[Nothing]]]  = None,
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
-  private val _tls                       : Option[(SSLEngine, Option[String])] = None,
+  private val _tls                       : Option[(Engine, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
-  private val _tracer                    : Tracer                        = NullTracer,
+  private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
 {
   import ClientConfig._
@@ -190,12 +191,12 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val hostConfig                = _hostConfig
   val sendBufferSize            = _sendBufferSize
   val recvBufferSize            = _recvBufferSize
-  val retries                   = _retries
+  val retryPolicy               = _retryPolicy
   val logger                    = _logger
   val channelFactory            = _channelFactory
   val tls                       = _tls
   val failureAccrualParams      = _failureAccrualParams
-  val tracer                    = _tracer
+  val tracerFactory             = _tracerFactory
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -218,12 +219,12 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
-    "retries"                   -> _retries,
+    "retryPolicy"               -> _retryPolicy,
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
     "failureAccrualParams"      -> _failureAccrualParams,
-    "tracer"                    -> Some(tracer)
+    "tracerFactory"             -> Some(_tracerFactory)
   )
 
   override def toString = {
@@ -463,7 +464,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The number of retries applied. Only applicable to service-builds ({{build()}})
    */
   def retries(value: Int): This =
-    withConfig(_.copy(_retries = Some(value)))
+    retryPolicy(RetryPolicy.tries(value))
+
+  def retryPolicy(value: RetryPolicy[Try[Nothing]]): This =
+    withConfig(_.copy(_retryPolicy = Some(value)))
 
   /**
    * Sets the TCP send buffer size.
@@ -500,8 +504,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
    */
+  def tracerFactory(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
+  def tracer(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
   def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracer = tracer))
+    withConfig(_.copy(_tracerFactory = () => tracer))
 
   def exceptionReceiver(erFactory: ClientExceptionReceiverBuilder): This =
     withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
@@ -542,9 +554,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         }
 
         for ((engine, hostname) <- config.tls) {
-          engine.setUseClientMode(true)
-          engine.setEnableSessionCreation(true)
-          val sslHandler = new SslHandler(engine)
+          engine.self.setUseClientMode(true)
+          engine.self.setEnableSessionCreation(true)
+          val sslHandler = new SslHandler(engine.self)
           val verifier = hostname map {
             SslConnectHandler.sessionHostnameVerifier(_) _
           } getOrElse { Function.const(None) _ }
@@ -687,12 +699,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
+    val tracer = config.tracerFactory()
     var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
       new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
       {
         override def close() = {
           super.close()
           Timer.default.stop()
+          tracer.release()
         }
       }
     } else {
@@ -704,6 +718,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         override def close() = {
           super.close()
           Timer.default.stop()
+          tracer.release()
         }
       }
     }
@@ -727,7 +742,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // requests are never dispatched to the underlying stack, they
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
-    factory = (new TracingFilter(config.tracer)) andThen factory
+    factory = (new TracingFilter(tracer)) andThen factory
 
     factory
   }
@@ -743,9 +758,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     // We keep the retrying filter at the very bottom: this allows us
     // to retry across multiple hosts, etc.
-    config.retries foreach { numRetries =>
-      val filter = RetryingService.tries[Req, Rep](
-        numRetries, statsReceiver)
+    config.retryPolicy foreach { retryPolicy =>
+      val filter = new RetryingFilter[Req, Rep](retryPolicy, Timer.default, statsReceiver)
       service = filter andThen service
     }
 

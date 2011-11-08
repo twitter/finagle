@@ -13,36 +13,31 @@ import com.twitter.util.Base64StringEncoder
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
+import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ThriftClientRequest, thrift}
 
-import collection.mutable.{ArrayBuffer, HashMap}
+import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 
 object BigBrotherBirdTracer {
-
   // to make sure we only create one instance of the tracer
   // per host and port
-  private val map = HashMap[String, BigBrotherBirdTracer]()
+  private[this] val map =
+    new HashMap[String, BigBrotherBirdTracer] with SynchronizedMap[String, BigBrotherBirdTracer]
 
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
-            statsReceiver: StatsReceiver): BigBrotherBirdTracer = synchronized {
+            statsReceiver: StatsReceiver): Tracer.Factory = {
 
-    map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-        val transport = ClientBuilder()
-          .hosts(new InetSocketAddress(scribeHost, scribePort))
-          .codec(ThriftClientFramedCodec())
-          .hostConnectionLimit(5)
-          .build()
-
-        val client = new scribe.ServiceToClient(new TracelessFilter andThen transport,
-          new TBinaryProtocol.Factory())
-
-        new BigBrotherBirdTracer(client, statsReceiver.scope("b3"))
+    val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
+      new BigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"))
     })
-  }
 
+    () => {
+      tracer.acquire()
+      tracer
+    }
+  }
 }
 
 /**
@@ -52,8 +47,10 @@ object BigBrotherBirdTracer {
  * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
  */
 private[thrift] class BigBrotherBirdTracer(
-  client: scribe.ServiceToClient,
-  statsReceiver: StatsReceiver = NullStatsReceiver) extends Tracer
+  scribeHost: String,
+  scribePort: Int,
+  statsReceiver: StatsReceiver = NullStatsReceiver
+) extends Tracer
 {
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
   private[this] val TraceCategory = "b3" // scribe category
@@ -61,6 +58,32 @@ private[thrift] class BigBrotherBirdTracer(
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver)
   private[this] var sampleRate = 0.001f // default sample rate 0.1%. Max is 1, min 0.
+  private[this] var refcount = 0
+  private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = null
+  private[thrift] var client: scribe.ServiceToClient = null
+
+  def acquire() = synchronized {
+    refcount += 1
+    if (refcount == 1) {
+      transport = ClientBuilder()
+        .hosts(new InetSocketAddress(scribeHost, scribePort))
+        .codec(ThriftClientFramedCodec())
+        .hostConnectionLimit(5)
+        .build()
+
+      client = new scribe.ServiceToClient(new TracelessFilter andThen transport,
+                                          new TBinaryProtocol.Factory())
+    }
+  }
+
+  override def release() = synchronized {
+    refcount -= 1
+    if (refcount == 0) {
+      transport.release()
+      transport = null
+      client = null
+    }
+  }
 
   /**
    * Set the sample rate.

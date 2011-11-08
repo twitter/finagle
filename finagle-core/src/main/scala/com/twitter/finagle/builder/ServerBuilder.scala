@@ -1,43 +1,4 @@
 package com.twitter.finagle.builder
-/**
- * Provides a class for building servers.
- * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
- * {{{
- * ServerBuilder()
- *   .codec(Http)
- *   .hostConnectionMaxLifeTime(5.minutes)
- *   .readTimeout(2.minutes)
- *   .name("servicename")
- *   .bindTo(new InetSocketAddress(serverPort))
- *   .build(plusOneService)
- * }}}
- *
- * The `ServerBuilder` requires the definition of `codec`, `bindTo`
- * and `name`. In Scala, these are statically type
- * checked, and in Java the lack of any of the above causes a runtime
- * error.
- *
- * The `build` method uses an implicit argument to statically
- * typecheck the builder (to ensure completeness, see above). The Java
- * compiler cannot provide such implicit, so we provide a separate
- * function in Java to accomplish this. Thus, the Java code for the
- * above is
- *
- * {{{
- * ServerBuilder.safeBuild(
- *  plusOneService,
- *  ServerBuilder.get()
- *   .codec(Http)
- *   .hostConnectionMaxLifeTime(5.minutes)
- *   .readTimeout(2.minutes)
- *   .name("servicename")
- *   .bindTo(new InetSocketAddress(serverPort)));
- * }}}
- *
- * Alternatively, using the `unsafeBuild` method on `ServerBuilder`
- * verifies the builder dynamically, resulting in a runtime error
- * instead of a compiler error.
- */
 
 import scala.collection.mutable.HashSet
 import scala.collection.JavaConversions._
@@ -69,7 +30,7 @@ import com.twitter.concurrent.AsyncSemaphore
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
 import exception._
-import ssl.Ssl
+import ssl.{Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 
 trait Server {
   /**
@@ -138,13 +99,15 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _bindTo:                          Option[SocketAddress]                    = None,
   private val _logger:                          Option[Logger]                           = None,
   private val _tls:                             Option[(String, String, String, String)] = None,
-  private val _startTls:                        Boolean                                  = false,
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
   private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]  = None,
-  private val _tracer:                          Tracer                                   = NullTracer,
+  private val _requestTimeout:                  Option[Duration]                         = None,
+  private val _readTimeout:                     Option[Duration]                         = None,
+  private val _writeCompletionTimeout:          Option[Duration]                         = None,
+  private val _tracerFactory:                   Tracer.Factory                           = () => NullTracer,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None)
 {
   import ServerConfig._
@@ -172,7 +135,6 @@ case class TimeoutConfig(
   val bindTo                          = _bindTo
   val logger                          = _logger
   val tls                             = _tls
-  val startTls                        = _startTls
   val channelFactory                  = _channelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
   val healthEventCallback             = _healthEventCallback
@@ -183,7 +145,10 @@ case class TimeoutConfig(
   val writeCompletionTimeout          = _timeoutConfig.writeCompletionTimeout
   val timeoutConfig                   = _timeoutConfig
   val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
-  val tracer                          = _tracer
+  val requestTimeout                  = _requestTimeout
+  val readTimeout                     = _readTimeout
+  val writeCompletionTimeout          = _writeCompletionTimeout
+  val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
 
   def toMap = Map(
@@ -197,7 +162,6 @@ case class TimeoutConfig(
     "bindTo"                          -> _bindTo,
     "logger"                          -> _logger,
     "tls"                             -> _tls,
-    "startTls"                        -> Some(_startTls),
     "channelFactory"                  -> Some(_channelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
     "healthEventCallback"             -> _healthEventCallback,
@@ -207,7 +171,10 @@ case class TimeoutConfig(
     "readTimeout"                     -> _timeoutConfig.readTimeout,
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "openConnectionsHealthThresholds" -> _openConnectionsHealthThresholds,
-    "tracer"                          -> Some(_tracer),
+    "requestTimeout"                  -> _requestTimeout,
+    "readTimeout"                     -> _readTimeout,
+    "writeCompletionTimeout"          -> _writeCompletionTimeout,
+    "tracerFactory"                   -> Some(_tracerFactory),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
   )
 
@@ -233,6 +200,43 @@ case class TimeoutConfig(
  * A handy Builder for constructing Servers (i.e., binding Services to
  * a port).  This class is subclassable. Override copy() and build()
  * to do your own dirty work.
+ *
+ * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
+ * {{{
+ * ServerBuilder()
+ *   .codec(Http)
+ *   .hostConnectionMaxLifeTime(5.minutes)
+ *   .readTimeout(2.minutes)
+ *   .name("servicename")
+ *   .bindTo(new InetSocketAddress(serverPort))
+ *   .build(plusOneService)
+ * }}}
+ *
+ * The `ServerBuilder` requires the definition of `codec`, `bindTo`
+ * and `name`. In Scala, these are statically type
+ * checked, and in Java the lack of any of the above causes a runtime
+ * error.
+ *
+ * The `build` method uses an implicit argument to statically
+ * typecheck the builder (to ensure completeness, see above). The Java
+ * compiler cannot provide such implicit, so we provide a separate
+ * function in Java to accomplish this. Thus, the Java code for the
+ * above is
+ *
+ * {{{
+ * ServerBuilder.safeBuild(
+ *  plusOneService,
+ *  ServerBuilder.get()
+ *   .codec(Http)
+ *   .hostConnectionMaxLifeTime(5.minutes)
+ *   .readTimeout(2.minutes)
+ *   .name("servicename")
+ *   .bindTo(new InetSocketAddress(serverPort)));
+ * }}}
+ *
+ * Alternatively, using the `unsafeBuild` method on `ServerBuilder`
+ * verifies the builder dynamically, resulting in a runtime error
+ * instead of a compiler error.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   val config: ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
@@ -304,9 +308,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           caCertificatePath: String = null, ciphers: String = null): This =
     withConfig(_.copy(_tls = Some(certificatePath, keyPath, caCertificatePath, ciphers)))
 
-  def startTls(value: Boolean): This =
-    withConfig(_.copy(_startTls = value))
-
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
 
@@ -334,8 +335,16 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def exceptionReceiver(erFactory: ServerExceptionReceiverBuilder): This =
     withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
 
-  def tracer(receiver: Tracer): This =
-    withConfig(_.copy(_tracer = receiver))
+  def tracerFactory(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
+  def tracer(factory: Tracer.Factory): This =
+    withConfig(_.copy(_tracerFactory = factory))
+
+  @deprecated("Use tracerFactory instead")
+  def tracer(tracer: Tracer): This =
+    withConfig(_.copy(_tracerFactory = () => tracer))
 
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
@@ -432,12 +441,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       new ChannelOpenConnectionsHandler(_, config.healthEventCallback, scopedOrNullStatsReceiver)
     }
 
-    // connection-limiting system
-    val channelLimitHandler = config.openConnectionsThresholds map { threshold =>
-      val idleTimeout = config.hostConnectionMaxIdleTime.getOrElse(30.seconds)
-      val idleConnectionHandler = new BucketIdleConnectionHandler(idleTimeout)
-      new ChannelLimitHandler(threshold, idleConnectionHandler, scopedOrNullStatsReceiver)
-    }
+    val tracer = config.tracerFactory()
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
@@ -477,11 +481,38 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         // SSL comes first so that ChannelSnooper gets plaintext
         config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers) =>
-          val engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers)
-          engine.setUseClientMode(false)
-          engine.setEnableSessionCreation(true)
+          val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers)
+          engine.self.setUseClientMode(false)
+          engine.self.setEnableSessionCreation(true)
 
-          pipeline.addFirst("ssl", new SslHandler(engine, config.startTls))
+          val handler = new SslHandler(engine.self)
+
+          // Certain engine implementations need to handle renegotiation internally,
+          // as Netty's TLS protocol parser implementation confuses renegotiation and
+          // notification events. Renegotiation will be enabled for those Engines with
+          // a true handlesRenegotiation value.
+          handler.setEnableRenegotiation(engine.handlesRenegotiation)
+
+          pipeline.addFirst("ssl", handler)
+
+          // Netty's SslHandler does not provide SSLEngine implementations any hints that they
+          // are no longer needed (namely, upon disconnection.) Since some engine implementations
+          // make use of objects that are not managed by the JVM's memory manager, we need to
+          // know when memory can be released. The SslShutdownHandler will invoke the shutdown
+          // method on implementations that define shutdown(): Unit.
+          pipeline.addFirst(
+            "sslShutdown",
+            new SslShutdownHandler(engine)
+          )
+
+          // Information useful for debugging SSL issues, such as the certificate, cipher spec,
+          // remote address is provided to the SSLEngine implementation by the SslIdentifierHandler.
+          // The SslIdentifierHandler will invoke the setIdentifier method on implementations
+          // that define setIdentifier(String): Unit.
+          pipeline.addFirst(
+            "sslIdentifier",
+            new SslIdentifierHandler(engine, certificatePath, ciphers)
+          )
         }
 
         // Serialization keeps the codecs honest.
@@ -559,7 +590,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         // This has to go last (ie. first in the stack) so that
         // protocol-specific trace support can override our generic
         // one here.
-        service = (new TracingFilter(config.tracer)) andThen service
+        service = (new TracingFilter(tracer)) andThen service
 
         val channelHandler = new ServiceToChannelHandler(
           service, postponedService, serviceFactory,
@@ -589,8 +620,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         pipeline.addLast("channelHandler", channelHandler)
 
         // Connection limiting system comes first
-        channelLimitHandler foreach { handler =>
-          pipeline.addFirst("channelLimitHandler", handler)
+        val channelLimitHandler = config.openConnectionsThresholds map { threshold =>
+          val idleTimeout = config.hostConnectionMaxIdleTime.getOrElse(30.seconds)
+          val idleConnectionHandler = new BucketIdleConnectionHandler(idleTimeout)
+          new ChannelLimitHandler(threshold, idleConnectionHandler, scopedOrNullStatsReceiver)
         }
 
         pipeline
@@ -637,6 +670,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         bs.releaseExternalResources()
         Timer.default.stop()
+        tracer.release()
       }
 
       override def toString = "Server(%s)".format(config.toString)
