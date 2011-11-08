@@ -129,6 +129,9 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get response associated with request. */
   def getResponse(): Response = response
+
+  override def toString =
+    "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
 }
 
 
