@@ -145,9 +145,6 @@ case class TimeoutConfig(
   val writeCompletionTimeout          = _timeoutConfig.writeCompletionTimeout
   val timeoutConfig                   = _timeoutConfig
   val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
-  val requestTimeout                  = _requestTimeout
-  val readTimeout                     = _readTimeout
-  val writeCompletionTimeout          = _writeCompletionTimeout
   val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
 
@@ -171,9 +168,6 @@ case class TimeoutConfig(
     "readTimeout"                     -> _timeoutConfig.readTimeout,
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "openConnectionsHealthThresholds" -> _openConnectionsHealthThresholds,
-    "requestTimeout"                  -> _requestTimeout,
-    "readTimeout"                     -> _readTimeout,
-    "writeCompletionTimeout"          -> _writeCompletionTimeout,
     "tracerFactory"                   -> Some(_tracerFactory),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
   )
