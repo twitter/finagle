@@ -7,7 +7,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   with DefaultRepos
 {
   override def usesMavenStyleBasePatternInPublishLocalConfiguration = true
-  override def subversionRepository = Some("http://svn.local.twitter.com/maven-public")
+  override def subversionRepository = Some("https://svn.twitter.biz/maven-public")
 
   val nettyRepo =
     "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
