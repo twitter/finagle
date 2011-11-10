@@ -289,7 +289,7 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
           idleConnectionHandler.addConnection(ctx.getChannel)
         }
         handler.openConnections mustEqual thresholds.highWaterMark
-        idleConnectionHandler.getIdleConnections.size mustEqual 0
+        idleConnectionHandler.countIdleConnections mustEqual 0
       }
 
       // Wait a little
@@ -342,13 +342,13 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
           handler.channelOpen(ctx, e)
         }
         handler.openConnections mustEqual thresholds.highWaterMark
-        idleConnectionHandler.getIdleConnections.size mustEqual 0
+        idleConnectionHandler.countIdleConnections mustEqual 0
       }
 
       // Wait a little
       t += idleTimeout * 3
       Time.withTimeAt(t) { _ =>
-        idleConnectionHandler.getIdleConnections.size mustEqual 0
+        idleConnectionHandler.countIdleConnections mustEqual 0
       }
 
       // Simulate response from server
@@ -356,7 +356,7 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
         contexts foreach { ctx =>
           idleConnectionHandler.addConnection(ctx.getChannel)
         }
-        idleConnectionHandler.getIdleConnections.size mustEqual 0
+        idleConnectionHandler.countIdleConnections mustEqual 0
       }
 
       // Wait a little
@@ -364,7 +364,7 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
 
       // Detect those connections as idle
       Time.withTimeAt(t) { _ =>
-        idleConnectionHandler.getIdleConnections.size mustEqual thresholds.highWaterMark
+        idleConnectionHandler.countIdleConnections mustEqual thresholds.highWaterMark
       }
     }
   }

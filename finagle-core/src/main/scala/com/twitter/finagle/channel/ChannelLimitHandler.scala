@@ -243,7 +243,7 @@ class ChannelLimitHandler(
 
     if (accept) {
       // We don't track this new connection in the idleConnectionManager, we wait that the server
-      // respond first before tracking idle time
+      // responds first before tracking idle time
       super.channelOpen(ctx, e)
     } else {
       ctx.getChannel.close()
@@ -257,7 +257,8 @@ class ChannelLimitHandler(
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    idleConnectionHandler.markConnectionAsActive(ctx.getChannel)
+    // Don't track connection until the server respond
+    idleConnectionHandler.removeConnection(ctx.getChannel)
     super.messageReceived(ctx,e)
   }
 

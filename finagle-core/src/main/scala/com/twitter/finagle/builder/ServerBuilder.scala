@@ -594,16 +594,20 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           val channelLimitHandler = new ChannelLimitHandler(threshold, idleConnectionHandler,
             scopedOrNullStatsReceiver)
 
+          // This filter is responsible for adding/removing a connection to/from the idle tracking
+          // system during the phase when the server is computing the result.
+          // So if a request take a long time to be processed, we will never detect it as idle
           def filterFactory(c: ClientConnection) = new SimpleFilter[Req, Rep] {
             def apply(request: Req, service: Service[Req, Rep]) = {
+              idleConnectionHandler.removeConnection(c.channel)
               service(request) respond {
-                case Return(_) => idleConnectionHandler.addConnection(c.channel)
+                case Return(_) => idleConnectionHandler.markConnectionAsActive(c.channel)
                 case Throw(_) => idleConnectionHandler.removeConnection(c.channel)
               }
             }
           }
 
-          newServiceFactory = c => { filterFactory(c) andThen serviceFactory(c) }
+          newServiceFactory = c => filterFactory(c) andThen serviceFactory(c)
           pipeline.addFirst("channelLimitHandler", channelLimitHandler)
         }
 
