@@ -6,6 +6,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   with ParentProjectDependencies
   with DefaultRepos
 {
+  override def usesMavenStyleBasePatternInPublishLocalConfiguration = true
   override def subversionRepository = Some("https://svn.twitter.biz/maven-public")
 
   val nettyRepo =
