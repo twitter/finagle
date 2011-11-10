@@ -64,7 +64,7 @@ object FrontEndServerStress {
       .bindTo(serverAddr)
       .codec(Http())
       .reportTo(new OstrichStatsReceiver)
-      .openConnectionsThresholds( OpenConnectionsThresholds(500,1000) )
+      .openConnectionsThresholds( OpenConnectionsThresholds(500, 1000, 30.seconds) )
       .build(DummyService)
 
     val beginTime = Time.now

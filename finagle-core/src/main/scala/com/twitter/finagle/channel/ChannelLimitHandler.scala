@@ -7,7 +7,11 @@ import collection._
 import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
-case class OpenConnectionsThresholds(lowWaterMark: Int, highWaterMark: Int) {
+case class OpenConnectionsThresholds(
+  lowWaterMark: Int,
+  highWaterMark: Int,
+  idleTimeout: Duration
+) {
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
@@ -176,56 +180,15 @@ class BucketGenerationalQueue[A](timeout: Duration) extends GenerationalQueue[A]
  * This class is notified everytime a connection receive activity or when it is closed
  * You also can retrieved from this class an idle connection.
  */
-trait IdleConnectionHandler {
-  def getIdleConnections: Iterable[Channel]
-  def getIdleConnection: Option[Channel]
-  def getIdleTimeout: Duration
+class IdleConnectionHandler(idleTimeout: Duration, queue: GenerationalQueue[Channel]) {
   def countIdleConnections: Int = getIdleConnections.size
-  def markChannelAsActive(channel: Channel): Unit
-  def removeChannel(channel: Channel): Unit
-}
-
-
-/**
- * Always return the most idle connection
- */
-class PreciseIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionHandler {
-  private[this] val activeConnections = new ExactGenerationalQueue[Channel]
-
   def getIdleTimeout = idleTimeout
-
-  def getIdleConnections = activeConnections.collectAll(idleTimeout)
-
-  def getIdleConnection: Option[Channel] = activeConnections.collect(idleTimeout)
-
-  def markChannelAsActive(channel: Channel) { activeConnections.touch(channel) }
-
-  def removeChannel(channel: Channel) { activeConnections.remove(channel) }
-}
-
-
-/**
- * Keep track of active connections using 3 buckets in a circular buffer way, every time some
- * activity happens on a connection, we move the channel from the corresponding bucket to the most
- * recent one. So, if we need a idle connection, we just have to choose randomly from the oldest
- * bucket
- * NB: This implementation doesn't guarantee that connections that have been idle during exactly
- * idleTimeout will be detected as idle, it may take at most 2 times idleTimeout to be detected
- */
-class BucketIdleConnectionHandler(idleTimeout: Duration) extends IdleConnectionHandler {
-  private[this] val queue = new BucketGenerationalQueue[Channel](idleTimeout)
-
-  def getIdleTimeout = idleTimeout
-
   def getIdleConnections: Iterable[Channel] = queue.collectAll(idleTimeout)
-
   def getIdleConnection: Option[Channel] = queue.collect(idleTimeout)
-
-  def markChannelAsActive(channel: Channel) = queue.touch(channel)
-
-  def removeChannel(channel: Channel) = queue.remove(channel)
+  def addConnection(c: Channel) = queue.add(c)
+  def markConnectionAsActive(c: Channel) = queue.touch(c)
+  def removeConnection(c: Channel) = queue.remove(c)
 }
-
 
 /**
  * This Handler limit the number of connections of a server and try to close idle ones when the
@@ -279,7 +242,8 @@ class ChannelLimitHandler(
     }
 
     if (accept) {
-      idleConnectionHandler.markChannelAsActive(ctx.getChannel)
+      // We don't track this new connection in the idleConnectionManager, we wait that the server
+      // respond first before tracking idle time
       super.channelOpen(ctx, e)
     } else {
       ctx.getChannel.close()
@@ -287,18 +251,18 @@ class ChannelLimitHandler(
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    idleConnectionHandler.removeChannel(ctx.getChannel)
+    idleConnectionHandler.removeConnection(ctx.getChannel)
     connectionCounter.decrementAndGet()
     super.channelClosed(ctx, e)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    idleConnectionHandler.markChannelAsActive(ctx.getChannel)
+    idleConnectionHandler.markConnectionAsActive(ctx.getChannel)
     super.messageReceived(ctx,e)
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    idleConnectionHandler.markChannelAsActive(ctx.getChannel)
+    idleConnectionHandler.markConnectionAsActive(ctx.getChannel)
     super.writeRequested(ctx,e)
   }
 }

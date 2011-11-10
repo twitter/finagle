@@ -24,7 +24,7 @@ import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Try, Return, Throw}
 import com.twitter.concurrent.AsyncSemaphore
 
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
@@ -586,8 +586,29 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         // one here.
         service = (new TracingFilter(tracer)) andThen service
 
+        var newServiceFactory = serviceFactory
+        // Connection limiting system comes first
+        config.openConnectionsThresholds foreach { threshold =>
+          val queue = new BucketGenerationalQueue[Channel](threshold.idleTimeout)
+          val idleConnectionHandler = new IdleConnectionHandler(threshold.idleTimeout, queue)
+          val channelLimitHandler = new ChannelLimitHandler(threshold, idleConnectionHandler,
+            scopedOrNullStatsReceiver)
+
+          def filterFactory(c: ClientConnection) = new SimpleFilter[Req, Rep] {
+            def apply(request: Req, service: Service[Req, Rep]) = {
+              service(request) respond {
+                case Return(_) => idleConnectionHandler.addConnection(c.channel)
+                case Throw(_) => idleConnectionHandler.removeConnection(c.channel)
+              }
+            }
+          }
+
+          newServiceFactory = c => { filterFactory(c) andThen serviceFactory(c) }
+          pipeline.addFirst("channelLimitHandler", channelLimitHandler)
+        }
+
         val channelHandler = new ServiceToChannelHandler(
-          service, postponedService, serviceFactory,
+          service, postponedService, newServiceFactory,
           scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName))
 
         /*
@@ -612,14 +633,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
 
         pipeline.addLast("channelHandler", channelHandler)
-
-        // Connection limiting system comes first
-        val channelLimitHandler = config.openConnectionsThresholds map { threshold =>
-          val idleTimeout = config.hostConnectionMaxIdleTime.getOrElse(30.seconds)
-          val idleConnectionHandler = new BucketIdleConnectionHandler(idleTimeout)
-          new ChannelLimitHandler(threshold, idleConnectionHandler, scopedOrNullStatsReceiver)
-        }
-
         pipeline
       }
     })

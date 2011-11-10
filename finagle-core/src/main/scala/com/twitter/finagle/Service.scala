@@ -56,6 +56,11 @@ trait ClientConnection {
    * Close the underlying client connection.
    */
   def close()
+
+  /**
+   * Expose the underlying Netty Channel
+   */
+  private[finagle] def channel: Channel
 }
 
 /**

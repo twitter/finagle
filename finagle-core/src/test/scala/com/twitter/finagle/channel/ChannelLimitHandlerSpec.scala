@@ -70,22 +70,16 @@ object GenerationalQueueSpec extends Specification with Mockito {
 
 object IdleConnectionHandlerSpec extends Specification with Mockito {
 
-  def time[A]( f : => A ) = {
-    val start = System.currentTimeMillis()
-    val result = f
-    val end = System.currentTimeMillis()
-    (result, end - start)
-  }
+  "IdleConnectionHandler with ExactGenerationalQueue" should {
 
-  "PreciseIdleConnectionHandler" should {
-
-    val handler = new PreciseIdleConnectionHandler(100.milliseconds)
+    val queue = new ExactGenerationalQueue[Channel]()
+    val handler = new IdleConnectionHandler(100.milliseconds, queue)
 
     "Don't find a random idle connection amoung fresh connection" in {
       handler.getIdleConnection mustEqual None
       1 to 10 foreach{ _ =>
-        val channel = mock[Channel]
-        handler.markChannelAsActive(channel)
+        val c = mock[Channel]
+        handler.addConnection(c)
       }
       handler.getIdleConnection mustEqual None
     }
@@ -93,9 +87,9 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
     "Consider oldest connection as the idlest one" in {
       var t = Time.now
 
-      val channels = (1 to 5).map{ _ => mock[Channel] }
-      channels.foreach{ channel =>
-        Time.withTimeAt(t) { _ => handler.markChannelAsActive(channel) }
+      val connections = (1 to 5).map{ _ => mock[Channel] }
+      connections.foreach{ connection =>
+        Time.withTimeAt(t) { _ => handler.addConnection(connection) }
         t += 1.millisecond
       }
       Time.withTimeAt(t) { _ =>
@@ -103,21 +97,21 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
       }
       t += handler.getIdleTimeout + 1.millisecond
       Time.withTimeAt(t) { _ =>
-        handler.getIdleConnection mustEqual channels.headOption
+        handler.getIdleConnection mustEqual connections.headOption
       }
     }
   }
 
-  "BucketIdleConnectionHandler" should {
-
-    val handler = new BucketIdleConnectionHandler(100.milliseconds)
+  "IdleConnectionHandler with BucketGenerationalQueue" should {
+    val queue = new BucketGenerationalQueue[Channel](100.milliseconds)
+    val handler = new IdleConnectionHandler(100.milliseconds, queue)
 
     "Don't find a random idle connection amoung fresh connection" in {
       handler.getIdleConnection mustEqual None
 
       (1 to 10).foreach{ _ =>
         val channel = mock[Channel]
-        handler.markChannelAsActive(channel)
+        handler.addConnection(channel)
       }
       handler.getIdleConnection mustEqual None
     }
@@ -129,7 +123,7 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
 
         val channels = (1 to 5).map{ _ =>
           val channel = mock[Channel]
-          handler.markChannelAsActive(channel)
+          handler.addConnection(channel)
           channel
         }
         handler.getIdleConnection mustEqual None
@@ -145,7 +139,7 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
         channels.contains( randomIdleConnection.get ) mustBe true
 
         // clean-up
-        channels.foreach{ handler.removeChannel(_) }
+        channels.foreach{ handler.removeConnection(_) }
         handler.getIdleConnection mustEq None
       }
     }
@@ -157,7 +151,7 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
       val channels = (1 to 3).map{ _ =>
         val channel = mock[Channel]
         t += handler.getIdleTimeout / 4
-        Time.withTimeAt(t) { _ => handler.markChannelAsActive(channel) }
+        Time.withTimeAt(t) { _ => handler.addConnection(channel) }
         channel
       }
 
@@ -171,18 +165,18 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
         channels.contains( someIdleConnection.get ) mustBe true
 
         // clean-up
-        channels.foreach{ handler.removeChannel(_) }
+        channels.foreach{ handler.removeConnection(_) }
         handler.getIdleConnection mustEq None
       }
     }
 
-    "Generate activity every idleTimeout ms and don't detect this connection as idle" in {
+    "Generate activity periodically and don't detect this connection as idle" in {
       var t = Time.now
       val channel = Time.withTimeAt(t) { _ =>
         handler.getIdleConnection mustEqual None
 
         val channel = mock[Channel]
-        handler.markChannelAsActive(channel)
+        handler.markConnectionAsActive(channel)
         handler.getIdleConnection mustEqual None
         channel
       }
@@ -191,13 +185,13 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
         t += handler.getIdleTimeout / 2
         Time.withTimeAt(t) { _ =>
           handler.getIdleConnection mustEqual None
-          handler.markChannelAsActive(channel)
+          handler.markConnectionAsActive(channel)
         }
       }
 
       // clean-up
       Time.withTimeAt(t) { _ =>
-        handler.removeChannel(channel)
+        handler.removeConnection(channel)
         handler.getIdleConnection mustEq None
       }
     }
@@ -208,13 +202,13 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
 object ChannelLimitHandlerSpec extends Specification with Mockito {
 
   def open(handler: ChannelLimitHandler) {
-    val channel = mock[Channel]
+    val connection = mock[Channel]
     val ctx = mock[ChannelHandlerContext]
-    ctx.getChannel returns channel
+    ctx.getChannel returns connection
 
-    channel.close answers{ _ =>
+    connection.close answers{ _ =>
       close(handler)
-      Channels.future(channel)
+      Channels.future(connection)
     }
 
     val e = mock[ChannelStateEvent]
@@ -222,144 +216,94 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
   }
 
   def close(handler: ChannelLimitHandler) {
-    val channel = mock[Channel]
+    val connection = mock[Channel]
     val ctx = mock[ChannelHandlerContext]
-    ctx.getChannel returns channel
+    ctx.getChannel returns connection
 
     val e = mock[ChannelStateEvent]
     handler.channelClosed(ctx, e)
   }
 
-  val thresholds = OpenConnectionsThresholds(5, 10)
   val idleTimeout = 100.milliseconds
+  val thresholds = OpenConnectionsThresholds(5, 10, idleTimeout)
+  val t0 = Time.now
 
-  "ChannelLimitHandlerSpec with PreciseIdleConnectionHandler" should {
-    val idleConnectionHandler = new PreciseIdleConnectionHandler(idleTimeout)
-    val handler = new ChannelLimitHandler(thresholds, idleConnectionHandler)
-
+  // Both implementation of GenerationalQueue must not have effect of the behavior of the
+  // ChannelLimitHandler / IdleConnectionHandler, so tests are commons.
+  def commonTests(
+    queue: GenerationalQueue[Channel],
+    idleConnectionHandler: IdleConnectionHandler,
+    handler: ChannelLimitHandler
+  ) {
     "correctly count connections" in {
-      handler.openConnections mustEqual 0
-      open(handler)
-      handler.openConnections mustEqual 1
-      close(handler)
-      handler.openConnections mustEqual 0
+      Time.withTimeAt(t0) { _ =>
+        handler.openConnections mustEqual 0
+        open(handler)
+        handler.openConnections mustEqual 1
+        close(handler)
+        handler.openConnections mustEqual 0
+      }
     }
 
     "refuse connections if total open connections is above highWaterMark" in {
+      Time.withTimeAt(t0) { _ =>
       // Load up
-      handler.openConnections mustEqual 0
-      (1 to thresholds.highWaterMark).map{ i =>
+        handler.openConnections mustEqual 0
+        (1 to thresholds.highWaterMark).map{ i =>
+          open(handler)
+        }
+        handler.openConnections mustEqual thresholds.highWaterMark
+
+        // Try to open a new connection
         open(handler)
-      }
-      handler.openConnections mustEqual thresholds.highWaterMark
+        handler.openConnections mustEqual thresholds.highWaterMark
 
-      // Try to open a new connection
-      open(handler)
-      handler.openConnections mustEqual thresholds.highWaterMark
-
-      // clean up
-      (1 to thresholds.highWaterMark).map{ i =>
-        close(handler)
+        // clean up
+        (1 to thresholds.highWaterMark).map{ i =>
+          close(handler)
+        }
+        handler.openConnections mustEqual 0
       }
-      handler.openConnections mustEqual 0
     }
 
     "collect idle connection if total open connections is above lowWaterMark" in {
-      var t = Time.now
+      var t = t0
       handler.openConnections mustEqual 0
 
       // Generate mocked contexts
-      val contexts = (1 to thresholds.highWaterMark).map{ i =>
+      val contexts = (1 to thresholds.highWaterMark) map { i =>
         val channel = mock[Channel]
         val ctx = mock[ChannelHandlerContext]
         ctx.getChannel returns channel
         ctx
       }
 
-      // open all connections (every ms, so that we know which one will be detected as idle)
-      contexts.map{ ctx =>
-        val e = mock[ChannelStateEvent]
-        Time.withTimeAt(t) { _ => handler.channelOpen(ctx, e) }
-        t += 1.millisecond
-      }
+      // open all connections
       Time.withTimeAt(t) { _ =>
-        handler.openConnections mustEqual thresholds.highWaterMark
-      }
-
-      // Wait a little
-      t += idleTimeout / 2
-      Time.withTimeAt(t) { _ =>
-        // Generate activity on the 5 first connections
-        contexts.take(5).map{ ctx =>
-          val e = mock[MessageEvent]
-          handler.messageReceived(ctx,e)
-        }
-      }
-
-      // Wait a little
-      t += idleTimeout / 2
-
-      // try to open a new connection
-      Time.withTimeAt(t) { _ =>
-        val channel = mock[Channel]
-        val ctx = mock[ChannelHandlerContext]
-        ctx.getChannel returns channel
-        val e = mock[ChannelStateEvent]
-        handler.channelOpen(ctx, e)
-
-        // Check that this new connection hasn't been closed
-        there was no(channel).close()
-
-        // Verify that the most "idle" connection have been closed
-        there was one(contexts(5).getChannel).close()
-
-        // but not the next one
-        there was no(contexts(6).getChannel).close()
-      }
-    }
-  }
-
-  "ChannelLimitHandlerSpec with BucketIdleConnectionHandler" should {
-    val idleConnectionHandler = new BucketIdleConnectionHandler(idleTimeout)
-    val handler = new ChannelLimitHandler(thresholds, idleConnectionHandler)
-
-    "collect idle connection if total open connections is above lowWaterMark" in {
-      var t = Time.now
-
-      val contexts = Time.withTimeAt(t) { _ =>
-        handler.openConnections mustEqual 0
-
-        // Generate mocked contexts
-        (1 to thresholds.highWaterMark).map{ i =>
-          val channel = mock[Channel]
-          val ctx = mock[ChannelHandlerContext]
-          ctx.getChannel returns channel
-          ctx
-        }
-      }
-
-      Time.withTimeAt(t) { _ =>
-        contexts.map{ ctx =>
+        contexts foreach { ctx =>
           val e = mock[ChannelStateEvent]
           handler.channelOpen(ctx, e)
+          // Simulate response from the service (NB: a connection isn't considered as idle when
+          // the server hasn't answer yet the request). So we simulate the server answer by
+          // calling directly 'addConnection'
+          idleConnectionHandler.addConnection(ctx.getChannel)
         }
+        handler.openConnections mustEqual thresholds.highWaterMark
+        idleConnectionHandler.getIdleConnections.size mustEqual 0
       }
 
-      Time.withTimeAt(t) { _ => handler.openConnections mustEqual thresholds.highWaterMark }
-
       // Wait a little
-      t += idleTimeout / 2
-
-      // Generate activity on the 5 first connections
+      t += idleTimeout - 1.millisecond
       Time.withTimeAt(t) { _ =>
-        contexts.take(5).map{ ctx =>
+        // Generate activity on the 5 first connections
+        contexts.take(5) foreach { ctx =>
           val e = mock[MessageEvent]
           handler.messageReceived(ctx,e)
         }
       }
 
       // Wait a little
-      t += idleTimeout + 1.millisecond
+      t += idleTimeout - 1.milliseconds
 
       // try to open a new connection
       Time.withTimeAt(t) { _ =>
@@ -379,5 +323,69 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
       }
     }
 
+    "Don't track connection until the server respond to the request" in {
+      var t = t0
+      handler.openConnections mustEqual 0
+
+      // Generate mocked contexts
+      val contexts = (1 to thresholds.highWaterMark) map { i =>
+        val channel = mock[Channel]
+        val ctx = mock[ChannelHandlerContext]
+        ctx.getChannel returns channel
+        ctx
+      }
+
+      // open all connections
+      Time.withTimeAt(t) { _ =>
+        contexts foreach { ctx =>
+          val e = mock[ChannelStateEvent]
+          handler.channelOpen(ctx, e)
+        }
+        handler.openConnections mustEqual thresholds.highWaterMark
+        idleConnectionHandler.getIdleConnections.size mustEqual 0
+      }
+
+      // Wait a little
+      t += idleTimeout * 3
+      Time.withTimeAt(t) { _ =>
+        idleConnectionHandler.getIdleConnections.size mustEqual 0
+      }
+
+      // Simulate response from server
+      Time.withTimeAt(t) { _ =>
+        contexts foreach { ctx =>
+          idleConnectionHandler.addConnection(ctx.getChannel)
+        }
+        idleConnectionHandler.getIdleConnections.size mustEqual 0
+      }
+
+      // Wait a little
+      t += idleTimeout * 3
+
+      // Detect those connections as idle
+      Time.withTimeAt(t) { _ =>
+        idleConnectionHandler.getIdleConnections.size mustEqual thresholds.highWaterMark
+      }
+    }
+  }
+
+  "ChannelLimitHandler with ExactGenerationalQueue" should {
+    Time.withTimeAt(t0) { _ =>
+      val queue = new ExactGenerationalQueue[Channel]()
+      val idleConnectionHandler = new IdleConnectionHandler(idleTimeout, queue)
+      val handler = new ChannelLimitHandler(thresholds, idleConnectionHandler)
+
+      commonTests(queue, idleConnectionHandler, handler)
+    }
+  }
+
+  "ChannelLimitHandler with BucketGenerationalQueue" should {
+    Time.withTimeAt(t0) { _ =>
+      val queue = new BucketGenerationalQueue[Channel](idleTimeout)
+      val idleConnectionHandler = new IdleConnectionHandler(idleTimeout, queue)
+      val handler = new ChannelLimitHandler(thresholds, idleConnectionHandler)
+
+      commonTests(queue, idleConnectionHandler, handler)
+    }
   }
 }
