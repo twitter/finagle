@@ -580,3 +580,56 @@ case class RubyMemCacheClientBuilder(
     new RubyMemCacheClient(clients)
   }
 }
+
+/**
+ * PHP memcache-client (memcache.so) compatible client.
+ */
+class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher)
+  extends PartitionedClient {
+  protected[memcached] def clientOf(key: String) = {
+    // See mmc_hash() in memcache_standard_hash.c
+    val hash = (keyHasher.hashKey(key.getBytes) >> 16) & 0x7fff
+    val index = hash % clients.size
+    clients(index.toInt)
+  }
+
+  def release() {
+    clients foreach { _.release() }
+  }
+}
+
+/**
+ * Builder for memcache-client (memcache.so) compatible client.
+ */
+case class PHPMemCacheClientBuilder(
+  _nodes: Seq[(String, Int, Int)],
+  _hashName: Option[String],
+  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
+
+  def nodes(nodes: Seq[(String, Int, Int)]): PHPMemCacheClientBuilder =
+    copy(_nodes = nodes)
+
+  def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
+    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+
+  def hashName(hashName: String): PHPMemCacheClientBuilder =
+    copy(_hashName = Some(hashName))
+
+  def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): PHPMemCacheClientBuilder =
+    copy(_clientBuilder = Some(clientBuilder))
+
+  def build(): PartitionedClient = {
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
+    val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
+    val clients = _nodes.map { case (hostname, port, weight) =>
+      val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      for (i <- (1 to weight)) yield client
+    }.flatten.toArray
+    new PHPMemCacheClient(clients, keyHasher)
+  }
+}
+
+object PHPMemCacheClientBuilder {
+  def apply(): PHPMemCacheClientBuilder = PHPMemCacheClientBuilder(Nil, Some("crc32-itu"), None)
+  def get() = apply()
+}
