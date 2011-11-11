@@ -42,6 +42,19 @@ object DecoderSpec extends Specification with Mockito {
           TokensWithData(Seq("VALUE", "bar", "0", "2"), "12")))
       }
 
+      "data with flag" in {
+        val buffer = stringToChannelBuffer("VALUE foo 20 1\r\n1\r\nVALUE bar 10 2\r\n12\r\nEND\r\n")
+        // These are called once for each state transition (i.e., once per \r\n)
+        // by the FramedCodec
+        decoder.decode(null, null, buffer)
+        decoder.decode(null, null, buffer)
+        decoder.decode(null, null, buffer)
+        decoder.decode(null, null, buffer)
+        decoder.decode(null, null, buffer) mustEqual ValueLines(Seq(
+          TokensWithData(Seq("VALUE", "foo", "20", "1"), "1"),
+          TokensWithData(Seq("VALUE", "bar", "10", "2"), "12")))
+      }
+
       "end" in {
         val buffer = "END\r\n"
         decoder.decode(null, null, buffer) mustEqual ValueLines(Seq[TokensWithData]())
