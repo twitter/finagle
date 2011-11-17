@@ -15,7 +15,7 @@ case class OpenConnectionsThresholds(
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
-abstract class GenerationalQueue[A] {
+trait GenerationalQueue[A] {
   def touch(a: A)
   def add(a: A)
   def remove(a: A)
@@ -76,62 +76,43 @@ class BucketGenerationalQueue[A](timeout: Duration) extends GenerationalQueue[A]
   object TimeBucket {
     def empty[A] = new TimeBucket[A](Time.now, timeSlice)
   }
-  class TimeBucket[A](val origin: Time, var timeSize: Duration) extends mutable.HashSet[A] {
+  class TimeBucket[A](val origin: Time, var span: Duration) extends mutable.HashSet[A] {
+
+    // return the age of the potential youngest element of the bucket (may be negative if the
+    // bucket is not yet expired)
+    def age(now: Time = Time.now): Duration = now - (origin + span)
+
     override def toString() = "TimeBucket(origin=%d, size=%d, Set=%s)".format(
-      origin.inMilliseconds, timeSize.inMilliseconds, super.toString()
+      origin.inMilliseconds, span.inMilliseconds, super.toString()
     )
   }
 
   private[this] val timeSlice = timeout / 3
   private[this] var buckets = List(TimeBucket.empty[A])
 
-  private[this] def extendChainIfNeeded() = {
-    val now = Time.now
-    val headBucket = buckets.head
-    if (headBucket.origin + headBucket.timeSize < now) {
+  private[this] def maybeGrowChain() = {
+    if (0 < buckets.head.age()) {
       buckets = TimeBucket.empty[A] :: buckets
       true
-    }
-    else
+    } else
       false
   }
 
-  private[this] def compactChain() = {
+  private[this] def compactChain(): List[TimeBucket[A]] = {
     val now = Time.now
-
-    def accumulate(chain: List[TimeBucket[A]],
-      accumulatedTime: Duration,
-      newChain: List[TimeBucket[A]] = Nil,
-      oldestBucket: TimeBucket[A] = TimeBucket.empty[A]
-    ): List[TimeBucket[A]] = {
-      if (chain.isEmpty)
-        if (oldestBucket.isEmpty)
-          newChain.reverse
-        else
-          (oldestBucket :: newChain).reverse
-      else {
-        val bucket = chain.head
-        val newAccumulatedTime = accumulatedTime + (now - bucket.origin)
-        if (newAccumulatedTime < timeout)
-          accumulate(chain.tail, newAccumulatedTime, bucket :: newChain, oldestBucket)
-        else {
-          val newOldestBucket = oldestBucket
-          newOldestBucket ++= bucket
-          accumulate(chain.tail, newAccumulatedTime, newChain, newOldestBucket)
-        }
-      }
-    }
-
-    accumulate(buckets, 0.millisecond)
+    val (newBuckets, oldBuckets) = buckets.partition(_.age(now) < timeout)
+    val lastBucket = TimeBucket.empty[A]
+    oldBuckets foreach { b => lastBucket ++= b }
+    newBuckets ::: List(lastBucket)
   }
 
   def updateBuckets() {
-    if (extendChainIfNeeded())
+    if (maybeGrowChain())
       buckets = compactChain()
   }
 
   def touch(a: A) = synchronized {
-    buckets.drop(1) foreach { _.remove(a) }
+    buckets drop 1 foreach { _.remove(a) }
     add(a)
   }
 
@@ -147,15 +128,16 @@ class BucketGenerationalQueue[A](timeout: Duration) extends GenerationalQueue[A]
 
   def collect(d: Duration): Option[A] = synchronized {
     val oldestBucket = buckets.last
-    val ageOfNewestElement = oldestBucket.origin + oldestBucket.timeSize
-    if (ageOfNewestElement < Time.now - d)
+    if (d < oldestBucket.age())
       oldestBucket.headOption
     else
       None
   }
 
   def collectAll(d: Duration): Iterable[A] = synchronized {
-    def loop(bucketChain: List[TimeBucket[A]], accumulatedTime: Duration,
+    def loop(
+      bucketChain: List[TimeBucket[A]],
+      accumulatedTime: Duration,
       result: Set[A] = Set.empty[A]
     ): Set[A] = {
       if (bucketChain.isEmpty)
@@ -181,13 +163,13 @@ class BucketGenerationalQueue[A](timeout: Duration) extends GenerationalQueue[A]
  * You also can retrieved from this class an idle connection.
  */
 class IdleConnectionHandler(idleTimeout: Duration, queue: GenerationalQueue[Channel]) {
-  def countIdleConnections: Int = getIdleConnections.size
-  def getIdleTimeout = idleTimeout
-  def getIdleConnections: Iterable[Channel] = queue.collectAll(idleTimeout)
-  def getIdleConnection: Option[Channel] = queue.collect(idleTimeout)
-  def addConnection(c: Channel) = queue.add(c)
-  def markConnectionAsActive(c: Channel) = queue.touch(c)
-  def removeConnection(c: Channel) = queue.remove(c)
+  def size: Int = getMany.size
+  def timeout = idleTimeout
+  def getMany: Iterable[Channel] = queue.collectAll(idleTimeout)
+  def get: Option[Channel] = queue.collect(idleTimeout)
+  def put(c: Channel) = queue.add(c)
+  def activate(c: Channel) = queue.touch(c)
+  def remove(c: Channel) = queue.remove(c)
 }
 
 /**
@@ -206,18 +188,15 @@ class ChannelLimitHandler(
   extends SimpleChannelHandler
 {
   private[this] val connectionCounter = new AtomicInteger(0)
-  private[this] val closedGauge = statsReceiver.addGauge("idle_connections_closed") {
-    idleConnectionHandler.countIdleConnections
-  }
-  private[this] val ratioGauge = statsReceiver.addGauge("idle_active_connections_ratio") {
-    idleConnectionHandler.countIdleConnections.toFloat / connectionCounter.get
+  private[this] val collectedGauge = statsReceiver.addGauge("idle_connections_collected") {
+    idleConnectionHandler.size
   }
   private[this] val refusedConnectionCounter = statsReceiver.counter("connections_refused")
 
   def openConnections = connectionCounter.get()
 
   def closeIdleConnections() =
-    idleConnectionHandler.getIdleConnection match {
+    idleConnectionHandler.get match {
       case Some(conn) =>
         conn.close(); true
       case None =>
@@ -235,10 +214,8 @@ class ChannelLimitHandler(
       // Try to close idle connections, if we don't find any, then we refuse the connection
       if (closeIdleConnections())
         true
-      else {
-        refusedConnectionCounter.incr()
+      else
         false
-      }
     }
 
     if (accept) {
@@ -246,24 +223,25 @@ class ChannelLimitHandler(
       // responds first before tracking idle time
       super.channelOpen(ctx, e)
     } else {
+      refusedConnectionCounter.incr()
       ctx.getChannel.close()
     }
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    idleConnectionHandler.removeConnection(ctx.getChannel)
+    idleConnectionHandler.remove(ctx.getChannel)
     connectionCounter.decrementAndGet()
     super.channelClosed(ctx, e)
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     // Don't track connection until the server respond
-    idleConnectionHandler.removeConnection(ctx.getChannel)
+    idleConnectionHandler.remove(ctx.getChannel)
     super.messageReceived(ctx,e)
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    idleConnectionHandler.markConnectionAsActive(ctx.getChannel)
+    idleConnectionHandler.activate(ctx.getChannel)
     super.writeRequested(ctx,e)
   }
 }

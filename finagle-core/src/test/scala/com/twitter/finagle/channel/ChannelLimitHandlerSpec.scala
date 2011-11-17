@@ -74,12 +74,12 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
     val handler = new IdleConnectionHandler(100.milliseconds, queue)
 
     "Don't find a random idle connection amoung fresh connection" in {
-      handler.getIdleConnection mustEqual None
+      handler.get mustEqual None
       1 to 10 foreach{ _ =>
         val c = mock[Channel]
-        handler.addConnection(c)
+        handler.put(c)
       }
-      handler.getIdleConnection mustEqual None
+      handler.get mustEqual None
     }
 
     "Consider oldest connection as the idlest one" in {
@@ -87,14 +87,14 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
       Time.withTimeFunction(t) { _ =>
         val connections = (1 to 5).map{ _ => mock[Channel] }
         connections.foreach{ connection =>
-          handler.addConnection(connection)
+          handler.put(connection)
           t += 1.millisecond
         }
 
-        handler.getIdleConnection mustEqual None
+        handler.get mustEqual None
 
-        t += handler.getIdleTimeout + 1.millisecond
-        handler.getIdleConnection mustEqual connections.headOption
+        t += handler.timeout + 1.millisecond
+        handler.get mustEqual connections.headOption
       }
     }
   }
@@ -104,86 +104,86 @@ object IdleConnectionHandlerSpec extends Specification with Mockito {
     val handler = new IdleConnectionHandler(100.milliseconds, queue)
 
     "Don't find a random idle connection amoung fresh connection" in {
-      handler.getIdleConnection mustEqual None
+      handler.get mustEqual None
 
       (1 to 10).foreach{ _ =>
         val channel = mock[Channel]
-        handler.addConnection(channel)
+        handler.put(channel)
       }
-      handler.getIdleConnection mustEqual None
+      handler.get mustEqual None
     }
 
     "Find a random idle connection" in {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
-        handler.getIdleConnection mustEqual None
+        handler.get mustEqual None
 
         val channels = (1 to 5).map{ _ =>
           val channel = mock[Channel]
-          handler.addConnection(channel)
+          handler.put(channel)
           channel
         }
-        handler.getIdleConnection mustEqual None
+        handler.get mustEqual None
         channels
 
       // Wait the time channels become idle
-        t += (2 * handler.getIdleTimeout).milliseconds + 1.millisecond
+        t += (2 * handler.timeout).milliseconds + 1.millisecond
 
-        val randomIdleConnection = handler.getIdleConnection
+        val randomIdleConnection = handler.get
         randomIdleConnection mustNotEq None
         channels.contains( randomIdleConnection.get ) mustBe true
 
         // clean-up
-        channels.foreach{ handler.removeConnection(_) }
-        handler.getIdleConnection mustEq None
+        channels.foreach{ handler.remove(_) }
+        handler.get mustEq None
       }
     }
 
     "Find a random idle connection among idle/active connections" in {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
-        handler.getIdleConnection mustEqual None
+        handler.get mustEqual None
 
         val channels = (1 to 3).map{ _ =>
           val channel = mock[Channel]
-          t += handler.getIdleTimeout / 4
-          handler.addConnection(channel)
+          t += handler.timeout / 4
+          handler.put(channel)
           channel
         }
 
-        handler.getIdleConnection mustEqual None
+        handler.get mustEqual None
 
-        t += handler.getIdleTimeout * 2 + 1.millisecond
+        t += handler.timeout * 2 + 1.millisecond
 
-        val someIdleConnection = handler.getIdleConnection
+        val someIdleConnection = handler.get
         someIdleConnection mustNotEq None
         channels.contains( someIdleConnection.get ) mustBe true
 
         // clean-up
-        channels.foreach{ handler.removeConnection(_) }
-        handler.getIdleConnection mustEq None
+        channels.foreach{ handler.remove(_) }
+        handler.get mustEq None
       }
     }
 
     "Generate activity periodically and don't detect this connection as idle" in {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
-        handler.getIdleConnection mustEqual None
+        handler.get mustEqual None
 
         val channel = mock[Channel]
-        handler.markConnectionAsActive(channel)
-        handler.getIdleConnection mustEqual None
+        handler.activate(channel)
+        handler.get mustEqual None
         channel
 
         (1 to 5).foreach{ _ =>
-          t += handler.getIdleTimeout / 2
-          handler.getIdleConnection mustEqual None
-          handler.markConnectionAsActive(channel)
+          t += handler.timeout / 2
+          handler.get mustEqual None
+          handler.activate(channel)
         }
 
         // clean-up
-        handler.removeConnection(channel)
-        handler.getIdleConnection mustEq None
+        handler.remove(channel)
+        handler.get mustEq None
       }
     }
   }
@@ -276,11 +276,11 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
           handler.channelOpen(ctx, e)
           // Simulate response from the service (NB: a connection isn't considered as idle when
           // the server hasn't answer yet the request). So we simulate the server answer by
-          // calling directly 'addConnection'
-          idleConnectionHandler.addConnection(ctx.getChannel)
+          // calling directly 'put'
+          idleConnectionHandler.put(ctx.getChannel)
         }
         handler.openConnections mustEqual thresholds.highWaterMark
-        idleConnectionHandler.countIdleConnections mustEqual 0
+        idleConnectionHandler.size mustEqual 0
 
         // Wait a little
         t += idleTimeout - 1.millisecond
@@ -329,23 +329,23 @@ object ChannelLimitHandlerSpec extends Specification with Mockito {
           handler.channelOpen(ctx, e)
         }
         handler.openConnections mustEqual thresholds.highWaterMark
-        idleConnectionHandler.countIdleConnections mustEqual 0
+        idleConnectionHandler.size mustEqual 0
 
         // Wait a little
         t += idleTimeout * 3
-        idleConnectionHandler.countIdleConnections mustEqual 0
+        idleConnectionHandler.size mustEqual 0
 
         // Simulate response from server
         contexts foreach { ctx =>
-          idleConnectionHandler.addConnection(ctx.getChannel)
+          idleConnectionHandler.put(ctx.getChannel)
         }
-        idleConnectionHandler.countIdleConnections mustEqual 0
+        idleConnectionHandler.size mustEqual 0
 
         // Wait a little
         t += idleTimeout * 3
 
         // Detect those connections as idle
-        idleConnectionHandler.countIdleConnections mustEqual thresholds.highWaterMark
+        idleConnectionHandler.size mustEqual thresholds.highWaterMark
       }
     }
   }

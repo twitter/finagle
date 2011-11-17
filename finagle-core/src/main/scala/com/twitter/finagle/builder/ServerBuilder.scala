@@ -599,10 +599,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           // So if a request take a long time to be processed, we will never detect it as idle
           def filterFactory(c: ClientConnection) = new SimpleFilter[Req, Rep] {
             def apply(request: Req, service: Service[Req, Rep]) = {
-              idleConnectionHandler.removeConnection(c.channel)
+              idleConnectionHandler.remove(c.channel)
               service(request) respond {
-                case Return(_) => idleConnectionHandler.markConnectionAsActive(c.channel)
-                case Throw(_) => idleConnectionHandler.removeConnection(c.channel)
+                case Return(_) => idleConnectionHandler.activate(c.channel)
+                case Throw(_) => idleConnectionHandler.remove(c.channel)
               }
             }
           }
