@@ -1,6 +1,7 @@
 package com.twitter.finagle.service
 
 import java.{util => ju}
+import java.util.{concurrent => juc}
 import scala.collection.JavaConversions._
 import com.twitter.conversions.time._
 import com.twitter.finagle.{RetryFailureException, SimpleFilter, Service, WriteException}
@@ -11,8 +12,22 @@ import com.twitter.finagle.tracing.Trace
 trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
 object RetryPolicy {
+  val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(_: WriteException) => true
+  }
+
   def tries(numTries: Int) = {
-    backoff[Try[Nothing]](Backoff.const(0.second) take (numTries - 1)) {
+    backoff[Try[Nothing]](Backoff.const(0.second) take (numTries - 1))(WriteExceptionsOnly)
+  }
+
+  /**
+   * A constructor usable from Java (`backoffs` from `Backoff.toJava`).
+   */
+  def backoffJava[A](
+    backoffs: juc.Callable[ju.Iterator[Duration]],
+    shouldRetry: PartialFunction[A, Boolean]
+  ): RetryPolicy[Try[Nothing]] = {
+    backoff[Try[Nothing]](backoffs.call().toStream) {
       case Throw(_: WriteException) => true
     }
   }
@@ -129,6 +144,9 @@ object Backoff {
 
   def linear(start: Duration, offset: Duration) =
     Backoff(start) { _ + offset }
+
+  /* Alias because `const' is a reserved word in Java */
+  def constant(start: Duration) = const(start)
 
   def const(start: Duration) =
     Backoff(start)(Function.const(start))
