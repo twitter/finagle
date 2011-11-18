@@ -82,7 +82,7 @@ object ClientSpec extends Specification with Mockito {
     val client1 = mock[Client]
     val client2 = mock[Client]
     val client3 = mock[Client]
-    val phpMemCacheClient = new PHPMemCacheClient(Seq(client1, client2, client3), KeyHasher.FNV1_32)
+    val phpMemCacheClient = new PHPMemCacheClient(Array(client1, client2, client3), KeyHasher.FNV1_32)
 
     "pick the correct node" in {
       phpMemCacheClient.clientOf("apple")    must be_==(client3)
