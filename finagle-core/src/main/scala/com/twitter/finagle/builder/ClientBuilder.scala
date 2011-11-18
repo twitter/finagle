@@ -55,7 +55,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 
-import com.twitter.util.{Future, Duration, Throw, Return, Try}
+import com.twitter.util.{Future, Duration, Throw, Return,  Try, Monitor, NullMonitor}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -64,14 +64,13 @@ import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
+import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.stats.{
-  StatsReceiver, RollupStatsReceiver, NullStatsReceiver, GlobalStatsReceiver
-}
+  StatsReceiver, RollupStatsReceiver,
+  NullStatsReceiver, GlobalStatsReceiver}
 import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy, HeapBalancer}
 import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
-
-import exception._
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -151,7 +150,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _readerIdleTimeout         : Option[Duration]              = None,
   private val _writerIdleTimeout         : Option[Duration]              = None,
   private val _statsReceiver             : Option[StatsReceiver]         = None,
-  private val _exceptionReceiver         : Option[ClientExceptionReceiverBuilder] = None,
+  private val _monitor                   : Option[String => Monitor]     = None,
   private val _name                      : Option[String]                = Some("client"),
   private val _sendBufferSize            : Option[Int]                   = None,
   private val _recvBufferSize            : Option[Int]                   = None,
@@ -177,7 +176,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val connectTimeout            = _connectTimeout
   val timeout                   = _timeout
   val statsReceiver             = _statsReceiver
-  val exceptionReceiver         = _exceptionReceiver
+  val monitor                   = _monitor
   val keepAlive                 = _keepAlive
   val readerIdleTimeout         = _readerIdleTimeout
   val writerIdleTimeout         = _writerIdleTimeout
@@ -209,7 +208,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "readerIdleTimeout"         -> Some(_readerIdleTimeout),
     "writerIdleTimeout"         -> Some(_writerIdleTimeout),
     "statsReceiver"             -> _statsReceiver,
-    "exceptionReceiver"         -> _exceptionReceiver,
+    "monitor"                   -> _monitor,
     "name"                      -> _name,
     "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
     "hostConnectionLimit"       -> _hostConfig.hostConnectionLimit,
@@ -515,8 +514,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tracer(tracer: Tracer): This =
     withConfig(_.copy(_tracerFactory = () => tracer))
 
-  def exceptionReceiver(erFactory: ClientExceptionReceiverBuilder): This =
-    withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
+  def monitor(mFactory: String => Monitor): This =
+    withConfig(_.copy(_monitor = Some(mFactory)))
 
   /**
    * Log very detailed debug information to the given logger.
@@ -668,7 +667,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       )
 
       var factory: ServiceFactory[Req, Rep] = null
-
       val bs = buildBootstrap(codec, host)
       factory = new ChannelServiceFactory[Req, Rep](
         bs, prepareService(codec) _, hostStatsReceiver)
@@ -686,15 +684,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         factory = new FailureAccrualFactory(factory, numFailures, markDeadFor)
       }
 
-      val exceptionFilter = new ExceptionFilter[Req, Rep](
-        config.exceptionReceiver map {
-          _(config.name.get)
-        } getOrElse {
-          NullExceptionReceiver
-        }
-      )
       val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
-      factory = exceptionFilter andThen statsFilter andThen factory
+      val monitorFilter = new MonitorFilter[Req, Rep]({
+        config.monitor map { mf =>
+          mf(config.name.get)
+        } getOrElse NullMonitor
+      })
+
+      factory = monitorFilter andThen statsFilter andThen factory
 
       factory
     }

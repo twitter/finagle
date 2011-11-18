@@ -1,17 +1,21 @@
 package com.twitter.finagle.exception
 
-import com.twitter.finagle.tracing.Trace
-import com.twitter.util.Time
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
-import org.apache.scribe.{LogEntry, ResultCode, scribe}
 import scala.collection.JavaConversions._
+
+import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.scribe.{LogEntry, ResultCode, scribe}
+
+import com.twitter.util.GZIPStringEncoder
+import com.twitter.util.{Time, Monitor}
+
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
-import org.apache.thrift.protocol.TBinaryProtocol
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.GZIPStringEncoder
+
 /**
- * A collection of methods to construct an ExceptionReceiver that logs to a ScribeHandler
+ * A collection of methods to construct a Monitor that logs to a ScribeHandler
  * specifically for the chickadee exception reporting service. These methods are not generic
  * enough for general use.
  */
@@ -76,7 +80,7 @@ sealed case class Reporter(
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = None,
-  private val clientAddress: Option[String] = None) extends ExceptionReceiver {
+  private val clientAddress: Option[String] = None) extends Monitor {
 
   /**
    * Add a modifier to append a client address (i.e. endpoint) to a generated ServiceException.
@@ -117,12 +121,14 @@ sealed case class Reporter(
    * See top level comment for this class for more details on performance
    * implications.
    */
-  def receive(t: Throwable) {
+  def handle(t: Throwable) = {
     client.Log(createEntry(t) :: Nil) onSuccess {
       case ResultCode.OK => statsReceiver.counter("report_exception_ok").incr()
       case ResultCode.TRY_LATER => statsReceiver.counter("report_exception_try_later").incr()
     } onFailure {
       case e => statsReceiver.counter("report_exception_" + e.toString).incr()
     }
+
+    false  // did not actually handle
   }
 }
