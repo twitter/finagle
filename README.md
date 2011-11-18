@@ -391,19 +391,9 @@ A `SimpleFilter` is a kind of `Filter` that does not convert the request and res
 
 ### Codec Objects
 
-A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, Twitter streaming, and generic multiplexeror protocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
+A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, HTTP chunked streaming (ala Twitter Streaming) prptocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
 
 [Top](#Top)
-
-<!--
-<a name="Channel Objects"></a>
-
-### Channel Objects
-
-Finagle makes streaming and pubsub-like RPCs easy. Streams rely on a generalization of `Future` called `Channel`. A `Channel` represents a stream of events that can be listened to. Every `Channel` has a sub-channel that indicates when a responder subscribes or unsubscribes to the channel.
-
-[Top](#Top)
--->
 
 <a name="Servers"></a>
 
@@ -533,11 +523,6 @@ You can also specify these attributes:
 <td><I>None</I></td>
 </tr>
 <tr>
-<td>startTls</td>
-<td>Whether to start transport layer security</td>
-<td><B>false</B></td>
-</tr>
-<tr>
 <td>channelFactory</td>
 <td>Channel service factory object</td>
 <td><I>None</I></td>
@@ -644,7 +629,13 @@ You can specify the following attributes to manage the host connection:
 </tr>
 <tr>
 <td>hostConnectionIdleTime</td>
-<td> </td>
+<td></td>
+<td><I>None</I></td>
+</tr>
+</tr>
+<tr>
+<td>hostConnectionMaxWaiters</td>
+<td>The maximum number of queued requests awaiting a connection</td>
 <td><I>None</I></td>
 </tr>
 <tr>
@@ -706,11 +697,6 @@ You can also specify these attributes:
 <td>The kind of transport layer security</td>
 <td><I>None</I></td>
 </tr>
-<tr>
-<td>startTls</td>
-<td>Whether to start transport layer security</td>
-<td><B>false</B></td>
-</tr>
 </table>
 
 If you are using _stateful protocols_, such as those used for transaction processing or authentication, you should call `buildFactory`, which creates a `ServiceFactory` to support stateful connections.
@@ -728,7 +714,6 @@ Blocking events include but are not limited to
 * network calls
 * system calls
 * database calls
-* any operation that synchronizes resources
 
 Note: You do not need to be concerned with long-running or CPU intensive operations if they do not block. Examples of these operations include image processing operations, public key cryptography, or anything that might take a non-trivial amount of clock time to perform. Only operations that block in Finagle are of concern. Because Finagle and its event loop use a relatively low number of threads, blocked threads can cause performance issues.
 
@@ -750,15 +735,7 @@ In this example, you can use a `FuturePool` object to provide threads for blocki
 
 ### Starting and Stopping Servers
 
-A server automatically starts when you call `build` on the server after assigning the IP address on which it runs. To stop a server, call it's `close` method. The server will immediately stop accepting requests; however, the server will continue to process outstanding requests until all have been handled or until a specific duration has elapsed. You specify the duration when you call `close`. In this way, the server is allowed to drain out outstanding requests but will not run indefinitely. You are responsible for releasing all resources when the server is no longer needed.
-
-[Top](#Top)
-
-<a name="Exception Handling"></a>
-
-### Exception Handling
-
-As soon as an exception occurs, it is executed. If more than one exception handler is defined, the first exception to occur executes its handler. Casting the exception as a `Future` means that the exception will not block; however, Finagle does not allow the thread causing the exception to continue. For an example, see <a href="#Future Exceptions">Future Exceptions</a>.
+A server automatically starts when you call `build` on the server after assigning the IP address on which it runs. To stop a server, call its `close` method. The server will immediately stop accepting requests; however, the server will continue to process outstanding requests until all have been handled or until a specific duration has elapsed. You specify the duration when you call `close`. In this way, the server is allowed to drain out outstanding requests but will not run indefinitely. You are responsible for releasing all resources when the server is no longer needed.
 
 [Top](#Top)
 
@@ -885,6 +862,8 @@ Usually a producer makes a `Promise` and casts it to a `Future` before giving it
       }
       promise
     }
+    
+You are discouraged from creating your own Promises. Instead, where possible, use `Future` combinators to compose actions (discussed next).
 
 [Top](#Top)
 
