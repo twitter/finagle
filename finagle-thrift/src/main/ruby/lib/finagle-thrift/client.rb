@@ -16,10 +16,11 @@ module FinagleThrift
     def send_message(name, args_class, args = {})
       if @upgraded
         header = ::FinagleThrift::TracedRequestHeader.new
-        header.trace_id = ::Trace.id.to_i
-        header.span_id = ::Trace.next_id.to_i
+        header.trace_id = Trace.id.trace_id.to_i
+        header.parent_span_id = Trace.id.parent_id.to_i
+        header.span_id = Trace.id.span_id.to_i
+        header.sampled = Trace.id.sampled?
         header.debug = false
-        header.sampled = ::Trace.sampled?
         header.write(@oprot)
       end
 
