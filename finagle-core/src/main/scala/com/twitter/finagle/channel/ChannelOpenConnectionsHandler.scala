@@ -1,7 +1,5 @@
 package com.twitter.finagle.channel
 
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-
 import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext}
 
 import com.twitter.finagle.health.{HealthEvent, Healthy, Unhealthy, UnhealthyReason}
@@ -14,8 +12,7 @@ import com.twitter.util.Future
  * If the unhealthyThreshold is reached, mark the server as unhealthy until
  * the healthThreshold is reached.
  */
-case class OpenConnectionsHealthThresholds(highWaterMark: Int, lowWaterMark: Int)
-{
+case class OpenConnectionsHealthThresholds(highWaterMark: Int, lowWaterMark: Int) {
   require(highWaterMark > lowWaterMark, "highWaterMark must be > lowWaterMark")
 }
 

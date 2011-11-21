@@ -4,8 +4,7 @@ package com.twitter.finagle.health
  * specifies why a server is unhealthy. currently the only
  * health metric we have is open connections
  */
-object UnhealthyReason extends Enumeration
-{
+object UnhealthyReason extends Enumeration {
   type UnhealthyReason = Value
   val TooManyOpenConnections = Value
 }

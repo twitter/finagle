@@ -366,7 +366,7 @@ public class B {
 
   }
 
-  public static class ServiceToClient extends A.ServiceToClient {
+  public static class ServiceToClient extends A.ServiceToClient implements ServiceIface {
     private com.twitter.finagle.Service<ThriftClientRequest, byte[]> service;
     private TProtocolFactory protocolFactory;
     public ServiceToClient(com.twitter.finagle.Service<ThriftClientRequest, byte[]> service, TProtocolFactory protocolFactory) {
@@ -386,7 +386,7 @@ public class B {
         __args__.setB(b);
         __args__.write(__prot__);
         __prot__.writeMessageEnd();
-
+      
 
         byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
         ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
@@ -417,7 +417,7 @@ public class B {
         __args__.setB(b);
         __args__.write(__prot__);
         __prot__.writeMessageEnd();
-
+      
 
         byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
         ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
@@ -448,7 +448,7 @@ public class B {
         __args__.setSome_string(some_string);
         __args__.write(__prot__);
         __prot__.writeMessageEnd();
-
+      
 
         byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
         ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, false);
@@ -477,7 +477,7 @@ public class B {
         someway_args __args__ = new someway_args();
         __args__.write(__prot__);
         __prot__.writeMessageEnd();
-
+      
 
         byte[] __buffer__ = Arrays.copyOfRange(__memoryTransport__.getArray(), 0, __memoryTransport__.length());
         ThriftClientRequest __request__ = new ThriftClientRequest(__buffer__, true);
@@ -675,7 +675,7 @@ public class B {
               TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
               TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
               TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+          
               oprot.writeMessageBegin(new TMessage("add", TMessageType.EXCEPTION, seqid));
               x.write(oprot);
               oprot.writeMessageEnd();
@@ -688,7 +688,7 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
-
+          
           try {
             iprot.readMessageEnd();
           } catch (Exception e) {
@@ -706,15 +706,15 @@ public class B {
                 add_result result = new add_result();
                 result.success = value;
                 result.setSuccessIsSet(true);
-
+          
                 try {
                   TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
                   TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+                   
                   oprot.writeMessageBegin(new TMessage("add", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
-
+                   
                   return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
                 } catch (Exception e) {
                   return Future.exception(e);
@@ -722,21 +722,16 @@ public class B {
               }
             }).rescue(new Function<Throwable, Future<byte[]>>() {
               public Future<byte[]> apply(Throwable t) {
-                TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
-                TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
                 try {
                   add_result result = new add_result();
                   if (t instanceof AnException) {
                     result.ae = (AnException)t;
                   }
                   else {
-                    TApplicationException x = new TApplicationException(TApplicationException.INTERNAL_ERROR, "Internal error processing add");
-                    oprot.writeMessageBegin(new TMessage("add", TMessageType.EXCEPTION, seqid));
-                    x.write(oprot);
-                    oprot.writeMessageEnd();
-                    oprot.getTransport().flush();
-                    return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
+                    return Future.exception(t);
                   }
+                  TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+                  TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
                   oprot.writeMessageBegin(new TMessage("add", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
@@ -752,7 +747,7 @@ public class B {
           }
         }
       });
-
+      
       functionMap.put("add_one", new Function2<TProtocol, Integer, Future<byte[]>>() {
         public Future<byte[]> apply(final TProtocol iprot, final Integer seqid) {
           add_one_args args = new add_one_args();
@@ -764,7 +759,7 @@ public class B {
               TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
               TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
               TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+          
               oprot.writeMessageBegin(new TMessage("add_one", TMessageType.EXCEPTION, seqid));
               x.write(oprot);
               oprot.writeMessageEnd();
@@ -777,7 +772,7 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
-
+          
           try {
             iprot.readMessageEnd();
           } catch (Exception e) {
@@ -793,15 +788,15 @@ public class B {
             return future.flatMap(new Function<Void, Future<byte[]>>() {
               public Future<byte[]> apply(Void value) {
                 add_one_result result = new add_one_result();
-
+          
                 try {
                   TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
                   TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+                   
                   oprot.writeMessageBegin(new TMessage("add_one", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
-
+                   
                   return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
                 } catch (Exception e) {
                   return Future.exception(e);
@@ -809,21 +804,16 @@ public class B {
               }
             }).rescue(new Function<Throwable, Future<byte[]>>() {
               public Future<byte[]> apply(Throwable t) {
-                TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
-                TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
                 try {
                   add_one_result result = new add_one_result();
                   if (t instanceof AnException) {
                     result.ae = (AnException)t;
                   }
                   else {
-                    TApplicationException x = new TApplicationException(TApplicationException.INTERNAL_ERROR, "Internal error processing add_one");
-                    oprot.writeMessageBegin(new TMessage("add_one", TMessageType.EXCEPTION, seqid));
-                    x.write(oprot);
-                    oprot.writeMessageEnd();
-                    oprot.getTransport().flush();
-                    return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
+                    return Future.exception(t);
                   }
+                  TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
+                  TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
                   oprot.writeMessageBegin(new TMessage("add_one", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
@@ -839,7 +829,7 @@ public class B {
           }
         }
       });
-
+      
       functionMap.put("complex_return", new Function2<TProtocol, Integer, Future<byte[]>>() {
         public Future<byte[]> apply(final TProtocol iprot, final Integer seqid) {
           complex_return_args args = new complex_return_args();
@@ -851,7 +841,7 @@ public class B {
               TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
               TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
               TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+          
               oprot.writeMessageBegin(new TMessage("complex_return", TMessageType.EXCEPTION, seqid));
               x.write(oprot);
               oprot.writeMessageEnd();
@@ -864,7 +854,7 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
-
+          
           try {
             iprot.readMessageEnd();
           } catch (Exception e) {
@@ -882,15 +872,15 @@ public class B {
                 complex_return_result result = new complex_return_result();
                 result.success = value;
                 result.setSuccessIsSet(true);
-
+          
                 try {
                   TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
                   TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+                   
                   oprot.writeMessageBegin(new TMessage("complex_return", TMessageType.REPLY, seqid));
                   result.write(oprot);
                   oprot.writeMessageEnd();
-
+                   
                   return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
                 } catch (Exception e) {
                   return Future.exception(e);
@@ -898,18 +888,7 @@ public class B {
               }
             }).rescue(new Function<Throwable, Future<byte[]>>() {
               public Future<byte[]> apply(Throwable t) {
-                TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
-                TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-                try {
-                  TApplicationException x = new TApplicationException(TApplicationException.INTERNAL_ERROR, "Internal error processing complex_return");
-                  oprot.writeMessageBegin(new TMessage("complex_return", TMessageType.EXCEPTION, seqid));
-                  x.write(oprot);
-                  oprot.writeMessageEnd();
-                  oprot.getTransport().flush();
-                  return Future.value(Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length()));
-                } catch (Exception e) {
-                  return Future.exception(e);
-                }
+                return Future.exception(t);
               }
             });
           } catch (Exception e) {
@@ -917,7 +896,7 @@ public class B {
           }
         }
       });
-
+      
       functionMap.put("someway", new Function2<TProtocol, Integer, Future<byte[]>>() {
         public Future<byte[]> apply(final TProtocol iprot, final Integer seqid) {
           someway_args args = new someway_args();
@@ -929,7 +908,7 @@ public class B {
               TApplicationException x = new TApplicationException(TApplicationException.PROTOCOL_ERROR, e.getMessage());
               TMemoryBuffer memoryBuffer = new TMemoryBuffer(512);
               TProtocol oprot = protocolFactory.getProtocol(memoryBuffer);
-
+          
               oprot.writeMessageBegin(new TMessage("someway", TMessageType.EXCEPTION, seqid));
               x.write(oprot);
               oprot.writeMessageEnd();
@@ -942,7 +921,7 @@ public class B {
           } catch (Exception e) {
             return Future.exception(e);
           }
-
+          
           try {
             iprot.readMessageEnd();
           } catch (Exception e) {
@@ -961,20 +940,20 @@ public class B {
           });
         }
       });
-
+      
     }
-
+    
     public Future<byte[]> apply(byte[] request) {
       TTransport inputTransport = new TMemoryInputTransport(request);
       TProtocol iprot = protocolFactory.getProtocol(inputTransport);
-
+    
       TMessage msg;
       try {
         msg = iprot.readMessageBegin();
       } catch (Exception e) {
         return Future.exception(e);
       }
-
+    
       Function2<TProtocol, Integer, Future<byte[]>> fn = functionMap.get(msg.name);
       if (fn == null) {
         try {
@@ -992,7 +971,7 @@ public class B {
           return Future.exception(e);
         }
       }
-
+    
       return fn.apply(iprot, msg.seqid);
     }
 
@@ -1076,9 +1055,9 @@ public class B {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
-      tmpMap.put(_Fields.B, new FieldMetaData("b", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.B, new FieldMetaData("b", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(add_args.class, metaDataMap);
@@ -1294,7 +1273,7 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {
@@ -1302,7 +1281,7 @@ public class B {
             if (field.type == TType.I32) {
               this.a = iprot.readI32();
               setAIsSet(true);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -1310,7 +1289,7 @@ public class B {
             if (field.type == TType.I32) {
               this.b = iprot.readI32();
               setBIsSet(true);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -1438,9 +1417,9 @@ public class B {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
-      tmpMap.put(_Fields.AE, new FieldMetaData("ae", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.AE, new FieldMetaData("ae", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.STRUCT)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(add_result.class, metaDataMap);
@@ -1657,7 +1636,7 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {
@@ -1665,7 +1644,7 @@ public class B {
             if (field.type == TType.I32) {
               this.success = iprot.readI32();
               setSuccessIsSet(true);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -1673,7 +1652,7 @@ public class B {
             if (field.type == TType.STRUCT) {
               this.ae = new AnException();
               this.ae.read(iprot);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -1808,9 +1787,9 @@ public class B {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.A, new FieldMetaData("a", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
-      tmpMap.put(_Fields.B, new FieldMetaData("b", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.B, new FieldMetaData("b", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(add_one_args.class, metaDataMap);
@@ -2026,7 +2005,7 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {
@@ -2034,7 +2013,7 @@ public class B {
             if (field.type == TType.I32) {
               this.a = iprot.readI32();
               setAIsSet(true);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -2042,7 +2021,7 @@ public class B {
             if (field.type == TType.I32) {
               this.b = iprot.readI32();
               setBIsSet(true);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -2163,7 +2142,7 @@ public class B {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.AE, new FieldMetaData("ae", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.AE, new FieldMetaData("ae", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.STRUCT)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(add_one_result.class, metaDataMap);
@@ -2317,7 +2296,7 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {
@@ -2325,7 +2304,7 @@ public class B {
             if (field.type == TType.STRUCT) {
               this.ae = new AnException();
               this.ae.read(iprot);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -2444,7 +2423,7 @@ public class B {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.SOME_STRING, new FieldMetaData("some_string", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.SOME_STRING, new FieldMetaData("some_string", TFieldRequirementType.DEFAULT, 
           new FieldValueMetaData(TType.STRING)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(complex_return_args.class, metaDataMap);
@@ -2598,14 +2577,14 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {
           case 1: // SOME_STRING
             if (field.type == TType.STRING) {
               this.some_string = iprot.readString();
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -2725,7 +2704,7 @@ public class B {
     public static final Map<_Fields, FieldMetaData> metaDataMap;
     static {
       Map<_Fields, FieldMetaData> tmpMap = new EnumMap<_Fields, FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT,
+      tmpMap.put(_Fields.SUCCESS, new FieldMetaData("success", TFieldRequirementType.DEFAULT, 
           new StructMetaData(TType.STRUCT, SomeStruct.class)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       FieldMetaData.addStructMetaDataMap(complex_return_result.class, metaDataMap);
@@ -2879,7 +2858,7 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {
@@ -2887,7 +2866,7 @@ public class B {
             if (field.type == TType.STRUCT) {
               this.success = new SomeStruct();
               this.success.read(iprot);
-            } else {
+            } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
@@ -3084,7 +3063,7 @@ public class B {
       while (true)
       {
         field = iprot.readFieldBegin();
-        if (field.type == TType.STOP) {
+        if (field.type == TType.STOP) { 
           break;
         }
         switch (field.id) {

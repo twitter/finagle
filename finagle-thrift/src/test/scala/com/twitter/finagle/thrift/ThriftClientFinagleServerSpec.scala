@@ -24,7 +24,7 @@ object ThriftClientFinagleServerSpec extends Specification {
       def complex_return(someString: String) =
         someString match {
           case "throwAnException" =>
-            throw new Exception("")
+            throw new Exception("msg")
           case _ =>
             Future { new SomeStruct(123, someString) }
         }
@@ -61,12 +61,12 @@ object ThriftClientFinagleServerSpec extends Specification {
 
     "treat undeclared exceptions as internal failures" in {
       client.multiply(1, 0/*div by zero*/) must throwA(
-        new TApplicationException("Internal error processing multiply"))
+        new TApplicationException("Internal error processing multiply: / by zero"))
     }
 
-    "treat processor exceptions as transport exceptions" in {
+    "treat synchronous exceptions as transport exceptions" in {
       client.complex_return("throwAnException") must throwA(
-        new TApplicationException("Internal error processing complex_return"))
+        new TApplicationException("Internal error processing complex_return: msg"))
     }
 
     "handle one-way calls" in {

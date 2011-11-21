@@ -7,9 +7,7 @@ package com.twitter.finagle.service
 import com.twitter.util.Future
 import com.twitter.finagle.Service
 
-class ConstantService[Req, Rep](reply: Future[Rep])
-  extends Service[Req, Rep]
-{
+class ConstantService[Req, Rep](reply: Future[Rep]) extends Service[Req, Rep] {
   def apply(request: Req): Future[Rep] = reply
 }
 
