@@ -9,30 +9,25 @@ import org.mockito.{Matchers, ArgumentCaptor}
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel,
   ChannelPipeline, DownstreamMessageEvent,
-  ChannelStateEvent, Channels}
+  ChannelStateEvent, Channels, ExceptionEvent}
 
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Return, NullMonitor}
 import com.twitter.finagle.{ClientConnection, Service}
 import com.twitter.finagle.stats.StatsReceiver
 
 object ServiceToChannelHandlerSpec extends Specification with Mockito {
-  def withLoggingOff[A](f: => A): A = {
-    val rootLogger = Logger.getLogger("")
-    val savedLevel = rootLogger.getLevel
-    rootLogger.setLevel(Level.OFF)
-    try f finally rootLogger.setLevel(savedLevel)
-  }
-
   "ServiceToChannelHandler" should {
     class Foo { def fooMethod() = "hey there" }
 
-    val log = mock[StatsReceiver]
+    val log = mock[Logger]
+    val statsReceiver = mock[StatsReceiver]
     val request = new Foo
     val service = mock[Service[Foo, String]]
     val postponedService = mock[Promise[Service[Foo, String]]]
     val serviceFactory = { (clientConnection: ClientConnection) => service }
-    val handler = new ServiceToChannelHandler(service, postponedService, serviceFactory,
-      log, Logger.getLogger(getClass.getName))
+    val handler = new ServiceToChannelHandler(
+      service, postponedService, serviceFactory,
+      statsReceiver, log, NullMonitor)
     val pipeline = mock[ChannelPipeline]
     val channel = mock[Channel]
     val closeFuture = Channels.future(channel)
@@ -70,26 +65,67 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
 
     "service shutdown" in {
       "when sending an invalid message" in {
-        withLoggingOff {
-          e.getMessage returns mock[Object]   // wrong type
-          handler.messageReceived(ctx, e)
+        e.getMessage returns mock[Object]   // wrong type
+        handler.messageReceived(ctx, e)
 
-          // Unfortunately, we rely on catching the ClassCastError from
-          // the invocation of the service itself :-/
-          //   there was no(service)(Matchers.any[Foo])
-          there was one(service).release()
-          there was one(channel).close()
-        }
+        // Unfortunately, we rely on catching the ClassCastError from
+        // the invocation of the service itself :-/
+        //   there was no(service)(Matchers.any[Foo])
+        there was one(service).release()
+        there was one(channel).close()
+
+        there was one(log).log(
+          Matchers.eq(Level.SEVERE),
+          Matchers.eq("A Service threw an exception"),
+          any[ClassCastException])
       }
 
-      "when the service handler throws" in {
-        withLoggingOff {
-          service(request) returns Future.exception(new Exception("WTF"))
-          handler.messageReceived(ctx, e)
+      "an exception was caught by Netty" in {
+        val exc = new Exception("netty exception")
+        val e = mock[ExceptionEvent]
+        e.getCause returns exc
+        handler.exceptionCaught(mock[ChannelHandlerContext], e)
+        there was one(service).release()
+        there was one(channel).close()
+        org.mockito.Mockito.verifyZeroInteractions(log)
+      }
 
-          there was one(service).release()
-          there was one(channel).close()
+      "when the service handler throws (encoded)" in {
+        val exc = new Exception("WTF")
+        service(request) returns Future.exception(exc)
+        handler.messageReceived(ctx, e)
+
+        there was one(service).release()
+        there was one(channel).close()
+
+        there was one(log).log(Level.SEVERE, "A Service threw an exception", exc)
+      }
+
+      "when the service handler throws (raw)" in {
+        val exc = new RuntimeException("WTF")
+        service(request) throws exc
+        handler.messageReceived(ctx, e) mustNot throwA[Throwable]
+
+        there was one(service).release()
+        there was one(channel).close()
+        there was one(log).log(Level.SEVERE, "A Service threw an exception", exc)
+      }
+
+      "when the service handlers throws (indirect)" in {
+        val exc = new Exception("indirect exception")
+        val res = new Promise[String]
+        val inner = new Promise[String]
+        service(request) answers { _ =>
+          inner ensure { throw exc }
+          res
         }
+        handler.messageReceived(ctx, e)
+        there was one(service)(request)
+        inner() = Return("ok")
+
+        there was one(service).release()
+        there was one(channel).close()
+        there was one(log).log(Level.SEVERE, "A Service threw an exception", exc)
       }
     }
   }

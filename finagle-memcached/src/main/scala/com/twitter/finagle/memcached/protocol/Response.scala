@@ -14,4 +14,8 @@ case class NoOp()                         extends Response
 case class Values(values: Seq[Value]) extends Response
 case class Number(value: Long)         extends Response
 
-case class Value(key: ChannelBuffer, value: ChannelBuffer, casUnique: Option[ChannelBuffer] = None)
+case class Value(
+    key: ChannelBuffer,
+    value: ChannelBuffer,
+    casUnique: Option[ChannelBuffer] = None,
+    flags: Option[ChannelBuffer] = None)

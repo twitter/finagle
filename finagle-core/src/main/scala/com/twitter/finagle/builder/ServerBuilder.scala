@@ -14,7 +14,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Monitor, NullMonitor}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
@@ -29,7 +29,6 @@ import com.twitter.concurrent.AsyncSemaphore
 
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
-import exception._
 import ssl.{Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 
 trait Server {
@@ -91,7 +90,7 @@ case class TimeoutConfig(
 final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _codecFactory:                    Option[CodecFactory[Req, Rep]#Server]    = None,
   private val _statsReceiver:                   Option[StatsReceiver]                    = None,
-  private val _exceptionReceiver:               Option[ServerExceptionReceiverBuilder]   = None,
+  private val _monitor:                         Option[(String, SocketAddress) => Monitor] = None,
   private val _name:                            Option[String]                           = None,
   private val _bufferSize:                      BufferSize                               = BufferSize(),
   private val _keepAlive:                       Option[Boolean]                          = None,
@@ -127,7 +126,7 @@ case class TimeoutConfig(
 )
   val codecFactory                    = _codecFactory
   val statsReceiver                   = _statsReceiver
-  val exceptionReceiver               = _exceptionReceiver
+  val monitor                         = _monitor
   val name                            = _name
   val bufferSize                      = _bufferSize
   val keepAlive                       = _keepAlive
@@ -151,7 +150,7 @@ case class TimeoutConfig(
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
     "statsReceiver"                   -> _statsReceiver,
-    "exceptionReceiver"               -> _exceptionReceiver,
+    "monitor"                         -> _monitor,
     "name"                            -> _name,
     "bufferSize"                      -> _bufferSize,
     "keepAlive"                       -> _keepAlive,
@@ -326,8 +325,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def writeCompletionTimeout(howlong: Duration): This =
     withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(writeCompletionTimeout = Some(howlong))))
 
-  def exceptionReceiver(erFactory: ServerExceptionReceiverBuilder): This =
-    withConfig(_.copy(_exceptionReceiver = Some(erFactory)))
+  def monitor(mFactory: (String, SocketAddress) => Monitor): This =
+    withConfig(_.copy(_monitor = Some(mFactory)))
 
   def tracerFactory(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
@@ -530,21 +529,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         val postponedService = new Promise[Service[Req, Rep]]
 
         // Compose the service stack.
-        var service: Service[Req, Rep] = {
-          new ProxyService(postponedService flatMap { s => codec.prepareService(s) })
-        }
-
-        // Add the exception service at the bottom layer
-        // This is not required, but argubably the best style
-        val exceptionFilter = new ExceptionFilter[Req, Rep] (
-          config.exceptionReceiver map {
-            _(config.name.get, config.bindTo.get)
-          } getOrElse {
-            NullExceptionReceiver
-          }
+        var service: Service[Req, Rep] = new ProxyService(
+          postponedService flatMap { s => codec.prepareService(s) }
         )
-
-        service = exceptionFilter andThen service
 
         statsFilter foreach { sf =>
           service = sf andThen service
@@ -596,9 +583,16 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           )
         }
 
+        val monitor = config.monitor map {
+          _(config.name.get, config.bindTo.get)
+        } getOrElse {
+          NullMonitor
+        }
+
         val channelHandler = new ServiceToChannelHandler(
           service, postponedService, newServiceFactory,
-          scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName))
+          scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName),
+          monitor)
 
         /*
          * Register the channel so we can wait for them for a drain. We close the socket but wait

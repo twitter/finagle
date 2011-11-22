@@ -2,23 +2,22 @@ package com.twitter.finagle.thrift
 
 import collection.JavaConversions._
 
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TStruct}
+import org.apache.thrift.protocol.{TMessage, TMessageType}
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 
 import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Trace, Annotation, TraceId, SpanId}
+import org.apache.thrift.{TApplicationException, TException}
 
 object ThriftServerFramedCodec {
-  def apply() =
-    new ThriftServerFramedCodecFactory()
-
-  def get() = apply()
+  def apply() = new ThriftServerFramedCodecFactory
+  def get()   = apply()
 }
 
 class ThriftServerFramedCodecFactory extends CodecFactory[Array[Byte], Array[Byte]]#Server {
@@ -26,10 +25,7 @@ class ThriftServerFramedCodecFactory extends CodecFactory[Array[Byte], Array[Byt
     new ThriftServerFramedCodec(config)
 }
 
-class ThriftServerFramedCodec(
-  config: ServerCodecConfig
-) extends Codec[Array[Byte], Array[Byte]]
-{
+class ThriftServerFramedCodec(config: ServerCodecConfig ) extends Codec[Array[Byte], Array[Byte]] {
   def pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
@@ -42,12 +38,12 @@ class ThriftServerFramedCodec(
     }
 
   override def prepareService(service: Service[Array[Byte], Array[Byte]]) = Future {
-    val ia = config.boundAddress match {
+    val boundAddress = config.boundAddress match {
       case ia: InetSocketAddress => ia
       case _ => new InetSocketAddress(0)
     }
-    val filter = new ThriftServerTracingFilter(config.serviceName, ia)
-    filter andThen service
+    val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress)
+    trace andThen HandleUncaughtApplicationExceptions andThen service
   }
 }
 
@@ -65,6 +61,31 @@ private[thrift] class ThriftServerChannelBufferEncoder
     }
   }
 }
+
+private[thrift] object HandleUncaughtApplicationExceptions
+  extends SimpleFilter[Array[Byte], Array[Byte]]
+{
+  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) =
+    service(request) handle {
+      case e if !e.isInstanceOf[TException] =>
+        val msg = InputBuffer.readMessageBegin(request)
+        val name = msg.name
+
+        val buffer = new OutputBuffer
+        buffer().writeMessageBegin(
+          new TMessage(name, TMessageType.EXCEPTION, msg.seqid))
+
+        // Note: The wire contents of the exception message differ from Apache's Thrift in that here,
+        // e.getMessage is appended to the error message.
+        val x = new TApplicationException(
+          TApplicationException.INTERNAL_ERROR,
+          "Internal error processing " + name + ": " + e.getMessage)
+
+        x.write(buffer())
+        buffer().writeMessageEnd()
+        buffer.toArray
+    }
+  }
 
 private[thrift] class ThriftServerTracingFilter(
   serviceName: String,

@@ -72,22 +72,14 @@ module FinagleThrift
       ::Thrift::Struct.generate_accessors self
     end
 
-    # TracedRequest defines trace headers. These carry the span data, and
-    # a flag indicating whether the request is to be debugged.
-    class TracedRequestHeader
+    # At connection time, we can let the server know who we are so
+    # they can book keep and optionally reject unknown clients.
+    class ClientId
       include ::Thrift::Struct, ::Thrift::Struct_Union
-      TRACE_ID = 1
-      SPAN_ID = 2
-      PARENT_SPAN_ID = 3
-      DEBUG = 4
-      SAMPLED = 5
+      NAME = 1
 
       FIELDS = {
-        TRACE_ID => {:type => ::Thrift::Types::I64, :name => 'trace_id'},
-        SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'span_id'},
-        PARENT_SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'parent_span_id', :optional => true},
-        DEBUG => {:type => ::Thrift::Types::BOOL, :name => 'debug'},
-        SAMPLED => {:type => ::Thrift::Types::BOOL, :name => 'sampled', :optional => true}
+        NAME => {:type => ::Thrift::Types::STRING, :name => 'name'}
       }
 
       def struct_fields; FIELDS; end
@@ -98,10 +90,38 @@ module FinagleThrift
       ::Thrift::Struct.generate_accessors self
     end
 
-    # The TracedResponse carries a reply header for tracing. These are
+    # RequestHeader defines headers for the request. These carry the span data, and
+    # a flag indicating whether the request is to be debugged.
+    class RequestHeader
+      include ::Thrift::Struct, ::Thrift::Struct_Union
+      TRACE_ID = 1
+      SPAN_ID = 2
+      PARENT_SPAN_ID = 3
+      DEBUG = 4
+      SAMPLED = 5
+      CLIENT_ID = 6
+
+      FIELDS = {
+        TRACE_ID => {:type => ::Thrift::Types::I64, :name => 'trace_id'},
+        SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'span_id'},
+        PARENT_SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'parent_span_id', :optional => true},
+        DEBUG => {:type => ::Thrift::Types::BOOL, :name => 'debug'},
+        SAMPLED => {:type => ::Thrift::Types::BOOL, :name => 'sampled', :optional => true},
+        CLIENT_ID => {:type => ::Thrift::Types::STRUCT, :name => 'client_id', :class => FinagleThrift::ClientId, :optional => true}
+      }
+
+      def struct_fields; FIELDS; end
+
+      def validate
+      end
+
+      ::Thrift::Struct.generate_accessors self
+    end
+
+    # The Response carries a reply header for tracing. These are
     # empty unless the request is being debugged, in which case a
     # transcript is copied.
-    class TracedResponseHeader
+    class ResponseHeader
       include ::Thrift::Struct, ::Thrift::Struct_Union
       SPANS = 1
 
@@ -117,9 +137,9 @@ module FinagleThrift
       ::Thrift::Struct.generate_accessors self
     end
 
-    # These are connection-level trace options negotiated during protocol
-    # upgrade. (Intentionally left blank: for future use).
-    class TraceOptions
+    # These are connection-level options negotiated during protocol
+    # upgrade.
+    class ConnectionOptions
       include ::Thrift::Struct, ::Thrift::Struct_Union
 
       FIELDS = {

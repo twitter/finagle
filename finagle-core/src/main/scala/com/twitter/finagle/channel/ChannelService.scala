@@ -9,7 +9,8 @@ import org.jboss.netty.channel.{
   SimpleChannelUpstreamHandler, ExceptionEvent,
   ChannelStateEvent}
 
-import com.twitter.util.{Future, Promise, Throw, Try, Time, Return}
+import com.twitter.util.{
+  Future, Promise, Throw, Try, Time, Return}
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}

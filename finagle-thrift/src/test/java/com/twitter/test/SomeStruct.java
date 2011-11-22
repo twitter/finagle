@@ -26,13 +26,7 @@ import org.apache.thrift.meta_data.*;
 import org.apache.thrift.transport.*;
 import org.apache.thrift.protocol.*;
 
-import com.twitter.util.Future;
-import com.twitter.util.Function;
-import com.twitter.util.Function2;
-import com.twitter.util.Try;
-import com.twitter.util.Return;
-import com.twitter.util.Throw;
-import com.twitter.finagle.thrift.ThriftClientRequest;
+// No additional import required for struct/union.
 
 public class SomeStruct implements TBase<SomeStruct, SomeStruct._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("SomeStruct");

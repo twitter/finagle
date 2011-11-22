@@ -77,4 +77,26 @@ object ClientSpec extends Specification with Mockito {
       there was one(client3).release()
     }
   }
+
+  "PHPMemCacheClient" should {
+    val client1 = mock[Client]
+    val client2 = mock[Client]
+    val client3 = mock[Client]
+    val phpMemCacheClient = new PHPMemCacheClient(Array(client1, client2, client3), KeyHasher.FNV1_32)
+
+    "pick the correct node" in {
+      phpMemCacheClient.clientOf("apple")    must be_==(client3)
+      phpMemCacheClient.clientOf("banana")   must be_==(client1)
+      phpMemCacheClient.clientOf("cow")      must be_==(client3)
+      phpMemCacheClient.clientOf("dog")      must be_==(client2)
+      phpMemCacheClient.clientOf("elephant") must be_==(client2)
+    }
+    "release" in {
+      phpMemCacheClient.release()
+      there was one(client1).release()
+      there was one(client2).release()
+      there was one(client3).release()
+    }
+  }
+
 }

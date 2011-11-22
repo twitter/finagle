@@ -196,7 +196,7 @@ object Http {
   def get() = new Http()
 }
 
-private[http] object HttpTracing {
+object HttpTracing {
   object Header {
     val TraceId = "X-B3-TraceId"
     val SpanId = "X-B3-SpanId"

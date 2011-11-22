@@ -4,6 +4,8 @@ import com.twitter.util.Duration
 
 trait NoStacktrace extends Exception {
   override def fillInStackTrace = this
+  // specs expects non-empty stacktrace array
+  this.setStackTrace(Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1)))
 }
 
 // Request failures (eg. for request behavior changing brokers.)
