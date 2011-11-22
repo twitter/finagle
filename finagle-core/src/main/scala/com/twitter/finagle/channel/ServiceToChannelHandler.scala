@@ -123,8 +123,8 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   }
 
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
+    val channel = ctx.getChannel
     val clientConnection = new ClientConnection {
-      def channel = ctx.getChannel
       def remoteAddress = channel.getRemoteAddress
       def localAddress = channel.getLocalAddress
       def close() { channel.disconnect() }
