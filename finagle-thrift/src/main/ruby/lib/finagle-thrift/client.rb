@@ -54,7 +54,7 @@ module FinagleThrift
         @upgraded = false
       end
     rescue
-      @oprot.trans.close
+      @upgraded = false
       raise
     end
   end
