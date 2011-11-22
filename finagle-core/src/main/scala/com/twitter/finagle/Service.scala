@@ -58,9 +58,9 @@ trait ClientConnection {
   def close()
 
   /**
-   * Expose the underlying Netty Channel
+   * closeFuture
    */
-  private[finagle] def channel: Channel
+  def closeFuture: Future[Unit]
 }
 
 /**
