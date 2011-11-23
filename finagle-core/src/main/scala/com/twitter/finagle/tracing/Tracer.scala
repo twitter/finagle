@@ -28,7 +28,8 @@ object Annotation {
   case class Rpcname(service: String, rpc: String) extends Annotation
   case class ClientAddr(ia: InetSocketAddress)     extends Annotation
   case class ServerAddr(ia: InetSocketAddress)     extends Annotation
-  case class BinaryAnnotation(key: String, value: ByteBuffer) extends Annotation
+
+  case class BinaryAnnotation(key: String, value: Any) extends Annotation
 }
 
 object Tracer {

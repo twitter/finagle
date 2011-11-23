@@ -177,10 +177,23 @@ private[thrift] class BigBrotherBirdTracer(
           mutate(record.traceId) { span =>
             span.copy(_name = Some(rpc), _serviceName = Some(service))
           }
+        case tracing.Annotation.BinaryAnnotation(key: String, value: Boolean) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(Array[Byte](if (value) 1 else 0)), thrift.AnnotationType.BOOL)
+        case tracing.Annotation.BinaryAnnotation(key: String, value: Array[Byte]) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(value), thrift.AnnotationType.BYTES)
         case tracing.Annotation.BinaryAnnotation(key: String, value: ByteBuffer) =>
-          mutate(record.traceId) { span =>
-            span.copy(bAnnotations = span.bAnnotations + (key -> value))
-          }
+          binaryAnnotation(record, key, value, thrift.AnnotationType.BYTES)
+        case tracing.Annotation.BinaryAnnotation(key: String, value: Short) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.I16)
+        case tracing.Annotation.BinaryAnnotation(key: String, value: Int) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.I32)
+        case tracing.Annotation.BinaryAnnotation(key: String, value: Long) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.I64)
+        case tracing.Annotation.BinaryAnnotation(key: String, value: Double) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.DOUBLE)
+        case tracing.Annotation.BinaryAnnotation(key: String, value: String) =>
+          binaryAnnotation(record, key, ByteBuffer.wrap(value.getBytes), thrift.AnnotationType.STRING)
+        case tracing.Annotation.BinaryAnnotation(key: String, value) => // Throw error?
         case tracing.Annotation.ClientAddr(ia: InetSocketAddress) =>
           setEndpoint(record, ia)
         case tracing.Annotation.ServerAddr(ia: InetSocketAddress) =>
@@ -201,6 +214,18 @@ private[thrift] class BigBrotherBirdTracer(
     }
   }
 
+  protected def binaryAnnotation(
+    record: Record,
+    key: String,
+    value: ByteBuffer,
+    annotationType: thrift.AnnotationType
+  ) = {
+    mutate(record.traceId) { span =>
+      span.copy(bAnnotations = span.bAnnotations ++ Seq(
+        B3BinaryAnnotation(key, value, annotationType, span.endpoint)))
+    }
+  }
+
   /**
    * Add this record as a time based annotation.
    */
@@ -210,7 +235,6 @@ private[thrift] class BigBrotherBirdTracer(
         B3Annotation(record.timestamp, value, span.endpoint)))
     }
   }
-
 }
 
 /**

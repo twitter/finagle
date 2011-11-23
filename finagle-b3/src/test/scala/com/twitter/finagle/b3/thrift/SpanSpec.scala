@@ -11,7 +11,7 @@ class SpanSpec extends Specification with Mockito {
     "serialize properly" in {
       val ann = B3Annotation(Time.now, "value", Endpoint(1,2))
       val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
-      val span = Span(traceId, Some("service"), Some("name"), Seq(ann), Map(), Some(Endpoint(123, 123)))
+      val span = Span(traceId, Some("service"), Some("name"), Seq(ann), Seq(), Some(Endpoint(123, 123)))
 
       val tspan = span.toThrift
       tspan.isSetAnnotations mustEqual true

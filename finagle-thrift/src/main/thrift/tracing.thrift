@@ -30,13 +30,23 @@ struct Annotation {
   3: optional Endpoint host                 // host this happened on
 }
 
+enum AnnotationType { BOOL, BYTES, I16, I32, I64, DOUBLE, STRING }
+
+// tag this span with a key and a value of AnnotationType type.
+struct BinaryAnnotation {
+  1: string key,
+  2: binary value,
+  3: AnnotationType annotation_type,
+  4: optional Endpoint host
+}
+
 struct Span {
   1: i64 trace_id                  // unique trace id, use for all spans in trace
   3: string name,                  // span name, rpc method for example
   4: i64 id,                       // unique span id, only used for this span
   5: optional i64 parent_id,                // parent span id
   6: list<Annotation> annotations, // list of all annotations/events that occured
-  7: map<string, binary> binary_annotations // any binary annotations
+  8: list<BinaryAnnotation> binary_annotations // any binary annotations
 }
 
 
