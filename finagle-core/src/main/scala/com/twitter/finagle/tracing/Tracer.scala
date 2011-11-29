@@ -30,6 +30,12 @@ object Annotation {
   case class ServerAddr(ia: InetSocketAddress)     extends Annotation
 
   case class BinaryAnnotation(key: String, value: Any) extends Annotation
+
+  object BinaryAnnotation {
+    /* Needed to not break backwards compatibility */
+    def apply(key: String, value: ByteBuffer): BinaryAnnotation =
+      new BinaryAnnotation(key, value: Any)
+  }
 }
 
 object Tracer {
