@@ -20,9 +20,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.channel.{
   WriteCompletionTimeoutHandler, ChannelStatsHandler,
-  ChannelRequestStatsHandler, ChannelOpenConnectionsHandler,
-  OpenConnectionsHealthThresholds}
-import com.twitter.finagle.health.{HealthEvent, NullHealthEventCallback}
+  ChannelRequestStatsHandler}
 import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
@@ -92,10 +90,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _tls:                             Option[(String, String, String, String)] = None,
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
-  private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
   private val _hostConnectionMaxIdleTime:       Option[Duration]                         = None,
   private val _hostConnectionMaxLifeTime:       Option[Duration]                         = None,
-  private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]  = None,
   private val _requestTimeout:                  Option[Duration]                         = None,
   private val _readTimeout:                     Option[Duration]                         = None,
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
@@ -121,10 +117,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val tls                             = _tls
   val channelFactory                  = _channelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
-  val healthEventCallback             = _healthEventCallback
   val hostConnectionMaxIdleTime       = _hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime       = _hostConnectionMaxLifeTime
-  val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
   val requestTimeout                  = _requestTimeout
   val readTimeout                     = _readTimeout
   val writeCompletionTimeout          = _writeCompletionTimeout
@@ -144,10 +138,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "tls"                             -> _tls,
     "channelFactory"                  -> Some(_channelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
-    "healthEventCallback"             -> _healthEventCallback,
     "hostConnectionMaxIdleTime"       -> _hostConnectionMaxIdleTime,
     "hostConnectionMaxLifeTime"       -> _hostConnectionMaxLifeTime,
-    "openConnectionsHealthThresholds" -> _openConnectionsHealthThresholds,
     "requestTimeout"                  -> _requestTimeout,
     "readTimeout"                     -> _readTimeout,
     "writeCompletionTimeout"          -> _writeCompletionTimeout,
@@ -287,17 +279,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
 
-  def healthEventCallback(callback: HealthEvent => Unit): This =
-    withConfig(_.copy(_healthEventCallback = callback))
-
   def hostConnectionMaxIdleTime(howlong: Duration): This =
     withConfig(_.copy(_hostConnectionMaxIdleTime = Some(howlong)))
 
   def hostConnectionMaxLifeTime(howlong: Duration): This =
     withConfig(_.copy(_hostConnectionMaxLifeTime = Some(howlong)))
-
-  def openConnectionsHealthThresholds(thresholds: OpenConnectionsHealthThresholds): This =
-    withConfig(_.copy(_openConnectionsHealthThresholds = Some(thresholds)))
 
   def requestTimeout(howlong: Duration): This =
     withConfig(_.copy(_requestTimeout = Some(howlong)))
@@ -409,11 +395,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val channelStatsHandler = scopedStatsReceiver map { new ChannelStatsHandler(_) }
     val channelRequestStatsHandler = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
 
-    // health-measuring handler
-    val channelOpenConnectionsHandler = config.openConnectionsHealthThresholds map {
-      new ChannelOpenConnectionsHandler(_, config.healthEventCallback, scopedOrNullStatsReceiver)
-    }
-
     val tracer = config.tracerFactory()
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
@@ -423,10 +404,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         config.logger foreach { logger =>
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(config.name getOrElse "server")(logger.info))
-        }
-
-        channelOpenConnectionsHandler foreach { handler =>
-          pipeline.addFirst("channelOpenConnectionsHandler", handler)
         }
 
         channelStatsHandler foreach { handler =>
