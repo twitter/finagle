@@ -73,9 +73,10 @@ trait ClientConnection {
   def close()
 
   /**
-   * closeFuture
+   * Expose a Future[Unit] that will be filled when the connection is closed
+   * Useful if you want to trigger action on connection closing
    */
-  def closeFuture: Future[Unit]
+  def onClose: Future[Unit]
 }
 
 /**

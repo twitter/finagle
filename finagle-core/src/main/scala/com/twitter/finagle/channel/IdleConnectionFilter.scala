@@ -1,8 +1,11 @@
 package com.twitter.finagle.channel
 
+import com.twitter.collection.BucketGenerationalQueue
 import com.twitter.finagle.{SimpleFilter, Service, ClientConnection}
+import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{BucketGenerationalQueue, Duration}
+
+import com.twitter.util.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 case class OpenConnectionsThresholds(
@@ -32,26 +35,27 @@ class IdleConnectionFilter[Req, Rep](
   statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends (ClientConnection => Service[Req, Rep]) {
 
+  class ConnectionRefusedException extends Exception("Connection refused by IdleConnectionFilter")
+
   private[this] val queue = new BucketGenerationalQueue[ClientConnection](threshold.idleTimeout)
   private[this] val connectionCounter = new AtomicInteger(0)
-  private[this] val collectedGauge = statsReceiver.addGauge("idle_connections") {
+  private[this] val idle = statsReceiver.scope("idleconn").addGauge("idle") {
     queue.collectAll(threshold.idleTimeout).size
   }
-  private[this] val refusedConnectionCounter = statsReceiver.counter("connections_refused")
+  private[this] val refused = statsReceiver.scope("idleconn").counter("refused")
 
   def openConnections = connectionCounter.get()
 
-  def apply(c: ClientConnection) = {
+  def apply(c: ClientConnection) =
     if (accept(c)) {
-      connectionCounter.incrementAndGet()
-      c.closeFuture ensure { connectionCounter.decrementAndGet() }
+      c.onClose ensure { connectionCounter.decrementAndGet() }
       filterFactory(c) andThen underlying(c)
     } else {
-      refusedConnectionCounter.incr()
+      connectionCounter.decrementAndGet()
+      refused.incr()
       c.close()
-      underlying(c) // TODO: return a dummy Service ?
+      new FailedService(new ConnectionRefusedException)
     }
-  }
 
   // This filter is responsible for adding/removing a connection to/from the idle tracking
   // system during the phase when the server is computing the result.
@@ -60,34 +64,30 @@ class IdleConnectionFilter[Req, Rep](
   private[channel] def filterFactory(c: ClientConnection) = new SimpleFilter[Req, Rep] {
     def apply(request: Req, service: Service[Req, Rep]) = {
       queue.remove(c)
-      service(request) onSuccess { _ =>
+      service(request) ensure {
         queue.touch(c)
       }
     }
   }
 
-  private[channel] def closeIdleConnections() = {
+  private[channel] def closeIdleConnections() =
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) =>
         conn.close(); true
       case None =>
         false
     }
-  }
 
   private[this] def accept(c: ClientConnection): Boolean = {
-    val connectionCount = connectionCounter.get()
-    if (connectionCount < threshold.lowWaterMark)
+    val connectionCount = connectionCounter.incrementAndGet()
+    if (connectionCount <= threshold.lowWaterMark)
       true
-    else if (connectionCount < threshold.highWaterMark) {
+    else if (connectionCount <= threshold.highWaterMark) {
       closeIdleConnections() // whatever the result of this, we accept the connection
       true
     } else {
       // Try to close idle connections, if we don't find any, then we refuse the connection
-      if (closeIdleConnections())
-        true
-      else
-        false
+      closeIdleConnections()
     }
   }
 }

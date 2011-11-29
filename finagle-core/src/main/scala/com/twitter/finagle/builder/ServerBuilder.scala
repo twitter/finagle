@@ -116,14 +116,6 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
    * Nevertheless, we want a friendly public API so we create delegators without
    * underscores.
    */
-
-case class TimeoutConfig(
-  hostConnectionMaxIdleTime: Option[Duration] = None,
-  hostConnectionMaxLifeTime: Option[Duration] = None,
-  requestTimeout: Option[Duration] = None,
-  readTimeout: Option[Duration] = None,
-  writeCompletionTimeout: Option[Duration] = None
-)
   val codecFactory                    = _codecFactory
   val statsReceiver                   = _statsReceiver
   val monitor                         = _monitor
