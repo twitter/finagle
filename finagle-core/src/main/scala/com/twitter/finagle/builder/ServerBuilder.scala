@@ -19,7 +19,6 @@ import com.twitter.conversions.time._
 
 import com.twitter.finagle._
 import channel._
-import com.twitter.finagle.health.{HealthEvent, NullHealthEventCallback}
 import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
@@ -100,9 +99,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _tls:                             Option[(String, String, String, String)] = None,
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
-  private val _healthEventCallback:             HealthEvent => Unit                      = NullHealthEventCallback,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
-  private val _openConnectionsHealthThresholds: Option[OpenConnectionsHealthThresholds]  = None,
   private val _requestTimeout:                  Option[Duration]                         = None,
   private val _readTimeout:                     Option[Duration]                         = None,
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
@@ -128,14 +125,12 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val tls                             = _tls
   val channelFactory                  = _channelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
-  val healthEventCallback             = _healthEventCallback
   val hostConnectionMaxIdleTime       = _timeoutConfig.hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime       = _timeoutConfig.hostConnectionMaxLifeTime
   val requestTimeout                  = _timeoutConfig.requestTimeout
   val readTimeout                     = _timeoutConfig.readTimeout
   val writeCompletionTimeout          = _timeoutConfig.writeCompletionTimeout
   val timeoutConfig                   = _timeoutConfig
-  val openConnectionsHealthThresholds = _openConnectionsHealthThresholds
   val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
 
@@ -152,13 +147,11 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "tls"                             -> _tls,
     "channelFactory"                  -> Some(_channelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
-    "healthEventCallback"             -> _healthEventCallback,
     "hostConnectionMaxIdleTime"       -> _timeoutConfig.hostConnectionMaxIdleTime,
     "hostConnectionMaxLifeTime"       -> _timeoutConfig.hostConnectionMaxLifeTime,
     "requestTimeout"                  -> _timeoutConfig.requestTimeout,
     "readTimeout"                     -> _timeoutConfig.readTimeout,
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
-    "openConnectionsHealthThresholds" -> _openConnectionsHealthThresholds,
     "tracerFactory"                   -> Some(_tracerFactory),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
   )
@@ -296,17 +289,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
 
-  def healthEventCallback(callback: HealthEvent => Unit): This =
-    withConfig(_.copy(_healthEventCallback = callback))
-
   def hostConnectionMaxIdleTime(howlong: Duration): This =
     withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(hostConnectionMaxIdleTime = Some(howlong))))
 
   def hostConnectionMaxLifeTime(howlong: Duration): This =
     withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(hostConnectionMaxLifeTime = Some(howlong))))
-
-  def openConnectionsHealthThresholds(thresholds: OpenConnectionsHealthThresholds): This =
-    withConfig(_.copy(_openConnectionsHealthThresholds = Some(thresholds)))
 
   def requestTimeout(howlong: Duration): This =
     withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(requestTimeout = Some(howlong))))
@@ -421,11 +408,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val channelStatsHandler = scopedStatsReceiver map { new ChannelStatsHandler(_) }
     val channelRequestStatsHandler = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
 
-    // health-measuring handler
-    val channelOpenConnectionsHandler = config.openConnectionsHealthThresholds map {
-      new ChannelOpenConnectionsHandler(_, config.healthEventCallback, scopedOrNullStatsReceiver)
-    }
-
     val tracer = config.tracerFactory()
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
@@ -435,10 +417,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         config.logger foreach { logger =>
           pipeline.addFirst(
             "channelLogger", ChannelSnooper(config.name getOrElse "server")(logger.info))
-        }
-
-        channelOpenConnectionsHandler foreach { handler =>
-          pipeline.addFirst("channelOpenConnectionsHandler", handler)
         }
 
         channelStatsHandler foreach { handler =>
