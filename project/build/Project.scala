@@ -155,7 +155,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val netty = "org.jboss.netty" %  "netty" % "3.2.7.Final"
+    val netty = "org.jboss.netty" %  "netty" % "3.2.5.Final"
 
     projectDependencies(
       "util" ~ "util-core",
@@ -164,7 +164,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     )
 
     // Testing:
-    val mockito = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
+    val mockito = "org.mockito"             % "mockito-all"      % "1.8.5" % "test" withSources()
     val specs   = "org.scala-tools.testing" %% "specs"      % "1.6.8" % "test" withSources()
   }
 
