@@ -54,8 +54,11 @@ class HttpChunker extends BrokerChannelHandler {
 
      res.error { _ =>
        val future = Channels.future(ctx.getChannel)
-       Channels.write(ctx, future,
-amserv         if (res.httpResponse.isChunked) new DefaultHttpChunkTrailer else new SimpleHttpTrailer)
+       val trailer =
+         new DefaultHttpChunkTrailer {
+           override def isLast(): Boolean = res.httpResponse.isChunked
+         }
+       Channels.write(ctx, future, trailer)
        future {
          // Close only after we sucesfully write the trailer.
          // todo: can this be a source of resource leaks?
@@ -83,14 +86,12 @@ amserv         if (res.httpResponse.isChunked) new DefaultHttpChunkTrailer else 
       downstreamEvent {
         case e@WriteValue(res: StreamResponse, ctx) =>
           val httpRes = res.httpResponse
-          if (httpRes.getProtocolVersion == HttpVersion.HTTP_1_0 ||
-            httpRes.getHeader(HttpHeaders.Names.CONTENT_LENGTH) != null) {
-            httpRes.setChunked(false)
-            HttpHeaders.setHeader(httpRes, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
-          } else {
-            httpRes.setChunked(true)
+          val chunked = httpRes.getProtocolVersion == HttpVersion.HTTP_1_1 && httpRes.getHeader(HttpHeaders.Names.CONTENT_LENGTH) == null
+          httpRes.setChunked(chunked)
+          if (chunked)
             HttpHeaders.setHeader(httpRes, HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED)
-          }
+          else
+            HttpHeaders.setHeader(httpRes, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
 
           val writeComplete = Channels.future(ctx.getChannel)
           Channels.write(ctx, writeComplete, httpRes)
