@@ -614,7 +614,7 @@ case class RubyMemCacheClientBuilder(
 /**
  * PHP memcache-client (memcache.so) compatible client.
  */
-class PHPMemCacheClient(clients: Seq[Client], keyHasher: KeyHasher)
+class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher)
   extends PartitionedClient {
   protected[memcached] def clientOf(key: String) = {
     // See mmc_hash() in memcache_standard_hash.c
