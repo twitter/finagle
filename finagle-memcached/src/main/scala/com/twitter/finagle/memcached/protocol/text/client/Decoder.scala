@@ -49,7 +49,7 @@ class Decoder extends AbstractDecoder with StateMachine {
             awaitStatsOrEnd(linesSoFar ++ Seq(Tokens(tokens)))
             needMoreData
           } else {
-            throw new Exception("Invalid protocol state")
+            throw new ServerError("Invalid reply from STATS command")
           }
         }
       case AwaitingData(valuesSoFar, tokens, bytesNeeded) =>
