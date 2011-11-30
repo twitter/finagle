@@ -10,4 +10,4 @@ case class TokensWithData(
     casUnique: Option[ChannelBuffer] = None)
   extends Decoding
 case class ValueLines(lines: Seq[TokensWithData])                          extends Decoding
-
+case class StatLines(lines: Seq[Tokens])                                   extends Decoding

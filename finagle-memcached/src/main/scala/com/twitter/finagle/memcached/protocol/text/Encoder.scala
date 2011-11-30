@@ -65,6 +65,18 @@ class Encoder extends OneToOneEncoder {
         buffer.writeBytes(END)
         buffer.writeBytes(DELIMITER)
         buffer
+      case StatLines(lines) =>
+        val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
+        lines foreach { case Tokens(tokens) =>
+          tokens foreach { token =>
+            buffer.writeBytes(token)
+            buffer.writeBytes(SPACE)
+          }
+          buffer.writeBytes(DELIMITER)
+        }
+        buffer.writeBytes(END)
+        buffer.writeBytes(DELIMITER)
+        buffer
     }
   }
 }

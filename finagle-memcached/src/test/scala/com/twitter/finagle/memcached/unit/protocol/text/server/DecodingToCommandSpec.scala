@@ -7,9 +7,9 @@ import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.protocol.text.TokensWithData
+import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
 import com.twitter.finagle.memcached.protocol.text.server.DecodingToCommand
-import com.twitter.finagle.memcached.protocol.Set
+import com.twitter.finagle.memcached.protocol.{Set, Stats}
 import com.twitter.util.{Duration, Time}
 
 object DecodingToCommandSpec extends Specification with DataTables {
@@ -36,6 +36,23 @@ object DecodingToCommandSpec extends Specification with DataTables {
             set.key.toString(CharsetUtil.UTF_8) mustEqual key
             set.value.toString(CharsetUtil.UTF_8) mustEqual data
             set.expiry.moreOrLessEquals(expectedExpiration, delta) must beTrue
+          }
+        }
+      }
+
+      "STAT" in {
+        Seq(None, Some("slabs"), Some("items")).foreach { arg =>
+          val cmd: Seq[ChannelBuffer] = arg match {
+            case None => Seq("stats")
+            case Some(s) => Seq("stats", s)
+          }
+          val buffer = Tokens(cmd)
+          val command = decodingToCommand.decode(null, null, buffer)
+          command must haveClass[Stats]
+          val stats = command.asInstanceOf[Stats]
+          stats.args.headOption match {
+            case None => arg must beNone
+            case Some(cb) => cb.toString(CharsetUtil.UTF_8) mustEqual arg.get
           }
         }
       }

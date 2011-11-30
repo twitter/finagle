@@ -27,4 +27,5 @@ case class Delete(key: ChannelBuffer)                                           
 case class Incr(key: ChannelBuffer, value: Long)                                       extends ArithmeticCommand(key, value)
 case class Decr(key: ChannelBuffer, value: Long)                                       extends ArithmeticCommand(key, -value)
 
+case class Stats(args: Seq[ChannelBuffer])                                             extends NonStorageCommand
 case class Quit()                                                                      extends Command

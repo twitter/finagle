@@ -67,6 +67,41 @@ object ProxySpec extends Specification {
       foo.get.toString(CharsetUtil.UTF_8) mustEqual "bar"
     }
 
+    "stats is supported" in {
+      externalClient.delete("foo")()
+      externalClient.get("foo")() must beNone
+      externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8)))()
+      Seq(None, Some("items"), Some("slabs")).foreach { arg =>
+        val stats = externalClient.stats(arg)()
+        stats must notBeEmpty
+        stats.foreach { line =>
+          line must startWith("STAT")
+        }
+      }
+    }
+
+    "stats is supported (no value)" in {
+      val stats = externalClient.stats("items")()
+      stats must beEmpty
+    }
+
+    "stats (cachedump) is supported" in {
+      externalClient.delete("foo")()
+      externalClient.get("foo")() must beNone
+      externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8)))()
+      val slabs = externalClient.stats(Some("slabs"))()
+      slabs must notBeEmpty
+      val n = slabs.head.split(" ")(1).split(":")(0).toInt
+      val stats = externalClient.stats(Some("cachedump " + n + " 100"))()
+      stats must notBeEmpty
+      stats.foreach { stat =>
+        stat must startWith("ITEM")
+      }
+      stats.find { stat =>
+        stat.contains("foo")
+      } must beSome
+    }
+
     "quit is supported" in {
       externalClient.get("foo")() // do nothing
       externalClient.quit()()
