@@ -1,3 +1,9 @@
+1.9.8		2011/11/30
+
+	* upgrade to netty 3.2.7.Final
+	* streaming: support HTTP/1.0
+	* native: fix content-length header
+
 1.9.7		2011/11/29
 
 
