@@ -28,9 +28,6 @@ class Decoder extends AbstractDecoder with StateMachine {
     state = AwaitingResponse()
   }
 
-  private[this] def isStats(tokens: Seq[ChannelBuffer]) =
-    (tokens.length > 0 && (tokens.head == STAT || tokens.head == ITEM))
-
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Decoding = {
     state match {
       case AwaitingResponse() =>
@@ -96,6 +93,9 @@ class Decoder extends AbstractDecoder with StateMachine {
 
   private[this] def isEnd(tokens: Seq[ChannelBuffer]) =
     (tokens.length == 1 && tokens.head == END)
+
+  private[this] def isStats(tokens: Seq[ChannelBuffer]) =
+    (tokens.length > 0 && (tokens.head == STAT || tokens.head == ITEM))
 
   private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
     val responseName = tokens.head
