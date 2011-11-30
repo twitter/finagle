@@ -29,7 +29,10 @@ class LocalRateLimitingStore[Req](categorizer: Req => String) extends RateLimiti
 
   def getWindow(request: Req, now: Time, windowSize: Duration): List[Time] = {
     val id = categorize(request)
-    windows.getOrElse(id, Nil) takeWhile { _.until(now) < windowSize }
+    // truncate events to the size of the window
+    val newWindow = windows.getOrElse(id, Nil) takeWhile { _.until(now) < windowSize }
+    windows(id) = newWindow
+    newWindow
   }
 }
 
