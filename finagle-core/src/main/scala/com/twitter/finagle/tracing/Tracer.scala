@@ -28,7 +28,11 @@ object Annotation {
   case class Rpcname(service: String, rpc: String) extends Annotation
   case class ClientAddr(ia: InetSocketAddress)     extends Annotation
   case class ServerAddr(ia: InetSocketAddress)     extends Annotation
-  case class BinaryAnnotation(key: String, value: ByteBuffer) extends Annotation
+
+  case class BinaryAnnotation(key: String, value: Any) extends Annotation {
+    /* Needed to not break backwards compatibility.  Can be removed later */
+    def this(key: String, value: ByteBuffer) = this(key, value: Any)
+  }
 }
 
 object Tracer {

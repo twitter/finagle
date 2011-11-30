@@ -20,74 +20,82 @@ object RetryingFilterSpec extends Specification with Mockito {
       case Throw(_: WriteException) => true
       case _ => false
     }
-    val policy = RetryPolicy.backoff(backoffs)(shouldRetry)
-    val filter = new RetryingFilter[Int, Int](policy, timer, stats)
-    val service = mock[Service[Int, Int]]
-    val retryingService = filter andThen service
 
-    "always try once" in {
-      service(123) returns Future(321)
-      retryingService(123)() must be_==(321)
-      there was one(service)(123)
-      there was one(retriesStat).add(0)
-    }
+    "with RetryPolicy.backoff" in
+      testPolicy(RetryPolicy.backoff(backoffs)(shouldRetry))
+    "with RetryPolicy.javaBackoff" in
+      testPolicy(RetryPolicy.backoffJava(Backoff.toJava(backoffs), shouldRetry))
 
-    "when failed with a WriteException, consult the retry strategy" in Time.withCurrentTimeFrozen { tc =>
-      service(123) returns Future.exception(new WriteException(new Exception))
-      val f = retryingService(123)
-      there was one(service)(123)
-      f.isDefined must beFalse
-      timer.tasks must haveSize(1)
+    def testPolicy(policy: RetryPolicy[Try[Nothing]]) {
+      val filter = new RetryingFilter[Int, Int](policy, timer, stats)
+      val service = mock[Service[Int, Int]]
+      val retryingService = filter andThen service
 
-      service(123) returns Future(321)  // we succeed next time; tick!
-      tc.advance(1.second); timer.tick()
 
-      there were two(service)(123)
-      there was one(retriesStat).add(1)
-      f() must be_==(321)
-    }
-
-    "give up when the retry strategy is exhausted" in Time.withCurrentTimeFrozen { tc =>
-      service(123) returns Future.exception(new WriteException(new Exception("i'm exhausted")))
-      val f = retryingService(123)
-      1 to 3 foreach { i =>
-        f.isDefined must beFalse
-        there were i.times(service)(123)
-        there was no(retriesStat).add(3)
-        tc.advance(i.seconds); timer.tick()
+      "always try once" in {
+        service(123) returns Future(321)
+        retryingService(123)() must be_==(321)
+        there was one(service)(123)
+        there was one(retriesStat).add(0)
       }
 
-      there was one(retriesStat).add(3)
-      f.isDefined must beTrue
-      f.isThrow must beTrue
-      f() must throwA(new WriteException(new Exception("i'm exhausted")))
-    }
+      "when failed with a WriteException, consult the retry strategy" in Time.withCurrentTimeFrozen { tc =>
+        service(123) returns Future.exception(new WriteException(new Exception))
+        val f = retryingService(123)
+        there was one(service)(123)
+        f.isDefined must beFalse
+        timer.tasks must haveSize(1)
 
-    "when failed with a non-WriteException, fail immediately" in {
-      service(123) returns Future.exception(new Exception("WTF!"))
-      retryingService(123)() must throwA(new Exception("WTF!"))
-      there was one(service)(123)
-      timer.tasks must beEmpty
-      there was one(retriesStat).add(0)
-    }
+        service(123) returns Future(321)  // we succeed next time; tick!
+        tc.advance(1.second); timer.tick()
 
-    "when no retry occurs, no stat update" in {
-      service(123) returns Future(321)
-      retryingService(123)() must be_==(321)
-      there was one(retriesStat).add(0)
-    }
+        there were two(service)(123)
+        there was one(retriesStat).add(1)
+        f() must be_==(321)
+      }
 
-    "propagate cancellation" in {
-      val replyPromise = new Promise[Int]
-      service(123) returns replyPromise
+      "give up when the retry strategy is exhausted" in Time.withCurrentTimeFrozen { tc =>
+        service(123) returns Future.exception(new WriteException(new Exception("i'm exhausted")))
+        val f = retryingService(123)
+        1 to 3 foreach { i =>
+          f.isDefined must beFalse
+          there were i.times(service)(123)
+          there was no(retriesStat).add(3)
+          tc.advance(i.seconds); timer.tick()
+        }
 
-      val res = retryingService(123)
-      res.isDefined must beFalse
-      replyPromise.isCancelled must beFalse
+        there was one(retriesStat).add(3)
+        f.isDefined must beTrue
+        f.isThrow must beTrue
+        f() must throwA(new WriteException(new Exception("i'm exhausted")))
+      }
 
-      res.cancel()
-      res.isDefined must beFalse
-      replyPromise.isCancelled must beTrue
+      "when failed with a non-WriteException, fail immediately" in {
+        service(123) returns Future.exception(new Exception("WTF!"))
+        retryingService(123)() must throwA(new Exception("WTF!"))
+        there was one(service)(123)
+        timer.tasks must beEmpty
+        there was one(retriesStat).add(0)
+      }
+
+      "when no retry occurs, no stat update" in {
+        service(123) returns Future(321)
+        retryingService(123)() must be_==(321)
+        there was one(retriesStat).add(0)
+      }
+
+      "propagate cancellation" in {
+        val replyPromise = new Promise[Int]
+        service(123) returns replyPromise
+
+        val res = retryingService(123)
+        res.isDefined must beFalse
+        replyPromise.isCancelled must beFalse
+
+        res.cancel()
+        res.isDefined must beFalse
+        replyPromise.isCancelled must beTrue
+      }
     }
   }
 

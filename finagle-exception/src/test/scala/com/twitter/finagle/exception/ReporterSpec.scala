@@ -23,7 +23,7 @@ object ReporterSpec extends Specification with Mockito {
     val tse = new TestServiceException("service16", "my cool message")
 
     "log entries to a client once upon receive" in {
-      reporter.receive(tse.throwable)
+      reporter.handle(tse.throwable)
       there was one(logger).Log(captor.capture())
     }
 
@@ -48,7 +48,7 @@ object ReporterSpec extends Specification with Mockito {
     val tse = new TestServiceException("service16", "my cool message", clientAddress = Some(InetAddress.getLocalHost.getHostAddress))
 
     "log entries to a client once upon receive" in {
-      reporter.receive(tse.throwable)
+      reporter.handle(tse.throwable)
       there was one(logger).Log(captor.capture())
     }
 
@@ -76,7 +76,7 @@ object ReporterSpec extends Specification with Mockito {
     val tse = new TestServiceException("service16", "my cool message", clientAddress = Some(InetAddress.getLocalHost.getHostAddress), sourceAddress = Some(socket.getAddress.getHostAddress + ":" + socket.getPort))
 
     "log entries to a client once upon receive" in {
-      reporter.receive(tse.throwable)
+      reporter.handle(tse.throwable)
       there was one(logger).Log(captor.capture())
     }
 

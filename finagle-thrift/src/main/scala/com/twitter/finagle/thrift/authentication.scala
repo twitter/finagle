@@ -8,6 +8,17 @@ case class ClientId(name: String) {
     clientId.setName(name)
     clientId
   }
+
+  /**
+   * Executes the given function with this ClientId set as the current
+   * ClientId.  The current ClientId before executing this will be restored
+   * on completion.
+   */
+  def asCurrent[T](f: => T): T = {
+    val old = ClientId.current
+    ClientId.set(Some(this))
+    try f finally { ClientId.set(old) }
+  }
 }
 
 /**

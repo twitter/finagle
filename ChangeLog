@@ -1,3 +1,20 @@
+1.9.7		2011/11/29
+
+
+	* http: Propagate CancelledRequestException rather than
+	continuing
+	* thrift: deprecated LookupContext, using
+	finagle.thrift.ClientId
+	* use monitors where applicable (composable widgets for
+	handling exceptions)
+	* memcache: PHPMemCacheClient
+	* make RetryingFilter usable from Java
+	* thrift: convert uncaught application exceptions into
+	TApplicationExceptions on the wire
+	* NoStacktrace.getStackTrace() returns non-empty stacktrace
+	array
+	* kill off openConnectionsHealthThresholds (unused)
+
 1.9.6		2011/11/08
 
 	* SSL: make native provider bootstrapping code work; refactor

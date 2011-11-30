@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
 import com.twitter.util.Future
@@ -24,7 +24,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         case e => Future.exception(e)
       }
     } rescue {
-      case e =>
+      case e if !e.isInstanceOf[CancelledRequestException] =>
         try {
           log.warning(e, "exception: uri:%s exception:%s".format(request.getUri, e))
           val response = request.response

@@ -1,5 +1,6 @@
 package com.twitter.finagle.b3.thrift
 
+import java.nio.ByteBuffer
 import com.twitter.util.Time
 import com.twitter.finagle.thrift.thrift
 
@@ -12,18 +13,31 @@ case class B3Annotation(
   endpoint:  Endpoint
 ) {
 
-  def toThrift(): thrift.Annotation = {
+  def toThrift: thrift.Annotation = {
     val thriftAnnotation = new thrift.Annotation
     thriftAnnotation.setTimestamp(timestamp.inMicroseconds.toLong)
     thriftAnnotation.setValue(value)
 
-    if (endpoint != Endpoint.Unknown) {
-      val e = new thrift.Endpoint
-      e.setIpv4(endpoint.ipv4)
-      e.setPort(endpoint.port)
-      thriftAnnotation.setHost(e)
-    }
+    endpoint.toThrift foreach { thriftAnnotation.setHost(_) }
+    
     thriftAnnotation
   }
+}
 
+case class B3BinaryAnnotation(
+  key: String,
+  value: ByteBuffer,
+  annotationType: thrift.AnnotationType,
+  endpoint: Endpoint
+) {
+  def toThrift: thrift.BinaryAnnotation = {
+    val thriftAnnotation = new thrift.BinaryAnnotation
+    thriftAnnotation.setKey(key)
+    thriftAnnotation.setValue(value)
+    thriftAnnotation.setAnnotation_type(annotationType)
+
+    endpoint.toThrift foreach { thriftAnnotation.setHost(_) }
+
+    thriftAnnotation
+  }
 }

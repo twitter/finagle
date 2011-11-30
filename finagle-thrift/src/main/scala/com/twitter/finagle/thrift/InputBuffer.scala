@@ -12,6 +12,12 @@ private[thrift] object InputBuffer {
     message.read(buffer())
     buffer.remainder
   }
+
+  def readMessageBegin(bytes: Array[Byte]) = {
+    val buffer = new InputBuffer(bytes)
+    val iprot = buffer()
+    iprot.readMessageBegin()
+  }
 }
 
 private[thrift] class InputBuffer(bytes: Array[Byte]) {

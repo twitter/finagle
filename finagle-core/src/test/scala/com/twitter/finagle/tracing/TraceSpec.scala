@@ -116,7 +116,7 @@ object TraceSpec extends Specification with Mockito {
         Trace.pushTracer(tracer1)
         Trace.pushId(id0)
         val rec1 = Record(id0, Time.now,
-          Annotation.BinaryAnnotation("key", ByteBuffer.wrap("test".getBytes)))
+          Annotation.BinaryAnnotation("key", "test"))
         Trace.recordBinary("key", "test")
         there was one(tracer1).record(rec1)
       }

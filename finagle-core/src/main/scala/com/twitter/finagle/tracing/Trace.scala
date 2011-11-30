@@ -177,11 +177,7 @@ object Trace {
     record(Annotation.ServerAddr(ia))
   }
 
-  def recordBinary(key: String, value: ByteBuffer) {
+  def recordBinary(key: String, value: Any) {
     record(Annotation.BinaryAnnotation(key, value))
-  }
-
-  def recordBinary(key: String, value: String) {
-    record(Annotation.BinaryAnnotation(key, ByteBuffer.wrap(value.getBytes)))
   }
 }
