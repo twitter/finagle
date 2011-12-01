@@ -61,12 +61,12 @@ object ThriftClientFinagleServerSpec extends Specification {
 
     "treat undeclared exceptions as internal failures" in {
       client.multiply(1, 0/*div by zero*/) must throwA(
-        new TApplicationException("Internal error processing multiply: / by zero"))
+        new TApplicationException("Internal error processing multiply: 'java.lang.ArithmeticException: / by zero'"))
     }
 
     "treat synchronous exceptions as transport exceptions" in {
       client.complex_return("throwAnException") must throwA(
-        new TApplicationException("Internal error processing complex_return: msg"))
+        new TApplicationException("Internal error processing complex_return: 'java.lang.Exception: msg'"))
     }
 
     "handle one-way calls" in {
