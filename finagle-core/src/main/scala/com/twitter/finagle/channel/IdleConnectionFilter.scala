@@ -1,12 +1,12 @@
 package com.twitter.finagle.channel
 
 import com.twitter.collection.BucketGenerationalQueue
-import com.twitter.finagle.{SimpleFilter, Service, ClientConnection}
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 import com.twitter.util.Duration
 import java.util.concurrent.atomic.AtomicInteger
+import com.twitter.finagle.{ConnectionRefusedException, SimpleFilter, Service, ClientConnection}
 
 case class OpenConnectionsThresholds(
   lowWaterMark: Int,
@@ -35,27 +35,26 @@ class IdleConnectionFilter[Req, Rep](
   statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends (ClientConnection => Service[Req, Rep]) {
 
-  class ConnectionRefusedException extends Exception("Connection refused by IdleConnectionFilter")
-
   private[this] val queue = new BucketGenerationalQueue[ClientConnection](threshold.idleTimeout)
   private[this] val connectionCounter = new AtomicInteger(0)
-  private[this] val idle = statsReceiver.scope("idleconn").addGauge("idle") {
+  private[this] val idle = statsReceiver.addGauge("idle") {
     queue.collectAll(threshold.idleTimeout).size
   }
-  private[this] val refused = statsReceiver.scope("idleconn").counter("refused")
+  private[this] val refused = statsReceiver.counter("refused")
 
   def openConnections = connectionCounter.get()
 
-  def apply(c: ClientConnection) =
-    if (accept(c)) {
-      c.onClose ensure { connectionCounter.decrementAndGet() }
+  def apply(c: ClientConnection) = {
+    val service = if (accept(c)) {
       filterFactory(c) andThen underlying(c)
     } else {
-      connectionCounter.decrementAndGet()
       refused.incr()
       c.close()
-      new FailedService(new ConnectionRefusedException)
+      new FailedService[Req, Rep](new ConnectionRefusedException)
     }
+    c.onClose ensure { connectionCounter.decrementAndGet() }
+    service
+  }
 
   // This filter is responsible for adding/removing a connection to/from the idle tracking
   // system during the phase when the server is computing the result.

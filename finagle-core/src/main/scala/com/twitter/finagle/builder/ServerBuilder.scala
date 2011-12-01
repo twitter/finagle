@@ -347,10 +347,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
    */
-  def build(serviceFactory: (ClientConnection) => Service[Req, Rep])(
+  def build(inputServiceFactory: (ClientConnection) => Service[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Server = {
+    var serviceFactory = inputServiceFactory
+
     config.statsReceiver foreach { sr =>
       GlobalStatsReceiver.register(sr.scope("finagle"))
     }
@@ -543,12 +545,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         // one here.
         service = (new TracingFilter(tracer)) andThen service
 
-        var newServiceFactory = serviceFactory
         // Connection limiting system
         config.openConnectionsThresholds foreach { threshold =>
-          newServiceFactory = new IdleConnectionFilter(
+          serviceFactory = new IdleConnectionFilter(
             threshold,
-            serviceFactory,
+            inputServiceFactory,
             scopedOrNullStatsReceiver
           )
         }
@@ -560,7 +561,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
 
         val channelHandler = new ServiceToChannelHandler(
-          service, postponedService, newServiceFactory,
+          service, postponedService, serviceFactory,
           scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName),
           monitor)
 

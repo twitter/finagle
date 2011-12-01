@@ -17,6 +17,9 @@ object IdleConnectionFilterSpec extends Specification with Mockito {
       val c = mock[ClientConnection]
       val closeFuture = new Promise[Unit]
       c.onClose returns closeFuture
+      c.close() answers { _ =>
+        closeFuture.setValue(())
+      }
       filter(c)
       (c, closeFuture)
     }
@@ -75,6 +78,9 @@ object IdleConnectionFilterSpec extends Specification with Mockito {
         val c = mock[ClientConnection]
         val closeFuture = new Promise[Unit]
         c.onClose returns closeFuture
+        c.close() answers { _ =>
+          closeFuture.setValue(())
+        }
         spyFilter(c)
 
         there was one(c).close()
