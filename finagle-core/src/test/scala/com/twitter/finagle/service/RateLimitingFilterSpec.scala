@@ -11,8 +11,8 @@ object RateLimitingFilterSpec extends Specification with Mockito {
 
   "RateLimitingFilter" should {
     def categorize(i: Int) = (i%5).toString
-    val store = new LocalRateLimitingStore[Int](categorize)
-    val filter = new RateLimitingFilter[Int, Int](1.second, 5, store)
+    val strategy = new LocalRateLimitingStrategy[Int](categorize, 1.second, 5)
+    val filter = new RateLimitingFilter[Int, Int](strategy)
     val service = mock[Service[Int, Int]]
     service(Matchers.anyInt) returns Future.value(1)
 

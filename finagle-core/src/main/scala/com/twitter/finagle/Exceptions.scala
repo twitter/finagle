@@ -66,6 +66,10 @@ case class WriteException (underlying: Throwable) extends ChannelException(under
 }
 case class SslHandshakeException  (underlying: Throwable)              extends ChannelException(underlying)
 case class SslHostVerificationException(principal: String)             extends ChannelException(null)
+case class RefusedByRateLimiter extends ChannelException(
+  new Exception("Request refused by rate limiter")
+)
+
 
 object ChannelException {
   def apply(cause: Throwable) = {
