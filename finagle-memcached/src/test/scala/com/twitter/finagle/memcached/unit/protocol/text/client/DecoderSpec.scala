@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.unit.protocol.text.client
 import org.specs.Specification
 import com.twitter.finagle.memcached.protocol.text.client.Decoder
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.protocol.text.{TokensWithData, ValueLines, Tokens}
+import com.twitter.finagle.memcached.protocol.text.{TokensWithData, ValueLines, Tokens, StatLines}
 import org.specs.mock.Mockito
 
 object DecoderSpec extends Specification with Mockito {
@@ -59,6 +59,20 @@ object DecoderSpec extends Specification with Mockito {
         val buffer = "END\r\n"
         decoder.decode(null, null, buffer) mustEqual ValueLines(Seq[TokensWithData]())
       }
+
+      "stats" in {
+        val buffer = stringToChannelBuffer("STAT items:1:number 1\r\nSTAT items:1:age 1468\r\nITEM foo [5 b; 1322514067 s]\r\nEND\r\n")
+        decoder.decode(null, null, buffer)
+        decoder.decode(null, null, buffer)
+        decoder.decode(null, null, buffer)
+        val lines = decoder.decode(null, null, buffer)
+        lines mustEqual StatLines(Seq(
+          Tokens(Seq("STAT", "items:1:number", "1")),
+          Tokens(Seq("STAT", "items:1:age", "1468")),
+          Tokens(Seq("ITEM", "foo", "[5", "b;", "1322514067", "s]"))
+          ))
+      }
+
     }
   }
 }

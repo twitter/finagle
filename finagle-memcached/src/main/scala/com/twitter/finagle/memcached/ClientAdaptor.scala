@@ -29,5 +29,7 @@ class ClientAdaptor[T](
   def incr(key: String, delta: Long): Future[Option[Long]]   = self.incr(key, delta)
   def decr(key: String, delta: Long): Future[Option[Long]]   = self.decr(key, delta)
 
+  def stats(args: Option[String]): Future[Seq[String]]       = self.stats(args)
+
   def release(): Unit = self.release()
 }

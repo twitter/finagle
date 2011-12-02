@@ -15,7 +15,8 @@ import com.twitter.hashing._
 import com.twitter.util.{Time, Future, Bijection}
 
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.util.CharsetUtil
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Client {
   /**
@@ -257,6 +258,14 @@ trait BaseClient[T] {
   def quit(): Future[Unit] = Future(release())
 
   /**
+   * Send a stats command with optional arguments to the server
+   * @return a sequence of strings, each of which is a line of output
+   */
+  def stats(args: Option[String]): Future[Seq[String]]
+  def stats(args: String): Future[Seq[String]] = stats(Some(args))
+  def stats(): Future[Seq[String]] = stats(None)
+
+  /**
    * release the underlying service(s)
    */
   def release(): Unit
@@ -292,12 +301,12 @@ trait Client extends BaseClient[ChannelBuffer] {
  */
 protected class ConnectedClient(service: Service[Command, Response]) extends Client {
   private[this] def rawGet(command: RetrievalCommand) = {
-    val keys = immutable.Set(command.keys map { _.toString(CharsetUtil.UTF_8) }: _*)
+    val keys = immutable.Set(command.keys map { _.toString(UTF_8) }: _*)
 
     service(command) map {
       case Values(values) =>
         val tuples = values.map {
-          case value => (value.key.toString(CharsetUtil.UTF_8), value)
+          case value => (value.key.toString(UTF_8), value)
         }
         val hits = tuples.toMap
         val misses = keys -- hits.keySet
@@ -388,6 +397,23 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
+  def stats(args: Option[String]): Future[Seq[String]] = {
+    val statArgs: Seq[ChannelBuffer] = args match {
+      case None => Seq(ChannelBuffers.EMPTY_BUFFER)
+      case Some(args) => args.split(" ").toSeq
+    }
+    service(Stats(statArgs)) map {
+      case InfoLines(lines) => lines.map { line =>
+        val key = line.key
+        val values = line.values
+        key.toString(UTF_8) + " " + values.map { value => value.toString(UTF_8) }.mkString(" ")
+      }
+      case Error(e) => throw e
+      case Values(list) => Nil
+      case _ => throw new IllegalStateException
+    }
+  }
+
   def release() {
     service.release()
   }
@@ -445,6 +471,10 @@ trait PartitionedClient extends Client {
   def delete(key: String)            = clientOf(key).delete(key)
   def incr(key: String, delta: Long) = clientOf(key).incr(key, delta)
   def decr(key: String, delta: Long) = clientOf(key).decr(key, delta)
+
+  def stats(args: Option[String]): Future[Seq[String]] =
+    throw new UnsupportedOperationException("No logical way to perform stats without a key")
+
 }
 
 object PartitionedClient {
