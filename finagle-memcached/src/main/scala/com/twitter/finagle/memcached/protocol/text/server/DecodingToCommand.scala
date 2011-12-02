@@ -25,6 +25,7 @@ object DecodingToCommand {
   private val INCR    = copiedBuffer("incr"   .getBytes)
   private val DECR    = copiedBuffer("decr"   .getBytes)
   private val QUIT    = copiedBuffer("quit"   .getBytes)
+  private val STATS   = copiedBuffer("stats"  .getBytes)
 }
 
 abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
@@ -100,7 +101,9 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
       case INCR    => tupled(Incr)(validateArithmeticCommand(args))
       case DECR    => tupled(Decr)(validateArithmeticCommand(args))
       case QUIT    => Quit()
+      case STATS   => Stats(args)
       case _       => throw new NonexistentCommand(hexDump(commandName))
     }
   }
+
 }

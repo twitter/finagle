@@ -10,6 +10,8 @@ import com.twitter.finagle.memcached.protocol.text._
 
 object Decoder {
   private val END   = "END": ChannelBuffer
+  private val ITEM  = "ITEM": ChannelBuffer
+  private val STAT  = "STAT": ChannelBuffer
   private val VALUE = "VALUE": ChannelBuffer
 }
 
@@ -19,6 +21,7 @@ class Decoder extends AbstractDecoder with StateMachine {
 
   case class AwaitingResponse()                                                  extends State
   case class AwaitingResponseOrEnd(valuesSoFar: Seq[TokensWithData])             extends State
+  case class AwaitingStatsOrEnd(valuesSoFar: Seq[Tokens])                        extends State
   case class AwaitingData(valuesSoFar: Seq[TokensWithData], tokens: Seq[ChannelBuffer], bytesNeeded: Int) extends State
 
   final protected[memcached] def start() {
@@ -31,8 +34,22 @@ class Decoder extends AbstractDecoder with StateMachine {
         decodeLine(buffer, needsData(_)) { tokens =>
           if (isEnd(tokens)) {
             ValueLines(Seq[TokensWithData]())
+          } else if (isStats(tokens)) {
+            awaitStatsOrEnd(Seq(Tokens(tokens)))
+            needMoreData
           } else {
             Tokens(tokens)
+          }
+        }
+      case AwaitingStatsOrEnd(linesSoFar) =>
+        decodeLine(buffer, needsData(_)) { tokens =>
+          if (isEnd(tokens)) {
+            StatLines(linesSoFar)
+          } else if (isStats(tokens)) {
+            awaitStatsOrEnd(linesSoFar ++ Seq(Tokens(tokens)))
+            needMoreData
+          } else {
+            throw new ServerError("Invalid reply from STATS command")
           }
         }
       case AwaitingData(valuesSoFar, tokens, bytesNeeded) =>
@@ -68,10 +85,17 @@ class Decoder extends AbstractDecoder with StateMachine {
     state = AwaitingResponseOrEnd(valuesSoFar)
   }
 
+  private[this] def awaitStatsOrEnd(valuesSoFar: Seq[Tokens]) {
+    state = AwaitingStatsOrEnd(valuesSoFar)
+  }
+
   private[this] val needMoreData = null: Decoding
 
   private[this] def isEnd(tokens: Seq[ChannelBuffer]) =
     (tokens.length == 1 && tokens.head == END)
+
+  private[this] def isStats(tokens: Seq[ChannelBuffer]) =
+    (tokens.length > 0 && (tokens.head == STAT || tokens.head == ITEM))
 
   private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
     val responseName = tokens.head

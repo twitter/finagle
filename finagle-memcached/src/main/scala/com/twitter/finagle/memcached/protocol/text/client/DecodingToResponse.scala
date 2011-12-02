@@ -5,7 +5,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
-import text.{TokensWithData, ValueLines, Tokens}
+import text.{StatLines, TokensWithData, ValueLines, Tokens}
 
 object AbstractDecodingToResponse {
   private[finagle] val STORED        = "STORED":          ChannelBuffer
@@ -24,11 +24,14 @@ abstract class AbstractDecodingToResponse[R <: AnyRef] extends OneToOneDecoder {
       parseResponse(tokens)
     case ValueLines(lines) =>
       parseValues(lines)
+    case StatLines(lines) =>
+      parseStatLines(lines)
     case _ => throw new IllegalArgumentException("Expecting a Decoding")
   }
 
   protected def parseResponse(tokens: Seq[ChannelBuffer]): R
   protected def parseValues(valueLines: Seq[TokensWithData]): R
+  protected def parseStatLines(lines: Seq[Tokens]): R
 }
 
 class DecodingToResponse extends AbstractDecodingToResponse[Response] {
@@ -47,6 +50,14 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
       case Some(SERVER_ERROR) => Error(new ServerError(""))
       case Some(ds)           => Number(ds.toLong)
     }
+  }
+
+  protected def parseStatLines(lines: Seq[Tokens]) = {
+    val l = lines.map { line =>
+      val tokens = line.tokens
+      Info(tokens(0), tokens.drop(1))
+    }
+    InfoLines(l)
   }
 
   protected def parseValues(valueLines: Seq[TokensWithData]) = {

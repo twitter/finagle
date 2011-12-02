@@ -147,5 +147,7 @@ class MockClient(map: mutable.Map[String, ChannelBuffer]) extends Client {
   def decr(key: String, delta: Long): Future[Option[Long]] =
     incr(key, -delta)
 
+  def stats(args: Option[String]): Future[Seq[String]] = Future.value(Nil)
+
   def release() {}
 }

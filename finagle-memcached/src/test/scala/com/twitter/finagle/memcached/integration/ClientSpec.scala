@@ -88,17 +88,26 @@ object ClientSpec extends Specification {
       }
 
       "incr & decr" in {
-        client.set("foo", "")()
+        // As of memcached 1.4.8 (issue 221), empty values are no longer treated as integers
+        client.set("foo", "0")()
         client.incr("foo")()    mustEqual Some(1L)
         client.incr("foo", 2)() mustEqual Some(3L)
         client.decr("foo")()    mustEqual Some(2L)
 
-        client.set("foo", "")()
+        client.set("foo", "0")()
         client.incr("foo")()    mustEqual Some(1L)
         val l = 1L << 50
         client.incr("foo", l)() mustEqual Some(l + 1L)
         client.decr("foo")()    mustEqual Some(l)
         client.decr("foo", l)() mustEqual Some(0L)
+      }
+
+      "stats" in {
+        val stats = client.stats()()
+        stats must notBeEmpty
+        stats.foreach { stat =>
+          stat must startWith("STAT")
+        }
       }
     }
 
