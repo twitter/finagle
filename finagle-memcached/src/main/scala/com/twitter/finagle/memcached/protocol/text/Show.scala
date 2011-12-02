@@ -85,10 +85,7 @@ class CommandToEncoding extends OneToOneEncoder {
       Tokens(Seq(DECR, key, amount.toString))
     case Delete(key) =>
       Tokens(Seq(DELETE, key))
-    case Stats(args) => args.isEmpty match {
-      case true => Tokens(Seq(STATS))
-      case false => Tokens(Seq[ChannelBuffer](STATS) ++ args)
-    }
+    case Stats(args) => Tokens(Seq[ChannelBuffer](STATS) ++ args)
     case Quit() =>
       Tokens(Seq(QUIT))
   }
