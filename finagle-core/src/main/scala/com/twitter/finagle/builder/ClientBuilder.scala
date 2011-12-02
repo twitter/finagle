@@ -542,6 +542,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       override def getPipeline = {
         val pipeline = codec.pipelineFactory.getPipeline
 
+        pipeline.addFirst("channelStatsHandler", new ChannelStatsHandler(statsReceiver))
+
         if (config.readerIdleTimeout.isDefined || config.writerIdleTimeout.isDefined) {
           pipeline.addFirst("idleReactor", new IdleChannelHandler)
           pipeline.addFirst("idleDetector",
