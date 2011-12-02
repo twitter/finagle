@@ -409,7 +409,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
         key.toString(UTF_8) + " " + values.map { value => value.toString(UTF_8) }.mkString(" ")
       }
       case Error(e) => throw e
-      case Values(list) => Seq[String]()
+      case Values(list) => Nil
       case _ => throw new IllegalStateException
     }
   }
