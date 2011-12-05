@@ -39,16 +39,11 @@ class LocalRateLimitingStrategy[Req](
   }
 }
 
-object RateLimitingFilter {
-  type Strategy[Rep] = Rep => Future[Boolean]
-}
-
-
 /**
  * Filter responsible for accepting/refusing request based on the rate limiting strategy.
  */
 class RateLimitingFilter[Req, Rep](
-  strategy: RateLimitingFilter.Strategy[Req],
+  strategy: Req => Future[Boolean],
   statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends SimpleFilter[Req, Rep] {
 
