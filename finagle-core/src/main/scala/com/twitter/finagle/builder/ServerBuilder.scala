@@ -550,7 +550,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           serviceFactory = new IdleConnectionFilter(
             threshold,
             inputServiceFactory,
-            scopedOrNullStatsReceiver
+            scopedOrNullStatsReceiver.scope("idle")
           )
         }
 
