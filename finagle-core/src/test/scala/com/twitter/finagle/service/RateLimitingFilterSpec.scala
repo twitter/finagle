@@ -49,15 +49,5 @@ object RateLimitingFilterSpec extends Specification with Mockito {
         }
       }
     }
-
-    "Execute different categories of requests and keep a window per category" in {
-      var t = Time.now
-      Time.withTimeFunction(t) { _ =>
-        (1 to 5) foreach { _ =>
-          (1 to 5) foreach { i => rateLimitedService(i)() mustBe 1 }
-          t += 100.milliseconds
-        }
-      }
-    }
   }
 }

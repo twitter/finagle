@@ -6,7 +6,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{RefusedByRateLimiter, Service, SimpleFilter}
 
 /**
- * Local implementation of a request store, every request Time are stored in a HashMap
+ * Strategy responsible for tracking requests and computing rate per client.
  */
 class LocalRateLimitingStrategy[Req](
   categorizer: Req => String,
@@ -14,30 +14,28 @@ class LocalRateLimitingStrategy[Req](
   rate: Int
 ) extends (Req => Future[Boolean]) {
 
-  private[this] val windows = mutable.HashMap.empty[String, List[Time]]
-  private[this] val availabilityTime = mutable.HashMap.empty[String, Time]
+  val rates = mutable.HashMap.empty[String, (Int,Time)]
 
   def apply(req: Req) = synchronized {
     val now = Time.now
     val id = categorizer(req)
+    val (remainingRequests, timestamp) = rates.getOrElse(id, (rate, now))
 
-    val nextAvailability = availabilityTime.getOrElse(id, Time.epoch)
-    val accept = if (now < nextAvailability)
-      false
-    else {
-      val window = windows.getOrElse(id, Nil) takeWhile { _.until(now) < windowSize }
-      if (rate <= window.size) {
-        availabilityTime(id) = window.last + windowSize
-        false
-      } else {
-        windows(id) = Time.now :: windows.getOrElse(id, Nil)
+    val accept = if (timestamp.untilNow > windowSize) {
+      rates(id) = (rate, now)
+      true
+    } else {
+      if (remainingRequests > 0) {
+        rates(id) = (remainingRequests - 1, timestamp)
         true
-      }
+      } else
+        false
     }
 
     Future.value(accept)
   }
 }
+
 
 /**
  * Filter responsible for accepting/refusing request based on the rate limiting strategy.
