@@ -64,11 +64,9 @@ case class WriteException (underlying: Throwable) extends ChannelException(under
   override def fillInStackTrace = this
   override def getStackTrace = underlying.getStackTrace
 }
-case class SslHandshakeException  (underlying: Throwable)              extends ChannelException(underlying)
-case class SslHostVerificationException(principal: String)             extends ChannelException(null)
-case class RefusedByRateLimiter extends ChannelException(
-  new Exception("Request refused by rate limiter")
-)
+case class SslHandshakeException  (underlying: Throwable)       extends ChannelException(underlying)
+case class SslHostVerificationException(principal: String)      extends ChannelException(null)
+case class RefusedByRateLimiter()                               extends ChannelException(null)
 
 
 object ChannelException {
