@@ -543,6 +543,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         val pipeline = codec.pipelineFactory.getPipeline
 
         pipeline.addFirst("channelStatsHandler", new ChannelStatsHandler(statsReceiver))
+        pipeline.addFirst("channelRequestStatsHandler",
+          new ChannelRequestStatsHandler(statsReceiver)
+        )
 
         if (config.readerIdleTimeout.isDefined || config.writerIdleTimeout.isDefined) {
           pipeline.addFirst("idleReactor", new IdleChannelHandler)
