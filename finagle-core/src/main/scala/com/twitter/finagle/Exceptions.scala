@@ -66,6 +66,8 @@ case class WriteException (underlying: Throwable) extends ChannelException(under
 }
 case class SslHandshakeException  (underlying: Throwable)              extends ChannelException(underlying)
 case class SslHostVerificationException(principal: String)             extends ChannelException(null)
+case class ConnectionRefusedException()                                extends ChannelException(null)
+
 
 object ChannelException {
   def apply(cause: Throwable) = {
