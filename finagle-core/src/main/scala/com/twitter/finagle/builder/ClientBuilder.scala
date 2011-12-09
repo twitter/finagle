@@ -157,7 +157,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _retryPolicy               : Option[RetryPolicy[Try[Nothing]]]  = None,
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
-  private val _tls                       : Option[(Engine, Option[String])] = None,
+  private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
   private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
@@ -491,13 +491,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * provided against the given hostname.
    */
   def tls(hostname: String): This =
-    withConfig(_.copy(_tls = Some(Ssl.client(), Some(hostname))))
+    withConfig(_.copy(_tls = Some({ () => Ssl.client()}, Some(hostname))))
 
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
   def tlsWithoutValidation(): This =
-    withConfig(_.copy(_tls = Some(Ssl.clientWithoutCertificateValidation(), None)))
+    withConfig(_.copy(_tls = Some({ () => Ssl.clientWithoutCertificateValidation()}, None)))
 
   /**
    * Specifies a tracer that receives trace events.
@@ -557,7 +557,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
               TimeUnit.MILLISECONDS))
         }
 
-        for ((engine, hostname) <- config.tls) {
+        for ((engineFactory, hostname) <- config.tls) {
+          val engine = engineFactory.apply
           engine.self.setUseClientMode(true)
           engine.self.setEnableSessionCreation(true)
           val sslHandler = new SslHandler(engine.self)
