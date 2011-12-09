@@ -558,7 +558,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         }
 
         for ((engineFactory, hostname) <- config.tls) {
-          val engine = engineFactory.apply
+          val engine = engineFactory()
           engine.self.setUseClientMode(true)
           engine.self.setEnableSessionCreation(true)
           val sslHandler = new SslHandler(engine.self)
