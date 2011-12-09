@@ -93,7 +93,7 @@ trait StatsReceiver {
   /**
    * Prepend ``namespace'' to the names of this receiver.
    */
-  def scope(namespace: String) = {
+  def scope(namespace: String): StatsReceiver = {
     val seqPrefix = Seq(namespace)
     new NameTranslatingStatsReceiver(this) {
       protected[this] def translate(name: Seq[String]) = seqPrefix ++ name
@@ -103,7 +103,7 @@ trait StatsReceiver {
   /**
    * Append ``namespace'' to the names of this receiver.
    */
-  def withSuffix(namespace: String) = {
+  def withSuffix(namespace: String): StatsReceiver = {
     val seqSuffix = Seq(namespace)
     new NameTranslatingStatsReceiver(this) {
       protected[this] def translate(name: Seq[String]) = name ++ seqSuffix
