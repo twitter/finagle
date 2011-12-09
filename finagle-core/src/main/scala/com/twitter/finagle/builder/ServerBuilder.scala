@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 
 import java.util.concurrent.Executors
 import java.util.logging.Logger
-import java.net.SocketAddress
+import java.net.{SocketAddress, InetSocketAddress}
 import javax.net.ssl.{SSLContext, SSLEngine}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
@@ -37,6 +37,12 @@ trait Server {
    * ``timeout'', after which channels are forcibly closed.
    */
   def close(timeout: Duration = Duration.MaxValue)
+
+  /**
+   * When a server is bound to an ephemeral port, gets back the address
+   * with concrete listening port picked.
+   */
+  def localAddress: SocketAddress
 }
 
 /**
@@ -104,7 +110,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _readTimeout:                     Option[Duration]                         = None,
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
   private val _tracerFactory:                   Tracer.Factory                           = () => NullTracer,
-  private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None)
+  private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
+  private val _serverBootstrap:                 Option[ServerBootstrap]                  = None)
 {
   import ServerConfig._
 
@@ -133,6 +140,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val timeoutConfig                   = _timeoutConfig
   val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
+  val serverBootstrap                 = _serverBootstrap
 
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
@@ -153,7 +161,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "readTimeout"                     -> _timeoutConfig.readTimeout,
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "tracerFactory"                   -> Some(_tracerFactory),
-    "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
+    "openConnectionsThresholds"       -> Some(_openConnectionsThresholds),
+    "serverBootstrap"                 -> _serverBootstrap
   )
 
   override def toString = {
@@ -310,6 +319,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tracerFactory(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
 
+  /**
+   * Used for testing.
+   */
+  private[builder] def serverBootstrap(bs: ServerBootstrap): This =
+    withConfig(_.copy(_serverBootstrap = Some(bs)))
+
   @deprecated("Use tracerFactory instead")
   def tracer(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
@@ -367,7 +382,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     val cf = config.channelFactory
     cf.acquire()
-    val bs = new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
+
+    val bs = config.serverBootstrap getOrElse new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
 
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
@@ -517,7 +533,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         // TODO: can we share closing handler instances with the
         // channelHandler?
-
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
 
@@ -592,6 +607,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     })
 
     val serverChannel = bs.bind(config.bindTo.get)
+
     Timer.default.acquire()
     new Server {
       def close(timeout: Duration = Duration.MaxValue) = {
@@ -633,6 +649,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         Timer.default.stop()
         tracer.release()
       }
+
+      def localAddress: SocketAddress = serverChannel.getLocalAddress()
 
       override def toString = "Server(%s)".format(config.toString)
     }
