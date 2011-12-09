@@ -23,8 +23,11 @@ class ResponseToEncoding extends OneToOneEncoder {
     case Exists()       => Tokens(Seq(EXISTS))
     case Deleted()      => Tokens(Seq(DELETED))
     case NotFound()     => Tokens(Seq(NOT_FOUND))
-    case NoOp()         => Tokens(Seq())
+    case NoOp()         => Tokens(Nil)
     case Number(value)  => Tokens(Seq(value.toString))
+    case Error(cause)   =>
+      val formatted = ExceptionHandler.format(cause)
+      Tokens(formatted.map { ChannelBuffers.copiedBuffer(_) })
     case InfoLines(lines) =>
       val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
       val statLines = lines map { line =>
@@ -92,21 +95,34 @@ class CommandToEncoding extends OneToOneEncoder {
 }
 
 class ExceptionHandler extends SimpleChannelUpstreamHandler {
-  private[this] val DELIMITER     = "\r\n"
-  private[this] val ERROR         = copiedBuffer("ERROR".getBytes,        DELIMITER.getBytes)
-  private[this] val CLIENT_ERROR  = copiedBuffer("CLIENT_ERROR".getBytes, DELIMITER.getBytes)
-  private[this] val SERVER_ERROR  = copiedBuffer("SERVER_ERROR".getBytes, DELIMITER.getBytes)
-
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) = {
-    e.getCause match {
-      case e: NonexistentCommand =>
-        Channels.write(ctx.getChannel, ERROR)
-      case e: ClientError        =>
-        Channels.write(ctx.getChannel, CLIENT_ERROR)
-      case e: ServerError        =>
-        Channels.write(ctx.getChannel, SERVER_ERROR)
-      case t                     =>
-        throw t
-    }
+    val formatted = ExceptionHandler.formatWithEol(e.getCause)
+    Channels.write(ctx.getChannel, ChannelBuffers.copiedBuffer(formatted:_*))
+  }
+}
+
+object ExceptionHandler {
+  private val DELIMITER     = "\r\n".getBytes
+  private val ERROR         = "ERROR".getBytes
+  private val CLIENT_ERROR  = "CLIENT_ERROR".getBytes
+  private val SERVER_ERROR  = "SERVER_ERROR".getBytes
+  private val SPACE         = " ".getBytes
+  private val Newlines      = "[\\r\\n]".r
+
+  def formatWithEol(e: Throwable) = format(e) match {
+    case head :: Nil => Seq(head, DELIMITER)
+    case head :: tail :: Nil => Seq(head, SPACE, tail, DELIMITER)
+    case _ => throw e
+  }
+
+  def format(e: Throwable) = e match {
+    case e: NonexistentCommand =>
+      Seq(ERROR)
+    case e: ClientError        =>
+      Seq(CLIENT_ERROR, Newlines.replaceAllIn(e.getMessage, " ").getBytes)
+    case e: ServerError        =>
+      Seq(SERVER_ERROR, Newlines.replaceAllIn(e.getMessage, " ").getBytes)
+    case t                     =>
+      throw t
   }
 }
