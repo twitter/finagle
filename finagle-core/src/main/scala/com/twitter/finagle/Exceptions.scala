@@ -68,7 +68,7 @@ case class SslHandshakeException  (underlying: Throwable)       extends ChannelE
 case class SslHostVerificationException(principal: String)      extends ChannelException(null)
 case class RefusedByRateLimiter()                               extends ChannelException(null)
 case class ConnectionRefusedException()                         extends ChannelException(null)
-
+case class FailFastException()                                  extends ChannelException(null)
 
 object ChannelException {
   def apply(cause: Throwable) = {

@@ -159,6 +159,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
+  private val _maxOutstandingConnections: Option[Int]                = None,
   private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
 {
@@ -195,6 +196,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val channelFactory            = _channelFactory
   val tls                       = _tls
   val failureAccrualParams      = _failureAccrualParams
+  val maxOutstandingConnections = _maxOutstandingConnections
   val tracerFactory             = _tracerFactory
 
   def toMap = Map(
@@ -223,6 +225,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
     "failureAccrualParams"      -> _failureAccrualParams,
+    "maxOutstandingConnections" -> _maxOutstandingConnections,
     "tracerFactory"             -> Some(_tracerFactory)
   )
 
@@ -531,6 +534,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def failureAccrualParams(params: (Int, Duration)): This =
     withConfig(_.copy(_failureAccrualParams = Some(params)))
 
+  /**
+   * Toggle transmission policy to "Fast-Fail", then if an host become unavailable we will fail
+   * fast for every next request (no timeout), but each we try to reconnect with at most
+   * `maxOutstandingConnections` outstanding connections.
+   */
+  def maxOutstandingConnections(n: Int): This =
+    withConfig(_.copy(_maxOutstandingConnections = Some(n)))
+
+
   /* BUILDING */
   /* ======== */
 
@@ -688,6 +700,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
       config.failureAccrualParams foreach { case (numFailures, markDeadFor) =>
         factory = new FailureAccrualFactory(factory, numFailures, markDeadFor)
+      }
+
+      config.maxOutstandingConnections foreach { n =>
+        factory = new FailFastFactory(factory, n)
       }
 
       val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
