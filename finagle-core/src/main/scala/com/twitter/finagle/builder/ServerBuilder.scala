@@ -5,8 +5,7 @@ import scala.collection.JavaConversions._
 
 import java.util.concurrent.Executors
 import java.util.logging.Logger
-import java.net.{SocketAddress, InetSocketAddress}
-import javax.net.ssl.{SSLContext, SSLEngine}
+import java.net.SocketAddress
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
@@ -14,7 +13,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 
-import com.twitter.util.{Duration, Monitor, NullMonitor}
+import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
@@ -23,8 +22,7 @@ import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
-import com.twitter.util.{Future, Promise, Try, Return, Throw}
-import com.twitter.concurrent.AsyncSemaphore
+import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise}
 
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
@@ -67,8 +65,11 @@ object ServerBuilder {
     new ReferenceCountedChannelFactory(
       new LazyRevivableChannelFactory(() =>
         new NioServerSocketChannelFactory(
-          Executors.newCachedThreadPool(),
-          Executors.newCachedThreadPool())))
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerBoss")),
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerIO"))
+        )
+      )
+    )
 }
 
 object ServerConfig {

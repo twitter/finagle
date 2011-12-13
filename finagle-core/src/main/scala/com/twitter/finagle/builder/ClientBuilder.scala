@@ -55,7 +55,8 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 
-import com.twitter.util.{Future, Duration, Throw, Return,  Try, Monitor, NullMonitor}
+import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor}
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -106,8 +107,11 @@ object ClientBuilder {
     new ReferenceCountedChannelFactory(
       new LazyRevivableChannelFactory(() =>
         new NioClientSocketChannelFactory(
-          Executors.newCachedThreadPool(),
-          Executors.newCachedThreadPool())))
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientBoss")),
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientIO"))
+        )
+      )
+    )
 }
 
 object ClientConfig {
