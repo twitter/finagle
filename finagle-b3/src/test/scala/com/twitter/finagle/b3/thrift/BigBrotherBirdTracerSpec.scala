@@ -4,7 +4,7 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import java.util.ArrayList
 
-import org.apache.scribe.{ResultCode, LogEntry, scribe}
+import com.twitter.finagle.b3.thrift.{ResultCode, LogEntry, scribe}
 import com.twitter.util._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.Timer

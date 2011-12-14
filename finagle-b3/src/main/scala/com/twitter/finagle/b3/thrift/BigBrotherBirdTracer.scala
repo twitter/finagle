@@ -1,7 +1,7 @@
 package com.twitter.finagle.b3.thrift
 
 import org.apache.thrift.protocol.TBinaryProtocol
-import org.apache.scribe.{ResultCode, LogEntry, scribe}
+import com.twitter.finagle.b3.thrift.{ResultCode, LogEntry, scribe}
 import org.apache.thrift.transport.TIOStreamTransport
 
 import java.net.InetSocketAddress
