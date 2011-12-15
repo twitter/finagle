@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import java.net.SocketAddress
+
 import com.twitter.util.Duration
 
 trait NoStacktrace extends Exception {
@@ -50,36 +52,73 @@ class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException            (underlying: Throwable) extends Exception(underlying)
-class ConnectionFailedException   (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace
-class ChannelClosedException      (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
+class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress) extends Exception(underlying) {
+  def this(underlying: Throwable) = this(underlying, null)
+  def this() = this(null, null)
+  override def getMessage =
+    (underlying, remoteAddress) match {
+      case (_, null) => super.getMessage
+      case (null, _) => "ChannelException at remote address: %s".format(remoteAddress.toString)
+      case (_, _) => "%s at remote address: %s".format(underlying.getMessage, remoteAddress.toString)
+    }
+}
+
+class ConnectionFailedException(underlying: Throwable, remoteAddress: SocketAddress)
+  extends ChannelException(underlying, remoteAddress) with NoStacktrace {
+  def this() = this(null, null)
+}
+
+class ChannelClosedException(underlying: Throwable, remoteAddress: SocketAddress)
+  extends ChannelException(underlying, remoteAddress) with NoStacktrace {
+  def this(remoteAddress: SocketAddress) = this(null, remoteAddress)
+  def this() = this(null, null)
+}
+
+class WriteTimedOutException(remoteAddress: SocketAddress) extends ChannelException(null, remoteAddress) {
   def this() = this(null)
 }
-class SpuriousMessageException    (underlying: Throwable) extends ChannelException(underlying)
-class IllegalMessageException     (underlying: Throwable) extends ChannelException(underlying)
-class WriteTimedOutException extends ChannelException(null)
-class InconsistentStateException extends ChannelException(null)
-case class UnknownChannelException(underlying: Throwable) extends ChannelException(underlying)
-case class WriteException (underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
+class InconsistentStateException(remoteAddress: SocketAddress) extends ChannelException(null, remoteAddress) {
+  def this() = this(null)
+}
+
+case class UnknownChannelException(underlying: Throwable, override val remoteAddress: SocketAddress)
+  extends ChannelException(underlying, remoteAddress) {
+  def this() = this(null, null)
+}
+
+case class WriteException(underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
+  def this() = this(null)
   override def fillInStackTrace = this
   override def getStackTrace = underlying.getStackTrace
 }
-case class SslHandshakeException  (underlying: Throwable)       extends ChannelException(underlying)
-case class SslHostVerificationException(principal: String)      extends ChannelException(null)
-case class RefusedByRateLimiter()                               extends ChannelException(null)
-case class ConnectionRefusedException()                         extends ChannelException(null)
-case class FailFastException()                                  extends ChannelException(null)
+
+case class SslHandshakeException(underlying: Throwable, override val remoteAddress: SocketAddress)
+  extends ChannelException(underlying, remoteAddress) {
+  def this() = this(null, null)
+}
+
+case class SslHostVerificationException(principal: String) extends ChannelException {
+  def this() = this(null)
+}
+
+case class ConnectionRefusedException(override val remoteAddress: SocketAddress)
+  extends ChannelException(null, remoteAddress) {
+  def this() = this(null)
+}
+
+case class RefusedByRateLimiter()          extends ChannelException
+case class FailFastException()             extends ChannelException
 
 object ChannelException {
-  def apply(cause: Throwable) = {
+  def apply(cause: Throwable, remoteAddress: SocketAddress) = {
     cause match {
       case exc: ChannelException => exc
-      case _: java.net.ConnectException                    => new ConnectionFailedException(cause)
-      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException(cause)
-      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause)
+      case _: java.net.ConnectException                    => new ConnectionFailedException(cause, remoteAddress)
+      case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException(cause, remoteAddress)
+      case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException
-        if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause)
-      case e                                               => new UnknownChannelException(cause)
+        if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause, remoteAddress)
+      case e                                               => new UnknownChannelException(cause, remoteAddress)
     }
   }
 }

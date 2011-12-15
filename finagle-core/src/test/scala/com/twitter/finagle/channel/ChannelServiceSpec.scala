@@ -21,9 +21,11 @@ object ChannelServiceSpec extends Specification with Mockito {
     val sink = mock[ChannelSink]
     val closeFuture = Channels.future(channel)
     val factory = mock[ChannelServiceFactory[String, String]]
+    val address = mock[SocketAddress]
     channel.getPipeline returns pipeline
     channel.isOpen returns true
     channel.getCloseFuture returns closeFuture
+    channel.getRemoteAddress returns address
     pipeline.attach(channel, sink)
 
     "installs channel handler" in {
@@ -116,7 +118,7 @@ object ChannelServiceSpec extends Specification with Mockito {
         exceptionEvent.getCause returns new Exception("weird")
         handler.handleUpstream(context, exceptionEvent)
         future.isDefined must beTrue
-        future() must throwA(new UnknownChannelException(new Exception("weird")))
+        future() must throwA(new UnknownChannelException(new Exception("weird"), address))
         service.isAvailable must beFalse
 
         // The channel was also closed.

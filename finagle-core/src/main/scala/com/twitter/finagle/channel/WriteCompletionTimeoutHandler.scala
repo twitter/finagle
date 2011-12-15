@@ -20,8 +20,9 @@ private[finagle] class WriteCompletionTimeoutHandler(timer: Timer, timeout: Dura
 {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val task = timer.schedule(Time.now + timeout) {
+      val channel = ctx.getChannel
       Channels.fireExceptionCaught(
-        ctx.getChannel, new WriteTimedOutException)
+        channel, new WriteTimedOutException(if (channel != null) channel.getRemoteAddress else null))
     }
     e.getFuture onSuccessOrFailure { task.cancel() }
     super.writeRequested(ctx, e)

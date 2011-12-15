@@ -1,5 +1,6 @@
 package com.twitter.finagle.ssl
 
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import sun.security.util.HostnameChecker
 import java.security.cert.X509Certificate
@@ -36,11 +37,16 @@ class SslConnectHandler(
     Channels.close(c)
   }
 
+  private[this] def fail(c: Channel, exGen: (SocketAddress) => Throwable) {
+    val t = exGen(if (c != null) c.getRemoteAddress else null)
+    fail(c, t)
+  }
+
   override def connectRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     e match {
       case de: DownstreamChannelStateEvent =>
         if (!connectFuture.compareAndSet(null, e.getFuture)) {
-          fail(ctx.getChannel, new InconsistentStateException)
+          fail(ctx.getChannel, new InconsistentStateException(_))
           return
         }
 
@@ -55,20 +61,20 @@ class SslConnectHandler(
         super.connectRequested(ctx, wrappedEvent)
 
       case _ =>
-        fail(ctx.getChannel, new InconsistentStateException)
+        fail(ctx.getChannel, new InconsistentStateException(_))
     }
   }
 
   // we delay propagating connection upstream until we've completed the handshake.
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     if (connectFuture.get eq null) {
-      fail(ctx.getChannel, new InconsistentStateException)
+      fail(ctx.getChannel, new InconsistentStateException(_))
       return
     }
 
     // proxy cancellations again.
     connectFuture.get.onCancellation {
-      fail(ctx.getChannel, new ChannelClosedException)
+      fail(ctx.getChannel, new ChannelClosedException(_))
     }
 
     sslHandler.handshake() {
@@ -82,10 +88,10 @@ class SslConnectHandler(
         }
 
       case Error(t) =>
-        fail(ctx.getChannel, new SslHandshakeException(t))
+        fail(ctx.getChannel, new SslHandshakeException(t, _))
 
       case Cancelled =>
-        fail(ctx.getChannel, new InconsistentStateException)
+        fail(ctx.getChannel, new InconsistentStateException(_))
     }
   }
 }
