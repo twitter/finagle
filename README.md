@@ -1,6 +1,6 @@
 <a name="Top"></a>
 
-# Finagle Developer Guide (October 21, 2011 Draft)
+# Finagle Developer Guide (December 15, 2011 Draft)
 
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
@@ -1000,6 +1000,8 @@ The following example extends the `SimpleFilter`class to set the HTTP response c
       }
     }
 
+For an example implementation using a `Filter` object, see <a href="#Creating Filters to Transform Requests and Responses">Creating Filters to Transform Requests and Responses</a>.
+
 [Top](#Top)
 
 <a name="Building a Robust Server"></a>
@@ -1241,7 +1243,7 @@ As you write a server in Java, you will become familiar with the following packa
     import com.twitter.finagle.http.Http;
     import com.twitter.util.Future;
     import com.twitter.util.FutureEventListener;
-    import com.twitter.util.Promise;
+    import com.twitter.util.FutureTransformer;
 
 [Top](#Top)
 
@@ -1269,28 +1271,30 @@ In this example, the `try` `catch` block causes the server to either return a re
 
 #### Performing Asynchronous Operations
 
-In Java, asynchronous operations are often implemented with `Promise` objects. You add a `FutureEventListener` object to the `Future` object whose result you need. Finagle either invokes your `onSuccess` method if the `Future` object receives a value, or it invokes your `onFailure` method if an exception occurs. A `Throwable` object is provided when an exception occurs to communicate information about the kind of exception. 
-
-You should assign either the `Future` value or a `Throwable` exception to the `Promise` object, which is implicitly cast as a `Future` object on return. The following example shows this pattern:
+In Java, you can implement asynchronous operations by calling a `Future` object's `getContentAsync` method to obtain the content from an asynchronous request. The `Future` object's `transformedBy` method transforms the content of the `Future` object from one data type to another, with the help of a `FutureTransformer` object. You typically override the object's `map` method to perform the actual conversion. A `Throwable` object is provided when an exception occurs to communicate information about the kind of exception. The following example shows this pattern:
 
     public class HTTPServer extends Service<HttpRequest, HttpResponse> {
-      final Promise<HttpResponse> responsePromise = new Promise<HttpResponse>();
-      Future<String> contentFuture = getContentAsync(request);
-      contentFuture.addEventListener(new FutureEventListener<String>() {
-        @Override
-        public void onSuccess(String content) {
-        HttpResponse httpResponse =
-          new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        httpResponse.setContent(ChannelBuffers.wrappedBuffer(content.getBytes()));
-        responsePromise.setValue(httpResponse);
-        }
+      public Future<HttpResponse> apply(HttpRequest request) {
 
-        @Override
-        public void onFailure(Throwable throwable) {
-          responsePromise.setException(throwable);
+        Future<String> contentFuture = getContentAsync(request);
+        return contentFuture.transformedBy(new FutureTransformer<String, HttpResponse>() {
+          @Override
+          public HttpResponse map(String content) {
+            HttpResponse httpResponse =
+              new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            httpResponse.setContent(ChannelBuffers.wrappedBuffer(content.getBytes()));
+	          return httpResponse;
+          }
+
+          @Override
+          public HttpResponse handle(Throwable throwable) {
+            HttpResponse httpResponse =
+              new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.SERVICE_UNAVAILABLE);
+            httpResponse.setContent(ChannelBuffers.wrappedBuffer(throwable.toString().getBytes()));
+            return httpResponse;
+          }
         }
       });
-      return responsePromise;
     }
 
 [Top](#Top)
@@ -1558,6 +1562,12 @@ To invoke the blocking operation, you call the method that wraps your blocking o
 * [Service](http://twitter.github.com/finagle/api/finagle-core/com/twitter/finagle/Service.html)
 * [Future](http://twitter.github.com/util/util-core/target/site/doc/main/api/com/twitter/util/Future.html)
 * [Complete Core Project Scaladoc](http://twitter.github.com/finagle/api/finagle-core/)
+* [Kestrel](http://twitter.github.com/finagle/api/finagle-kestrel/index.html)
+* [Memcached](http://twitter.github.com/finagle/api/finagle-memcached/index.html)
+* [Ostrich 4](http://twitter.github.com/finagle/api/finagle-ostrich4/index.html)
+* [ServerSets](http://twitter.github.com/finagle/api/finagle-serversets/index.html)
+* [Stream](http://twitter.github.com/finagle/api/finagle-stream/index.html)
+* [Thrift](http://twitter.github.com/finagle/api/finagle-thrift/index.html)
 * [Complete Util Project Scaladoc](http://twitter.github.com/util/util-core/target/site/doc/main/api/)
 
 For the software revision history, see the [Finagle change log](https://github.com/twitter/finagle/blob/master/ChangeLog).
