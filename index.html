@@ -1,150 +1,267 @@
-<!DOCTYPE html> 
-<html> 
-<head> 
-  <meta charset='utf-8'> 
-  <link rel="shortcut icon" href="favicon.ico"/> 
-  <title>twitter/finagle @ GitHub</title> 
- 
-  <style type="text/css"> 
-    body {
-      margin-top: 1.0em;
-      background-color: #c0deed;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
-      color: #000000;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-    h1 { font-size: 3.8em; color: #0084b4; margin-bottom: 3px; }
-    h1 .small { font-size: 0.4em; }
-    h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #0084b4; }
-    h3 { text-align: center; color: #0084b4; }
-    a { color: #0084b4; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-  </style> 
-</head> 
- 
-<body> 
-  <a href="http://github.com/twitter/finagle"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a> 
- 
-  <div id="container"> 
- 
-    <h1><a href="http://github.com/twitter/finagle">Finagle</a> 
-      <span class="small">by <a href="http://github.com/twitter">twitter</a></span></h1> 
- 
-    <div class="description"> 
-      <p>Finagle is a library for building asynchronous RPC servers and clients in Java, Scala, or any JVM language.</p>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Finagle, from Twitter</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="Bootstrap/bootstrap.css" rel="stylesheet">
+    <link href="Bootstrap/docs/assets/css/docs.css" rel="stylesheet">
+    <link href="Bootstrap/docs/assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" type="image/x-icon" href="Bootstrap/docs/assets/ico/favicon.ico">
+<!--    <link rel="apple-touch-icon" href="assets/ico/bootstrap-apple-57x57.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/ico/bootstrap-apple-72x72.png">
+
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/ico/bootstrap-apple-114x114.png"> -->
+  </head>
+
+  <body>
+
+    <!-- Topbar
+    ================================================== -->
+    <div class="topbar" data-scrollspy="scrollspy" >
+      <div class="topbar-inner">
+        <div class="container">
+          <a class="brand" href="#">Finagle</a>
+          <ul class="nav">
+            <li><a href="https://github.com/twitter/finagle/blob/master/README.md#Quick%20Start">Quick Start</a></li>
+            <li><a href="https://github.com/twitter/finagle/blob/master/README.md#Architecture">Architecture</a></li>
+            <li><a href="https://github.com/twitter/finagle/blob/master/README.md#Java%20Design%20Patterns%20for%20Finagle">Java patterns</a></li>
+            <li><a href="#examples">Scala examples</a></li>
+           </ul>
+        </div>
+      </div>
     </div>
-    <div>
-      <h2>Overview</h2>
-      <p>Built atop Netty, Finagle provides a rich set of tools that are protocol independent.</p>
-      <p>Finagle is flexible enough to support a variety of RPC styles, including request-response, streaming, and pipelining (e.g., HTTP pipelining and Redis pipelining). It also makes it easy to work with stateful RPC styles (e.g., those requiring authentication and those that support transactions).</p>
 
-<h3>Client Features</h3>
+    <!-- Masthead (blueprinty thing)
+    ================================================== -->
 
-<ul>
-<li> Connection Pooling
-<li> Load Balancing
-<li> Failure Detection
-<li> Failover/Retry
-<li> Distributed Tracing (a la <a href="http://research.google.com/pubs/pub36356.html">Dapper</a>)
-<li> Service Discovery (e.g., via <a href="http://hadoop.apache.org/zookeeper/">Zookeeper</a>)
-<li> Rich Statistics
-<li> Native OpenSSL bindings
-<li> Sharding
-</ul>
+    <header class="jumbotron masthead" id="overview">
+      <div class="inner">
+        <div class="container">
+          <h1><b>Finagle</b>, from Twitter</h1>
+          <p class="lead">
+            Finagle is a network stack for the JVM that you can use to build <i>asynchronous</i> Remote Procedure Call (RPC) clients and servers in Java, Scala, or any JVM-hosted language. Finagle provides a rich set of protocol-independent tools.</p>
+          <p><strong>Nerd alert:</strong> Finagle is <a target="_blank" href="http://www.scala-lang.org/" title="Check out Scala">written in Scala</a> on top of <a target="_blank" href="http://www.jboss.org/netty" title="Netty">Netty</a>.</p>
+        </div><!-- /container -->
+      </div>
+    </header>
 
-<h3>Server Features</h3>
-<ul>
-<li> Backpressure (to defend against abusive clients)
-<li> Service Registration (e.g., via Zookeeper)
-<li> Native OpenSSL bindings
-</ul>
+    <!-- Quickstart options
+    ================================================== -->
+    <div class="quickstart">
+      <div class="container">
+        <div class="row">
+          <div class="span5">
+            <h6>Learn more</h6>
+  			    <ul>
+              <li><a target="_blank" href="https://github.com/twitter/finagle/blob/master/README.md#Top">Finagle Developer Guide</a></li>
+              <li><a target="_blank" href="https://github.com/twitter/finagle/blob/master/README.md#API%20Reference%20Documentation">API Reference (Scaladoc)</a></li>
+				      <li><a target="_blank" href="http://twitter.github.com/scala_school/">Twitter Scala School</a>
+					    <ul>
+					      <li><a target="_blank" href="http://twitter.github.com/scala_school/finagle.html">Introduction to Finagle</a></li>
+					      <li><a target="_blank" href="http://twitter.github.com/scala_school/searchbird.html">Searchbird distributed DB example</a></li>
+					    </ul>
+				      <li><a  target="_blank" href="http://days2011.scala-lang.org/node/138/286">Scala Days 2011 Finagle video</a></li>
+   				  </ul>
+          </div>
+          <div class="span5">
+            <h6>Join in</h6>
+            <p>Join in the conversation and get support. Check out the <a target="_blank" href="http://groups.google.com/group/finaglers?hl=en">finaglers</a> Google group.</p>
+          </div>
+          <div class="span5">
+            <h6>Fork on GitHub</h6>
+            <p>Download, fork, pull, file issues, and more with the official Finagle repo on Github.</p>
+            <p><a target="_blank" href="https://github.com/twitter/finagle" class="btn primary">Finagle on GitHub &raquo;</a></p>
 
-<h3>Supported Protocols</h3>
-<ul>
-<li> HTTP
-<li> Streaming HTTP (Comet)
-<li> Thrift
-<li> Memcached/Kestrel
-<li> More to come!
-</ul>
+            <p class="current-version">Currently <a href="https://github.com/twitter/finagle/blob/master/ChangeLog">v1.9.10</a></p>
+          </div>
+        </div><!-- /row -->
+      </div>
+    </div>
+
+    <div class="container">
+
+			<!-- About Finagle
+			================================================== -->
+			<section id="about">
+			  <div class="page-header">
+			    <h1>Finagle Features <small>protocols and baked-in features for RPC clients and servers</small></h1>
+			  </div>
+			  <div class="row">
+				  <div class="span3">
+			      <h2>&nbsp;</h2>
+			    </div>
+			    <div class="span3">
+			      <h3>Protocols</h3>
+						<ul>
+						<li> HTTP
+						<li> Streaming HTTP (Comet)
+						<li> Thrift
+						<li> Memcached/Kestrel
+						<li> More to come!
+						</ul>
+			    </div>
+			    <div class="span4">
+			      <h3>Server Support</h3>
+						<ul>
+						<li> Backpressure (to defend against abusive clients)
+						<li> Service Registration (e.g., via Zookeeper)
+						<li> Native OpenSSL bindings
+						</ul>
+			    </div>
+			    <div class="span4">
+			      <h3>Client Support</h3>
+						<ul>
+						<li> Connection Pooling
+						<li> Load Balancing
+						<li> Failure Detection
+						<li> Failover/Retry
+						<li> Distributed Tracing (a la <a href="http://research.google.com/pubs/pub36356.html">Dapper</a>)
+						<li> Service Discovery (e.g., via <a href="http://hadoop.apache.org/zookeeper/">Zookeeper</a>)
+						<li> Rich Statistics
+						<li> Native OpenSSL bindings
+						<li> Sharding
+						</ul>
+			    </div>
+			  </div><!-- /row -->
+			</section>
+
+			<section id="examples">
+			  <div class="row">
+				  <div class="span3">
+			      <h2>Examples</h2>
+			    </div>
+			    <div class="span12">
+
+			      <p>Check out these basic examples for a quick start using Scala:</p>
+			      <ul>
+				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/echo">Echo</a> - A simple echo client and server using a newline-delimited protocol. Illustrates the basics of asynchronous control-flow.
+</li>				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/http">Http</a> - An advanced HTTP client and server that illustrates the use of Filters to compositionally organize your code. Filters are used here to isolate authentication and error handling concerns.
+</li>				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/memcachedproxy">Memcached Proxy</a> - A simple proxy supporting the Memcached protocol.
+</li>				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stream">Stream</a> - An illustration of Channels, the abstraction for Streaming protocols.
+</li>				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel">Spritzer 2 Kestrel</a> - An illustration of Channels, the abstraction for Streaming protocols. Here the <a href="http://dev.twitter.com/pages/streaming_api">Twitter Firehose</a> is "piped" into a <a href="https://github.com/robey/kestrel">Kestrel</a> message queue, illustrating some of the compositionality of Channels.
+</li>				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stress">Stress</a> - A high-throughput HTTP client for driving stressful traffic to an HTTP server. Illustrates more advanced asynchronous control-flow.
+</li>				      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/thrift">Thrift</a> - A simple client and server for a Thrift protocol.</a>
+</li>
+			      </ul>
+			    </div>
+			  </div><!-- /row -->
+
+							  <div class="row">
+								  <div class="span3">
+							      <h2>Build &amp; Test</h2>
+							    </div>
+							    <div class="span12">
+
+							      <p>To build and test the examples:</p>
+								    <p>
+
+								      <ol>
+								        <li><a href="http://code.google.com/p/simple-build-tool/wiki/Setup">Install SBT</a>
+								        <li>run <code>sbt update test</code> from the command line</li>
+								      </ol>
+								    </p> 
+								
+								    <p><b>Note: </b>Maven Artifacts are published to the public twitter maven repo at <a href="http://maven.twttr.com/">http://maven.twttr.com</a>.</p>
+							  
+							    </div>
+							  </div><!-- /row -->
+							  <div class="row">
+								  <div class="span3">
+							      <h2>Subprojects</h2>
+							    </div>
+							    <div class="span12">
+
+							      <p>Here is documentation (scaladoc) on selected Finagle subprojects:</p>
+							      <ul>
+
+							        <li><a target="_blank" href="api/finagle-kestrel/index.html">Kestrel</a></li>
+							        <li><a target="_blank" href="api/finagle-memcached/index.html">Memcached</a></li>
+							        <li><a target="_blank" href="api/finagle-ostrich4/index.html">Ostrich 4</a></li>
+							        <li><a target="_blank" href="api/finagle-serversets/index.html">ServerSets</a></li>
+							        <li><a target="_blank" href="api/finagle-stream/index.html">Stream</a></li>
+							        <li><a target="_blank" href="api/finagle-thrift/index.html">Thrift</a></li>
+
+							      </ul>
+						        <p>For all scaladoc, see <a target="_blank" href="https://github.com/twitter/finagle/blob/master/README.md#API%20Reference%20Documentation">API Reference</a>.</p>
+							    </div>
+							  </div><!-- /row -->
+							</section>
+							
+							<section id="authors">
+			  <div class="row">
+				  <div class="span3">
+			      <h2>Authors</h2>
+			    </div>
+			    <div>
+			      <p>The following individuals contributed to the development of Finagle:</p>
+				  </div>
+				  </div><!-- /row -->
+				  <div class="row">
+					  <div class="span3">
+				      <h2>&nbsp;</h2>
+				    </div>
+			    <div class="span3">
+						<ul>
+					    <li>Marius Eriksen
+					    <li>Nick Kallen
+						  <li>Wilhelm Bierbaum
+						</ul>
+			    </div>
+			    <div class="span4">
+						<ul>
+					    <li>Arya Asemanfar
+					    <li>David Helder
+					    <li>Glen D Sanford
+						</ul>
+			    </div>
+			    <div class="span4">
+						<ul>
+					    <li>Jeremy Cloud
+					    <li>Steve Jenson
+						</ul>
+			    </div>
+			  </div><!-- /row -->
+			</section>
 
 
-    </div> 
- 
-    <h2>Authors</h2> 
-<p><ul>
-    <li>Marius Eriksen
-    <li>Nick Kallen
-    <li>Wilhelm Bierbaum
-    <li>Arya Asemanfar
-    <li>David Helder
-    <li>Glen D Sanford
-    <li>Jeremy Cloud
-    <li>Steve Jenson
-      </ul>
-<h2>Contact</h2> 
-<ul>
-<li>Marius Eriksen (marius@twitter.com)
-<li>Nick Kallen (nick@twitter.com)
-</ul>
-<h2>Mailing list</h2> 
-<a href="http://groups.google.com/group/finaglers?hl=en">Google groups</a> (finaglers@googlegroups.com)
 
-    <h2>Getting Started</h2>
-    <p>Please read the overview of Finagle <a href="https://github.com/twitter/finagle/blob/master/README.md">in the README</a>.</p>
-    <p>But probably the best way to get started is by reading the examples.</p>
-    <ul>
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/echo">Echo</a> - A simple echo client and server using a newline-delimited protocol. Illustrates the basics of asynchronous control-flow.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/http">Http</a> - An advanced HTTP client and server that illustrates the use of Filters to compositionally organize your code. Filters are used here to isolate authentication and error handling concerns.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/memcachedproxy">Memcached Proxy</a> - A simple proxy supporting the Memcached protocol.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stream">Stream</a> - An illustration of Channels, the abstraction for Streaming protocols.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/spritzer2kestrel">Spritzer 2 Kestrel</a> - An illustration of Channels, the abstraction for Streaming protocols. Here the <a href="http://dev.twitter.com/pages/streaming_api">Twitter Firehose</a> is "piped" into a <a href="https://github.com/robey/kestrel">Kestrel</a> message queue, illustrating some of the compositionality of Channels.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/stress">Stress</a> - A high-throughput HTTP client for driving stressful traffic to an HTTP server. Illustrates more advanced asynchronous control-flow.
-      <li><a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example/thrift">Thrift</a> - A simple client and server for a Thrift protocol.</a>
-    </ul>
-    <p>Additional documentation, tutorials, etc.:</p>
-    <ul>
-      <li>The <a href="http://twitter.github.com/scala_school/">Twitter Scala School</a> has two sections on finagle: <a href="http://twitter.github.com/scala_school/finagle.html">"An Introduction to Finagle"</a> and <a href="http://twitter.github.com/scala_school/searchbird.html">"Searchbird"</a> which walks through the creation of a simple distributed search engine using Finagle.</li>
-      <li>Marius' <a href="http://days2011.scala-lang.org/node/138/286">Scala Days 2011 talk on Finagle</a></li>
-    </ul>
-    <h2>API Docs &amp; Artifact Info</h2> 
-    <p> 
-      You can browse API docs for the various sub-projects:
-      <ul>
-        <li><a href="api/finagle-core/index.html">Core</a>
-        <li><a href="api/finagle-kestrel/index.html">Kestrel</a>
-        <li><a href="api/finagle-memcached/index.html">Memcached</a>
-        <li><a href="api/finagle-ostrich4/index.html">Ostrich 4</a>
-        <li><a href="api/finagle-serversets/index.html">ServerSets</a>
-        <li><a href="api/finagle-stream/index.html">Stream</a>
-        <li><a href="api/finagle-thrift/index.html">Thrift</a>
-      </ul>
-    </p>
-    <p>
-      Maven Artifacts are published to the public twitter maven repo at <a href="http://maven.twttr.com/">http://maven.twttr.com</a>.
-    </p>
-    
-    <h2>Build &amp; Test</h2> 
-    <p>
-      <ol>
-        <li><a href="http://code.google.com/p/simple-build-tool/wiki/Setup">Install SBT</a>
-        <li>run <code>sbt update test</code> from the command line</li>
-      </ol>
-    </p> 
+    </div><!-- /container -->
 
-    <div class="footer"> 
-      get the source code on GitHub : <a href="http://github.com/twitter/finagle">twitter/finagle</a> 
-    </div> 
- 
-  </div> 
-</body> 
+    <footer class="footer">
+
+      <div class="container">
+        <p class="pull-right"><a href="#">Back to top</a></p>
+        <p>
+          For more information about Finagle, contact <a href="mailto:marius@twitter.com">Marius Eriksen</a> or <a href="mailto:nick@twitter.com">Nick Kallen</a>.<br />
+
+          This page created with <a target="_blank" href="http://twitter.github.com/bootstrap/">Bootstrap from Twitter</a>.
+        </p>
+      </div>
+    </footer>
+
+
+    <!-- Le javascript -->
+    <script src="http://code.jquery.com/jquery-1.7.min.js"></script>
+
+    <script src="http://autobahn.tablesorter.com/jquery.tablesorter.min.js"></script>
+    <script src="Bootstrap/docs/assets/js/google-code-prettify/prettify.js"></script>
+    <script>$(function () { prettyPrint() })</script>
+    <script src="Bootstrap/js/bootstrap-dropdown.js"></script>
+    <script src="Bootstrap/js/bootstrap-twipsy.js"></script>
+    <script src="Bootstrap/js/bootstrap-scrollspy.js"></script>
+
+    <script src="Bootstrap/docs/assets/js/application.js"></script>
+
+  </body>
 </html>
-
