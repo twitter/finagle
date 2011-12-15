@@ -25,11 +25,9 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
 
-  private[this] var connectionCount = new AtomicInteger(0)
-  private[this] var writeCount      = new AtomicLong(0)
-  private[this] var readCount       = new AtomicLong(0)
+  private[this] val connectionCount = new AtomicInteger(0)
 
-  statsReceiver.provideGauge("connections") { connectionCount.get }
+  private[this] val connectionGauge = statsReceiver.addGauge("connections") { connectionCount.get }
 
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
@@ -67,7 +65,6 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
       case buffer: ChannelBuffer =>
         val (channelReadCount, _) = ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
         channelReadCount.getAndAdd(buffer.readableBytes())
-        readCount.getAndAdd(buffer.readableBytes())
       case _ =>
         log.warning("ChannelStatsHandler received non-channelbuffer read")
     }
