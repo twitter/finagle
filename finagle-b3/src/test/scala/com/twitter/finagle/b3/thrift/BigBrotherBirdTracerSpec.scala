@@ -4,7 +4,6 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import java.util.ArrayList
 
-import com.twitter.finagle.b3.thrift.{ResultCode, LogEntry, scribe}
 import com.twitter.util._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.Timer
@@ -12,7 +11,7 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 import org.mockito.Matchers._
 import java.nio.ByteBuffer
-import java.net.{Inet4Address, InetAddress, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress}
 
 object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
