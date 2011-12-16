@@ -25,7 +25,7 @@ class ThriftServerFramedCodecFactory extends CodecFactory[Array[Byte], Array[Byt
     new ThriftServerFramedCodec(config)
 }
 
-class ThriftServerFramedCodec(config: ServerCodecConfig ) extends Codec[Array[Byte], Array[Byte]] {
+class ThriftServerFramedCodec(config: ServerCodecConfig) extends Codec[Array[Byte], Array[Byte]] {
   def pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
