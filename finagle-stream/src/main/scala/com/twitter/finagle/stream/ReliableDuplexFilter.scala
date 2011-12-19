@@ -20,21 +20,20 @@ import com.twitter.util.{Future, Promise, Return, Throw}
  * is `true`.
  */
 
-abstract sealed class MessageType(val id: Byte) {
+final class MessageType private(val id: Byte) {
   MessageType.addType(this)
 }
-case object Push extends MessageType(0)
-case object AckReturn extends MessageType(1)
-case object AckThrow extends MessageType(2)
 
 object MessageType {
   private[this] val types = new Array[MessageType](256)
 
-  def apply(id: Byte) = {
-    Option(types(id - Byte.MinValue))
-  }
+  val Push = new MessageType(0)
+  val AckReturn = new MessageType(1)
+  val AckThrow = new MessageType(2)
 
-  private[stream] def addType(messageType: MessageType) {
+  def apply(id: Byte) = Option(types(id - Byte.MinValue))
+
+  private def addType(messageType: MessageType) {
     types(messageType.id - Byte.MinValue) = messageType
   }
 }
@@ -42,6 +41,7 @@ object MessageType {
 abstract class ReliableDuplexFilter
   extends SimpleFilter[Channel[ChannelBuffer], Channel[ChannelBuffer]]
 {
+  import MessageType._
 
   protected type Cb = ChannelBuffer
   private[this] val nextMessageId = new AtomicInteger(0)
