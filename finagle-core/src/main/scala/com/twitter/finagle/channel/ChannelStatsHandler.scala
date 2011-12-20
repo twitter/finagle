@@ -4,15 +4,15 @@ package com.twitter.finagle.channel
  * Keeps channel/connection statistics. The handler is meant to be
  * shared as to keep statistics across a number of channels.
  */
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util.{Time, Future}
 
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.Logger
 
-import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext, MessageEvent}
 import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext, MessageEvent}
 
-import com.twitter.util.{Time, Future}
-import com.twitter.finagle.stats.StatsReceiver
 
 class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
