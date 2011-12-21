@@ -24,12 +24,19 @@ object BigBrotherBirdTracer {
   private[this] val map =
     new HashMap[String, BigBrotherBirdTracer] with SynchronizedMap[String, BigBrotherBirdTracer]
 
+  /**
+   * @param scribeHost Host to send trace data to
+   * @param scribePort Port to send trace data to
+   * @param statsReceiver Where to log information about tracing success/failures
+   * @param sampleRate How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
+   */
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
-            statsReceiver: StatsReceiver): Tracer.Factory = {
+            statsReceiver: StatsReceiver = NullStatsReceiver,
+            sampleRate: Float = 0.001f): Tracer.Factory = {
 
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-      new BigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"))
+      new BigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"), sampleRate)
     })
 
     () => {
@@ -48,7 +55,8 @@ object BigBrotherBirdTracer {
 private[thrift] class BigBrotherBirdTracer(
   scribeHost: String,
   scribePort: Int,
-  statsReceiver: StatsReceiver = NullStatsReceiver
+  statsReceiver: StatsReceiver,
+  initialSampleRate: Float
 ) extends Tracer
 {
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
@@ -56,10 +64,12 @@ private[thrift] class BigBrotherBirdTracer(
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver)
-  private[this] var sampleRate = 0.001f // default sample rate 0.1%. Max is 1, min 0.
+  private[this] var sampleRate = initialSampleRate
   private[this] var refcount = 0
   private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = null
   private[thrift] var client: scribe.ServiceToClient = null
+
+  setSampleRate(initialSampleRate)
 
   def acquire() = synchronized {
     refcount += 1
