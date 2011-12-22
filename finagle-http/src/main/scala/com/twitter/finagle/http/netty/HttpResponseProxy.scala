@@ -10,5 +10,5 @@ trait HttpResponseProxy extends HttpResponse with HttpMessageProxy {
   def httpMessage: HttpMessage = httpResponse
 
   def getStatus(): HttpResponseStatus       = httpResponse.getStatus()
-  def setStatus(status: HttpResponseStatus) = httpResponse.setStatus(status)
+  def setStatus(status: HttpResponseStatus) { httpResponse.setStatus(status) }
 }

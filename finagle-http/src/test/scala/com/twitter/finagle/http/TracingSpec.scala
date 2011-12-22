@@ -27,7 +27,7 @@ object TracingSpec extends Specification {
         }
       }
 
-      val filter = new HttpClientTracingFilter("testservice")
+      val filter = new HttpClientTracingFilter[HttpResponse]("testservice")
       val req = Request("/test.json")
       filter(req, dummyService)
     }

@@ -766,6 +766,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
     factory = (new TracingFilter(tracer)) andThen factory
+    factory = codec.prepareFactory(factory)
 
     factory
   }
