@@ -118,6 +118,11 @@ abstract class Message extends HttpMessage {
   /** Set Expires header by Date */
   def expires_=(value: Date) { expires = Message.httpDateFormat(value) }
 
+  /** Get Host header */
+  def host: Option[String] =  Option(getHeader(HttpHeaders.Names.HOST))
+  /** Set Host header */
+  def host_=(value: String) { setHeader(HttpHeaders.Names.HOST, value) }
+
   /** Get Location header */
   def location: Option[String] = Option(getHeader(HttpHeaders.Names.LOCATION))
   /** Set Location header */
