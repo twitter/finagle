@@ -65,7 +65,7 @@ import com.twitter.finagle.pool._
 import com.twitter.finagle._
 import com.twitter.finagle.service._
 import com.twitter.finagle.factory._
-import com.twitter.finagle.filter.MonitorFilter
+import com.twitter.finagle.filter.{MonitorFilter, ExceptionSourceFilter}
 import com.twitter.finagle.stats.{
   StatsReceiver, RollupStatsReceiver,
   NullStatsReceiver, GlobalStatsReceiver}
@@ -663,6 +663,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): ServiceFactory[Req, Rep] = {
+    val factory = internalBuildFactory()
+    exceptionSourceFilter andThen factory
+  }
+
+  private[this] def internalBuildFactory()(
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): ServiceFactory[Req, Rep] = {
     Timer.default.acquire()
 
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
@@ -697,7 +705,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       if (config.requestTimeout < Duration.MaxValue) {
         val filter = new TimeoutFilter[Req, Rep](
           config.requestTimeout,
-          new IndividualRequestTimeoutException(config.name.get, config.requestTimeout))
+          new IndividualRequestTimeoutException(config.requestTimeout))
 
         factory = filter andThen factory
       }
@@ -757,7 +765,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory = new TimeoutFactory(
         factory,
         config.connectTimeout,
-        new ServiceTimeoutException(config.name.get, config.connectTimeout))
+        new ServiceTimeoutException(config.connectTimeout))
 
     // We maintain a separate log of factory failures here so that
     // factory failures are captured in the service failure
@@ -778,7 +786,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Service[Req, Rep] = {
-    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
+    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](internalBuildFactory())
 
     // We keep the retrying filter at the very bottom: this allows us
     // to retry across multiple hosts, etc.
@@ -790,11 +798,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     if (config.timeout < Duration.MaxValue) {
       val filter = new TimeoutFilter[Req, Rep](
         config.timeout,
-        new GlobalRequestTimeoutException(config.name.get, config.timeout))
+        new GlobalRequestTimeoutException(config.timeout))
       service = filter andThen service
     }
 
-    service
+    exceptionSourceFilter andThen service
   }
 
   /**
@@ -810,4 +818,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def unsafeBuildFactory(): ServiceFactory[Req, Rep] =
     withConfig(_.validated).buildFactory()
+
+  private[this] def exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](config.name.get)
 }

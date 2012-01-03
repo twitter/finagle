@@ -15,7 +15,7 @@ object TimeoutFactorySpec extends Specification with Mockito {
     val promise = new Promise[Service[String, String]]
     underlying.make() returns promise
     val timeout = 1.second
-    val exception = new ServiceTimeoutException("test", timeout)
+    val exception = new ServiceTimeoutException(timeout)
     val factory = new TimeoutFactory(underlying, 1.second, exception, timer)
 
     "after the timeout" in Time.withCurrentTimeFrozen { tc =>
