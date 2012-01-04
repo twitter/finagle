@@ -44,9 +44,9 @@ object ExpiringServiceSpec extends Specification with Mockito {
 
           there was one(underlying).release()
 
-          // Now attempt to release it once more:
+          // Now attempt to release it once more; should not call release again
           service.release()
-          there were two(underlying).release()
+          there was one(underlying).release()
         }
       }
 
