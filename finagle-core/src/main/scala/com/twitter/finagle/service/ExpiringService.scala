@@ -85,7 +85,7 @@ class ExpiringService[Req, Rep](
   }
 
   override def release() {
-    deactivate()
-    super.release()
+    if(deactivate())
+      super.release()
   }
 }
