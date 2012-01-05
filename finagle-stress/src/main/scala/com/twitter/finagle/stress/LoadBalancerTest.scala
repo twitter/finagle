@@ -19,6 +19,8 @@ import com.twitter.finagle.util.Timer
 import com.twitter.finagle.util.Conversions._
 
 object LoadBalancerTest {
+  val totalRequests = new AtomicInteger(0)
+
   def main(args: Array[String]) {
     // Make the type enforced by the *codec*
 
@@ -82,6 +84,7 @@ class LoadBalancerTest(
       servers: Seq[EmbeddedServer],
       f: PartialFunction[(Int, Seq[EmbeddedServer]), Unit]) {
     val num = requestNumber.incrementAndGet()
+    LoadBalancerTest.totalRequests.incrementAndGet()
     if (f.isDefinedAt((num, servers)))
       f((num, servers))
 
