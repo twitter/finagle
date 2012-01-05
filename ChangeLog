@@ -1,3 +1,16 @@
+1.9.12	2012/01/05
+
+	* SSLEngine: do not reuse between connections
+	* ServerBuilder.Server: localAddress to get ephemeral port values
+	* More detailed client stats
+	* kestrel: parse parseStatsLines
+	* FailFastFactory: new fast-fail strategy with maxOutstandingConnections
+	* exceptions: add peer information to connection failures, add service name to all exceptions
+	* fixes: space leak in stats, ReliableDuplexFilter lazy load ordering
+	* b3: allow the user to specify sample rate
+	* exception reporter: share scribe connection across instances
+	* finagle-ostrich: remove, it's obsoleted by finagle-ostrich4
+ 
 1.9.10	2011/12/02
 
 	* update to util 1.12.7
