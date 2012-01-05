@@ -36,13 +36,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new CoreProject(_))
 
   /**
-   * finagle-ostrich implements a StatsReceiver for the Ostrich 2.x statistics library
-   */
-  val ostrichProject = project(
-    "finagle-ostrich", "finagle-ostrich",
-    new OstrichProject(_), coreProject)
-
-  /**
    * finagle-ostrich4 implements a StatsReceiver for the Ostrich 4.x statistics library
    */
   val ostrich4Project = project(
@@ -239,12 +232,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     projectDependencies(
       "util" ~ "util-codec"
     )
-  }
-
-  class OstrichProject(info: ProjectInfo) extends StandardProject(info)
-    with Defaults
-  {
-    val ostrich2 = "com.twitter" % "ostrich" % "2.3.4"
   }
 
   class Ostrich4Project(info: ProjectInfo) extends StandardProject(info)
