@@ -188,10 +188,11 @@ abstract class Message extends HttpMessage {
    * Use content as InputStream.  The underlying channel buffer's reader
    * index is advanced.  (Scala interface.  Java users can use getInputStream().)
    */
-  def withInputStream(f: (InputStream => Unit)) {
+  def withInputStream[T](f: InputStream => T): T = {
     val inputStream = getInputStream()
-    f(inputStream) // throws
+    val result = f(inputStream) // throws
     inputStream.close()
+    result
   }
 
   /**
@@ -202,7 +203,7 @@ abstract class Message extends HttpMessage {
     new ChannelBufferInputStream(getContent)
 
   /** Use content as Reader.  (Scala interface.  Java usrs can use getReader().) */
-  def withReader(f: Reader => Unit) {
+  def withReader[T](f: Reader => T): T = {
     withInputStream { inputStream =>
       val reader = new InputStreamReader(inputStream)
       f(reader)
@@ -244,22 +245,24 @@ abstract class Message extends HttpMessage {
    * (Java users can use this with a Function, or use Netty's ChannelBufferOutputStream
    * and then call setContent() with the underlying buffer.)
    */
-  def withOutputStream(f: (OutputStream => Unit)) {
+  def withOutputStream[T](f: OutputStream => T): T = {
     // Use buffer size of 1024.  Netty default is 256, which seems too small.
     // Netty doubles buffers on resize.
     val outputStream = new ChannelBufferOutputStream(ChannelBuffers.dynamicBuffer(1024))
-    f(outputStream) // throws
+    val result = f(outputStream) // throws
     outputStream.close()
     write(outputStream.buffer)
+    result
   }
 
   /** Use as a Writer.  Content is replaced with writer contents. */
-  def withWriter(f: (Writer => Unit)) {
+  def withWriter[T](f: Writer => T): T = {
     withOutputStream { outputStream =>
       val writer = new OutputStreamWriter(outputStream)
-      f(writer)
+      val result = f(writer)
       writer.close()
       // withOutputStream will write()
+      result
     }
   }
 

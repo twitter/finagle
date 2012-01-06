@@ -1,3 +1,6 @@
+??
+	* http: Message.withX methods now have parameterized return types
+
 1.9.12	2012/01/05
 
 	* SSLEngine: do not reuse between connections
