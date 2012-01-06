@@ -76,6 +76,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     new KestrelProject(_), coreProject, memcachedProject)
 
   /**
+   * finagle-redis is a redis codec contributed by Tumblr.
+   */
+  val redisProject = project(
+    "finagle-redis", "finagle-redis",
+    new RedisProject(_), coreProject)
+
+  /**
    * finagle-http contains an http codec.
    */
   val httpProject = project(
@@ -188,6 +195,24 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
+  }
+
+  class RedisProject(info: ProjectInfo) extends StandardProject(info)
+    with Defaults with UnpublishedProject
+  {
+    val naggati = "com.twitter" % "naggati" % "2.2.0" intransitive()
+
+    // This is currently disabled since it requires the user to have a redis
+    // installation. We might be able to ship the redis binary with some
+    // architectures, and make the test conditional.
+    override def testOptions = {
+      val name = "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec"
+      ExcludeTests(name :: Nil) :: super.testOptions.toList
+    }
+
+    projectDependencies(
+      "util" ~ "util-logging"
+    )
   }
 
   class HttpProject(info: ProjectInfo) extends StandardProject(info)
