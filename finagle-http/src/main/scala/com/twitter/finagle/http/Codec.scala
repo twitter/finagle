@@ -18,7 +18,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle._
 import com.twitter.util.{Try, StorageUnit, Future}
 
-class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
+case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
 
 object BadHttpRequest {
