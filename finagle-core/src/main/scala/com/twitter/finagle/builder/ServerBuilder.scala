@@ -6,7 +6,6 @@ import scala.collection.JavaConversions._
 import java.util.concurrent.Executors
 import java.util.logging.Logger
 import java.net.SocketAddress
-import javax.net.ssl.{SSLContext, SSLEngine}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
@@ -14,7 +13,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 
-import com.twitter.util.{Duration, Monitor, NullMonitor}
+import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle._
@@ -23,8 +22,7 @@ import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
-import com.twitter.util.{Future, Promise, Try, Return, Throw}
-import com.twitter.concurrent.AsyncSemaphore
+import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise}
 
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
@@ -37,6 +35,12 @@ trait Server {
    * ``timeout'', after which channels are forcibly closed.
    */
   def close(timeout: Duration = Duration.MaxValue)
+
+  /**
+   * When a server is bound to an ephemeral port, gets back the address
+   * with concrete listening port picked.
+   */
+  def localAddress: SocketAddress
 }
 
 /**
@@ -61,8 +65,11 @@ object ServerBuilder {
     new ReferenceCountedChannelFactory(
       new LazyRevivableChannelFactory(() =>
         new NioServerSocketChannelFactory(
-          Executors.newCachedThreadPool(),
-          Executors.newCachedThreadPool())))
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerBoss")),
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerIO"))
+        )
+      )
+    )
 }
 
 object ServerConfig {
@@ -104,7 +111,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _readTimeout:                     Option[Duration]                         = None,
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
   private val _tracerFactory:                   Tracer.Factory                           = () => NullTracer,
-  private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None)
+  private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
+  private val _serverBootstrap:                 Option[ServerBootstrap]                  = None)
 {
   import ServerConfig._
 
@@ -133,6 +141,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val timeoutConfig                   = _timeoutConfig
   val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
+  val serverBootstrap                 = _serverBootstrap
 
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
@@ -153,7 +162,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "readTimeout"                     -> _timeoutConfig.readTimeout,
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "tracerFactory"                   -> Some(_tracerFactory),
-    "openConnectionsThresholds"       -> Some(_openConnectionsThresholds)
+    "openConnectionsThresholds"       -> Some(_openConnectionsThresholds),
+    "serverBootstrap"                 -> _serverBootstrap
   )
 
   override def toString = {
@@ -310,6 +320,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tracerFactory(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
 
+  /**
+   * Used for testing.
+   */
+  private[builder] def serverBootstrap(bs: ServerBootstrap): This =
+    withConfig(_.copy(_serverBootstrap = Some(bs)))
+
   @deprecated("Use tracerFactory instead")
   def tracer(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
@@ -367,7 +383,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     val cf = config.channelFactory
     cf.acquire()
-    val bs = new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
+
+    val bs = config.serverBootstrap getOrElse new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
 
     // bs.setOption("soLinger", 0) // XXX: (TODO)
     bs.setOption("reuseAddress", true)
@@ -517,7 +534,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         // TODO: can we share closing handler instances with the
         // channelHandler?
-
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
 
@@ -592,6 +608,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     })
 
     val serverChannel = bs.bind(config.bindTo.get)
+
     Timer.default.acquire()
     new Server {
       def close(timeout: Duration = Duration.MaxValue) = {
@@ -633,6 +650,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         Timer.default.stop()
         tracer.release()
       }
+
+      def localAddress: SocketAddress = serverChannel.getLocalAddress()
 
       override def toString = "Server(%s)".format(config.toString)
     }

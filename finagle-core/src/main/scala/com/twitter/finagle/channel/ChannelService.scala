@@ -72,10 +72,10 @@ private[finagle] class ChannelService[Req, Rep](
     }
 
     override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) =
-      reply(Throw(ChannelException(e.getCause)), true)
+      reply(Throw(ChannelException(e.getCause, channel.getRemoteAddress)), true)
 
     override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-      reply(Throw(new ChannelClosedException), true)
+      reply(Throw(new ChannelClosedException(channel.getRemoteAddress)), true)
     }
   })
 
@@ -87,7 +87,7 @@ private[finagle] class ChannelService[Req, Rep](
           if (currentReplyFuture.compareAndSet(replyFuture, null)) {
             isHealthy = false
             if (channel.isOpen) Channels.close(channel)
-            replyFuture() = Throw(new WriteException(ChannelException(cause)))
+            replyFuture() = Throw(new WriteException(ChannelException(cause, channel.getRemoteAddress)))
           }
         case _ => ()
       }

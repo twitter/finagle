@@ -33,6 +33,8 @@ object SslConnectHandlerSpec extends Specification with Mockito {
     val closeFuture = Channels.future(channel)
     channel.getCloseFuture returns closeFuture
     val remoteAddress = mock[SocketAddress]
+    channel.getRemoteAddress returns remoteAddress
+
     val verifier = mock[SSLSession => Option[Throwable]]
     verifier(any) returns None
 
@@ -91,10 +93,10 @@ object SslConnectHandlerSpec extends Specification with Mockito {
 
       "propagate handshake failures as SslHandshakeException" in {
          val exc = new Exception("sad panda")
-        	handshakeFuture.setFailure(exc)
-        	connectFuture.isDone must beTrue
-        	connectFuture.getCause must be_==(
-        	  new SslHandshakeException(exc))
+          handshakeFuture.setFailure(exc)
+          connectFuture.isDone must beTrue
+          connectFuture.getCause must be_==(
+            new SslHandshakeException(exc, remoteAddress))
       }
 
       "propagate connection cancellation" in {
