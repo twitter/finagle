@@ -4,30 +4,38 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
-import com.twitter.concurrent.{Channel, ChannelSource, Observer}
+import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.{
-  Codec, CodecFactory, Service, Filter}
+  Codec, CodecFactory, Service, Filter, ServerCodecConfig, ClientCodecConfig}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.util.{Future, Promise, Return}
 
 /**
- * A DuplexStreamCodec exposes two `Channel[ChannelBuffer]` (inbound and outbound).
- * The DuplexStreamCodec will acknowledge sends on the outbound channel when netty
- * acknowledges the write. Optionally, you can pass to the codec constructor
- * and sends will only be acknowledged when the corresponding inbound channel on the
- * receiving end acknowledges its send.
- *
- * The channels are exposed via Finagle's Service interface:
- *  val factory = ClientBuilder()
- *    .codec(new DuplexStreamCodec(true))
- *    .hosts(Seq(address))
- *    .buildFactory()
- *  val service = factory.make()
- *  service.foreach { client =>
- *    val outbound = new ChannelSource[ChannelBuffer]
- *    val inbound: Future[Channel[ChannelBuffer]] = client(outbound)
- *  }
+ * DuplexStreamCodec allows you to send and receive messages to server running
+ * the same codec. It sends to you a DuplexStreamHandle that contains:
+ *  - messages: Offer[ChannelBuffer]
+ *  - onClose: Future[Unit]
+ *  - close: () => Unit
+ * and it expects you to send/return to it a Offer[ChannelBuffer] for outbound
+ * messages. This codec synchronizes immediately on outbound messages, and does
+ * not provide you with information about the other side's offer synchronization.
+ * example:
+ * val factory = ClientBuilder()
+ *   .codec(DuplexStreamCodec())
+ *   .hosts(Seq(address))
+ *   .buildFactory()
+ * val service =
+ * factory.make() onSuccess { client =>
+ *   val outbound = new Broker[ChannelBuffer]
+ *   val handle: Future[DuplexStreamHandle] = client(outbound.recv)
+ *   handle.messages foreach { inboundMessage => ... }
  */
+
+case class DuplexStreamHandle(
+  messages: Offer[ChannelBuffer],
+  onClose: Future[Unit],
+  close: () => Unit
+)
 
 class FramingCodec extends SimpleChannelHandler {
   private[this] val decoder = new LengthFieldBasedFrameDecoder(0x7FFFFFFF, 0, 4, 0, 4)
@@ -41,131 +49,96 @@ class FramingCodec extends SimpleChannelHandler {
 }
 
 private[stream] abstract class BufferToChannelCodec extends SimpleChannelHandler {
-  private[this] val inbound: Promise[ChannelSource[ChannelBuffer]] = new Promise[ChannelSource[ChannelBuffer]]
-  private[this] var outbound: Channel[ChannelBuffer] = null
-  private[this] var outboundObserver: Observer = null
+  private[this] val inbound = new Broker[ChannelBuffer]
+  private[this] val onClose = new Promise[Unit]
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    if (inbound.isDefined && inbound().isOpen) {
-      inbound().close()
-    }
-
-    if (outboundObserver != null) {
-     outboundObserver.dispose()
-    }
+    onClose() = Return(())
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
-      case buf: ChannelBuffer => inbound() send buf
-      case _ => throw new Exception("Unexpected message received")
+      case buf: ChannelBuffer => inbound ! buf
+      case m =>
+        val msg = "Unexpected message type sent upstream: %s".format(m.getClass.toString)
+        throw new IllegalArgumentException(msg)
     }
-  }
-
-  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    require(!inbound.isDefined, "Inbound channel already created.")
-
-    // We don't want message to go to the ether
-    ctx.getChannel.setReadable(false)
-
-    inbound() = Return(new ChannelSource[ChannelBuffer])
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
-      case channel: Channel[ChannelBuffer] =>
-        synchronized {
-          require(outbound == null, "Already have an outbound channel")
-          outbound = channel
+      case outbound: Offer[_] =>
+        outbound foreach { message =>
+          Channels.write(ctx, Channels.future(ctx.getChannel), message)
         }
-      case _ => throw new Exception("Unexpected message written")
-    }
-
-    outboundObserver = outbound respond { buf =>
-      val messageFuture = Channels.future(ctx.getChannel)
-      val result = messageFuture.toTwitterFuture
-      Channels.write(ctx, messageFuture, buf)
-      result
-    }
-
-    outbound.closes onSuccess { _ =>
-      val messageFuture = Channels.future(ctx.getChannel)
-      val result = messageFuture.toTwitterFuture
-      Channels.close(ctx, messageFuture)
-      result
+      case m =>
+        val msg = "Unexpected message type sent downstream: %s".format(m.getClass.toString)
+        throw new IllegalArgumentException(msg)
     }
   }
 
-  protected[this] def sendInboundUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    inbound foreach { ch =>
-      Channels.fireMessageReceived(ctx, ch)
-      ctx.getChannel.setReadable(true)
-    }
+  protected[this] def sendHandleUpstream(ctx: ChannelHandlerContext) {
+    def close() { Channels.close(ctx.getChannel) }
+
+    val streamHandle = DuplexStreamHandle(inbound.recv, onClose, close)
+    Channels.fireMessageReceived(ctx, streamHandle)
   }
 }
 
 class ServerBufferToChannelCodec extends BufferToChannelCodec {
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     super.channelConnected(ctx, e)
-    sendInboundUpstream(ctx, e)
+    sendHandleUpstream(ctx)
   }
 }
 
 class ClientBufferToChannelCodec extends BufferToChannelCodec {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
     super.writeRequested(ctx, e)
-    sendInboundUpstream(ctx, e)
+    sendHandleUpstream(ctx)
   }
 }
 
-case class DuplexStreamCodec(_reliable: Boolean = false)
-  extends CodecFactory[Channel[ChannelBuffer], Channel[ChannelBuffer]]
+class DuplexStreamServerCodec extends Codec[DuplexStreamHandle, Offer[ChannelBuffer]] {
+  def pipelineFactory = new ChannelPipelineFactory {
+    def getPipeline = {
+      val pipeline = Channels.pipeline()
+      pipeline.addLast("framer", new FramingCodec)
+      pipeline.addLast("upgrade", new ServerBufferToChannelCodec)
+      pipeline
+    }
+  }
+}
+
+class DuplexStreamClientCodec extends Codec[Offer[ChannelBuffer], DuplexStreamHandle] {
+  def pipelineFactory = new ChannelPipelineFactory {
+    def getPipeline = {
+      val pipeline = Channels.pipeline()
+      pipeline.addLast("framer", new FramingCodec)
+      pipeline.addLast("upgrade", new ClientBufferToChannelCodec)
+      pipeline
+    }
+  }
+}
+
+class DuplexStreamServerCodecFactory
+  extends CodecFactory[DuplexStreamHandle, Offer[ChannelBuffer]]#Server
 {
-  def reliable(v: Boolean) = copy(_reliable = v)
-
-  def server = Function.const {
-    new Codec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline = {
-          val pipeline = Channels.pipeline()
-          pipeline.addLast("framingCodec", new FramingCodec)
-          pipeline.addLast("channelify", new ServerBufferToChannelCodec)
-          pipeline
-        }
-      }
-
-      override def prepareService(service: Service[Channel[ChannelBuffer], Channel[ChannelBuffer]]) = {
-        if (_reliable) {
-          Future.value(new ReliableDuplexServerFilter().andThen(service))
-        } else {
-          Future.value(service)
-        }
-      }
-    }
-  }
-
-  def client = Function.const {
-    new Codec[Channel[ChannelBuffer], Channel[ChannelBuffer]] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline = {
-          val pipeline = Channels.pipeline()
-          pipeline.addLast("framingCodec", new FramingCodec)
-          pipeline.addLast("channelify", new ClientBufferToChannelCodec)
-          pipeline
-        }
-      }
-
-      override def prepareService(service: Service[Channel[ChannelBuffer], Channel[ChannelBuffer]]) = {
-        if (_reliable) {
-          Future.value(new ReliableDuplexClientFilter().andThen(service))
-        } else {
-          Future.value(service)
-        }
-      }
-    }
-  }
+  def apply(config: ServerCodecConfig) = new DuplexStreamServerCodec()
 }
 
-object DuplexStreamCodec {
-  def get() = DuplexStreamCodec()
+class DuplexStreamClientCodecFactory
+  extends CodecFactory[Offer[ChannelBuffer], DuplexStreamHandle]#Client
+{
+  def apply(config: ClientCodecConfig) = new DuplexStreamClientCodec()
+}
+
+object DuplexStreamServerCodec {
+  def apply() = new DuplexStreamServerCodecFactory
+  def get() = apply()
+}
+
+object DuplexStreamClientCodec {
+  def apply() = new DuplexStreamClientCodecFactory
+  def get() = apply()
 }

@@ -19,13 +19,13 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
   "BigBrotherBirdReceiver" should {
     "throw exception if illegal sample rate" in {
-      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver)
+      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, 0)
       tracer.setSampleRate(-1) must throwA[IllegalArgumentException]
       tracer.setSampleRate(1.1f) must throwA[IllegalArgumentException]
     }
 
     "drop all" in {
-      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver)
+      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, 0)
       tracer.setSampleRate(0)
       for (i <- 1 until 100) {
         tracer.sampleTrace(TraceId(None, None, SpanId(i), None)) mustEqual Some(false)
@@ -33,7 +33,7 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
     }
 
     "drop none" in {
-      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver)
+      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, 0)
       tracer.setSampleRate(1f)
       for (i <- 1 until 100) {
         tracer.sampleTrace(TraceId(None, None, SpanId(i), None)) mustEqual Some(true)
@@ -42,7 +42,7 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
     "make a decision if sampled None" in {
       class TestTrace(statsReceiver: StatsReceiver = NullStatsReceiver)
-        extends BigBrotherBirdTracer("localhost", 1463, statsReceiver) {
+        extends BigBrotherBirdTracer("localhost", 1463, statsReceiver, 0) {
         var annotateCalled = false
         protected override def annotate(record: Record, value: String) = {
           annotateCalled = true
@@ -56,7 +56,7 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
     "send all traces to scribe" in {
       Timer.default.acquire()
-      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver).setSampleRate(1)
+      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, 0).setSampleRate(1)
       tracer.client = mock[scribe.ServiceToClient]
 
       val expected = new ArrayList[LogEntry]()

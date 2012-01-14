@@ -1,21 +1,21 @@
 package com.twitter.finagle.channel
 
+import com.twitter.finagle._
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
+import com.twitter.util.{Future, Promise, Throw, Try, Time, Return}
+
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Logger, Level}
-import java.net.SocketAddress
+
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel, Channels,
   SimpleChannelUpstreamHandler, ExceptionEvent,
   ChannelStateEvent}
 
-import com.twitter.util.{
-  Future, Promise, Throw, Try, Time, Return}
-
-import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
 
 case class ChannelServiceReply(message: Any, markDead: Boolean)
 
@@ -149,7 +149,6 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
-  private[this] val gauge = statsReceiver.addGauge("connections") { channelLatch.getCount }
 
   protected[channel] def channelReleased(channel: ChannelService[Req, Rep]) {
     channelLatch.decr()

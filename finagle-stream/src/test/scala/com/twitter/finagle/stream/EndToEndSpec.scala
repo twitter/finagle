@@ -14,15 +14,13 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 
 import org.specs.Specification
 
-import com.twitter.util.{
-  Future, RandomSocket, CountDownLatch,
-  Promise, Return, Throw}
 
 import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{Service, ServiceNotAvailableException}
-import com.twitter.finagle.ClientCodecConfig
+import com.twitter.finagle.{SimpleFilter, Service, ServiceNotAvailableException, ClientCodecConfig}
+import org.jboss.netty.util.CharsetUtil
+import com.twitter.util._
 
 object EndToEndSpec extends Specification {
   case class MyStreamResponse(
@@ -161,12 +159,13 @@ object EndToEndSpec extends Specification {
           channel.close()
         }
 
+        // first request is accepted
         channel
           .write(httpRequest)
           .awaitUninterruptibly()
           .isSuccess must beTrue
 
-        messages !! ChannelBuffers.wrappedBuffer("chunk".getBytes)
+        messages !! ChannelBuffers.wrappedBuffer("chunk1".getBytes)
 
         (recvd?)(1.second) must beLike {
           case e: ChannelStateEvent =>
@@ -180,25 +179,34 @@ object EndToEndSpec extends Specification {
             }
         }
 
-        // This request should be ignored now.
+        (recvd?)(1.second) must beLike {
+          case m: MessageEvent =>
+            m.getMessage must beLike {
+              case res: HttpChunk => !res.isLast  // get "chunk1"
+            }
+        }
+
+        // The following requests should be ignored
         channel
           .write(httpRequest)
           .awaitUninterruptibly()
           .isSuccess must beTrue
 
+        // the streaming should continue
+        messages !! ChannelBuffers.wrappedBuffer("chunk2".getBytes)
+
         (recvd?)(1.second) must beLike {
           case m: MessageEvent =>
             m.getMessage must beLike {
-              case res: HttpChunk => !res.isLast
+              case res: HttpChunk => !res.isLast  // get "chunk2"
             }
         }
 
         error !! EOF
-
         (recvd?)(1.second) must beLike {
           case m: MessageEvent =>
             m.getMessage must beLike {
-              case res: HttpChunk => res.isLast
+              case res: HttpChunkTrailer => res.isLast
             }
         }
 
@@ -207,6 +215,32 @@ object EndToEndSpec extends Specification {
           case e: ChannelStateEvent =>
             e.getState == ChannelState.OPEN && (java.lang.Boolean.FALSE equals e.getValue)
         }
+      }
+
+      "server ignores channel buffer messages after channel close" in {
+        val clientRes = client(httpRequest)(1.second)
+        var result = ""
+        val latch = new CountDownLatch(1)
+
+        (clientRes.error?) ensure {
+          Future { latch.countDown() }
+        }
+
+        clientRes.messages foreach { channelBuffer =>
+          Future {
+            result += channelBuffer.toString(Charset.defaultCharset)
+          }
+        }
+
+        FuturePool.defaultPool {
+          messages !! ChannelBuffers.wrappedBuffer("12".getBytes)
+          messages !! ChannelBuffers.wrappedBuffer("23".getBytes)
+          error !! EOF
+          messages !! ChannelBuffers.wrappedBuffer("34".getBytes)
+        }
+
+        latch.within(1.second)
+        result mustEqual "1223"
       }
     }
   }

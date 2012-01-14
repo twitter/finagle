@@ -1,0 +1,37 @@
+package com.twitter.finagle.redis
+package protocol
+
+trait KeyCommand extends Command {
+  val key: String
+  protected def validate() {
+    RequireClientProtocol(key != null && key.length > 0, "Empty Key found")
+  }
+}
+trait StrictKeyCommand extends KeyCommand {
+  validate()
+}
+
+trait KeysCommand extends Command {
+  val keys: List[String]
+  protected def validate() {
+    RequireClientProtocol(keys != null && keys.length > 0, "Empty KeySet found")
+    keys.foreach { key => RequireClientProtocol(key != null && key.length > 0, "Empty key found") }
+  }
+}
+trait StrictKeysCommand extends KeysCommand {
+  validate()
+}
+
+trait ValueCommand extends Command {
+  val value: Array[Byte]
+}
+trait StrictValueCommand extends ValueCommand {
+  RequireClientProtocol(value != null && value.length > 0, "Found unexpected empty value")
+}
+
+trait MemberCommand extends Command {
+  val member: Array[Byte]
+}
+trait StrictMemberCommand extends MemberCommand {
+  RequireClientProtocol(member != null && member.length > 0, "Found unexpected empty set member")
+}

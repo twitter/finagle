@@ -18,7 +18,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle._
 import com.twitter.util.{Try, StorageUnit, Future}
 
-class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
+case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
 
 object BadHttpRequest {
@@ -126,7 +126,7 @@ case class Http(
         underlying: Service[HttpRequest, HttpResponse]
       ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
         if (_enableTracing)
-          new HttpClientTracingFilter(config.serviceName) andThen underlying
+          new HttpClientTracingFilter[HttpResponse](config.serviceName) andThen underlying
         else
           underlying
       }
@@ -211,12 +211,12 @@ object HttpTracing {
 /**
  * Pass along headers with the required tracing information.
  */
-class HttpClientTracingFilter(serviceName: String)
-  extends SimpleFilter[HttpRequest, HttpResponse]
+class HttpClientTracingFilter[Res](serviceName: String)
+  extends SimpleFilter[HttpRequest, Res]
 {
   import HttpTracing._
 
-  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = Trace.unwind {
+  def apply(request: HttpRequest, service: Service[HttpRequest, Res]) = Trace.unwind {
     Header.All foreach { request.removeHeader(_) }
 
     request.addHeader(Header.TraceId, Trace.id.traceId.toString)

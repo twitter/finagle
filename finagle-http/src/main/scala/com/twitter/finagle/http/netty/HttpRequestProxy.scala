@@ -10,7 +10,7 @@ trait HttpRequestProxy extends HttpRequest with HttpMessageProxy {
   def httpMessage: HttpMessage = httpRequest
 
   def getMethod(): HttpMethod       = httpRequest.getMethod
-  def setMethod(method: HttpMethod) = httpRequest.setMethod(method)
+  def setMethod(method: HttpMethod) { httpRequest.setMethod(method) }
   def getUri(): String              = httpRequest.getUri()
   def setUri(uri: String)           { httpRequest.setUri(uri) }
 }

@@ -25,6 +25,8 @@ trait IntegrationBase extends Specification with Mockito {
     val codec = mock[Codec[String, String]]
     (codec.prepareService(Matchers.any[Service[String, String]])
      answers { s => Future.value(s.asInstanceOf[Service[String, String]]) })
+    (codec.prepareFactory(Matchers.any[ServiceFactory[String, String]])
+     answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
 
     val clientAddress = new SocketAddress {}
 

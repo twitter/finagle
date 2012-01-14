@@ -49,9 +49,11 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster {
               val lastValue = queuedChange.getAndSet(serverSet)
               val firstToChange = lastValue eq null
               if (firstToChange) {
+                var mostRecentValue: ImmutableSet[ServiceInstance] = null
                 do {
-                  performChange(serverSet)
-                } while (!queuedChange.compareAndSet(serverSet, null))
+                  mostRecentValue = queuedChange.get
+                  performChange(mostRecentValue)
+                } while (!queuedChange.compareAndSet(mostRecentValue, null))
               }
             }
           })

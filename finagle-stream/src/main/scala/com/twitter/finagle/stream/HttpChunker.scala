@@ -81,10 +81,10 @@ class HttpChunker extends BrokerChannelHandler {
     )
   }
 
-  private[this] def awaitResponse() {
+  private[this] def awaitResponse(dead: Boolean) {
     Offer.select(
       downstreamEvent {
-        case e@WriteValue(res: StreamResponse, ctx) =>
+        case e@WriteValue(res: StreamResponse, ctx) if !dead =>
           val httpRes = res.httpResponse
           val chunked = httpRes.getProtocolVersion == HttpVersion.HTTP_1_1 && httpRes.getHeader(HttpHeaders.Names.CONTENT_LENGTH) == null
           httpRes.setChunked(chunked)
@@ -99,27 +99,31 @@ class HttpChunker extends BrokerChannelHandler {
           proxyDownstream()
           write(ctx, res)
 
+        case WriteValue(res: StreamResponse, _) if dead =>
+          res.release()
+          awaitResponse(dead)
+
         case WriteValue(invalid, ctx) =>
           Channels.fireExceptionCaught(ctx,
             new IllegalArgumentException(
               "Invalid reply \"%s\"".format(invalid)))
-          proxy()
+          awaitResponse(dead)
 
         case e@Close(_, _) =>
           e.sendDownstream()
-          proxy()
+          awaitResponse(true)
 
         case e =>
           e.sendDownstream()
-          awaitResponse()
+          awaitResponse(dead)
       },
 
       upstreamEvent { e =>
         e.sendUpstream()
-        awaitResponse()
+        awaitResponse(dead)
       }
     )
   }
 
-  awaitResponse()
+  awaitResponse(false)
 }

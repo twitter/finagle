@@ -22,9 +22,17 @@ trait Codec[Req, Rep] {
   /**
    * Prepare a newly-created (connected) Service endpoint.  It becomes
    * available once the returned Future is satisfied.
+   * Used to allow codec modifications to the service at the bottom of the network stack.
    */
   def prepareService(underlying: Service[Req, Rep]): Future[Service[Req, Rep]] =
     Future.value(underlying)
+
+  /**
+   * Prepare a factory for usage with the codec.
+   * Used to allow codec modifications to the service at the top of the network stack.
+   */
+  def prepareFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+    underlying
 }
 
 object Codec {

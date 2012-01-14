@@ -4,6 +4,10 @@ import java.net.SocketAddress
 
 import com.twitter.util.Duration
 
+trait SourcedException {
+  var serviceName: String = "unspecified"
+}
+
 trait NoStacktrace extends Exception {
   override def fillInStackTrace = this
   // specs expects non-empty stacktrace array
@@ -11,32 +15,28 @@ trait NoStacktrace extends Exception {
 }
 
 // Request failures (eg. for request behavior changing brokers.)
-class RequestException(cause: Throwable) extends Exception(cause) with NoStacktrace {
+class RequestException(cause: Throwable) extends Exception(cause) with NoStacktrace with SourcedException {
   def this() = this(null)
   override def getStackTrace = if (cause != null) cause.getStackTrace else super.getStackTrace
 }
 
-trait TimeoutException { self: Exception =>
-  val serviceName: String
+trait TimeoutException extends SourcedException { self: Exception =>
   protected val timeout: Duration
   protected val explanation: String
 
-  override def getMessage = "exceeded %s while %s (%s)".format(timeout, explanation, serviceName)
+  override def getMessage = "exceeded %s while %s".format(timeout, explanation)
 }
 
 class RequestTimeoutException(
-  val serviceName: String,
   protected val timeout: Duration,
   protected val explanation: String
 ) extends RequestException with TimeoutException
-class IndividualRequestTimeoutException(serviceName: String, timeout: Duration)
+class IndividualRequestTimeoutException(timeout: Duration)
   extends RequestTimeoutException(
-    serviceName,
     timeout,
     "waiting for a response for an individual request, excluding retries")
-class GlobalRequestTimeoutException(serviceName: String, timeout: Duration)
+class GlobalRequestTimeoutException(timeout: Duration)
   extends RequestTimeoutException(
-    serviceName,
     timeout,
     "waiting for a response for the request, including retries (if applicable)")
 
@@ -52,7 +52,7 @@ class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress) extends Exception(underlying) {
+class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress) extends Exception(underlying) with SourcedException {
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
   override def getMessage =
@@ -124,11 +124,10 @@ object ChannelException {
 }
 
 // Service layer errors.
-class ServiceException                                         extends Exception
+class ServiceException                                         extends Exception with SourcedException
 class ServiceClosedException                                   extends ServiceException
 class ServiceNotAvailableException                             extends ServiceException
 class ServiceTimeoutException(
-    val serviceName: String,
     protected val timeout: Duration)
     extends ServiceException
     with TimeoutException {

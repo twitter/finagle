@@ -7,12 +7,29 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.scribe.{LogEntry, ResultCode, scribe}
 
 import com.twitter.util.GZIPStringEncoder
-import com.twitter.util.{Time, Monitor}
+import com.twitter.util.{Time, Monitor, NullMonitor}
 
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
+
+
+trait ClientMonitorFactory extends (String => Monitor)
+trait ServerMonitorFactory extends ((String, SocketAddress) => Monitor)
+
+trait MonitorFactory extends ServerMonitorFactory with ClientMonitorFactory {
+  def clientMonitor(serviceName: String): Monitor
+  def serverMonitor(serviceName: String, address: SocketAddress): Monitor
+
+  def apply(serviceName: String) = clientMonitor(serviceName)
+  def apply(serviceName: String, address: SocketAddress) = serverMonitor(serviceName, address)
+}
+
+object NullMonitorFactory extends MonitorFactory {
+  def clientMonitor(serviceName: String) = NullMonitor
+  def serverMonitor(serviceName: String, address: SocketAddress) = NullMonitor
+}
 
 /**
  * A collection of methods to construct a Monitor that logs to a ScribeHandler
@@ -29,16 +46,7 @@ object Reporter {
    * receive method is called does not report any endpoints.
    */
   def defaultReporter(scribeHost: String, scribePort: Int, serviceName: String): Reporter = {
-    new Reporter(
-      new scribe.ServiceToClient(
-        ClientBuilder() // these are from the b3 tracer
-          .hosts(new InetSocketAddress(scribeHost, scribePort))
-          .codec(ThriftClientFramedCodec())
-          .hostConnectionLimit(5)
-          .build(),
-        new TBinaryProtocol.Factory()
-      ), serviceName
-    )
+    new Reporter(makeClient(scribeHost, scribePort), serviceName)
   }
 
   /**
@@ -47,10 +55,12 @@ object Reporter {
    * Default means the Reporter instance created by defaultReporter with the addition of
    * reporting the client based on the localhost address as the client endpoint.
    *
-   * When partially applied, this function conforms to ClientExceptionReceiverBuilder.
+   * It returns a String => Reporter, which conforms to ClientBuilder's monitor option.
    */
-  def clientReporter(scribeHost: String, scribePort: Int)(sn: String) =
-    defaultReporter(scribeHost, scribePort, sn).withClient()
+  @deprecated("Use reporterFactory instead")
+  def clientReporter(scribeHost: String, scribePort: Int): String => Monitor = {
+    monitorFactory(scribeHost, scribePort).clientMonitor _
+  }
 
   /**
    * Create a default source (i.e. server) reporter.
@@ -58,10 +68,38 @@ object Reporter {
    * Default means the Reporter instance created by defaultReporter with the addition of
    * reporting the source based on the SocketAddress argument.
    *
-   * When partially applied, this function conforms to ServerExceptionReceiverBuilder.
+   * It returns a (String, SocketAddress) => Reporter, which conforms to ServerBuilder's
+   * monitor option.
    */
-  def sourceReporter(scribeHost: String, scribePort: Int)(sn: String, sa: SocketAddress) =
-    defaultReporter(scribeHost, scribePort, sn).withSource(sa)
+  @deprecated("Use reporterFactory instead")
+  def sourceReporter(scribeHost: String, scribePort: Int): (String, SocketAddress) => Monitor = {
+    monitorFactory(scribeHost, scribePort).serverMonitor _
+  }
+
+
+  /**
+   * Create a reporter factory that can produce either a client or server reporter based
+   * on the signature.
+   */
+  def monitorFactory(scribeHost: String, scribePort: Int): MonitorFactory = new MonitorFactory {
+    private[this] val scribeClient = makeClient(scribeHost, scribePort)
+
+    def clientMonitor(serviceName: String) =
+      new Reporter(scribeClient, serviceName).withClient()
+    def serverMonitor(serviceName: String, address: SocketAddress) =
+      new Reporter(scribeClient, serviceName).withSource(address)
+  }
+
+
+  private[this] def makeClient(scribeHost: String, scribePort: Int) = {
+    val service = ClientBuilder() // these are from the b3 tracer
+      .hosts(new InetSocketAddress(scribeHost, scribePort))
+      .codec(ThriftClientFramedCodec())
+      .hostConnectionLimit(5)
+      .build()
+
+    new scribe.ServiceToClient(service, new TBinaryProtocol.Factory())
+  }
 }
 
 /**
