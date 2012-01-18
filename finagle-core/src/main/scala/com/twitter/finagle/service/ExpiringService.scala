@@ -8,6 +8,8 @@ import com.twitter.finagle.{
   ChannelClosedException, Service, ServiceClosedException,
   ServiceProxy, WriteException}
 import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
+import java.util.concurrent.atomic.AtomicBoolean
+
 /**
  * A service wrapper that expires the self service after a
  * certain amount of idle time. By default, expiring calls
@@ -29,6 +31,7 @@ class ExpiringService[Req, Rep](
   private[this] val lifeCounter = stats.counter("lifetime")
   private[this] var idleTask = startTimer(maxIdleTime, idleCounter)
   private[this] var lifeTask = startTimer(maxLifeTime, lifeCounter)
+  private[this] val wasReleased = new AtomicBoolean(false)
 
   private[this] def startTimer(duration: Option[Duration], counter: Counter) =
     duration map { t: Duration =>
@@ -56,7 +59,8 @@ class ExpiringService[Req, Rep](
   }
 
   def expired(): Unit = {
-    super.release()
+    if (wasReleased.compareAndSet(false, true))
+      super.release()
   }
 
   override def apply(req: Req): Future[Rep] = {
@@ -86,6 +90,7 @@ class ExpiringService[Req, Rep](
 
   override def release() {
     deactivate()
-    super.release()
+    if (wasReleased.compareAndSet(false, true))
+      super.release()
   }
 }
