@@ -4,7 +4,7 @@ import java.net.SocketAddress
 
 import com.twitter.util.Duration
 
-trait SourcedException {
+trait SourcedException extends Exception {
   var serviceName: String = "unspecified"
 }
 
