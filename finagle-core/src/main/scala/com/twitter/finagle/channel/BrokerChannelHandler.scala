@@ -115,8 +115,19 @@ class BrokerChannelHandler extends SimpleChannelHandler {
     upstreamBroker ! Message(e, ctx)
   }
 
+
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    upstreamBroker ! Exception(e, ctx)
+    // Exceptions are special: we always want to make sure we handle
+    // them, so we're stricter: the receiver must synchronize immediately,
+    // otherwise we proxy it upstream.
+    //
+    // This makes sure that exceptions always get propagated, even if 
+    // the channel handler process has died (eg. it threw an unhandled
+    // exception).
+    val of = upstreamBroker.send(Exception(e, ctx)) orElse Offer.const {
+      super.exceptionCaught(ctx, e)
+    }
+    of.sync()
   }
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {

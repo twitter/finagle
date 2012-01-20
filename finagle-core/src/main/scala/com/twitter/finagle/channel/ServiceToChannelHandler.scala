@@ -36,11 +36,17 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   import ServiceToChannelHandler._
   import State._
 
+  @volatile private[this] var clientConnection: ClientConnection = ClientConnection.nil
   private[this] val state = new AtomicReference[State](Idle)
   private[this] val onShutdownPromise = new Promise[Unit]
   private[this] val monitor =
     parentMonitor andThen Monitor.mk {
-      case _ =>
+      case e =>
+        val msg = "Unhandled exception in connection with " + 
+          clientConnection.remoteAddress.toString +
+          " , shutting down connection"
+
+        log.log(Level.SEVERE, msg, e)
         shutdown()
         true
     }
@@ -124,7 +130,7 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
 
   protected def channelConnected(ctx: ChannelHandlerContext, _onClose: Future[Unit]) {
     val channel = ctx.getChannel
-    val clientConnection = new ClientConnection {
+    clientConnection = new ClientConnection {
       def remoteAddress = channel.getRemoteAddress
       def localAddress = channel.getLocalAddress
       def close() { channel.disconnect() }

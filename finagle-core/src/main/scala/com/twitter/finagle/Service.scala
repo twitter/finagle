@@ -79,6 +79,17 @@ trait ClientConnection {
   def onClose: Future[Unit]
 }
 
+object ClientConnection {
+  val nil: ClientConnection = new ClientConnection {
+    private[this] val unconnected = 
+      new SocketAddress { override def toString = "unconnected" }
+    def remoteAddress = unconnected
+    def localAddress = unconnected
+    def close() {}
+    def onClose = new com.twitter.util.Promise[Unit]
+  }
+}
+
 /**
  * A simple proxy Service that forwards all calls to another Service.
  * This is is useful if you to wrap-but-modify an existing service.
