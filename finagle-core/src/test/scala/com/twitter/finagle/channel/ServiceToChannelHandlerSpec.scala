@@ -6,6 +6,7 @@ import org.specs.Specification
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
+import java.net.InetSocketAddress
 import org.jboss.netty.channel.{
   ChannelHandlerContext, MessageEvent, Channel,
   ChannelPipeline, DownstreamMessageEvent,
@@ -34,6 +35,9 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     channel.close returns closeFuture
     channel.isOpen returns true
     channel.getCloseFuture returns closeFuture
+    val address = mock[InetSocketAddress]
+    address.toString returns "ADDRESS"
+    channel.getRemoteAddress returns address
     val ctx = mock[ChannelHandlerContext]
     channel.getPipeline returns pipeline
     ctx.getChannel returns channel
@@ -87,7 +91,7 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
         handler.exceptionCaught(mock[ChannelHandlerContext], e)
         there was one(service).release()
         there was one(channel).close()
-        org.mockito.Mockito.verifyZeroInteractions(log)
+        there was one(log).log(Level.SEVERE, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
       }
 
       "when the service handler throws (encoded)" in {
