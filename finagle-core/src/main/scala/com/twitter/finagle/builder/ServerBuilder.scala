@@ -22,7 +22,7 @@ import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util._
 import com.twitter.finagle.util.Timer._
-import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise, Return}
+import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise}
 
 import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
 import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
@@ -110,7 +110,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _requestTimeout:                  Option[Duration]                         = None,
   private val _readTimeout:                     Option[Duration]                         = None,
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
-  private val _tracerFactory:                   Tracer.Factory                           = NullTracer.factory,
+  private val _tracerFactory:                   Tracer.Factory                           = () => NullTracer,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
   private val _serverBootstrap:                 Option[ServerBootstrap]                  = None)
 {
@@ -332,10 +332,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   @deprecated("Use tracerFactory instead")
   def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracerFactory = h => {
-      h.onClose { tracer.release() }
-      tracer
-    }))
+    withConfig(_.copy(_tracerFactory = () => tracer))
 
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
@@ -430,9 +427,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val channelStatsHandler = scopedStatsReceiver map { new ChannelStatsHandler(_) }
     val channelRequestStatsHandler = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
 
-    val closing = new Promise[Unit]
-    val closeNotifier = CloseNotifier.makeLifo(closing)
-    val tracer = config.tracerFactory(closeNotifier)
+    val tracer = config.tracerFactory()
 
     bs.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
@@ -614,7 +609,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     val serverChannel = bs.bind(config.bindTo.get)
 
-    Timer.register(closeNotifier)
+    Timer.default.acquire()
     new Server {
       def close(timeout: Duration = Duration.MaxValue) = {
         // According to NETTY-256, the following sequence of operations
@@ -652,10 +647,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         gauges foreach { _.remove() }
 
         bs.releaseExternalResources()
-
-        // Notify all registered resources that service is closing so they can
-        // perform their own cleanup.
-        closing.updateIfEmpty(Return(()))
+        Timer.default.stop()
+        tracer.release()
       }
 
       def localAddress: SocketAddress = serverChannel.getLocalAddress()

@@ -6,7 +6,7 @@ import java.util.ArrayList
 
 import com.twitter.util._
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{Timer, CloseNotifier}
+import com.twitter.finagle.util.Timer
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 import org.mockito.Matchers._
@@ -78,18 +78,6 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
       Timer.default.stop()
       there was one(tracer.client).Log(expected)
-    }
-
-    "register onClose handler that calls release" in {
-      var callback: () => Unit = null
-      val factory = BigBrotherBirdTracer()
-      val tracer = factory(new CloseNotifier { def onClose(h: => Unit) = callback = () => h })
-        .asInstanceOf[BigBrotherBirdTracer]
-
-      tracer.client mustNot beNull
-      callback()
-      // tracer.release() should set client to null
-      tracer.client must beNull
     }
   }
 }

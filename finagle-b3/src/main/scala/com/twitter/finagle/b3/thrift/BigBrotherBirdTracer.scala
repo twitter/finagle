@@ -39,11 +39,8 @@ object BigBrotherBirdTracer {
       new BigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"), sampleRate)
     })
 
-    h => {
+    () => {
       tracer.acquire()
-      h.onClose {
-        tracer.release()
-      }
       tracer
     }
   }

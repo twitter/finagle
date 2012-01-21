@@ -18,13 +18,6 @@ private[finagle] object Timer {
   private[this] val timerStoppingExecutor = Executors.newFixedThreadPool(
     1, new NamedPoolThreadFactory("FINAGLE-TIMER-STOPPER", true/*daemon*/))
 
-  def register(h: CloseNotifier) {
-      default.acquire()
-      h.onClose {
-        default.stop()
-      }
-  }
-
   // This timer should only be used inside the context of finagle,
   // since it requires explicit reference count management. (Via the
   // builder routines.) We jump through a ridiculous number of hoops

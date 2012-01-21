@@ -51,8 +51,7 @@ object ProxySpec extends Specification {
     }
 
     doAfter {
-      // externalClient.release() needs to be called explicitly by each test. Otherwise
-      // 'quit' test would call it twice.
+      externalClient.release()
       server.close(0.seconds)
       proxyService.release()
       proxyClient.release()
@@ -66,7 +65,6 @@ object ProxySpec extends Specification {
       val foo = externalClient.get("foo")()
       foo must beSome
       foo.get.toString(CharsetUtil.UTF_8) mustEqual "bar"
-      externalClient.release()
     }
 
     "stats is supported" in {
@@ -80,13 +78,11 @@ object ProxySpec extends Specification {
           line must startWith("STAT")
         }
       }
-      externalClient.release()
     }
 
     "stats is supported (no value)" in {
       val stats = externalClient.stats("items")()
       stats must beEmpty
-      externalClient.release()
     }
 
     "stats (cachedump) is supported" in {
@@ -104,7 +100,6 @@ object ProxySpec extends Specification {
       stats.find { stat =>
         stat.contains("foo")
       } must beSome
-      externalClient.release()
     }
 
     "quit is supported" in {

@@ -8,7 +8,6 @@ import java.nio.ByteBuffer
 import java.net.InetSocketAddress
 import scala.collection.mutable.ArrayBuffer
 
-import com.twitter.finagle.util.CloseNotifier
 import com.twitter.util.{Time, TimeFormat}
 
 private[tracing] object RecordTimeFormat
@@ -37,7 +36,7 @@ object Annotation {
 }
 
 object Tracer {
-  type Factory = (CloseNotifier) => Tracer
+  type Factory = () => Tracer
 }
 
 trait Tracer {
@@ -56,7 +55,7 @@ trait Tracer {
 }
 
 object NullTracer extends Tracer {
-  val factory: Tracer.Factory = (_) => this
+  val factory: Tracer.Factory = () => this
   def record(record: Record) {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
@@ -74,7 +73,7 @@ class BufferingTracer extends Tracer
 }
 
 object ConsoleTracer extends Tracer {
-  val factory: Tracer.Factory = (_) => this
+  val factory: Tracer.Factory = () => this
 
   def record(record: Record) {
     println(record)
