@@ -91,7 +91,18 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
         handler.exceptionCaught(mock[ChannelHandlerContext], e)
         there was one(service).release()
         there was one(channel).close()
-        there was one(log).log(Level.SEVERE, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
+        there was one(log).log(Level.WARNING, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
+      }
+
+      "a close exception was caught by Netty" in {
+        val exc = new java.nio.channels.ClosedChannelException
+        val e = mock[ExceptionEvent]
+        e.getCause returns exc
+        handler.exceptionCaught(mock[ChannelHandlerContext], e)
+        there was one(service).release()
+        there was one(channel).close()
+        there was no(log).log(Level.WARNING, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
+        there was one(log).log(Level.FINEST, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
       }
 
       "when the service handler throws (encoded)" in {

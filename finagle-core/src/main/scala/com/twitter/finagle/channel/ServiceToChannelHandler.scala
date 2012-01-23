@@ -22,6 +22,22 @@ private[finagle] object ServiceToChannelHandler {
     type State = Value
     val Idle, Busy, Draining, Shutdown = Value
   }
+
+  private[ServiceToChannelHandler] def severity(exc: Throwable) = exc match {
+    case
+        _: java.nio.channels.ClosedChannelException
+      | _: javax.net.ssl.SSLException
+      | _: ReadTimeoutException
+      | _: WriteTimedOutException
+      | _: javax.net.ssl.SSLException => Level.FINEST
+    case e: java.io.IOException if (
+      e.getMessage == "Connection reset by peer" ||
+      e.getMessage == "Broken pipe" ||
+      e.getMessage == "Connection timed out" ||
+      e.getMessage == "No route to host"
+    ) => Level.FINEST
+    case _ => Level.WARNING
+  }
 }
 
 private[finagle] class ServiceToChannelHandler[Req, Rep](
@@ -42,11 +58,11 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   private[this] val monitor =
     parentMonitor andThen Monitor.mk {
       case e =>
-        val msg = "Unhandled exception in connection with " + 
+        val msg = "Unhandled exception in connection with " +
           clientConnection.remoteAddress.toString +
           " , shutting down connection"
 
-        log.log(Level.SEVERE, msg, e)
+        log.log(severity(e), msg, e)
         shutdown()
         true
     }
