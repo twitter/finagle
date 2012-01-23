@@ -162,7 +162,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
-  private val _failureAccrualParams      : Option[(Int, Duration)]       = Some(5, 5.seconds),
+  private val _failureAccrual            : Option[ServiceFactoryWrapper]  = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _maxOutstandingConnections: Option[Int]                = None,
   private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
@@ -199,7 +199,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val logger                    = _logger
   val channelFactory            = _channelFactory
   val tls                       = _tls
-  val failureAccrualParams      = _failureAccrualParams
+  val failureAccrual            = _failureAccrual
   val maxOutstandingConnections = _maxOutstandingConnections
   val tracerFactory             = _tracerFactory
 
@@ -228,7 +228,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
-    "failureAccrualParams"      -> _failureAccrualParams,
+    "failureAccrual"            -> _failureAccrual,
     "maxOutstandingConnections" -> _maxOutstandingConnections,
     "tracerFactory"             -> Some(_tracerFactory)
   )
@@ -254,7 +254,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   }
 }
 
-class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[builder](
+class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   config: ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
 ) {
   import ClientConfig._
@@ -535,8 +535,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * a host failed.  The second paramter specifies how long the host
    * is dead for, once marked.
    */
-  def failureAccrualParams(params: (Int, Duration)): This =
-    withConfig(_.copy(_failureAccrualParams = Some(params)))
+  def failureAccrualParams(params: (Int, Duration)): This = {
+    val filter = FailureAccrualFactory.wrapper(params._1, params._2)
+    failureAccrual(filter)
+  }
+
+  def failureAccrual(failureAccrual: ServiceFactoryWrapper): This = {
+    withConfig(_.copy(_failureAccrual = Some(failureAccrual)))
+  }
+
 
   /**
    * Toggle transmission policy to "Fast-Fail", then if an host become unavailable we will fail
@@ -647,13 +654,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     future
   }
 
-  private[this] lazy val statsReceiver = {
+  private[finagle] lazy val statsReceiver = {
     val statsReceiver = config.statsReceiver getOrElse NullStatsReceiver
     config.name match {
       case Some(name) => statsReceiver.scope(name)
       case None       => statsReceiver
     }
   }
+
+  private[this] lazy val tracer = config.tracerFactory()
 
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
@@ -702,35 +711,19 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         bs, prepareService(codec) _, hostStatsReceiver)
       factory = buildPool(factory, hostStatsReceiver)
 
-      if (config.requestTimeout < Duration.MaxValue) {
-        val filter = new TimeoutFilter[Req, Rep](
-          config.requestTimeout,
-          new IndividualRequestTimeoutException(config.requestTimeout))
+      factory = requestTimeoutFilter andThen factory
 
-        factory = filter andThen factory
-      }
-
-      config.failureAccrualParams foreach { case (numFailures, markDeadFor) =>
-        factory = new FailureAccrualFactory(factory, numFailures, markDeadFor)
-      }
-
-      config.maxOutstandingConnections foreach { n =>
-        factory = new FailFastFactory(factory, n)
-      }
+      factory = failureAccrualFactory(factory)
+      factory = failFastFactory(factory)
 
       val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
-      val monitorFilter = new MonitorFilter[Req, Rep]({
-        config.monitor map { mf =>
-          mf(config.name.get)
-        } getOrElse NullMonitor
-      })
+      factory = statsFilter andThen factory
 
-      factory = monitorFilter andThen statsFilter andThen factory
+      factory = monitorFilter andThen factory
 
       factory
     }
 
-    val tracer = config.tracerFactory()
     var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
       new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
       {
@@ -761,11 +754,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
      */
     factory = new RefcountedFactory(factory)
 
-    if (config.connectTimeout < Duration.MaxValue)
-      factory = new TimeoutFactory(
-        factory,
-        config.connectTimeout,
-        new ServiceTimeoutException(config.connectTimeout))
+    factory = connectTimeoutFactory(factory)
 
     // We maintain a separate log of factory failures here so that
     // factory failures are captured in the service failure
@@ -773,7 +762,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // requests are never dispatched to the underlying stack, they
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
-    factory = (new TracingFilter(tracer)) andThen factory
+    factory = tracingFilter andThen factory
     factory = codec.prepareFactory(factory)
 
     factory
@@ -788,21 +777,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): Service[Req, Rep] = {
     var service: Service[Req, Rep] = new FactoryToService[Req, Rep](internalBuildFactory())
 
-    // We keep the retrying filter at the very bottom: this allows us
-    // to retry across multiple hosts, etc.
-    config.retryPolicy foreach { retryPolicy =>
-      val filter = new RetryingFilter[Req, Rep](retryPolicy, Timer.default, statsReceiver)
-      service = filter andThen service
-    }
-
-    if (config.timeout < Duration.MaxValue) {
-      val filter = new TimeoutFilter[Req, Rep](
-        config.timeout,
-        new GlobalRequestTimeoutException(config.timeout))
-      service = filter andThen service
-    }
-
-    exceptionSourceFilter andThen service
+    // We keep the retrying filter after the load balancer so we can
+    // retry across different hosts rather than the same one repeatedly.
+    service = retryFilter andThen service
+    service = globalTimeoutFilter andThen service
+    service = exceptionSourceFilter andThen service
+    service
   }
 
   /**
@@ -819,5 +799,54 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def unsafeBuildFactory(): ServiceFactory[Req, Rep] =
     withConfig(_.validated).buildFactory()
 
-  private[this] def exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](config.name.get)
+
+  protected def failureAccrualFactory(factory: ServiceFactory[Req, Rep]) =
+    config.failureAccrual map { _ andThen factory } getOrElse(factory)
+
+  protected def failFastFactory(factory: ServiceFactory[Req, Rep]) =
+    config.maxOutstandingConnections map { n =>
+      new FailFastFactory(factory, n)
+    } getOrElse(factory)
+
+  protected def monitorFilter =
+    config.monitor map { monitorFactory =>
+      new MonitorFilter[Req, Rep](monitorFactory(config.name.get))
+    } getOrElse(identityFilter)
+
+  protected def connectTimeoutFactory(factory: ServiceFactory[Req, Rep]) =
+    if (config.connectTimeout < Duration.MaxValue) {
+      val exception = new ServiceTimeoutException(config.connectTimeout)
+      new TimeoutFactory(factory, config.connectTimeout, exception)
+    } else {
+      factory
+    }
+
+  protected def exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](config.name.get)
+
+  protected def retryFilter =
+    config.retryPolicy map { retryPolicy =>
+      new RetryingFilter[Req, Rep](retryPolicy, Timer.default, statsReceiver)
+    } getOrElse(identityFilter)
+
+
+  protected def requestTimeoutFilter =
+    if (config.requestTimeout < Duration.MaxValue) {
+      val exception = new IndividualRequestTimeoutException(config.requestTimeout)
+      new TimeoutFilter[Req, Rep](config.requestTimeout, exception)
+    } else {
+      identityFilter
+    }
+
+  protected def globalTimeoutFilter =
+    if (config.timeout < Duration.MaxValue) {
+      val exception = new GlobalRequestTimeoutException(config.timeout)
+      new TimeoutFilter[Req, Rep](config.timeout, exception)
+    } else {
+      identityFilter
+    }
+
+  protected def tracingFilter = new TracingFilter[Req, Rep](tracer)
+
+  protected val identityFilter = Filter.identity[Req, Rep]
 }
+

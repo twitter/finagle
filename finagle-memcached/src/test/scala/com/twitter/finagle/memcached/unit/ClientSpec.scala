@@ -1,7 +1,12 @@
 package com.twitter.finagle.memcached.unit
 
+import com.twitter.finagle.{Service, ServiceException}
 import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
+import com.twitter.concurrent.Broker
+import com.twitter.util.Future
+import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito
 import org.specs.Specification
 import scala.collection.mutable
@@ -27,33 +32,67 @@ object ClientSpec extends Specification with Mockito {
     expected.size mustEqual 99
 
     // Build Ketama client
-    val client = mock[Client]
     val clients = Map(
-      ("10.0.1.1", 11211, 600)  -> mock[Client],
-      ("10.0.1.2", 11211, 300)  -> mock[Client],
-      ("10.0.1.3", 11211, 200)  -> mock[Client],
-      ("10.0.1.4", 11211, 350)  -> mock[Client],
-      ("10.0.1.5", 11211, 1000) -> mock[Client],
-      ("10.0.1.6", 11211, 800)  -> mock[Client],
-      ("10.0.1.7", 11211, 950)  -> mock[Client],
-      ("10.0.1.8", 11211, 100)  -> mock[Client]
-    )
-    val ketamaClient = new KetamaClient(clients, KeyHasher.KETAMA)
+      ("10.0.1.1", 11211, 600)  -> mock[Service[Command, Response]],
+      ("10.0.1.2", 11211, 300)  -> mock[Service[Command, Response]],
+      ("10.0.1.3", 11211, 200)  -> mock[Service[Command, Response]],
+      ("10.0.1.4", 11211, 350)  -> mock[Service[Command, Response]],
+      ("10.0.1.5", 11211, 1000) -> mock[Service[Command, Response]],
+      ("10.0.1.6", 11211, 800)  -> mock[Service[Command, Response]],
+      ("10.0.1.7", 11211, 950)  -> mock[Service[Command, Response]],
+      ("10.0.1.8", 11211, 100)  -> mock[Service[Command, Response]]
+    ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
+    val broker = new Broker[NodeHealth]
+    val ketamaClient = new KetamaClient(clients, broker.recv, KeyHasher.KETAMA, 160)
 
     "pick the correct node" in {
-      // Test that ketamaClient.clientOf(key) == expected IP
-      val mockClientToIp = clients.map { case (k,v) => v -> k._1 }
+      val ipToService = clients map { case (key, service) => key.host -> service } toMap
+      val rng = new scala.util.Random
       for (testcase <- expected) {
         val mockClient = ketamaClient.clientOf(testcase(0))
-        val resultIp = mockClientToIp(mockClient)
-        resultIp must be_==(testcase(3))
+        val expectedService = ipToService(testcase(3))
+        val randomResponse = Number(rng.nextLong)
+
+        expectedService.apply(any[Incr]) returns Future.value(randomResponse)
+
+        mockClient.incr("foo")().get mustEqual randomResponse.value
       }
     }
+
     "release" in {
       ketamaClient.release()
       clients.values foreach { client =>
         there was one(client).release()
       }
+    }
+
+    "ejects dead clients" in {
+      val serviceA = smartMock[Service[Command,Response]]
+      val serviceB = smartMock[Service[Command,Response]]
+      val keyA = ("10.0.1.1", 11211, 100)
+      val keyB = ("10.0.1.2", 11211, 100)
+      val nodeKeyA = KetamaClientKey(keyA._1, keyA._2, keyA._3)
+      val services = Map(
+        keyA -> serviceA,
+        keyB -> serviceB
+      ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
+
+      val key = ChannelBuffers.wrappedBuffer("foo".getBytes)
+      val value = smartMock[Value]
+      value.key returns key
+      serviceA(Get(Seq(key))) returns Future.value(Values(Seq(value)))
+
+      val broker = new Broker[NodeHealth]
+      val ketamaClient = new KetamaClient(services, broker.recv, KeyHasher.KETAMA, 160)
+
+      ketamaClient.get("foo")()
+      there was one(serviceA).apply(any)
+
+      broker !! NodeMarkedDead(nodeKeyA)
+
+      serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
+      ketamaClient.get("foo")()
+      there was one(serviceB).apply(any)
     }
   }
 

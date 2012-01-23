@@ -3,16 +3,24 @@ package com.twitter.finagle.memcached
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
+import _root_.java.net.InetSocketAddress
 import _root_.java.util.{Map => JMap}
+import _root_.java.util.concurrent.ConcurrentHashMap
 
-import com.twitter.finagle.{ChannelException, RequestException, ServiceException}
+import com.twitter.conversions.time._
+import com.twitter.finagle.{
+  ChannelException, RequestException, ServiceException,
+  ServiceProxy, ServiceFactory, ServiceFactoryWrapper}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.service.FailureAccrualFactory
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.Service
 import com.twitter.hashing._
-import com.twitter.util.{Time, Future, Bijection}
+import com.twitter.util.{Time, Future, Bijection, Duration}
+import com.twitter.concurrent.{Broker, Offer}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
@@ -467,14 +475,12 @@ trait PartitionedClient extends Client {
   def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
     clientOf(key).cas(key, flags, expiry, value, casUnique)
 
-
   def delete(key: String)            = clientOf(key).delete(key)
   def incr(key: String, delta: Long) = clientOf(key).incr(key, delta)
   def decr(key: String, delta: Long) = clientOf(key).decr(key, delta)
 
   def stats(args: Option[String]): Future[Seq[String]] =
     throw new UnsupportedOperationException("No logical way to perform stats without a key")
-
 }
 
 object PartitionedClient {
@@ -491,48 +497,106 @@ object PartitionedClient {
 }
 
 case class KetamaClientKey(host: String, port: Int, weight: Int) {
-  def toTuple = (host, port, weight)
+  private[memcached] def identifier = if (port == 11211) host else host + ":" + port
 }
 
-class KetamaClient(clients: Map[(String, Int, Int), Client], keyHasher: KeyHasher = KeyHasher.KETAMA)
-  extends PartitionedClient
-{
-  def this(clients: JMap[KetamaClientKey, Client]) =
-      this((Map() ++ clients) map { case (k, v) => (k.toTuple, v) })
 
-  require(!clients.isEmpty, "At least one client must be provided")
+sealed abstract trait NodeHealth
+case class NodeMarkedDead(key: KetamaClientKey) extends NodeHealth
+case class NodeRevived(key: KetamaClientKey) extends NodeHealth
 
-  private val NUM_REPS = 160
 
-  protected val distributor = {
-    val nodes = clients.map { case ((ip, port, weight), client) =>
-      val identifier = if (port == 11211) ip else ip + ":" + port
-      KetamaNode(identifier, weight, client)
-    }.toList
-    new KetamaDistributor(nodes, NUM_REPS)
+class KetamaFailureAccrualFactory[Req, Rep](
+  underlying: ServiceFactory[Req, Rep],
+  numFailures: Int,
+  markDeadFor: Duration,
+  key: KetamaClientKey,
+  healthBroker: Broker[NodeHealth]
+) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor) {
+
+  override def markDead() = {
+    super.markDead()
+    healthBroker ! NodeMarkedDead(key)
   }
 
-  protected[memcached] def clientOf(key: String) = {
-    distributor.nodeForHash(keyHasher.hashKey(key))
+  override def revive() = {
+    super.revive()
+    healthBroker ! NodeRevived(key)
+  }
+}
+
+object KetamaClient {
+  val NumReps = 160
+}
+
+class KetamaClient private[memcached](
+  services: Map[KetamaClientKey, Service[Command, Response]],
+  health: Offer[NodeHealth],
+  keyHasher: KeyHasher,
+  numReps: Int,
+  statsReceiver: StatsReceiver = NullStatsReceiver
+) extends PartitionedClient {
+  require(!services.isEmpty, "At least one service must be provided")
+
+  private[this] val nodes = services map {  case (clientKey, service) =>
+    clientKey -> KetamaNode(clientKey.identifier, clientKey.weight, Client(service))
+  } toMap
+
+  private[this] val pristineDistributor = buildDistributor(nodes.values toSeq)
+  @volatile private[this] var currentDistributor = pristineDistributor
+
+  private[this] val ejected = new ConcurrentHashMap[Client, KetamaClientKey]
+  private[this] def liveNodes = (nodes -- ejected.values).values toSeq
+
+  private[this] val liveNodeGauge = statsReceiver.addGauge("live_nodes") { nodes.size - ejected.size }
+  private[this] val deadNodeGauge = statsReceiver.addGauge("dead_nodes") { ejected.size }
+  private[this] val ejectionCount = statsReceiver.counter("ejections")
+
+  private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) =
+    new KetamaDistributor(nodes, numReps)
+
+  health foreach {
+    case NodeMarkedDead(key) =>
+      ejectNode(key)
+      ejectionCount.incr()
+    case NodeRevived(key) => reviveNode(key)
+  }
+
+  override def clientOf(key: String): Client = {
+    val hash = keyHasher.hashKey(key)
+    currentDistributor.nodeForHash(hash)
+  }
+
+  private[this] def rebuildDistributor(): Unit = synchronized {
+    currentDistributor = buildDistributor(liveNodes)
+  }
+
+  private[this] def ejectNode(key: KetamaClientKey) {
+    val node = nodes(key)
+    if (ejected.putIfAbsent(node.handle, key) == null) {
+      rebuildDistributor()
+    }
+  }
+
+  private[this] def reviveNode(key: KetamaClientKey) {
+    val node = nodes(key)
+    if (ejected.remove(key) != null) {
+      rebuildDistributor()
+    }
   }
 
   def release() {
-    clients.values foreach { _.release() }
+    services.values foreach { _.release() }
   }
 }
 
 case class KetamaClientBuilder(
   _nodes: Seq[(String, Int, Int)],
   _hashName: Option[String],
-  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
-
-  @deprecated("Use `KetamaClientBuilder()` instead")
-  def this() = this(
-    Nil,            // nodes
-    Some("ketama"), // hashName
-    None            // clientBuilder
-  )
-
+  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
+  _numFailures: Int = 5,
+  _markDeadFor: Duration = 30.seconds
+  ) {
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
     copy(_nodes = nodes)
@@ -546,16 +610,46 @@ case class KetamaClientBuilder(
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): KetamaClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
 
-  def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
+  def failureAccrualParams(numFailures: Int, markDeadFor: Duration): KetamaClientBuilder =
+    copy(_numFailures = numFailures, _markDeadFor = markDeadFor)
 
-    val clients = Map() ++ _nodes.map { case (hostname, port, weight) =>
-      val b = builder.hosts(hostname + ":" + port).codec(new Memcached)
-      val client = Client(b.build())
-      ((hostname, port, weight) -> client)
+
+  def build(): Client = {
+    val builder =
+      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
+
+    val keys = _nodes map {
+      case (hostname, port, weight) => KetamaClientKey(hostname, port, weight)
     }
+
+    val (failureAccrurers, healths) = keys map { key =>
+      val (wrapper, broker) = failureAccrualWrapper(key)
+      ((key, wrapper), broker)
+    } unzip
+
+    val clients = failureAccrurers map { case (key, fa) =>
+      val hostBuilder = builder
+        .hosts(new InetSocketAddress(key.host, key.port))
+        .failureAccrual(fa)
+      (key -> hostBuilder.build())
+    } toMap
+
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
-    new KetamaClient(clients, keyHasher)
+    val allHealth = Offer.choose(healths: _*)
+    val statsReceiver = builder.statsReceiver.scope("memcached_client")
+    new KetamaClient(clients, allHealth, keyHasher, KetamaClient.NumReps, statsReceiver)
+  }
+
+  private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
+    val broker = new Broker[NodeHealth]
+    val filter = new ServiceFactoryWrapper {
+      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
+        new KetamaFailureAccrualFactory(
+          factory, _numFailures, _markDeadFor, key, broker
+        )
+      }
+    }
+    (filter, broker.recv)
   }
 }
 

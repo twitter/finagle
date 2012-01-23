@@ -150,3 +150,12 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   override def release() = factory.close()
   override def isAvailable = factory.isAvailable
 }
+
+
+/**
+ * A ServiceFactoryWrapper produces a ServiceFactory given a ServiceFactory through, tradionally
+ * by constructing a composing ServiceFactory.
+ */
+trait ServiceFactoryWrapper {
+  def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep]
+}

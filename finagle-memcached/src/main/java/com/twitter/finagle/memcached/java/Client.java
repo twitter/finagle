@@ -29,10 +29,6 @@ public abstract class Client {
     return new com.twitter.finagle.memcached.java.ClientBase(schmemcachedClient);
   }
 
-  public static KetamaClient newInstance(java.util.Map<KetamaClientKey, com.twitter.finagle.memcached.Client> input) {
-    return new com.twitter.finagle.memcached.KetamaClient(input);
-  }
-
   /**
    * Get a key from the server.
    */

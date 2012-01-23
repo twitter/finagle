@@ -1,7 +1,17 @@
 package com.twitter.finagle.service
 
-import com.twitter.util.{Time, Duration, Throw, Return}
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.util.{Time, Duration, Throw, Return, TimerTask, Timer}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceFactoryWrapper}
+import com.twitter.finagle.util.{Timer => FinagleTimer}
+
+object FailureAccrualFactory {
+  def wrapper(numFailures: Int, markDeadFor: Duration): ServiceFactoryWrapper = {
+    new ServiceFactoryWrapper {
+      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
+        new FailureAccrualFactory(factory, numFailures, markDeadFor)
+    }
+  }
+}
 
 /**
  * A factory that does failure accrual, marking it unavailable when
@@ -13,21 +23,37 @@ import com.twitter.finagle.{Service, ServiceFactory}
 class FailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
-    markDeadFor: Duration)
+    markDeadFor: Duration,
+    timer: Timer = FinagleTimer.default)
   extends ServiceFactory[Req, Rep]
 {
+
   private[this] var failureCount = 0
-  private[this] var failedAt = Time.epoch
+  @volatile private[this] var markedDead = false
+  private[this] var reviveTimerTask: Option[TimerTask] = None
 
   private[this] def didFail() = synchronized {
     failureCount += 1
-    if (failureCount >= numFailures)
-      failedAt = Time.now
+    if (failureCount >= numFailures) markDead()
   }
 
   private[this] def didSucceed() = synchronized {
     failureCount = 0
-    failedAt = Time.epoch
+  }
+
+  protected def markDead() = synchronized {
+    if (!markedDead) {
+      markedDead = true
+      val timerTask = timer.schedule(markDeadFor) { revive() }
+      reviveTimerTask = Some(timerTask)
+    }
+  }
+
+  protected def revive() = synchronized {
+    failureCount = 0
+    markedDead = false
+    reviveTimerTask foreach { _.cancel() }
+    reviveTimerTask = None
   }
 
   def make() =
@@ -48,8 +74,7 @@ class FailureAccrualFactory[Req, Rep](
       }
     } onFailure { _ => didFail() }
 
-  override def isAvailable =
-    underlying.isAvailable && synchronized { failedAt.untilNow >= markDeadFor }
+  override def isAvailable = !markedDead && underlying.isAvailable
 
   override def close() = underlying.close()
 
