@@ -44,13 +44,12 @@ class FailureAccrualFactory[Req, Rep](
   protected def markDead() = synchronized {
     if (!markedDead) {
       markedDead = true
-      val timerTask = timer.schedule(markDeadFor) { revive() }
+      val timerTask = timer.schedule(markDeadFor.fromNow) { revive() }
       reviveTimerTask = Some(timerTask)
     }
   }
 
   protected def revive() = synchronized {
-    failureCount = 0
     markedDead = false
     reviveTimerTask foreach { _.cancel() }
     reviveTimerTask = None
