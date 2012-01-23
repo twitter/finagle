@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.{Service, ServiceException}
+import com.twitter.finagle.{Service, ServiceException, ShardNotAvailableException}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
@@ -72,6 +72,7 @@ object ClientSpec extends Specification with Mockito {
       val keyA = ("10.0.1.1", 11211, 100)
       val keyB = ("10.0.1.2", 11211, 100)
       val nodeKeyA = KetamaClientKey(keyA._1, keyA._2, keyA._3)
+      val nodeKeyB = KetamaClientKey(keyB._1, keyB._2, keyB._3)
       val services = Map(
         keyA -> serviceA,
         keyB -> serviceB
@@ -80,7 +81,7 @@ object ClientSpec extends Specification with Mockito {
       val key = ChannelBuffers.wrappedBuffer("foo".getBytes)
       val value = smartMock[Value]
       value.key returns key
-      serviceA(Get(Seq(key))) returns Future.value(Values(Seq(value)))
+      serviceA(any) returns Future.value(Values(Seq(value)))
 
       val broker = new Broker[NodeHealth]
       val ketamaClient = new KetamaClient(services, broker.recv, KeyHasher.KETAMA, 160)
@@ -90,9 +91,23 @@ object ClientSpec extends Specification with Mockito {
 
       broker !! NodeMarkedDead(nodeKeyA)
 
-      serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
-      ketamaClient.get("foo")()
-      there was one(serviceB).apply(any)
+      "goes to secondary if primary is down" in {
+        serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
+        ketamaClient.get("foo")()
+        there was one(serviceB).apply(any)
+      }
+
+      "throws ShardNotAvailableException when no nodes available" in {
+        broker !! NodeMarkedDead(nodeKeyB)
+        ketamaClient.get("foo")() must throwA[ShardNotAvailableException]
+      }
+
+      "brings back the dead node" in {
+        serviceA(any) returns Future.value(Values(Seq(value)))
+        broker !! NodeRevived(nodeKeyA)
+        ketamaClient.get("foo")()
+        there was two(serviceA).apply(any)
+      }
     }
   }
 
