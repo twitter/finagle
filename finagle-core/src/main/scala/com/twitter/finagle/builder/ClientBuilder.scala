@@ -56,7 +56,7 @@ import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor}
+import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor, Promise, Return }
 import com.twitter.util.TimeConversions._
 
 import com.twitter.finagle.channel._
@@ -164,7 +164,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _failureAccrual            : Option[ServiceFactoryWrapper]  = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _maxOutstandingConnections: Option[Int]                = None,
-  private val _tracerFactory             : Tracer.Factory                = () => NullTracer,
+  private val _tracerFactory             : Tracer.Factory                = NullTracer.factory,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
 {
   import ClientConfig._
@@ -519,7 +519,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   @deprecated("Use tracerFactory instead")
   def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracerFactory = () => tracer))
+    withConfig(_.copy(_tracerFactory = h => {
+      h.onClose { tracer.release() }
+      tracer
+    }))
 
   def monitor(mFactory: String => Monitor): This =
     withConfig(_.copy(_monitor = Some(mFactory)))
@@ -560,6 +563,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[this] def buildBootstrap(codec: Codec[Req, Rep], host: SocketAddress) = {
     val cf = config.channelFactory getOrElse ClientBuilder.defaultChannelFactory
     cf.acquire()
+
     val bs = new ClientBootstrap(cf)
     val pf = new ChannelPipelineFactory {
       override def getPipeline = {
@@ -662,8 +666,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     }
   }
 
-  private[this] lazy val tracer = config.tracerFactory()
-
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
    * (e.g., those that support transactions or authentication).
@@ -680,8 +682,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): ServiceFactory[Req, Rep] = {
-    Timer.default.acquire()
 
+    val closing = new Promise[Unit]
+    val closeNotifier = CloseNotifier.makeLifo(closing)
+
+    Timer.register(closeNotifier)
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
     val cluster = config.cluster.get
@@ -724,13 +729,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
+    val tracer = config.tracerFactory(closeNotifier)
+
     var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
       new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
       {
         override def close() = {
           super.close()
-          Timer.default.stop()
-          tracer.release()
+          closing.updateIfEmpty(Return(()))
         }
       }
     } else {
@@ -741,8 +747,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       {
         override def close() = {
           super.close()
-          Timer.default.stop()
-          tracer.release()
+          closing.updateIfEmpty(Return(()))
         }
       }
     }
@@ -762,7 +767,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // requests are never dispatched to the underlying stack, they
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
-    factory = tracingFilter andThen factory
+    factory = tracingFilter(tracer) andThen factory
     factory = codec.prepareFactory(factory)
 
     factory
@@ -845,7 +850,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       identityFilter
     }
 
-  protected def tracingFilter = new TracingFilter[Req, Rep](tracer)
+  protected def tracingFilter(tracer: Tracer) = new TracingFilter[Req, Rep](tracer)
 
   protected val identityFilter = Filter.identity[Req, Rep]
 }
