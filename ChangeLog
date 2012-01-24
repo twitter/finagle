@@ -1,5 +1,13 @@
-??
+1.10.0	2012/01/24
+
 	* http: Message.withX methods now have parameterized return types
+	* memcached: (Ketama) host ejection
+	* Noisier, more robust monitoring.
+	* zk cluster: avoid potential infinite loop
+	* http streaming: better detection, handling of dead channels
+	* http: always encode output as UTF-8
+	* stream: use offer/broker for duplex stream
+	* redis: imported finagle redis client from Tumblr. not yet published.
 
 1.9.12	2012/01/05
 
