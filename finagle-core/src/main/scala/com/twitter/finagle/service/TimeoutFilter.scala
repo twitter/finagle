@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.{
-  Filter, Service, RequestTimeoutException, IndividualRequestTimeoutException}
+  SimpleFilter, Service, RequestTimeoutException, IndividualRequestTimeoutException}
 import com.twitter.finagle.util.Timer
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util
@@ -15,7 +15,7 @@ class TimeoutFilter[Req, Rep](
     timeout: Duration,
     exception: RequestTimeoutException,
     timer: util.Timer = Timer.default)
-    extends Filter[Req, Rep, Req, Rep] {
+    extends SimpleFilter[Req, Rep] {
   def this(timeout: Duration) = this(timeout, new IndividualRequestTimeoutException(timeout))
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {

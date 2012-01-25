@@ -7,7 +7,7 @@ import org.mockito.{Matchers, ArgumentCaptor}
 import com.twitter.util.{Time, Future}
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, MockTimer}
 
 object FailureAccrualFactorySpec extends Specification with Mockito {
   "a failing service" should {
@@ -19,7 +19,8 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
     underlying.isAvailable returns true
     underlying.make() returns Future.value(underlyingService)
 
-    val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds)
+    val timer = new MockTimer
+    val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds, timer)
     val service = factory.make()()
     there was one(underlying).make()
 
@@ -39,7 +40,7 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
         there were three(underlyingService)(123)
       }
     }
- 
+
     "be revived (for one request) after the markDeadFor duration" in {
       Time.withCurrentTimeFrozen { timeControl =>
         service(123)() must throwA[Exception]
@@ -49,6 +50,7 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
         service.isAvailable must beFalse
 
         timeControl.advance(10.seconds)
+        timer.tick()
 
         // Healthy again!
         factory.isAvailable must beTrue
@@ -61,7 +63,7 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
         service.isAvailable must beFalse
       }
     }
- 
+
     "reset failure counters after an individual success" in {
       Time.withCurrentTimeFrozen { timeControl =>
         service(123)() must throwA[Exception]
@@ -71,6 +73,7 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
         service.isAvailable must beFalse
 
         timeControl.advance(10.seconds)
+        timer.tick()
 
         // Healthy again!
         factory.isAvailable must beTrue
@@ -86,16 +89,16 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
 
         // Counts are now reset.
         underlyingService(123) returns Future.exception(new Exception)
-        service(123)() must throwA[Exception]        
+        service(123)() must throwA[Exception]
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
-        service(123)() must throwA[Exception]        
+        service(123)() must throwA[Exception]
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
-        service(123)() must throwA[Exception]        
+        service(123)() must throwA[Exception]
         factory.isAvailable must beFalse
         service.isAvailable must beFalse
-      }      
+      }
     }
   }
 
@@ -134,14 +137,14 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
     underlying.isAvailable returns true
     underlying.make() returns Future.exception(new Exception("i broked :-("))
     val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds)
-    
+
     "fail after the given number of tries" in {
       Time.withCurrentTimeFrozen { timeControl =>
         factory.isAvailable must beTrue
         factory.make()() must throwA[Exception]
-        factory.isAvailable must beTrue   
+        factory.isAvailable must beTrue
         factory.make()() must throwA[Exception]
-        factory.isAvailable must beTrue   
+        factory.isAvailable must beTrue
         factory.make()() must throwA[Exception]
         factory.isAvailable must beFalse
       }

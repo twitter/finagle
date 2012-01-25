@@ -99,6 +99,11 @@ abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 object Filter {
   def identity[Req, Rep] = new SimpleFilter[Req, Rep] {
+    override def andThen[Req2, Rep2](next: Filter[Req, Rep, Req2, Rep2]) = next
+    override def andThen(service: Service[Req, Rep]) = service
+    override def andThen(factory: ServiceFactory[Req, Rep]) = factory
+
     def apply(request: Req, service: Service[Req, Rep]) = service(request)
   }
 }
+

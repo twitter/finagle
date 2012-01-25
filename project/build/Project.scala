@@ -78,9 +78,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   /**
    * finagle-redis is a redis codec contributed by Tumblr.
    */
-  val redisProject = project(
-    "finagle-redis", "finagle-redis",
-    new RedisProject(_), coreProject)
+//  val redisProject = project(
+//    "finagle-redis", "finagle-redis",
+//    new RedisProject(_), coreProject)
 
   /**
    * finagle-http contains an http codec.

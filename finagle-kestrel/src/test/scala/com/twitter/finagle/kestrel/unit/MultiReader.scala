@@ -56,8 +56,8 @@ object MultiReaderSpec extends Specification with Mockito {
 
      val handle = MultiReader(handles)
      val messages = new ArrayBuffer[ReadMessage]
-     (handle.messages??) must be_==(ms(2))
      (handle.messages??) must be_==(ms(0))
+     (handle.messages??) must be_==(ms(2))
      (handle.messages??) must be_==(ms(1))
    }
 
