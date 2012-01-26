@@ -6,6 +6,18 @@
 
 
 module FinagleThrift
+    module AnnotationType
+      BOOL = 0
+      BYTES = 1
+      I16 = 2
+      I32 = 3
+      I64 = 4
+      DOUBLE = 5
+      STRING = 6
+      VALUE_MAP = {0 => "BOOL", 1 => "BYTES", 2 => "I16", 3 => "I32", 4 => "I64", 5 => "DOUBLE", 6 => "STRING"}
+      VALID_VALUES = Set.new([BOOL, BYTES, I16, I32, I64, DOUBLE, STRING]).freeze
+    end
+
     class Endpoint
       include ::Thrift::Struct, ::Thrift::Struct_Union
       IPV4 = 1
@@ -46,6 +58,31 @@ module FinagleThrift
       ::Thrift::Struct.generate_accessors self
     end
 
+    class BinaryAnnotation
+      include ::Thrift::Struct, ::Thrift::Struct_Union
+      KEY = 1
+      VALUE = 2
+      ANNOTATION_TYPE = 3
+      HOST = 4
+
+      FIELDS = {
+        KEY => {:type => ::Thrift::Types::STRING, :name => 'key'},
+        VALUE => {:type => ::Thrift::Types::STRING, :name => 'value', :binary => true},
+        ANNOTATION_TYPE => {:type => ::Thrift::Types::I32, :name => 'annotation_type', :enum_class => FinagleThrift::AnnotationType},
+        HOST => {:type => ::Thrift::Types::STRUCT, :name => 'host', :class => FinagleThrift::Endpoint, :optional => true}
+      }
+
+      def struct_fields; FIELDS; end
+
+      def validate
+        unless @annotation_type.nil? || FinagleThrift::AnnotationType::VALID_VALUES.include?(@annotation_type)
+          raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field annotation_type!')
+        end
+      end
+
+      ::Thrift::Struct.generate_accessors self
+    end
+
     class Span
       include ::Thrift::Struct, ::Thrift::Struct_Union
       TRACE_ID = 1
@@ -53,7 +90,7 @@ module FinagleThrift
       ID = 4
       PARENT_ID = 5
       ANNOTATIONS = 6
-      BINARY_ANNOTATIONS = 7
+      BINARY_ANNOTATIONS = 8
 
       FIELDS = {
         TRACE_ID => {:type => ::Thrift::Types::I64, :name => 'trace_id'},
@@ -61,7 +98,7 @@ module FinagleThrift
         ID => {:type => ::Thrift::Types::I64, :name => 'id'},
         PARENT_ID => {:type => ::Thrift::Types::I64, :name => 'parent_id', :optional => true},
         ANNOTATIONS => {:type => ::Thrift::Types::LIST, :name => 'annotations', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::Annotation}},
-        BINARY_ANNOTATIONS => {:type => ::Thrift::Types::MAP, :name => 'binary_annotations', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
+        BINARY_ANNOTATIONS => {:type => ::Thrift::Types::LIST, :name => 'binary_annotations', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::BinaryAnnotation}}
       }
 
       def struct_fields; FIELDS; end

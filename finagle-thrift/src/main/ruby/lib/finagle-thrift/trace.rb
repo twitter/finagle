@@ -38,11 +38,23 @@ module Trace
     end
   end
 
+  def record(annotation)
+    tracer.record(id, annotation) unless stack.empty?
+  end
+
+  def set_rpc_name(name)
+    tracer.set_rpc_name(id, name) unless stack.empty?
+  end
+
   def sample_rate=(sample_rate)
     if sample_rate > 1 || sample_rate < 0
       raise ArgumentError.new("sample rate must be [0,1]")
     end
     @sample_rate = sample_rate
+  end
+
+  def tracer=(tracer)
+    @tracer = tracer
   end
 
   class TraceId
@@ -100,10 +112,24 @@ module Trace
     rand < (@sample_rate || DEFAULT_SAMPLE_RATE)
   end
 
+  def default_endpoint=(endpoint)
+    @default_endpoint = endpoint
+  end
+
+  def default_endpoint
+    @default_endpoint ||= begin
+      Endpoint.new(Endpoint.host_to_i32(Socket.gethostname), 0, "finagle-ruby")
+    end
+  end
+
   private
 
   def stack
     @stack ||= []
+  end
+
+  def tracer
+    @tracer ||= NullTracer.new
   end
 
 end
