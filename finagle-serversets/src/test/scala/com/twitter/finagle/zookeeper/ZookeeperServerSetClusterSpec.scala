@@ -79,7 +79,6 @@ object ZookeeperServerSetClusterSpec extends Specification {
         .hostConnectionLimit(1)
         .build()
 
-      cluster.thread.join()
       client("hello\n")(1.seconds) mustEqual "olleh"
     }
   }

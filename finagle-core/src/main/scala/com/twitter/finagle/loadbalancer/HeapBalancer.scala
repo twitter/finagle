@@ -1,35 +1,29 @@
 package com.twitter.finagle.loadbalancer
 
-import scala.util.Random
-import scala.collection.mutable.HashMap
-
-import com.twitter.util.Future
-
-import com.twitter.finagle.{
-  Service, ServiceProxy, ServiceFactory,
-  NoBrokersAvailableException}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import util.Random
+import com.twitter.finagle.{Service, ServiceProxy, ServiceFactory, NoBrokersAvailableException}
+import com.twitter.finagle.stats.{Gauge, StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.builder.Cluster
+import collection.mutable.HashMap
+import com.twitter.util._
+import com.twitter.finagle.service.FailingFactory
 
 /**
- * An efficient heap-based load balancer.
- *
- * It has good shuffling, but it's not perfect.  It currently assumes
- * that the input factory sequence is static.
+ * An efficient load balancer that operates of Clusters.
  */
 class HeapBalancer[Req, Rep](
-  factories: Seq[ServiceFactory[Req, Rep]],
+  cluster: Cluster[ServiceFactory[Req, Rep]],
   statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
-  // todo: handle nonavailable nodes somewhat
-  // better. maybe a separate list?
-  private[this] val rng = new Random
-  private[this] val size = factories.size
-
-  private[this] case class Node(
+  case class Node(
     factory: ServiceFactory[Req, Rep],
     var load: Int,
     var index: Int)
+
+  private[this] val rng = new Random
+
+
   private[this] val HeapOps = Heap[Node](
     Ordering.by { _.load },
     new Heap.Indexer[Node] {
@@ -40,25 +34,54 @@ class HeapBalancer[Req, Rep](
   )
   import HeapOps._
 
-  private[this] val heap = {
-    // populate the heap.  since the nodes all
-    // start out unloaded, we form a valid heap by
-    // simply copying them to an array.  our heap
-    // is 1-indexed for easier arithmetic.
+  // Hashmap to hold references to the gauges, which are otherwise only weakly referenced
+  private[this] val gauges = HashMap.empty[Node, (Gauge, Gauge)]
+  private[this] def addGauges(node: Node) = {
+    val availableGauge = statsReceiver.scope("available").addGauge(node.factory.toString) {
+      if (node.factory.isAvailable) 1F else 0F
+    }
+    val loadGauge = statsReceiver.scope("load").addGauge(node.factory.toString) {
+      node.load.toFloat
+    }
+    gauges(node) = (availableGauge, loadGauge)
+  }
+  private[this] def removeGauges(node: Node) = gauges.remove(node)
 
-    val heap = new Array[Node](size + 1)
+  private[this] val (factories, updates) = cluster.snap
+
+  // Build initial heap
+  // Our heap is 1-indexed. We make heap[0] a dummy node
+  // Invariants:
+  //   1. heap[i].index == i
+  //   2. heap.size == size + 1
+  private[this] var size = factories.size
+  private[this] var heap = {
+    val heap = new Array[Node] (size + 1)
+    heap(0) = new Node(new FailingFactory(new Exception("Invalid heap operation on index 0")), 0, 0)
     val nodes = (factories zipWithIndex) map { case (f, i) => Node(f, 0, i + 1) }
+    nodes foreach { addGauges(_) }
     nodes.copyToArray(heap, 1, nodes.size)
     heap
   }
 
-  private[this] val gauges = heap drop 1 map { n =>
-    statsReceiver.scope("available").addGauge(n.factory.toString) {
-      if (n.factory.isAvailable) 1F else 0F
-    }
-
-    statsReceiver.scope("load").addGauge(n.factory.toString) {
-      n.load.toFloat
+  updates foreach { spool =>
+    spool foreach {
+      case Cluster.Add(elem) => synchronized {
+        size += 1
+        val newNode = Node(elem, 0, size)
+        heap = heap :+ newNode
+        fixUp(heap, size)
+        addGauges(newNode)
+      }
+      case Cluster.Rem(elem) => synchronized {
+        val i = heap.indexWhere(n => n.factory eq elem, 1)
+        val node = heap(i)
+        swap(heap, i, size)
+        fixDown(heap, i, size - 1)
+        heap = heap.dropRight(1)
+        size -= 1
+        removeGauges(node)
+      }
     }
   }
 
@@ -111,21 +134,20 @@ class HeapBalancer[Req, Rep](
 
   def make(): Future[Service[Req, Rep]] = {
     if (size == 0) return Future.exception(new NoBrokersAvailableException)
-  
+
     val n = synchronized {
       val n = get(1)
       n.load += 1
       fixDown(heap, n.index, size)
       n
     }
-
     n.factory.make() map { new Wrapped(n, _) } onFailure { _ => put(n) }
   }
 
   def close() {
-    factories foreach { _.close() }
+    heap foreach { _.factory.close() }
   }
 
   override def isAvailable = true
-  override val toString = "HeapBalancer(%d)".format(factories.size)
+  override val toString = "HeapBalancer(%d)".format(size)
 }
