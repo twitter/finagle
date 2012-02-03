@@ -1,8 +1,15 @@
 package com.twitter.finagle.builder
 
+import java.net.SocketAddress
+
 import org.specs.Specification
 import org.specs.mock.Mockito
 import org.mockito.Matchers
+
+import org.jboss.netty.channel.{
+  Channel, ChannelFactory, ChannelPipeline,
+  ChannelPipelineFactory, Channels, ChannelConfig,
+  DefaultChannelConfig}
 
 import com.twitter.util.{Promise, Return, Future}
 

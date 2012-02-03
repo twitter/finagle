@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.util.{Future, Time}
 
 import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.finagle.builder.StaticCluster
+import com.twitter.finagle.stats.NullStatsReceiver
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -55,9 +55,11 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val cluster = new StaticCluster[ServiceFactory[Int, Int]](factories)
-    val heap = new HeapBalancer(cluster)
+    val leastQueued = new LoadBalancedFactory(
+      factories, NullStatsReceiver, new LeastQueuedStrategy)
+    val heap = new HeapBalancer(factories)
 
+    go(leastQueued, "LeastQueued")
     go(heap, "Heap")
   }
 }

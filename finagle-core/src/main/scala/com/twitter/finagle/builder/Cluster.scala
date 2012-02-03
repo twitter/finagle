@@ -1,47 +1,54 @@
 package com.twitter.finagle.builder
+/*
+ * Provides a class for specifying a collection of servers.
+ * e.g. `finagle-serversets` is an implementation of the Finagle Cluster interface using
+ * [[com.twitter.com.zookeeper.ServerSets] (
+ * http://twitter.github.com/commons/apidocs/#com.twitter.common.zookeeper.ServerSet),
+ * {{{
+ *   val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+ *   val cluster = new ZookeeperServerSetCluster(serverSet)
+ * }}}
+ */
 
-import com.twitter.concurrent.Spool
-import com.twitter.util.Future
+import java.net.SocketAddress
+import com.twitter.finagle.ServiceFactory
 
 /**
- * Cluster is a collection of servers. The intention of this interface
+ * A collection of SocketAddresses. The intention of this interface
  * to express membership in a cluster of servers that provide a
  * specific service.
  *
  * Note that a Cluster can be elastic: members can join or leave at
  * any time.
  */
-trait Cluster[T] { self =>
+trait Cluster {
   /**
-   * Takes a snapshot of the collection; returns the current elements and a Spool of future updates
+   * Produce a sequence of ServiceFactories that changes as servers join and
+   * leave the cluster.
    */
-  def snap: (Seq[T], Future[Spool[Cluster.Change[T]]])
+  def mkFactories[Req, Rep](f: SocketAddress => ServiceFactory[Req, Rep]): Seq[ServiceFactory[Req, Rep]]
 
   /**
-   * Maps the elements as well as future updates to the given type.
+   * Register a new Server in the cluster at the given SocketAddress, as so
+   * {{{
+   *   val serviceAddress = new InetSocketAddress(...)
+   *   val server = ServerBuilder()
+   *     .bindTo(serviceAddress)
+   *     .build()
+   *   cluster.join(serviceAddress)
+   * }}}
    */
-  def map[U](f: T => U): Cluster[U] = new Cluster[U] {
-    def snap: (Seq[U], Future[Spool[Cluster.Change[U]]]) = {
-      val (seqT, changeT) = self.snap
-      val changeU = changeT.map { _ map {
-          case Cluster.Add(t) => Cluster.Add(f(t))
-          case Cluster.Rem(t) => Cluster.Rem(f(t))
-        }
-      }
-      (seqT.map(f), changeU)
-    }
+  def join(address: SocketAddress)
+}
+
+class SocketAddressCluster(underlying: Seq[SocketAddress])
+  extends Cluster
+{
+  private[this] var self = underlying
+
+  def mkFactories[Req, Rep](f: SocketAddress => ServiceFactory[Req, Rep]) = self map f
+
+  def join(address: SocketAddress) {
+    self = underlying ++ Seq(address)
   }
-}
-
-object Cluster {
-  sealed abstract trait Change[T]
-  case class Add[T](t: T) extends Change[T]
-  case class Rem[T](t: T) extends Change[T]
-}
-
-/**
- * A simple static cluster implementation.
- */
-class StaticCluster[T](underlying: Seq[T]) extends Cluster[T] {
-  def snap: (Seq[T], Future[Spool[Cluster.Change[T]]]) = (underlying, Future.value(Spool.empty))
 }
