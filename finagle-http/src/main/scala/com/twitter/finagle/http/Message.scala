@@ -123,6 +123,13 @@ abstract class Message extends HttpMessage {
   /** Set Host header */
   def host_=(value: String) { setHeader(HttpHeaders.Names.HOST, value) }
 
+  /** Get Last-Modified header */
+  def lastModified: Option[String] = Option(getHeader(HttpHeaders.Names.LAST_MODIFIED))
+  /** Set LastModified header */
+  def lastModified_=(value: String) { setHeader(HttpHeaders.Names.LAST_MODIFIED, value) }
+  /** Set LastModified header by Date */
+  def lastModified_=(value: Date) { lastModified = Message.httpDateFormat(value) }
+
   /** Get Location header */
   def location: Option[String] = Option(getHeader(HttpHeaders.Names.LOCATION))
   /** Set Location header */
