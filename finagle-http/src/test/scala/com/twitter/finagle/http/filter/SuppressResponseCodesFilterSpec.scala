@@ -20,13 +20,13 @@ object SuppressResponseCodesFilterSpec extends Specification {
   }
 
   "SuppressResponseCodesFilter" should {
-    "not convert 4xx to 200 if no suppress param specified" in {
+    "not convert 5xx to 200 if no suppress param specified" in {
       val request  = Request("code" -> "500")
       val response = SuppressResponseCodesFilter(request, dummyService)()
       response.status must_== Status.InternalServerError
     }
 
-    "not convert 5xx to 200 if no suppress param specified" in {
+    "not convert 4xx to 200 if no suppress param specified" in {
       val request  = Request("code" -> "400")
       val response = SuppressResponseCodesFilter(request, dummyService)()
       response.status must_== Status.BadRequest
