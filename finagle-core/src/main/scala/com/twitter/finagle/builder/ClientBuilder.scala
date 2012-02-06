@@ -69,7 +69,7 @@ import com.twitter.finagle.filter.{MonitorFilter, ExceptionSourceFilter}
 import com.twitter.finagle.stats.{
   StatsReceiver, RollupStatsReceiver,
   NullStatsReceiver, GlobalStatsReceiver}
-import com.twitter.finagle.loadbalancer.{LoadBalancedFactory, LeastQueuedStrategy, HeapBalancer}
+import com.twitter.finagle.loadbalancer.HeapBalancer
 import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
@@ -144,7 +144,7 @@ final case class ClientHostConfig(
  * are accessed by the end-user.
  */
 final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
-  private val _cluster                   : Option[Cluster]               = None,
+  private val _cluster                   : Option[Cluster[SocketAddress]]               = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _tcpConnectTimeout         : Duration                      = 10.milliseconds,
   private val _connectTimeout            : Duration                      = Duration.MaxValue,
@@ -304,7 +304,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def hosts(
     addresses: Seq[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    cluster(new SocketAddressCluster(addresses))
+    cluster(new StaticCluster[SocketAddress](addresses))
 
   /**
    * A convenience method for specifying a one-host
@@ -322,7 +322,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * remains connected.
    */
   def cluster(
-    cluster: Cluster
+    cluster: Cluster[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     withConfig(_.copy(_cluster = Some(cluster)))
 
@@ -666,6 +666,43 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     }
   }
 
+  private[this] def hostToServiceFactory(codec: Codec[Req, Rep], host: SocketAddress): ServiceFactory[Req, Rep] = {
+    // The per-host stack is as follows:
+    //
+    //   ChannelService
+    //   Pool
+    //   Timeout
+    //   Failure accrual
+    //   Stats
+    //
+    // the pool & below are host-specific,
+
+    val hostStatsReceiver = new RollupStatsReceiver(statsReceiver).withSuffix(
+      host match {
+        case iaddr: InetSocketAddress => "%s:%d".format(iaddr.getHostName, iaddr.getPort)
+        case other => other.toString
+      }
+    )
+
+    var factory: ServiceFactory[Req, Rep] = null
+    val bs = buildBootstrap(codec, host)
+    factory = new ChannelServiceFactory[Req, Rep](
+      bs, prepareService(codec) _, hostStatsReceiver)
+    factory = buildPool(factory, hostStatsReceiver)
+
+    factory = requestTimeoutFilter andThen factory
+
+    factory = failureAccrualFactory(factory)
+    factory = failFastFactory(factory)
+
+    val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
+    factory = statsFilter andThen factory
+
+    factory = monitorFilter andThen factory
+
+    factory
+  }
+
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
    * (e.g., those that support transactions or authentication).
@@ -690,48 +727,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
     val cluster = config.cluster.get
-    val codec   = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
-
-    val hostFactories = cluster mkFactories { host =>
-      // The per-host stack is as follows:
-      //
-      //   ChannelService
-      //   Pool
-      //   Timeout
-      //   Failure accrual
-      //   Stats
-      //
-      // the pool & below are host-specific,
-
-      val hostStatsReceiver = new RollupStatsReceiver(statsReceiver).withSuffix(
-        host match {
-          case iaddr: InetSocketAddress => "%s:%d".format(iaddr.getHostName, iaddr.getPort)
-          case other => other.toString
-        }
-      )
-
-      var factory: ServiceFactory[Req, Rep] = null
-      val bs = buildBootstrap(codec, host)
-      factory = new ChannelServiceFactory[Req, Rep](
-        bs, prepareService(codec) _, hostStatsReceiver)
-      factory = buildPool(factory, hostStatsReceiver)
-
-      factory = requestTimeoutFilter andThen factory
-
-      factory = failureAccrualFactory(factory)
-      factory = failFastFactory(factory)
-
-      val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
-      factory = statsFilter andThen factory
-
-      factory = monitorFilter andThen factory
-
-      factory
-    }
-
+    val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
     val tracer = config.tracerFactory(closeNotifier)
 
-    var factory: ServiceFactory[Req, Rep] = if (config.cluster.get.isInstanceOf[SocketAddressCluster]) {
+    val hostFactories = cluster map { host => hostToServiceFactory(codec, host) }
+    var factory: ServiceFactory[Req, Rep] =
       new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
       {
         override def close() = {
@@ -739,18 +739,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           closing.updateIfEmpty(Return(()))
         }
       }
-    } else {
-      new LoadBalancedFactory(
-        hostFactories,
-        statsReceiver.scope("loadbalancer"),
-        new LeastQueuedStrategy(statsReceiver.scope("least_queued_strategy")))
-      {
-        override def close() = {
-          super.close()
-          closing.updateIfEmpty(Return(()))
-        }
-      }
-    }
 
     /*
      * Everything above this point in the stack (load balancer, pool)
