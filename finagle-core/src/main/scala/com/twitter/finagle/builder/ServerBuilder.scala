@@ -103,7 +103,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _backlog:                         Option[Int]                              = None,
   private val _bindTo:                          Option[SocketAddress]                    = None,
   private val _logger:                          Option[Logger]                           = None,
-  private val _tls:                             Option[(String, String, String, String)] = None,
+  private val _tls:                             Option[(String, String, String, String, String)] = None,
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
@@ -293,8 +293,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     withConfig(_.copy(_logger = Some(logger)))
 
   def tls(certificatePath: String, keyPath: String,
-          caCertificatePath: String = null, ciphers: String = null): This =
-    withConfig(_.copy(_tls = Some(certificatePath, keyPath, caCertificatePath, ciphers)))
+          caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
+    withConfig(_.copy(_tls = Some(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)))
 
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
@@ -467,8 +467,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
 
         // SSL comes first so that ChannelSnooper gets plaintext
-        config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers) =>
-          val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers)
+        config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers, nextProtos) =>
+          val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)
           engine.self.setUseClientMode(false)
           engine.self.setEnableSessionCreation(true)
 

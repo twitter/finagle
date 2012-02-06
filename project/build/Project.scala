@@ -9,9 +9,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   override def usesMavenStyleBasePatternInPublishLocalConfiguration = true
   override def subversionRepository = Some("https://svn.twitter.biz/maven-public")
 
-  val nettyRepo =
-    "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
-
   val reflectionsRepo =
     "reflections.googlecode.com" at "http://reflections.googlecode.com/svn/repo"
 
@@ -155,7 +152,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val netty = "org.jboss.netty" %  "netty" % "3.2.7.Final" withSources()
+    val netty = "io.netty" % "netty" % "3.3.1.Final" withSources()
 
     projectDependencies(
       "util" ~ "util-core",

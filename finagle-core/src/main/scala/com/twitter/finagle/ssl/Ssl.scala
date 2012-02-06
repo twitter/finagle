@@ -32,18 +32,21 @@ object Ssl {
   def server(certificatePath: String,
              keyPath: String,
              caCertPath: String,
-             ciphers: String): Engine = {
+             ciphers: String,
+             nextProtos: String): Engine = {
     val nativeInstance = OpenSSL.server(
       certificatePath,
       keyPath,
       caCertPath,
       ciphers,
+      nextProtos,
       cacheContexts
     )
 
     nativeInstance.getOrElse {
       require(caCertPath == null, "'CA Certificate' parameter unsupported with JSSE SSL provider")
       require(ciphers == null, "'Ciphers' parameter unsupported with JSSE SSL provider")
+      require(nextProtos == null, "'Next Protocols' parameter unsupported with JSSE SSL provider")
 
       val jsseInstance = JSSE.server(
         certificatePath,
