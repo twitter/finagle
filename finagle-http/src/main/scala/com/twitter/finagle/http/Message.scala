@@ -111,6 +111,13 @@ abstract class Message extends HttpMessage {
   /** Set Content-Type header to application/json;charset=utf-8 */
   def setContentTypeJson() { setHeader(HttpHeaders.Names.CONTENT_TYPE, Message.ContentTypeJson) }
 
+  /** Get Date header */
+  def date: Option[String] = Option(getHeader(HttpHeaders.Names.LAST_MODIFIED))
+  /** Set Date header */
+  def date_=(value: String) { setHeader(HttpHeaders.Names.LAST_MODIFIED, value) }
+  /** Set Date header by Date */
+  def date_=(value: Date) { date = Message.httpDateFormat(value) }
+
   /** Get Expires header */
   def expires: Option[String] = Option(getHeader(HttpHeaders.Names.EXPIRES))
   /** Set Expires header */
@@ -125,9 +132,9 @@ abstract class Message extends HttpMessage {
 
   /** Get Last-Modified header */
   def lastModified: Option[String] = Option(getHeader(HttpHeaders.Names.LAST_MODIFIED))
-  /** Set LastModified header */
+  /** Set Last-Modified header */
   def lastModified_=(value: String) { setHeader(HttpHeaders.Names.LAST_MODIFIED, value) }
-  /** Set LastModified header by Date */
+  /** Set Last-Modified header by Date */
   def lastModified_=(value: Date) { lastModified = Message.httpDateFormat(value) }
 
   /** Get Location header */
@@ -163,6 +170,11 @@ abstract class Message extends HttpMessage {
   def retryAfter_=(value: String) { setHeader(HttpHeaders.Names.RETRY_AFTER, value) }
   /** Set Retry-After header by seconds */
   def retryAfter_=(value: Long) { retryAfter = value.toString }
+
+  /** Get Server header */
+  def server: Option[String] = Option(getHeader(HttpHeaders.Names.SERVER))
+  /** Set Server header */
+  def server_=(value: String) { setHeader(HttpHeaders.Names.SERVER, value) }
 
   /** Get User-Agent header */
   def userAgent: Option[String] = Option(getHeader(HttpHeaders.Names.USER_AGENT))
