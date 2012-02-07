@@ -203,8 +203,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     // installation. We might be able to ship the redis binary with some
     // architectures, and make the test conditional.
     override def testOptions = {
-      val name = "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec"
-      ExcludeTests(name :: Nil) :: super.testOptions.toList
+      val tests = List(
+        "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec",
+        "com.twitter.finagle.redis.integration.ClientSpec")
+      ExcludeTests(tests) :: super.testOptions.toList
     }
 
     projectDependencies(
