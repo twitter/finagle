@@ -24,8 +24,12 @@ class TimeoutFilter[Req, Rep](
     res.within(timer, timeout) rescue {
       case _: java.util.concurrent.TimeoutException =>
         res.cancel()
-        Trace.record("finagle.timeout")
+        Trace.record(TimeoutFilter.TimeoutAnnotation)
         Future.exception(exception)
     }
   }
+}
+
+object TimeoutFilter {
+  val TimeoutAnnotation = "finagle.timeout"
 }

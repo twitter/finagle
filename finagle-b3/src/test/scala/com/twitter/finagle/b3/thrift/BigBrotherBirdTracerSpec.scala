@@ -12,6 +12,7 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import org.mockito.Matchers._
 import java.nio.ByteBuffer
 import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.finagle.service.TimeoutFilter
 
 object BigBrotherBirdTracerSpec extends Specification with Mockito {
 
@@ -90,6 +91,25 @@ object BigBrotherBirdTracerSpec extends Specification with Mockito {
       callback()
       // tracer.release() should set client to null
       tracer.client must beNull
+    }
+
+    "logSpan if a timeout occurs" in {
+      val ann1 = Annotation.Message("some_message")
+      val ann2 = Annotation.Rpcname("some_service", "rpc_name")
+      val ann3 = Annotation.Message(TimeoutFilter.timeoutAnnotation)
+
+      val tracer = new BigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, 1)
+      tracer.client = mock[scribe.ServiceToClient]
+
+      tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
+
+      Timer.default.acquire()
+      tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
+      tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
+      tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
+
+      // scribe Log method is in java
+      there was one(tracer.client).Log(any[java.util.List[LogEntry]])
     }
   }
 }
