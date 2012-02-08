@@ -48,6 +48,12 @@ object BigBrotherBirdTracer {
       tracer
     }
   }
+
+  /**
+   * Util method since named parameters can't be called from Java
+   * @param sr
+   */
+  def apply(sr: StatsReceiver): Tracer.Factory = apply(statsReceiver = sr)
 }
 
 /**
