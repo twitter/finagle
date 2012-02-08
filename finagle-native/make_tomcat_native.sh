@@ -35,5 +35,5 @@ echo "  APR:     http://apr.apache.org/"
 echo "  OpenSSL: http://openssl.org/"
 echo ""
 echo "You need OpenSSL 1.0.1 or greater; or 1.0.0g with an SPDY NPN patch applied."
-echo "For 1.0.0g, an NPN patch is included in this directory. 'git apply' it in the 1.0.0g source tree""
-
+echo "For OpenSSL 1.0.0g, an NPN patch is included in this directory for convenience."
+echo "To use the patch, 'git apply < patchfile' it in the 1.0.0g source tree and build."
