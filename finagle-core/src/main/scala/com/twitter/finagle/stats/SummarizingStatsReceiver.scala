@@ -6,7 +6,7 @@ package com.twitter.finagle.stats
  */
 
 import java.util.concurrent.atomic.AtomicInteger
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, SynchronizedBuffer}
 
 import com.twitter.util.MapMaker
 
@@ -18,8 +18,8 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   }
 
   // Just keep all the samples.
-  private[this] val stats = MapMaker[Seq[String], ArrayBuffer[Float]] { config =>
-    config.compute { _ => new ArrayBuffer[Float] }
+  private[this] val stats = MapMaker[Seq[String], ArrayBuffer[Float] with SynchronizedBuffer[Float]] { config =>
+    config.compute { _ => new ArrayBuffer[Float] with SynchronizedBuffer[Float]}
   }
 
   def counter(name: String*) = new Counter {
