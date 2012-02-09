@@ -117,7 +117,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-example", "finagle-example",
     new ExampleProject(_),
     coreProject, httpProject, streamProject, thriftProject,
-    memcachedProject, kestrelProject, redisProject)
+    memcachedProject, kestrelProject, redisProject, ostrich4Project)
 
   /**
    * finagle-stress has stress/integration test suites & tools for
