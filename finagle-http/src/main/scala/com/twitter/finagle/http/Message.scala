@@ -163,9 +163,9 @@ abstract class Message extends HttpMessage {
   def setContentTypeJson() { setHeader(HttpHeaders.Names.CONTENT_TYPE, Message.ContentTypeJson) }
 
   /** Get Date header */
-  def date: Option[String] = Option(getHeader(HttpHeaders.Names.LAST_MODIFIED))
+  def date: Option[String] = Option(getHeader(HttpHeaders.Names.DATE))
   /** Set Date header */
-  def date_=(value: String) { setHeader(HttpHeaders.Names.LAST_MODIFIED, value) }
+  def date_=(value: String) { setHeader(HttpHeaders.Names.DATE, value) }
   /** Set Date header by Date */
   def date_=(value: Date) { date = Message.httpDateFormat(value) }
 
