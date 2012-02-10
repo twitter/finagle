@@ -2,6 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.concurrent.Spool
 import com.twitter.util.Future
+import collection.mutable.HashMap
 
 /**
  * Cluster is a collection of servers. The intention of this interface
@@ -21,14 +22,19 @@ trait Cluster[T] { self =>
    * Maps the elements as well as future updates to the given type.
    */
   def map[U](f: T => U): Cluster[U] = new Cluster[U] {
+    // Translation cache to ensure that mapping is idempotent.
+    private[this] val cache = HashMap.empty[T, U]
+    private[this] def g(t: T) = synchronized { cache.getOrElseUpdate(t, f(t)) }
+
     def snap: (Seq[U], Future[Spool[Cluster.Change[U]]]) = {
       val (seqT, changeT) = self.snap
-      val changeU = changeT.map { _ map {
-          case Cluster.Add(t) => Cluster.Add(f(t))
-          case Cluster.Rem(t) => Cluster.Rem(f(t))
+      val seqU = seqT map g
+      val changeU = changeT map { _ map {
+          case Cluster.Add(t) => Cluster.Add(g(t))
+          case Cluster.Rem(t) => Cluster.Rem(g(t))
         }
       }
-      (seqT.map(f), changeU)
+      (seqU, changeU)
     }
   }
 }
