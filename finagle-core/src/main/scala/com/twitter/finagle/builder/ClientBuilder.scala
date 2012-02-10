@@ -317,7 +317,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Specify a cluster directly.  A
-   * [[com.twitter.finagle.builder.Cluster] defines a dynamic
+   * [[com.twitter.finagle.builder.Cluster]] defines a dynamic
    * mechanism for specifying a set of endpoints to which this client
    * remains connected.
    */
