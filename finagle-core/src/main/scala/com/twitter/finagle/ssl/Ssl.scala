@@ -27,7 +27,7 @@ object Ssl {
    * @param caCertPath [OpenSSL] The path to the optional PEM encoded CA cert file
    * @param cipherSpec [OpenSSL] The cipher spec
    * @throws RuntimeException if no provider could be initialized
-   * @returns an SSLEngine
+   * @return an SSLEngine
    */
   def server(certificatePath: String,
              keyPath: String,
