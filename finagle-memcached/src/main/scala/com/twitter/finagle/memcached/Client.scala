@@ -528,7 +528,7 @@ class KetamaFailureAccrualFactory[Req, Rep](
 object KetamaClient {
   val NumReps = 160
   private val shardNotAvailableDistributor = {
-    val failedService = new FailedService[Command, Response](new ShardNotAvailableException)
+    val failedService = new FailedService(new ShardNotAvailableException)
     new SingletonDistributor(Client(failedService))
   }
 }

@@ -1,21 +1,15 @@
 package com.twitter.finagle.builder
 
-import java.net.SocketAddress
-
 import org.specs.Specification
 import org.specs.mock.Mockito
 import org.mockito.Matchers
-
-import org.jboss.netty.channel.{
-  Channel, ChannelFactory, ChannelPipeline,
-  ChannelPipelineFactory, Channels, ChannelConfig,
-  DefaultChannelConfig}
 
 import com.twitter.util.{Promise, Return, Future}
 
 import com.twitter.finagle._
 import com.twitter.finagle.channel.ChannelService
 import com.twitter.finagle.integration.IntegrationBase
+import com.twitter.finagle.tracing.Tracer
 
 object ClientBuilderSpec extends Specification with IntegrationBase with Mockito {
   "ClientBuilder" should {
@@ -55,6 +49,22 @@ object ClientBuilderSpec extends Specification with IntegrationBase with Mockito
       there was no(m.channelFactory).releaseExternalResources()
       client2.release()
       there was one(m.channelFactory).releaseExternalResources()
+    }
+
+    "notify resources when client is released" in {
+      val tracer = mock[Tracer]
+      var called = false
+
+      val client = new MockChannel().clientBuilder
+        .tracerFactory { h =>
+          h.onClose { called = true }
+          tracer
+        }
+        .build()
+
+      called must beFalse
+      client.release()
+      called must beTrue
     }
   }
 }

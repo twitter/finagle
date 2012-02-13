@@ -9,9 +9,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   override def usesMavenStyleBasePatternInPublishLocalConfiguration = true
   override def subversionRepository = Some("https://svn.twitter.biz/maven-public")
 
-  val nettyRepo =
-    "repository.jboss.org" at "http://repository.jboss.org/nexus/content/groups/public/"
-
   val reflectionsRepo =
     "reflections.googlecode.com" at "http://reflections.googlecode.com/svn/repo"
 
@@ -78,9 +75,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   /**
    * finagle-redis is a redis codec contributed by Tumblr.
    */
-//  val redisProject = project(
-//    "finagle-redis", "finagle-redis",
-//    new RedisProject(_), coreProject)
+  val redisProject = project(
+    "finagle-redis", "finagle-redis",
+    new RedisProject(_), coreProject)
 
   /**
    * finagle-http contains an http codec.
@@ -120,7 +117,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-example", "finagle-example",
     new ExampleProject(_),
     coreProject, httpProject, streamProject, thriftProject,
-    memcachedProject, kestrelProject)
+    memcachedProject, kestrelProject, redisProject, ostrich4Project)
 
   /**
    * finagle-stress has stress/integration test suites & tools for
@@ -155,7 +152,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val netty = "org.jboss.netty" %  "netty" % "3.2.7.Final"
+    val netty = "io.netty" % "netty" % "3.3.1.Final" withSources()
 
     projectDependencies(
       "util" ~ "util-core",
@@ -206,8 +203,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     // installation. We might be able to ship the redis binary with some
     // architectures, and make the test conditional.
     override def testOptions = {
-      val name = "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec"
-      ExcludeTests(name :: Nil) :: super.testOptions.toList
+      val tests = List(
+        "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec",
+        "com.twitter.finagle.redis.integration.ClientSpec")
+      ExcludeTests(tests) :: super.testOptions.toList
     }
 
     projectDependencies(
@@ -274,7 +273,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift   = "thrift"      % "libthrift" % "0.5.0"
     val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
-    projectDependencies("ostrich")
+    projectDependencies(
+      "ostrich",
+      "util" ~ "util-logging"
+    )
   }
 
   class B3Project(info: ProjectInfo) extends StandardProject(info)

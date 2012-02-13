@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap, SynchronizedMap, WeakHashMap}
 import scala.ref.WeakReference
 
 import com.twitter.util.{Future, Time, JavaSingleton}
@@ -167,6 +167,46 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
 }
 
 object NullStatsReceiver extends NullStatsReceiver
+
+/** In-memory stats receiver for testing. */
+class InMemoryStatsReceiver extends StatsReceiver {
+  val repr = this
+
+  val counters = new HashMap[Seq[String], Int]
+                   with SynchronizedMap[Seq[String], Int]
+  val stats    = new HashMap[Seq[String], Seq[Float]]
+                   with SynchronizedMap[Seq[String], Seq[Float]]
+  val gauges   = new WeakHashMap[Seq[String], () => Float]
+                   with SynchronizedMap[Seq[String], () => Float]
+
+  def counter(name: String*): Counter = {
+    new Counter {
+      def incr(delta: Int) {
+        val oldValue = counters.get(name).getOrElse(0)
+        counters(name) = oldValue + delta
+      }
+    }
+  }
+
+  def stat(name: String*): Stat = {
+    new Stat {
+      def add(value: Float) {
+        val oldValue = stats.get(name).getOrElse(Seq.empty)
+        stats(name) = oldValue :+ value
+      }
+    }
+  }
+
+  def addGauge(name: String*)(f: => Float): Gauge = {
+    val gauge = new Gauge {
+      def remove() {
+        gauges -= name
+      }
+    }
+    gauges += name -> (() => f)
+    gauge
+  }
+}
 
 /**
  * Note: currently supports only gauges, will throw

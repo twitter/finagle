@@ -1,3 +1,9 @@
+1.11.0  ?
+
+	* http: Message.mediaType=: no longer sets charset to utf-8
+	* http: Message.setContentType: defaults charset to utf-8
+	* http: added Message.charset, Message.charset=
+
 1.10.0	2012/01/24
 
 	* http: Message.withX methods now have parameterized return types

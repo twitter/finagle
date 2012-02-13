@@ -24,11 +24,9 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     val statsReceiver = mock[StatsReceiver]
     val request = new Foo
     val service = mock[Service[Foo, String]]
-    val postponedService = mock[Promise[Service[Foo, String]]]
     val serviceFactory = { (clientConnection: ClientConnection) => service }
     val handler = new ServiceToChannelHandler(
-      service, postponedService, serviceFactory,
-      statsReceiver, log, NullMonitor)
+      serviceFactory, statsReceiver, log, NullMonitor)
     val pipeline = mock[ChannelPipeline]
     val channel = mock[Channel]
     val closeFuture = Channels.future(channel)

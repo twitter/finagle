@@ -51,7 +51,7 @@ class IdleConnectionFilter[Req, Rep](
       refused.incr()
       val address = c.remoteAddress
       c.close()
-      new FailedService[Req, Rep](new ConnectionRefusedException(address))
+      new FailedService(new ConnectionRefusedException(address))
     }
     c.onClose ensure { connectionCounter.decrementAndGet() }
     service

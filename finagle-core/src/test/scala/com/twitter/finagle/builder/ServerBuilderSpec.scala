@@ -7,12 +7,13 @@ import org.mockito.Matchers
 import java.net.{SocketAddress, InetSocketAddress}
 
 import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.ServerChannel
+import org.jboss.netty.channel.{ServerChannel, ChannelFuture}
 
 import com.twitter.util.Future
 
 import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
+import com.twitter.finagle.tracing.Tracer
 
 object ServerBuilderSpec extends Specification with IntegrationBase with Mockito {
   "ServerBuilder" should {
@@ -24,6 +25,8 @@ object ServerBuilderSpec extends Specification with IntegrationBase with Mockito
 
     // Channel
     val channel = mock[ServerChannel]
+    val channelFuture = mock[ChannelFuture]
+    channel.close() returns channelFuture
 
     // ServerBootstrap
     val bs = mock[ServerBootstrap]
@@ -47,6 +50,24 @@ object ServerBuilderSpec extends Specification with IntegrationBase with Mockito
       val result = server.localAddress
 
       result must be_==(address)
+    }
+
+    "build server that notifies when it's closing" in {
+      val address = mock[SocketAddress]
+      val tracer = mock[Tracer]
+      var called = false
+
+      val server = serverBuilder
+        .bindTo(address)
+        .tracerFactory { h =>
+          h.onClose { called = true }
+          tracer
+        }
+        .build(service)
+
+      called must beFalse
+      server.close()
+      called must beTrue
     }
   }
 }

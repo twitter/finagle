@@ -61,6 +61,17 @@ object Commands {
   val ZSCORE            = "ZSCORE"
   val ZUNIONSTORE       = "ZUNIONSTORE"
 
+  // Miscellaneous
+  val FLUSHDB           = "FLUSHDB"
+  val SELECT            = "SELECT"
+
+  // Hash Sets
+  val HDEL              = "HDEL"
+  val HGET              = "HGET"
+  val HGETALL           = "HGETALL"
+  val HMGET             = "HMGET"
+  val HSET              = "HSET"
+
   val commandMap: Map[String,Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {args => Del(BytesToString.fromList(args))},
@@ -69,7 +80,7 @@ object Commands {
     EXPIREAT          -> {ExpireAt(_)},
     KEYS              -> {Keys(_)},
     PERSIST           -> {Persist(_)},
-    RANDOMKEY         -> {args => Randomkey()},
+    RANDOMKEY         -> {_ => Randomkey()},
     RENAME            -> {Rename(_)},
     RENAMENX          -> {RenameNx(_)},
     TTL               -> {Ttl(_)},
@@ -111,7 +122,19 @@ object Commands {
     ZREVRANGEBYSCORE  -> {ZRevRangeByScore(_)},
     ZREVRANK          -> {ZRevRank(_)},
     ZSCORE            -> {ZScore(_)},
-    ZUNIONSTORE       -> {ZUnionStore(_)}
+    ZUNIONSTORE       -> {ZUnionStore(_)},
+
+    // miscellaneous
+    FLUSHDB           -> {_ => FlushDB()},
+    SELECT            -> {Select(_)},
+
+    // hash sets
+    HDEL              -> {HDel(_)},
+    HGET              -> {HGet(_)},
+    HGETALL           -> {HGetAll(_)},
+    HMGET             -> {HMGet(_)},
+    HSET              -> {HSet(_)}
+
   )
 
   def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd).map {

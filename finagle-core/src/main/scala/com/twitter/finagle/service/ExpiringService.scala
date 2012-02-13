@@ -32,7 +32,7 @@ class ExpiringService[Req, Rep](
   private[this] var idleTask = startTimer(maxIdleTime, idleCounter)
   private[this] var lifeTask = startTimer(maxLifeTime, lifeCounter)
   private[this] val wasReleased = new AtomicBoolean(false)
-
+  
   private[this] def startTimer(duration: Option[Duration], counter: Counter) =
     duration map { t: Duration =>
       timer.schedule(t.fromNow) { expire(counter) }
@@ -58,7 +58,7 @@ class ExpiringService[Req, Rep](
     }
   }
 
-  def expired(): Unit = {
+  private[this] def expired(): Unit = {
     if (wasReleased.compareAndSet(false, true))
       super.release()
   }

@@ -17,6 +17,7 @@ import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ThriftClientRequest,
 import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
+import com.twitter.finagle.service.TimeoutFilter
 
 object BigBrotherBirdTracer {
   // to make sure we only create one instance of the tracer
@@ -39,11 +40,20 @@ object BigBrotherBirdTracer {
       new BigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"), sampleRate)
     })
 
-    () => {
+    h => {
       tracer.acquire()
+      h.onClose {
+        tracer.release()
+      }
       tracer
     }
   }
+
+  /**
+   * Util method since named parameters can't be called from Java
+   * @param sr
+   */
+  def apply(sr: StatsReceiver): Tracer.Factory = apply(statsReceiver = sr)
 }
 
 /**
@@ -159,7 +169,9 @@ private[thrift] class BigBrotherBirdTracer(
 
     // if either two "end annotations" exists we send off the span
     if (span.annotations.exists { a =>
-      a.value.equals(thrift.Constants.CLIENT_RECV) || a.value.equals(thrift.Constants.SERVER_SEND)
+      a.value.equals(thrift.Constants.CLIENT_RECV) ||
+      a.value.equals(thrift.Constants.SERVER_SEND) ||
+      a.value.equals(TimeoutFilter.TimeoutAnnotation)
     }) {
       spanMap.remove(traceId)
       logSpan(span)
