@@ -6,7 +6,7 @@ import java.util.logging.{Level, Logger}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.timeout.ReadTimeoutException
 
-import com.twitter.util.{Future, Promise, Return, Throw, Monitor}
+import com.twitter.util.{Future, Promise, Return, Throw, Monitor, Time}
 
 import com.twitter.finagle.{ClientConnection, CodecException, Service, WriteTimedOutException}
 import com.twitter.finagle.util.Conversions._
@@ -50,6 +50,7 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   import ServiceToChannelHandler._
   import State._
 
+  private[this] val handleStat = statsReceiver.stat("handletime_us")
   @volatile private[this] var clientConnection: ClientConnection = ClientConnection.nil
   @volatile private[this] var service: Service[Req, Rep] = NilService
   private[this] val state = new AtomicReference[State](Idle)
@@ -132,7 +133,9 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
     }
 
     Future.monitored {
+      val begin = Time.now
       val res = service(message.asInstanceOf[Req])
+      handleStat.add((Time.now - begin).inMicroseconds)
       currentResponse = Some(res)
       res
     } onSuccess { value =>

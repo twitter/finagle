@@ -1,7 +1,7 @@
 package com.twitter.finagle.channel
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Stat}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
 import com.twitter.util.{Future, Promise, Throw, Try, Time, Return}
@@ -27,15 +27,17 @@ case class ChannelServiceReply(message: Any, markDead: Boolean)
 private[finagle] class ChannelService[Req, Rep](
     channel: Channel,
     factory: ChannelServiceFactory[Req, Rep],
+    statsReceiver: StatsReceiver,
     log: Logger)
   extends Service[Req, Rep]
 {
-  def this(channel: Channel, factory: ChannelServiceFactory[Req, Rep]) =
-    this(channel, factory, Logger.getLogger(classOf[ChannelService[Req, Rep]].getName))
+  def this(channel: Channel, factory: ChannelServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
+    this(channel, factory, statsReceiver, Logger.getLogger(classOf[ChannelService[Req, Rep]].getName))
 
   private[this] val currentReplyFuture = new AtomicReference[Promise[Rep]]
   @volatile private[this] var isHealthy = true
   private[this] var wasReleased = false
+  private[this] val handleStat = statsReceiver.stat("handletime_us")
 
   private[this] def reply(message: Try[Rep], markDead: Boolean = false) {
     if (message.isThrow || markDead) {
@@ -49,7 +51,10 @@ private[finagle] class ChannelService[Req, Rep](
     }
 
     Option(currentReplyFuture.getAndSet(null)) match {
-      case Some(f) => f() = message
+      case Some(f) =>
+        val begin = Time.now
+        f() = message
+        handleStat.add((Time.now - begin).inMicroseconds)
       case None => isHealthy = false
     }
 
@@ -87,7 +92,9 @@ private[finagle] class ChannelService[Req, Rep](
           if (currentReplyFuture.compareAndSet(replyFuture, null)) {
             isHealthy = false
             if (channel.isOpen) Channels.close(channel)
+            val begin = Time.now
             replyFuture() = Throw(new WriteException(ChannelException(cause, channel.getRemoteAddress)))
+            handleStat.add((Time.now - begin).inMicroseconds)
           }
         case _ => ()
       }
@@ -96,7 +103,9 @@ private[finagle] class ChannelService[Req, Rep](
         if (currentReplyFuture.compareAndSet(replyFuture, null)) {
           isHealthy = false
           if (channel.isOpen) Channels.close(channel)
+          val begin = Time.now
           replyFuture() = Throw(new CancelledRequestException)
+          handleStat.add((Time.now - begin).inMicroseconds)
         }
       }
 
@@ -157,7 +166,8 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
   /**
    * Abstracted only for testing.
    */
-  protected def mkService(ch: Channel): Service[Req, Rep] = new ChannelService(ch, this)
+  protected def mkService(ch: Channel, statsReceiver: StatsReceiver): Service[Req, Rep] =
+    new ChannelService(ch, this, statsReceiver)
 
   def make(): Future[Service[Req, Rep]] = {
     val begin = Time.now
@@ -176,7 +186,7 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
           ch.bind(sa)
         case _ => ()
       }
-      val service = mkService(ch)
+      val service = mkService(ch, statsReceiver)
       (ch.connect(addr), service)
     } flatMap { case (connectFuture, service) =>
       val promise = new Promise[Service[Req, Rep]]
