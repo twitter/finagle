@@ -1,8 +1,22 @@
-1.11.0  ?
+1.11.0	2012/02/13
 
+	* finagle-redis: publish.
 	* http: Message.mediaType=: no longer sets charset to utf-8
 	* http: Message.setContentType: defaults charset to utf-8
 	* http: added Message.charset, Message.charset=
+	* Refactor resource management inside of the builders, making lifetimes
+	explicit
+	* Generic cluster API, support in the HeapBalancer for dynamic hosts list;
+	remove other load balancers
+	* redis: memcache.Client-style interface
+	* netty: update to 3.3.1.Final, and add NPN TLS extension support
+	* b3: flush span if timeout occurs
+	* b3: java friendly tracer API
+	* stress/example: "topo", a minimal appserver-like topology for testing
+	* memcache: tunable example for benchmarking, testing
+	* ServerBuilder: major refactor & simplification
+	* SummarizingStatsReceiver: fix bug where sort didn't operate over a
+	stable collection
 
 1.10.0	2012/01/24
 
