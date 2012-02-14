@@ -195,7 +195,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class RedisProject(info: ProjectInfo) extends StandardProject(info)
-    with Defaults with UnpublishedProject
+    with Defaults
   {
     val naggati = "com.twitter" % "naggati" % "2.2.0" intransitive()
 
