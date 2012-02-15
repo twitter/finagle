@@ -55,7 +55,7 @@ object HeapBalancerSpec extends Specification with Mockito {
 
     def snap = (set.toSeq, s)
   }
-
+  
   "HeapBalancer (nonempty)" should {
     val N = 10
     val statsReceiver = NullStatsReceiver // mock[StatsReceiver]
@@ -122,6 +122,17 @@ object HeapBalancerSpec extends Specification with Mockito {
       val made2 = 0 until N foreach { _ => b.make()() }
       factories foreach { _.load must be_==(3) }
       newFactory.load must be_==(2)
+    }
+
+    "be safe to remove a host from cluster before releasing it" in {
+      val made = 0 until N map { _ => b.make()() }
+      cluster.add(newFactory)
+      val made2 = b.make()()
+      (factories :+ newFactory) foreach { _.load must be_==(1) }
+
+      cluster.del(newFactory)
+      made2.release()
+      newFactory.load must be_==(0)
     }
   }
   

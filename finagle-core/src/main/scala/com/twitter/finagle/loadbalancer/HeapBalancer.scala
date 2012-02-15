@@ -81,13 +81,16 @@ class HeapBalancer[Req, Rep](
         heap = heap.dropRight(1)
         size -= 1
         removeGauges(node)
+        node.index = -1 // sentinel value indicating node is no longer in the heap.
       }
     }
   }
 
   private[this] def put(n: Node) = synchronized {
     n.load -= 1
-    if (n.load == 0 && size > 1) {
+    if (n.index < 0) {
+      // n has already been removed from the cluster, therefore do nothing
+    } else if (n.load == 0 && size > 1) {
       // since we know that n is now <= any element in the heap, we
       // can do interesting stuff without violating the heap
       // invariant.
