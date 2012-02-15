@@ -46,6 +46,11 @@ object LoggingFilterSpec extends Specification {
   "LogFormatter" should {
     val UnescapedEscaped =
     Seq(
+      // boundaries
+      ("",        ""),
+      ("hello\n", "hello\\n"),
+      ("\nhello", "\\nhello"),
+      // low ascii and special characters
       ("\u0000", "\\x00"),
       ("\u0001", "\\x01"),
       ("\u0002", "\\x02"),
