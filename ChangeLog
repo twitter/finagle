@@ -1,3 +1,10 @@
+1.11.1	2012/02/15
+
+	* HeapBalancer: safely remove services from cluster when
+	they have requests in flight
+	* http: speed up logging
+	* core: keep track of handler walltimes
+
 1.11.0	2012/02/13
 
 	* finagle-redis: publish.
