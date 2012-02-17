@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import java.net.ConnectException
 import java.util.concurrent.atomic.AtomicInteger
-import com.twitter.finagle.{FailFastException, WriteException, ServiceFactory, ServiceFactoryProxy}
+import com.twitter.finagle.{FailFastException, WriteException, ServiceFactory, ServiceFactoryProxy, ClientConnection}
 import com.twitter.util.Future
 
 
@@ -23,11 +23,11 @@ class FailFastFactory[Req, Rep](
    * - If we are limited: Acquire a "Token" (AtomicInteger) that allow you to establish a connection. If the connection
    *   succeed the isLimited flag is set back to false.
    */
-  override def make() =
+  override def apply(conn: ClientConnection) =
     if (isLimited) {
       val accept = pending.incrementAndGet() <= maxPending
       if (accept) {
-        underlying.make() onSuccess { _ =>
+        underlying(conn) onSuccess { _ =>
           isLimited = false
         } ensure {
           pending.decrementAndGet()
@@ -37,7 +37,7 @@ class FailFastFactory[Req, Rep](
         Future.exception(new FailFastException)
       }
     } else {
-      underlying.make() onFailure {
+      underlying(conn) onFailure {
         case WriteException(_) => isLimited = true
         case _ => // Other exceptions don't change the factory state
       }

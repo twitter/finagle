@@ -379,7 +379,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * cannot create more connections due to {{hostConnectionLimit}} and
    * there are more than {{hostConnectionLimit}} requests outstanding)
    * as well as physical connection time.  Futures returned from
-   * {{factory.make()}} will always be satisfied within this timeout.
+   * {{factory()}} will always be satisfied within this timeout.
    */
   def connectTimeout(duration: Duration): This =
     withConfig(_.copy(_connectTimeout = duration))
@@ -791,7 +791,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def unsafeBuildFactory(): ServiceFactory[Req, Rep] =
     withConfig(_.validated).buildFactory()
-
 
   protected def failureAccrualFactory(factory: ServiceFactory[Req, Rep]) =
     config.failureAccrual map { _ andThen factory } getOrElse(factory)

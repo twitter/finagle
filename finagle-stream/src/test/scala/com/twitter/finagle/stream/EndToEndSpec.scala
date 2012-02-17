@@ -57,7 +57,7 @@ object EndToEndSpec extends Specification {
         .hosts(Seq(address))
         .hostConnectionLimit(1)
         .buildFactory()
-      val client = clientFactory.make()()
+      val client = clientFactory()()
 
       doAfter {
         client.release()

@@ -21,15 +21,15 @@ object CachingPoolSpec extends Specification with Mockito {
     val underlyingService = mock[Service[Any, Any]]
     underlyingService.isAvailable returns true
     underlyingService(Matchers.any) returns Future.value(obj)
-    underlying.make() returns Future.value(underlyingService)
+    underlying() returns Future.value(underlyingService)
 
     "cache objects for the specified amount of time" in {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
 
-        val f = cachingPool.make()()
+        val f = cachingPool()()
         f(123)() must be_==(obj)
-        there was one(underlying).make()
+        there was one(underlying)()
         timer.tasks must beEmpty
 
         f.release()
@@ -50,17 +50,17 @@ object CachingPoolSpec extends Specification with Mockito {
     "reuse cached objects & revive from death row" in {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
-        cachingPool.make()().release()
+        cachingPool()().release()
         timer.tasks must haveSize(1)
 
-        there was one(underlying).make()
+        there was one(underlying)()
         there was no(underlyingService).release()
         timer.tasks must haveSize(1)
 
         timeControl.advance(4.seconds)
 
-        cachingPool.make()().release()
-        there was one(underlying).make()
+        cachingPool()().release()
+        there was one(underlying)()
         there was no(underlyingService).release()
         timer.tasks must haveSize(1)
 
@@ -91,22 +91,22 @@ object CachingPoolSpec extends Specification with Mockito {
         val s2 = mock[Service[Any, Any]]; s2(any) returns Future.value(o2)
 
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
-        underlying.make() returns Future.value(s0)
-        val f0 = cachingPool.make()()
+        underlying() returns Future.value(s0)
+        val f0 = cachingPool()()
         f0(123)() must be_==(o0)
 
-        underlying.make() returns Future.value(s1)
-        val f1 = cachingPool.make()()
+        underlying() returns Future.value(s1)
+        val f1 = cachingPool()()
         f1(123)() must be_==(o1)
 
-        underlying.make() returns Future.value(s2)
-        val f2 = cachingPool.make()()
+        underlying() returns Future.value(s2)
+        val f2 = cachingPool()()
         f2(123)() must be_==(o2)
 
         val ss = Seq(s0, s1, s2)
         val fs = Seq(f0, f1, f2)
 
-        there were three(underlying).make()
+        there were three(underlying)()
 
         ss foreach { _.isAvailable returns true }
 
@@ -130,7 +130,7 @@ object CachingPoolSpec extends Specification with Mockito {
         timer.tasks.head.when must be_==(Time.now + 5.seconds)
 
         // Take it!
-        cachingPool.make()()(123)() must be_==(o2)
+        cachingPool()()(123)() must be_==(o2)
 
         timeControl.advance(5.seconds)
 
@@ -148,10 +148,10 @@ object CachingPoolSpec extends Specification with Mockito {
         underlyingService(Matchers.any) returns Future.value(obj)
 
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
-        underlying.make() returns Future.value(underlyingService)
+        underlying() returns Future.value(underlyingService)
 
         timer.tasks must beEmpty
-        val service = cachingPool.make()()
+        val service = cachingPool()()
         service(123)() must be_==(obj)
         timer.tasks must beEmpty
 
@@ -163,7 +163,7 @@ object CachingPoolSpec extends Specification with Mockito {
 
         timeControl.advance(1.second)
 
-        cachingPool.make()()(123)() must be_==(obj)
+        cachingPool()()(123)() must be_==(obj)
 
         timeControl.advance(4.seconds)
         timer.tasks must beEmpty
@@ -184,10 +184,10 @@ object CachingPoolSpec extends Specification with Mockito {
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
         underlyingService(Matchers.any) returns Future.value(obj)
-        underlying.make() returns Future.value(underlyingService)
+        underlying() returns Future.value(underlyingService)
         underlyingService.isAvailable returns false
 
-        val service = cachingPool.make()()
+        val service = cachingPool()()
         service(123)() must be_==(obj)
 
         service.release()
@@ -204,10 +204,10 @@ object CachingPoolSpec extends Specification with Mockito {
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
         underlyingService(Matchers.any) returns Future.value(obj)
-        underlying.make() returns Future.value(underlyingService)
+        underlying() returns Future.value(underlyingService)
         underlyingService.isAvailable returns true
 
-        val service = cachingPool.make()()
+        val service = cachingPool()()
         service.release()
         there was no(underlyingService).release()
 
@@ -221,10 +221,10 @@ object CachingPoolSpec extends Specification with Mockito {
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
         underlyingService(Matchers.any) returns Future.value(obj)
-        underlying.make() returns Future.value(underlyingService)
+        underlying() returns Future.value(underlyingService)
         underlyingService.isAvailable returns true
 
-        val service = cachingPool.make()()
+        val service = cachingPool()()
         cachingPool.close()
         there was no(underlyingService).release()
         service.release()

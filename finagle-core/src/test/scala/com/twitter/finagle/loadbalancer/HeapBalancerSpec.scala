@@ -5,7 +5,7 @@ import org.specs.mock.Mockito
 
 import com.twitter.finagle.{
   Service, ServiceFactory,
-  NoBrokersAvailableException}
+  NoBrokersAvailableException, ClientConnection}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.builder.{StaticCluster, Cluster}
 import com.twitter.concurrent.Spool
@@ -17,7 +17,7 @@ object HeapBalancerSpec extends Specification with Mockito {
     var load = 0
     var _isAvailable = true
     var _closed = false
-    def make() = Future.value {
+    def apply(conn: ClientConnection) = Future.value {
       load += 1
       new Service[Unit, LoadedFactory] {
         def apply(req: Unit) = Future.value(LoadedFactory.this)
@@ -55,7 +55,7 @@ object HeapBalancerSpec extends Specification with Mockito {
 
     def snap = (set.toSeq, s)
   }
-  
+
   "HeapBalancer (nonempty)" should {
     val N = 10
     val statsReceiver = NullStatsReceiver // mock[StatsReceiver]
@@ -73,11 +73,11 @@ object HeapBalancerSpec extends Specification with Mockito {
     val newFactory = new LoadedFactory // the host to be added after creating heapbalancer
 
     "balance according to load" in {
-      val made = 0 until N map { _ => b.make()() }
+      val made = 0 until N map { _ => b()() }
       factories foreach { f =>
         f.load must be_==(1)
       }
-      val made2 = 0 until N map { _ => b.make()() }
+      val made2 = 0 until N map { _ => b()() }
       factories foreach { f =>
         f.load must be_==(2)
       }
@@ -88,15 +88,15 @@ object HeapBalancerSpec extends Specification with Mockito {
       f.load must be_==(1)
 
       // f is now least-loaded
-      val f1 = b.make()()(())()
+      val f1 = b()()(())()
       f1 must be(f)
     }
 
     "pick only healthy services" in {
-      0 until N foreach { _ => b.make() }
+      0 until N foreach { _ => b() }
       factories(0)._isAvailable = false
       factories(1)._isAvailable = false
-      0 until 2*(N-2) foreach { _=> b.make() }
+      0 until 2*(N-2) foreach { _=> b() }
       factories(0).load must be_==(1)
       factories(1).load must be_==(1)
       factories drop 2 foreach { f =>
@@ -106,26 +106,26 @@ object HeapBalancerSpec extends Specification with Mockito {
 
     "be able to handle dynamically added factory" in {
       // initially N factories, load them twice
-      val made = 0 until N*2 map { _ => b.make()() }
+      val made = 0 until N*2 map { _ => b()() }
       factories foreach { _.load must be_==(2) }
 
       // add newFactory to the heap balancer. Initially it has load 0, so the next two make()() should both pick
       // newFactory
       cluster.add(newFactory)
-      b.make()()
+      b()()
       newFactory.load must be_==(1)
-      b.make()()
+      b()()
       newFactory.load must be_==(2)
 
       // remove newFactory from the heap balancer. Further calls to make()() should not affect the load on newFactory
       cluster.del(newFactory)
-      val made2 = 0 until N foreach { _ => b.make()() }
+      val made2 = 0 until N foreach { _ => b()() }
       factories foreach { _.load must be_==(3) }
       newFactory.load must be_==(2)
     }
 
     "be safe to remove a host from cluster before releasing it" in {
-      val made = 0 until N map { _ => b.make()() }
+      val made = 0 until N map { _ => b()() }
       cluster.add(newFactory)
       val made2 = b.make()()
       (factories :+ newFactory) foreach { _.load must be_==(1) }
@@ -135,11 +135,11 @@ object HeapBalancerSpec extends Specification with Mockito {
       newFactory.load must be_==(0)
     }
   }
-  
+
   "HeapBalancer (empty)" should {
     "always return NoBrokersAvailableException" in {
       val b = new HeapBalancer(new StaticCluster[ServiceFactory[Unit, LoadedFactory]](Seq()))
-      b.make()() must throwA[NoBrokersAvailableException]
+      b()() must throwA[NoBrokersAvailableException]
     }
   }
 }

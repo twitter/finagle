@@ -222,7 +222,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "close the underlying bootstrap only after all channels are released" in {
-      val f = factory.make()
+      val f = factory()
       there was one(channelFactory).newChannel(pipeline)
       there was one(channel).connect(address)
       f.isDefined must beFalse
@@ -237,7 +237,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "propagate bootstrap errors" in {
-      val f = factory.make()
+      val f = factory()
       f.isDefined must beFalse
       there was one(channel).connect(address)
 
@@ -255,7 +255,7 @@ object ChannelServiceSpec extends Specification with Mockito {
       val e = new ChannelPipelineException("sad panda")
       channel.connect(address) throws e
 
-      val f = factory.make()
+      val f = factory()
       f.isDefined must beTrue
       f() must throwA(e)
     }
@@ -270,7 +270,7 @@ object ChannelServiceSpec extends Specification with Mockito {
       }
 
       "be called on new services" in {
-        val p = factory.make()
+        val p = factory()
         there was no(prepareChannel)(any)
         channelFuture.setSuccess()
         there was one(prepareChannel)(any)
@@ -280,7 +280,7 @@ object ChannelServiceSpec extends Specification with Mockito {
         val exc = new Exception("sad panda")
         prepareChannel(any) returns Future.exception(exc)
         there was no(underlyingService).release
-        val p = factory.make()
+        val p = factory()
         channelFuture.setSuccess()
         p.poll must beSome(Throw(exc))
         there was one(underlyingService).release()

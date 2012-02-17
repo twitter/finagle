@@ -51,7 +51,7 @@ object DuplexStreamSpec extends Specification {
         .hostConnectionLimit(1)
         .buildFactory()
 
-      val client = factory.make()()
+      val client = factory()()
 
       val outbound = new Broker[ChannelBuffer]
       val handle = client(outbound.recv)()

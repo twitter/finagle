@@ -13,14 +13,14 @@ object TimeoutFactorySpec extends Specification with Mockito {
     val timer = new MockTimer
     val underlying = mock[ServiceFactory[String, String]]
     val promise = new Promise[Service[String, String]]
-    underlying.make() returns promise
+    underlying(any) returns promise
     val timeout = 1.second
     val exception = new ServiceTimeoutException(timeout)
     val factory = new TimeoutFactory(underlying, 1.second, exception, timer)
 
     "after the timeout" in Time.withCurrentTimeFrozen { tc =>
-      val res = factory.make()
-      there was one(underlying).make()
+      val res = factory()
+      there was one(underlying)(any)
       promise.isCancelled must beFalse
       res.isDefined must beFalse
       tc.advance(5.seconds)
@@ -38,7 +38,7 @@ object TimeoutFactorySpec extends Specification with Mockito {
 
     "before the timeout" in {
       "pass the successfully created service through" in {
-        val res = factory.make()
+        val res = factory()
         res.isDefined must beFalse
         val service = mock[Service[String, String]]
         promise() = Return(service)

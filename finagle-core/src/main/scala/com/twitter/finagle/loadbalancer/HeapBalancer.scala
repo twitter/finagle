@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import util.Random
-import com.twitter.finagle.{Service, ServiceProxy, ServiceFactory, NoBrokersAvailableException}
+import com.twitter.finagle.{Service, ServiceProxy, ServiceFactory, NoBrokersAvailableException, ClientConnection}
 import com.twitter.finagle.stats.{Gauge, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.builder.Cluster
 import collection.mutable.HashMap
@@ -135,7 +135,7 @@ class HeapBalancer[Req, Rep](
     }
   }
 
-  def make(): Future[Service[Req, Rep]] = {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (size == 0) return Future.exception(new NoBrokersAvailableException)
 
     val n = synchronized {
@@ -144,7 +144,7 @@ class HeapBalancer[Req, Rep](
       fixDown(heap, n.index, size)
       n
     }
-    n.factory.make() map { new Wrapped(n, _) } onFailure { _ => put(n) }
+    n.factory(conn) map { new Wrapped(n, _) } onFailure { _ => put(n) }
   }
 
   def close() {
