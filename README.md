@@ -391,7 +391,7 @@ A `SimpleFilter` is a kind of `Filter` that does not convert the request and res
 
 ### Codec Objects
 
-A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, HTTP chunked streaming (ala Twitter Streaming) prptocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
+A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, HTTP chunked streaming (ala Twitter Streaming) protocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
 
 [Top](#Top)
 
