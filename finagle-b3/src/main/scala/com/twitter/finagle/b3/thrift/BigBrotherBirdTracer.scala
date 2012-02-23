@@ -18,6 +18,7 @@ import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.util.Timer
 
 object BigBrotherBirdTracer {
   // to make sure we only create one instance of the tracer
@@ -73,7 +74,7 @@ private[thrift] class BigBrotherBirdTracer(
   private[this] val TraceCategory = "b3" // scribe category
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
-  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver)
+  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, Timer.default)
   private[this] var sampleRate = initialSampleRate
   private[this] var refcount = 0
   private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = null
