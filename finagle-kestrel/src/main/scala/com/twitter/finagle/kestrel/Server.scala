@@ -3,21 +3,21 @@ package com.twitter.finagle.kestrel
 import _root_.java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
-import protocol.Kestrel
+import protocol.{Kestrel, Command, Response}
 import _root_.java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
-import com.twitter.util.MapMaker
+import com.twitter.util.{Future, MapMaker}
+import com.twitter.finagle.{ServiceFactory, ClientConnection}
 
 class Server(address: SocketAddress) {
-  private[this] val serviceFactory = {
-    val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
+  private[this] val serviceFactory = new ServiceFactory[Command, Response] {
+    private[this] val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
       config.compute { key =>
         new LinkedBlockingDeque[ChannelBuffer]
       }
     }
-
-    () => {
-      new InterpreterService(new Interpreter(queues))
-    }
+    
+    def apply(conn: ClientConnection) = Future.value(new InterpreterService(new Interpreter(queues)))
+    def close() = ()
   }
 
   private[this] val serverSpec =
