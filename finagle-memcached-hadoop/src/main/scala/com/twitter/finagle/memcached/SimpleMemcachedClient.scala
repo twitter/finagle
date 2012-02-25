@@ -23,7 +23,7 @@ class SimpleMemcachedClient(hosts: Seq[String], port: Int, hostConnectionLimit: 
   def put(key: String, value: Array[Byte]) = {
     client.set(key, 0, forever, value)
   }
-  
+
   def release() = {
     client.release()
   }

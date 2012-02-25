@@ -8,13 +8,13 @@ import com.twitter.conversions.time._
 
 class MemcachedOutputFormatSpec extends Specification {
   "MemcachedOutputFormat" should {
-    
+
     doBefore {
       FauxMemcachedClient.map.clear
     }
 
     "write to the memcached" in {
-      val id = new TaskAttemptID() 
+      val id = new TaskAttemptID()
       val conf = new Configuration
       val client = new FauxMemcachedClientFactory()
       MemcachedOutputFormat.setFactory(conf, client)
@@ -22,13 +22,13 @@ class MemcachedOutputFormatSpec extends Specification {
       val of = new MemcachedOutputFormat
       val writer = of.getRecordWriter(context)
       writer.write(new Text("hello"), new BytesWritable("world".getBytes))
-      
+
       new String(FauxMemcachedClient.map.get("hello")) mustEqual "world"
     }
-    
-    
+
+
     "write to the memcached with delay" in {
-      val id = new TaskAttemptID() 
+      val id = new TaskAttemptID()
       val conf = new Configuration
       val client = new FauxMemcachedClientFactory(100.millis)
       MemcachedOutputFormat.setFactory(conf, client)

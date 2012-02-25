@@ -12,8 +12,8 @@ class PooledMemcachedClientFactory(pools: Seq[SerializableKeyValueClientFactory]
 
 class PooledMemcachedClient(pools: Seq[SerializableKeyValueClientFactory]) extends KeyValueClient {
   val clients = pools.map(_.newInstance())
-  
+
   def put(key: String, value: Array[Byte]) = Future.collect(clients.map(_.put(key, value))).map(x=>())
-  
+
   def release() = clients.map(_.release())
 }

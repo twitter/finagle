@@ -30,14 +30,14 @@ object MemcachedOutputFormat {
 }
 
 class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
-    
+
   def checkOutputSpecs(jobContext: JobContext) = {
     val conf = jobContext.getConfiguration
     if(conf.getBoolean("mapred.reduce.tasks.speculative.execution", true)) {
       throw new RuntimeException("Speculative execution should be false");
     }
   }
-    
+
   def getOutputCommitter(context: TaskAttemptContext) = new OutputCommitter {
     def abortTask(taskContext: TaskAttemptContext) = {}
     def cleanupJob(jobContext: JobContext) = {}
@@ -46,14 +46,14 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
     def setupJob(jobContext: JobContext) = {}
     def setupTask(taskContext: TaskAttemptContext) = {}
   }
-  
+
   private[memcached] def memcachedClientFactory(taskContext: TaskAttemptContext) = {
     val string = taskContext.getConfiguration.get(CLIENT_FACTORY)
     val bytes  = Base64.decodeBase64(string)
     val ois = new ObjectInputStream(new ByteArrayInputStream(bytes))
     ois.readObject().asInstanceOf[SerializableKeyValueClientFactory]
   }
-  
+
   def getRecordWriter(taskContext: TaskAttemptContext) = new RecordWriter[Text, BytesWritable] {
     val concurrencyString = taskContext.getConfiguration.get(MAX_CONCURRENCY)
     val concurrency = if(concurrencyString != null) {
@@ -64,15 +64,15 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
     val semaphore = new Semaphore(concurrency)
     val client = memcachedClientFactory(taskContext).newInstance()
     var written = 0
-    
+
     def write(key: Text, value: BytesWritable): Unit = write(key, value, 0)
-    
+
     def write(key: Text, value: BytesWritable, tries: Int): Unit = {
       if (tries == TRIES_LIMIT) {
         return
       }
       semaphore.acquire
-      client.put(key.toString, value.getBytes).map { x => 
+      client.put(key.toString, value.getBytes).map { x =>
         semaphore.release
         written += 1
         if(written % PROGRESS_EVERY == 0) {
@@ -84,7 +84,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
         write(key, value, tries + 1)
       }
     }
-    
+
     def close(taskContext: TaskAttemptContext) = {
       semaphore.acquire(concurrency)
       client.release()

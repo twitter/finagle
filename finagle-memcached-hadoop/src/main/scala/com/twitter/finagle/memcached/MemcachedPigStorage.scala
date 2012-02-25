@@ -10,7 +10,7 @@ import org.apache.hadoop.io._
 
 class MemcachedPigStorage extends StoreFunc {
   def getOutputFormat = new MemcachedOutputFormat()
-  
+
   var writer: RecordWriter[Text, BytesWritable] = null
 
   override def checkSchema(s: ResourceSchema) = {
@@ -23,13 +23,13 @@ class MemcachedPigStorage extends StoreFunc {
       throw new RuntimeException("MemcachedPigStorage expects a chararray and a bytearray")
     }
   }
-  
+
   def putNext(tuple: Tuple) = {
     val key = DataType.toString(tuple.get(0))
     val value = DataType.toBytes(tuple.get(1))
     writer.write(new Text(key), new BytesWritable(value))
   }
-  
+
   def prepareToWrite(_writer: RecordWriter[_,_]) = {
     writer = _writer.asInstanceOf[RecordWriter[Text, BytesWritable]]
   }
