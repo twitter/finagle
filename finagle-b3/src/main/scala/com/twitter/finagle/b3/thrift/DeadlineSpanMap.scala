@@ -1,20 +1,21 @@
 package com.twitter.finagle.b3.thrift
 
-import com.twitter.util.Duration
 import collection.mutable.HashMap
 import com.twitter.finagle.tracing.TraceId
-import com.twitter.finagle.util.Timer
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util.{Timer, Duration}
 
 /**
  * Takes care of storing the spans in a thread safe fashion. If a span
  * is not removed from the map it will expire after the deadline is reached
  * and sent off to B3 despite being incomplete.
  */
-class DeadlineSpanMap(tracer: BigBrotherBirdTracer, deadline: Duration, statsReceiver: StatsReceiver) {
+class DeadlineSpanMap(tracer: BigBrotherBirdTracer,
+                      deadline: Duration,
+                      statsReceiver: StatsReceiver,
+                      timer: Timer) {
 
   private[this] val spanMap = HashMap[TraceId, Span]()
-  private[this] val timer = Timer.default
 
   /**
    * Update the span in the map. If none exists create a new span. Synchronized.
