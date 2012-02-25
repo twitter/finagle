@@ -18,7 +18,8 @@ object MemcachedOutputFormat {
   val MAX_CONCURRENCY_DEFAULT = 100
   val TRIES_LIMIT = 3
   val MIN_SLEEP = 1000
-  
+  val PROGRESS_EVERY = 10000
+
   def setFactory(config: Configuration, factory: SerializableKeyValueClientFactory) = {
     val baos = new ByteArrayOutputStream()
     val oos = new ObjectOutputStream(baos)
@@ -67,10 +68,16 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
     def write(key: Text, value: BytesWritable): Unit = write(key, value, 0)
     
     def write(key: Text, value: BytesWritable, tries: Int): Unit = {
+      if (tries == TRIES_LIMIT) {
+        return
+      }
       semaphore.acquire
       client.put(key.toString, value.getBytes).map { x => 
         semaphore.release
         written += 1
+        if(written % PROGRESS_EVERY == 0) {
+          taskContext.progress()
+        }
       } onFailure { throwable =>
         Thread.sleep(MIN_SLEEP * (1 << tries))
         semaphore.release

@@ -17,8 +17,8 @@ object FauxMemcachedClient {
 
 class FauxMemcachedClient(factory: FauxMemcachedClientFactory, delay: Duration = 0.seconds) extends KeyValueClient {
   val timer = new JavaTimer()
-  
+
   def put(key: String, value: Array[Byte]) = timer.doLater(delay)(FauxMemcachedClient.map.put(key, value))
-  
+
   def release() = ()
 }
