@@ -48,6 +48,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-thrift", "finagle-thrift",
     new ThriftProject(_), coreProject)
 
+  val protobufProject = project(
+    "finagle-protobuf", "finagle-protobuf",
+    new ProtobufProject(_), coreProject)
+
   /**
    * finagle-exception implements an ExceptionReceiver for the yet-to-be-named
    * (if at all) exception service.
@@ -192,6 +196,15 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
+  }
+
+  class ProtobufProject(info: ProjectInfo) extends StandardProject(info)
+    with Defaults
+  {
+    override def compileOrder = CompileOrder.JavaThenScala
+    val protobuf    = "com.google.protobuf" % "protobuf-java" % "2.4.1"
+    val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
+    //val junit = "junit" % "junit" % "3.8.2" % "test"
   }
 
   class RedisProject(info: ProjectInfo) extends StandardProject(info)
