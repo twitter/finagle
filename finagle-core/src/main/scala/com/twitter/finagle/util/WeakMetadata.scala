@@ -14,4 +14,3 @@ object WeakMetadata {
       config.weakKeys
     }
 }
-
