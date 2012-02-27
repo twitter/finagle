@@ -1,0 +1,22 @@
+This package provides a MemcachedOutputFormat for use with Hadoop.  This 
+outputformat can be configured like any other output format, plus one 
+additional step:
+
+    MemcachedOutputFormat.setFactory(job.getConfiguration(), factory);
+        
+Factory can be any class that implements 
+com.twitter.finagle.memcached.SerializableKeyValueClientFactory.  There are two
+reference factories: SimpleMemcachedClientFactory, and 
+PooledMemcachedClientFactory.  Scala constructors are:
+    
+    new SimpleMemcachedClientFactory(hosts: Seq[String], 
+                                     port: Int, 
+                                     hostConnectionLimit: Int = 10)
+    new PooledMemcachedClient(clients: Seq[SerializableKeyValueClientFactory])
+    
+Java constructors are:
+
+    new SimpleMemcachedClientFactory(List<String> hosts, 
+                                     int port, 
+                                     int hostConnectionLimit)
+    new PooledMemcachedClient(List[SerializableKeyValueClientFactory] clients)

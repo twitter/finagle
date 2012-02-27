@@ -27,7 +27,7 @@ class MemcachedOutputFormatSpec extends Specification {
     }
 
 
-    "write to the memcached with delay" in {
+    "write to the memcached with delay must commit on close" in {
       val id = new TaskAttemptID()
       val conf = new Configuration
       val client = new FauxMemcachedClientFactory(100.millis)

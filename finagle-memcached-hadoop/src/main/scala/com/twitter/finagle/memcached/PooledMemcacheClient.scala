@@ -5,13 +5,16 @@ import com.twitter.util.Future
 import com.twitter.finagle.builder._
 import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.protocol.text.Memcached
+import _root_.java.util.{List => JList}
+import scala.collection.JavaConversions._
 
-class PooledMemcachedClientFactory(pools: Seq[SerializableKeyValueClientFactory]) {
-  def newInstance() = new PooledMemcachedClient(pools)
+class PooledMemcachedClientFactory(clients: Seq[SerializableKeyValueClientFactory]) {
+  def this(clients: JList[SerializableKeyValueClientFactory]) = this(clients.toSeq)
+  def newInstance() = new PooledMemcachedClient(clients)
 }
 
-class PooledMemcachedClient(pools: Seq[SerializableKeyValueClientFactory]) extends KeyValueClient {
-  val clients = pools.map(_.newInstance())
+class PooledMemcachedClient(_clients: Seq[SerializableKeyValueClientFactory]) extends KeyValueClient {
+  val clients = _clients.map(_.newInstance())
 
   def put(key: String, value: Array[Byte]) = Future.collect(clients.map(_.put(key, value))).map(x=>())
 
