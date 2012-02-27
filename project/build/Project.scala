@@ -48,6 +48,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     "finagle-thrift", "finagle-thrift",
     new ThriftProject(_), coreProject)
 
+  /**
+  * Codec for protobuf RPC.
+  *
+  */
   val protobufProject = project(
     "finagle-protobuf", "finagle-protobuf",
     new ProtobufProject(_), coreProject)
@@ -201,10 +205,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class ProtobufProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
-    override def compileOrder = CompileOrder.JavaThenScala
+    override def compileOrder = CompileOrder.ScalaThenJava
+    override def compileOptions = super.compileOptions ++ 
+        compileOptions("-Xlint", "unchecked")
+  
     val protobuf    = "com.google.protobuf" % "protobuf-java" % "2.4.1"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
-    //val junit = "junit" % "junit" % "3.8.2" % "test"
+    val junit = "junit" % "junit" % "4.10"
   }
 
   class RedisProject(info: ProjectInfo) extends StandardProject(info)
