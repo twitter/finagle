@@ -6,17 +6,16 @@ additional step:
         
 Factory can be any class that implements 
 com.twitter.finagle.memcached.SerializableKeyValueClientFactory.  There are two
-reference factories: SimpleMemcachedClientFactory, and 
-PooledMemcachedClientFactory.  Scala constructors are:
+reference factories: SimpleMemcachedClientFactory (which uses Ketama hashing), 
+and PooledMemcachedClientFactory which updates all of a set of other clients.  
+Scala constructors are: 
     
     new SimpleMemcachedClientFactory(hosts: Seq[String], 
-                                     port: Int, 
-                                     hostConnectionLimit: Int = 10)
+                                     port: Int)
     new PooledMemcachedClient(clients: Seq[SerializableKeyValueClientFactory])
     
 Java constructors are:
 
     new SimpleMemcachedClientFactory(List<String> hosts, 
-                                     int port, 
-                                     int hostConnectionLimit)
+                                     int port)
     new PooledMemcachedClient(List[SerializableKeyValueClientFactory] clients)
