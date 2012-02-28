@@ -15,8 +15,8 @@ import _root_.java.io._
 object MemcachedOutputFormat {
   val CLIENT_FACTORY = "memcached_client_factory"
   val MAX_CONCURRENCY = "memcached_max_concurrency"
-  val MAX_CONCURRENCY_DEFAULT = 100
-  val TRIES_LIMIT = 3
+  val MAX_CONCURRENCY_DEFAULT = 1000
+  val TRIES_LIMIT = 6
   val MIN_SLEEP = 1000
   val PROGRESS_EVERY = 10000
 

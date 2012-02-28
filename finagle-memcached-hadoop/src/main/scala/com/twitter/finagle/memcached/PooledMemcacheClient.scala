@@ -8,7 +8,7 @@ import com.twitter.finagle.memcached.protocol.text.Memcached
 import _root_.java.util.{List => JList}
 import scala.collection.JavaConversions._
 
-class PooledMemcachedClientFactory(clients: Seq[SerializableKeyValueClientFactory]) {
+class PooledMemcachedClientFactory(clients: Seq[SerializableKeyValueClientFactory]) extends SerializableKeyValueClientFactory {
   def this(clients: JList[SerializableKeyValueClientFactory]) = this(clients.toSeq)
   def newInstance() = new PooledMemcachedClient(clients)
 }

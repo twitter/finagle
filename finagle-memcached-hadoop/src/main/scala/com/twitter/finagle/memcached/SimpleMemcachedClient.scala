@@ -16,12 +16,9 @@ class SimpleMemcachedClientFactory(hosts: Seq[String], port: Int, hostConnection
 class SimpleMemcachedClient(hosts: Seq[String], port: Int, hostConnectionLimit: Int = 10) extends KeyValueClient {
   val forever = Int.MaxValue.seconds.fromNow
   val mkhosts = hosts.map{ host => host + ":" + String.valueOf(port) }.mkString(",")
-  val client = Client(
-    ClientBuilder()
-      .hosts(mkhosts)
-      .hostConnectionLimit(hostConnectionLimit)
-      .codec(new Memcached)
-      .build()).withBytes
+  val client = KetamaClientBuilder()
+               .nodes(mkhosts)
+               .build().withBytes
 
   def put(key: String, value: Array[Byte]) = {
     client.set(key, 0, forever, value)
