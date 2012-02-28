@@ -126,7 +126,7 @@ case class Http(
         underlying: Service[HttpRequest, HttpResponse]
       ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
         if (_enableTracing)
-          new HttpClientTracingFilter[HttpResponse](config.serviceName) andThen underlying
+          new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen underlying
         else
           underlying
       }
@@ -179,11 +179,11 @@ case class Http(
       ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
         val checkRequest = new CheckHttpRequestFilter
         if (_enableTracing) {
-          val ia = config.boundAddress match {
-            case ia: InetSocketAddress => ia
-            case _ => new InetSocketAddress(0)
-          }
-          new HttpServerTracingFilter(config.serviceName, ia) andThen checkRequest andThen underlying
+          val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](
+            config.serviceName,
+            config.boundInetSocketAddress
+          )
+          tracingFilter andThen checkRequest andThen underlying
         } else {
           checkRequest andThen underlying
         }
@@ -211,12 +211,12 @@ object HttpTracing {
 /**
  * Pass along headers with the required tracing information.
  */
-class HttpClientTracingFilter[Res](serviceName: String)
-  extends SimpleFilter[HttpRequest, Res]
+class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
+  extends SimpleFilter[Req, Res]
 {
   import HttpTracing._
 
-  def apply(request: HttpRequest, service: Service[HttpRequest, Res]) = Trace.unwind {
+  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
     Header.All foreach { request.removeHeader(_) }
 
     request.addHeader(Header.TraceId, Trace.id.traceId.toString)
@@ -245,12 +245,12 @@ class HttpClientTracingFilter[Res](serviceName: String)
  * Adds tracing annotations for each http request we receive.
  * Including uri, when request was sent and when it was received.
  */
-class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddress)
-  extends SimpleFilter[HttpRequest, HttpResponse]
+class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boundAddress: InetSocketAddress)
+  extends SimpleFilter[Req, Res]
 {
   import HttpTracing._
 
-  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = Trace.unwind {
+  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
 
     if (Header.Required.forall { request.containsHeader(_) }) {
       val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
@@ -285,13 +285,13 @@ class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddre
 
 /**
  * Http codec for rich Request/Response objects.
- * Note the ValidateRequestFilter isn't baked in, as in the Http Codec.
+ * Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
  */
 case class RichHttp[REQUEST <: Request](
-     httpFactory: CodecFactory[HttpRequest, HttpResponse])
+     httpFactory: Http)
   extends CodecFactory[REQUEST, Response] {
 
-  def client = Function.const {
+  def client = { config =>
     new Codec[REQUEST, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
@@ -301,10 +301,19 @@ case class RichHttp[REQUEST <: Request](
           pipeline
         }
       }
+
+      override def prepareService(
+        underlying: Service[REQUEST, Response]
+      ): Future[Service[REQUEST, Response]] = Future.value {
+        if (httpFactory._enableTracing)
+          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
+        else
+          underlying
+      }
     }
   }
 
-  def server = Function.const {
+  def server = { config =>
     new Codec[REQUEST, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
@@ -315,7 +324,16 @@ case class RichHttp[REQUEST <: Request](
         }
       }
 
-      // prepareService is not defined
+      override def prepareService(
+        underlying: Service[REQUEST, Response]
+      ): Future[Service[REQUEST, Response]] = Future.value {
+        if (httpFactory._enableTracing) {
+          val tracingFilter = new HttpServerTracingFilter[REQUEST, Response](config.serviceName, config.boundInetSocketAddress)
+          tracingFilter andThen underlying
+        } else {
+          underlying
+        }
+      }
     }
   }
 }
