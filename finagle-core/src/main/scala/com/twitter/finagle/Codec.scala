@@ -6,7 +6,7 @@ package com.twitter.finagle
  * from this codec.
  */
 
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{ChannelPipelineFactory, ChannelPipeline}
 import com.twitter.util.Future
 
@@ -63,7 +63,12 @@ case class ClientCodecConfig(serviceName: String)
 /**
  * Servers
  */
-case class ServerCodecConfig(serviceName: String, boundAddress: SocketAddress)
+case class ServerCodecConfig(serviceName: String, boundAddress: SocketAddress) {
+  def boundInetSocketAddress = boundAddress match {
+    case ia: InetSocketAddress => ia
+    case _ => new InetSocketAddress(0)
+  }
+}
 
 /**
  * A combined codec factory provides both client and server codec

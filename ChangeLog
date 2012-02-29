@@ -1,3 +1,10 @@
+2.0.0		2012/02/27
+
+	* unify client and server factories
+	* memcache stress test: one connection per process
+	* b3: make tests deterministic
+	* upgrade to newest util (and to Guava r11)
+
 1.11.1	2012/02/15
 
 	* HeapBalancer: safely remove services from cluster when
