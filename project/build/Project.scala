@@ -236,17 +236,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class ServersetsProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
-    override def ivyXML =
-      <dependencies>
-        <exclude module="jms"/>
-        <exclude module="jmxtools"/>
-        <exclude module="jmxri"/>
-        <exclude module="google-collections"/> // is subset of guava, which is also included
-        <override org="commons-codec" rev="1.5"/>
-      </dependencies>
-
-    val client = "com.twitter.common.zookeeper" % "client" % "0.0.6"
-    val serverSet = "com.twitter.common.zookeeper" % "server-set" % "0.0.5"
+    val commonClient    = "com.twitter.common.zookeeper" % "client"     % "0.0.6"
+    val commonGroup     = "com.twitter.common.zookeeper" % "group"      % "0.0.5"
+    val commonServerSet = "com.twitter.common.zookeeper" % "server-set" % "0.0.5"
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
