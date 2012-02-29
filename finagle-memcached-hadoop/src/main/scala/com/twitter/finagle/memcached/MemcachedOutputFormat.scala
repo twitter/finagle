@@ -69,7 +69,9 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
     def write(key: Text, value: BytesWritable): Unit = {
       Thread.sleep(pending.get() / 100)
       if(ops.get() % PROGRESS_EVERY == 0) {
-        println("MemcachedOutputFormat#RecordWriter status (started: "+ops.get()+
+        val now = new java.util.Date()
+        println("MemcachedOutputFormat#RecordWriter status ["+now+
+            "] (started: "+ops.get()+
             ", written: "+written.get()+
             ", pending: "+pending.get()+
             ", failures: "+failures.get()+
