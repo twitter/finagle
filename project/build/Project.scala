@@ -206,8 +206,6 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    override def compileOptions = super.compileOptions ++ 
-        compileOptions("-Xlint", "unchecked")
   
     val protobuf    = "com.google.protobuf" % "protobuf-java" % "2.4.1"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"

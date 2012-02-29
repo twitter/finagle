@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
+import com.twitter.finagle.protobuf.rpc.channel.SimpleMethodLookup;
 
 public class SimpleMethodLookupTest {
 
