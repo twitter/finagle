@@ -13,6 +13,7 @@ import com.twitter.util._
 import com.twitter.conversions.time._
 import org.apache.commons.codec.binary.Base64
 import _root_.java.io._
+import _root_.java.util.Date
 import _root_.java.util.concurrent.atomic._
 
 object MemcachedOutputFormat {
@@ -69,7 +70,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
     def write(key: Text, value: BytesWritable): Unit = {
       Thread.sleep(pending.get() / 100)
       if(ops.get() % PROGRESS_EVERY == 0) {
-        val now = new java.util.Date()
+        val now = new Date()
         println("MemcachedOutputFormat#RecordWriter status ["+now+
             "] (started: "+ops.get()+
             ", written: "+written.get()+
