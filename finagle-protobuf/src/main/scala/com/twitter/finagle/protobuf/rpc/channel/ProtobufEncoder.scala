@@ -1,4 +1,4 @@
-package com.tendril.finagle.protobuf.rpc.channel
+package com.twitter.finagle.protobuf.rpc.channel
 
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.channel.ChannelHandlerContext

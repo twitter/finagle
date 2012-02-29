@@ -1,4 +1,4 @@
-package com.tendril.finagle.protobuf.rpc.impl
+package com.twitter.finagle.protobuf.rpc.impl
 
 import java.net.InetSocketAddress
 import com.google.protobuf.Descriptors.MethodDescriptor
@@ -12,8 +12,8 @@ import com.twitter.util.Duration
 import com.twitter.util.FuturePool
 import com.twitter.finagle.builder.ClientBuilder
 import java.util.concurrent.ExecutorService
-import com.tendril.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
-import com.tendril.finagle.protobuf.rpc.channel.ProtoBufCodec
+import com.twitter.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
+import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
 
 class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], s: Service, executorService: ExecutorService) extends RpcChannel {
 

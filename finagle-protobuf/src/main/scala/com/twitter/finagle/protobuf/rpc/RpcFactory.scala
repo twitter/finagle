@@ -1,4 +1,4 @@
-package com.tendril.finagle.protobuf.rpc
+package com.twitter.finagle.protobuf.rpc
 
 import com.google.protobuf.Message
 import com.google.protobuf.RpcChannel

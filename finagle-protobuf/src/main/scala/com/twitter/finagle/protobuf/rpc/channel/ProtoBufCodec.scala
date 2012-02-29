@@ -1,4 +1,4 @@
-package com.tendril.finagle.protobuf.rpc.channel
+package com.twitter.finagle.protobuf.rpc.channel
 
 import org.jboss.netty.channel.ChannelPipelineFactory
 import org.jboss.netty.channel.Channels

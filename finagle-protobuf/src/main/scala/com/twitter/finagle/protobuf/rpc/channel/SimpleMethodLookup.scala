@@ -1,6 +1,6 @@
-package com.tendril.finagle.protobuf.rpc.channel
+package com.twitter.finagle.protobuf.rpc.channel
 
-import com.tendril.finagle.protobuf.rpc.Util
+import com.twitter.finagle.protobuf.rpc.Util
 import com.google.protobuf.Service
 import scala.collection.JavaConversions._
 import scala.collection.mutable._

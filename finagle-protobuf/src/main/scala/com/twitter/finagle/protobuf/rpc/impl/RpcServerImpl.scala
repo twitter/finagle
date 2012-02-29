@@ -1,7 +1,7 @@
-package com.tendril.finagle.protobuf.rpc.impl
+package com.twitter.finagle.protobuf.rpc.impl
 
-import com.tendril.finagle.protobuf.rpc.channel.ProtoBufCodec
-import com.tendril.finagle.protobuf.rpc.RpcServer
+import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
+import com.twitter.finagle.protobuf.rpc.RpcServer
 
 import com.twitter.util.Future
 import com.twitter.util.Duration

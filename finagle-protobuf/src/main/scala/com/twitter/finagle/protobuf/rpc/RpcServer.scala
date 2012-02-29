@@ -1,4 +1,4 @@
-package com.tendril.finagle.protobuf.rpc
+package com.twitter.finagle.protobuf.rpc
 import com.twitter.util.Duration
 
 trait RpcServer {

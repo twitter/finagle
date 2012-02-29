@@ -1,4 +1,4 @@
-package com.tendril.finagle.protobuf.rpc
+package com.twitter.finagle.protobuf.rpc
 import com.google.protobuf.RpcCallback
 import com.google.protobuf.RpcController
 import com.twitter.finagle.TimeoutException

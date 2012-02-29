@@ -1,9 +1,9 @@
-package com.tendril.finagle.protobuf.rpc.impl
+package com.twitter.finagle.protobuf.rpc.impl
 
-import com.tendril.finagle.protobuf.rpc.RpcFactory
-import com.tendril.finagle.protobuf.rpc.RpcServer
-import com.tendril.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
-import com.tendril.finagle.protobuf.rpc.RpcServer
+import com.twitter.finagle.protobuf.rpc.RpcFactory
+import com.twitter.finagle.protobuf.rpc.RpcServer
+import com.twitter.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
+import com.twitter.finagle.protobuf.rpc.RpcServer
 
 import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.builder.ClientBuilder
