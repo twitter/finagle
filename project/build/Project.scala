@@ -245,7 +245,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
         <override org="commons-codec" rev="1.5"/>
       </dependencies>
 
-    val commonsZookeeper = "com.twitter.common" % "zookeeper" % "0.0.24"
+    val client = "com.twitter.common.zookeeper" % "client" % "0.0.6"
+    val serverSet = "com.twitter.common.zookeeper" % "server-set" % "0.0.5"
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
