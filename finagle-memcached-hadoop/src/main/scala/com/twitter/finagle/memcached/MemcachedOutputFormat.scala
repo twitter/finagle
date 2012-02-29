@@ -9,15 +9,17 @@ import org.apache.hadoop.mapreduce.OutputFormat
 import org.apache.hadoop.mapreduce.RecordWriter
 import org.apache.hadoop.mapreduce.TaskAttemptContext
 import MemcachedOutputFormat._
+import com.twitter.util._
+import com.twitter.conversions.time._
 import org.apache.commons.codec.binary.Base64
 import _root_.java.io._
+import _root_.java.util.concurrent.atomic._
 
 object MemcachedOutputFormat {
   val CLIENT_FACTORY = "memcached_client_factory"
   val MAX_CONCURRENCY = "memcached_max_concurrency"
-  val MAX_CONCURRENCY_DEFAULT = 1000
-  val TRIES_LIMIT = 6
-  val MIN_SLEEP = 1000
+  val TRIES_LIMIT = 3
+  val MIN_SLEEP = 1.second
   val PROGRESS_EVERY = 10000
 
   def setFactory(config: Configuration, factory: SerializableKeyValueClientFactory) = {
@@ -55,39 +57,54 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
   }
 
   def getRecordWriter(taskContext: TaskAttemptContext) = new RecordWriter[Text, BytesWritable] {
-    val concurrencyString = taskContext.getConfiguration.get(MAX_CONCURRENCY)
-    val concurrency = if(concurrencyString != null) {
-      concurrencyString.toInt
-    } else {
-      MAX_CONCURRENCY_DEFAULT
-    }
-    val semaphore = new Semaphore(concurrency)
+    println("Opening MemcachedOutputFormat#RecordWriter")
     val client = memcachedClientFactory(taskContext).newInstance()
-    var written = 0
+    val timer = new JavaTimer()
+    var written = new AtomicLong()
+    var pending = new AtomicLong()
+    var failures = new AtomicLong()
+    var retries = new AtomicLong()
+    var ops = new AtomicLong()
 
-    def write(key: Text, value: BytesWritable): Unit = write(key, value, 0)
+    def write(key: Text, value: BytesWritable): Unit = {
+      Thread.sleep(pending.get() / 100)
+      if(ops.get() % PROGRESS_EVERY == 0) {
+        println("MemcachedOutputFormat#RecordWriter status (started: "+ops.get()+
+            ", written: "+written.get()+
+            ", pending: "+pending.get()+
+            ", failures: "+failures.get()+
+            ", retries: "+retries.get()+")")
+        taskContext.progress()
+      }
+      write(key, value, 0)
+      ops.incrementAndGet()
+    }
 
     def write(key: Text, value: BytesWritable, tries: Int): Unit = {
       if (tries == TRIES_LIMIT) {
+        failures.incrementAndGet()
         return
       }
-      semaphore.acquire
+      
+      pending.incrementAndGet()
       client.put(key.toString, value.getBytes).map { x =>
-        semaphore.release
-        written += 1
-        if(written % PROGRESS_EVERY == 0) {
-          taskContext.progress()
-        }
+        pending.decrementAndGet()
+        written.incrementAndGet()
       } onFailure { throwable =>
-        Thread.sleep(MIN_SLEEP * (1 << tries))
-        semaphore.release
-        write(key, value, tries + 1)
+        retries.incrementAndGet()
+        pending.decrementAndGet()
+        timer.doLater(MIN_SLEEP * (1 << tries))(write(key, value, tries + 1))        
       }
     }
 
     def close(taskContext: TaskAttemptContext) = {
-      semaphore.acquire(concurrency)
+      while(pending.get() > 0) {
+        println("Closing MemcachedOutputFormat#RecordWriter, waiting on "+pending.get()+" records to finish.")
+        Thread.sleep(MIN_SLEEP.inMillis)
+      }
+      timer.stop()
       client.release()
+      println("Closed MemcachedOutputFormat#RecordWriter.")
     }
   }
 }
