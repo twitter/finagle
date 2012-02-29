@@ -88,7 +88,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
         failures.incrementAndGet()
         return
       }
-      
+
       pending.incrementAndGet()
       client.put(key.toString, value.getBytes).map { x =>
         pending.decrementAndGet()
@@ -96,7 +96,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
       } onFailure { throwable =>
         retries.incrementAndGet()
         pending.decrementAndGet()
-        timer.doLater(MIN_SLEEP * (1 << tries))(write(key, value, tries + 1))        
+        timer.doLater(MIN_SLEEP * (1 << tries))(write(key, value, tries + 1))
       }
     }
 
