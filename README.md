@@ -1,3 +1,9 @@
+Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/RunningSbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
+
+	$ ./sbt update compile
+
+- - -
+
 <a name="Top"></a>
 
 # Finagle Developer Guide (December 15, 2011 Draft)
@@ -391,7 +397,7 @@ A `SimpleFilter` is a kind of `Filter` that does not convert the request and res
 
 ### Codec Objects
 
-A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, HTTP chunked streaming (ala Twitter Streaming) prptocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
+A `Codec` object encodes and decodes _wire_ protocols, such as HTTP. You can use Finagle-provided `Codec` objects for encoding and decoding the Thrift, HTTP, memcache, Kestrel, HTTP chunked streaming (ala Twitter Streaming) protocols. You can also extend the `CodecFactory` class to implement encoding and decoding of other protocols.
 
 [Top](#Top)
 

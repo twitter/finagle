@@ -654,7 +654,7 @@ private[builder] class MkServer[Req, Rep](
         serverChannel.close().awaitUninterruptibly()
 
         // At this point, no new channels may be created.
-        for (h <- activeHandlers)
+        for (h <- activeHandlers.toArray)
           h.drain()
 
         // Wait for all channels to shut down.
@@ -663,7 +663,8 @@ private[builder] class MkServer[Req, Rep](
         // Force close any remaining connections. Don't wait for
         // success. Buffer channels into an array to avoid
         // deadlocking.
-        for (h <- activeHandlers)
+
+        for (h <- activeHandlers.toArray)
           h.close()
 
         bootstrap.releaseExternalResources()

@@ -2,9 +2,10 @@ package com.twitter.finagle.ssl
 
 import java.lang.reflect.Method
 import java.util.logging.Logger
+import javax.net.ssl.SSLException
 
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelStateEvent, SimpleChannelUpstreamHandler
+  ChannelHandlerContext, ChannelStateEvent, ExceptionEvent, SimpleChannelUpstreamHandler
 }
 
 class SslShutdownHandler(o: Object) extends SimpleChannelUpstreamHandler {
@@ -20,6 +21,14 @@ class SslShutdownHandler(o: Object) extends SimpleChannelUpstreamHandler {
     shutdownMethod foreach { method: Method =>
       method.invoke(o)
     }
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    // remove the ssl handler so that it doesn't trap the disconnect
+    if (e.getCause.isInstanceOf[SSLException])
+      ctx.getPipeline.remove("ssl")
+
+    super.exceptionCaught(ctx, e)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
