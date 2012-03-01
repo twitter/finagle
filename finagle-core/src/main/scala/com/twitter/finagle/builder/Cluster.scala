@@ -2,7 +2,8 @@ package com.twitter.finagle.builder
 
 import com.twitter.concurrent.Spool
 import com.twitter.util.Future
-import collection.mutable.HashMap
+import collection.mutable
+import java.util.logging.Logger
 
 /**
  * Cluster is a collection of servers. The intention of this interface
@@ -23,26 +24,54 @@ trait Cluster[T] { self =>
    */
   def map[U](f: T => U): Cluster[U] = new Cluster[U] {
     // Translation cache to ensure that mapping is idempotent.
-    private[this] val cache = HashMap.empty[T, U]
-    private[this] def g(t: T) = synchronized { cache.getOrElseUpdate(t, f(t)) }
+    private[this] val mapped = mutable.HashMap.empty[T, mutable.Queue[U]]
 
     def snap: (Seq[U], Future[Spool[Cluster.Change[U]]]) = {
       val (seqT, changeT) = self.snap
-      val seqU = seqT map g
-      val changeU = changeT map { _ map {
-          case Cluster.Add(t) => Cluster.Add(g(t))
-          case Cluster.Rem(t) => Cluster.Rem(g(t))
+      val seqU = seqT map { t =>
+        val q = mapped.getOrElseUpdate(t, mutable.Queue[U]())
+        val u = f(t)
+        q.enqueue(u)
+        u
+      }
+
+      val changeU = changeT map { spoolT =>
+        spoolT map { elem =>
+          mapped.synchronized {
+            elem match {
+              case Cluster.Add(t) =>
+                val q = mapped.getOrElseUpdate(t, mutable.Queue[U]())
+                val u = f(t)
+                q.enqueue(u)
+                Cluster.Add(u)
+
+              case Cluster.Rem(t) =>
+                 mapped.get(t) match {
+                   case Some(q) =>
+                     val u = q.dequeue()
+                     if (q.isEmpty)
+                       mapped.remove(t)
+                     Cluster.Rem(u)
+
+                   case None =>
+                     Logger.getLogger("").warning(
+                       "cluster does not have removed key, regenerating")
+                     Cluster.Rem(f(t))
+                 }
+            }
+          }
         }
       }
+
       (seqU, changeU)
     }
   }
 }
 
 object Cluster {
-  sealed abstract trait Change[T]
-  case class Add[T](t: T) extends Change[T]
-  case class Rem[T](t: T) extends Change[T]
+  sealed abstract trait Change[T] { def value: T }
+  case class Add[T](value: T) extends Change[T]
+  case class Rem[T](value: T) extends Change[T]
 }
 
 /**
