@@ -79,11 +79,15 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   @volatile private[this] var currentResponse: Option[Future[Rep]] = None
 
   private[this] def shutdown() =
-    if (state.getAndSet(Shutdown) != Shutdown) {
-      currentResponse foreach { _.cancel() }
-      currentResponse = None
-      close() onSuccessOrFailure { onShutdownPromise() = Return(()) }
-      service.release()
+    state.getAndSet(Shutdown) match {
+      case Shutdown => // Already shut down.
+      case previous =>
+        currentResponse foreach { _.cancel() }
+        currentResponse = None
+        close() onSuccessOrFailure { onShutdownPromise() = Return(()) }
+        service.release()
+        if (previous == Busy)
+          statsReceiver.counter("shutdown_while_pending").incr()
     }
 
   /**
@@ -138,11 +142,19 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
       handleStat.add((Time.now - begin).inMicroseconds)
       currentResponse = Some(res)
       res
-    } onSuccess { value =>
-      currentResponse = None
-      Channels.write(channel, value)
-    } onFailure { exc =>
-      serviceMonitor.handle(exc)
+    } respond { value =>
+      // This avoids generating an extra exception if the channel
+      // closed while we were processing, and cancellation did
+      // not propagate.
+      if (state.get != Shutdown) {
+        value match {
+          case Return(response) =>
+            currentResponse = None
+            Channels.write(channel, response)
+          case Throw(exc) =>
+            serviceMonitor.handle(exc)
+        }
+      }
     }
   }
 

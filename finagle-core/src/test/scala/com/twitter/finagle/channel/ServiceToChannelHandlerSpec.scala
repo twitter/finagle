@@ -14,19 +14,20 @@ import org.jboss.netty.channel.{
 
 import com.twitter.util.{Future, Promise, Return, NullMonitor}
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, InMemoryStatsReceiver}
 
 object ServiceToChannelHandlerSpec extends Specification with Mockito {
   "ServiceToChannelHandler" should {
     class Foo { def fooMethod() = "hey there" }
 
+    val statsReceiver = new InMemoryStatsReceiver
     val log = mock[Logger]
     val request = new Foo
     val service = mock[Service[Foo, String]]
     val serviceFactory = mock[ServiceFactory[Foo, String]]
     serviceFactory(any) returns Future.value(service)
     val handler = new ServiceToChannelHandler(
-      serviceFactory, NullStatsReceiver, log, NullMonitor)
+      serviceFactory, statsReceiver, log, NullMonitor)
     val pipeline = mock[ChannelPipeline]
     val channel = mock[Channel]
     val closeFuture = Channels.future(channel)
@@ -46,9 +47,8 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     // the channel.
     handler.channelOpen(ctx, mock[ChannelStateEvent])
 
-    service(Matchers.any[Foo]) answers { f => Future.value(f.asInstanceOf[Foo].fooMethod) }
-
     "when sending a valid message" in {
+      service(Matchers.any[Foo]) answers { f => Future.value(f.asInstanceOf[Foo].fooMethod) }
       handler.messageReceived(ctx, e)
 
       "propagate received messages to the service" in {
@@ -66,6 +66,7 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     }
 
     "service shutdown" in {
+      service(Matchers.any[Foo]) answers { f => Future.value(f.asInstanceOf[Foo].fooMethod) }
       "when sending an invalid message" in {
         e.getMessage returns mock[Object]   // wrong type
         handler.messageReceived(ctx, e)
@@ -90,6 +91,7 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
         there was one(service).release()
         there was one(channel).close()
         there was one(log).log(Level.WARNING, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
+
       }
 
       "a close exception was caught by Netty" in {
@@ -139,6 +141,28 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
         there was one(service).release()
         there was one(channel).close()
         there was one(log).log(Level.SEVERE, "A Service threw an exception", exc)
+      }
+    }
+
+    "on close" in {
+      "pending request is cancelled" in {
+        val p = new Promise[String]
+        service(any) returns p
+        handler.messageReceived(ctx, e)
+        there was one(service)(request)
+        val exc = new Exception("netty exception")
+        val ee = mock[ExceptionEvent]
+        ee.getCause returns exc
+        p.isCancelled must beFalse
+        statsReceiver.counters mustNot haveKey(Seq("shutdown_while_pending"))
+        handler.exceptionCaught(mock[ChannelHandlerContext], ee)
+        p.isCancelled must beTrue
+        there was one(log).log(Level.WARNING, "Unhandled exception in connection with ADDRESS , shutting down connection", exc)
+        there was no(pipeline).sendDownstream(any)
+        p() = Return("ok")
+        there was no(pipeline).sendDownstream(any)
+        statsReceiver.counters must haveKey(Seq("shutdown_while_pending"))
+        statsReceiver.counters(Seq("shutdown_while_pending")) must be_==(1)
       }
     }
   }
