@@ -247,10 +247,25 @@ abstract class Message extends HttpMessage {
   /** Set User-Agent header */
   def userAgent_=(value: String) { setHeader(HttpHeaders.Names.USER_AGENT, value) }
 
+  /** Get WWW-Authenticate header */
+  def wwwAuthenticate: Option[String] = Option(getHeader(HttpHeaders.Names.WWW_AUTHENTICATE))
+  /** Set WWW-Authenticate header */
+  def wwwAuthenticate_=(value: String) { setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, value) }
+
   /** Get X-Forwarded-For header */
   def xForwardedFor: Option[String] = Option(getHeader("X-Forwarded-For"))
   /** Set X-Forwarded-For header */
   def xForwardedFor_=(value: String) { setHeader("X-Forwarded-For", value) }
+
+  /**
+   * Check if X-Requested-With contains XMLHttpRequest, usually signalling a
+   * request from a JavaScript AJAX libraries.  Some servers treat these
+   * requests specially.  For example, an endpoint might render JSON or XML
+   * instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
+   */
+  def isXmlHttpRequest = {
+    Option(getHeader("X-Requested-With")) exists { _.toLowerCase.contains("xmlhttprequest") }
+  }
 
   /** Get length of content. */
   def length: Int = getContent.readableBytes
