@@ -183,7 +183,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def dependencyPath = "lib"
 
     override def compileOrder = CompileOrder.JavaThenScala
-    val thrift    = "thrift"    % "libthrift" % "0.5.0"
+    val thrift    = "org.apache.thrift" % "libthrift" % "0.5.0"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
   }
 
@@ -285,7 +285,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults with IntegrationSpecs with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
-    val thrift   = "thrift"      % "libthrift" % "0.5.0"
+    val thrift   = "org.apache.thrift" % "libthrift" % "0.5.0"
     val slf4jNop = "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
     projectDependencies(
       "ostrich",
@@ -297,7 +297,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults with LibDirClasspath with CompileThriftFinagle
   {
     override def compileOrder = CompileOrder.JavaThenScala
-    val thrift    = "thrift"    % "libthrift" % "0.5.0"
+    val thrift    = "org.apache.thrift" % "libthrift" % "0.5.0"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
 
     projectDependencies(
@@ -311,7 +311,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val codaRepo            = "Coda Hale's Repository" at "http://repo.codahale.com/"
     override def compileOrder = CompileOrder.JavaThenScala
 
-    val thrift    = "thrift"    % "libthrift" % "0.5.0"
+    val thrift   = "org.apache.thrift" % "libthrift" % "0.5.0"
     val jerkson  = "com.codahale" % "jerkson_2.8.1" % "0.1.4"
     val jacksonCore = "org.codehaus.jackson" % "jackson-core-asl"  % "1.8.1"
     val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.8.1"
