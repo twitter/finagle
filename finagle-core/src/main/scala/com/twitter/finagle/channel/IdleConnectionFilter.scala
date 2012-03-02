@@ -3,8 +3,9 @@ package com.twitter.finagle.channel
 import com.twitter.collection.BucketGenerationalQueue
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
 
-import com.twitter.util.Duration
+import com.twitter.util.{Future, Duration}
 import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.finagle.{ConnectionRefusedException, SimpleFilter, Service, ClientConnection}
 
@@ -30,11 +31,10 @@ case class OpenConnectionsThresholds(
  * not count in the idle timeout.
  */
 class IdleConnectionFilter[Req, Rep](
+  self: ServiceFactory[Req, Rep],
   threshold: OpenConnectionsThresholds,
-  underlying: ClientConnection => Service[Req, Rep],
   statsReceiver: StatsReceiver = NullStatsReceiver
-) extends (ClientConnection => Service[Req, Rep]) {
-
+) extends ServiceFactoryProxy[Req, Rep](self) {
   private[this] val queue = new BucketGenerationalQueue[ClientConnection](threshold.idleTimeout)
   private[this] val connectionCounter = new AtomicInteger(0)
   private[this] val idle = statsReceiver.addGauge("idle") {
@@ -44,17 +44,14 @@ class IdleConnectionFilter[Req, Rep](
 
   def openConnections = connectionCounter.get()
 
-  def apply(c: ClientConnection) = {
-    val service = if (accept(c)) {
-      filterFactory(c) andThen underlying(c)
-    } else {
+  override def apply(c: ClientConnection) = {
+    c.onClose ensure { connectionCounter.decrementAndGet() }
+    if (accept(c)) super.apply(c) map { filterFactory(c) andThen _ } else {
       refused.incr()
       val address = c.remoteAddress
       c.close()
-      new FailedService(new ConnectionRefusedException(address))
+      Future.value(new FailedService(new ConnectionRefusedException(address)))
     }
-    c.onClose ensure { connectionCounter.decrementAndGet() }
-    service
   }
 
   // This filter is responsible for adding/removing a connection to/from the idle tracking

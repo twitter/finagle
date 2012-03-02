@@ -17,12 +17,12 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
 
     val underlying = mock[ServiceFactory[Int, Int]]
     underlying.isAvailable returns true
-    underlying.make() returns Future.value(underlyingService)
+    underlying() returns Future.value(underlyingService)
 
     val timer = new MockTimer
     val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds, timer)
-    val service = factory.make()()
-    there was one(underlying).make()
+    val service = factory()()
+    there was one(underlying)()
 
     "become unavailable" in {
       Time.withCurrentTimeFrozen { timeControl =>
@@ -109,11 +109,11 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
 
     val underlying = mock[ServiceFactory[Int, Int]]
     underlying.isAvailable returns true
-    underlying.make() returns Future.value(underlyingService)
+    underlying() returns Future.value(underlyingService)
 
     val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds)
-    val service = factory.make()()
-    there was one(underlying).make()
+    val service = factory()()
+    there was one(underlying)()
 
     "[service] pass through underlying availability" in {
       service.isAvailable must beTrue
@@ -136,17 +136,17 @@ object FailureAccrualFactorySpec extends Specification with Mockito {
     val underlying = mock[ServiceFactory[Int, Int]]
     underlying.isAvailable returns true
     val exc = new Exception("i broked :-(")
-    underlying.make() returns Future.exception(exc)
+    underlying() returns Future.exception(exc)
     val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds, new MockTimer)
 
     "fail after the given number of tries" in {
       Time.withCurrentTimeFrozen { timeControl =>
         factory.isAvailable must beTrue
-        factory.make()() must throwA(exc)
+        factory()() must throwA(exc)
         factory.isAvailable must beTrue
-        factory.make()() must throwA(exc)
+        factory()() must throwA(exc)
         factory.isAvailable must beTrue
-        factory.make()() must throwA(exc)
+        factory()() must throwA(exc)
         factory.isAvailable must beFalse
       }
     }

@@ -349,16 +349,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def build(service: Service[Req, Rep]) (
      implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
        ThisConfig =:= FullySpecifiedConfig
-   ): Server = build { () =>
-     new ServiceProxy[Req, Rep](service) {
-       // release() is meaningless on connectionless services.
-       override def release() = ()
-     }
-   }
+   ): Server = build(ServiceFactory.const(service))
 
   /**
    * Construct the Server, given the provided Service factory.
    */
+  @deprecated("Use the ServiceFactory variant instead")
   def build(serviceFactory: () => Service[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
@@ -369,7 +365,21 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
    */
+  @deprecated("Use the ServiceFactory variant instead")
   def build(serviceFactory: (ClientConnection) => Service[Req, Rep])(
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Server = build(new ServiceFactory[Req, Rep] {
+    def apply(conn: ClientConnection) = Future.value(serviceFactory(conn))
+    def close() = ()
+  })
+
+  /**
+   * Construct the Server, given the provided ServiceFactory. This
+   * is useful if the protocol is stateful (e.g., requires authentication
+   * or supports transactions).
+   */
+  def build(serviceFactory: ServiceFactory[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Server = MkServer(config, serviceFactory)
@@ -385,7 +395,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 private[builder] object MkServer {
   def apply[Req, Rep](
     config: ServerConfig.FullySpecified[Req, Rep],
-    serviceFactory: (ClientConnection) => Service[Req, Rep]
+    serviceFactory: ServiceFactory[Req, Rep]
   ) = {
     val mk = new MkServer[Req, Rep](config, serviceFactory)
     mk()
@@ -397,7 +407,7 @@ private[builder] object MkServer {
  */
 private[builder] class MkServer[Req, Rep](
   val config: ServerConfig.FullySpecified[Req, Rep],
-  val inputServiceFactory: (ClientConnection) => Service[Req, Rep]
+  val inputServiceFactory: ServiceFactory[Req, Rep]
 )  {
   val serverConfig = ServerCodecConfig(serviceName = config.name, boundAddress = config.bindTo)
   val codec = config.codecFactory(serverConfig)
@@ -460,16 +470,16 @@ private[builder] class MkServer[Req, Rep](
 
     tracingFilter andThen statsFilter andThen timeoutFilter
   }
- 
+
   val serviceFactory = {
     var factory = inputServiceFactory
 
     config.openConnectionsThresholds foreach { threshold =>
       factory = new IdleConnectionFilter(
-        threshold, factory, statsReceiver.scope("idle"))
+        factory, threshold, statsReceiver.scope("idle"))
     }
 
-    factory andThen { service =>
+    factory map { service =>
       val prepared: Service[Req, Rep] = {
         val prepared = codec.prepareService(service)
         if (prepared.isDefined && prepared.isReturn) prepared.get
@@ -512,7 +522,7 @@ private[builder] class MkServer[Req, Rep](
 
     // Serialization keeps the codecs honest.
     pipeline.addLast(
-      "requestSerializing", 
+      "requestSerializing",
       new ChannelSemaphoreHandler(new AsyncSemaphore(1)))
 
     // Add this after the serialization to get an accurate request
@@ -520,7 +530,7 @@ private[builder] class MkServer[Req, Rep](
     channelRequestStatsHandler foreach { handler =>
       pipeline.addLast("channelRequestStatsHandler", handler)
     }
-    
+
     pipeline
   }
 
@@ -529,17 +539,17 @@ private[builder] class MkServer[Req, Rep](
       val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)
       engine.self.setUseClientMode(false)
       engine.self.setEnableSessionCreation(true)
-  
+
       val handler = new SslHandler(engine.self)
-  
+
       // Certain engine implementations need to handle renegotiation internally,
       // as Netty's TLS protocol parser implementation confuses renegotiation and
       // notification events. Renegotiation will be enabled for those Engines with
       // a true handlesRenegotiation value.
       handler.setEnableRenegotiation(engine.handlesRenegotiation)
-  
+
       pipeline.addFirst("ssl", handler)
-  
+
       // Netty's SslHandler does not provide SSLEngine implementations any hints that they
       // are no longer needed (namely, upon disconnection.) Since some engine implementations
       // make use of objects that are not managed by the JVM's memory manager, we need to
@@ -549,7 +559,7 @@ private[builder] class MkServer[Req, Rep](
         "sslShutdown",
         new SslShutdownHandler(engine)
       )
-  
+
       // Information useful for debugging SSL issues, such as the certificate, cipher spec,
       // remote address is provided to the SSLEngine implementation by the SslIdentifierHandler.
       // The SslIdentifierHandler will invoke the setIdentifier method on implementations
@@ -563,7 +573,7 @@ private[builder] class MkServer[Req, Rep](
   bootstrap.setPipelineFactory(new ChannelPipelineFactory {
     def getPipeline() = {
       val pipeline = mkPipeline()
-  
+
       // Add the (shared) queueing handler *after* request
       // serialization as it assumes at most one outstanding request
       // per channel.
@@ -572,7 +582,7 @@ private[builder] class MkServer[Req, Rep](
       // Make some connection-specific changes to the service
       // factory.
       var thisServiceFactory = serviceFactory
-  
+
       // We add the idle time after the codec. This ensures that a
       // client couldn't DoS us by sending lots of little messages
       // that don't produce a request object for some time. In other
@@ -584,7 +594,7 @@ private[builder] class MkServer[Req, Rep](
       if (idleTime.isDefined || lifeTime.isDefined) {
         val closingHandler = new ChannelClosingHandler
         pipeline.addLast("closingHandler", closingHandler)
-        thisServiceFactory = serviceFactory andThen { service =>
+        thisServiceFactory = serviceFactory map { service =>
           val closingService = new ServiceProxy(service) {
             override def release() {
               closingHandler.close()
@@ -595,7 +605,7 @@ private[builder] class MkServer[Req, Rep](
             closingService, idleTime, lifeTime, Timer.default,
             statsReceiver.scope("expired")
           )
-  
+
         }
       }
 
@@ -606,12 +616,12 @@ private[builder] class MkServer[Req, Rep](
         thisServiceFactory, statsReceiver,
         Logger.getLogger(classOf[ServiceToChannelHandler[Req, Rep]].getName),
         monitor)
-  
+
       activeHandlers += channelHandler
       channelHandler.onShutdown ensure {
         activeHandlers -= channelHandler
       }
-  
+
       pipeline.addLast("channelHandler", channelHandler)
       pipeline
     }

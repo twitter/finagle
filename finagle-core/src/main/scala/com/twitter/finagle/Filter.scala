@@ -73,7 +73,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 
   def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
     new ServiceFactory[ReqIn, RepOut] {
-      def make() = factory.make() map { Filter.this andThen _ }
+      def apply(conn: ClientConnection) = factory(conn) map { Filter.this andThen _ }
       override def close() = factory.close()
       override def isAvailable = factory.isAvailable
       override def toString = factory.toString

@@ -1,19 +1,31 @@
 package com.twitter.finagle.example.memcache
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.builder.{
-  ReferenceCountedChannelFactory, LazyRevivableChannelFactory}
+  ReferenceCountedChannelFactory, LazyRevivableChannelFactory, ClientBuilder}
 import com.twitter.finagle.memcached
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.stats.OstrichStatsReceiver
+import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
-import com.twitter.util.Time
+import com.twitter.util.{Future, Time}
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep])
+  extends Service[Req, Rep] 
+{
+  @volatile private[this] var currentService: Future[Service[Req, Rep]] = factory()
+
+  def apply(req: Req) =
+    currentService flatMap { service =>
+      service(req) onFailure { _ =>
+        currentService = factory()
+      }
+    }
+}
 
 object MemcacheStress {
   val count = new AtomicLong
@@ -80,13 +92,14 @@ object MemcacheStress {
     adminService.start()
 
     println(builder)
-    val svc = builder.build()
-
-    val client = memcached.Client(svc)
+    val factory = builder.buildFactory()
     val begin = Time.now
 
-    for (_ <- 0 until concurrency)
+    for (_ <- 0 until concurrency) {
+      val svc = new PersistentService(factory)
+      val client = memcached.Client(svc)
       proc(client, key, value)
+    }
 
     while (true) {
       Thread.sleep(5000)

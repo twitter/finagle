@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.{
   Service, ServiceFactory, ServiceClosedException,
   TooManyWaitersException, ServiceProxy,
-  CancelledConnectionException}
+  CancelledConnectionException, ClientConnection}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
@@ -41,7 +41,7 @@ class WatermarkPool[Req, Rep](
   private[this] def flushWaiters() = synchronized {
     while (numServices < highWatermark && !waiters.isEmpty) {
       val waiter = waiters.dequeue()
-      val res = make() respond { waiter() = _ }
+      val res = this() respond { waiter() = _ }
       waiter.linkTo(res)
     }
   }
@@ -88,7 +88,7 @@ class WatermarkPool[Req, Rep](
     }
   }
 
-  def make(): Future[Service[Req, Rep]] = synchronized {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
     if (!isOpen)
       return Future.exception(new ServiceClosedException)
 
@@ -97,7 +97,7 @@ class WatermarkPool[Req, Rep](
         Future.value(service)
       case None if numServices < highWatermark =>
         numServices += 1
-        factory.make() onFailure { _ =>
+        factory(conn) onFailure { _ =>
           synchronized {
             numServices -= 1
             flushWaiters()

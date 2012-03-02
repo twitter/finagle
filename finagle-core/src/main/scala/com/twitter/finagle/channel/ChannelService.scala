@@ -169,7 +169,7 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
   protected def mkService(ch: Channel, statsReceiver: StatsReceiver): Service[Req, Rep] =
     new ChannelService(ch, this, statsReceiver)
 
-  def make(): Future[Service[Req, Rep]] = {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     val begin = Time.now
 
     Future {

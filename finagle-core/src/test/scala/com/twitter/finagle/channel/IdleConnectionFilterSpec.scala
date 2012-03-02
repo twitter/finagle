@@ -2,16 +2,16 @@ package com.twitter.finagle.channel
 
 import org.specs.Specification
 import org.specs.mock.Mockito
-import com.twitter.finagle.{Service, ClientConnection}
+import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Time, Future, Promise}
 
 object IdleConnectionFilterSpec extends Specification with Mockito {
   "IdleConnectionFilter" should {
-    def underlying(c: ClientConnection) = mock[Service[String, String]]
+    val underlying = ServiceFactory.const(mock[Service[String, String]])
 
     val threshold = OpenConnectionsThresholds(2, 4, 1.second)
-    val filter = new IdleConnectionFilter(threshold, underlying)
+    val filter = new IdleConnectionFilter(underlying, threshold)
 
     def open(filter: IdleConnectionFilter[_, _]) = {
       val c = mock[ClientConnection]
@@ -47,7 +47,7 @@ object IdleConnectionFilterSpec extends Specification with Mockito {
     }
 
     "try to close an idle connection if above lowerWaterMark" in {
-      val spyFilter = spy(new IdleConnectionFilter(threshold, underlying))
+      val spyFilter = spy(new IdleConnectionFilter(underlying, threshold))
 
       spyFilter.openConnections mustEqual 0
       (1 to threshold.lowWaterMark) map { _ => open(spyFilter) }
@@ -61,14 +61,15 @@ object IdleConnectionFilterSpec extends Specification with Mockito {
     "don't close connections not yet answered by the server (long processing requests)" in {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
-        def underlying(c: ClientConnection) = new Service[String, String] {
+        val service = new Service[String, String] {
           def apply(req: String): Future[String] = new Promise[String]
         }
-        val spyFilter = spy(new IdleConnectionFilter(threshold, underlying))
+        val underlying = ServiceFactory.const(service)
+        val spyFilter = spy(new IdleConnectionFilter(underlying, threshold))
         spyFilter.openConnections mustEqual 0
         (1 to threshold.highWaterMark) map { _ =>
           val (c,_) = open(spyFilter)
-          spyFilter.filterFactory(c)("titi", underlying(c))
+          spyFilter.filterFactory(c)("titi", service)
         }
         spyFilter.openConnections mustEqual threshold.highWaterMark
 
@@ -92,19 +93,20 @@ object IdleConnectionFilterSpec extends Specification with Mockito {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
         val responses = collection.mutable.HashSet.empty[Promise[String]]
-        def underlying(c: ClientConnection) = new Service[String, String] {
+        val service = new Service[String, String] {
           def apply(req: String): Future[String] = {
             val p = new Promise[String]
             responses += p
             p
           }
         }
-        val spyFilter = spy(new IdleConnectionFilter(threshold, underlying))
+        val underlying = ServiceFactory.const(service)
+        val spyFilter = spy(new IdleConnectionFilter(underlying, threshold))
 
         // Open all connections
         (1 to threshold.highWaterMark) map { _ =>
           val (c,_) = open(spyFilter)
-          spyFilter.filterFactory(c)("titi", underlying(c))
+          spyFilter.filterFactory(c)("titi", underlying(c)())
         }
 
         // Simulate response from the server

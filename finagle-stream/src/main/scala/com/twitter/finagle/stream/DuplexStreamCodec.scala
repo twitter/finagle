@@ -25,7 +25,7 @@ import com.twitter.util.{Future, Promise, Return}
  *   .hosts(Seq(address))
  *   .buildFactory()
  * val service =
- * factory.make() onSuccess { client =>
+ * factory() onSuccess { client =>
  *   val outbound = new Broker[ChannelBuffer]
  *   val handle: Future[DuplexStreamHandle] = client(outbound.recv)
  *   handle.messages foreach { inboundMessage => ... }

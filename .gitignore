@@ -17,4 +17,4 @@ out/
 .ivyjars
 .idea
 .DS_Store
-sbt
+sbt-launch-0.7.5.jar
