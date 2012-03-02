@@ -236,6 +236,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class ServersetsProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
+    val commonsCodec    = "commons-codec" % "commons-codec" % "1.5"
     val commonClient    = "com.twitter.common.zookeeper" % "client"     % "0.0.6"
     val commonGroup     = "com.twitter.common.zookeeper" % "group"      % "0.0.5"
     val commonServerSet = "com.twitter.common.zookeeper" % "server-set" % "0.0.5"
