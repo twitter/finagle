@@ -43,7 +43,16 @@ object JSSE {
   /**
    * Get a client
    */
-  def client(): Engine = client(null)
+  def client(): Engine = client(null : Array[TrustManager])
+  
+  /**
+   * Get a client from the given Context
+   */
+  def client(ctx : SSLContext) : Engine = {
+    val sslEngine = ctx.createSSLEngine();
+    sslEngine.setUseClientMode(true);
+    new Engine(sslEngine)
+  }
 
   /**
    * Get a client that skips verification of certificates.
