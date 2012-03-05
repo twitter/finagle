@@ -56,7 +56,8 @@ private[thrift] class ThriftServerChannelBufferEncoder
       case array: Array[Byte] if (!array.isEmpty) =>
         val buffer = ChannelBuffers.wrappedBuffer(array)
         Channels.write(ctx, e.getFuture, buffer)
-      case array: Array[Byte] => ()
+      case array: Array[Byte] =>
+        e.getFuture.setSuccess()
       case _ => throw new IllegalArgumentException("no byte array")
     }
   }
@@ -68,6 +69,9 @@ private[thrift] object HandleUncaughtApplicationExceptions
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) =
     service(request) handle {
       case e if !e.isInstanceOf[TException] =>
+        // NB! This is technically incorrect for one-way calls,
+        // but we have no way of knowing it here. We may
+        // consider simply not supporting one-way calls at all.
         val msg = InputBuffer.readMessageBegin(request)
         val name = msg.name
 
@@ -134,10 +138,12 @@ private[thrift] class ThriftServerTracingFilter(
 
       try {
         ClientId.set(extractClientId(header))
-        service(request_) map { response =>
-          Trace.record(Annotation.ServerSend())
-          val responseHeader = new thrift.ResponseHeader
-          OutputBuffer.messageToArray(responseHeader) ++ response
+        service(request_) map {
+          case response if response.isEmpty => response
+          case response =>
+            Trace.record(Annotation.ServerSend())
+            val responseHeader = new thrift.ResponseHeader
+            OutputBuffer.messageToArray(responseHeader) ++ response
         }
       } finally {
         ClientId.clear()
