@@ -191,7 +191,7 @@ class Client(service: Service[Command, Reply]) {
    * @return Number of elements added to sorted set
    */
   def zAdd(key: Array[Byte], score: Double, member: Array[Byte]): Future[Int] =
-    doRequest(ZAdd(key, ZMember(score.toFloat, member))) {
+    doRequest(ZAdd(key, ZMember(score, member))) {
       case IntegerReply(n)     => Future.value(n)
     }
 
@@ -212,7 +212,7 @@ class Client(service: Service[Command, Reply]) {
    * @return Number of elements between min and max in sorted set
    */
   def zCount(key: Array[Byte], min: Double, max: Double): Future[Int] =
-    doRequest(ZCount(key, ZInterval(min.toFloat), ZInterval(max.toFloat))) {
+    doRequest(ZCount(key, ZInterval(min), ZInterval(max))) {
       case IntegerReply(n)     => Future.value(n)
     }
 
@@ -228,8 +228,8 @@ class Client(service: Service[Command, Reply]) {
     doRequest(
       ZRangeByScore(
         BytesToString(key),
-        ZInterval(min.toFloat),
-        ZInterval(max.toFloat),
+        ZInterval(min),
+        ZInterval(max),
         Some(WithScores),
         Some(Limit(offset, count))
       )
