@@ -3,7 +3,7 @@ package com.twitter.finagle
 import org.specs.Specification
 import org.specs.mock.Mockito
 
-import com.twitter.util.{Future, Return}
+import com.twitter.util.{Future, Return, Throw}
 
 object ServiceSpec extends Specification with Mockito {
   "ServiceProxy" should {
@@ -38,6 +38,30 @@ object ServiceSpec extends Specification with Mockito {
       val proxied = f()
       proxied("ok").poll must be_==(Some(Return("ko")))
       there was one(service)("ok")
+    }
+  }
+  
+  "ServiceFactory.flatMap" should {
+    "release underlying service on failure" in {
+      val exc = new Exception
+      val service = mock[Service[String, String]]
+      val factory = new ServiceFactory[String, String] {
+        def apply(conn: ClientConnection) = Future.value(service)
+        def close() = ()
+      }
+
+      there was no(service).release()
+      var didRun = false
+      val f2 = factory flatMap { _ =>
+        didRun = true
+        Future.exception(exc)
+      }
+      didRun must beFalse
+      there was no(service).release()
+
+      f2().poll must beSome(Throw(exc))
+      didRun must beTrue
+      there was one(service).release()
     }
   }
 }

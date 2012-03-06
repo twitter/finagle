@@ -643,22 +643,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       statsReceiver, maxWaiters)
   }
 
-  private[this] def prepareService(codec: Codec[Req, Rep])(service: Service[Req, Rep]) = {
-    var future: Future[Service[Req, Rep]] = codec.prepareService(service)
-
-    if (config.hostConnectionMaxIdleTime.isDefined ||
-        config.hostConnectionMaxLifeTime.isDefined) {
-      future = future map { underlying =>
-        new ExpiringService(
-          underlying,
-          config.hostConnectionMaxIdleTime,
-          config.hostConnectionMaxLifeTime)
-      }
-    }
-
-    future
-  }
-
   private[finagle] lazy val statsReceiver = {
     val statsReceiver = config.statsReceiver getOrElse NullStatsReceiver
     config.name match {
@@ -687,8 +671,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     var factory: ServiceFactory[Req, Rep] = null
     val bs = buildBootstrap(codec, host)
-    factory = new ChannelServiceFactory[Req, Rep](
-      bs, prepareService(codec) _, hostStatsReceiver)
+    factory = codec.rawPrepareClientConnFactory(new ChannelServiceFactory[Any, Any](bs, hostStatsReceiver))
+
+    if (config.hostConnectionMaxIdleTime.isDefined ||
+        config.hostConnectionMaxLifeTime.isDefined) {
+      factory = factory map { service =>
+        new ExpiringService(
+          service,
+          config.hostConnectionMaxIdleTime,
+          config.hostConnectionMaxLifeTime)
+      }
+    }
+
     factory = buildPool(factory, hostStatsReceiver)
     factory = requestTimeoutFilter andThen factory
     factory = failureAccrualFactory(factory)
@@ -759,7 +753,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
     factory = tracingFilter(tracer) andThen factory
-    factory = codec.prepareFactory(factory)
+    factory = codec.prepareServiceFactory(factory)
 
     factory
   }
@@ -839,4 +833,3 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   protected val identityFilter = Filter.identity[Req, Rep]
 }
-

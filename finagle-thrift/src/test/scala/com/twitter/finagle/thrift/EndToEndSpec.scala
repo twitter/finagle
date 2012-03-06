@@ -114,7 +114,6 @@ object EndToEndSpec extends Specification {
 
       "handle wrong interface" in {
         val client = new F.ServiceToClient(service, new TBinaryProtocol.Factory())
-
         client.another_method(123)() must throwA(
           new TApplicationException("Invalid method name: 'another_method'"))
       }

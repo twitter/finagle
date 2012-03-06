@@ -20,19 +20,39 @@ trait Codec[Req, Rep] {
   def pipelineFactory: ChannelPipelineFactory
 
   /**
-   * Prepare a newly-created (connected) Service endpoint.  It becomes
-   * available once the returned Future is satisfied.
-   * Used to allow codec modifications to the service at the bottom of the network stack.
-   */
-  def prepareService(underlying: Service[Req, Rep]): Future[Service[Req, Rep]] =
-    Future.value(underlying)
-
-  /**
    * Prepare a factory for usage with the codec.
    * Used to allow codec modifications to the service at the top of the network stack.
    */
-  def prepareFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+  def prepareServiceFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
     underlying
+
+  /**
+   * Prepare a connection factory.
+   * Used to allow codec modifications to the service at the bottom of the stack
+   * (connection level).
+   */
+  def prepareConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+    underlying
+
+  /**
+   * Raw version of `prepareConnFactory` for clients. This allows raw (as-yet untyped) '
+   * access to the underlying codec, allowing the implementor to use different message
+   * types for communications between the connection factory and the codec.
+   *
+   * Useful in implementing connection multiplexing.
+   */
+  def rawPrepareClientConnFactory(underlying: ServiceFactory[Any, Any]): ServiceFactory[Req, Rep] =
+    prepareConnFactory(underlying.asInstanceOf[ServiceFactory[Req, Rep]])
+
+  /**
+   * Raw version of `prepareConnFactory` for servers. This allows raw (as-yet untyped) '
+   * access to the underlying codec, allowing the implementor to use different message
+   * types for communications between the connection factory and the codec.
+   *
+   * Useful in implementing connection multiplexing.
+   */
+  def rawPrepareServerConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Any, Any] =
+    prepareConnFactory(underlying).asInstanceOf[ServiceFactory[Any, Any]]
 }
 
 object Codec {
@@ -53,12 +73,10 @@ object Codec {
  * Codec factories create codecs given some configuration.
  */
 
-
 /**
  * Clients
  */
 case class ClientCodecConfig(serviceName: String)
-
 
 /**
  * Servers
