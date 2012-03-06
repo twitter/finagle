@@ -180,4 +180,10 @@ object Trace {
   def recordBinary(key: String, value: Any) {
     record(Annotation.BinaryAnnotation(key, value))
   }
+
+  def recordBinaries(annotations: Map[String, Any]) {
+    for ((key, value) <- annotations) {
+      recordBinary(key, value)
+    }
+  }
 }

@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.util.{Time, Duration, Throw, Return, TimerTask, Timer}
-import com.twitter.finagle.{Service, ServiceFactory, ServiceFactoryWrapper}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceFactoryWrapper, ClientConnection}
 import com.twitter.finagle.util.{Timer => FinagleTimer}
 
 object FailureAccrualFactory {
@@ -55,8 +55,8 @@ class FailureAccrualFactory[Req, Rep](
     reviveTimerTask = None
   }
 
-  def make() =
-    underlying.make() map { service =>
+  def apply(conn: ClientConnection) =
+    underlying(conn) map { service =>
       new Service[Req, Rep] {
         def apply(request: Req) = {
           val result = service(request)

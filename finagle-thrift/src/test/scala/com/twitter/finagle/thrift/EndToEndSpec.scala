@@ -41,7 +41,7 @@ object EndToEndSpec extends Specification {
       .codec(ThriftServerFramedCodec())
       .bindTo(serverAddr)
       .name("ThriftServer")
-      .tracerFactory(() => serverTracer)
+      .tracerFactory((_) => serverTracer)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     doAfter { server.close(20.milliseconds) }
@@ -51,7 +51,7 @@ object EndToEndSpec extends Specification {
       .hosts(Seq(serverAddr))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(1)
-      .tracerFactory(() => clientTracer)
+      .tracerFactory((_) => clientTracer)
       .build()
 
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())

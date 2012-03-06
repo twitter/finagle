@@ -312,19 +312,19 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
   private[this] val log = Logger.getLogger(getClass.getName)
 
   def flush(queueName: String) = {
-    underlying.service(Flush(queueName))
+    underlying.toService(Flush(queueName))
   }
 
   def delete(queueName: String) = {
-    underlying.service(Delete(queueName))
+    underlying.toService(Delete(queueName))
   }
 
   def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch) = {
-    underlying.service(Set(queueName, expiry, value))
+    underlying.toService(Set(queueName, expiry, value))
   }
 
   def get(queueName: String, waitUpTo: Duration = 0.seconds) = {
-    underlying.service(Get(queueName, Some(waitUpTo))) map {
+    underlying.toService(Get(queueName, Some(waitUpTo))) map {
       case Values(Seq()) => None
       case Values(Seq(Value(key, value))) => Some(value)
       case _ => throw new IllegalArgumentException
@@ -341,7 +341,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
         case 1 =>
           // only start receiving if we weren't already running
           if (!isRunning.getAndSet(true)) {
-            underlying.make() onSuccess { service =>
+            underlying() onSuccess { service =>
               receive(isRunning, service, Open(queueName, Some(waitUpTo)), result)
             } onFailure { t =>
               log.log(Level.WARNING, "Could not make service", t)
@@ -409,7 +409,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
       )
     }
 
-    underlying.make() onSuccess { recv(_, open) } onFailure { error ! _ }
+    underlying() onSuccess { recv(_, open) } onFailure { error ! _ }
 
     ReadHandle(messages.recv, error.recv, close.send(()))
   }

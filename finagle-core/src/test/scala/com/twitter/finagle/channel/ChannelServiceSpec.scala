@@ -13,6 +13,7 @@ import org.jboss.netty.channel._
 import com.twitter.util.{Promise, Return, Throw, Future}
 
 import com.twitter.finagle._
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 object ChannelServiceSpec extends Specification with Mockito {
   "ChannelService" should {
@@ -30,12 +31,12 @@ object ChannelServiceSpec extends Specification with Mockito {
 
     "installs channel handler" in {
       pipeline.toMap.keySet.size() mustEqual 0
-      new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
+      new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]], NullStatsReceiver)
       pipeline.toMap.keySet.size() mustEqual 1
     }
 
     "write requests to the underlying channel" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, factory, NullStatsReceiver)
       val future = service("hello")
       val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
       there was one(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
@@ -66,7 +67,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "propagate cancellation" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, factory, NullStatsReceiver)
       val future = service("hello")
 
       future.isCancelled must beFalse
@@ -86,7 +87,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "receive replies" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, factory, NullStatsReceiver)
       service.isAvailable must beTrue
       val future = service("hello")
       service.isAvailable must beFalse
@@ -165,7 +166,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "without a request" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, factory, NullStatsReceiver)
       service.isAvailable must beTrue
 
       "any response is considered spurious" in {
@@ -179,7 +180,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "freak out on concurrent requests" in {
-      val service = new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
+      val service = new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]], NullStatsReceiver)
       val f0 = service("hey")
       f0.isDefined must beFalse
       val f1 = service("there")
@@ -188,7 +189,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "notify the factory upon release" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, factory, NullStatsReceiver)
       service.release()
       there was one(factory).channelReleased(service)
     }
@@ -221,7 +222,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "close the underlying bootstrap only after all channels are released" in {
-      val f = factory.make()
+      val f = factory()
       there was one(channelFactory).newChannel(pipeline)
       there was one(channel).connect(address)
       f.isDefined must beFalse
@@ -236,7 +237,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "propagate bootstrap errors" in {
-      val f = factory.make()
+      val f = factory()
       f.isDefined must beFalse
       there was one(channel).connect(address)
 
@@ -254,7 +255,7 @@ object ChannelServiceSpec extends Specification with Mockito {
       val e = new ChannelPipelineException("sad panda")
       channel.connect(address) throws e
 
-      val f = factory.make()
+      val f = factory()
       f.isDefined must beTrue
       f() must throwA(e)
     }
@@ -265,11 +266,11 @@ object ChannelServiceSpec extends Specification with Mockito {
       val underlyingService = mock[Service[Any, Any]]
       prepareChannel(any) returns preparedPromise
       val factory = new ChannelServiceFactory[Any, Any](bootstrap, prepareChannel) {
-        override protected def mkService(ch: Channel) = underlyingService
+        override protected def mkService(ch: Channel, statsReceiver: StatsReceiver) = underlyingService
       }
 
       "be called on new services" in {
-        val p = factory.make()
+        val p = factory()
         there was no(prepareChannel)(any)
         channelFuture.setSuccess()
         there was one(prepareChannel)(any)
@@ -279,7 +280,7 @@ object ChannelServiceSpec extends Specification with Mockito {
         val exc = new Exception("sad panda")
         prepareChannel(any) returns Future.exception(exc)
         there was no(underlyingService).release
-        val p = factory.make()
+        val p = factory()
         channelFuture.setSuccess()
         p.poll must beSome(Throw(exc))
         there was one(underlyingService).release()

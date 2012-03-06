@@ -17,7 +17,7 @@ import com.twitter.finagle.{
  *       .nodes(services) // services is of type Seq[(String, Service[Req,Rep])]
  *       .withHash { req => Some(hashCodeOfSomething)}
  *       .buildFactory()
- *   val service = serviceFactory.make()
+ *   val service = serviceFactory()
  *   service(req) // where req is a Req and may have ShardableRequest mixed in
  */
 

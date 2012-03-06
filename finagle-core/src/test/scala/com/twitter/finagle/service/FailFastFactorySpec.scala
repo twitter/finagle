@@ -13,26 +13,26 @@ object FailFastFactorySpec extends Specification with Mockito {
 
     val underlyingFactory = mock[ServiceFactory[Int, Int]]
     underlyingFactory.isAvailable returns true
-    underlyingFactory.make() returns Future.value(underlyingService)
+    underlyingFactory() returns Future.value(underlyingService)
 
     val factory = new FailFastFactory[Int, Int](underlyingFactory, 1)
-    factory.make() returns Future.value(underlyingService)
+    factory() returns Future.value(underlyingService)
 
     "become unavailable if connections failed" in {
-      val service = factory.make()()
+      val service = factory()()
       factory.isAvailable must beTrue
       service.isAvailable must beTrue
 
       // Now fail:
-      underlyingFactory.make() returns Future.exception(new WriteException(new ConnectException))
-      factory.make()
+      underlyingFactory() returns Future.exception(new WriteException(new ConnectException))
+      factory()
       // factory must be limited but remain available (try to connect for the next request)
       factory.isLimited must beTrue
       factory.isAvailable must beTrue
 
       val factoryRequest = new Promise[Service[Int,Int]]
-      underlyingFactory.make() returns factoryRequest
-      factory.make()
+      underlyingFactory() returns factoryRequest
+      factory()
       factory.isLimited must beTrue
       // now the factory isn't available because the outstanding connections is == 1
       factory.isAvailable must beFalse

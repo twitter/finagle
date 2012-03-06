@@ -14,15 +14,15 @@ object WatermarkPoolSpec extends Specification with Mockito {
     val service = mock[Service[Int, Int]]
     val promise = new Promise[Service[Int, Int]]
 
-    factory.make() returns promise
+    factory() returns promise
     service.isAvailable returns true
     service(123) returns Future.value(321)
     val pool = new WatermarkPool(factory, 0)
 
     "yield the pooled item when the underlying factory returns it" in {
-      val f = pool.make()
+      val f = pool()
       f.isDefined must beFalse
-      there was one(factory).make()
+      there was one(factory)()
       promise() = Return(service)
       f.isDefined must beTrue
       f()(123)() must be_==(321)
@@ -30,7 +30,7 @@ object WatermarkPoolSpec extends Specification with Mockito {
 
     "dispose of it when returned to the pool" in {
       promise() = Return(service)
-      val f = pool.make()()
+      val f = pool()()
       f.release()
       there was one(service).isAvailable
       there was one(service).release()
@@ -42,17 +42,17 @@ object WatermarkPoolSpec extends Specification with Mockito {
     val service0 = mock[Service[Int, Int]]
     val promise = new Promise[Service[Int, Int]]
 
-    factory.make() returns Future.value(service0)
+    factory() returns Future.value(service0)
     service0.isAvailable returns true
 
     val pool = new WatermarkPool(factory, 1, 1)
 
     "enqueue requests when we have already allocated one item" in {
-      val f0 = pool.make()
+      val f0 = pool()
       f0.isDefined must beTrue
-      there was one(factory).make()
+      there was one(factory)()
 
-      val f1 = pool.make()
+      val f1 = pool()
       f1.isDefined must beFalse
 
       f0().release()
@@ -64,33 +64,33 @@ object WatermarkPoolSpec extends Specification with Mockito {
 
     "retry an enqueued request if the underlying factory fails" in {
       val p = new Promise[Service[Int, Int]]
-      factory.make() returns p
+      factory() returns p
 
-      val f0 = pool.make()
+      val f0 = pool()
       f0.isDefined must beFalse
-      there was one(factory).make()
+      there was one(factory)()
 
       // The second one will be enqueued
-      val f1 = pool.make()
+      val f1 = pool()
       f1.isDefined must beFalse
-      there was one(factory).make()
+      there was one(factory)()
 
       // Fail the request, which should dequeue
       // the queued one.
-      factory.make() returns Future.value(service0)
+      factory() returns Future.value(service0)
       val exc = new Exception
       p() = Throw(exc)
       f0.poll must beSome(Throw(exc))
 
-      there were two(factory).make()
+      there were two(factory)()
       f1.poll must beSome(Return(service0))
     }
 
     "throw CancelledConnectionException if an enqueued waiter is cancelled" in {
-      pool.make().isDefined must beTrue  // consume item
-      there was one(factory).make()
+      pool().isDefined must beTrue  // consume item
+      there was one(factory)()
 
-      val f1 = pool.make()
+      val f1 = pool()
       f1.isDefined must beFalse
 
       f1.cancel()
@@ -99,16 +99,16 @@ object WatermarkPoolSpec extends Specification with Mockito {
     }
 
     "when item becomes unhealthy while pool is idle, it is returned" in {
-      val f0 = pool.make()
+      val f0 = pool()
       f0.isDefined must beTrue
       f0().release()  // give it back
       there was no(service0).release()  // it retained
 
       val service1 = mock[Service[Int, Int]]
-      factory.make() returns Future.value(service1)
+      factory() returns Future.value(service1)
       service0.isAvailable returns false
 
-      val f1 = pool.make()
+      val f1 = pool()
       there was one(service0).release()
       f1.isDefined must beTrue
     }
@@ -118,14 +118,14 @@ object WatermarkPoolSpec extends Specification with Mockito {
       val service1Promise = new Promise[Service[Int, Int]]
       service1(123) returns Future.value(111)
 
-      val f0 = pool.make()
+      val f0 = pool()
       f0.isDefined must beTrue
-      there was one(factory).make()
+      there was one(factory)()
 
-      val f1 = pool.make()
+      val f1 = pool()
       f1.isDefined must beFalse
 
-      factory.make() returns service1Promise
+      factory() returns service1Promise
       service0.isAvailable returns false
       service1.isAvailable returns true
 
@@ -135,7 +135,7 @@ object WatermarkPoolSpec extends Specification with Mockito {
         there was one(service0).release()
         there was one(service0).isAvailable
         f1.isDefined must beTrue
-        there were two(factory).make()
+        there were two(factory)()
         f1()(123)() must be_==(111)
 
         // Healthy again:
@@ -160,26 +160,26 @@ object WatermarkPoolSpec extends Specification with Mockito {
     val service0 = mock[Service[Int, Int]]
     val promise = new Promise[Service[Int, Int]]
 
-    factory.make() returns Future.value(service0)
+    factory() returns Future.value(service0)
     service0.isAvailable returns true
 
     val pool = new WatermarkPool(factory, 1, 1, maxWaiters = 2)
 
     "throw TooManyWaitersException when the number of waiters exceeds 2" in {
-      val f0 = pool.make()
+      val f0 = pool()
       f0.isDefined must beTrue
-      there was one(factory).make()
+      there was one(factory)()
 
       // one waiter. this is cool.
-      val f1 = pool.make()
+      val f1 = pool()
       f1.isDefined must beFalse
 
       // two waiters. this is *still* cool.
-      val f2 = pool.make()
+      val f2 = pool()
       f2.isDefined must beFalse
 
       // three waiters and i freak out.
-      val f3 = pool.make()
+      val f3 = pool()
       f3.isDefined must beTrue
       f3() must throwA[TooManyWaitersException]
 
@@ -200,11 +200,11 @@ object WatermarkPoolSpec extends Specification with Mockito {
       val mocks = 0 until 100 map { _ => mock[Service[Int, Int]] }
 
       val services = 0 until 100 map { i =>
-        factory.make() returns Future.value(mocks(i))
-        pool.make()()
+        factory() returns Future.value(mocks(i))
+        pool()()
       }
 
-      there were 100.times(factory).make()
+      there were 100.times(factory)()
       // We now have 100 items, the low watermark of the pool.  We can
       // give them all back, and all should persist.
       mocks foreach { service =>
@@ -220,12 +220,12 @@ object WatermarkPoolSpec extends Specification with Mockito {
 
       // We can now fetch them again, incurring no additional object
       // creation.
-      0 until 100 foreach { _ => pool.make()() }
+      0 until 100 foreach { _ => pool()() }
       mocks foreach { service =>
         there were two(service).isAvailable
       }
 
-      there were 100.times(factory).make()
+      there were 100.times(factory)()
       mocks foreach { service =>
         there was no(service).release()
       }
@@ -242,25 +242,25 @@ object WatermarkPoolSpec extends Specification with Mockito {
     "not leak services when they are born unhealthy" in {
       (0 until highWaterMark) foreach { _ =>
         val promise = new Promise[Service[Int, Int]]
-        factory.make() returns promise
+        factory() returns promise
         promise() = Throw(new Exception)
-        pool.make().isThrow mustBe true
+        pool().isThrow mustBe true
       }
 
       val promise = new Promise[Service[Int, Int]]
-      factory.make() returns promise
+      factory() returns promise
       promise() = Return(service)
-      pool.make()(1.second).isAvailable mustBe true
+      pool()(1.second).isAvailable mustBe true
     }
 
     "release unhealthy services that have been queued" in {
       val promise = new Promise[Service[Int, Int]]
-      factory.make() returns promise
+      factory() returns promise
 
       promise() = Return(service)
 
-      val f = pool.make()
-      there was one(factory).make()
+      val f = pool()
+      there was one(factory)()
       f.isDefined must beTrue
       f().isAvailable must beTrue
 
@@ -268,14 +268,14 @@ object WatermarkPoolSpec extends Specification with Mockito {
       f().release()
       there was no(service).release()
 
-      factory.make() returns new Promise[Service[Int, Int]]
+      factory() returns new Promise[Service[Int, Int]]
       service.isAvailable returns false
 
       // The service is now unhealty, so it should be discarded, and a
       // new one should be made.
-      pool.make().isDefined must beFalse
+      pool().isDefined must beFalse
       there was one(service).release()
-      there were two(factory).make()
+      there were two(factory)()
     }
   }
 
@@ -284,11 +284,11 @@ object WatermarkPoolSpec extends Specification with Mockito {
     val pool = new WatermarkPool(factory, 100, 1000)
     val underlyingService = mock[Service[Int, Int]]
 
-    factory.make() returns Future.value(underlyingService)
+    factory() returns Future.value(underlyingService)
     underlyingService.isAvailable returns true
     underlyingService(123) returns Future.value(321)
 
-    val serviceFuture = pool.make()
+    val serviceFuture = pool()
     serviceFuture.isDefined must beTrue
     val service = serviceFuture()
 
@@ -308,7 +308,7 @@ object WatermarkPoolSpec extends Specification with Mockito {
 
     "deny new requests" in {
       pool.close()
-      pool.make()() must throwA[ServiceClosedException]
+      pool()() must throwA[ServiceClosedException]
     }
 
     "close the underlying factory" in {

@@ -81,7 +81,7 @@ trait ClientConnection {
 
 object ClientConnection {
   val nil: ClientConnection = new ClientConnection {
-    private[this] val unconnected = 
+    private[this] val unconnected =
       new SocketAddress { override def toString = "unconnected" }
     def remoteAddress = unconnected
     def localAddress = unconnected
@@ -102,20 +102,34 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   override def isAvailable = self.isAvailable
 }
 
-abstract class ServiceFactory[-Req, +Rep] {
+abstract class ServiceFactory[-Req, +Rep]
+  extends (ClientConnection => Future[Service[Req, Rep]])
+{ self =>
+
   /**
    * Reserve the use of a given service instance. This pins the
    * underlying channel and the returned service has exclusive use of
    * its underlying connection. To relinquish the use of the reserved
    * Service, the user must call Service.release().
    */
-  def make(): Future[Service[Req, Rep]]
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]]
+  final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
+
+  @deprecated("use apply() instead")
+  final def make(): Future[Service[Req, Rep]] = this()
+
+  def map[Req1, Rep1](f: Service[Req, Rep] => Service[Req1, Rep1]): ServiceFactory[Req1, Rep1] =
+    new ServiceFactory[Req1, Rep1] {
+      def apply(conn: ClientConnection) = self(conn) map(f)
+      def close = self.close()
+      override def isAvailable = self.isAvailable
+    }
 
   /**
    * Make a service that after dispatching a request on that service,
    * releases the service.
    */
-  final def service: Service[Req, Rep] = new FactoryToService(this)
+  final def toService: Service[Req, Rep] = new FactoryToService(this)
 
   /**
    * Close the factory and its underlying resources.
@@ -123,6 +137,18 @@ abstract class ServiceFactory[-Req, +Rep] {
   def close()
 
   def isAvailable: Boolean = true
+}
+
+object ServiceFactory {
+  def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] = new ServiceFactory[Req, Rep] {
+      private[this] val noRelease = Future.value(new ServiceProxy[Req, Rep](service) {
+       // release() is meaningless on connectionless services.
+       override def release() = ()
+     })
+
+      def apply(conn: ClientConnection) = noRelease
+      def close() = ()
+    }
 }
 
 /**
@@ -133,7 +159,7 @@ abstract class ServiceFactory[-Req, +Rep] {
 abstract class ServiceFactoryProxy[-Req, +Rep](val self: ServiceFactory[Req, Rep])
   extends ServiceFactory[Req, Rep] with Proxy
 {
-  def make() = self.make()
+  def apply(conn: ClientConnection) = self(conn)
   def close() = self.close()
   override def isAvailable = self.isAvailable
 }
@@ -141,16 +167,16 @@ abstract class ServiceFactoryProxy[-Req, +Rep](val self: ServiceFactory[Req, Rep
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
-  def apply(request: Req) = {
-    factory.make() flatMap { service =>
-      service(request) ensure { service.release() }
+  def apply(request: Req) =
+    factory() flatMap { service =>
+      service(request) ensure {
+        service.release()
+      }
     }
-  }
 
   override def release() = factory.close()
   override def isAvailable = factory.isAvailable
 }
-
 
 /**
  * A ServiceFactoryWrapper produces a ServiceFactory given a ServiceFactory through, tradionally

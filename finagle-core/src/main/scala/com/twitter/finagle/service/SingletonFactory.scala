@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.util.Future
 
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.finagle.util.AsyncLatch
 
 class SingletonFactory[Req, Rep](service: Service[Req, Rep])
@@ -10,7 +10,7 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
 {
   private[this] var latch = new AsyncLatch
 
-  def make() = Future {
+  def apply(conn: ClientConnection) = Future {
     latch.incr()
     new Service[Req, Rep] {
       def apply(request: Req) = service(request)

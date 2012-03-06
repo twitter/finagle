@@ -39,7 +39,7 @@ object HosebirdClient {
     request.setHeader("Host", hostAndPort)
     println(request)
     for {
-      client <- clientFactory.make()
+      client <- clientFactory()
       streamResponse <- client(request)
     } {
       val httpResponse = streamResponse.httpResponse

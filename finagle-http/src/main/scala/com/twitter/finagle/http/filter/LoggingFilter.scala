@@ -19,29 +19,44 @@ object LogFormatter {
 
   /** Escape string for logging (compatible with Apache's ap_escape_logitem()) */
   def escape(s: String): String = {
-    val builder = new StringBuilder(s.length)
-    s.foreach {
-      case '\b'       => builder.append("\\b")
-      case '\n'       => builder.append("\\n")
-      case '\r'       => builder.append("\\r")
-      case '\t'       => builder.append("\\t")
-      case BackslashV => builder.append("\\v")
-      case '\\'       => builder.append("\\\\")
-      case '"'        => builder.append("\\\"")
-      case c =>
-        val i = c.toInt
-        if (i >= 0x20 && i <= 0x7E)
+    var builder: StringBuilder = null // only create if escaping is needed
+    var index = 0
+    s.foreach { c =>
+      val i = c.toInt
+      if (i >= 0x20 && i <= 0x7E && i != 0x22 && i != 0x5C) {
+        if (builder == null) {
+          index += 1 // common case
+        } else {
           builder.append(c)
-        else
-          c.toString().getBytes("UTF-8").foreach { byte =>
-            builder.append("\\x")
-            val s = java.lang.Integer.toHexString(byte & 0xff)
-            if (s.length == 1)
-              builder.append("0")
-            builder.append(s)
-          }
+        }
+      } else {
+        if (builder == null) {
+          builder = new StringBuilder(s.substring(0, index))
+        }
+        c match {
+          case '\b'       => builder.append("\\b")
+          case '\n'       => builder.append("\\n")
+          case '\r'       => builder.append("\\r")
+          case '\t'       => builder.append("\\t")
+          case BackslashV => builder.append("\\v")
+          case '\\'       => builder.append("\\\\")
+          case '"'        => builder.append("\\\"")
+          case _ =>
+            c.toString().getBytes("UTF-8").foreach { byte =>
+              builder.append("\\x")
+              val s = java.lang.Integer.toHexString(byte & 0xff)
+              if (s.length == 1)
+                builder.append("0")
+              builder.append(s)
+            }
+        }
+      }
     }
-    builder.toString
+    if (builder == null) {
+      s // common case: nothing needed escaping
+    } else {
+      builder.toString
+    }
   }
 }
 

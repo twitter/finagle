@@ -77,6 +77,7 @@ object OpenSSL {
              keyPath: String,
              caPath: String,
              ciphers: String,
+             nextProtos: String,
              useCache: Boolean = true): Option[Engine] = {
     try {
       synchronized {
@@ -99,6 +100,9 @@ object OpenSSL {
 
       if (caPath != null)
         configMap.put("ssl.ca_path", caPath)
+
+      if (nextProtos != null)
+        configMap.put("ssl.next_protos", nextProtos)
 
       val config = linker.configurationCtor.newInstance(configMap.asInstanceOf[MapOfStrings])
 

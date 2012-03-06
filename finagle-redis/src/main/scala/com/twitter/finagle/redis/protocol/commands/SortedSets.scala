@@ -21,6 +21,7 @@ object ZAdd {
       throw ClientError("Invalid use of ZADD")
   }
   def apply(key: String, member: ZMember) = new ZAdd(key, List(member))
+  def apply(key: Array[Byte], member: ZMember) = new ZAdd(new String(key), List(member))
 }
 
 
@@ -44,6 +45,8 @@ object ZCount {
     val list = BytesToString.fromList(trimList(args, 3, "ZCOUNT"))
     new ZCount(list(0), ZInterval(list(1)), ZInterval(list(2)))
   }
+  def apply(key: Array[Byte], min: ZInterval, max: ZInterval) =
+    new ZCount(BytesToString(key), min, max)
 }
 
 
@@ -246,6 +249,7 @@ object ZScore {
     val list = trimList(args, 2, "ZSCORE")
     new ZScore(BytesToString(args(0)), args(1))
   }
+  def apply(key: Array[Byte], member: Array[Byte]) = new ZScore(BytesToString(key), member)
 }
 
 
@@ -291,6 +295,7 @@ case class ZInterval(value: String) {
     }
   }
   override def toString = representation
+  def toBytes = representation.getBytes
 }
 object ZInterval {
   private val P_INF = "+inf"

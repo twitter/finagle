@@ -27,23 +27,26 @@ object Ssl {
    * @param caCertPath [OpenSSL] The path to the optional PEM encoded CA cert file
    * @param cipherSpec [OpenSSL] The cipher spec
    * @throws RuntimeException if no provider could be initialized
-   * @returns an SSLEngine
+   * @return an SSLEngine
    */
   def server(certificatePath: String,
              keyPath: String,
              caCertPath: String,
-             ciphers: String): Engine = {
+             ciphers: String,
+             nextProtos: String): Engine = {
     val nativeInstance = OpenSSL.server(
       certificatePath,
       keyPath,
       caCertPath,
       ciphers,
+      nextProtos,
       cacheContexts
     )
 
     nativeInstance.getOrElse {
       require(caCertPath == null, "'CA Certificate' parameter unsupported with JSSE SSL provider")
       require(ciphers == null, "'Ciphers' parameter unsupported with JSSE SSL provider")
+      require(nextProtos == null, "'Next Protocols' parameter unsupported with JSSE SSL provider")
 
       val jsseInstance = JSSE.server(
         certificatePath,
@@ -61,6 +64,11 @@ object Ssl {
    * Get a client engine
    */
   def client(): Engine = JSSE.client()
+  
+  /**
+   * Get a client engine, from the given context
+   */
+  def client(sslContext : SSLContext): Engine = JSSE.client(sslContext)
 
   /**
    * Get a client engine that doesn't check the validity of certificates

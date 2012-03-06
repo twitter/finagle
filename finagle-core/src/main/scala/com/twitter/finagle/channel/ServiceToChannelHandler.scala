@@ -6,11 +6,11 @@ import java.util.logging.{Level, Logger}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.timeout.ReadTimeoutException
 
-import com.twitter.util.{Future, Promise, Return, Throw, Monitor}
+import com.twitter.util.{Future, Promise, Return, Throw, Monitor, Time}
 
-import com.twitter.finagle.{ClientConnection, CodecException, Service, WriteTimedOutException}
+import com.twitter.finagle.{ClientConnection, CodecException, Service, WriteTimedOutException, ServiceFactory}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.service.ProxyService
+import com.twitter.finagle.service.{ProxyService, NilService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
 private[finagle] object ServiceToChannelHandler {
@@ -41,9 +41,7 @@ private[finagle] object ServiceToChannelHandler {
 }
 
 private[finagle] class ServiceToChannelHandler[Req, Rep](
-    service: Service[Req, Rep],
-    postponedService: Promise[Service[Req, Rep]],
-    serviceFactory: (ClientConnection) => Service[Req, Rep],
+    serviceFactory: ServiceFactory[Req, Rep],
     statsReceiver: StatsReceiver,
     log: Logger,
     parentMonitor: Monitor)
@@ -52,7 +50,9 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
   import ServiceToChannelHandler._
   import State._
 
+  private[this] val handleStat = statsReceiver.stat("handletime_us")
   @volatile private[this] var clientConnection: ClientConnection = ClientConnection.nil
+  @volatile private[this] var service: Service[Req, Rep] = NilService
   private[this] val state = new AtomicReference[State](Idle)
   private[this] val onShutdownPromise = new Promise[Unit]
   private[this] val monitor =
@@ -133,7 +133,9 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
     }
 
     Future.monitored {
+      val begin = Time.now
       val res = service(message.asInstanceOf[Req])
+      handleStat.add((Time.now - begin).inMicroseconds)
       currentResponse = Some(res)
       res
     } onSuccess { value =>
@@ -152,7 +154,11 @@ private[finagle] class ServiceToChannelHandler[Req, Rep](
       def close() { channel.disconnect() }
       val onClose = _onClose
     }
-    postponedService.setValue(serviceFactory(clientConnection))
+
+    service = {
+      val s = serviceFactory(clientConnection)
+      s.toOption getOrElse new ProxyService(s)
+    }
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {

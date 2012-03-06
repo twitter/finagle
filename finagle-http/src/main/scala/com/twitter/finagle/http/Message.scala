@@ -5,6 +5,7 @@ import java.io.{InputStream, InputStreamReader, OutputStream, OutputStreamWriter
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
 import java.util.{Date, TimeZone}
+import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http.{Cookie, HttpMessage, HttpHeaders, HttpMethod,
@@ -91,6 +92,56 @@ abstract class Message extends HttpMessage {
     cacheControl = "max-age=" + maxAge.inSeconds.toString + ", must-revalidate"
   }
 
+  /** Get charset from Content-Type header */
+  def charset: Option[String] = {
+    contentType.foreach { contentType =>
+      val parts = StringUtils.split(contentType, ';')
+      1.to(parts.length - 1) foreach { i =>
+        val part = parts(i).trim
+        if (part.startsWith("charset=")) {
+          val equalsIndex = part.indexOf('=')
+          val charset = part.substring(equalsIndex + 1)
+          return Some(charset)
+        }
+      }
+    }
+    None
+  }
+  /** Set charset in Content-Type header.  This does not change the content. */
+  def charset_=(value: String) {
+    val contentType = this.contentType.getOrElse("")
+    val parts = StringUtils.split(contentType, ';')
+    if (parts.isEmpty) {
+      this.contentType = ";charset=" + value // malformed
+      return
+    }
+
+    val builder = new StringBuilder(parts(0))
+    if (!(parts.exists { _.trim.startsWith("charset=") })) {
+      // No charset parameter exist, add charset after media type
+      builder.append(";charset=")
+      builder.append(value)
+      // Copy other parameters
+      1.to(parts.length - 1) foreach {  i =>
+        builder.append(";")
+        builder.append(parts(i))
+      }
+    } else {
+      // Replace charset= parameter(s)
+      1.to(parts.length - 1) foreach {  i =>
+        val part = parts(i)
+        if (part.trim.startsWith("charset=")) {
+          builder.append(";charset=")
+          builder.append(value)
+        } else {
+          builder.append(";")
+          builder.append(part)
+        }
+      }
+    }
+    this.contentType = builder.toString
+  }
+
   /** Get Content-Length header.  Use length to get the length of actual content. */
   def contentLength: Option[Long] =
     Option(getHeader(HttpHeaders.Names.CONTENT_LENGTH)).map { _.toLong }
@@ -105,11 +156,18 @@ abstract class Message extends HttpMessage {
   /** Set Content-Type header */
   def contentType_=(value: String) { setHeader(HttpHeaders.Names.CONTENT_TYPE, value) }
   /** Set Content-Type header by media-type and charset */
-  def setContentType(mediaType: String, charset: String) {
+  def setContentType(mediaType: String, charset: String = "utf-8") {
     setHeader(HttpHeaders.Names.CONTENT_TYPE, mediaType + ";charset=" + charset)
   }
   /** Set Content-Type header to application/json;charset=utf-8 */
   def setContentTypeJson() { setHeader(HttpHeaders.Names.CONTENT_TYPE, Message.ContentTypeJson) }
+
+  /** Get Date header */
+  def date: Option[String] = Option(getHeader(HttpHeaders.Names.DATE))
+  /** Set Date header */
+  def date_=(value: String) { setHeader(HttpHeaders.Names.DATE, value) }
+  /** Set Date header by Date */
+  def date_=(value: Date) { date = Message.httpDateFormat(value) }
 
   /** Get Expires header */
   def expires: Option[String] = Option(getHeader(HttpHeaders.Names.EXPIRES))
@@ -122,6 +180,13 @@ abstract class Message extends HttpMessage {
   def host: Option[String] =  Option(getHeader(HttpHeaders.Names.HOST))
   /** Set Host header */
   def host_=(value: String) { setHeader(HttpHeaders.Names.HOST, value) }
+
+  /** Get Last-Modified header */
+  def lastModified: Option[String] = Option(getHeader(HttpHeaders.Names.LAST_MODIFIED))
+  /** Set Last-Modified header */
+  def lastModified_=(value: String) { setHeader(HttpHeaders.Names.LAST_MODIFIED, value) }
+  /** Set Last-Modified header by Date */
+  def lastModified_=(value: Date) { lastModified = Message.httpDateFormat(value) }
 
   /** Get Location header */
   def location: Option[String] = Option(getHeader(HttpHeaders.Names.LOCATION))
@@ -142,8 +207,23 @@ abstract class Message extends HttpMessage {
       else
         None
     }
-  /** Set media-type in Content-Type heaer */
-  def mediaType_=(value: String) { setContentType(value, "utf-8") }
+  /**
+   * Set media-type in Content-Type header.  Charset and parameter values are
+   * preserved, though may not be appropriate for the new media type.
+   */
+  def mediaType_=(value: String) {
+    contentType match {
+      case Some(contentType) =>
+        val parts = StringUtils.split(contentType, ";", 2)
+        if (parts.length == 2) {
+          this.contentType = value + ";" + parts(1)
+        } else {
+          this.contentType = value
+        }
+      case None =>
+        this.contentType = value
+    }
+  }
 
   /** Get Referer [sic] header */
   def referer: Option[String] = Option(getHeader(HttpHeaders.Names.REFERER))
@@ -156,6 +236,11 @@ abstract class Message extends HttpMessage {
   def retryAfter_=(value: String) { setHeader(HttpHeaders.Names.RETRY_AFTER, value) }
   /** Set Retry-After header by seconds */
   def retryAfter_=(value: Long) { retryAfter = value.toString }
+
+  /** Get Server header */
+  def server: Option[String] = Option(getHeader(HttpHeaders.Names.SERVER))
+  /** Set Server header */
+  def server_=(value: String) { setHeader(HttpHeaders.Names.SERVER, value) }
 
   /** Get User-Agent header */
   def userAgent: Option[String] = Option(getHeader(HttpHeaders.Names.USER_AGENT))
