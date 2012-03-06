@@ -112,7 +112,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
   private val _tracerFactory:                   Tracer.Factory                           = NullTracer.factory,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
-  private val _serverBootstrap:                 Option[ServerBootstrap]                  = None)
+  private val _serverBootstrap:                 Option[ServerBootstrap]                  = None,
+  private val _cancelOnHangup:                  Boolean                                  = true)
 {
   import ServerConfig._
 
@@ -142,6 +143,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
   val serverBootstrap                 = _serverBootstrap
+  val cancelOnHangup                  = _cancelOnHangup
 
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
@@ -163,7 +165,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "tracerFactory"                   -> Some(_tracerFactory),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds),
-    "serverBootstrap"                 -> _serverBootstrap
+    "serverBootstrap"                 -> _serverBootstrap,
+    "cancelOnHangup"                  -> Some(_cancelOnHangup)
   )
 
   override def toString = {
@@ -319,6 +322,13 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def tracerFactory(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
+
+  /**
+   * Cancel pending futures whenever the the connection is shut down.
+   * This defaults to true.
+   */
+  def cancelOnHangup(yesOrNo: Boolean): This =
+    withConfig(_.copy(_cancelOnHangup = yesOrNo))
 
   /**
    * Used for testing.
@@ -615,7 +625,7 @@ private[builder] class MkServer[Req, Rep](
       val channelHandler = new ServiceToChannelHandler(
         thisServiceFactory, statsReceiver,
         Logger.getLogger(classOf[ServiceToChannelHandler[Req, Rep]].getName),
-        monitor)
+        monitor, config.cancelOnHangup)
 
       activeHandlers += channelHandler
       channelHandler.onShutdown ensure {

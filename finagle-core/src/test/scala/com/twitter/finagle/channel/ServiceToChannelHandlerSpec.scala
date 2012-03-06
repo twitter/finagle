@@ -27,7 +27,7 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     val serviceFactory = mock[ServiceFactory[Foo, String]]
     serviceFactory(any) returns Future.value(service)
     val handler = new ServiceToChannelHandler(
-      serviceFactory, statsReceiver, log, NullMonitor)
+      serviceFactory, statsReceiver, log, NullMonitor, true)
     val pipeline = mock[ChannelPipeline]
     val channel = mock[Channel]
     val closeFuture = Channels.future(channel)
@@ -145,7 +145,7 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
     }
 
     "on close" in {
-      "pending request is cancelled" in {
+      "pending request is cancelled (hangupOnCancel=true)" in {
         val p = new Promise[String]
         service(any) returns p
         handler.messageReceived(ctx, e)
@@ -163,6 +163,21 @@ object ServiceToChannelHandlerSpec extends Specification with Mockito {
         there was no(pipeline).sendDownstream(any)
         statsReceiver.counters must haveKey(Seq("shutdown_while_pending"))
         statsReceiver.counters(Seq("shutdown_while_pending")) must be_==(1)
+      }
+
+      "pending request ISN'T cancelled (hangupOnCancel=false)" in {
+        val handler = new ServiceToChannelHandler(serviceFactory, statsReceiver, log, NullMonitor, false)
+        handler.channelOpen(ctx, mock[ChannelStateEvent])
+        val p = new Promise[String]
+        service(any) returns p
+        handler.messageReceived(ctx, e)
+        there was one(service)(request)
+        val exc = new Exception("netty exception")
+        val ee = mock[ExceptionEvent]
+        ee.getCause returns exc
+        p.isCancelled must beFalse
+        handler.exceptionCaught(mock[ChannelHandlerContext], ee)
+        p.isCancelled must beFalse
       }
     }
   }
