@@ -150,7 +150,6 @@ private[finagle] class ChannelService[Req, Rep](
  */
 private[finagle] class ChannelServiceFactory[Req, Rep](
     bootstrap: ClientBootstrap,
-    prepareChannel: Service[Req, Rep] => Future[Service[Req, Rep]],
     statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
@@ -199,10 +198,7 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
         case Ok(channel) =>
           channelLatch.incr()
           connectLatencyStat.add(begin.untilNow.inMilliseconds)
-
-          prepareChannel(service) onFailure { _ =>
-            service.release()
-          } proxyTo promise
+          promise() = Return(service)
 
         case Error(cause) =>
           failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)

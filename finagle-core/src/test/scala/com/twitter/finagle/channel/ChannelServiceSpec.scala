@@ -214,7 +214,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     val channelFuture = Channels.future(channel)
     channel.connect(address) returns channelFuture
 
-    val factory = new ChannelServiceFactory[Any, Any](bootstrap, Future.value(_))
+    val factory = new ChannelServiceFactory[Any, Any](bootstrap)
 
     "close the underlying bootstrap on close() with no outstanding requests" in {
       factory.close()
@@ -258,33 +258,6 @@ object ChannelServiceSpec extends Specification with Mockito {
       val f = factory()
       f.isDefined must beTrue
       f() must throwA(e)
-    }
-
-    "prepareChannel" in {
-      val preparedPromise = new Promise[Service[Any, Any]]
-      val prepareChannel = mock[Service[Any, Any] => Future[Service[Any, Any]]]
-      val underlyingService = mock[Service[Any, Any]]
-      prepareChannel(any) returns preparedPromise
-      val factory = new ChannelServiceFactory[Any, Any](bootstrap, prepareChannel) {
-        override protected def mkService(ch: Channel, statsReceiver: StatsReceiver) = underlyingService
-      }
-
-      "be called on new services" in {
-        val p = factory()
-        there was no(prepareChannel)(any)
-        channelFuture.setSuccess()
-        there was one(prepareChannel)(any)
-      }
-
-      "when failed, underlying service should be released" in {
-        val exc = new Exception("sad panda")
-        prepareChannel(any) returns Future.exception(exc)
-        there was no(underlyingService).release
-        val p = factory()
-        channelFuture.setSuccess()
-        p.poll must beSome(Throw(exc))
-        there was one(underlyingService).release()
-      }
     }
   }
 }

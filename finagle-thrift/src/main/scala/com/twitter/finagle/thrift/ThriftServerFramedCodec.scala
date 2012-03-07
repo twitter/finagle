@@ -37,13 +37,13 @@ class ThriftServerFramedCodec(config: ServerCodecConfig) extends Codec[Array[Byt
       }
     }
 
-  override def prepareService(service: Service[Array[Byte], Array[Byte]]) = Future {
+  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
     val boundAddress = config.boundAddress match {
       case ia: InetSocketAddress => ia
       case _ => new InetSocketAddress(0)
     }
     val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress)
-    trace andThen HandleUncaughtApplicationExceptions andThen service
+    trace andThen HandleUncaughtApplicationExceptions andThen factory
   }
 }
 
@@ -130,6 +130,7 @@ private[thrift] class ThriftServerTracingFilter(
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
         SpanId(header.getSpan_id),
         sampled)
+
 
       Trace.pushId(traceId)
       Trace.recordRpcname(serviceName, msg.name)

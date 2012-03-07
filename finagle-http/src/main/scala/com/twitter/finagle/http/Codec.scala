@@ -5,8 +5,7 @@ package com.twitter.finagle.http
  */
 import java.net.InetSocketAddress
 
-import org.jboss.netty.channel.{
-  Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, UpstreamMessageEvent}
+import org.jboss.netty.channel.{Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, UpstreamMessageEvent}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
@@ -122,14 +121,13 @@ case class Http(
         }
       }
 
-      override def prepareService(
-        underlying: Service[HttpRequest, HttpResponse]
-      ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
+      override def prepareConnFactory(
+        underlying: ServiceFactory[HttpRequest, HttpResponse]
+      ): ServiceFactory[HttpRequest, HttpResponse] =
         if (_enableTracing)
           new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen underlying
         else
           underlying
-      }
     }
   }
 
@@ -174,9 +172,9 @@ case class Http(
         }
       }
 
-      override def prepareService(
-        underlying: Service[HttpRequest, HttpResponse]
-      ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
+      override def prepareConnFactory(
+        underlying: ServiceFactory[HttpRequest, HttpResponse]
+      ): ServiceFactory[HttpRequest, HttpResponse] = {
         val checkRequest = new CheckHttpRequestFilter
         if (_enableTracing) {
           val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](
@@ -302,15 +300,14 @@ case class RichHttp[REQUEST <: Request](
         }
       }
 
-      override def prepareService(
-        underlying: Service[REQUEST, Response]
-      ): Future[Service[REQUEST, Response]] = Future.value {
+      override def prepareConnFactory(
+        underlying: ServiceFactory[REQUEST, Response]
+      ): ServiceFactory[REQUEST, Response] =
         if (httpFactory._enableTracing)
           new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
         else
           underlying
       }
-    }
   }
 
   def server = { config =>
@@ -324,16 +321,15 @@ case class RichHttp[REQUEST <: Request](
         }
       }
 
-      override def prepareService(
-        underlying: Service[REQUEST, Response]
-      ): Future[Service[REQUEST, Response]] = Future.value {
+      override def prepareConnFactory(
+        underlying: ServiceFactory[REQUEST, Response]
+      ): ServiceFactory[REQUEST, Response] =
         if (httpFactory._enableTracing) {
           val tracingFilter = new HttpServerTracingFilter[REQUEST, Response](config.serviceName, config.boundInetSocketAddress)
           tracingFilter andThen underlying
         } else {
           underlying
         }
-      }
     }
   }
 }

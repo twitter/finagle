@@ -19,8 +19,6 @@ object ServerBuilderSpec extends Specification with IntegrationBase with Mockito
   "ServerBuilder" should {
     // Codec
     val codec = mock[Codec[String, String]]
-    (codec.prepareService(Matchers.any[Service[String, String]])
-    answers { s => Future.value(s.asInstanceOf[Service[String, String]]) })
     val codecFactory = Function.const(codec) _
 
     // Channel

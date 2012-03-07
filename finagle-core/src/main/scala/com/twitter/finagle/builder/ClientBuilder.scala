@@ -58,6 +58,7 @@ import org.jboss.netty.handler.timeout.IdleStateHandler
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor, Promise, Return }
 import com.twitter.util.TimeConversions._
+import javax.net.ssl.SSLContext
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
@@ -501,6 +502,22 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_tls = Some({ () => Ssl.client()}, Some(hostname))))
 
   /**
+   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
+   * This allows the user to use client certificates  
+   * No SSL Hostname Validation is performed
+   */
+  def tls(sslContext : SSLContext): This =
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))    
+  
+  /**
+   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
+   * This allows the user to use client certificates  
+   * SSL Hostname Validation is performed, on the passed in hostname
+   */
+  def tls(sslContext : SSLContext, hostname : Option[String]): This =
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))  
+    
+  /**
    * Do not perform TLS validation. Probably dangerous.
    */
   def tlsWithoutValidation(): This =
@@ -643,22 +660,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       statsReceiver, maxWaiters)
   }
 
-  private[this] def prepareService(codec: Codec[Req, Rep])(service: Service[Req, Rep]) = {
-    var future: Future[Service[Req, Rep]] = codec.prepareService(service)
-
-    if (config.hostConnectionMaxIdleTime.isDefined ||
-        config.hostConnectionMaxLifeTime.isDefined) {
-      future = future map { underlying =>
-        new ExpiringService(
-          underlying,
-          config.hostConnectionMaxIdleTime,
-          config.hostConnectionMaxLifeTime)
-      }
-    }
-
-    future
-  }
-
   private[finagle] lazy val statsReceiver = {
     val statsReceiver = config.statsReceiver getOrElse NullStatsReceiver
     config.name match {
@@ -687,8 +688,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     var factory: ServiceFactory[Req, Rep] = null
     val bs = buildBootstrap(codec, host)
-    factory = new ChannelServiceFactory[Req, Rep](
-      bs, prepareService(codec) _, hostStatsReceiver)
+    factory = codec.rawPrepareClientConnFactory(new ChannelServiceFactory[Any, Any](bs, hostStatsReceiver))
+
+    if (config.hostConnectionMaxIdleTime.isDefined ||
+        config.hostConnectionMaxLifeTime.isDefined) {
+      factory = factory map { service =>
+        new ExpiringService(
+          service,
+          config.hostConnectionMaxIdleTime,
+          config.hostConnectionMaxLifeTime)
+      }
+    }
+
     factory = buildPool(factory, hostStatsReceiver)
     factory = requestTimeoutFilter andThen factory
     factory = failureAccrualFactory(factory)
@@ -759,7 +770,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
     factory = tracingFilter(tracer) andThen factory
-    factory = codec.prepareFactory(factory)
+    factory = codec.prepareServiceFactory(factory)
 
     factory
   }
@@ -839,4 +850,3 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   protected val identityFilter = Filter.identity[Req, Rep]
 }
-
