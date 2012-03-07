@@ -58,6 +58,7 @@ import org.jboss.netty.handler.timeout.IdleStateHandler
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor, Promise, Return }
 import com.twitter.util.TimeConversions._
+import javax.net.ssl.SSLContext
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
@@ -500,6 +501,22 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tls(hostname: String): This =
     withConfig(_.copy(_tls = Some({ () => Ssl.client()}, Some(hostname))))
 
+  /**
+   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
+   * This allows the user to use client certificates  
+   * No SSL Hostname Validation is performed
+   */
+  def tls(sslContext : SSLContext): This =
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))    
+  
+  /**
+   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
+   * This allows the user to use client certificates  
+   * SSL Hostname Validation is performed, on the passed in hostname
+   */
+  def tls(sslContext : SSLContext, hostname : Option[String]): This =
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))  
+    
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
