@@ -35,7 +35,7 @@ object Limit {
 }
 
 // Represents a list of WEIGHTS
-class Weights(underlying: Vector[Float]) extends CommandArgument with IndexedSeq[Float] {
+class Weights(underlying: Vector[Double]) extends CommandArgument with IndexedSeq[Double] {
   override def apply(idx: Int) = underlying(idx)
   override def length = underlying.length
   override def toString = Weights.toString + " " + this.mkString(" ")
@@ -45,9 +45,9 @@ class Weights(underlying: Vector[Float]) extends CommandArgument with IndexedSeq
 object Weights {
   val WEIGHTS = "WEIGHTS"
 
-  def apply(weight: Float) = new Weights(Vector(weight))
-  def apply(weights: Float*) = new Weights(Vector(weights:_*))
-  def apply(weights: Vector[Float]) = new Weights(weights)
+  def apply(weight: Double) = new Weights(Vector(weight))
+  def apply(weights: Double*) = new Weights(Vector(weights:_*))
+  def apply(weights: Vector[Double]) = new Weights(weights)
 
   def apply(args: List[String]): Option[Weights] = {
     val argLength = args.length
@@ -57,8 +57,8 @@ object Weights {
     args.head.toUpperCase match {
       case WEIGHTS =>
         RequireClientProtocol(argLength > 1, "WEIGHTS requires additional arguments")
-        val weights: Vector[Float] = RequireClientProtocol.safe {
-          args.tail.map { item => NumberFormat.toFloat(item) }(collection.breakOut)
+        val weights: Vector[Double] = RequireClientProtocol.safe {
+          args.tail.map { item => NumberFormat.toDouble(item) }(collection.breakOut)
         }
         Some(new Weights(weights))
       case _ => None

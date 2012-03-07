@@ -24,6 +24,5 @@ private[kestrel] class DecodingToResponse extends AbstractDecodingToResponse[Res
     Values(values)
   }
 
-  // not yet supported
   def parseStatLines(lines: Seq[Tokens]) = Error()
 }
