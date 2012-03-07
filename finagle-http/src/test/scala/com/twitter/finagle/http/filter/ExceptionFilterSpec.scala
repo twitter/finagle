@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.{CancelledRequestException, Service}
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.Future
+import com.twitter.util.{Future, Promise}
 import org.specs.Specification
 
 
@@ -15,6 +15,8 @@ object ExceptionFilterSpec extends Specification {
         throw new Exception
       else if (request.params.get("throw").isDefined)
         Future.exception(new Exception)
+      else if (request.params.get("cancel").isDefined)
+        Future.exception(new CancelledRequestException)
       else
         Future.value(request.response)
     }
@@ -45,6 +47,15 @@ object ExceptionFilterSpec extends Specification {
 
       val response = filter(request)()
       response.status        must_== Status.InternalServerError
+      response.contentString must_== ""
+    }
+
+    "handle cancel" in {
+      val request = Request("cancel" -> "true")
+      val filter = (new ExceptionFilter) andThen service
+
+      val response = filter(request)()
+      response.statusCode    must_== 499
       response.contentString must_== ""
     }
   }
