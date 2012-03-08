@@ -1,5 +1,6 @@
 package com.twitter.finagle.example.memcache
 
+import com.twitter.common.args.Flags
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.builder.{
   ReferenceCountedChannelFactory, LazyRevivableChannelFactory, ClientBuilder}
@@ -9,14 +10,12 @@ import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Future, Time}
-import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep])
-  extends Service[Req, Rep] 
-{
+
+class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep]) extends Service[Req, Rep] {
   @volatile private[this] var currentService: Future[Service[Req, Rep]] = factory()
 
   def apply(req: Req) =
@@ -28,8 +27,17 @@ class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep])
 }
 
 object MemcacheStress {
-  val count = new AtomicLong
-  
+  private[this] case class Config(
+    concurrency: Int       = 400,
+    hosts:       String    = "localhost:11211",
+    keysize:     Int       = 55,
+    valuesize:   Int       = 1,
+    nworkers:    Int       = -1,
+    stats:       Boolean   = true,
+    tracing:     Boolean   = true
+  )
+  val count    = new AtomicLong
+
   def proc(client: memcached.Client, key: String, value: ChannelBuffer) {
     client.set(key, value) ensure {
       count.incrementAndGet()
@@ -38,54 +46,33 @@ object MemcacheStress {
   }
 
   def main(args: Array[String]) {
-    var concurrency = 400
-    var hosts = "localhost:11211"
-    var keysize = 55
-    var valuesize = 1
-
-    val kvs = for (a <- args; Array(k, v) = a.split("=")) yield (k, v)
-    kvs foreach {
-      case ("concurrency", n) =>
-        concurrency = n.toInt
-      case ("hosts", hs) =>
-        hosts = hs
-      case _ => ()
-    }
+    val config = Flags(Config(), args)
 
     var builder = ClientBuilder()
       .name("mc")
       .codec(Memcached())
-      .hostConnectionLimit(concurrency)
-      .hosts(hosts)
+      .hostConnectionLimit(config.concurrency)
+      .hosts(config.hosts)
 
-    kvs foreach {
-      case ("nworkers", n) =>
-        builder = builder.channelFactory(
-          new ReferenceCountedChannelFactory(
-            new LazyRevivableChannelFactory(() =>
-              new NioClientSocketChannelFactory(
-                Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheboss")),
-                Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheIO")),
-                n.toInt
-              )
+    if (config.nworkers > 0)
+      builder = builder.channelFactory(
+        new ReferenceCountedChannelFactory(
+          new LazyRevivableChannelFactory(() =>
+            new NioClientSocketChannelFactory(
+              Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheboss")),
+              Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheIO")),
+              config.nworkers
             )
           )
         )
+      )
 
-      case ("stats", x) if x != "no" =>
-        builder = builder.reportTo(new OstrichStatsReceiver)
+    if (config.stats)    builder = builder.reportTo(new OstrichStatsReceiver)
+    if (config.tracing)  com.twitter.finagle.tracing.Trace.enable()
+    else                 com.twitter.finagle.tracing.Trace.disable()
 
-      case ("tracing", "yes") =>
-        com.twitter.finagle.tracing.Trace.enable()
-
-      case ("tracing", "no") =>
-        com.twitter.finagle.tracing.Trace.disable()
-
-      case _ => ()
-    }
-
-    val key = "x"*keysize
-    val value = ChannelBuffers.wrappedBuffer(("y"*valuesize).getBytes)
+    val key = "x" * config.keysize
+    val value = ChannelBuffers.wrappedBuffer(("y" * config.valuesize).getBytes)
 
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(2000, 100/*backlog*/, runtime)
@@ -95,7 +82,7 @@ object MemcacheStress {
     val factory = builder.buildFactory()
     val begin = Time.now
 
-    for (_ <- 0 until concurrency) {
+    for (_ <- 0 until config.concurrency) {
       val svc = new PersistentService(factory)
       val client = memcached.Client(svc)
       proc(client, key, value)

@@ -266,6 +266,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults with CompileThriftFinagle
   {
     val slf4jNop = "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
+    val commonServerSet = "com.twitter.common" % "flags" % "0.0.1"
 
     projectDependencies(
       "util" ~ "util-codec"
