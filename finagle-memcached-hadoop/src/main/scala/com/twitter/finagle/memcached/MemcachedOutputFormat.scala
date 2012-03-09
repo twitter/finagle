@@ -18,6 +18,7 @@ import _root_.java.util.concurrent.atomic._
 
 object MemcachedOutputFormat {
   val CLIENT_FACTORY = "memcached_client_factory"
+  val CLIENT_FACTORY_STRING = "memcached_client_factory_string"
   val MAX_CONCURRENCY = "memcached_max_concurrency"
   val TRIES_LIMIT = 3
   val MIN_SLEEP = 1.second
@@ -29,6 +30,10 @@ object MemcachedOutputFormat {
     oos.writeObject(factory)
     oos.close
     config.set(CLIENT_FACTORY, Base64.encodeBase64String(baos.toByteArray))
+  }
+  
+  def setFactoryConfig(config: Configuration, factoryConfig: String) = {
+    config.set(CLIENT_FACTORY_STRING, factoryConfig)
   }
 }
 
@@ -52,15 +57,20 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
 
   private[memcached] def memcachedClientFactory(taskContext: TaskAttemptContext) = {
     val string = taskContext.getConfiguration.get(CLIENT_FACTORY)
-    val bytes  = Base64.decodeBase64(string)
-    val ois = new ObjectInputStream(new ByteArrayInputStream(bytes))
-    ois.readObject().asInstanceOf[SerializableKeyValueClientFactory]
+    if (string != null) {
+      val bytes  = Base64.decodeBase64(string)
+      val ois = new ObjectInputStream(new ByteArrayInputStream(bytes))
+      ois.readObject().asInstanceOf[SerializableKeyValueClientFactory]
+    } else {
+      val configString = taskContext.getConfiguration.get(CLIENT_FACTORY_STRING)
+      new Eval().apply[SerializableKeyValueClientFactory](configString)
+    }
   }
 
   def getRecordWriter(taskContext: TaskAttemptContext) = new RecordWriter[Text, BytesWritable] {
     println("Opening MemcachedOutputFormat#RecordWriter")
     val client = memcachedClientFactory(taskContext).newInstance()
-    val timer = new JavaTimer()
+    implicit val timer = new JavaTimer()
     var written = new AtomicLong()
     var pending = new AtomicLong()
     var failures = new AtomicLong()
@@ -68,7 +78,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
     var ops = new AtomicLong()
 
     def write(key: Text, value: BytesWritable): Unit = {
-      Thread.sleep(pending.get() / 100)
+      Thread.sleep((pending.get() / 100) * 10)
       if(ops.get() % PROGRESS_EVERY == 0) {
         val now = new Date()
         println("MemcachedOutputFormat#RecordWriter status ["+now+
@@ -90,7 +100,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
       }
 
       pending.incrementAndGet()
-      client.put(key.toString, value.getBytes).map { x =>
+      client.put(key.toString, value.getBytes).within(MIN_SLEEP).map { x =>
         pending.decrementAndGet()
         written.incrementAndGet()
       } onFailure { throwable =>

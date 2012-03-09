@@ -4,6 +4,7 @@ import com.twitter.util._
 import _root_.java.util.concurrent.Executors
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.mutable.ArrayBuffer
+import com.twitter.conversions.time._
 import _root_.java.util.Random
 
 /**
@@ -70,7 +71,11 @@ class PoolingReadRepairClient(allClients: Seq[BaseClient[ChannelBuffer]],
   }
 
   def release() = allClients.map(_.release())
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = Future.collect(allClients.map(_.set(key, flags, expiry, value))).map(x=>())
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    val futures = allClients.map(_.set(key, flags, expiry, value))
+    val base = futures.head
+    futures.tail.foldLeft(base)(_.or(_))
+  }
   def delete(key: String) = Future.collect(allClients.map(_.delete(key))).map(_.exists(x=>x))
 
   def getsResult(keys: Iterable[String]) = unsupported

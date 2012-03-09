@@ -210,6 +210,11 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   {
     override def compileOrder = CompileOrder.ScalaThenJava
     val junit = "junit" % "junit" % "3.8.2" % "test"
+    
+    
+    projectDependencies(
+      "util" ~ "util-eval"
+    )
 
     val hadoop    = "org.apache.hadoop" % "hadoop-core" % "0.20.2"
     val codec     = "commons-codec" % "commons-codec" % "1.5"
