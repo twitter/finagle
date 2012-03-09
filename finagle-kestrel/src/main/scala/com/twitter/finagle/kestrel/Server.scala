@@ -15,7 +15,7 @@ class Server(address: SocketAddress) {
         new LinkedBlockingDeque[ChannelBuffer]
       }
     }
-    
+
     def apply(conn: ClientConnection) = Future.value(new InterpreterService(new Interpreter(queues)))
     def close() = ()
   }
@@ -28,8 +28,9 @@ class Server(address: SocketAddress) {
 
   private[this] var server: Option[BuiltServer] = None
 
-  def start() {
+  def start(): BuiltServer = {
     server = Some(serverSpec.build(serviceFactory))
+    server.get
   }
 
   def stop() {

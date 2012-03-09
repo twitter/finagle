@@ -1,30 +1,29 @@
 package com.twitter.finagle.stress
 
-import scala.collection.JavaConversions._
-
-import java.net.SocketAddress
-import java.util.concurrent.{Executors}
-
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.jboss.netty.channel._
-import org.jboss.netty.buffer._
-import org.jboss.netty.channel.group.DefaultChannelGroup
-import org.jboss.netty.handler.codec.http._
-
 import com.twitter.conversions.time._
-import com.twitter.util.{RandomSocket, Duration}
-import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Timer
+import com.twitter.ostrich.stats.StatsCollection
+import com.twitter.util.Duration
+import java.net.InetSocketAddress
+import java.net.SocketAddress
+import java.util.concurrent.{Executors}
+import org.jboss.netty.bootstrap.ServerBootstrap
+import org.jboss.netty.buffer._
+import org.jboss.netty.channel._
+import org.jboss.netty.channel.group.DefaultChannelGroup
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import org.jboss.netty.handler.codec.http._
+import scala.collection.JavaConversions._
 
 object EmbeddedServer {
-  def apply() = new EmbeddedServer(RandomSocket())
+  def apply() = new EmbeddedServer()
   val timer = Timer.default
   timer.acquire()
 }
 
 class EmbeddedServer(val addr: SocketAddress) {
+  def this() = this(new InetSocketAddress(0))
   import EmbeddedServer._
 
   // (Publicly accessible) stats covering this server.

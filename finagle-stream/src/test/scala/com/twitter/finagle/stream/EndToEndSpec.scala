@@ -3,24 +3,22 @@ package com.twitter.finagle.stream
 import java.nio.charset.Charset
 import java.util.concurrent.Executors
 
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.{
-  ChannelPipelineFactory, ChannelUpstreamHandler,
-  ChannelHandlerContext, MessageEvent, ChannelEvent, Channels,
-  ChannelStateEvent, ChannelState, WriteCompletionEvent}
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-
-import org.specs.Specification
-
-
 import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{SimpleFilter, Service, ServiceNotAvailableException, ClientCodecConfig}
-import org.jboss.netty.util.CharsetUtil
+import com.twitter.finagle.{
+  ClientCodecConfig, SimpleFilter, Service, ServiceNotAvailableException}
 import com.twitter.util._
+import java.net.InetSocketAddress
+import org.jboss.netty.bootstrap.ClientBootstrap
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import org.jboss.netty.channel.{
+  MessageEvent, ChannelEvent, Channels, ChannelStateEvent, ChannelState, WriteCompletionEvent
+  , ChannelPipelineFactory, ChannelUpstreamHandler, ChannelHandlerContext}
+import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.util.CharsetUtil
+import org.specs.Specification
 
 object EndToEndSpec extends Specification {
   case class MyStreamResponse(
@@ -41,7 +39,6 @@ object EndToEndSpec extends Specification {
 
   "Streams" should {
     "work" in {
-      val address = RandomSocket()
       val httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
       val httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
       val messages = new Broker[ChannelBuffer]
@@ -49,9 +46,10 @@ object EndToEndSpec extends Specification {
       val serverRes = MyStreamResponse(httpResponse, messages.recv, error.recv)
       val server = ServerBuilder()
         .codec(new Stream)
-        .bindTo(address)
+        .bindTo(new InetSocketAddress(0))
         .name("Streams")
         .build(new MyService(serverRes))
+      val address = server.localAddress
       val clientFactory = ClientBuilder()
         .codec(new Stream)
         .hosts(Seq(address))
