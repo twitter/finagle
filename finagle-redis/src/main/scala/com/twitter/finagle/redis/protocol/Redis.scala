@@ -2,7 +2,7 @@ package com.twitter.finagle.redis
 
 import protocol.{Command, CommandCodec, Reply, ReplyCodec}
 
-import com.twitter.finagle.{Codec, CodecFactory, Service}
+import com.twitter.finagle.{Codec, CodecFactory, Service, ServiceFactory}
 import com.twitter.finagle.tracing.ClientRequestTracingFilter
 import com.twitter.naggati.{Codec => NaggatiCodec}
 import com.twitter.util.Future
@@ -45,10 +45,8 @@ class Redis extends CodecFactory[Command, Reply] {
         }
       }
 
-      override def prepareService(underlying: Service[Command, Reply]) = {
-        Future.value((new RedisTracingFilter()) andThen underlying)
-      }
-
+      override def prepareConnFactory(underlying: ServiceFactory[Command, Reply]) =
+        new RedisTracingFilter() andThen underlying
     }
   }
 }

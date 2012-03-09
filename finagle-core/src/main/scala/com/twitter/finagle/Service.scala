@@ -118,12 +118,27 @@ abstract class ServiceFactory[-Req, +Rep]
   @deprecated("use apply() instead")
   final def make(): Future[Service[Req, Rep]] = this()
 
-  def map[Req1, Rep1](f: Service[Req, Rep] => Service[Req1, Rep1]): ServiceFactory[Req1, Rep1] =
+  /**
+   * Apply `f` on created services, returning the resulting Future in their
+   * stead. This is useful for implementing common factory wrappers that
+   * only need to modify or operate on the underlying service.
+   */
+  def flatMap[Req1, Rep1](f: Service[Req, Rep] => Future[Service[Req1, Rep1]]): ServiceFactory[Req1, Rep1] =
     new ServiceFactory[Req1, Rep1] {
-      def apply(conn: ClientConnection) = self(conn) map(f)
+      def apply(conn: ClientConnection) =
+        self(conn) flatMap { service =>
+          f(service) onFailure { _ => service.release() }
+        }
       def close = self.close()
       override def isAvailable = self.isAvailable
     }
+
+  /**
+   * Map created services. Useful for implementing common
+   * styles of factory wrappers.
+   */
+  def map[Req1, Rep1](f: Service[Req, Rep] => Service[Req1, Rep1]): ServiceFactory[Req1, Rep1] =
+    flatMap { s => Future.value(f(s)) }
 
   /**
    * Make a service that after dispatching a request on that service,

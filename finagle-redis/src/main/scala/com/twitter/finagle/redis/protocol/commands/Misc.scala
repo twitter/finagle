@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.protocol
 import Commands.trimList
 import com.twitter.finagle.redis.util._
 
-case class FlushDB extends Command {
+case class FlushDB() extends Command {
   def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.FLUSHDB))
 }
 

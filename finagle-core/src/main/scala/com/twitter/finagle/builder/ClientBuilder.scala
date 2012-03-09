@@ -58,6 +58,7 @@ import org.jboss.netty.handler.timeout.IdleStateHandler
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor, Promise, Return }
 import com.twitter.util.TimeConversions._
+import javax.net.ssl.SSLContext
 
 import com.twitter.finagle.channel._
 import com.twitter.finagle.util._
@@ -163,9 +164,9 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _failureAccrual            : Option[ServiceFactoryWrapper]  = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
-  private val _maxOutstandingConnections: Option[Int]                = None,
   private val _tracerFactory             : Tracer.Factory                = NullTracer.factory,
-  private val _hostConfig                : ClientHostConfig              = new ClientHostConfig)
+  private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
+  private val _expFailFast               : Boolean                       = false)
 {
   import ClientConfig._
 
@@ -200,8 +201,8 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val channelFactory            = _channelFactory
   val tls                       = _tls
   val failureAccrual            = _failureAccrual
-  val maxOutstandingConnections = _maxOutstandingConnections
   val tracerFactory             = _tracerFactory
+  val expFailFast               = _expFailFast
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -229,8 +230,8 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
     "failureAccrual"            -> _failureAccrual,
-    "maxOutstandingConnections" -> _maxOutstandingConnections,
-    "tracerFactory"             -> Some(_tracerFactory)
+    "tracerFactory"             -> Some(_tracerFactory),
+    "expFailFast"               -> expFailFast
   )
 
   override def toString = {
@@ -501,6 +502,22 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_tls = Some({ () => Ssl.client()}, Some(hostname))))
 
   /**
+   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
+   * This allows the user to use client certificates  
+   * No SSL Hostname Validation is performed
+   */
+  def tls(sslContext : SSLContext): This =
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))    
+  
+  /**
+   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
+   * This allows the user to use client certificates  
+   * SSL Hostname Validation is performed, on the passed in hostname
+   */
+  def tls(sslContext : SSLContext, hostname : Option[String]): This =
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))  
+    
+  /**
    * Do not perform TLS validation. Probably dangerous.
    */
   def tlsWithoutValidation(): This =
@@ -547,15 +564,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_failureAccrual = Some(failureAccrual)))
   }
 
-
   /**
-   * Toggle transmission policy to "Fast-Fail", then if an host become unavailable we will fail
-   * fast for every next request (no timeout), but each we try to reconnect with at most
-   * `maxOutstandingConnections` outstanding connections.
+   * An experimental "fail-fast" mode that marks a host dead on
+   * connection failure. The host remains dead until we
+   * succesfully connect.
+   *
+   * Intermediate connection attempts *are* respected, but host
+   * availability is turned off during the reconnection period.
    */
-  def maxOutstandingConnections(n: Int): This =
-    withConfig(_.copy(_maxOutstandingConnections = Some(n)))
-
+  def expFailFast(onOrOff: Boolean): This =
+   withConfig(_.copy(_expFailFast = onOrOff))
 
   /* BUILDING */
   /* ======== */
@@ -642,22 +660,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       statsReceiver, maxWaiters)
   }
 
-  private[this] def prepareService(codec: Codec[Req, Rep])(service: Service[Req, Rep]) = {
-    var future: Future[Service[Req, Rep]] = codec.prepareService(service)
-
-    if (config.hostConnectionMaxIdleTime.isDefined ||
-        config.hostConnectionMaxLifeTime.isDefined) {
-      future = future map { underlying =>
-        new ExpiringService(
-          underlying,
-          config.hostConnectionMaxIdleTime,
-          config.hostConnectionMaxLifeTime)
-      }
-    }
-
-    future
-  }
-
   private[finagle] lazy val statsReceiver = {
     val statsReceiver = config.statsReceiver getOrElse NullStatsReceiver
     config.name match {
@@ -686,14 +688,26 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     var factory: ServiceFactory[Req, Rep] = null
     val bs = buildBootstrap(codec, host)
-    factory = new ChannelServiceFactory[Req, Rep](
-      bs, prepareService(codec) _, hostStatsReceiver)
+    factory = codec.rawPrepareClientConnFactory(new ChannelServiceFactory[Any, Any](bs, hostStatsReceiver))
+
+    if (config.hostConnectionMaxIdleTime.isDefined ||
+        config.hostConnectionMaxLifeTime.isDefined) {
+      factory = factory map { service =>
+        new ExpiringService(
+          service,
+          config.hostConnectionMaxIdleTime,
+          config.hostConnectionMaxLifeTime)
+      }
+    }
+
     factory = buildPool(factory, hostStatsReceiver)
-
     factory = requestTimeoutFilter andThen factory
-
     factory = failureAccrualFactory(factory)
-    factory = failFastFactory(factory)
+
+    if (config.expFailFast) {
+      factory = new FailFastFactory(
+        factory, hostStatsReceiver.scope("failfast"), Timer.default)
+    }
 
     val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
     factory = statsFilter andThen factory
@@ -756,7 +770,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // don't get recorded there.
     factory = new StatsFactoryWrapper(factory, statsReceiver)
     factory = tracingFilter(tracer) andThen factory
-    factory = codec.prepareFactory(factory)
+    factory = codec.prepareServiceFactory(factory)
 
     factory
   }
@@ -794,11 +808,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   protected def failureAccrualFactory(factory: ServiceFactory[Req, Rep]) =
     config.failureAccrual map { _ andThen factory } getOrElse(factory)
-
-  protected def failFastFactory(factory: ServiceFactory[Req, Rep]) =
-    config.maxOutstandingConnections map { n =>
-      new FailFastFactory(factory, n)
-    } getOrElse(factory)
 
   protected def monitorFilter =
     config.monitor map { monitorFactory =>
@@ -841,4 +850,3 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   protected val identityFilter = Filter.identity[Req, Rep]
 }
-

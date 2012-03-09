@@ -58,6 +58,8 @@ class IdleConnectionFilter[Req, Rep](
   // system during the phase when the server is computing the result.
   // So if a request take a long time to be processed, we will never detect it as idle
   // NB: private[channel] for testing purpose only
+
+  // TODO: this should be connection (service acquire/release) based, not request based.
   private[channel] def filterFactory(c: ClientConnection) = new SimpleFilter[Req, Rep] {
     def apply(request: Req, service: Service[Req, Rep]) = {
       queue.remove(c)

@@ -1581,3 +1581,6 @@ For additional information about Finagle, see the [Finagle homepage](http://twit
 
 [Top](#Top)
 
+# Administrivia
+
+We use [Semantic Versioning](http://semver.org/) for published artifacts.

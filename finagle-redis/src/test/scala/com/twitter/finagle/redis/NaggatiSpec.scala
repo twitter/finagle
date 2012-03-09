@@ -86,17 +86,17 @@ class NaggatiSpec extends Specification {
 
             unwrap(codec(wrap("ZADD nums 3.14159 pi\r\n"))) {
               case ZAdd("nums", members) =>
-                unwrap(members) { case ZMember(3.14159f, value) =>
+                unwrap(members) { case ZMember(3.14159, value) =>
                     BytesToString(value) mustEqual "pi"
                 }
             }
             unwrap(codec(wrap("ZADD nums 3.14159 pi 2.71828 e\r\n"))) {
               case ZAdd("nums", members) => members match {
                 case pi :: e :: Nil =>
-                  unwrap(List(pi)) { case ZMember(3.14159f, value) =>
+                  unwrap(List(pi)) { case ZMember(3.14159, value) =>
                     BytesToString(value) mustEqual "pi"
                   }
-                  unwrap(List(e)) { case ZMember(2.71828f, value) =>
+                  unwrap(List(e)) { case ZMember(2.71828, value) =>
                     BytesToString(value) mustEqual "e"
                   }
                 case _ => fail("Expected two elements in list")
@@ -139,7 +139,7 @@ class NaggatiSpec extends Specification {
             }
             unwrap(codec(wrap("ZINCRBY key 2.1 one\r\n"))) {
               case ZIncrBy("key", value, member) =>
-                value mustEqual 2.1f
+                value mustEqual 2.1
                 BytesToString(member) mustEqual "one"
             }
           }
@@ -185,7 +185,7 @@ class NaggatiSpec extends Specification {
               unwrap(doCmd("%s out 2 zset1 zset2 WEIGHTS 2 3\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
                   keys mustEqual List("zset1", "zset2")
-                  weights must beSome(Weights(2f, 3f))
+                  weights must beSome(Weights(2, 3))
                   aggregate must beNone
                 }
               }
@@ -199,14 +199,14 @@ class NaggatiSpec extends Specification {
               unwrap(doCmd("%s out 2 zset1 zset2 weights 2 3 aggregate min\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
                   keys mustEqual List("zset1", "zset2")
-                  weights must beSome(Weights(2f, 3f))
+                  weights must beSome(Weights(2, 3))
                   aggregate must beSome(Aggregate.Min)
                 }
               }
               unwrap(doCmd("%s out 2 zset1 zset2 aggregate max weights 2 3\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
                   keys mustEqual List("zset1", "zset2")
-                  weights must beSome(Weights(2f, 3f))
+                  weights must beSome(Weights(2, 3))
                   aggregate must beSome(Aggregate.Max)
                 }
               }
@@ -284,19 +284,19 @@ class NaggatiSpec extends Specification {
                 }
               }
               unwrap(doCmd("%s myzset 1 2")) {
-                verify("myzset", ZInterval(1f), ZInterval(2f)) { (s,l) =>
+                verify("myzset", ZInterval(1), ZInterval(2)) { (s,l) =>
                   s must beNone
                   l must beNone
                 }
               }
               unwrap(doCmd("%s myzset (1 2")) {
-                verify("myzset", ZInterval.exclusive(1f), ZInterval(2f)) { (s,l) =>
+                verify("myzset", ZInterval.exclusive(1), ZInterval(2)) { (s,l) =>
                   s must beNone
                   l must beNone
                 }
               }
               unwrap(doCmd("%s myzset (1 (2")) {
-                verify("myzset", ZInterval.exclusive(1f), ZInterval.exclusive(2f)) { (s,l) =>
+                verify("myzset", ZInterval.exclusive(1), ZInterval.exclusive(2)) { (s,l) =>
                   s must beNone
                   l must beNone
                 }

@@ -1,3 +1,9 @@
+2.0.1		2012/03/01
+
+	* commons-stats: memoize counters
+	* cluster: don't reuse adds; keep many values per key
+	* clientbuilder: buffer handlers to avoid deadlock
+
 2.0.0		2012/02/27
 
 	* unify client and server factories
