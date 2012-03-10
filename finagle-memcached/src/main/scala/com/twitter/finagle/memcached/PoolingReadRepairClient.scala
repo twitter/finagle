@@ -76,6 +76,7 @@ class PoolingReadRepairClient(allClients: Seq[BaseClient[ChannelBuffer]],
     val base = futures.head
     futures.tail.foldLeft(base)(_.or(_))
   }
+
   def delete(key: String) = Future.collect(allClients.map(_.delete(key))).map(_.exists(x=>x))
 
   def getsResult(keys: Iterable[String]) = unsupported
