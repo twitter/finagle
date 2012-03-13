@@ -14,7 +14,7 @@ import org.apache.thrift.transport.TMemoryInputTransport
 import com.twitter.util.Time
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.{Ok, Error, Cancelled}
+import com.twitter.finagle.util.{ByteArrays, Ok, Error, Cancelled}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.tracing.{Trace, Annotation}
 
@@ -163,7 +163,7 @@ private[thrift] class ThriftClientTracingFilter(
       }
 
       new ThriftClientRequest(
-        OutputBuffer.messageToArray(header) ++ request.message,
+        ByteArrays.concat(OutputBuffer.messageToArray(header), request.message),
         request.oneway)
     } else {
       request
