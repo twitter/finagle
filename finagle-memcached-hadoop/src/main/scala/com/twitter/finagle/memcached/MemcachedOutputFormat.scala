@@ -1,20 +1,20 @@
 package com.twitter.finagle.memcached
 
-import org.apache.hadoop.io._
+import _root_.java.util.concurrent.Semaphore
+import _root_.java.io._
+import _root_.java.util.Date
+import _root_.java.util.concurrent.atomic._
+import com.twitter.conversions.time._
+import com.twitter.finagle.memcached.MemcachedOutputFormat._
+import com.twitter.util._
+import org.apache.commons.codec.binary.Base64
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.io._
 import org.apache.hadoop.mapreduce.JobContext
-import  _root_.java.util.concurrent.Semaphore
 import org.apache.hadoop.mapreduce.OutputCommitter
 import org.apache.hadoop.mapreduce.OutputFormat
 import org.apache.hadoop.mapreduce.RecordWriter
 import org.apache.hadoop.mapreduce.TaskAttemptContext
-import MemcachedOutputFormat._
-import com.twitter.util._
-import com.twitter.conversions.time._
-import org.apache.commons.codec.binary.Base64
-import _root_.java.io._
-import _root_.java.util.Date
-import _root_.java.util.concurrent.atomic._
 
 object MemcachedOutputFormat {
   val CLIENT_FACTORY = "memcached_client_factory"
@@ -31,7 +31,7 @@ object MemcachedOutputFormat {
     oos.close
     config.set(CLIENT_FACTORY, Base64.encodeBase64String(baos.toByteArray))
   }
-  
+
   def setFactoryConfig(config: Configuration, factoryConfig: String) = {
     config.set(CLIENT_FACTORY_STRING, factoryConfig)
   }
@@ -106,7 +106,7 @@ class MemcachedOutputFormat extends OutputFormat[Text, BytesWritable] {
       } onFailure { throwable =>
         retries.incrementAndGet()
         pending.decrementAndGet()
-        timer.doLater(MIN_SLEEP * (1 << tries))(write(key, value, tries + 1))        
+        timer.doLater(MIN_SLEEP * (1 << tries))(write(key, value, tries + 1))
       }
     }
 
