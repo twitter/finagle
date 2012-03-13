@@ -26,7 +26,17 @@ class Encoder extends OneToOneEncoder {
       case Tokens(tokens) =>
         val buffer = ChannelBuffers.dynamicBuffer(10 * tokens.size)
         tokens foreach { token =>
-          buffer.writeBytes(token)
+          // Note that certain variants of writeBytes with a
+          // ChannelBuffer *consume* the buffer and others *copy* it.
+          // This encoder is not supposed to be destructive of the
+          // input, so make sure to use a version that does not alter
+          // the message.
+          //
+          // See:
+          //  http://netty.io/docs/stable/api/org/jboss/netty/buffer/ChannelBuffer.html#writeBytes(org.jboss.netty.buffer.ChannelBuffer)
+          //  http://netty.io/docs/stable/api/org/jboss/netty/buffer/ChannelBuffer.html#writeBytes(org.jboss.netty.buffer.ChannelBuffer,%20int,%20int)
+
+          buffer.writeBytes(token, 0, token.readableBytes)
           buffer.writeBytes(SPACE)
         }
         buffer.writeBytes(DELIMITER)
@@ -34,32 +44,32 @@ class Encoder extends OneToOneEncoder {
       case TokensWithData(tokens, data, casUnique) =>
         val buffer = ChannelBuffers.dynamicBuffer(50 + data.readableBytes)
         tokens foreach { token =>
-          buffer.writeBytes(token)
+          buffer.writeBytes(token, 0, token.readableBytes)
           buffer.writeBytes(SPACE)
         }
         buffer.writeBytes(data.readableBytes.toString.getBytes)
         casUnique foreach { token =>
           buffer.writeBytes(SPACE)
-          buffer.writeBytes(token)
+          buffer.writeBytes(token, 0, token.readableBytes)
         }
         buffer.writeBytes(DELIMITER)
-        buffer.writeBytes(data)
+        buffer.writeBytes(data, 0, data.readableBytes)
         buffer.writeBytes(DELIMITER)
         buffer
       case ValueLines(lines) =>
         val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
         lines foreach { case TokensWithData(tokens, data, casUnique) =>
           tokens foreach { token =>
-            buffer.writeBytes(token)
+            buffer.writeBytes(token, 0, token.readableBytes)
             buffer.writeBytes(SPACE)
           }
           buffer.writeBytes(data.readableBytes.toString.getBytes)
           casUnique foreach { token =>
             buffer.writeBytes(SPACE)
-            buffer.writeBytes(token)
+            buffer.writeBytes(token, 0, token.readableBytes)
           }
           buffer.writeBytes(DELIMITER)
-          buffer.writeBytes(data)
+          buffer.writeBytes(data, 0, data.readableBytes)
           buffer.writeBytes(DELIMITER)
         }
         buffer.writeBytes(END)
@@ -69,7 +79,7 @@ class Encoder extends OneToOneEncoder {
         val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
         lines foreach { case Tokens(tokens) =>
           tokens foreach { token =>
-            buffer.writeBytes(token)
+            buffer.writeBytes(token, 0, token.readableBytes)
             buffer.writeBytes(SPACE)
           }
           buffer.writeBytes(DELIMITER)

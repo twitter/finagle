@@ -1,12 +1,11 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.redis.{Client, Redis}
-import com.twitter.finagle.redis.util.{RedisCluster, BytesToString}
 import com.twitter.finagle.Service
-import com.twitter.util.{Future, RandomSocket}
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.redis.util.{RedisCluster, BytesToString}
+import com.twitter.finagle.redis.{Client, Redis}
+import com.twitter.util.Future
 import org.specs.Specification
-
 
 object ClientSpec extends Specification {
 

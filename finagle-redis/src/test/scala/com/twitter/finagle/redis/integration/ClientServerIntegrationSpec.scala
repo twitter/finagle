@@ -2,17 +2,14 @@ package com.twitter.finagle.redis
 package protocol
 package integration
 
-import util._
-
-import com.twitter.util.{Future, RandomSocket}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.util.Future
+import java.net.InetSocketAddress
 import org.specs.Specification
+import util._
 
 class ClientServerIntegrationSpec extends Specification {
-  val serverAddress = RandomSocket.nextAddress()
-  implicit def s2b(s: String) = s.getBytes
-
   lazy val svcClient = ClientBuilder()
                 .name("redis-client")
                 .codec(Redis())
@@ -21,14 +18,7 @@ class ClientServerIntegrationSpec extends Specification {
                 .retries(2)
                 .build()
 
-  lazy val client = ClientBuilder()
-                .name("redis-client")
-                .codec(Redis())
-                .hosts("localhost:%d".format(serverAddress.getPort()))
-                .hostConnectionLimit(2)
-                .retries(2)
-                .build()
-
+  implicit def s2b(s: String) = s.getBytes
   val service = new Service[Command, Reply] {
     def apply(cmd: Command): Future[Reply] = {
       svcClient(cmd)
@@ -38,8 +28,18 @@ class ClientServerIntegrationSpec extends Specification {
   val server = ServerBuilder()
                 .name("redis-server")
                 .codec(Redis())
-                .bindTo(serverAddress)
+                .bindTo(new InetSocketAddress(0))
                 .build(service)
+
+
+  lazy val client = ClientBuilder()
+                .name("redis-client")
+                .codec(Redis())
+                .hosts(server.localAddress)
+                .hostConnectionLimit(2)
+                .retries(2)
+                .build()
+
 
   val KEY = "foo"
   val VALUE = "bar"
@@ -65,7 +65,7 @@ class ClientServerIntegrationSpec extends Specification {
         client(Exists(null:String))() must throwA[ClientError]
       }
       "EXPIRE" >> {
-        client(Expire("key1", 30))() mustEqual IntegerReply(0) 
+        client(Expire("key1", 30))() mustEqual IntegerReply(0)
         client(Expire(null, 30))() must throwA[ClientError]
         client(Expire(KEY, 3600))() mustEqual IntegerReply(1)
         assertIntegerReply(client(Ttl(KEY)), 3600)

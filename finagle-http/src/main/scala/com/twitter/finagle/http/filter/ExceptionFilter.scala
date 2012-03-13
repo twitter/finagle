@@ -31,7 +31,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
     } rescue {
       case e: CancelledRequestException =>
         // This only happens when ChannelService cancels a reply.
-        log.warning(e, "cancelled request: uri:%s", request.getUri)
+        log.warning("cancelled request: uri:%s", request.getUri)
         val response = request.response
         response.status = ClientClosedRequestStatus
         response.clearContent()
