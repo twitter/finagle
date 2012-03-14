@@ -1,5 +1,7 @@
-import sbt._
+
+
 import com.twitter.sbt._
+import sbt._
 
 class Project(info: ProjectInfo) extends StandardParentProject(info)
   with SubversionPublisher
@@ -73,6 +75,13 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   val memcachedProject = project(
     "finagle-memcached", "finagle-memcached",
     new MemcachedProject(_), coreProject)
+
+  /**
+   * finagle-memcached contains a memcached reducer
+   */
+  val memcachedHadoopProject = project(
+    "finagle-memcached-hadoop", "finagle-memcached-hadoop",
+    new MemcachedHadoopProject(_), coreProject, memcachedProject)
 
   /**
    * finagle-kestrel contains the kestrel codec and Java and Scala
@@ -196,6 +205,22 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     projectDependencies(
       "util" ~ "util-hashing"
     )
+  }
+
+  class MemcachedHadoopProject(info: ProjectInfo) extends StandardProject(info)
+    with Defaults
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+    val junit = "junit" % "junit" % "3.8.2" % "test"
+
+    projectDependencies(
+      "util" ~ "util-eval"
+    )
+
+    val hadoop    = "org.apache.hadoop" % "hadoop-core" % "0.20.2"
+    val codec     = "commons-codec" % "commons-codec" % "1.5"
+    val pig       = "org.apache.pig" % "pig" % "0.9.2"
+    val mrunit    = "org.apache.mrunit" % "mrunit" % "0.8.0-incubating" % "test"
   }
 
   class KestrelProject(info: ProjectInfo) extends StandardProject(info)
