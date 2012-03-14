@@ -755,7 +755,7 @@ case class PHPMemCacheClientBuilder(
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(10)
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
     val clients = _nodes.map { case (hostname, port, weight) =>
       val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
