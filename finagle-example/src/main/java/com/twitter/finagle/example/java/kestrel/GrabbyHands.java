@@ -30,7 +30,7 @@ import com.twitter.finagle.kestrel.protocol.Kestrel;
 public class GrabbyHands {
   public static void main(String args[]) {
     if (args.length < 2) {
-      System.err.println("usage: java… QUEUE HOST1 [HOST2 HOST3…]");
+      System.err.println("usage: java... QUEUE HOST1 [HOST2 HOST3...]");
       System.exit(1);
     }
 
