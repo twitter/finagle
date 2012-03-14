@@ -35,7 +35,7 @@ object Client {
   def apply(host: String): Client = Client(
     ClientBuilder()
       .hosts(host)
-      .hostConnectionLimit(10)
+      .hostConnectionLimit(1)
       .codec(new Memcached)
       .build())
 
@@ -628,7 +628,7 @@ case class KetamaClientBuilder(
 
   def build(): Client = {
     val builder =
-      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(10)).codec(Memcached())
+      (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
     val keys = _nodes map {
       case (hostname, port, weight) => KetamaClientKey(hostname, port, weight)
@@ -708,7 +708,7 @@ case class RubyMemCacheClientBuilder(
     copy(_clientBuilder = Some(clientBuilder))
 
   def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(10)
+    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
     val clients = _nodes.map { case (hostname, port, weight) =>
       require(weight == 1, "Ruby memcache node weight must be 1")
       Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
