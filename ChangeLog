@@ -1,3 +1,29 @@
+3.0.0		2012/03/14
+
+	* ServiceToChannelHandler: keep track of shutdowns with
+	pending replies, don't monitor errors that occur after
+	cancellation.
+	* Add two received_bytesm sent_bytes to per-channel stats.
+	* http: Add wwwAuthenticate(=) and isXmlHttpRequest
+	* http: CancelledRequestExceptions become 499s
+	* clients: experimental Fail-Fast mode
+	(ClientBuilder.expFailFast(true))
+	* b3: Only log that a span was unfinished if we actually found
+	one
+	* thrift: better support for one-way calls
+	* server: option for cancellation on hangup (default=true)
+	* codecs: improved support for multiplexed protocols
+	* upgrade to netty 3.4.0.alpha1 which fixes connect timer
+	resolution issues. Trustin says this should be as stable as
+	3.3.1.Final
+	* serversets: allow for additional endpoints
+	* tests: use true ephemeral ports instead of RandomSocket
+	* memcache stress: use new command line flag library from
+	commons
+	* thrift: concatenate arrays with System.arraycopy
+	* memached: fix bug wherein we made requests with empty keys
+	on retries
+
 2.0.1		2012/03/01
 
 	* commons-stats: memoize counters
