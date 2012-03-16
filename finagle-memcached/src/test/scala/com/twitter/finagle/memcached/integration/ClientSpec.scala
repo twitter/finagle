@@ -1,15 +1,13 @@
 package com.twitter.finagle.memcached.integration
 
-import org.specs.Specification
-
-import org.jboss.netty.util.CharsetUtil
-
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
-import com.twitter.util.RandomSocket
+import java.net.{InetSocketAddress, SocketAddress}
+import org.jboss.netty.util.CharsetUtil
+import org.specs.Specification
 
 object ClientSpec extends Specification {
   "ConnectedClient" should {
@@ -118,14 +116,14 @@ object ClientSpec extends Specification {
        */
       var server1: Server = null
       var server2: Server = null
-      val address1 = RandomSocket()
-      val address2 = RandomSocket()
+      var address1: InetSocketAddress = null
+      var address2: InetSocketAddress = null
 
       doBefore {
-        server1 = new Server(address1)
-        server1.start()
-        server2 = new Server(address2)
-        server2.start()
+        server1 = new Server(new InetSocketAddress(0))
+        address1 = server1.start().localAddress.asInstanceOf[InetSocketAddress]
+        server2 = new Server(new InetSocketAddress(0))
+        address2 = server2.start().localAddress.asInstanceOf[InetSocketAddress]
       }
 
       doAfter {
@@ -133,11 +131,12 @@ object ClientSpec extends Specification {
         server2.stop()
       }
 
-      val client = KetamaClientBuilder()
-        .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
-        .build()
 
       "doesn't blow up" in {
+        val client = KetamaClientBuilder()
+          .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
+          .build()
+
         client.delete("foo")()
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()

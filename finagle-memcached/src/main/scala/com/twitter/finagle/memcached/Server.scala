@@ -28,8 +28,9 @@ class Server(address: SocketAddress) {
 
   private[this] var server: Option[BuiltServer] = None
 
-  def start() {
+  def start(): BuiltServer = {
     server = Some(serverSpec.build(service))
+    server.get
   }
 
   def stop() {

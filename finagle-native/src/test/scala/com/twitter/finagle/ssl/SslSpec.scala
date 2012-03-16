@@ -1,22 +1,19 @@
 package com.twitter.finagle.ssl
 
-import org.specs.Specification
-
+import com.twitter.finagle.Service
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.http.Http
+import com.twitter.finagle.ssl.Ssl
+import com.twitter.io.TempFile
+import com.twitter.util.TimeConversions._
+import com.twitter.util.Future
 import java.io.File
+import java.net.InetSocketAddress
 import java.security.Provider
-
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
-
-import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.http.Http
-
-import com.twitter.util.{Future, RandomSocket}
-import com.twitter.util.TimeConversions._
-import com.twitter.io.TempFile
+import org.specs.Specification
 
 object Pwd {
   def pwd = System.getenv("PWD")
@@ -36,8 +33,6 @@ object SslConfig {
 object SslSpec extends Specification {
   "automatically detected available provider" should {
     "be able to send and receive various sized content" in {
-      val address = RandomSocket.nextAddress
-
       def makeContent(length: Int) = {
         val buf = ChannelBuffers.directBuffer(length)
         while (buf.writableBytes() > 0)
@@ -70,7 +65,7 @@ object SslSpec extends Specification {
       val server =
         ServerBuilder()
           .codec(codec)
-          .bindTo(address)
+          .bindTo(new InetSocketAddress(0))
           .tls(SslConfig.certificatePath, SslConfig.keyPath)
           .name("SSLServer")
           .build(service)
@@ -78,7 +73,7 @@ object SslSpec extends Specification {
       def client =
         ClientBuilder()
           .name("http-client")
-          .hosts(Seq(address))
+          .hosts(server.localAddress)
           .codec(codec)
           .hostConnectionLimit(1)
           .tlsWithoutValidation()

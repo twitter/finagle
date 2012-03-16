@@ -13,7 +13,6 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Ok
 import com.twitter.finagle.{WriteException, CancelledConnectionException}
 
-import com.twitter.util.{CountDownLatch, RandomSocket}
 import com.twitter.conversions.time._
 
 object CancellationSpec extends Specification with IntegrationBase with Mockito {

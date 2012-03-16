@@ -13,6 +13,7 @@ import java.net.InetSocketAddress
 import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Trace, Annotation, TraceId, SpanId}
+import com.twitter.finagle.util.ByteArrays
 import org.apache.thrift.{TApplicationException, TException}
 
 object ThriftServerFramedCodec {
@@ -144,7 +145,7 @@ private[thrift] class ThriftServerTracingFilter(
           case response =>
             Trace.record(Annotation.ServerSend())
             val responseHeader = new thrift.ResponseHeader
-            OutputBuffer.messageToArray(responseHeader) ++ response
+            ByteArrays.concat(OutputBuffer.messageToArray(responseHeader), response)
         }
       } finally {
         ClientId.clear()

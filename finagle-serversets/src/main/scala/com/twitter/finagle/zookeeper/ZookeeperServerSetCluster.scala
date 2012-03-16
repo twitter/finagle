@@ -69,12 +69,15 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddr
     changes = newTail
   }
 
-  def join(address: SocketAddress) {
+  def join(
+    address: SocketAddress,
+    endpoints: Map[String, InetSocketAddress] = Map[String, InetSocketAddress]()
+  ) {
     require(address.isInstanceOf[InetSocketAddress])
 
     serverSet.join(
       address.asInstanceOf[InetSocketAddress],
-      Map[String, InetSocketAddress](),
+      endpoints,
       ALIVE)
   }
 
