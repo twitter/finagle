@@ -1,6 +1,8 @@
 package com.twitter.finagle.memcached.java;
 
 import com.twitter.finagle.memcached.protocol.Response;
+import com.twitter.finagle.memcached.GetResult;
+import com.twitter.finagle.memcached.GetsResult;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -73,6 +75,14 @@ public class ClientBase extends Client {
         );
       }
     });
+  }
+
+  public Future<GetResult> getResult(List<String> keys) {
+    return underlying.getResult(JavaConversions.asScalaBuffer(keys));
+  }
+
+  public Future<GetsResult> getsResult(List<String> keys) {
+    return underlying.getsResult(JavaConversions.asScalaBuffer(keys));
   }
 
   public Future<Void> set(String key, ChannelBuffer value) {
