@@ -42,7 +42,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def append(key: String, value: Array[Byte]): Future[Int] =
     doRequest(Append(key, value)) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /**
@@ -54,7 +54,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def decrBy(key: String, amount: Int): Future[Int] =
     doRequest(DecrBy(key, amount)) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /**
@@ -97,7 +97,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def del(keys: Seq[String]): Future[Int] =
     doRequest(Del(keys.toList)) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /**
@@ -107,7 +107,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def exists(key: String): Future[Boolean] =
     doRequest(Exists(key)) {
-      case IntegerReply(n)     => Future.value((n == 1))
+      case IntegerReply(n) => Future.value((n == 1))
     }
 
   /**
@@ -137,7 +137,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def hDel(key: String, fields: Seq[String]): Future[Int] =
     doRequest(HDel(key, fields)) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /**
@@ -180,7 +180,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def hSet(key: Array[Byte], field: Array[Byte], value: Array[Byte]): Future[Int] =
     doRequest(HSet(key, field, value)) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /** Sorted Set commands */
@@ -192,7 +192,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def zAdd(key: Array[Byte], score: Double, member: Array[Byte]): Future[Int] =
     doRequest(ZAdd(key, ZMember(score, member))) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /**
@@ -213,7 +213,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def zCount(key: Array[Byte], min: Double, max: Double): Future[Int] =
     doRequest(ZCount(key, ZInterval(min), ZInterval(max))) {
-      case IntegerReply(n)     => Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 
   /**
@@ -230,6 +230,62 @@ class Client(service: Service[Command, Reply]) {
         BytesToString(key),
         ZInterval(min),
         ZInterval(max),
+        Some(WithScores),
+        Some(Limit(offset, count))
+      )
+    ) {
+      case MBulkReply(messages) => Future.value(messages)
+      case EmptyMBulkReply()    => Future.value(Seq())
+    }
+
+  /**
+   * Returns sorted set cardinality of the sorted set at key
+   * @param key
+   * @return Integer representing cardinality of sorted set,
+   * or 0 if key does not exist
+   */
+  def zCard(key: Array[Byte]): Future[Int] =
+    doRequest(ZCard(key)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+    * Removes specified member(s) from sorted set at key
+    * @params key, member(s)
+    * @return Number of members removed from sorted set
+    */
+  def zRem(key: Array[Byte], members: Seq[Array[Byte]]): Future[Int] =
+    doRequest(ZRem(key, members)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Returns specified range of elements in sorted set at key
+   * Elements are ordered from highest to lowest score
+   * @param key, start, stop
+   * @return List of element in specified range
+   */
+  def zRevRange(key: Array[Byte], start: Int, stop: Int): Future[Seq[Array[Byte]]] =
+    doRequest(ZRevRange(key, start, stop)) {
+      case MBulkReply(messages) => Future.value(messages)
+      case EmptyMBulkReply()    => Future.value(Seq())
+    }
+
+  /**
+   * Returns elements in sorted set at key with a score between max and min
+   * Elements are ordered from highest to lowest score
+   * Results are limited by offset and count
+   * @param key, max, min, offset, count
+   * @return List of element in specified score range
+   */
+  def zRevRangeByScoreWithScores(
+    key: Array[Byte], max: Double, min: Double, offset: Int, count: Int
+  ): Future[Seq[Array[Byte]]] =
+    doRequest(
+      ZRevRangeByScore(
+        BytesToString(key),
+        ZInterval(max),
+        ZInterval(min),
         Some(WithScores),
         Some(Limit(offset, count))
       )

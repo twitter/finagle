@@ -139,6 +139,29 @@ object ClientSpec extends Specification {
           client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)().toList) mustEqual Seq("bar", "10", "baz", "20")
       }
 
+      "get cardinality and remove members" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zCard(foo)() mustEqual 2
+        client.zRem(foo, Seq(bar, baz))() mustEqual 2
+      }
+
+      "get zRevRange" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        BytesToString.fromList(
+          client.zRevRange(foo, 0, -1)().toList) mustEqual Seq("baz", "bar")
+      }
+
+      "get zRevRangeByScoreWithScores" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        BytesToString.fromList(
+          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)().toList) mustEqual Seq("bar", "10")
+        BytesToString.fromList(
+          client.zRevRangeByScoreWithScores(foo, 0, 0, 0, 1)().toList) mustEqual Seq()
+      }
+
     }
 
   }
