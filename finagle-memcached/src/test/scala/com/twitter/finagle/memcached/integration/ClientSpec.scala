@@ -5,6 +5,7 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
+import com.twitter.finagle.tracing.ConsoleTracer
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.Specification
@@ -22,6 +23,7 @@ object ClientSpec extends Specification {
         .hosts(Seq(ExternalMemcached.address.get))
         .codec(new Memcached)
         .hostConnectionLimit(1)
+        .tracerFactory(ConsoleTracer.factory)
         .build()
       client = Client(service)
     }
