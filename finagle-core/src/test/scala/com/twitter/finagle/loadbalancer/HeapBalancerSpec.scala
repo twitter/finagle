@@ -7,9 +7,9 @@ import com.twitter.finagle.{
   Service, ServiceFactory,
   NoBrokersAvailableException, ClientConnection}
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.builder.{StaticCluster, Cluster}
-import com.twitter.concurrent.Spool
-import com.twitter.util.{Return, Promise, Future}
+import com.twitter.finagle.builder.StaticCluster
+import com.twitter.util.Future
+import com.twitter.finagle.integration.DynamicCluster
 
 object HeapBalancerSpec extends Specification with Mockito {
   // test: service creation failure
@@ -29,40 +29,13 @@ object HeapBalancerSpec extends Specification with Mockito {
     def close() { _closed = true }
   }
 
-  class DynamicCluster(initial: Seq[ServiceFactory[Unit, LoadedFactory]])
-    extends Cluster[ServiceFactory[Unit, LoadedFactory]] {
-
-    type T = Cluster.Change[ServiceFactory[Unit, LoadedFactory]]
-    var set = initial.toSet
-    var s = new Promise[Spool[T]]
-
-    def add(f: ServiceFactory[Unit, LoadedFactory]) = {
-      set += f
-      performChange(Cluster.Add(f))
-    }
-
-    def del(f: ServiceFactory[Unit, LoadedFactory]) = {
-      set -= f
-      performChange(Cluster.Rem(f))
-    }
-
-
-    private[this] def performChange (change: T) = {
-      val newTail = new Promise[Spool[T]]
-      s() = Return(change *:: newTail)
-      s = newTail
-    }
-
-    def snap = (set.toSeq, s)
-  }
-
   "HeapBalancer (nonempty)" should {
     val N = 10
     val statsReceiver = NullStatsReceiver // mock[StatsReceiver]
 
     // half of hosts are passed into Cluster constructor
     val half1 = 0 until N/2 map { _ => new LoadedFactory }
-    val cluster = new DynamicCluster(half1)
+    val cluster = new DynamicCluster[ServiceFactory[Unit, LoadedFactory]](half1)
 
     // the other half of hosts are added to cluster before the cluster is used to create heap balancer
     val half2 = 0 until N/2 map { _ => new LoadedFactory }
@@ -133,6 +106,12 @@ object HeapBalancerSpec extends Specification with Mockito {
       cluster.del(newFactory)
       made2.release()
       newFactory.load must be_==(0)
+    }
+
+    "close a factory as it is removed from cluster" in {
+      val made = 0 until N map { _ => b()() }
+      half1 foreach { cluster.del _ }
+      half1 foreach { _._closed must beTrue }
     }
   }
 

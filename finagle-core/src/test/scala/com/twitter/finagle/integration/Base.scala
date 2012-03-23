@@ -28,7 +28,7 @@ trait IntegrationBase extends Specification with Mockito {
     (codec.prepareServiceFactory(Matchers.any[ServiceFactory[String, String]])
      answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
 
-    val clientAddress = new SocketAddress {}
+    val hostAddress = new SocketAddress {}
 
     // Pipeline
     val clientPipelineFactory = mock[ChannelPipelineFactory]
@@ -45,7 +45,7 @@ trait IntegrationBase extends Specification with Mockito {
     channel.getCloseFuture returns closeFuture
     val channelConfig = new DefaultChannelConfig
     channel.getConfig() returns channelConfig
-    channel.connect(clientAddress) returns connectFuture
+    channel.connect(hostAddress) returns connectFuture
     channel.getPipeline returns channelPipeline
     channelFactory.newChannel(channelPipeline) returns channel
 
@@ -54,7 +54,7 @@ trait IntegrationBase extends Specification with Mockito {
     val clientBuilder = ClientBuilder()
       .codec(codecFactory)
       .channelFactory(refcountedChannelFactory)
-      .hosts(Seq(clientAddress))
+      .hosts(Seq(hostAddress))
       .hostConnectionLimit(1)
 
     def build() = clientBuilder.build()
