@@ -294,8 +294,8 @@ case class RichHttp[REQUEST <: Request](
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = httpFactory.client(null).pipelineFactory.getPipeline()
-          pipeline.addLast("requestDecoder", new RequestDecoder)
-          pipeline.addLast("responseEncoder", new ResponseEncoder)
+          pipeline.addLast("requestDecoder", new RequestEncoder)
+          pipeline.addLast("responseEncoder", new ResponseDecoder)
           pipeline
         }
       }
@@ -315,8 +315,8 @@ case class RichHttp[REQUEST <: Request](
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = httpFactory.server(null).pipelineFactory.getPipeline()
-          pipeline.addLast("requestDecoder", new RequestDecoder)
-          pipeline.addLast("responseEncoder", new ResponseEncoder)
+          pipeline.addLast("serverRequestDecoder", new RequestDecoder)
+          pipeline.addLast("serverResponseEncoder", new ResponseEncoder)
           pipeline
         }
       }
