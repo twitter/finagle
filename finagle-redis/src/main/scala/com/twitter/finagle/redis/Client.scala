@@ -1,6 +1,5 @@
 package com.twitter.finagle.redis
 
-
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.BytesToString
@@ -18,7 +17,7 @@ object Client {
     ClientBuilder()
       .hosts(host)
       .hostConnectionLimit(1)
-      .codec(new Redis())
+      .codec(Redis())
       .build())
 
   /**
@@ -300,7 +299,7 @@ class Client(service: Service[Command, Reply]) {
   def release() = service.release()
 
   /**
-   * Helper function for sending passing a command to the service
+   * Helper function for passing a command to the service
    */
   private def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
     service(cmd) flatMap (handler orElse {

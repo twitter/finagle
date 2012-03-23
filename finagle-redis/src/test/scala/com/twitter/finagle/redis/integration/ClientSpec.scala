@@ -1,10 +1,11 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.redis.util.{RedisCluster, BytesToString}
 import com.twitter.finagle.redis.{Client, Redis}
-import com.twitter.util.Future
+import com.twitter.finagle.redis.util.{RedisCluster, BytesToString}
+import com.twitter.finagle.Service
+import com.twitter.finagle.stats.SummarizingStatsReceiver
+import com.twitter.util.{Future, RandomSocket}
 import org.specs.Specification
 
 object ClientSpec extends Specification {
@@ -20,10 +21,12 @@ object ClientSpec extends Specification {
     val boo = "boo".getBytes
     val moo = "moo".getBytes
 
+    val stats = new SummarizingStatsReceiver
+
     doBefore {
       RedisCluster.start(1)
       val service = ClientBuilder()
-        .codec(new Redis())
+        .codec(new Redis(stats))
         .hosts(RedisCluster.hostAddresses())
         .hostConnectionLimit(1)
         .build()
@@ -32,6 +35,7 @@ object ClientSpec extends Specification {
 
     doAfter {
       RedisCluster.stop()
+      stats.print()
     }
 
     "perform simple commands" in {
@@ -104,13 +108,15 @@ object ClientSpec extends Specification {
       "get multiple values" in {
         client.hSet(foo, bar, baz)()
         client.hSet(foo, boo, moo)()
-        BytesToString.fromList(client.hMGet("foo", Seq("bar", "boo"))().toList) mustEqual Seq("baz", "moo")
+        BytesToString.fromList(
+          client.hMGet("foo", Seq("bar", "boo"))().toList) mustEqual Seq("baz", "moo")
       }
 
       "get multiple values at once" in {
         client.hSet(foo, bar, baz)()
         client.hSet(foo, boo, moo)()
-        BytesToString.fromList(client.hGetAll(foo)().toList) mustEqual Seq("bar", "baz", "boo", "moo")
+        BytesToString.fromList(
+          client.hGetAll(foo)().toList) mustEqual Seq("bar", "baz", "boo", "moo")
       }
 
     }
@@ -136,7 +142,8 @@ object ClientSpec extends Specification {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
         BytesToString.fromList(
-          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)().toList) mustEqual Seq("bar", "10", "baz", "20")
+          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)().toList) mustEqual Seq("bar", "10",
+            "baz", "20")
       }
 
       "get cardinality and remove members" in {

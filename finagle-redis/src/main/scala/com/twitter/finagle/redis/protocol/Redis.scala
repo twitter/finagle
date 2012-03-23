@@ -1,19 +1,19 @@
 package com.twitter.finagle.redis
 
-import protocol.{Command, CommandCodec, Reply, ReplyCodec}
-
-import com.twitter.finagle.{Codec, CodecFactory, Service, ServiceFactory}
-import com.twitter.finagle.tracing.ClientRequestTracingFilter
+import com.twitter.finagle._
+import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing.{Annotation, ClientRequestTracingFilter, Trace}
 import com.twitter.naggati.{Codec => NaggatiCodec}
 import com.twitter.util.Future
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 
 object Redis {
-  def apply() = new Redis
+  def apply(stats: StatsReceiver = NullStatsReceiver) = new Redis(stats)
   def get() = apply()
 }
 
-class Redis extends CodecFactory[Command, Reply] {
+class Redis(stats: StatsReceiver) extends CodecFactory[Command, Reply] {
   def server = Function.const {
     new Codec[Command, Reply] {
       def pipelineFactory = new ChannelPipelineFactory {
@@ -45,8 +45,10 @@ class Redis extends CodecFactory[Command, Reply] {
         }
       }
 
-      override def prepareConnFactory(underlying: ServiceFactory[Command, Reply]) =
-        new RedisTracingFilter() andThen underlying
+      override def prepareConnFactory(underlying: ServiceFactory[Command, Reply]) = {
+        new RedisTracingFilter() andThen new RedisLoggingFilter(stats) andThen underlying
+      }
+
     }
   }
 }
@@ -54,4 +56,39 @@ class Redis extends CodecFactory[Command, Reply] {
 private class RedisTracingFilter extends ClientRequestTracingFilter[Command, Reply] {
   val serviceName = "redis"
   def methodName(req: Command): String = req.getClass().getSimpleName()
+
+  override def apply(command: Command, service: Service[Command, Reply]) = Trace.unwind {
+    Trace.recordRpcname(serviceName, methodName(command))
+    Trace.record(Annotation.ClientSend())
+    service(command) map { response =>
+      Trace.record(Annotation.ClientRecv())
+      response
+    }
+  }
+}
+
+private class RedisLoggingFilter(stats: StatsReceiver)
+  extends SimpleFilter[Command, Reply] {
+
+  private[this] val serviceName = "redis"
+  private[this] def methodName(req: Command): String = req.getClass().getSimpleName()
+
+  private[this] val error = stats.scope("error")
+  private[this] val succ  = stats.scope("success")
+
+  override def apply(command: Command, service: Service[Command, Reply]) = {
+    service(command) map { response =>
+      response match {
+        case StatusReply(_)
+          | IntegerReply(_)
+          | BulkReply(_)
+          | EmptyBulkReply()
+          | MBulkReply(_)
+          | EmptyMBulkReply()    => succ.counter(methodName(command)).incr()
+        case ErrorReply(message) => error.counter(methodName(command)).incr()
+        case _                   => error.counter(methodName(command)).incr()
+      }
+      response
+    }
+  }
 }
