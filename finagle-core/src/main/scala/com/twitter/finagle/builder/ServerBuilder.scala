@@ -65,8 +65,8 @@ object ServerBuilder {
     new ReferenceCountedChannelFactory(
       new LazyRevivableChannelFactory(() =>
         new NioServerSocketChannelFactory(
-          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerBoss")),
-          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerIO"))
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerBoss", true)),
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleServerIO", true))
         )
       )
     )
@@ -623,56 +623,56 @@ private[builder] class MkServer[Req, Rep](
     }
   })
 
-  def apply(): Server = {
-    val serverChannel = bootstrap.bind(config.bindTo)
-
+  def apply(): Server = new Server {
+    private[this] val serverChannel = bootstrap.bind(config.bindTo)
     Timer.register(closeNotifier)
-    new Server {
-      def close(timeout: Duration = Duration.MaxValue) = {
-        // According to NETTY-256, the following sequence of operations
-        // has no race conditions.
-        //
-        //   - close the server socket  (awaitUninterruptibly)
-        //   - close all open channels  (awaitUninterruptibly)
-        //   - releaseExternalResources
-        //
-        // We modify this a little bit, to allow for graceful draining,
-        // closing open channels only after the grace period.
-        //
-        // The next step here is to do a half-closed socket: we want to
-        // suspend reading, but not writing to a socket.  This may be
-        // important for protocols that do any pipelining, and may
-        // queue in their codecs.
+    Registry.add(this, config.toString)
+    closeNotifier onClose Registry.del(this)
 
-        // On cursory inspection of the relevant Netty code, this
-        // should never block (it is little more than a close() syscall
-        // on the FD).
-        serverChannel.close().awaitUninterruptibly()
+    def close(timeout: Duration = Duration.MaxValue) = {
+      // According to NETTY-256, the following sequence of operations
+      // has no race conditions.
+      //
+      //   - close the server socket  (awaitUninterruptibly)
+      //   - close all open channels  (awaitUninterruptibly)
+      //   - releaseExternalResources
+      //
+      // We modify this a little bit, to allow for graceful draining,
+      // closing open channels only after the grace period.
+      //
+      // The next step here is to do a half-closed socket: we want to
+      // suspend reading, but not writing to a socket.  This may be
+      // important for protocols that do any pipelining, and may
+      // queue in their codecs.
 
-        // At this point, no new channels may be created.
-        for (h <- activeHandlers.toArray)
-          h.drain()
+      // On cursory inspection of the relevant Netty code, this
+      // should never block (it is little more than a close() syscall
+      // on the FD).
+      serverChannel.close().awaitUninterruptibly()
 
-        // Wait for all channels to shut down.
-        Future.join(activeHandlers map(_.onShutdown) toSeq).get(timeout)
+      // At this point, no new channels may be created.
+      for (h <- activeHandlers.toArray)
+        h.drain()
 
-        // Force close any remaining connections. Don't wait for
-        // success. Buffer channels into an array to avoid
-        // deadlocking.
+      // Wait for all channels to shut down.
+      Future.join(activeHandlers map(_.onShutdown) toSeq).get(timeout)
 
-        for (h <- activeHandlers.toArray)
-          h.close()
+      // Force close any remaining connections. Don't wait for
+      // success. Buffer channels into an array to avoid
+      // deadlocking.
 
-        bootstrap.releaseExternalResources()
+      for (h <- activeHandlers.toArray)
+        h.close()
 
-        // Notify all registered resources that service is closing so they can
-        // perform their own cleanup.
-        closer.close()
-      }
+      bootstrap.releaseExternalResources()
 
-      def localAddress: SocketAddress = serverChannel.getLocalAddress()
-
-      override def toString = "Server(%s)".format(config.toString)
+      // Notify all registered resources that service is closing so they can
+      // perform their own cleanup.
+      closer.close()
     }
+
+    def localAddress: SocketAddress = serverChannel.getLocalAddress()
+
+    override def toString = "Server(%s)".format(config.toString)
   }
 }
