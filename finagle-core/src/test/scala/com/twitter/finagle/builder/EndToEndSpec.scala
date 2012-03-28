@@ -1,7 +1,7 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle.integration.DynamicCluster
-import com.twitter.util.Promise
+import com.twitter.util.{CountDownLatch, Promise}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.specs.Specification
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
@@ -12,8 +12,12 @@ import com.twitter.finagle.{SimpleFilter, Codec, CodecFactory, Service, ServiceF
 
 class EndToEndSpec extends Specification {
   val constRes = new Promise[String]
+  val arrivalLatch = new CountDownLatch(1)
   val service = new Service[String, String] {
-    def apply(request: String) = constRes
+    def apply(request: String) = {
+      arrivalLatch.countDown()
+      constRes
+    }
   }
 
   "Finagle client" should {
@@ -34,6 +38,7 @@ class EndToEndSpec extends Specification {
     "handle pending request after a host is deleted from cluster" in {
       // create a pending request; delete the server from cluster; then verify the request can still finish
       val response = client("123")
+      arrivalLatch.await()
       cluster.del(server.localAddress)
       response.isDefined must beFalse
       constRes.setValue("foo")
