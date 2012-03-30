@@ -108,8 +108,8 @@ object ClientBuilder {
     new ReferenceCountedChannelFactory(
       new LazyRevivableChannelFactory(() =>
         new NioClientSocketChannelFactory(
-          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientBoss", true)),
-          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientIO", true))
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientBoss")),
+          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientIO"))
         )
       )
     )
@@ -503,20 +503,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates
+   * This allows the user to use client certificates  
    * No SSL Hostname Validation is performed
    */
   def tls(sslContext : SSLContext): This =
-    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))
-
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))    
+  
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates
+   * This allows the user to use client certificates  
    * SSL Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext : SSLContext, hostname : Option[String]): This =
-    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))
-
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))  
+    
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
@@ -760,9 +760,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     factory = new StatsFactoryWrapper(factory, statsReceiver)
     factory = tracingFilter(tracer) andThen factory
     factory = codec.prepareServiceFactory(factory)
-
-    Registry.add(factory, config.toString)
-    closeNotifier onClose Registry.del(factory)
 
     factory
   }

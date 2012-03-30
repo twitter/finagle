@@ -38,8 +38,7 @@ private[finagle] object Timer {
   //   threads themselves.)
   implicit val default: ReferenceCountedTimer = {
     def factory() = {
-      val underlying = new Timer(new HashedWheelTimer(
-        new NamedPoolThreadFactory("FinagleTimer", true), 10, TimeUnit.MILLISECONDS))
+      val underlying = new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
       new ThreadStoppingTimer(underlying, timerStoppingExecutor)
     }
 
