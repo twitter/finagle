@@ -1,13 +1,13 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.Matchers
 
 import com.twitter.util.{Promise, Return}
 import com.twitter.finagle.Service
 
-object RefcountedServiceSpec extends Specification with Mockito {
+class RefcountedServiceSpec extends SpecificationWithJUnit with Mockito {
   "PoolServiceWrapper" should {
     val service = mock[Service[Any, Any]]
     val promise = new Promise[Any]

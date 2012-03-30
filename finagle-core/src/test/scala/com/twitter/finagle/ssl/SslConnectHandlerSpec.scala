@@ -1,6 +1,6 @@
 package com.twitter.finagle.ssl
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.ArgumentCaptor
 
@@ -18,7 +18,7 @@ import com.twitter.finagle.{
   SslHandshakeException,
   SslHostVerificationException}
 
-object SslConnectHandlerSpec extends Specification with Mockito {
+class SslConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
   "SslConnectHandler" should {
     val ctx = mock[ChannelHandlerContext]
     val sslHandler = mock[SslHandler]

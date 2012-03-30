@@ -1,6 +1,6 @@
 package com.twitter.finagle.pool
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.Matchers
 import com.twitter.conversions.time._
@@ -8,7 +8,7 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 
 import com.twitter.finagle._
 
-object WatermarkPoolSpec extends Specification with Mockito {
+class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
   "WatermarkPool (lowWatermark = 0)" should {
     val factory = mock[ServiceFactory[Int, Int]]
     val service = mock[Service[Int, Int]]

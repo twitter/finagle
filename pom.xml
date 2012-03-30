@@ -1,0 +1,34 @@
+<project 
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.twitter</groupId>
+  <artifactId>finagle</artifactId>
+  <packaging>pom</packaging>
+  <version>3.0.1-SNAPSHOT</version>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>artifactory-snapshot</id>
+      <name>Twitter Artifactory Snapshots</name>
+      <url>http://artifactory.local.twitter.com/libs-snapshots-local</url>
+    </snapshotRepository>
+  </distributionManagement>
+  <modules>
+    <module>finagle-b3</module>
+    <module>finagle-commons-stats</module>
+    <module>finagle-core</module>
+    <module>finagle-example</module>
+    <module>finagle-exception</module>
+    <module>finagle-http</module>
+    <module>finagle-kestrel</module>
+    <module>finagle-memcached</module>
+    <module>finagle-memcached-hadoop</module>
+    <module>finagle-native</module>
+    <module>finagle-ostrich4</module>
+    <module>finagle-redis</module>
+    <module>finagle-serversets</module>
+    <module>finagle-stream</module>
+    <module>finagle-stress</module>
+    <module>finagle-test</module>
+    <module>finagle-thrift</module>
+  </modules>
+</project>

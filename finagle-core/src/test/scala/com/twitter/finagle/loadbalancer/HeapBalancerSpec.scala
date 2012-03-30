@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.finagle.{
@@ -11,7 +11,7 @@ import com.twitter.finagle.builder.StaticCluster
 import com.twitter.util.Future
 import com.twitter.finagle.integration.DynamicCluster
 
-object HeapBalancerSpec extends Specification with Mockito {
+class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
   // test: service creation failure
   class LoadedFactory extends ServiceFactory[Unit, LoadedFactory] {
     var load = 0

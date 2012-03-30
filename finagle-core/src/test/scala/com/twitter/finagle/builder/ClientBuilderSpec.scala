@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.Matchers
 
@@ -11,7 +11,7 @@ import com.twitter.finagle.channel.ChannelService
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.tracing.Tracer
 
-object ClientBuilderSpec extends Specification with IntegrationBase with Mockito {
+class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "ClientBuilder" should {
     "invoke rawPrepareClientConnFactory on connection" in {
       val preparedFactory = mock[ServiceFactory[String, String]]

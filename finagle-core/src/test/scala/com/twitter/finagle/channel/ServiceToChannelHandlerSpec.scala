@@ -2,7 +2,7 @@ package com.twitter.finagle.channel
 
 import java.util.logging.{Logger, Level}
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
@@ -16,7 +16,7 @@ import com.twitter.util.{Future, Promise, Return, NullMonitor}
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, InMemoryStatsReceiver}
 
-object ServiceToChannelHandlerSpec extends Specification with Mockito {
+class ServiceToChannelHandlerSpec extends SpecificationWithJUnit with Mockito {
   "ServiceToChannelHandler" should {
     class Foo { def fooMethod() = "hey there" }
 

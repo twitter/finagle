@@ -1,11 +1,11 @@
 package com.twitter.finagle
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.{Future, Return, Throw}
 
-object ServiceSpec extends Specification with Mockito {
+class ServiceSpec extends SpecificationWithJUnit with Mockito {
   "ServiceProxy" should {
     "proxy all requests" in {
       val service = mock[Service[String, String]]

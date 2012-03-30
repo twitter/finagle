@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.finagle.{Service, WriteException}
@@ -10,7 +10,7 @@ import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Time, Promise, Return}
 import com.twitter.conversions.time._
 
-object ExpiringServiceSpec extends Specification with Mockito {
+class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
   "ExpiringService" should {
     val stats = mock[StatsReceiver]
     val idleCounter = mock[Counter]

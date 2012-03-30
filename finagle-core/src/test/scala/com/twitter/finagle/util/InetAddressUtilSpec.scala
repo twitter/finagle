@@ -1,10 +1,10 @@
 package com.twitter.finagle.core.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import java.net.InetAddress
 
 
-object InetAddressUtilSpec extends Specification {
+class InetAddressUtilSpec extends SpecificationWithJUnit {
 
   "InetAddressUtil" should {
     "isPrivateAddress" in {

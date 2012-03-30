@@ -1,11 +1,11 @@
 package com.twitter.finagle.builder
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import com.twitter.concurrent.Spool
 import com.twitter.util.{Return, Promise}
 import collection.mutable
 
-object ClusterSpec extends Specification {
+class ClusterSpec extends SpecificationWithJUnit {
   case class WrappedInt(val value: Int)
 
   class ClusterInt extends Cluster[Int] {

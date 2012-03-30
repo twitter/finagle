@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.apache.thrift.{TProcessorFactory, TApplicationException}
 import org.apache.thrift.protocol.TBinaryProtocol
@@ -22,7 +22,7 @@ import com.twitter.silly.Silly
 import com.twitter.util.{Future, RandomSocket, Return, Promise, Time}
 import com.twitter.util.TimeConversions._
 
-object EndToEndSpec extends Specification {
+class EndToEndSpec extends SpecificationWithJUnit {
   "Thrift server" should {
     val processor =  new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)

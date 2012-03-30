@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.Matchers
 
@@ -15,7 +15,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.tracing.Tracer
 
-object ServerBuilderSpec extends Specification with IntegrationBase with Mockito {
+class ServerBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "ServerBuilder" should {
     // Codec
     val codec = mock[Codec[String, String]]

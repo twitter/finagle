@@ -1,12 +1,12 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.jboss.netty.channel.{Channels, ChannelFuture}
 
 import Conversions._
 
-object ChannelFutureSpec extends Specification {
+class ChannelFutureSpec extends SpecificationWithJUnit {
   "joining" should {
     "return when all futures are satisfied" in {
       val f0 = Channels.future(null)

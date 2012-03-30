@@ -27,12 +27,20 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     </dependencies>
 
   /**
+   * finagle-test contains shared test utilities
+   */
+  val finagleTestProject = project(
+    "finagle-test", "finagle-test",
+    new TestProject(_))
+
+  /**
    * finagle-core contains the finagle kernel itself, plus builders,
    * HTTP codecs [HTTP may move to its own project soon]
    */
   val coreProject = project(
     "finagle-core", "finagle-core",
-    new CoreProject(_))
+    new CoreProject(_), finagleTestProject)
+
 
   /**
    * finagle-ostrich4 implements a StatsReceiver for the Ostrich 4.x statistics library
@@ -48,7 +56,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val thriftProject = project(
     "finagle-thrift", "finagle-thrift",
-    new ThriftProject(_), coreProject)
+    new ThriftProject(_), coreProject, finagleTestProject)
 
   /**
    * Codec for protobuf RPC. Disabled by default until we've
@@ -180,8 +188,19 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     )
 
     // Testing:
-    val mockito = "org.mockito"             % "mockito-all" % "1.8.5" % "test" withSources()
+    val mockito = "org.mockito"             %  "mockito-all" % "1.8.5" % "test" withSources()
     val specs   = "org.scala-tools.testing" %% "specs"      % "1.6.8" % "test" withSources()
+    val junit   = "junit"                   %  "junit"      % "4.8.1" % "test" withSources()
+  }
+
+  class TestProject(info: ProjectInfo) extends StandardProject(info)
+    with Defaults
+  {
+    override def compileOrder = CompileOrder.ScalaThenJava
+    val netty = "io.netty" % "netty" % "3.4.0.Alpha1" withSources()
+    projectDependencies(
+      "util" ~ "util-core"
+    )
   }
 
   class ThriftProject(info: ProjectInfo) extends StandardProject(info)
@@ -193,6 +212,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
 
     override def compileOrder = CompileOrder.JavaThenScala
     val thrift    = "org.apache.thrift" % "libthrift" % "0.5.0" intransitive()
+    val sillyThrift = "silly" % "silly-thrift" % "0.5.0"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
   }
 
@@ -200,7 +220,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val junit = "junit" % "junit" % "3.8.2" % "test"
+    val junit = "junit" % "junit" % "4.8.1" % "test"
 
     projectDependencies(
       "util" ~ "util-hashing"
@@ -211,7 +231,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val junit = "junit" % "junit" % "3.8.2" % "test"
+    val junit = "junit" % "junit" % "4.8.1" % "test"
 
     projectDependencies(
       "util" ~ "util-eval"

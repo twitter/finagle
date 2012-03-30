@@ -1,9 +1,9 @@
 package com.twitter.finagle.stats
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-object CumulativeGaugeSpec extends Specification with Mockito {
+class CumulativeGaugeSpec extends SpecificationWithJUnit with Mockito {
   class TestGauge extends CumulativeGauge {
     def register() {}
     def deregister() {}

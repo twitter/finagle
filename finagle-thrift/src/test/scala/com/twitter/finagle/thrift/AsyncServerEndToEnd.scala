@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
 import org.jboss.netty.channel._
@@ -12,7 +12,7 @@ import com.twitter.silly.Silly
 
 import com.twitter.finagle.util.Conversions._
 
-object AsyncServerEndToEndSpec extends Specification {
+class AsyncServerEndToEndSpec extends SpecificationWithJUnit {
   "async Thrift server" should {
     "work" in {
       // ** Set up the server.

@@ -2,10 +2,10 @@ package com.twitter.finagle.stats
 
 import scala.collection.mutable.HashMap
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-object GlobalStatsReceiverSpec extends Specification with Mockito {
+class GlobalStatsReceiverSpec extends SpecificationWithJUnit with Mockito {
   // We seem to have to resort to these tricks-- Mockito
   // does not deal well with multiple argument lists.
   class MockReceiver extends StatsReceiver {

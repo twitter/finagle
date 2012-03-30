@@ -2,7 +2,7 @@ package com.twitter.finagle.integration
 
 import java.util.concurrent.Executors
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
@@ -15,7 +15,7 @@ import com.twitter.finagle.{WriteException, CancelledConnectionException}
 
 import com.twitter.conversions.time._
 
-object CancellationSpec extends Specification with IntegrationBase with Mockito {
+class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "Cancellation" should {
     "cancel while waiting for connect()" in {
       val m = new MockChannel
