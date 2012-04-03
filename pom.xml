@@ -6,6 +6,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <packaging>pom</packaging>
   <version>3.0.1-SNAPSHOT</version>
   <distributionManagement>
+    <repository>
+      <id>artifactory-release</id>
+      <name>Twitter Artifactory Releases</name>
+      <url>http://artifactory.local.twitter.com/libs-releases-local</url>
+    </repository>
     <snapshotRepository>
       <id>artifactory-snapshot</id>
       <name>Twitter Artifactory Snapshots</name>
