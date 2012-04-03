@@ -5,8 +5,7 @@ package com.twitter.finagle.http
  */
 import java.net.InetSocketAddress
 
-import org.jboss.netty.channel.{Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, UpstreamMessageEvent}
-import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.conversions.storage._
@@ -106,6 +105,7 @@ case class Http(
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("httpCodec", new HttpClientCodec())
+          pipeline.addLast("httpTracingClientAddr", new HttpTracingClientAddr)
           pipeline.addLast(
             "httpDechunker",
             new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
@@ -207,6 +207,20 @@ object HttpTracing {
 }
 
 /**
+ * Captures the client address and port and adds it to the current trace.
+ */
+private class HttpTracingClientAddr extends SimpleChannelDownstreamHandler {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
+    ctx.getChannel.getLocalAddress()  match {
+      case ia: InetSocketAddress => Trace.recordClientAddr(ia)
+      case _ => () // nothing
+    }
+
+    super.writeRequested(ctx, e)
+  }
+}
+
+/**
  * Pass along headers with the required tracing information.
  */
 class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
@@ -228,8 +242,8 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
       request.addHeader(Header.Sampled, sampled.toString)
     }
 
-    Trace.recordBinary("http.uri", request.getUri)
     Trace.recordRpcname(serviceName, request.getMethod.getName)
+    Trace.recordBinary("http.uri", request.getUri)
 
     Trace.record(Annotation.ClientSend())
     service(request) map { response =>
@@ -269,9 +283,9 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
 
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
-    Trace.recordBinary("http.uri", request.getUri)
     Trace.recordRpcname(serviceName, request.getMethod.getName)
     Trace.recordServerAddr(boundAddress)
+    Trace.recordBinary("http.uri", request.getUri)
 
     Trace.record(Annotation.ServerRecv())
     service(request) map { response =>
