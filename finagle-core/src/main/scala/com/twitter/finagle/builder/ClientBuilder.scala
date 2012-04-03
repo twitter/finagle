@@ -530,17 +530,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tracerFactory(factory: Tracer.Factory): This =
     withConfig(_.copy(_tracerFactory = factory))
 
-  @deprecated("Use tracerFactory instead")
-  def tracer(factory: Tracer.Factory): This =
-    withConfig(_.copy(_tracerFactory = factory))
-
-  @deprecated("Use tracerFactory instead")
-  def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracerFactory = h => {
-      h.onClose { tracer.release() }
-      tracer
-    }))
-
   def monitor(mFactory: String => Monitor): This =
     withConfig(_.copy(_monitor = Some(mFactory)))
 

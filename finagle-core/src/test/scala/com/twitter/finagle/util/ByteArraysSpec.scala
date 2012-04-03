@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object ByteArraysSpec extends Specification {
+class ByteArraysSpec extends SpecificationWithJUnit {
   "ByteArrays" should {
     "concat" in {
       "add two arrays" in {

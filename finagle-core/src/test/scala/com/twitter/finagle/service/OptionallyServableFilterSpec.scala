@@ -1,13 +1,13 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.{Future, Return, Throw}
 
 import com.twitter.finagle.{Service, Filter, NotServableException}
 
-object OptionallyServableFilterSpec extends Specification with Mockito {
+class OptionallyServableFilterSpec extends SpecificationWithJUnit with Mockito {
   "OptionallyServableFilter" should {
     val underlying = mock[Service[String, String]]
 

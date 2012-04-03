@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import com.twitter.util.Promise
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object CloseNotifierSpec extends Specification {
+class CloseNotifierSpec extends SpecificationWithJUnit {
   "CloseNotifier" should {
     "invoke onClose handlers in reverse order of adding" in {
       val closing = new Promise[Unit]

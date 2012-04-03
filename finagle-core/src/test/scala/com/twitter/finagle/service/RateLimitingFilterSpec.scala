@@ -1,13 +1,13 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.finagle.Service
 import com.twitter.util.TimeConversions._
 import org.mockito.Matchers
 import com.twitter.util.{Time, Future}
 
-object RateLimitingFilterSpec extends Specification with Mockito {
+class RateLimitingFilterSpec extends SpecificationWithJUnit with Mockito {
 
   "RateLimitingFilter" should {
     def categorize(i: Int) = (i%5).toString

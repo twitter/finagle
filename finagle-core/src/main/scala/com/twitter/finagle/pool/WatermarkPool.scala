@@ -12,7 +12,10 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
  * The watermark pool is an object pool with low & high
- * watermarks. This behaves as follows: the pool will persist up to
+ * watermarks. It keeps the number of services from a given service
+ * factory in a certain range.
+ *
+ * This behaves as follows: the pool will persist up to
  * the low watermark number of items (as long as they have been
  * created), and won't start queueing requests until the high
  * watermark has been reached. Put another way: up to `lowWatermark'

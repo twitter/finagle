@@ -4,13 +4,13 @@ import com.twitter.finagle.{WriteException, ServiceFactory, Service}
 import com.twitter.util.{Promise, Future}
 import java.net.ConnectException
 import org.specs.mock.Mockito
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.MockTimer
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Time, Return, Throw}
 import com.twitter.conversions.time._
 
-object FailFastFactorySpec extends Specification with Mockito {
+class FailFastFactorySpec extends SpecificationWithJUnit with Mockito {
   "a FailFastFactory" should {
     val timer = new MockTimer
     val backoffs = 1.second #:: 2.seconds #:: Stream.empty

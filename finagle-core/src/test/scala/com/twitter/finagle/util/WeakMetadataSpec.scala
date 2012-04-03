@@ -1,11 +1,11 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.finagle.Service
 
-object WeakMetadataSpec extends Specification with Mockito {
+class WeakMetadataSpec extends SpecificationWithJUnit with Mockito {
   "WeakMetadata" should {
     val s0 = mock[Service[Any, Any]]
     val s1 = mock[Service[Any, Any]]

@@ -1,11 +1,11 @@
 package com.twitter.finagle.loadbalancer
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import scala.util.Random
 import scala.collection.mutable.HashMap
 
-object HeapSpec extends Specification {
+class HeapSpec extends SpecificationWithJUnit {
   "Heap" should {
     val N = 100
     val heap = new Array[Int](N+1)

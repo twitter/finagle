@@ -1,12 +1,12 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.Service
 
-object ProxyServiceSpec extends Specification with Mockito {
+class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
   "ProxyService" should {
     val underlying = mock[Service[Int, Int]]
 

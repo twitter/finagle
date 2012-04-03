@@ -134,7 +134,7 @@ module Trace
         :name => @name,
         :trace_id => @span_id.trace_id.to_i,
         :id => @span_id.span_id.to_i,
-        :parent_id => @span_id.parent_id.to_i,
+        :parent_id => @span_id.parent_id.nil? ? nil : @span_id.parent_id.to_i,
         :annotations => @annotations.map { |a| a.to_thrift },
         :binary_annotations => @binary_annotations.map { |a| a.to_thrift }
       )

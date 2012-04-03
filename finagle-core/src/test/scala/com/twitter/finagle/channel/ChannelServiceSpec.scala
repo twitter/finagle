@@ -3,7 +3,7 @@ package com.twitter.finagle.channel
 import java.net.SocketAddress
 import scala.collection.JavaConversions._
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
@@ -15,7 +15,7 @@ import com.twitter.util.{Promise, Return, Throw, Future}
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 
-object ChannelServiceSpec extends Specification with Mockito {
+class ChannelServiceSpec extends SpecificationWithJUnit with Mockito {
   "ChannelService" should {
     val pipeline = new DefaultChannelPipeline
     val channel = mock[Channel]

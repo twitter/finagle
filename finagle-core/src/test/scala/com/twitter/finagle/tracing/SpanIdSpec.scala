@@ -1,10 +1,10 @@
 package com.twitter.finagle.tracing
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import java.nio.ByteBuffer
 import scala.collection.Map
 
-object SpanIdSpec extends Specification {
+class SpanIdSpec extends SpecificationWithJUnit {
   "SpanId" should {
     "parse positive long" in {
       SpanId.fromString("7fffffffffffffff").get.toLong mustEqual Long.MaxValue

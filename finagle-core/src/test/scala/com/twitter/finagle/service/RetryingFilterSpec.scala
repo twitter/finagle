@@ -4,10 +4,10 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{MockTimer, RetryFailureException, Service, WriteException}
 import com.twitter.finagle.stats.{StatsReceiver, Stat}
 import com.twitter.util._
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-object RetryingFilterSpec extends Specification with Mockito {
+class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
   "RetryingFilter" should {
     val backoffs = Stream(1.second, 2.seconds, 3.seconds)
     val stats = mock[StatsReceiver]

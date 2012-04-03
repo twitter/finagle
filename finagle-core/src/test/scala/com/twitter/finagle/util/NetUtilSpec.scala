@@ -1,9 +1,9 @@
 package com.twitter.finagle.core.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 
-object NetUtilSpec extends Specification {
+class NetUtilSpec extends SpecificationWithJUnit {
 
   "NetUtil" should {
     "isIpv4Address" in {

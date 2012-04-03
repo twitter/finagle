@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
@@ -9,7 +9,7 @@ import com.twitter.conversions.time._
 
 import com.twitter.finagle.{Service, ServiceFactory, MockTimer}
 
-object FailureAccrualFactorySpec extends Specification with Mockito {
+class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
   "a failing service" should {
     val underlyingService = mock[Service[Int, Int]]
     underlyingService.isAvailable returns true

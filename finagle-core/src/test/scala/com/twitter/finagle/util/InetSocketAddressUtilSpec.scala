@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import java.net.InetSocketAddress
 
-object InetSocketAddressUtilSpec extends Specification {
+class InetSocketAddressUtilSpec extends SpecificationWithJUnit {
   "InetSocketAddressUtil" should {
     "parseHosts" in {
       InetSocketAddressUtil.parseHosts("") must beEmpty

@@ -2,7 +2,7 @@ package com.twitter.finagle.channel
 
 import scala.collection.JavaConversions._
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
@@ -14,7 +14,7 @@ import com.twitter.util.{Promise, Return, Throw, Future}
 
 import com.twitter.finagle._
 
-object ChannelSemaphoreHandlerSpec extends Specification with Mockito {
+class ChannelSemaphoreHandlerSpec extends SpecificationWithJUnit with Mockito {
   class FakeChannelHandlerContext extends ChannelHandlerContext {
     var _attachment: Object = null
     var _channel = mock[Channel]

@@ -33,6 +33,7 @@ object ZCard {
     val list = BytesToString.fromList(trimList(args, 1, "ZCARD"))
     new ZCard(list(0))
   }
+  def apply(key: Array[Byte]) = new ZCard(new String(key))
 }
 
 
@@ -152,6 +153,10 @@ object ZRem {
     val remaining = args.drop(1)
     new ZRem(key, remaining)
   }
+  def apply(key: Array[Byte], members: Seq[Array[Byte]]) =
+    new ZRem(new String(key), members.toList)
+  def apply(key: Array[Byte], members: List[String]) =
+    new ZRem(new String(key), StringToBytes.fromList(members))
 }
 
 
@@ -203,6 +208,8 @@ case class ZRevRange(
 object ZRevRange extends ZRangeCmdCompanion {
   override def get(key: String, start: Int, stop: Int, withScores: Option[CommandArgument]) =
     new ZRevRange(key, start, stop, withScores)
+  def apply(key: Array[Byte], start: Int, stop: Int) =
+    new ZRevRange(new String(key), start, stop)
 }
 
 

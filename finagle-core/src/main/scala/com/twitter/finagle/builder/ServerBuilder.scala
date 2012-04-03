@@ -336,17 +336,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   private[builder] def serverBootstrap(bs: ServerBootstrap): This =
     withConfig(_.copy(_serverBootstrap = Some(bs)))
 
-  @deprecated("Use tracerFactory instead")
-  def tracer(factory: Tracer.Factory): This =
-    withConfig(_.copy(_tracerFactory = factory))
-
-  @deprecated("Use tracerFactory instead")
-  def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracerFactory = h => {
-      h.onClose { tracer.release() }
-      tracer
-    }))
-
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
 

@@ -1,12 +1,12 @@
 package com.twitter.finagle.channel
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Time, Future, Promise}
 
-object IdleConnectionFilterSpec extends Specification with Mockito {
+class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
   "IdleConnectionFilter" should {
     val underlying = ServiceFactory.const(mock[Service[String, String]])
 

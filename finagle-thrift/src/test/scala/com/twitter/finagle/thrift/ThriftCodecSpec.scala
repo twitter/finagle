@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.matcher.Matcher
 
 import org.jboss.netty.channel._
@@ -14,7 +14,7 @@ import org.apache.thrift.transport.TTransportException
 import com.twitter.finagle.{SunkChannel, TooManyConcurrentRequestsException}
 import com.twitter.silly.Silly
 
-object ThriftCodecSpec extends Specification {
+class ThriftCodecSpec extends SpecificationWithJUnit {
   def thriftToBuffer(method: String, `type`: Byte, seqid: Int,
       message: { def write(p: TProtocol) }): ChannelBuffer = {
     val buffer = ChannelBuffers.dynamicBuffer()

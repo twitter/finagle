@@ -20,7 +20,7 @@ import com.twitter.util.Future
  *
  * Thus, a Filter[A, B, C, D] converts a Service[C, D] to a Service[A, B].
  * In other words, it converts a Service[ReqOut, RepIn] to a
- * Service[ReqIn, ReqOut].
+ * Service[ReqIn, RepOut].
  *
  */
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]

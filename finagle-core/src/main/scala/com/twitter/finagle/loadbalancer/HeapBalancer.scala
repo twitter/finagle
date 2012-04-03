@@ -82,6 +82,7 @@ class HeapBalancer[Req, Rep](
         size -= 1
         removeGauges(node)
         node.index = -1 // sentinel value indicating node is no longer in the heap.
+        elem.close()
       }
     }
   }

@@ -1,12 +1,12 @@
 package com.twitter.finagle.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-object ChannelBufferTransportSpec extends Specification with Mockito {
+class ChannelBufferTransportSpec extends SpecificationWithJUnit with Mockito {
   "ChannelBufferToTransport" should {
     val buf = mock[ChannelBuffer]
     val t = new ChannelBufferToTransport(buf)
@@ -33,7 +33,7 @@ object ChannelBufferTransportSpec extends Specification with Mockito {
   }
 }
 
-object DuplexChannelBufferTransportSpec extends Specification with Mockito {
+class DuplexChannelBufferTransportSpec extends SpecificationWithJUnit with Mockito {
   "DuplexChannelBufferTransport" should {
     val in = mock[ChannelBuffer]
     val out = mock[ChannelBuffer]

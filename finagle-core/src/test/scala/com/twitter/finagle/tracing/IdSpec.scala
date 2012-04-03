@@ -1,8 +1,8 @@
 package com.twitter.finagle.tracing
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object IdSpec extends Specification {
+class IdSpec extends SpecificationWithJUnit {
   "Id" should {
     "not compare" in {
       "unequal ids" in {

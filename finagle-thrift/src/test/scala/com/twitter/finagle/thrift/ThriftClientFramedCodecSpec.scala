@@ -3,13 +3,13 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.Service
 import org.mockito.ArgumentCaptor
 import com.twitter.util.Future
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.apache.thrift.protocol.{TMessageType, TMessage}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.Filter._
 
-class ThriftClientFramedCodecSpec extends Specification with Mockito {
+class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
 
   "ThriftClientFramedCodec" should {
 

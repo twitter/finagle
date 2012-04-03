@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.TBinaryProtocol
@@ -14,7 +14,7 @@ import com.twitter.test._
 
 import com.twitter.finagle.builder.ServerBuilder
 
-object ThriftClientFinagleServerSpec extends Specification {
+class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
   "thrift client with finagle server" should {
     var somewayPromise = new Promise[Unit]
     val processor = new B.ServiceIface {

@@ -62,7 +62,7 @@ module Trace
     alias :sampled? :sampled
     def initialize(trace_id, parent_id, span_id, sampled)
       @trace_id = SpanId.from_value(trace_id)
-      @parent_id = SpanId.from_value(parent_id)
+      @parent_id = parent_id.nil? ? nil : SpanId.from_value(parent_id)
       @span_id = SpanId.from_value(span_id)
       @sampled = !!sampled
     end

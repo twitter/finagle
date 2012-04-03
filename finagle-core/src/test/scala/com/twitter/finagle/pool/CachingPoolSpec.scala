@@ -2,7 +2,7 @@ package com.twitter.finagle.pool
 
 import collection.mutable.Queue
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
@@ -13,7 +13,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.MockTimer
 
-object CachingPoolSpec extends Specification with Mockito {
+class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
   "CachingPool" should {
     val timer = new MockTimer
     val obj = mock[Object]

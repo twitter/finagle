@@ -2,7 +2,7 @@ package com.twitter.finagle.integration
 
 import java.util.concurrent.Executors
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
@@ -24,7 +24,7 @@ import com.twitter.conversions.time._
  * And if nothing else, they document the kinds of assumptions we
  * *are* making of Netty :-)
  */
-object NettyAssumptionsSpec extends Specification {
+class NettyAssumptionsSpec extends SpecificationWithJUnit {
   private[this] val executor = Executors.newCachedThreadPool()
   def makeServer() = {
     val bootstrap = new ServerBootstrap(

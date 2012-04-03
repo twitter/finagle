@@ -1,13 +1,13 @@
 package com.twitter.finagle.tracing
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.Time
 import com.twitter.conversions.time._
 import java.nio.ByteBuffer
 
-object TraceSpec extends Specification with Mockito {
+class TraceSpec extends SpecificationWithJUnit with Mockito {
   "Trace" should {
     doBefore { Trace.clear() }
 
