@@ -538,7 +538,8 @@ class KetamaClient private[memcached](
   health: Offer[NodeHealth],
   keyHasher: KeyHasher,
   numReps: Int,
-  statsReceiver: StatsReceiver = NullStatsReceiver
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  oldLibMemcachedVersionComplianceMode: Boolean = false
 ) extends PartitionedClient {
   require(!services.isEmpty, "At least one service must be provided")
 
@@ -558,7 +559,7 @@ class KetamaClient private[memcached](
   private[this] val revivalCount = statsReceiver.counter("revivals")
 
   private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) =
-    new KetamaDistributor(nodes, numReps)
+    new KetamaDistributor(nodes, numReps, oldLibMemcachedVersionComplianceMode)
 
   health foreach {
     case NodeMarkedDead(key) =>
@@ -607,8 +608,9 @@ case class KetamaClientBuilder(
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _numFailures: Int = 5,
-  _markDeadFor: Duration = 30.seconds
-  ) {
+  _markDeadFor: Duration = 30.seconds,
+  oldLibMemcachedVersionComplianceMode: Boolean = false
+) {
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
     copy(_nodes = nodes)
@@ -624,6 +626,9 @@ case class KetamaClientBuilder(
 
   def failureAccrualParams(numFailures: Int, markDeadFor: Duration): KetamaClientBuilder =
     copy(_numFailures = numFailures, _markDeadFor = markDeadFor)
+
+  def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
+    copy(oldLibMemcachedVersionComplianceMode = true)
 
 
   def build(): Client = {
@@ -649,7 +654,15 @@ case class KetamaClientBuilder(
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
     val allHealth = Offer.choose(healths: _*)
     val statsReceiver = builder.statsReceiver.scope("memcached_client")
-    new KetamaClient(clients, allHealth, keyHasher, KetamaClient.NumReps, statsReceiver)
+
+    new KetamaClient(
+      clients,
+      allHealth,
+      keyHasher,
+      KetamaClient.NumReps,
+      statsReceiver,
+      oldLibMemcachedVersionComplianceMode
+    )
   }
 
   private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
