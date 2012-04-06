@@ -1,10 +1,10 @@
 package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached.MockClient
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 
-object MockClientSpec extends Specification {
+class MockClientSpec extends SpecificationWithJUnit {
   "MockClient" should {
     "get" in {
       val memcache = new MockClient(Map("key" -> "value")).withStrings

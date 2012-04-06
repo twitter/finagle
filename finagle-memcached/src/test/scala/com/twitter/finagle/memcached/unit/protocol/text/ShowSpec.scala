@@ -6,11 +6,10 @@ import com.twitter.finagle.memcached.protocol.{
   NonexistentCommand,
   ServerError
 }
-import org.specs.Specification
 import org.jboss.netty.util.CharsetUtil
+import org.specs.SpecificationWithJUnit
 
-class ShowSpec extends Specification {
-
+class ShowSpec extends SpecificationWithJUnit {
   "ResponseToEncoding" should {
     val responseToEncoding = new ResponseToEncoding
 
@@ -40,7 +39,5 @@ class ShowSpec extends Specification {
         tokens.tokens.head.toString(CharsetUtil.UTF_8) mustEqual "SERVER_ERROR"
       }
     }
-
   }
-
 }

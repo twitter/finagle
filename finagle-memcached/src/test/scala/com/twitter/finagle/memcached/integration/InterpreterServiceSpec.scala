@@ -1,17 +1,17 @@
 package com.twitter.finagle.memcached.integration
 
-import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcached.Server
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.Server
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.TimeConversions._
+import com.twitter.finagle.Service
 import com.twitter.util.Time
+import com.twitter.util.TimeConversions._
 import java.net.InetSocketAddress
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object InterpreterServiceSpec extends Specification {
+class InterpreterServiceSpec extends SpecificationWithJUnit {
   "InterpreterService" should {
     var server: Server = null
     var client: Service[Command, Response] = null
@@ -47,6 +47,5 @@ object InterpreterServiceSpec extends Specification {
       val result = client(Quit())
       result() mustEqual NoOp()
     }
-
   }
 }

@@ -1,15 +1,15 @@
 package com.twitter.finagle.memcached.unit
 
-import org.specs.Specification
 import com.twitter.finagle.memcached.Interpreter
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.protocol._
-import scala.collection.mutable
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.util.AtomicMap
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.Time
+import org.jboss.netty.buffer.ChannelBuffer
+import org.specs.SpecificationWithJUnit
+import scala.collection.mutable
 
-class InterpreterSpec extends Specification {
+class InterpreterSpec extends SpecificationWithJUnit {
   "Interpreter" should {
     val map = mutable.Map[ChannelBuffer, ChannelBuffer]()
     val interpreter = new Interpreter(new AtomicMap(Seq(map)))

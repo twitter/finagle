@@ -1,18 +1,18 @@
 package com.twitter.finagle.memcached.unit.protocol.text.server
 
-import org.specs.Specification
-import org.specs.util.DataTables
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer 
-import org.jboss.netty.util.CharsetUtil
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
 import com.twitter.finagle.memcached.protocol.text.server.DecodingToCommand
+import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
 import com.twitter.finagle.memcached.protocol.{Set, Stats}
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Duration, Time}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
+import org.jboss.netty.util.CharsetUtil
+import org.specs.SpecificationWithJUnit
+import org.specs.util.DataTables
 
-object DecodingToCommandSpec extends Specification with DataTables {
+class DecodingToCommandSpec extends SpecificationWithJUnit with DataTables {
   "DecodingToCommand" should {
     val decodingToCommand = new DecodingToCommand
 

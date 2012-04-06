@@ -8,11 +8,11 @@ import com.twitter.concurrent.Broker
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 
-object PoolingReadRepairClientSpec extends Specification with Mockito {
+class PoolingReadRepairClientSpec extends SpecificationWithJUnit with Mockito {
   var full: MockClient = null
   var partial: MockClient = null
   var pooled: Client = null
@@ -25,7 +25,6 @@ object PoolingReadRepairClientSpec extends Specification with Mockito {
   }
   reset()
 
-
   "PoolingReadRepairClient" should {
     "return the correct value" in {
       pooled.withStrings.get("key")()                  must beSome("value")
@@ -37,5 +36,4 @@ object PoolingReadRepairClientSpec extends Specification with Mockito {
       partial.map.size mustEqual 2
     }
   }
-
 }

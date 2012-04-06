@@ -8,9 +8,9 @@ import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
 import com.twitter.finagle.tracing.ConsoleTracer
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.util.CharsetUtil
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object ClientSpec extends Specification {
+class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {
     /**
      * Note: This integration test requires a real Memcached server to run.
