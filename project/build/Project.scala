@@ -304,7 +304,15 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     val commonsCodec    = "commons-codec" % "commons-codec" % "1.5"
     val commonClient    = "com.twitter.common.zookeeper" % "client"     % "0.0.6"
     val commonGroup     = "com.twitter.common.zookeeper" % "group"      % "0.0.5"
-    val commonServerSet = "com.twitter.common.zookeeper" % "server-set" % "0.0.5"
+
+    override def ivyXML =
+      <dependencies>
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="0.0.5">
+          <exclude module="com.twitter" name="finagle-core"/>
+          <exclude module="com.twitter" name="finagle-thrift"/>
+          <exclude module="com.twitter" name="util-core"/>
+        </dependency>
+      </dependencies>
   }
 
   class ExampleProject(info: ProjectInfo) extends StandardProject(info)
