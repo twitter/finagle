@@ -44,7 +44,7 @@ object JSSE {
    * Get a client
    */
   def client(): Engine = client(null : Array[TrustManager])
-  
+
   /**
    * Get a client from the given Context
    */
@@ -69,7 +69,7 @@ object JSSE {
   }
 
   /**
-   * @returns a trust manager chain that does not validate certificates
+   * @return a trust manager chain that does not validate certificates
    */
   private[this] def trustAllCertificates(): Array[TrustManager] =
     Array(new IgnorantTrustManager)

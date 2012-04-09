@@ -197,7 +197,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets score of member in sorted set
    * @param key, member
-   * @returns Score of member as a byte array
+   * @return Score of member as a byte array
    */
   def zScore(key: Array[Byte], member: Array[Byte]): Future[Option[Array[Byte]]] =
     doRequest(ZScore(key, member)) {
