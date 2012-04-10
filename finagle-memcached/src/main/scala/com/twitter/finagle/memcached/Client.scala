@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached
 
 import scala.collection.JavaConversions._
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 import _root_.java.net.InetSocketAddress
 import _root_.java.util.{Map => JMap}
@@ -67,15 +67,32 @@ case class GetsResult(getResult: GetResult) {
 }
 
 object GetResult {
+  /**
+   * Equivalaent to results.reduceLeft { _ ++ _ }, but written to be more efficient.
+   */
   private[memcached] def merged(results: Seq[GetResult]): GetResult = {
-    results.foldLeft(GetResult()) { _ ++ _ }
+    results match {
+      case Nil => GetResult()
+      case Seq(single) => single
+      case Seq(a, b) => a ++ b
+      case _ =>
+        val hits = new mutable.HashMap[String, Value]
+        val misses = new mutable.HashSet[String]
+        val failures = new mutable.HashMap[String, Throwable]
+
+        for (result <- results) {
+          hits ++= result.hits
+          misses ++= result.misses
+          failures ++= result.failures
+        }
+
+        GetResult(hits.toMap, misses.toSet, failures.toMap)
+    }
   }
 
-  private[memcached] def merged(results: Seq[GetsResult]) = {
+  private[memcached] def merged(results: Seq[GetsResult]): GetsResult = {
     val unwrapped = results map { _.getResult }
-    GetsResult(
-      unwrapped.foldLeft(GetResult()) { _ ++ _ }
-    )
+    GetsResult(merged(unwrapped))
   }
 }
 
