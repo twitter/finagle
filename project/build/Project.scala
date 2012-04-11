@@ -160,7 +160,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    */
   val b3Project = project(
     "finagle-b3", "finagle-b3",
-    new B3Project(_), coreProject, thriftProject)
+    new B3Project(_), coreProject, thriftProject, finagleTestProject)
 
   /**
    * finagle-commons-stats contains bindings for using finagle in java projects
