@@ -36,8 +36,6 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
     } onFailure { e =>
       log.warn("Failed. ", e)
       controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
-    } ensure {
-      client.release()
     }
   }
 }
