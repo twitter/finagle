@@ -11,6 +11,6 @@ class JavaRetryingFilter {
   static {
     RetryPolicy$.MODULE$.backoffJava(
       Backoff.toJava(Backoff.constant(Duration.fromTimeUnit(0, TimeUnit.SECONDS))),
-      RetryPolicy$.MODULE$.WriteExceptionsOnly());
+      RetryPolicy$.MODULE$.TimeoutAndWriteExceptionsOnly());
   };
 }

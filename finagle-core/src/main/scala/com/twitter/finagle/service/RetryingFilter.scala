@@ -4,7 +4,7 @@ import java.{util => ju}
 import java.util.{concurrent => juc}
 import scala.collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{RetryFailureException, SimpleFilter, Service, WriteException}
+import com.twitter.finagle.{RetryFailureException, SimpleFilter, Service, WriteException, TimeoutException}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.finagle.tracing.Trace
@@ -13,6 +13,11 @@ trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
 object RetryPolicy {
   val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(_: WriteException) => true
+  }
+
+  val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(_: TimeoutException) => true
     case Throw(_: WriteException) => true
   }
 
@@ -26,10 +31,8 @@ object RetryPolicy {
   def backoffJava[A](
     backoffs: juc.Callable[ju.Iterator[Duration]],
     shouldRetry: PartialFunction[A, Boolean]
-  ): RetryPolicy[Try[Nothing]] = {
-    backoff[Try[Nothing]](backoffs.call().toStream) {
-      case Throw(_: WriteException) => true
-    }
+  ): RetryPolicy[A] = {
+    backoff[A](backoffs.call().toStream)(shouldRetry)
   }
 
   def backoff[A](
