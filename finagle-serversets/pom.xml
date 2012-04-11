@@ -113,54 +113,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.twitter.common.zookeeper</groupId>
-      <artifactId>server-set</artifactId>
-      <version>0.0.5</version>
-      <!-- excluded to prevent conflicts with caged finagle/util -->
-      <exclusions>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-collection</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-hashing</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-reflect</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-thrift</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-logging</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-eval</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>finagle-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>finagle-thrift</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.5</version>

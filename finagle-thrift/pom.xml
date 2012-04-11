@@ -40,6 +40,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
