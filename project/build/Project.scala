@@ -26,6 +26,8 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
       <exclude module="jmxri"/>
     </dependencies>
 
+  val nettyVersion = "3.4.0.Alpha2"
+
   /**
    * finagle-test contains shared test utilities
    */
@@ -179,7 +181,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val netty = "io.netty" % "netty" % "3.4.0.Alpha2" withSources()
+    val netty = "io.netty" % "netty" % nettyVersion withSources()
 
     projectDependencies(
       "util" ~ "util-core",
@@ -197,7 +199,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with Defaults
   {
     override def compileOrder = CompileOrder.ScalaThenJava
-    val netty = "io.netty" % "netty" % "3.4.0.Alpha1" withSources()
+    val netty = "io.netty" % "netty" % nettyVersion withSources()
     projectDependencies(
       "util" ~ "util-core"
     )

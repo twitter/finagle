@@ -58,7 +58,8 @@ private[stream] abstract class BufferToChannelCodec extends SimpleChannelHandler
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
-      case buf: ChannelBuffer => inbound ! buf
+      case buf: ChannelBuffer =>
+        inbound ! buf
       case m =>
         val msg = "Unexpected message type sent upstream: %s".format(m.getClass.toString)
         throw new IllegalArgumentException(msg)
@@ -68,6 +69,7 @@ private[stream] abstract class BufferToChannelCodec extends SimpleChannelHandler
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
     e.getMessage match {
       case outbound: Offer[_] =>
+        e.getFuture.setSuccess()
         outbound foreach { message =>
           Channels.write(ctx, Channels.future(ctx.getChannel), message)
         }
@@ -93,7 +95,7 @@ class ServerBufferToChannelCodec extends BufferToChannelCodec {
 }
 
 class ClientBufferToChannelCodec extends BufferToChannelCodec {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     super.writeRequested(ctx, e)
     sendHandleUpstream(ctx)
   }

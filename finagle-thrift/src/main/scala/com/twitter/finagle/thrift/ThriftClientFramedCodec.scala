@@ -1,25 +1,17 @@
 package com.twitter.finagle.thrift
 
-import collection.JavaConversions._
-
-import org.jboss.netty.channel.{
-  ChannelHandlerContext,
-  SimpleChannelDownstreamHandler, MessageEvent, Channels,
-  ChannelPipelineFactory}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.apache.thrift.protocol.{
-  TBinaryProtocol, TMessage,
-  TMessageType, TProtocolFactory}
-import org.apache.thrift.transport.TMemoryInputTransport
-import com.twitter.util.Time
-
 import com.twitter.finagle._
-import com.twitter.finagle.util.{ByteArrays, Ok, Error, Cancelled}
-import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.tracing.{Trace, Annotation}
-
-import java.net.{InetSocketAddress, SocketAddress}
-import scala.Option._
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.{ByteArrays, Ok, Error, Cancelled}
+import com.twitter.util.Time
+import org.apache.thrift.protocol.{
+  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
+import org.apache.thrift.transport.TMemoryInputTransport
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.{
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
+  SimpleChannelDownstreamHandler}
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -102,11 +94,6 @@ private[thrift] class ThriftClientChannelBufferEncoder
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
       case request: ThriftClientRequest =>
-        ctx.getChannel.getLocalAddress()  match {
-          case ia: InetSocketAddress => Trace.recordClientAddr(ia)
-          case _ => () // nothing
-        }
-
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
         if (request.oneway) {
           // oneway RPCs are satisfied when the write is complete.

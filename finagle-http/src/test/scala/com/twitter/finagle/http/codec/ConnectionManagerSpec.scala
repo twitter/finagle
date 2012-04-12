@@ -1,17 +1,15 @@
 package com.twitter.finagle.http.codec
 
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Promise, Return}
 import java.nio.charset.Charset
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.UpstreamMessageEvent
-import org.mockito.ArgumentCaptor
-
-import org.specs.Specification
-import org.specs.mock.Mockito
-
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.buffer.ChannelBuffers
-
-import com.twitter.finagle.channel.ChannelServiceReply
+import org.mockito.ArgumentCaptor
+import org.specs.Specification
+import org.specs.mock.Mockito
 
 object ConnectionManagerSpec extends Specification with Mockito {
   // > further tests
@@ -44,23 +42,27 @@ object ConnectionManagerSpec extends Specification with Mockito {
   }
 
 
-  "the client HTTP connection manager" should {
-    val handler = new ClientConnectionManager
+  "HttpClientDispatcher" should {
+    val trans = mock[Transport[HttpRequest, HttpResponse]]
+    val disp = new HttpClientDispatcher(trans)
 
     def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
-      me.getMessage returns request
-      me.getFuture returns cFuture
-      handler.writeRequested(ctx, me)
+      val wp = new Promise[Unit]
+      trans.write(any) returns wp
+      val f = disp(request)
+      f.isDefined must beFalse
+      there was one(trans).write(request)
+      there was no(trans).read()
+      val rp = new Promise[HttpResponse]
+      trans.read() returns rp
+      wp.setValue(())
+      there was one(trans).read()
+      f.isDefined must beFalse
+      rp.setValue(response)
+      f.poll must beSome(Return(response))
 
-      me.getMessage returns response
-      handler.messageReceived(ctx, me)
-
-      val messageEvent = ArgumentCaptor.forClass(classOf[MessageEvent])
-      there was one(ctx).sendUpstream(messageEvent.capture)
-      val reply = messageEvent.getValue.getMessage.asInstanceOf[ChannelServiceReply]
-
-      reply.message must be_==(response)
-      reply.markDead must be_==(shouldMarkDead)
+      if (shouldMarkDead)
+        there was one(trans).close()
     }
 
     "not terminate regular http/1.1 connections" in {
@@ -85,32 +87,6 @@ object ConnectionManagerSpec extends Specification with Mockito {
         makeResponse(HttpVersion.HTTP_1_1),
         true
       )
-    }
-
-    "terminate chunked http/1.1 with Connection: close" in {
-      val request = makeRequest(HttpVersion.HTTP_1_1, "connection" -> "close")
-      val response = makeResponse(HttpVersion.HTTP_1_1)
-      response.setChunked(true)
-
-      perform(request, response, false)
-
-      def receive(me: MessageEvent, count: Int) = {
-        val messageEvent = ArgumentCaptor.forClass(classOf[MessageEvent])
-        handler.messageReceived(ctx, me)
-        there were count.times(ctx).sendUpstream(messageEvent.capture)
-        messageEvent.getValue.getMessage.asInstanceOf[ChannelServiceReply]
-      }
-
-      val chunk = new DefaultHttpChunk(
-        ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
-
-      me.getMessage returns chunk
-      receive(me, 2).markDead must beFalse
-      receive(me, 3).markDead must beFalse
-
-      // The final chunk.
-      me.getMessage returns new DefaultHttpChunkTrailer
-      receive(me, 4).markDead must beTrue
     }
   }
 
@@ -214,7 +190,7 @@ object ConnectionManagerSpec extends Specification with Mockito {
       there was no(c).close()
       cFuture.setSuccess()   // write success
       there was no(c).close()
-      
+
       val chunk = new DefaultHttpChunk(
         ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
 
@@ -239,7 +215,7 @@ object ConnectionManagerSpec extends Specification with Mockito {
       there was no(c).close()
       cFuture.setSuccess()   // write success
       there was no(c).close()
-      
+
       val chunk = new DefaultHttpChunk(
         ChannelBuffers.copiedBuffer("content", Charset.forName("UTF-8")))
 

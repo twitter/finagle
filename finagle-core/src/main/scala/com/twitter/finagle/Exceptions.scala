@@ -52,7 +52,9 @@ class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress) extends Exception(underlying) with SourcedException {
+class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
+  extends Exception(underlying) with SourcedException
+{
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
   override def getMessage =
@@ -122,6 +124,11 @@ object ChannelException {
     }
   }
 }
+
+// Transport layer errors
+class TransportException extends Exception with SourcedException
+class CancelledReadException extends TransportException
+class CancelledWriteException extends TransportException
 
 // Service layer errors.
 class ServiceException                                         extends Exception with SourcedException

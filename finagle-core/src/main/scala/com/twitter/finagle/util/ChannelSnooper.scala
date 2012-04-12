@@ -85,7 +85,7 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
 
 object ChannelSnooper {
   def apply(name: String)(thePrinter: String => Unit) =
-    new ChannelBufferSnooper(name) {
+    new SimpleChannelSnooper(name) {
       override def printer(message: String) = thePrinter(message)
     }
 

@@ -2,42 +2,11 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
-  WriteException, ServiceFactory, ServiceFactoryProxy, ClientConnection, FailFastException}
-import com.twitter.util.{
-  Return, Timer, TimerTask, Future, Duration, Time, Throw}
-import java.net.ConnectException
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{ConcurrentLinkedQueue}
-import java.util.logging.{Logger, Level}
+  ClientConnection, ServiceFactory, ServiceFactoryProxy}
+import com.twitter.util.{Duration, Time, Throw, Return, Timer, TimerTask}
 import scala.util.Random
-
-private[service] class Proc[T](iteratee: T => Unit) {
-  private[this] val q = new ConcurrentLinkedQueue[T]
-  private[this] val nq = new AtomicInteger(0)
-  @volatile private[this] var closed = false
-
-  def close() { closed = true }
-
-  def !(elem: T) {
-    q.offer(elem)
-    if (nq.getAndIncrement() == 0)
-      do {
-        if (closed)
-          return
-        // Swallow exceptions as these would cause
-        // unbounded queue growth.
-        try iteratee(q.remove()) catch {
-           case exc =>
-             Logger.getLogger("").log(Level.WARNING, "Exception thrown in proc", exc)
-         }
-      } while (nq.decrementAndGet() > 0)
-  }
-}
-
-private[service] object Proc {
-  def apply[T](iteratee: T => Unit): Proc[T] = new Proc(iteratee)
-}
 
 private[finagle] object FailFastFactory {
   private sealed trait State

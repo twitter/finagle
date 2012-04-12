@@ -15,6 +15,7 @@ import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.handler.codec.http._
 import scala.collection.JavaConversions._
+import com.twitter.util.RandomSocket
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer()
@@ -23,7 +24,7 @@ object EmbeddedServer {
 }
 
 class EmbeddedServer(val addr: SocketAddress) {
-  def this() = this(new InetSocketAddress(0))
+  def this() = this(RandomSocket())
   import EmbeddedServer._
 
   // (Publicly accessible) stats covering this server.

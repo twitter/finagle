@@ -1,21 +1,20 @@
 package com.twitter.finagle.stream
 
-import java.nio.charset.Charset
-import java.util.concurrent.Executors
-
 import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.{
-  ClientCodecConfig, SimpleFilter, Service, ServiceNotAvailableException}
+  ServiceNotAvailableException, ClientCodecConfig, SimpleFilter, Service}
 import com.twitter.util._
 import java.net.InetSocketAddress
+import java.nio.charset.Charset
+import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{
-  MessageEvent, ChannelEvent, Channels, ChannelStateEvent, ChannelState, WriteCompletionEvent
-  , ChannelPipelineFactory, ChannelUpstreamHandler, ChannelHandlerContext}
+  ChannelStateEvent, ChannelState, WriteCompletionEvent, ChannelPipelineFactory,
+  ChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ChannelEvent, Channels}
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.CharsetUtil
 import org.specs.Specification

@@ -13,20 +13,19 @@ import com.twitter.finagle.tracing.Tracer
 
 class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "ClientBuilder" should {
-    "invoke rawPrepareClientConnFactory on connection" in {
+    "invoke prepareConnFactory on connection" in {
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
 
       val m = new MockChannel
-      (m.codec.rawPrepareClientConnFactory(Matchers.any[ServiceFactory[Any, Any]])
-       returns preparedFactory)
+      m.codec.prepareConnFactory(any) returns preparedFactory
 
       // Client
       val client = m.build()
       val requestFuture = client("123")
 
-      there was one(m.codec).rawPrepareClientConnFactory(any)
+      there was one(m.codec).prepareConnFactory(any)
       there was one(preparedFactory)()
 
       requestFuture.isDefined must beFalse

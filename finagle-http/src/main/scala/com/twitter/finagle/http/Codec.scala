@@ -3,18 +3,21 @@ package com.twitter.finagle.http
 /**
  * This puts it all together: The HTTP codec itself.
  */
-import java.net.InetSocketAddress
-
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 
 import com.twitter.conversions.storage._
-
+import com.twitter.finagle._
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle._
 import com.twitter.util.{Try, StorageUnit, Future}
+import java.net.InetSocketAddress
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.{
+  ChannelPipelineFactory, UpstreamMessageEvent, Channels,
+  ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
+import org.jboss.netty.handler.codec.http._
+import com.twitter.finagle.transport.TransportFactory
 
 case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
@@ -115,10 +118,6 @@ case class Http(
           if (_decompressionEnabled)
             pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
 
-          pipeline.addLast(
-            "connectionLifecycleManager",
-            new ClientConnectionManager)
-
           pipeline
         }
       }
@@ -126,10 +125,13 @@ case class Http(
       override def prepareConnFactory(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
       ): ServiceFactory[HttpRequest, HttpResponse] =
-        if (_enableTracing)
-          new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen underlying
-        else
-          underlying
+        if (_enableTracing) {
+          new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen
+            super.prepareConnFactory(underlying)
+        } else
+          super.prepareConnFactory(underlying)
+
+      override val mkClientDispatcher = (mkTrans: TransportFactory) => new HttpClientDispatcher(mkTrans())
     }
   }
 

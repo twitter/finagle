@@ -45,33 +45,30 @@ package com.twitter.finagle.builder
  * instead of a compiler error.
  */
 
+import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle._
+import com.twitter.finagle.channel._
+import com.twitter.finagle.factory._
+import com.twitter.finagle.filter.{MonitorFilter, ExceptionSourceFilter}
+import com.twitter.finagle.loadbalancer.HeapBalancer
+import com.twitter.finagle.pool._
+import com.twitter.finagle.service._
+import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
+import com.twitter.finagle.stats.{
+  GlobalStatsReceiver, NullStatsReceiver, RollupStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util._
+import com.twitter.util.TimeConversions._
+import com.twitter.util.{
+  Duration, Future, Monitor, NullMonitor, Promise, Return, Try}
 import java.net.{InetSocketAddress, SocketAddress}
-import java.util.logging.Logger
 import java.util.concurrent.{Executors, TimeUnit}
-
+import java.util.logging.Logger
+import javax.net.ssl.SSLContext
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
-
-import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor, Promise, Return }
-import com.twitter.util.TimeConversions._
-import javax.net.ssl.SSLContext
-
-import com.twitter.finagle.channel._
-import com.twitter.finagle.util._
-import com.twitter.finagle.pool._
-import com.twitter.finagle._
-import com.twitter.finagle.service._
-import com.twitter.finagle.factory._
-import com.twitter.finagle.filter.{MonitorFilter, ExceptionSourceFilter}
-import com.twitter.finagle.stats.{
-  StatsReceiver, RollupStatsReceiver,
-  NullStatsReceiver, GlobalStatsReceiver}
-import com.twitter.finagle.loadbalancer.HeapBalancer
-import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
 import tracing.{NullTracer, TracingFilter, Tracer}
 
 /**
@@ -503,20 +500,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates  
+   * This allows the user to use client certificates
    * No SSL Hostname Validation is performed
    */
   def tls(sslContext : SSLContext): This =
-    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))    
-  
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))
+
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates  
+   * This allows the user to use client certificates
    * SSL Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext : SSLContext, hostname : Option[String]): This =
-    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))  
-    
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))
+
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
@@ -677,7 +674,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     var factory: ServiceFactory[Req, Rep] = null
     val bs = buildBootstrap(codec, host)
-    factory = codec.rawPrepareClientConnFactory(new ChannelServiceFactory[Any, Any](bs, hostStatsReceiver))
+    factory = codec.prepareConnFactory(
+      new ChannelServiceFactory[Req, Rep](bs, codec.mkClientDispatcher, hostStatsReceiver))
 
     if (config.hostConnectionMaxIdleTime.isDefined ||
         config.hostConnectionMaxLifeTime.isDefined) {
