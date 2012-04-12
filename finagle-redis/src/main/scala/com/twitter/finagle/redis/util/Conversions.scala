@@ -25,6 +25,10 @@ object BytesToString {
   def fromList(args: List[Array[Byte]], charset: String = "UTF-8") = args.map { arg =>
     BytesToString(arg, charset)
   }
+  def fromMap(args: Map[Array[Byte], Array[Byte]], charset: String = "UTF-8") =
+    args.toSeq map { arg =>
+      (BytesToString(arg._1, charset), BytesToString(arg._2, charset))
+    }
 }
 object StringToBytes {
   def apply(arg: String, charset: String = "UTF-8") = arg.getBytes(charset)

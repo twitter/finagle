@@ -115,8 +115,8 @@ object ClientSpec extends Specification {
       "get multiple values at once" in {
         client.hSet(foo, bar, baz)()
         client.hSet(foo, boo, moo)()
-        BytesToString.fromList(
-          client.hGetAll(foo)().toList) mustEqual Seq("bar", "baz", "boo", "moo")
+        BytesToString.fromMap(
+          client.hGetAll(foo)()) mustEqual Seq(("bar" -> "baz"), ("boo", "moo"))
       }
 
     }
@@ -141,9 +141,9 @@ object ClientSpec extends Specification {
       "get the zRangeByScore" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        BytesToString.fromList(
-          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)().toList) mustEqual Seq("bar", "10",
-            "baz", "20")
+        BytesToString.fromMap(
+          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)()) mustEqual Seq(("bar", "10"),
+            ("baz", "20"))
       }
 
       "get cardinality and remove members" in {
@@ -163,10 +163,10 @@ object ClientSpec extends Specification {
       "get zRevRangeByScoreWithScores" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        BytesToString.fromList(
-          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)().toList) mustEqual Seq("bar", "10")
-        BytesToString.fromList(
-          client.zRevRangeByScoreWithScores(foo, 0, 0, 0, 1)().toList) mustEqual Seq()
+        BytesToString.fromMap(
+          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)()) mustEqual Seq(("bar", "10"))
+        BytesToString.fromMap(
+          client.zRevRangeByScoreWithScores(foo, 0, 0, 0, 1)()) mustEqual Seq()
       }
 
     }

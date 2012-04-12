@@ -153,12 +153,12 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets all field value pairs for given hash
    * @param hash key
-   * @return List of field value pairs
+   * @return Map of field/value pairs
    */
-  def hGetAll(key: Array[Byte]): Future[Seq[Array[Byte]]] =
+  def hGetAll(key: Array[Byte]): Future[Map[Array[Byte], Array[Byte]]] =
     doRequest(HGetAll(key)) {
-      case MBulkReply(messages) => Future.value(messages)
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case MBulkReply(messages) => returnPairs(messages)
+      case EmptyMBulkReply()    => Future.value(Map())
     }
 
   /**
@@ -219,11 +219,11 @@ class Client(service: Service[Command, Reply]) {
    * Gets member, score pairs from sorted set between min and max
    * Results are limited by offset and count
    * @param key, min, max, offset, count
-   * @return Member, score pairs that match constraints
+   * @return Map of member/score pairs
    */
   def zRangeByScoreWithScores(
     key: Array[Byte], min: Double, max: Double, offset: Int, count: Int
-  ): Future[Seq[Array[Byte]]] =
+  ): Future[Map[Array[Byte], Array[Byte]]] =
     doRequest(
       ZRangeByScore(
         BytesToString(key),
@@ -233,8 +233,8 @@ class Client(service: Service[Command, Reply]) {
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => Future.value(messages)
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case MBulkReply(messages) => returnPairs(messages)
+      case EmptyMBulkReply()    => Future.value(Map())
     }
 
   /**
@@ -249,10 +249,10 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
-    * Removes specified member(s) from sorted set at key
-    * @params key, member(s)
-    * @return Number of members removed from sorted set
-    */
+   * Removes specified member(s) from sorted set at key
+   * @params key, member(s)
+   * @return Number of members removed from sorted set
+   */
   def zRem(key: Array[Byte], members: Seq[Array[Byte]]): Future[Int] =
     doRequest(ZRem(key, members)) {
       case IntegerReply(n) => Future.value(n)
@@ -275,11 +275,11 @@ class Client(service: Service[Command, Reply]) {
    * Elements are ordered from highest to lowest score
    * Results are limited by offset and count
    * @param key, max, min, offset, count
-   * @return List of element in specified score range
+   * @return Map of element/score pairs in specified score range
    */
   def zRevRangeByScoreWithScores(
     key: Array[Byte], max: Double, min: Double, offset: Int, count: Int
-  ): Future[Seq[Array[Byte]]] =
+  ): Future[Map[Array[Byte], Array[Byte]]] =
     doRequest(
       ZRevRangeByScore(
         BytesToString(key),
@@ -289,8 +289,8 @@ class Client(service: Service[Command, Reply]) {
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => Future.value(messages)
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case MBulkReply(messages) => returnPairs(messages)
+      case EmptyMBulkReply()    => Future.value(Map())
     }
 
   /**
@@ -306,5 +306,17 @@ class Client(service: Service[Command, Reply]) {
       case ErrorReply(message)  => Future.exception(new ServerError(message))
       case _                    => Future.exception(new IllegalStateException)
     })
+
+  /**
+   * Helper function to convert a Redis multi-bulk reply into a map of pairs
+   */
+  private def returnPairs(messages: List[Array[Byte]]) = {
+    assert(messages.length % 2 == 0, "Odd number of items in response")
+    Future.value({
+      messages.grouped(2).toList flatMap {
+        case List(a, b) => Some(a, b)
+      } toMap
+    })
+  }
 
 }
