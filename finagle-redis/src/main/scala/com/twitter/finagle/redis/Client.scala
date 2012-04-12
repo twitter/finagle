@@ -118,6 +118,14 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
+   * Authorizes to db
+   */
+  def auth(token: String): Future[Unit] =
+    doRequest(Auth(token)) {
+      case StatusReply(message) => Future.Unit
+    }
+
+  /**
    * Select DB with specified zero-based index
    * @param index
    * @return Status reply

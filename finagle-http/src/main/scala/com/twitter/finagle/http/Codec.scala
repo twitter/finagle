@@ -87,7 +87,9 @@ case class Http(
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
     _annotateCipherHeader: Option[String] = None,
-    _enableTracing: Boolean = false)
+    _enableTracing: Boolean = false,
+    _maxInitialLineLength: StorageUnit = 4096.bytes,
+    _maxHeaderSize: StorageUnit = 8192.bytes)
   extends CodecFactory[HttpRequest, HttpResponse]
 {
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
@@ -142,11 +144,9 @@ case class Http(
           }
 
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
-          if (maxRequestSizeInBytes < 8192) {
-            pipeline.addLast("httpCodec", new SafeHttpServerCodec(4096, 8192, maxRequestSizeInBytes))
-          } else {
-            pipeline.addLast("httpCodec", new SafeHttpServerCodec(4096, 8192, 8192))
-          }
+          val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
+          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt 
+          pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
 
           if (_compressionLevel > 0) {
             pipeline.addLast(

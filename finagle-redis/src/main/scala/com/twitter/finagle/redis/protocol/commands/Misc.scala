@@ -17,3 +17,14 @@ object Select {
 case class Select(index: Int) extends Command {
   def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.SELECT, index.toString))
 }
+
+object Auth {
+  def apply(args: List[Array[Byte]]) = {
+    val list = trimList(args, 1, "AUTH")
+    new Auth(BytesToString(list(0)))
+  }
+}
+
+case class Auth(code: String) extends Command {
+  def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.AUTH, code))
+}
