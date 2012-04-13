@@ -19,7 +19,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
-      <version>3.4.0.Alpha1</version>
+      <version>3.4.0.Alpha2</version>
     </dependency>
     <!-- project dependencies -->
     <dependency>
