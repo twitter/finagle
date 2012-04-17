@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached
 
-import com.twitter.finagle.memcached.protocol.Value
+import com.twitter.finagle.memcached.protocol.{ClientError, Value}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils
 import com.twitter.util.{Future, Time}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
@@ -134,8 +134,8 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
               map(key) = ChannelBuffers.wrappedBuffer(newValue.toString.getBytes)
               Some(newValue)
             } catch {
-              case _:NumberFormatException =>
-                None
+              case _: NumberFormatException =>
+                throw new ClientError("cannot increment or decrement non-numeric value")
             }
 
           case None =>
