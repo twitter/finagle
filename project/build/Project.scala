@@ -62,11 +62,9 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
    * Codec for protobuf RPC. Disabled by default until we've
    * settled on a protocol.
    */
-/*
   val protobufProject = project(
     "finagle-protobuf", "finagle-protobuf",
     new ProtobufProject(_), coreProject)
-*/
 
   /**
    * finagle-exception implements an ExceptionReceiver for the yet-to-be-named
@@ -252,7 +250,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   class ProtobufProject(info: ProjectInfo) extends StandardProject(info)
     with Defaults
   {
-    override def compileOrder = CompileOrder.ScalaThenJava
+    override def compileOrder = CompileOrder.JavaThenScala
 
     val protobuf    = "com.google.protobuf" % "protobuf-java" % "2.4.1"
     val slf4jNop  = "org.slf4j" % "slf4j-nop" % "1.5.8" % "provided"
