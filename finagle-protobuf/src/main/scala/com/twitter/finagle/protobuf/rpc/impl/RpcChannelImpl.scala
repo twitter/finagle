@@ -38,4 +38,9 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
       controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
     }
   }
+
+  def release() {
+     client.release()	
+  } 
+  
 }
