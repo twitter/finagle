@@ -26,7 +26,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
       <exclude module="jmxri"/>
     </dependencies>
 
-  val nettyVersion = "3.4.0.Alpha2"
+  val nettyVersion = "3.4.1.Final"
 
   /**
    * finagle-test contains shared test utilities
