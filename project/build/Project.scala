@@ -310,9 +310,10 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     override def ivyXML =
       <dependencies>
         <dependency org="com.twitter.common.zookeeper" name="server-set" rev="0.0.5">
-          <exclude module="com.twitter" name="finagle-core"/>
-          <exclude module="com.twitter" name="finagle-thrift"/>
-          <exclude module="com.twitter" name="util-core"/>
+          <exclude org="com.twitter" name="finagle-core"/>
+          <exclude org="com.twitter" name="finagle-thrift"/>
+          <exclude org="com.twitter" name="util-core"/>
+          <exclude org="io.netty" name="netty"/>
         </dependency>
       </dependencies>
   }
