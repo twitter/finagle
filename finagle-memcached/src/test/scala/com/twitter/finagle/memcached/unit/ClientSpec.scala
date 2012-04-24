@@ -8,11 +8,11 @@ import com.twitter.concurrent.Broker
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 
-object ClientSpec extends Specification with Mockito {
+class ClientSpec extends SpecificationWithJUnit with Mockito {
   "KetamaClient" should {
     // Test from Smile's KetamaNodeLocatorSpec.scala
 

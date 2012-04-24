@@ -1,11 +1,11 @@
 package com.twitter.finagle
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import java.net.SocketAddress
 
-object ExceptionsSpec extends Specification with Mockito {
+class ExceptionsSpec extends SpecificationWithJUnit with Mockito {
   "ChannelException" should {
     val address = mock[SocketAddress]
     address.toString returns "foo"

@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.util.{Future, Time}
 
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.finagle.builder.StaticCluster
 
 object Benchmark {
@@ -17,7 +17,7 @@ object Benchmark {
     def apply(req: Int) = null
   }
   private[this] class LoadedServiceFactory(i: Int) extends ServiceFactory[Int, Int] {
-    def make() = { loads(i) += 1; Future.value(service) }
+    def apply(conn: ClientConnection) = { loads(i) += 1; Future.value(service) }
     def close = ()
   }
   private[this] val factories = 0 until F map { i => new LoadedServiceFactory(i) }
@@ -32,7 +32,7 @@ object Benchmark {
       val j = i % W
       // todo: jitter in release. pick one at random.
       if (outstanding(j) ne null) outstanding(j).release()
-      outstanding(j) = factory.make()()
+      outstanding(j) = factory()()
     }
   }
 

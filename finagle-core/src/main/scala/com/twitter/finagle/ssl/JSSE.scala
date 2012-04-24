@@ -13,6 +13,11 @@ object JSSE {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val contextCache: MutableMap[String, SSLContext] = MutableMap.empty
   private[this] val protocol = "TLS"
+  private[this] lazy val defaultSSLContext: SSLContext = {
+    val ctx = SSLContext.getInstance(protocol)
+    ctx.init(null, null, null)
+    ctx
+  }
 
   /**
    * Get a server
@@ -43,7 +48,17 @@ object JSSE {
   /**
    * Get a client
    */
-  def client(): Engine = client(null)
+  def client(): Engine = new Engine(defaultSSLContext.createSSLEngine())
+ 
+  
+  /**
+   * Get a client from the given Context
+   */
+  def client(ctx : SSLContext) : Engine = {
+    val sslEngine = ctx.createSSLEngine();
+    sslEngine.setUseClientMode(true);
+    new Engine(sslEngine)
+  }
 
   /**
    * Get a client that skips verification of certificates.
@@ -60,7 +75,7 @@ object JSSE {
   }
 
   /**
-   * @returns a trust manager chain that does not validate certificates
+   * @return a trust manager chain that does not validate certificates
    */
   private[this] def trustAllCertificates(): Array[TrustManager] =
     Array(new IgnorantTrustManager)

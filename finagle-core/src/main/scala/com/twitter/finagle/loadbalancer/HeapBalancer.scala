@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import util.Random
-import com.twitter.finagle.{Service, ServiceProxy, ServiceFactory, NoBrokersAvailableException}
+import com.twitter.finagle.{Service, ServiceProxy, ServiceFactory, NoBrokersAvailableException, ClientConnection}
 import com.twitter.finagle.stats.{Gauge, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.builder.Cluster
 import collection.mutable.HashMap
@@ -81,13 +81,17 @@ class HeapBalancer[Req, Rep](
         heap = heap.dropRight(1)
         size -= 1
         removeGauges(node)
+        node.index = -1 // sentinel value indicating node is no longer in the heap.
+        elem.close()
       }
     }
   }
 
   private[this] def put(n: Node) = synchronized {
     n.load -= 1
-    if (n.load == 0 && size > 1) {
+    if (n.index < 0) {
+      // n has already been removed from the cluster, therefore do nothing
+    } else if (n.load == 0 && size > 1) {
       // since we know that n is now <= any element in the heap, we
       // can do interesting stuff without violating the heap
       // invariant.
@@ -132,7 +136,7 @@ class HeapBalancer[Req, Rep](
     }
   }
 
-  def make(): Future[Service[Req, Rep]] = {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (size == 0) return Future.exception(new NoBrokersAvailableException)
 
     val n = synchronized {
@@ -141,7 +145,7 @@ class HeapBalancer[Req, Rep](
       fixDown(heap, n.index, size)
       n
     }
-    n.factory.make() map { new Wrapped(n, _) } onFailure { _ => put(n) }
+    n.factory(conn) map { new Wrapped(n, _) } onFailure { _ => put(n) }
   }
 
   def close() {

@@ -1,10 +1,10 @@
 package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached.MockClient
-import org.specs.Specification
-import scala.collection.mutable
+import com.twitter.finagle.memcached.protocol.ClientError
+import org.specs.SpecificationWithJUnit
 
-object MockClientSpec extends Specification {
+class MockClientSpec extends SpecificationWithJUnit {
   "MockClient" should {
     "get" in {
       val memcache = new MockClient(Map("key" -> "value")).withStrings
@@ -79,7 +79,7 @@ object MockClientSpec extends Specification {
     "incr" in {
       val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
 
-      memcache.incr("key")()                 must beNone
+      memcache.incr("key")()                 must throwA[ClientError]
       memcache.get("key")()                  must beSome("value")
 
       memcache.incr("count")()               must beSome(2)
@@ -92,7 +92,7 @@ object MockClientSpec extends Specification {
     "decr" in {
       val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
 
-      memcache.decr("key")()                 must beNone
+      memcache.decr("key")()                 must throwA[ClientError]
       memcache.get("key")()                  must beSome("value")
 
       memcache.decr("count")()               must beSome(0)

@@ -1,22 +1,19 @@
 package com.twitter.finagle.memcached.integration
 
-import org.specs.Specification
-
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil
-
 import com.twitter.conversions.time._
+import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceClosedException
-import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
 import com.twitter.util.RandomSocket
-
 import java.net.{InetSocketAddress, Socket}
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.util.CharsetUtil
+import org.specs.SpecificationWithJUnit
 
-object ProxySpec extends Specification {
+class ProxySpec extends SpecificationWithJUnit {
 
   type MemcacheService = Service[Command, Response]
 

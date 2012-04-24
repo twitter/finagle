@@ -1,32 +1,33 @@
 package com.twitter.finagle.builder
 
-import scala.collection.mutable.HashSet
-import scala.collection.JavaConversions._
-
-import java.util.concurrent.Executors
-import java.util.logging.Logger
+import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
+import com.twitter.conversions.time._
+import com.twitter.finagle._
+import com.twitter.finagle.channel._
+import com.twitter.finagle.filter.{
+  HandletimeFilter, MonitorFilter, RequestSemaphoreFilter}
+import com.twitter.finagle.service.{
+  CancelOnHangupService, ExpiringService, ProxyService, StatsFilter, TimeoutFilter}
+import com.twitter.finagle.ssl.{
+  Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.Timer._
+import com.twitter.finagle.util._
+import com.twitter.util.{Future, Duration, Monitor, NullMonitor}
 import java.net.SocketAddress
-
+import java.util.concurrent.Executors
+import java.util.logging.{Logger, Level}
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
+import org.jboss.netty.channel.group.{
+  DefaultChannelGroup, DefaultChannelGroupFuture}
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
-
-import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
-import com.twitter.conversions.time._
-
-import com.twitter.finagle._
-import channel._
-import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util._
-import com.twitter.finagle.util.Timer._
-import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise, Return}
-
-import service.{ExpiringService, TimeoutFilter, StatsFilter, ProxyService}
-import stats.{StatsReceiver, NullStatsReceiver, GlobalStatsReceiver}
-import ssl.{Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
+import scala.collection.JavaConverters._
+import scala.collection.mutable.{HashSet, SynchronizedSet}
 
 trait Server {
   /**
@@ -112,7 +113,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _writeCompletionTimeout:          Option[Duration]                         = None,
   private val _tracerFactory:                   Tracer.Factory                           = NullTracer.factory,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
-  private val _serverBootstrap:                 Option[ServerBootstrap]                  = None)
+  private val _serverBootstrap:                 Option[ServerBootstrap]                  = None,
+  private val _cancelOnHangup:                  Boolean                                  = true)
 {
   import ServerConfig._
 
@@ -121,14 +123,14 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
    * Nevertheless, we want a friendly public API so we create delegators without
    * underscores.
    */
-  val codecFactory                    = _codecFactory
+  lazy val codecFactory               = _codecFactory.get
   val statsReceiver                   = _statsReceiver
   val monitor                         = _monitor
-  val name                            = _name
+  lazy val name                       = _name.get
   val bufferSize                      = _bufferSize
   val keepAlive                       = _keepAlive
   val backlog                         = _backlog
-  val bindTo                          = _bindTo
+  lazy val bindTo                     = _bindTo.get
   val logger                          = _logger
   val tls                             = _tls
   val channelFactory                  = _channelFactory
@@ -142,6 +144,7 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   val tracerFactory                   = _tracerFactory
   val openConnectionsThresholds       = _openConnectionsThresholds
   val serverBootstrap                 = _serverBootstrap
+  val cancelOnHangup                  = _cancelOnHangup
 
   def toMap = Map(
     "codecFactory"                    -> _codecFactory,
@@ -163,7 +166,8 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
     "tracerFactory"                   -> Some(_tracerFactory),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds),
-    "serverBootstrap"                 -> _serverBootstrap
+    "serverBootstrap"                 -> _serverBootstrap,
+    "cancelOnHangup"                  -> Some(_cancelOnHangup)
   )
 
   override def toString = {
@@ -321,24 +325,23 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     withConfig(_.copy(_tracerFactory = factory))
 
   /**
+   * Cancel pending futures whenever the the connection is shut down.
+   * This defaults to true.
+   */
+  def cancelOnHangup(yesOrNo: Boolean): This =
+    withConfig(_.copy(_cancelOnHangup = yesOrNo))
+
+  /**
    * Used for testing.
    */
   private[builder] def serverBootstrap(bs: ServerBootstrap): This =
     withConfig(_.copy(_serverBootstrap = Some(bs)))
 
-  @deprecated("Use tracerFactory instead")
-  def tracer(factory: Tracer.Factory): This =
-    withConfig(_.copy(_tracerFactory = factory))
-
-  @deprecated("Use tracerFactory instead")
-  def tracer(tracer: Tracer): This =
-    withConfig(_.copy(_tracerFactory = h => {
-      h.onClose { tracer.release() }
-      tracer
-    }))
-
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
+
+
+  /* Builder methods follow */
 
   /**
    * Construct the Server, given the provided Service.
@@ -346,16 +349,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def build(service: Service[Req, Rep]) (
      implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
        ThisConfig =:= FullySpecifiedConfig
-   ): Server = build { () =>
-     new ServiceProxy[Req, Rep](service) {
-       // release() is meaningless on connectionless services.
-       override def release() = ()
-     }
-   }
+   ): Server = build(ServiceFactory.const(service))
 
   /**
    * Construct the Server, given the provided Service factory.
    */
+  @deprecated("Use the ServiceFactory variant instead")
   def build(serviceFactory: () => Service[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
@@ -366,303 +365,24 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
    */
-  def build(inputServiceFactory: (ClientConnection) => Service[Req, Rep])(
+  @deprecated("Use the ServiceFactory variant instead")
+  def build(serviceFactory: (ClientConnection) => Service[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
-  ): Server = {
-    var serviceFactory = inputServiceFactory
+  ): Server = build(new ServiceFactory[Req, Rep] {
+    def apply(conn: ClientConnection) = Future.value(serviceFactory(conn))
+    def close() = ()
+  })
 
-    config.statsReceiver foreach { sr =>
-      GlobalStatsReceiver.register(sr.scope("finagle"))
-    }
-
-    val scopedStatsReceiver =
-      config.statsReceiver map { sr => config.name map (sr.scope(_)) getOrElse sr }
-
-    val codecConfig = ServerCodecConfig(
-      serviceName = config.name.get,
-      boundAddress = config.bindTo.get)
-    val codec = config.codecFactory.get(codecConfig)
-
-    val cf = config.channelFactory
-    cf.acquire()
-
-    val bs = config.serverBootstrap getOrElse new ServerBootstrap(new ChannelFactoryToServerChannelFactory(cf))
-
-    // bs.setOption("soLinger", 0) // XXX: (TODO)
-    bs.setOption("reuseAddress", true)
-
-    bs.setOption("child.tcpNoDelay", true)
-    config.backlog.foreach { s => bs.setOption("backlog", s) }
-    config.bufferSize.send foreach { s => bs.setOption("child.send", s) }
-    config.bufferSize.recv foreach { s => bs.setOption("child.receiveBufferSize", s) }
-    config.keepAlive.foreach { s => bs.setOption("child.keepAlive", s) }
-
-    // TODO: we need something akin to a max queue depth.
-    val queueingChannelHandlerAndGauges =
-      config.maxConcurrentRequests map { maxConcurrentRequests =>
-        val semaphore = new AsyncSemaphore(maxConcurrentRequests)
-        val gauges = scopedStatsReceiver.toList flatMap { sr =>
-          sr.addGauge("request_concurrency") {
-            maxConcurrentRequests - semaphore.numPermitsAvailable
-          } :: sr.addGauge("request_queue_size") {
-            semaphore.numWaiters
-          } :: Nil
-        }
-
-        (new ChannelSemaphoreHandler(semaphore), gauges)
-      }
-
-    val queueingChannelHandler = queueingChannelHandlerAndGauges map { case (q, _) => q }
-    val gauges = queueingChannelHandlerAndGauges.toList flatMap { case (_, g) => g }
-
-    trait ChannelHandle {
-      def drain(): Future[Unit]
-      def close()
-    }
-
-    val scopedOrNullStatsReceiver = scopedStatsReceiver getOrElse NullStatsReceiver
-
-    val channels = new HashSet[ChannelHandle]
-
-    // We share some filters & handlers for cumulative stats.
-    val statsFilter = scopedStatsReceiver map { new StatsFilter[Req, Rep](_) }
-    val channelStatsHandler = scopedStatsReceiver map { new ChannelStatsHandler(_) }
-    val channelRequestStatsHandler = scopedStatsReceiver map { new ChannelRequestStatsHandler(_) }
-
-    val closing = new Promise[Unit]
-    val closeNotifier = CloseNotifier.makeLifo(closing)
-    val tracer = config.tracerFactory(closeNotifier)
-
-    bs.setPipelineFactory(new ChannelPipelineFactory {
-      def getPipeline = {
-        val pipeline = codec.pipelineFactory.getPipeline
-
-        config.logger foreach { logger =>
-          pipeline.addFirst(
-            "channelLogger", ChannelSnooper(config.name getOrElse "server")(logger.info))
-        }
-
-        channelStatsHandler foreach { handler =>
-          pipeline.addFirst("channelStatsHandler", handler)
-        }
-
-        // XXX/TODO: add stats for both read & write completion
-        // timeouts.
-
-        // Note that the timeout is *after* request decoding. This
-        // prevents death from clients trying to DoS by slowly
-        // trickling in bytes to our (accumulating) codec.
-        config.readTimeout foreach { howlong =>
-          val (timeoutValue, timeoutUnit) = howlong.inTimeUnit
-          pipeline.addLast(
-            "readTimeout",
-            new ReadTimeoutHandler(Timer.defaultNettyTimer, timeoutValue, timeoutUnit))
-        }
-
-        config.writeCompletionTimeout foreach { howlong =>
-          pipeline.addLast(
-            "writeCompletionTimeout",
-            new WriteCompletionTimeoutHandler(Timer.default, howlong))
-        }
-
-        // SSL comes first so that ChannelSnooper gets plaintext
-        config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers, nextProtos) =>
-          val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)
-          engine.self.setUseClientMode(false)
-          engine.self.setEnableSessionCreation(true)
-
-          val handler = new SslHandler(engine.self)
-
-          // Certain engine implementations need to handle renegotiation internally,
-          // as Netty's TLS protocol parser implementation confuses renegotiation and
-          // notification events. Renegotiation will be enabled for those Engines with
-          // a true handlesRenegotiation value.
-          handler.setEnableRenegotiation(engine.handlesRenegotiation)
-
-          pipeline.addFirst("ssl", handler)
-
-          // Netty's SslHandler does not provide SSLEngine implementations any hints that they
-          // are no longer needed (namely, upon disconnection.) Since some engine implementations
-          // make use of objects that are not managed by the JVM's memory manager, we need to
-          // know when memory can be released. The SslShutdownHandler will invoke the shutdown
-          // method on implementations that define shutdown(): Unit.
-          pipeline.addFirst(
-            "sslShutdown",
-            new SslShutdownHandler(engine)
-          )
-
-          // Information useful for debugging SSL issues, such as the certificate, cipher spec,
-          // remote address is provided to the SSLEngine implementation by the SslIdentifierHandler.
-          // The SslIdentifierHandler will invoke the setIdentifier method on implementations
-          // that define setIdentifier(String): Unit.
-          pipeline.addFirst(
-            "sslIdentifier",
-            new SslIdentifierHandler(engine, certificatePath, ciphers)
-          )
-        }
-
-        // Serialization keeps the codecs honest.
-        pipeline.addLast("requestSerializing", new ChannelSemaphoreHandler(new AsyncSemaphore(1)))
-
-        // Add this after the serialization to get an accurate request
-        // count.
-        channelRequestStatsHandler foreach { handler =>
-          pipeline.addLast("channelRequestStatsHandler", handler)
-        }
-
-        // Add the (shared) queueing handler *after* request
-        // serialization as it assumes at most one outstanding request
-        // per channel.
-        queueingChannelHandler foreach { pipeline.addLast("queue", _) }
-
-        /*
-         * this is a wrapper for the factory-created service for this connection, which we'll
-         * build once we get an "open" event from netty.
-         */
-        val postponedService = new Promise[Service[Req, Rep]]
-
-        // Compose the service stack.
-        var service: Service[Req, Rep] = new ProxyService(
-          postponedService flatMap { s => codec.prepareService(s) }
-        )
-
-        statsFilter foreach { sf =>
-          service = sf andThen service
-        }
-
-        // We add the idle time after the codec. This ensures that a
-        // client couldn't DoS us by sending lots of little messages
-        // that don't produce a request object for some time. In other
-        // words, the idle time refers to the idle time from the view
-        // of the protocol.
-
-        // TODO: can we share closing handler instances with the
-        // channelHandler?
-        val closingHandler = new ChannelClosingHandler
-        pipeline.addLast("closingHandler", closingHandler)
-
-        if (config.hostConnectionMaxIdleTime.isDefined ||
-            config.hostConnectionMaxLifeTime.isDefined) {
-          service =
-            new ExpiringService(
-              service,
-              config.hostConnectionMaxIdleTime,
-              config.hostConnectionMaxLifeTime,
-              Timer.default,
-              scopedOrNullStatsReceiver.scope("expired")
-            ) {
-              override def expired() { closingHandler.close() }
-            }
-        }
-
-        config.requestTimeout foreach { duration =>
-          val e = new IndividualRequestTimeoutException(duration)
-          service = (new TimeoutFilter(duration, e)) andThen service
-        }
-
-        // This has to go last (ie. first in the stack) so that
-        // protocol-specific trace support can override our generic
-        // one here.
-        service = (new TracingFilter(tracer)) andThen service
-
-        // Connection limiting system
-        config.openConnectionsThresholds foreach { threshold =>
-          serviceFactory = new IdleConnectionFilter(
-            threshold,
-            inputServiceFactory,
-            scopedOrNullStatsReceiver.scope("idle")
-          )
-        }
-
-        val monitor = config.monitor map {
-          _(config.name.get, config.bindTo.get)
-        } getOrElse {
-          NullMonitor
-        }
-
-        val channelHandler = new ServiceToChannelHandler(
-          service, postponedService, serviceFactory,
-          scopedOrNullStatsReceiver, Logger.getLogger(getClass.getName),
-          monitor)
-
-        /*
-         * Register the channel so we can wait for them for a drain. We close the socket but wait
-         * for all handlers to complete (to drain them individually.)  Note: this would be
-         * complicated by the presence of pipelining.
-         */
-        val handle = new ChannelHandle {
-          def close() =
-            channelHandler.close()
-          def drain() = {
-            channelHandler.drain()
-            channelHandler.onShutdown
-          }
-        }
-
-        channels.synchronized { channels += handle }
-        channelHandler.onShutdown ensure {
-          channels.synchronized {
-            channels.remove(handle)
-          }
-        }
-
-        pipeline.addLast("channelHandler", channelHandler)
-        pipeline
-      }
-    })
-
-    val serverChannel = bs.bind(config.bindTo.get)
-
-    Timer.register(closeNotifier)
-    new Server {
-      def close(timeout: Duration = Duration.MaxValue) = {
-        // According to NETTY-256, the following sequence of operations
-        // has no race conditions.
-        //
-        //   - close the server socket  (awaitUninterruptibly)
-        //   - close all open channels  (awaitUninterruptibly)
-        //   - releaseExternalResources
-        //
-        // We modify this a little bit, to allow for graceful draining,
-        // closing open channels only after the grace period.
-        //
-        // The next step here is to do a half-closed socket: we want to
-        // suspend reading, but not writing to a socket.  This may be
-        // important for protocols that do any pipelining, and may
-        // queue in their codecs.
-
-        // On cursory inspection of the relevant Netty code, this
-        // should never block (it is little more than a close() syscall
-        // on the FD).
-        serverChannel.close().awaitUninterruptibly()
-
-        // At this point, no new channels may be created.
-        val joined = Future.join(channels.synchronized { channels toArray } map { _.drain() })
-
-        // Wait for all channels to shut down.
-        joined.get(timeout)
-
-        // Force close any remaining connections. Don't wait for
-        // success. Buffer channels into an array to avoid
-        // deadlocking.
-        channels.synchronized { channels toArray } foreach { _.close() }
-
-        // Release any gauges we've created.
-        gauges foreach { _.remove() }
-
-        bs.releaseExternalResources()
-
-        // Notify all registered resources that service is closing so they can
-        // perform their own cleanup.
-        closing.updateIfEmpty(Return(()))
-      }
-
-      def localAddress: SocketAddress = serverChannel.getLocalAddress()
-
-      override def toString = "Server(%s)".format(config.toString)
-    }
-  }
+  /**
+   * Construct the Server, given the provided ServiceFactory. This
+   * is useful if the protocol is stateful (e.g., requires authentication
+   * or supports transactions).
+   */
+  def build(serviceFactory: ServiceFactory[Req, Rep])(
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Server = MkServer(config, serviceFactory)
 
   /**
    * Construct a Service, with runtime checks for builder
@@ -670,4 +390,282 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def unsafeBuild(service: Service[Req, Rep]): Server =
     withConfig(_.validated).build(service)
+}
+
+private[builder] object MkServer {
+  def apply[Req, Rep](
+    config: ServerConfig.FullySpecified[Req, Rep],
+    serviceFactory: ServiceFactory[Req, Rep]
+  ) = {
+    val mk = new MkServer[Req, Rep](config, serviceFactory)
+    mk()
+  }
+}
+
+/**
+ * MkServer builds a server from a configuration and service factory.
+ */
+private[builder] class MkServer[Req, Rep](
+  val config: ServerConfig.FullySpecified[Req, Rep],
+  val inputServiceFactory: ServiceFactory[Req, Rep]
+)  {
+  val serverConfig = ServerCodecConfig(serviceName = config.name, boundAddress = config.bindTo)
+  val codec = config.codecFactory(serverConfig)
+  val bootstrap = {
+    config.channelFactory.acquire()
+    val bs = config.serverBootstrap getOrElse {
+      val serverCf = new ChannelFactoryToServerChannelFactory(config.channelFactory)
+      new ServerBootstrap(serverCf)
+    }
+
+    bs.setOption("soLinger", 0) // XXX: (TODO)
+    bs.setOption("reuseAddress", true)
+    bs.setOption("child.tcpNoDelay", true)
+
+    config.backlog.foreach { s => bs.setOption("backlog", s) }
+    config.bufferSize.send foreach { s => bs.setOption("child.send", s) }
+    config.bufferSize.recv foreach { s => bs.setOption("child.receiveBufferSize", s) }
+    config.keepAlive.foreach { s => bs.setOption("child.keepAlive", s) }
+
+    bs
+  }
+
+  val statsReceiverOpt = config.statsReceiver map { sr => sr.scope(config.name) }
+  val statsReceiver = statsReceiverOpt getOrElse NullStatsReceiver
+
+  val closer = CloseNotifier.makeLifoCloser()
+  val closeNotifier: CloseNotifier = closer
+  val monitor = config.monitor map(_(config.name, config.bindTo)) getOrElse NullMonitor
+  val channels = new DefaultChannelGroup
+
+  // We share some filters & handlers for cumulative stats.
+  val channelStatsHandler = statsReceiverOpt map { new ChannelStatsHandler(_) }
+  val channelRequestStatsHandler = statsReceiverOpt map { new ChannelRequestStatsHandler(_) }
+
+  val semaphoreFilter = config.maxConcurrentRequests map { max =>
+    val sem = new AsyncSemaphore(max)
+    val g0 = statsReceiver.addGauge("request_concurrency") {
+      max - sem.numPermitsAvailable
+    }
+    val g1 = statsReceiver.addGauge("request_queue_size") { sem.numWaiters }
+    closeNotifier.onClose {
+      g0.remove()
+      g1.remove()
+    }
+    new RequestSemaphoreFilter[Req, Rep](sem)
+  } getOrElse Filter.identity[Req, Rep]
+
+  val filter = {  // per connection filter stack
+    val statsFilter = statsReceiverOpt map(new StatsFilter[Req, Rep](_)) getOrElse Filter.identity[Req, Rep]
+    val timeoutFilter = config.requestTimeout map { duration =>
+      val e = new IndividualRequestTimeoutException(duration)
+      new TimeoutFilter[Req, Rep](duration, e)
+    } getOrElse Filter.identity[Req, Rep]
+
+    semaphoreFilter andThen statsFilter andThen timeoutFilter
+  }
+
+  val serviceFactory: ServiceFactory[Req, Rep] = {
+    var factory = inputServiceFactory
+
+    if (config.cancelOnHangup)
+      factory = factory map { service => new CancelOnHangupService(service) }
+
+    config.openConnectionsThresholds foreach { threshold =>
+      factory = new IdleConnectionFilter(
+        factory, threshold, statsReceiver.scope("idle"))
+    }
+
+    filter andThen factory
+  }
+
+  def mkPipeline() = {
+    val pipeline = codec.pipelineFactory.getPipeline
+    config.logger foreach { logger =>
+      pipeline.addFirst(
+        "channelLogger", ChannelSnooper(config.name)(logger.info))
+    }
+
+    channelStatsHandler foreach { handler =>
+      pipeline.addFirst("channelStatsHandler", handler)
+    }
+
+    // Note that the timeout is *after* request decoding. This
+    // prevents death from clients trying to DoS by slowly
+    // trickling in bytes to our (accumulating) codec.
+    config.readTimeout foreach { howlong =>
+      val (timeoutValue, timeoutUnit) = howlong.inTimeUnit
+      pipeline.addLast(
+        "readTimeout",
+        new ReadTimeoutHandler(Timer.defaultNettyTimer, timeoutValue, timeoutUnit))
+    }
+
+    config.writeCompletionTimeout foreach { howlong =>
+      pipeline.addLast(
+        "writeCompletionTimeout",
+        new WriteCompletionTimeoutHandler(Timer.default, howlong))
+    }
+
+    // SSL comes first so that ChannelSnooper gets plaintext
+    addTls(pipeline)
+
+    // Add this after the serialization to get an accurate request
+    // count.
+    channelRequestStatsHandler foreach { handler =>
+      pipeline.addLast("channelRequestStatsHandler", handler)
+    }
+
+    pipeline
+  }
+
+  private[this] def addTls(pipeline: ChannelPipeline) =
+    config.tls foreach { case (certificatePath, keyPath, caCertificatePath, ciphers, nextProtos) =>
+      val engine: Engine = Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)
+      engine.self.setUseClientMode(false)
+      engine.self.setEnableSessionCreation(true)
+
+      val handler = new SslHandler(engine.self)
+
+      // Certain engine implementations need to handle renegotiation internally,
+      // as Netty's TLS protocol parser implementation confuses renegotiation and
+      // notification events. Renegotiation will be enabled for those Engines with
+      // a true handlesRenegotiation value.
+      handler.setEnableRenegotiation(engine.handlesRenegotiation)
+
+      pipeline.addFirst("ssl", handler)
+
+      // Netty's SslHandler does not provide SSLEngine implementations any hints that they
+      // are no longer needed (namely, upon disconnection.) Since some engine implementations
+      // make use of objects that are not managed by the JVM's memory manager, we need to
+      // know when memory can be released. The SslShutdownHandler will invoke the shutdown
+      // method on implementations that define shutdown(): Unit.
+      pipeline.addFirst(
+        "sslShutdown",
+        new SslShutdownHandler(engine)
+      )
+
+      // Information useful for debugging SSL issues, such as the certificate, cipher spec,
+      // remote address is provided to the SSLEngine implementation by the SslIdentifierHandler.
+      // The SslIdentifierHandler will invoke the setIdentifier method on implementations
+      // that define setIdentifier(String): Unit.
+      pipeline.addFirst(
+        "sslIdentifier",
+        new SslIdentifierHandler(engine, certificatePath, ciphers)
+      )
+    }
+
+
+  // Due to tracing semantics, we need to place these at the
+  // very bottom of the service stack. We should reconsider
+  // the tracing interface.
+  val tracer = config.tracerFactory(closeNotifier)
+  val tracingFilter = new TracingFilter[Req, Rep](tracer)
+
+  bootstrap.setPipelineFactory(new ChannelPipelineFactory {
+    def getPipeline() = {
+      val pipeline = mkPipeline()
+
+      // Make some connection-specific changes to the service
+      // factory.
+      var thisServiceFactory = serviceFactory
+
+      // We add the idle time after the codec. This ensures that a
+      // client couldn't DoS us by sending lots of little messages
+      // that don't produce a request object for some time. In other
+      // words, the idle time refers to the idle time from the view
+      // of the protocol.
+      val idleTime = config.hostConnectionMaxIdleTime
+      val lifeTime = config.hostConnectionMaxLifeTime
+
+      if (idleTime.isDefined || lifeTime.isDefined) {
+        val closingHandler = new ChannelClosingHandler
+        pipeline.addLast("closingHandler", closingHandler)
+        thisServiceFactory = serviceFactory map { service =>
+          val closingService = new ServiceProxy(service) {
+            override def release() {
+              closingHandler.close()
+              super.release()
+            }
+          }
+          new ExpiringService(
+            closingService, idleTime, lifeTime, Timer.default,
+            statsReceiver.scope("expired")
+          )
+
+        }
+      }
+
+      // These have to go last (ie. first in the stack) so that
+      // protocol-specific trace support can override our generic
+      // one here.
+      val monitorFilter = new MonitorFilter[Req, Rep](
+        monitor andThen Monitor.mk { case exc =>
+          Logger.getLogger(config.name).log(Level.SEVERE, "A Service threw an exception", exc)
+          false
+        }
+      )
+
+      val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
+
+      val connServiceFactory =
+        handletimeFilter andThen
+        monitorFilter andThen
+        tracingFilter andThen
+        codec.prepareConnFactory(thisServiceFactory)
+
+      val dispatcher = new ServiceDispatcher(
+        connServiceFactory, codec.mkServerDispatcher, statsReceiver,
+        Logger.getLogger(config.name), monitor, channels)
+      pipeline.addLast("finagleDispatcher", dispatcher)
+
+      pipeline
+    }
+  })
+
+  def apply(): Server = new Server {
+    private[this] val serverChannel = bootstrap.bind(config.bindTo)
+    Timer.register(closeNotifier)
+
+    def close(timeout: Duration = Duration.MaxValue) = {
+      // According to NETTY-256, the following sequence of operations
+      // has no race conditions.
+      //
+      //   - close the server socket  (awaitUninterruptibly)
+      //   - close all open channels  (awaitUninterruptibly)
+      //   - releaseExternalResources
+      //
+      // We modify this a little bit, to allow for graceful draining,
+      // closing open channels only after the grace period.
+      //
+      // The next step here is to do a half-closed socket: we want to
+      // suspend reading, but not writing to a socket.  This may be
+      // important for protocols that do any pipelining, and may
+      // queue in their codecs.
+
+      serverChannel.close().awaitUninterruptibly()
+
+      // At this point, no new channels may be created.
+      val active = channels.asScala
+      for (ch <- active)
+        ch.getPipeline.get(classOf[ServiceDispatcher[Req, Rep]]).drain()
+
+      val closing = new DefaultChannelGroupFuture(
+        channels, active map(_.getCloseFuture) asJava)
+      closing.await(timeout.inMilliseconds)
+
+      // Force close any remaining connections. Don't wait for
+      // success.
+      channels.close()
+
+      bootstrap.releaseExternalResources()
+
+      // Notify all registered resources that service is closing so they can
+      // perform their own cleanup.
+      closer.close()
+    }
+
+    def localAddress: SocketAddress = serverChannel.getLocalAddress()
+
+    override def toString = "Server(%s)".format(config.toString)
+  }
 }

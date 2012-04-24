@@ -27,7 +27,7 @@ object Ssl {
    * @param caCertPath [OpenSSL] The path to the optional PEM encoded CA cert file
    * @param cipherSpec [OpenSSL] The cipher spec
    * @throws RuntimeException if no provider could be initialized
-   * @returns an SSLEngine
+   * @return an SSLEngine
    */
   def server(certificatePath: String,
              keyPath: String,
@@ -64,6 +64,11 @@ object Ssl {
    * Get a client engine
    */
   def client(): Engine = JSSE.client()
+  
+  /**
+   * Get a client engine, from the given context
+   */
+  def client(sslContext : SSLContext): Engine = JSSE.client(sslContext)
 
   /**
    * Get a client engine that doesn't check the validity of certificates

@@ -4,7 +4,6 @@ import com.twitter.common.stats.Stats
 import org.specs.Specification
 import scala.collection.JavaConversions._
 
-
 //TODO after each clear Stats
 object CommonsStatsReceiverSpec extends Specification {
   doAfter{
@@ -19,6 +18,14 @@ object CommonsStatsReceiverSpec extends Specification {
       assert (Stats.getVariable("foo").read == 7)
       counter.incr(-8)
       assert (Stats.getVariable("foo").read == -1)
+    }
+
+    "memoize objects with the same name" in {
+      val sr = new CommonsStatsReceiver()
+      sr.counter("one") must be(sr.counter("one"))
+      sr.counter("one", "two") must be(sr.counter("one", "two"))
+
+      sr.counter("one") mustNot be(sr.counter("one", "two"))
     }
   }
 
@@ -41,7 +48,7 @@ object CommonsStatsReceiverSpec extends Specification {
       val receiver = new CommonsStatsReceiver()
       val stat1 = receiver.stat("what")
       val stat2 = receiver.stat("what")
-      assert (stat1 == stat2)
+      stat1 must be(stat2)
     }
   }
 

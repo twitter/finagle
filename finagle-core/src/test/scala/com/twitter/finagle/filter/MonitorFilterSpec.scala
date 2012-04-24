@@ -1,13 +1,13 @@
 package com.twitter.finagle.filter
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.{Monitor, Promise, Return, Throw}
 
 import com.twitter.finagle.Service
 
-object MonitorFilterSpec extends Specification with Mockito {
+class MonitorFilterSpec extends SpecificationWithJUnit with Mockito {
   class MockMonitor extends Monitor {
       def handle(cause: Throwable) = false
     }

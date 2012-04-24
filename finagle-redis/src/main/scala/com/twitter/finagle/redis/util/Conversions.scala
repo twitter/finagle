@@ -25,6 +25,10 @@ object BytesToString {
   def fromList(args: List[Array[Byte]], charset: String = "UTF-8") = args.map { arg =>
     BytesToString(arg, charset)
   }
+  def fromMap(args: Map[Array[Byte], Array[Byte]], charset: String = "UTF-8") =
+    args.toSeq map { arg =>
+      (BytesToString(arg._1, charset), BytesToString(arg._2, charset))
+    }
 }
 object StringToBytes {
   def apply(arg: String, charset: String = "UTF-8") = arg.getBytes(charset)
@@ -39,11 +43,18 @@ object StringToChannelBuffer {
 }
 object NumberFormat {
   import com.twitter.naggati.ProtocolError
-  def toLong(arg: String): Long = {
+  def toDouble(arg: String): Double = {
     try {
-      arg.toLong
+      arg.toDouble
     } catch {
-      case e: Throwable => throw new ProtocolError("Unable to convert %s to Long".format(arg))
+      case e: Throwable => throw new ProtocolError("Unable to convert %s to Double".format(arg))
+    }
+  }
+  def toFloat(arg: String): Float = {
+    try {
+      arg.toFloat
+    } catch {
+      case e: Throwable => throw new ProtocolError("Unable to convert %s to Float".format(arg))
     }
   }
   def toInt(arg: String): Int = {
@@ -53,11 +64,11 @@ object NumberFormat {
       case e: Throwable => throw new ProtocolError("Unable to convert %s to Int".format(arg))
     }
   }
-  def toFloat(arg: String): Float = {
+  def toLong(arg: String): Long = {
     try {
-      arg.toFloat
+      arg.toLong
     } catch {
-      case e: Throwable => throw new ProtocolError("Unable to convert %s to Float".format(arg))
+      case e: Throwable => throw new ProtocolError("Unable to convert %s to Long".format(arg))
     }
   }
 }

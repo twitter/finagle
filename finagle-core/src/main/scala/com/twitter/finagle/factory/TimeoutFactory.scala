@@ -4,7 +4,7 @@ import com.twitter.util
 import com.twitter.util.{Future, Duration}
 import com.twitter.finagle.util.Timer
 
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ServiceTimeoutException}
+import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ServiceTimeoutException, ClientConnection}
 
 /**
  * A factory wrapper that times out the service acquisition after the
@@ -17,9 +17,8 @@ class TimeoutFactory[Req, Rep](
     timer: util.Timer = Timer.default)
   extends ServiceFactoryProxy[Req, Rep](self)
 {
-  override def make() = {
-    val res = super.make()
-
+  override def apply(conn: ClientConnection) = {
+    val res = super.apply(conn)
     res.within(timer, timeout) rescue {
       case _: java.util.concurrent.TimeoutException =>
         res.cancel()

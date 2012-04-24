@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Method, Request, Response, Status}
+import com.twitter.finagle.http.{MediaType, Method, Request, Response, Status}
 import com.twitter.util.Future
 import org.specs.Specification
 
@@ -14,7 +14,7 @@ object JsonpFilterSpec extends Specification {
      if (request.params.contains("not_json"))
        response.mediaType = "not_json"
      else
-       response.setContentTypeJson()
+       response.mediaType = MediaType.Json
      response.write("{}")
      Future.value(response)
    }
@@ -25,7 +25,7 @@ object JsonpFilterSpec extends Specification {
       val request = Request("/test.json", "callback" -> "mycallback")
 
       val response = JsonpFilter(request, dummyService)()
-      response.contentType   must_== Some("application/javascript;charset=utf-8")
+      response.contentType   must_== Some("application/javascript")
       response.contentString must_== "mycallback({});"
     }
 
@@ -35,7 +35,7 @@ object JsonpFilterSpec extends Specification {
       val response = JsonpFilter(request, dummyService)()
       response.mediaType     must_== Some("not_json")
       response.contentString must_== "{}"
-      response.contentType   must_== Some("not_json;charset=utf-8")
+      response.contentType   must_== Some("not_json")
     }
 
     "ignore HEAD" in {
@@ -43,7 +43,7 @@ object JsonpFilterSpec extends Specification {
       request.method = Method.Head
 
       val response = JsonpFilter(request, dummyService)()
-      response.contentType   must_== Some("application/json;charset=utf-8")
+      response.contentType   must_== Some("application/json")
       response.contentString must_== "{}"
     }
 
@@ -52,7 +52,7 @@ object JsonpFilterSpec extends Specification {
       val request = Request("/test.json", "callback" -> "")
 
       val response = JsonpFilter(request, dummyService)()
-      response.contentType   must_== Some("application/json;charset=utf-8")
+      response.contentType   must_== Some("application/json")
       response.contentString must_== "{}"
     }
 

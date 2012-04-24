@@ -1,12 +1,12 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import com.twitter.finagle.Service
 import com.twitter.util.{Future, Throw}
 import com.twitter.conversions.time._
 
-object ServiceSpec extends Specification {
+class ServiceSpec extends SpecificationWithJUnit {
   "Service" should {
     "rescue" in {
       val e = new RuntimeException("yargs")

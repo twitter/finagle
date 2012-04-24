@@ -1,12 +1,12 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
-import org.specs.Specification
 import com.twitter.finagle.memcached.protocol.text.client.Decoder
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.{TokensWithData, ValueLines, Tokens, StatLines}
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.specs.mock.Mockito
+import org.specs.SpecificationWithJUnit
 
-object DecoderSpec extends Specification with Mockito {
+class DecoderSpec extends SpecificationWithJUnit with Mockito {
   "Decoder" should {
     val decoder = new Decoder
     decoder.start()

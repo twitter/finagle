@@ -1,23 +1,24 @@
 package com.twitter.finagle.kestrel.integration
 
-import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.conversions.time._
 import com.twitter.finagle.Service
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
-import org.specs.Specification
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Time, RandomSocket}
-import com.twitter.conversions.time._
+import java.net.InetSocketAddress
+import org.specs.Specification
 
 object InterpreterServiceSpec extends Specification {
   "InterpreterService" should {
     var server: Server = null
     var client: Service[Command, Response] = null
+    var address: InetSocketAddress = null
 
     doBefore {
-      val address = RandomSocket()
-      server = new Server(address)
-      server.start()
+      server = new Server(new InetSocketAddress(0))
+      address = server.start().localAddress.asInstanceOf[InetSocketAddress]
       client = ClientBuilder()
         .hosts("localhost:" + address.getPort)
         .codec(Kestrel())

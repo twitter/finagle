@@ -1,22 +1,18 @@
 package com.twitter.finagle.stress
 
-import java.net.InetSocketAddress
-
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, DefaultHttpResponse,
-  DefaultHttpRequest, HttpVersion, HttpResponseStatus,
-  HttpMethod, HttpHeaders}
-
 import com.twitter.conversions.time._
-import com.twitter.util.{Future, RandomSocket, Return, Throw, Time}
-import com.twitter.ostrich.stats
-
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
-import com.twitter.finagle.util.Timer
-import com.twitter.finagle.Service
 import com.twitter.finagle.stats.OstrichStatsReceiver
+import com.twitter.finagle.util.Timer
+import com.twitter.ostrich.stats
+import com.twitter.util.{Future, Return, Throw, Time}
+import java.net.{SocketAddress, InetSocketAddress}
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.http.{
+  DefaultHttpRequest, HttpVersion, HttpResponseStatus, HttpMethod, HttpHeaders, HttpRequest
+  , HttpResponse, DefaultHttpResponse}
 
 object EndToEndStress {
   private[this] object HttpService
@@ -47,7 +43,7 @@ object EndToEndStress {
     }
   }
 
-  private[this] def run(concurrency: Int, addr: InetSocketAddress) {
+  private[this] def run(concurrency: Int, addr: SocketAddress) {
     val service = ClientBuilder()
       .name("stressClient")
       .reportTo(new OstrichStatsReceiver)
@@ -60,10 +56,9 @@ object EndToEndStress {
   }
 
   def main(args: Array[String]) {
-    val serverAddr = RandomSocket()
     val server = ServerBuilder()
       .name("stressServer")
-      .bindTo(serverAddr)
+      .bindTo(new InetSocketAddress(0))
       .codec(Http())
       .reportTo(new OstrichStatsReceiver)
       .maxConcurrentRequests(5)
@@ -75,6 +70,6 @@ object EndToEndStress {
       Stats.prettyPrintStats()
     }
 
-    run(100, serverAddr)
+    run(100, server.localAddress)
   }
 }

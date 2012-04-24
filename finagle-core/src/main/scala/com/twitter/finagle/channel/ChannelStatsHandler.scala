@@ -13,7 +13,6 @@ import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext, MessageEvent}
 
-
 class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
@@ -24,6 +23,8 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
   private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
+  private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
+  private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
 
   private[this] val connectionCount = new AtomicInteger(0)
 
@@ -52,7 +53,9 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
     e.getMessage match {
       case buffer: ChannelBuffer =>
-        channelWriteCount.getAndAdd(buffer.readableBytes)
+        val readableBytes = buffer.readableBytes
+        channelWriteCount.getAndAdd(readableBytes)
+        sentBytes.incr(readableBytes)
       case _ =>
         log.warning("ChannelStatsHandler received non-channelbuffer write")
     }
@@ -64,7 +67,9 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     e.getMessage match {
       case buffer: ChannelBuffer =>
         val (channelReadCount, _) = ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
-        channelReadCount.getAndAdd(buffer.readableBytes())
+        val readableBytes = buffer.readableBytes
+        channelReadCount.getAndAdd(readableBytes)
+        receivedBytes.incr(readableBytes)
       case _ =>
         log.warning("ChannelStatsHandler received non-channelbuffer read")
     }

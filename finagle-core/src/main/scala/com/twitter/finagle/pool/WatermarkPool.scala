@@ -7,12 +7,15 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.{
   Service, ServiceFactory, ServiceClosedException,
   TooManyWaitersException, ServiceProxy,
-  CancelledConnectionException}
+  CancelledConnectionException, ClientConnection}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
  * The watermark pool is an object pool with low & high
- * watermarks. This behaves as follows: the pool will persist up to
+ * watermarks. It keeps the number of services from a given service
+ * factory in a certain range.
+ *
+ * This behaves as follows: the pool will persist up to
  * the low watermark number of items (as long as they have been
  * created), and won't start queueing requests until the high
  * watermark has been reached. Put another way: up to `lowWatermark'
@@ -41,7 +44,7 @@ class WatermarkPool[Req, Rep](
   private[this] def flushWaiters() = synchronized {
     while (numServices < highWatermark && !waiters.isEmpty) {
       val waiter = waiters.dequeue()
-      val res = make() respond { waiter() = _ }
+      val res = this() respond { waiter() = _ }
       waiter.linkTo(res)
     }
   }
@@ -88,7 +91,7 @@ class WatermarkPool[Req, Rep](
     }
   }
 
-  def make(): Future[Service[Req, Rep]] = synchronized {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
     if (!isOpen)
       return Future.exception(new ServiceClosedException)
 
@@ -97,7 +100,7 @@ class WatermarkPool[Req, Rep](
         Future.value(service)
       case None if numServices < highWatermark =>
         numServices += 1
-        factory.make() onFailure { _ =>
+        factory(conn) onFailure { _ =>
           synchronized {
             numServices -= 1
             flushWaiters()

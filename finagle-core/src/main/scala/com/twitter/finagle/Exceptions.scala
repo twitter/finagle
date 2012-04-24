@@ -14,7 +14,7 @@ trait NoStacktrace extends Exception {
   this.setStackTrace(Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1)))
 }
 
-// Request failures (eg. for request behavior changing brokers.)
+/** Request failures (eg. for request behavior changing brokers.) */
 class RequestException(cause: Throwable) extends Exception(cause) with NoStacktrace with SourcedException {
   def this() = this(null)
   override def getStackTrace = if (cause != null) cause.getStackTrace else super.getStackTrace
@@ -24,7 +24,7 @@ trait TimeoutException extends SourcedException { self: Exception =>
   protected val timeout: Duration
   protected val explanation: String
 
-  override def getMessage = "exceeded %s while %s".format(timeout, explanation)
+  override def getMessage = "exceeded %s to %s while %s".format(timeout, serviceName, explanation)
 }
 
 class RequestTimeoutException(
@@ -52,7 +52,9 @@ class NotShardableException         extends NotServableException
 class ShardNotAvailableException    extends NotServableException
 
 // Channel exceptions are failures on the channels themselves.
-class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress) extends Exception(underlying) with SourcedException {
+class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
+  extends Exception(underlying) with SourcedException
+{
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
   override def getMessage =
@@ -122,6 +124,11 @@ object ChannelException {
     }
   }
 }
+
+// Transport layer errors
+class TransportException extends Exception with SourcedException
+class CancelledReadException extends TransportException
+class CancelledWriteException extends TransportException
 
 // Service layer errors.
 class ServiceException                                         extends Exception with SourcedException

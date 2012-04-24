@@ -1,20 +1,23 @@
 package com.twitter.finagle.channel
 
+import com.twitter.finagle._
+import com.twitter.finagle.dispatch.{SerialClientDispatcher, ClientDispatcherFactory}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.util.{Promise, Return, Throw, Future}
 import java.net.SocketAddress
-import scala.collection.JavaConversions._
-
-import org.specs.Specification
-import org.specs.mock.Mockito
-import org.mockito.{Matchers, ArgumentCaptor}
-
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
+import org.mockito.{Matchers, ArgumentCaptor}
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
+import scala.collection.JavaConversions._
 
-import com.twitter.util.{Promise, Return, Throw, Future}
+object ChannelServiceSpec extends SpecificationWithJUnit with Mockito {
+  // TODO: we should really mock/drive the dispatcher here. his is
+  // Tcurrently more of an integration test.
+  def mkDispatcher[Req, Rep]: ClientDispatcherFactory[Req, Rep] =
+    (mkTrans) => new SerialClientDispatcher[Req, Rep](mkTrans())
 
-import com.twitter.finagle._
-
-object ChannelServiceSpec extends Specification with Mockito {
   "ChannelService" should {
     val pipeline = new DefaultChannelPipeline
     val channel = mock[Channel]
@@ -27,15 +30,14 @@ object ChannelServiceSpec extends Specification with Mockito {
     channel.getCloseFuture returns closeFuture
     channel.getRemoteAddress returns address
     pipeline.attach(channel, sink)
-
     "installs channel handler" in {
       pipeline.toMap.keySet.size() mustEqual 0
-      new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
+      new ChannelService[Any, Any](channel, mkDispatcher, NullStatsReceiver)
       pipeline.toMap.keySet.size() mustEqual 1
     }
 
     "write requests to the underlying channel" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, mkDispatcher, NullStatsReceiver)
       val future = service("hello")
       val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
       there was one(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
@@ -66,7 +68,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "propagate cancellation" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, mkDispatcher, NullStatsReceiver)
       val future = service("hello")
 
       future.isCancelled must beFalse
@@ -86,11 +88,17 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "receive replies" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, mkDispatcher, NullStatsReceiver)
       service.isAvailable must beTrue
       val future = service("hello")
-      service.isAvailable must beFalse
-      there was one(sink).eventSunk(Matchers.eq(pipeline), Matchers.any[ChannelEvent])
+      service.isAvailable must beTrue
+      val captor = ArgumentCaptor.forClass(classOf[ChannelEvent])
+      there was one(sink).eventSunk(Matchers.eq(pipeline), captor.capture)
+      captor.getValue must haveClass[DownstreamMessageEvent]
+      val dsme = captor.getValue.asInstanceOf[DownstreamMessageEvent]
+      // The serializing dispatcher will not read until the write
+      // succeeded.
+      dsme.getFuture.setSuccess()
 
       val handler = pipeline.getLast.asInstanceOf[ChannelUpstreamHandler]
       val context = mock[ChannelHandlerContext]
@@ -119,7 +127,6 @@ object ChannelServiceSpec extends Specification with Mockito {
         handler.handleUpstream(context, exceptionEvent)
         future.isDefined must beTrue
         future() must throwA(new UnknownChannelException(new Exception("weird"), address))
-        service.isAvailable must beFalse
 
         // The channel was also closed.
         val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
@@ -129,43 +136,26 @@ object ChannelServiceSpec extends Specification with Mockito {
          must be_==(ChannelState.OPEN))
         (eventCaptor.getValue.asInstanceOf[DownstreamChannelStateEvent].getValue
          must be_==(java.lang.Boolean.FALSE))
+
+        channel.isOpen returns false
+        service.isAvailable must beFalse
       }
 
       "on channel close" in {
         val stateEvent = mock[ChannelStateEvent]
         stateEvent.getState returns ChannelState.OPEN
         stateEvent.getValue returns java.lang.Boolean.FALSE
+        channel.isOpen returns false
         handler.handleUpstream(context, stateEvent)
 
         future.isDefined must beTrue
         future() must throwA[ChannelClosedException]
         service.isAvailable must beFalse
       }
-
-      "on ChannelServiceReply[markDead=true]" in {
-        event.getMessage returns ChannelServiceReply("olleh", true)
-        handler.handleUpstream(context, event)
-
-        // The channel was closed.
-        val eventCaptor = ArgumentCaptor.forClass(classOf[ChannelEvent])
-        there were two(sink).eventSunk(Matchers.eq(pipeline), eventCaptor.capture)
-        eventCaptor.getValue must haveClass[DownstreamChannelStateEvent]
-        (eventCaptor.getValue.asInstanceOf[DownstreamChannelStateEvent].getState
-         must be_==(ChannelState.OPEN))
-        (eventCaptor.getValue.asInstanceOf[DownstreamChannelStateEvent].getValue
-         must be_==(java.lang.Boolean.FALSE))
-      }
-
-      "on ChannelServiceReply[markDead=false]" in {
-        event.getMessage returns ChannelServiceReply("olleh", false)
-        handler.handleUpstream(context, event)
-        // No additional events on the channel.
-        there was one(sink).eventSunk(Matchers.eq(pipeline), Matchers.any[ChannelEvent])
-      }
     }
 
     "without a request" in {
-      val service = new ChannelService[String, String](channel, factory)
+      val service = new ChannelService[String, String](channel, mkDispatcher, NullStatsReceiver)
       service.isAvailable must beTrue
 
       "any response is considered spurious" in {
@@ -174,23 +164,8 @@ object ChannelServiceSpec extends Specification with Mockito {
         val event = mock[MessageEvent]
         event.getMessage returns "hello"
         handler.handleUpstream(context, event)
-        service.isAvailable must beFalse
+        service.isAvailable must beTrue
       }
-    }
-
-    "freak out on concurrent requests" in {
-      val service = new ChannelService[Any, Any](channel, mock[ChannelServiceFactory[Any, Any]])
-      val f0 = service("hey")
-      f0.isDefined must beFalse
-      val f1 = service("there")
-      f1.isDefined must beTrue
-      f1() must throwA[TooManyConcurrentRequestsException]
-    }
-
-    "notify the factory upon release" in {
-      val service = new ChannelService[String, String](channel, factory)
-      service.release()
-      there was one(factory).channelReleased(service)
     }
   }
 
@@ -206,6 +181,9 @@ object ChannelServiceSpec extends Specification with Mockito {
     channel.getPipeline returns pipeline
     val channelConfig = mock[ChannelConfig]
     channel.getConfig returns channelConfig
+    val closeFuture = new DefaultChannelFuture(channel, false)
+    channel.getCloseFuture() returns closeFuture
+    channel.close() returns closeFuture
     val channelFactory = mock[ChannelFactory]
     channelFactory.newChannel(any) returns channel
     bootstrap.getFactory returns channelFactory
@@ -213,7 +191,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     val channelFuture = Channels.future(channel)
     channel.connect(address) returns channelFuture
 
-    val factory = new ChannelServiceFactory[Any, Any](bootstrap, Future.value(_))
+    val factory = new ChannelServiceFactory[Any, Any](bootstrap, mkDispatcher)
 
     "close the underlying bootstrap on close() with no outstanding requests" in {
       factory.close()
@@ -221,7 +199,7 @@ object ChannelServiceSpec extends Specification with Mockito {
     }
 
     "close the underlying bootstrap only after all channels are released" in {
-      val f = factory.make()
+      val f = factory()
       there was one(channelFactory).newChannel(pipeline)
       there was one(channel).connect(address)
       f.isDefined must beFalse
@@ -230,13 +208,14 @@ object ChannelServiceSpec extends Specification with Mockito {
 
       factory.close()
       there was no(bootstrap).releaseExternalResources()
+      there was no(channel).close()
 
-      f().release()
+      closeFuture.setSuccess()
       there was one(bootstrap).releaseExternalResources()
     }
 
     "propagate bootstrap errors" in {
-      val f = factory.make()
+      val f = factory()
       f.isDefined must beFalse
       there was one(channel).connect(address)
 
@@ -254,36 +233,9 @@ object ChannelServiceSpec extends Specification with Mockito {
       val e = new ChannelPipelineException("sad panda")
       channel.connect(address) throws e
 
-      val f = factory.make()
+      val f = factory()
       f.isDefined must beTrue
       f() must throwA(e)
-    }
-
-    "prepareChannel" in {
-      val preparedPromise = new Promise[Service[Any, Any]]
-      val prepareChannel = mock[Service[Any, Any] => Future[Service[Any, Any]]]
-      val underlyingService = mock[Service[Any, Any]]
-      prepareChannel(any) returns preparedPromise
-      val factory = new ChannelServiceFactory[Any, Any](bootstrap, prepareChannel) {
-        override protected def mkService(ch: Channel) = underlyingService
-      }
-
-      "be called on new services" in {
-        val p = factory.make()
-        there was no(prepareChannel)(any)
-        channelFuture.setSuccess()
-        there was one(prepareChannel)(any)
-      }
-
-      "when failed, underlying service should be released" in {
-        val exc = new Exception("sad panda")
-        prepareChannel(any) returns Future.exception(exc)
-        there was no(underlyingService).release
-        val p = factory.make()
-        channelFuture.setSuccess()
-        p.poll must beSome(Throw(exc))
-        there was one(underlyingService).release()
-      }
     }
   }
 }

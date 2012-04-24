@@ -21,6 +21,7 @@ object ZAdd {
       throw ClientError("Invalid use of ZADD")
   }
   def apply(key: String, member: ZMember) = new ZAdd(key, List(member))
+  def apply(key: Array[Byte], member: ZMember) = new ZAdd(new String(key), List(member))
 }
 
 
@@ -32,6 +33,7 @@ object ZCard {
     val list = BytesToString.fromList(trimList(args, 1, "ZCARD"))
     new ZCard(list(0))
   }
+  def apply(key: Array[Byte]) = new ZCard(new String(key))
 }
 
 
@@ -44,10 +46,12 @@ object ZCount {
     val list = BytesToString.fromList(trimList(args, 3, "ZCOUNT"))
     new ZCount(list(0), ZInterval(list(1)), ZInterval(list(2)))
   }
+  def apply(key: Array[Byte], min: ZInterval, max: ZInterval) =
+    new ZCount(BytesToString(key), min, max)
 }
 
 
-case class ZIncrBy(key: String, amount: Float, member: Array[Byte])
+case class ZIncrBy(key: String, amount: Double, member: Array[Byte])
   extends StrictKeyCommand
   with StrictMemberCommand
 {
@@ -63,7 +67,7 @@ object ZIncrBy {
     val list = trimList(args, 3, "ZINCRBY")
     val key = BytesToString(list(0))
     val amount = RequireClientProtocol.safe {
-      NumberFormat.toFloat(BytesToString(list(1)))
+      NumberFormat.toDouble(BytesToString(list(1)))
     }
     new ZIncrBy(key, amount, list(2))
   }
@@ -149,6 +153,10 @@ object ZRem {
     val remaining = args.drop(1)
     new ZRem(key, remaining)
   }
+  def apply(key: Array[Byte], members: Seq[Array[Byte]]) =
+    new ZRem(new String(key), members.toList)
+  def apply(key: Array[Byte], members: List[String]) =
+    new ZRem(new String(key), StringToBytes.fromList(members))
 }
 
 
@@ -200,6 +208,8 @@ case class ZRevRange(
 object ZRevRange extends ZRangeCmdCompanion {
   override def get(key: String, start: Int, stop: Int, withScores: Option[CommandArgument]) =
     new ZRevRange(key, start, stop, withScores)
+  def apply(key: Array[Byte], start: Int, stop: Int) =
+    new ZRevRange(new String(key), start, stop)
 }
 
 
@@ -246,6 +256,7 @@ object ZScore {
     val list = trimList(args, 2, "ZSCORE")
     new ZScore(BytesToString(args(0)), args(1))
   }
+  def apply(key: Array[Byte], member: Array[Byte]) = new ZScore(BytesToString(key), member)
 }
 
 
@@ -279,18 +290,19 @@ case class ZInterval(value: String) {
   private val representation = value.toLowerCase match {
     case N_INF => N_INF
     case P_INF => P_INF
-    case float => float.head match {
+    case double => double.head match {
       case EXCLUSIVE => RequireClientProtocol.safe {
-        NumberFormat.toFloat(float.tail)
-        float
+        NumberFormat.toDouble(double.tail)
+        double
       }
       case f => RequireClientProtocol.safe {
-        NumberFormat.toFloat(value)
-        float
+        NumberFormat.toDouble(value)
+        double
       }
     }
   }
   override def toString = representation
+  def toBytes = representation.getBytes
 }
 object ZInterval {
   private val P_INF = "+inf"
@@ -299,13 +311,13 @@ object ZInterval {
 
   val MAX = new ZInterval(P_INF)
   val MIN = new ZInterval(N_INF)
-  def apply(float: Float) = new ZInterval(float.toString)
+  def apply(double: Double) = new ZInterval(double.toString)
   def apply(v: Array[Byte]) = new ZInterval(BytesToString(v))
-  def exclusive(float: Float) = new ZInterval("%c%s".format(EXCLUSIVE, float.toString))
+  def exclusive(double: Double) = new ZInterval("%c%s".format(EXCLUSIVE, double.toString))
 }
 
 
-case class ZMember(score: Float, member: Array[Byte])
+case class ZMember(score: Double, member: Array[Byte])
   extends StrictScoreCommand
   with StrictMemberCommand
 {
@@ -315,7 +327,7 @@ case class ZMember(score: Float, member: Array[Byte])
 
 
 sealed trait ScoreCommand extends Command {
-  val score: Float
+  val score: Double
 }
 sealed trait StrictScoreCommand extends ScoreCommand {
 }
@@ -349,7 +361,7 @@ object ZMembers {
       case score :: member :: Nil =>
         ZMember(
           RequireClientProtocol.safe {
-            NumberFormat.toFloat(BytesToString(score))
+            NumberFormat.toDouble(BytesToString(score))
           },
           member)
       case _ =>

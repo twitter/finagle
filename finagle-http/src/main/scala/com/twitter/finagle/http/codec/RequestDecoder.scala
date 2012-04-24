@@ -2,15 +2,15 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.logging.Logger
 import com.twitter.finagle.http.Request
-import org.jboss.netty.channel.{Channel, Channels, ChannelHandlerContext, MessageEvent,
-  SimpleChannelHandler}
+import org.jboss.netty.channel.{Channels, ChannelHandlerContext, MessageEvent, SimpleChannelHandler}
 import org.jboss.netty.handler.codec.http.HttpRequest
 
 
-/** Convert Netty Request to a Finagle-HTTP Request. */
+/**
+ * Convert Netty Requests to Finagle-HTTP Requests
+ */
 class RequestDecoder extends SimpleChannelHandler {
-
-  protected[this] val log = Logger("finagle-http")
+  private[this] val log = Logger("finagle-http")
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {

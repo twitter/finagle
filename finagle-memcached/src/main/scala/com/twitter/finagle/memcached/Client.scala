@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached
 
 import scala.collection.JavaConversions._
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 
 import _root_.java.net.InetSocketAddress
 import _root_.java.util.{Map => JMap}
@@ -67,15 +67,32 @@ case class GetsResult(getResult: GetResult) {
 }
 
 object GetResult {
+  /**
+   * Equivalaent to results.reduceLeft { _ ++ _ }, but written to be more efficient.
+   */
   private[memcached] def merged(results: Seq[GetResult]): GetResult = {
-    results.foldLeft(GetResult()) { _ ++ _ }
+    results match {
+      case Nil => GetResult()
+      case Seq(single) => single
+      case Seq(a, b) => a ++ b
+      case _ =>
+        val hits = new mutable.HashMap[String, Value]
+        val misses = new mutable.HashSet[String]
+        val failures = new mutable.HashMap[String, Throwable]
+
+        for (result <- results) {
+          hits ++= result.hits
+          misses ++= result.misses
+          failures ++= result.failures
+        }
+
+        GetResult(hits.toMap, misses.toSet, failures.toMap)
+    }
   }
 
-  private[memcached] def merged(results: Seq[GetsResult]) = {
+  private[memcached] def merged(results: Seq[GetsResult]): GetsResult = {
     val unwrapped = results map { _.getResult }
-    GetsResult(
-      unwrapped.foldLeft(GetResult()) { _ ++ _ }
-    )
+    GetsResult(merged(unwrapped))
   }
 }
 
@@ -528,7 +545,7 @@ class KetamaFailureAccrualFactory[Req, Rep](
 object KetamaClient {
   val NumReps = 160
   private val shardNotAvailableDistributor = {
-    val failedService = new FailedService[Command, Response](new ShardNotAvailableException)
+    val failedService = new FailedService(new ShardNotAvailableException)
     new SingletonDistributor(Client(failedService))
   }
 }
@@ -538,7 +555,8 @@ class KetamaClient private[memcached](
   health: Offer[NodeHealth],
   keyHasher: KeyHasher,
   numReps: Int,
-  statsReceiver: StatsReceiver = NullStatsReceiver
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  oldLibMemcachedVersionComplianceMode: Boolean = false
 ) extends PartitionedClient {
   require(!services.isEmpty, "At least one service must be provided")
 
@@ -558,7 +576,7 @@ class KetamaClient private[memcached](
   private[this] val revivalCount = statsReceiver.counter("revivals")
 
   private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) =
-    new KetamaDistributor(nodes, numReps)
+    new KetamaDistributor(nodes, numReps, oldLibMemcachedVersionComplianceMode)
 
   health foreach {
     case NodeMarkedDead(key) =>
@@ -607,8 +625,9 @@ case class KetamaClientBuilder(
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _numFailures: Int = 5,
-  _markDeadFor: Duration = 30.seconds
-  ) {
+  _markDeadFor: Duration = 30.seconds,
+  oldLibMemcachedVersionComplianceMode: Boolean = false
+) {
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
     copy(_nodes = nodes)
@@ -624,6 +643,9 @@ case class KetamaClientBuilder(
 
   def failureAccrualParams(numFailures: Int, markDeadFor: Duration): KetamaClientBuilder =
     copy(_numFailures = numFailures, _markDeadFor = markDeadFor)
+
+  def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
+    copy(oldLibMemcachedVersionComplianceMode = true)
 
 
   def build(): Client = {
@@ -649,7 +671,15 @@ case class KetamaClientBuilder(
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
     val allHealth = Offer.choose(healths: _*)
     val statsReceiver = builder.statsReceiver.scope("memcached_client")
-    new KetamaClient(clients, allHealth, keyHasher, KetamaClient.NumReps, statsReceiver)
+
+    new KetamaClient(
+      clients,
+      allHealth,
+      keyHasher,
+      KetamaClient.NumReps,
+      statsReceiver,
+      oldLibMemcachedVersionComplianceMode
+    )
   }
 
   private[this] def failureAccrualWrapper(key: KetamaClientKey) = {

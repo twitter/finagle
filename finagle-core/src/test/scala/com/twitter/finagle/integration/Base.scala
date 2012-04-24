@@ -1,34 +1,36 @@
 package com.twitter.finagle.integration
 
-import java.net.SocketAddress
-
-import org.specs.Specification
-import org.specs.mock.Mockito
-import org.mockito.Matchers
-
-import org.jboss.netty.channel.{
-  Channel, ChannelFactory, ChannelPipeline,
-  ChannelPipelineFactory, Channels, ChannelConfig,
-  DefaultChannelConfig}
-
-import com.twitter.util.Future
-
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ReferenceCountedChannelFactory}
+import com.twitter.finagle.builder.{
+  ClientBuilder, ReferenceCountedChannelFactory}
 import com.twitter.finagle.channel.ChannelService
+import com.twitter.finagle.dispatch.SerialClientDispatcher
+import com.twitter.finagle.transport.{TransportFactory, Transport}
+import com.twitter.util.Future
+import java.net.SocketAddress
+import org.jboss.netty.channel.{
+  ChannelPipeline, ChannelPipelineFactory, Channels,
+  ChannelConfig, DefaultChannelConfig, Channel, ChannelFactory}
+import org.mockito.Matchers
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
-trait IntegrationBase extends Specification with Mockito {
+trait IntegrationBase extends SpecificationWithJUnit with Mockito {
   /*
    * Bootstrap enough to get a basic client connection up & running.
    */
   class MockChannel {
-    val codec = mock[Codec[String, String]]
-    (codec.prepareService(Matchers.any[Service[String, String]])
-     answers { s => Future.value(s.asInstanceOf[Service[String, String]]) })
-    (codec.prepareFactory(Matchers.any[ServiceFactory[String, String]])
-     answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
 
-    val clientAddress = new SocketAddress {}
+    val codec = mock[Codec[String, String]]
+    (codec.prepareConnFactory(any)
+     answers { s => s.asInstanceOf[ServiceFactory[String, String]] })
+    (codec.prepareServiceFactory(Matchers.any[ServiceFactory[String, String]])
+     answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
+    codec.mkClientDispatcher returns { mkTrans: TransportFactory =>
+      new SerialClientDispatcher(mkTrans())
+    }
+
+    val clientAddress = new SocketAddress{}
 
     // Pipeline
     val clientPipelineFactory = mock[ChannelPipelineFactory]
@@ -36,6 +38,11 @@ trait IntegrationBase extends Specification with Mockito {
     clientPipelineFactory.getPipeline returns channelPipeline
     codec.pipelineFactory returns clientPipelineFactory
 
+/*
+    val codec = new Codec[String, String] {
+      def pipelineFactory = clientPipelineFactory
+    }
+*/
     // Channel
     val channelFactory = mock[ChannelFactory]
     val refcountedChannelFactory = new ReferenceCountedChannelFactory(channelFactory)

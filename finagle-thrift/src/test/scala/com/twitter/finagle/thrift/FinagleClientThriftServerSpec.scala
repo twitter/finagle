@@ -4,7 +4,7 @@ import java.net.ServerSocket
 import java.util.logging
 import java.util.concurrent.CyclicBarrier
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.apache.thrift.transport.{TServerSocket, TFramedTransport, TTransportFactory}
 import org.apache.thrift.protocol.TBinaryProtocol
@@ -17,7 +17,7 @@ import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
 import com.twitter.finagle.{Codec, ClientCodecConfig, CodecFactory}
 import com.twitter.finagle.builder.ClientBuilder
 
-object FinagleClientThriftServerSpec extends Specification {
+class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
   "finagle client vs. synchronous thrift server" should {
     var somewayPromise = new Promise[Unit]
     def makeServer(transportFactory: TTransportFactory)(f: (Int, Int) => Int) = {

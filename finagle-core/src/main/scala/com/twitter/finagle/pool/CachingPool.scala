@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 
 import com.twitter.util.{Future, Time, Duration}
 
-import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException}
+import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException, ClientConnection}
 import com.twitter.finagle.util.{Timer, Cache}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
@@ -46,13 +46,13 @@ private[finagle] class CachingPool[Req, Rep](
     }
   }
 
-  def make(): Future[Service[Req, Rep]] = synchronized {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
     if (!isOpen) Future.exception(new ServiceClosedException) else {
       get() match {
         case Some(service) =>
           Future.value(new WrappedService(service))
         case None =>
-          factory.make() map { new WrappedService(_) }
+          factory(conn) map { new WrappedService(_) }
       }
     }
   }

@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached
 
-import com.twitter.finagle.memcached.protocol.Value
+import com.twitter.finagle.memcached.protocol.{ClientError, Value}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils
 import com.twitter.util.{Future, Time}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
@@ -10,7 +10,7 @@ import scala.collection.mutable
  * Map-based mock client for testing
  * Note: The cas method checks if value is same as previous value, if not, do a swap and return true
  */
-class MockClient(map: mutable.Map[String, ChannelBuffer]) extends Client {
+class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   def this() = this(mutable.Map[String, ChannelBuffer]())
 
   def this(contents: Map[String, Array[Byte]]) =
@@ -134,8 +134,8 @@ class MockClient(map: mutable.Map[String, ChannelBuffer]) extends Client {
               map(key) = ChannelBuffers.wrappedBuffer(newValue.toString.getBytes)
               Some(newValue)
             } catch {
-              case _:NumberFormatException =>
-                None
+              case _: NumberFormatException =>
+                throw new ClientError("cannot increment or decrement non-numeric value")
             }
 
           case None =>
@@ -150,4 +150,8 @@ class MockClient(map: mutable.Map[String, ChannelBuffer]) extends Client {
   def stats(args: Option[String]): Future[Seq[String]] = Future.value(Nil)
 
   def release() {}
+
+  override def toString = {
+    "MockClient(" + map.toString + ")"
+  }
 }

@@ -1,13 +1,13 @@
 package com.twitter.finagle.channel
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.channel.{
   Channels, Channel, ChannelHandlerContext,
   ChannelStateEvent, ChannelPipeline}
 
-object ChannelClosingHandlerSpec extends Specification with Mockito {
+class ChannelClosingHandlerSpec extends SpecificationWithJUnit with Mockito {
   "ChannelClosingHandler" should {
     val channel = mock[Channel]
     val closeFuture = Channels.future(channel)

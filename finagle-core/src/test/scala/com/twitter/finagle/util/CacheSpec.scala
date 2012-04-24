@@ -1,13 +1,13 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.{CountDownLatch, Time}
 import com.twitter.conversions.time._
 import com.twitter.finagle.MockTimer
 
-object CacheSpec extends Specification with Mockito {
+class CacheSpec extends SpecificationWithJUnit with Mockito {
   "Cache(5, 5.seconds)" should Time.withTimeAt(Time.epoch) { tc =>
     val timer = new MockTimer
     val evictor = mock[Object => Unit]

@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import java.util.concurrent.TimeUnit
@@ -10,7 +10,7 @@ import com.twitter.util.{
   ReferenceCountingTimer, MockTimer}
 import com.twitter.conversions.time._
 
-object TimerSpec extends Specification with Mockito {
+class TimerSpec extends SpecificationWithJUnit with Mockito {
   "Timer" should {
     val timer = Timer.default
     timer.acquire()
@@ -36,7 +36,7 @@ object TimerSpec extends Specification with Mockito {
   }
 }
 
-object TimerToNettyTimerSpec extends Specification with Mockito {
+class TimerToNettyTimerSpec extends SpecificationWithJUnit with Mockito {
   // We have to jump through a lot of hoops here just
   // to make assertions about Timer#schedule calls.
   class MockReferenceCountingTimer(underlying: Timer)

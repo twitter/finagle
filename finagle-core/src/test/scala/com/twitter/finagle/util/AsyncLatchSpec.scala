@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object AsyncLatchSpec extends Specification {
+class AsyncLatchSpec extends SpecificationWithJUnit {
   "when count=0, AsyncLatch" should {
     "execute waiters immediately" in {
       val latch = new AsyncLatch(0)

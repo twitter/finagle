@@ -1,3 +1,69 @@
+3.0.0		2012/03/14
+
+	* ServiceToChannelHandler: keep track of shutdowns with
+	pending replies, don't monitor errors that occur after
+	cancellation.
+	* Add two received_bytesm sent_bytes to per-channel stats.
+	* http: Add wwwAuthenticate(=) and isXmlHttpRequest
+	* http: CancelledRequestExceptions become 499s
+	* clients: experimental Fail-Fast mode
+	(ClientBuilder.expFailFast(true))
+	* b3: Only log that a span was unfinished if we actually found
+	one
+	* thrift: better support for one-way calls
+	* server: option for cancellation on hangup (default=true)
+	* codecs: improved support for multiplexed protocols
+	* upgrade to netty 3.4.0.alpha1 which fixes connect timer
+	resolution issues. Trustin says this should be as stable as
+	3.3.1.Final
+	* serversets: allow for additional endpoints
+	* tests: use true ephemeral ports instead of RandomSocket
+	* memcache stress: use new command line flag library from
+	commons
+	* thrift: concatenate arrays with System.arraycopy
+	* memached: fix bug wherein we made requests with empty keys
+	on retries
+
+2.0.1		2012/03/01
+
+	* commons-stats: memoize counters
+	* cluster: don't reuse adds; keep many values per key
+	* clientbuilder: buffer handlers to avoid deadlock
+
+2.0.0		2012/02/27
+
+	* unify client and server factories
+	* memcache stress test: one connection per process
+	* b3: make tests deterministic
+	* upgrade to newest util (and to Guava r11)
+
+1.11.1	2012/02/15
+
+	* HeapBalancer: safely remove services from cluster when
+	they have requests in flight
+	* http: speed up logging
+	* core: keep track of handler walltimes
+
+1.11.0	2012/02/13
+
+	* finagle-redis: publish.
+	* http: Message.mediaType=: no longer sets charset to utf-8
+	* http: Message.setContentType: defaults charset to utf-8
+	* http: added Message.charset, Message.charset=
+	* Refactor resource management inside of the builders, making lifetimes
+	explicit
+	* Generic cluster API, support in the HeapBalancer for dynamic hosts list;
+	remove other load balancers
+	* redis: memcache.Client-style interface
+	* netty: update to 3.3.1.Final, and add NPN TLS extension support
+	* b3: flush span if timeout occurs
+	* b3: java friendly tracer API
+	* stress/example: "topo", a minimal appserver-like topology for testing
+	* memcache: tunable example for benchmarking, testing
+	* ServerBuilder: major refactor & simplification
+	* SummarizingStatsReceiver: fix bug where sort didn't operate over a
+	stable collection
+
 1.10.0	2012/01/24
 
 	* http: Message.withX methods now have parameterized return types

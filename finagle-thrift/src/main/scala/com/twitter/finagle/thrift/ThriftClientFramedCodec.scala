@@ -1,25 +1,17 @@
 package com.twitter.finagle.thrift
 
-import collection.JavaConversions._
-
-import org.jboss.netty.channel.{
-  ChannelHandlerContext,
-  SimpleChannelDownstreamHandler, MessageEvent, Channels,
-  ChannelPipelineFactory}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.apache.thrift.protocol.{
-  TBinaryProtocol, TMessage,
-  TMessageType, TProtocolFactory}
-import org.apache.thrift.transport.TMemoryInputTransport
-import com.twitter.util.Time
-
 import com.twitter.finagle._
-import com.twitter.finagle.util.{Ok, Error, Cancelled}
-import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.tracing.{Trace, Annotation}
-
-import java.net.{InetSocketAddress, SocketAddress}
-import scala.Option._
+import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.util.{ByteArrays, Ok, Error, Cancelled}
+import com.twitter.util.Time
+import org.apache.thrift.protocol.{
+  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
+import org.apache.thrift.transport.TMemoryInputTransport
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.{
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
+  SimpleChannelDownstreamHandler}
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -66,28 +58,27 @@ class ThriftClientFramedCodec(
       }
     }
 
-  override def prepareService(underlying: Service[ThriftClientRequest, Array[Byte]]) = {
+  override def prepareConnFactory(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) = underlying flatMap {  service =>
     // Attempt to upgrade the protocol the first time around by
     // sending a magic method invocation.
     val buffer = new OutputBuffer()
-    buffer().writeMessageBegin(
-      new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
+    buffer().writeMessageBegin(new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
 
     val options = new thrift.ConnectionOptions
     options.write(buffer())
 
     buffer().writeMessageEnd()
 
-    underlying(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
+    service(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
       val memoryTransport = new TMemoryInputTransport(bytes)
-      val iprot           = protocolFactory.getProtocol(memoryTransport)
-      val reply           = iprot.readMessageBegin()
-
-      (new ThriftClientTracingFilter(
+      val iprot = protocolFactory.getProtocol(memoryTransport)
+      val reply = iprot.readMessageBegin()
+      val filter = new ThriftClientTracingFilter(
         config.serviceName,
         reply.`type` != TMessageType.EXCEPTION,
-        clientId
-      )) andThen underlying
+        clientId)
+
+      filter andThen service
     }
   }
 }
@@ -103,11 +94,6 @@ private[thrift] class ThriftClientChannelBufferEncoder
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
       case request: ThriftClientRequest =>
-        ctx.getChannel.getLocalAddress()  match {
-          case ia: InetSocketAddress => Trace.recordClientAddr(ia)
-          case _ => () // nothing
-        }
-
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
         if (request.oneway) {
           // oneway RPCs are satisfied when the write is complete.
@@ -164,7 +150,7 @@ private[thrift] class ThriftClientTracingFilter(
       }
 
       new ThriftClientRequest(
-        OutputBuffer.messageToArray(header) ++ request.message,
+        ByteArrays.concat(OutputBuffer.messageToArray(header), request.message),
         request.oneway)
     } else {
       request

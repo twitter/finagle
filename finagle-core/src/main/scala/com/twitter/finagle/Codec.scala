@@ -6,9 +6,11 @@ package com.twitter.finagle
  * from this codec.
  */
 
-import java.net.SocketAddress
-import org.jboss.netty.channel.{ChannelPipelineFactory, ChannelPipeline}
-import com.twitter.util.Future
+import com.twitter.finagle.dispatch.{
+  ClientDispatcherFactory, SerialClientDispatcher, SerialServerDispatcher, 
+  ServerDispatcherFactory}
+import java.net.{InetSocketAddress, SocketAddress}
+import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
 
 /**
  * Superclass for all codecs.
@@ -20,19 +22,30 @@ trait Codec[Req, Rep] {
   def pipelineFactory: ChannelPipelineFactory
 
   /**
-   * Prepare a newly-created (connected) Service endpoint.  It becomes
-   * available once the returned Future is satisfied.
-   * Used to allow codec modifications to the service at the bottom of the network stack.
+   * Prepare a factory for usage with the codec. Used to allow codec
+   * modifications to the service at the top of the network stack.
    */
-  def prepareService(underlying: Service[Req, Rep]): Future[Service[Req, Rep]] =
-    Future.value(underlying)
+  def prepareServiceFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+    underlying
 
   /**
-   * Prepare a factory for usage with the codec.
-   * Used to allow codec modifications to the service at the top of the network stack.
+   * Prepare a connection factory. Used to allow codec modifications
+   * to the service at the bottom of the stack (connection level).
    */
-  def prepareFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+  def prepareConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
     underlying
+
+  /**
+   * Note: the below ("raw") interfaces are low level, and require a
+   * good understanding of finagle internals to implement correctly.
+   * Proceed with care.
+   */
+
+  val mkClientDispatcher: ClientDispatcherFactory[Req, Rep] = (mkTrans) =>
+    new SerialClientDispatcher(mkTrans())
+
+  val mkServerDispatcher: ServerDispatcherFactory[Req, Rep] = (mkTrans, service) =>
+    new SerialServerDispatcher[Req, Rep](mkTrans(), service)
 }
 
 object Codec {
@@ -53,17 +66,20 @@ object Codec {
  * Codec factories create codecs given some configuration.
  */
 
-
 /**
  * Clients
  */
 case class ClientCodecConfig(serviceName: String)
 
-
 /**
  * Servers
  */
-case class ServerCodecConfig(serviceName: String, boundAddress: SocketAddress)
+case class ServerCodecConfig(serviceName: String, boundAddress: SocketAddress) {
+  def boundInetSocketAddress = boundAddress match {
+    case ia: InetSocketAddress => ia
+    case _ => new InetSocketAddress(0)
+  }
+}
 
 /**
  * A combined codec factory provides both client and server codec

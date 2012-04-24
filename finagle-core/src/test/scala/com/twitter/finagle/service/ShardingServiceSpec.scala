@@ -3,12 +3,12 @@ package com.twitter.finagle.service
 import com.twitter.hashing._
 import com.twitter.finagle.{Service, ShardNotAvailableException, NotShardableException}
 import com.twitter.util.Future
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.Matchers._
 
 
-object ShardingServiceSpec extends Specification with Mockito {
+class ShardingServiceSpec extends SpecificationWithJUnit with Mockito {
   "ShardingService" should {
     class MockRequest
     class ShardingRequest(key: Long) extends MockRequest {

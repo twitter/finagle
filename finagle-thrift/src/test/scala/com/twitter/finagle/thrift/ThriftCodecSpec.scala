@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.matcher.Matcher
 
 import org.jboss.netty.channel._
@@ -14,7 +14,7 @@ import org.apache.thrift.transport.TTransportException
 import com.twitter.finagle.{SunkChannel, TooManyConcurrentRequestsException}
 import com.twitter.silly.Silly
 
-object ThriftCodecSpec extends Specification {
+class ThriftCodecSpec extends SpecificationWithJUnit {
   def thriftToBuffer(method: String, `type`: Byte, seqid: Int,
       message: { def write(p: TProtocol) }): ChannelBuffer = {
     val buffer = ChannelBuffers.dynamicBuffer()
@@ -96,14 +96,14 @@ object ThriftCodecSpec extends Specification {
         channel.upstreamEvents must haveSize(0)
         channel.downstreamEvents must haveSize(0)
 
+        val remainder = buffer.copy(buffer.readerIndex+numBytes, buffer.readableBytes-numBytes)
         // receive remainder of call
-        truncatedBuffer.writeBytes(buffer, buffer.readerIndex + numBytes,
-                                   buffer.readableBytes - numBytes)
-        Channels.fireMessageReceived(channel, truncatedBuffer)
+        Channels.fireMessageReceived(channel, remainder)
 
         // call should be received
         channel.upstreamEvents must haveSize(1)
         channel.downstreamEvents must haveSize(0)
+
         val message = channel.upstreamEvents(0).asInstanceOf[MessageEvent].getMessage()
         val thriftCall = message.asInstanceOf[ThriftCall[Silly.bleep_args, Silly.bleep_result]]
         thriftCall mustNot beNull
@@ -166,10 +166,9 @@ object ThriftCodecSpec extends Specification {
         channel.upstreamEvents must haveSize(0)
         channel.downstreamEvents must haveSize(0)
 
+        val remainder = buffer.copy(buffer.readerIndex+numBytes, buffer.readableBytes-numBytes)
         // receive remainder of call
-        truncatedBuffer.writeBytes(buffer, buffer.readerIndex + numBytes,
-                                   buffer.readableBytes - numBytes)
-        Channels.fireMessageReceived(channel, truncatedBuffer)
+        Channels.fireMessageReceived(channel, remainder)
 
         // call should be received
         channel.upstreamEvents must haveSize(1)

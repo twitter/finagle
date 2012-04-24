@@ -55,7 +55,7 @@ object KestrelClient {
       try {
         println(msg.bytes.toString(CharsetUtil.UTF_8))
       } finally {
-        msg.ack() // if we don't do this, no more msgs will come to us
+        msg.ack.sync() // if we don't do this, no more msgs will come to us
       }
     }
 

@@ -13,6 +13,7 @@ import java.net.InetSocketAddress
 import com.twitter.util.Future
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Trace, Annotation, TraceId, SpanId}
+import com.twitter.finagle.util.ByteArrays
 import org.apache.thrift.{TApplicationException, TException}
 
 object ThriftServerFramedCodec {
@@ -37,13 +38,13 @@ class ThriftServerFramedCodec(config: ServerCodecConfig) extends Codec[Array[Byt
       }
     }
 
-  override def prepareService(service: Service[Array[Byte], Array[Byte]]) = Future {
+  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
     val boundAddress = config.boundAddress match {
       case ia: InetSocketAddress => ia
       case _ => new InetSocketAddress(0)
     }
     val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress)
-    trace andThen HandleUncaughtApplicationExceptions andThen service
+    trace andThen HandleUncaughtApplicationExceptions andThen factory
   }
 }
 
@@ -56,7 +57,8 @@ private[thrift] class ThriftServerChannelBufferEncoder
       case array: Array[Byte] if (!array.isEmpty) =>
         val buffer = ChannelBuffers.wrappedBuffer(array)
         Channels.write(ctx, e.getFuture, buffer)
-      case array: Array[Byte] => ()
+      case array: Array[Byte] =>
+        e.getFuture.setSuccess()
       case _ => throw new IllegalArgumentException("no byte array")
     }
   }
@@ -68,6 +70,9 @@ private[thrift] object HandleUncaughtApplicationExceptions
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) =
     service(request) handle {
       case e if !e.isInstanceOf[TException] =>
+        // NB! This is technically incorrect for one-way calls,
+        // but we have no way of knowing it here. We may
+        // consider simply not supporting one-way calls at all.
         val msg = InputBuffer.readMessageBegin(request)
         val name = msg.name
 
@@ -127,6 +132,7 @@ private[thrift] class ThriftServerTracingFilter(
         SpanId(header.getSpan_id),
         sampled)
 
+
       Trace.pushId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
       Trace.recordServerAddr(boundAddress)
@@ -134,10 +140,12 @@ private[thrift] class ThriftServerTracingFilter(
 
       try {
         ClientId.set(extractClientId(header))
-        service(request_) map { response =>
-          Trace.record(Annotation.ServerSend())
-          val responseHeader = new thrift.ResponseHeader
-          OutputBuffer.messageToArray(responseHeader) ++ response
+        service(request_) map {
+          case response if response.isEmpty => response
+          case response =>
+            Trace.record(Annotation.ServerSend())
+            val responseHeader = new thrift.ResponseHeader
+            ByteArrays.concat(OutputBuffer.messageToArray(responseHeader), response)
         }
       } finally {
         ClientId.clear()

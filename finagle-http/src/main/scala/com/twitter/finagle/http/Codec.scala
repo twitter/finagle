@@ -3,20 +3,21 @@ package com.twitter.finagle.http
 /**
  * This puts it all together: The HTTP codec itself.
  */
-import java.net.InetSocketAddress
-
-import org.jboss.netty.channel.{
-  Channels, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, UpstreamMessageEvent}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
 
 import com.twitter.conversions.storage._
-
+import com.twitter.finagle._
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle._
 import com.twitter.util.{Try, StorageUnit, Future}
+import java.net.InetSocketAddress
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.{
+  ChannelPipelineFactory, UpstreamMessageEvent, Channels,
+  ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
+import org.jboss.netty.handler.codec.http._
+import com.twitter.finagle.transport.TransportFactory
 
 case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
@@ -89,7 +90,9 @@ case class Http(
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
     _annotateCipherHeader: Option[String] = None,
-    _enableTracing: Boolean = false)
+    _enableTracing: Boolean = false,
+    _maxInitialLineLength: StorageUnit = 4096.bytes,
+    _maxHeaderSize: StorageUnit = 8192.bytes)
   extends CodecFactory[HttpRequest, HttpResponse]
 {
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
@@ -107,6 +110,7 @@ case class Http(
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("httpCodec", new HttpClientCodec())
+          pipeline.addLast("httpTracingClientAddr", new HttpTracingClientAddr)
           pipeline.addLast(
             "httpDechunker",
             new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
@@ -114,22 +118,20 @@ case class Http(
           if (_decompressionEnabled)
             pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
 
-          pipeline.addLast(
-            "connectionLifecycleManager",
-            new ClientConnectionManager)
-
           pipeline
         }
       }
 
-      override def prepareService(
-        underlying: Service[HttpRequest, HttpResponse]
-      ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
-        if (_enableTracing)
-          new HttpClientTracingFilter[HttpResponse](config.serviceName) andThen underlying
-        else
-          underlying
-      }
+      override def prepareConnFactory(
+        underlying: ServiceFactory[HttpRequest, HttpResponse]
+      ): ServiceFactory[HttpRequest, HttpResponse] =
+        if (_enableTracing) {
+          new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen
+            super.prepareConnFactory(underlying)
+        } else
+          super.prepareConnFactory(underlying)
+
+      override val mkClientDispatcher = (mkTrans: TransportFactory) => new HttpClientDispatcher(mkTrans())
     }
   }
 
@@ -144,11 +146,9 @@ case class Http(
           }
 
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
-          if (maxRequestSizeInBytes < 8192) {
-            pipeline.addLast("httpCodec", new SafeHttpServerCodec(4096, 8192, maxRequestSizeInBytes))
-          } else {
-            pipeline.addLast("httpCodec", new SafeHttpServerCodec(4096, 8192, 8192))
-          }
+          val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
+          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt 
+          pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
 
           if (_compressionLevel > 0) {
             pipeline.addLast(
@@ -174,16 +174,16 @@ case class Http(
         }
       }
 
-      override def prepareService(
-        underlying: Service[HttpRequest, HttpResponse]
-      ): Future[Service[HttpRequest, HttpResponse]] = Future.value {
+      override def prepareConnFactory(
+        underlying: ServiceFactory[HttpRequest, HttpResponse]
+      ): ServiceFactory[HttpRequest, HttpResponse] = {
         val checkRequest = new CheckHttpRequestFilter
         if (_enableTracing) {
-          val ia = config.boundAddress match {
-            case ia: InetSocketAddress => ia
-            case _ => new InetSocketAddress(0)
-          }
-          new HttpServerTracingFilter(config.serviceName, ia) andThen checkRequest andThen underlying
+          val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](
+            config.serviceName,
+            config.boundInetSocketAddress
+          )
+          tracingFilter andThen checkRequest andThen underlying
         } else {
           checkRequest andThen underlying
         }
@@ -209,14 +209,28 @@ object HttpTracing {
 }
 
 /**
+ * Captures the client address and port and adds it to the current trace.
+ */
+private class HttpTracingClientAddr extends SimpleChannelDownstreamHandler {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
+    ctx.getChannel.getLocalAddress()  match {
+      case ia: InetSocketAddress => Trace.recordClientAddr(ia)
+      case _ => () // nothing
+    }
+
+    super.writeRequested(ctx, e)
+  }
+}
+
+/**
  * Pass along headers with the required tracing information.
  */
-class HttpClientTracingFilter[Res](serviceName: String)
-  extends SimpleFilter[HttpRequest, Res]
+class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
+  extends SimpleFilter[Req, Res]
 {
   import HttpTracing._
 
-  def apply(request: HttpRequest, service: Service[HttpRequest, Res]) = Trace.unwind {
+  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
     Header.All foreach { request.removeHeader(_) }
 
     request.addHeader(Header.TraceId, Trace.id.traceId.toString)
@@ -230,8 +244,8 @@ class HttpClientTracingFilter[Res](serviceName: String)
       request.addHeader(Header.Sampled, sampled.toString)
     }
 
-    Trace.recordBinary("http.uri", request.getUri)
     Trace.recordRpcname(serviceName, request.getMethod.getName)
+    Trace.recordBinary("http.uri", request.getUri)
 
     Trace.record(Annotation.ClientSend())
     service(request) map { response =>
@@ -245,12 +259,12 @@ class HttpClientTracingFilter[Res](serviceName: String)
  * Adds tracing annotations for each http request we receive.
  * Including uri, when request was sent and when it was received.
  */
-class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddress)
-  extends SimpleFilter[HttpRequest, HttpResponse]
+class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boundAddress: InetSocketAddress)
+  extends SimpleFilter[Req, Res]
 {
   import HttpTracing._
 
-  def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = Trace.unwind {
+  def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
 
     if (Header.Required.forall { request.containsHeader(_) }) {
       val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
@@ -271,9 +285,9 @@ class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddre
 
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
-    Trace.recordBinary("http.uri", request.getUri)
     Trace.recordRpcname(serviceName, request.getMethod.getName)
     Trace.recordServerAddr(boundAddress)
+    Trace.recordBinary("http.uri", request.getUri)
 
     Trace.record(Annotation.ServerRecv())
     service(request) map { response =>
@@ -285,37 +299,53 @@ class HttpServerTracingFilter(serviceName: String, boundAddress: InetSocketAddre
 
 /**
  * Http codec for rich Request/Response objects.
- * Note the ValidateRequestFilter isn't baked in, as in the Http Codec.
+ * Note the CheckHttpRequestFilter isn't baked in, as in the Http Codec.
  */
 case class RichHttp[REQUEST <: Request](
-     httpFactory: CodecFactory[HttpRequest, HttpResponse])
+     httpFactory: Http)
   extends CodecFactory[REQUEST, Response] {
 
-  def client = Function.const {
+  def client = { config =>
     new Codec[REQUEST, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = httpFactory.client(null).pipelineFactory.getPipeline()
-          pipeline.addLast("requestDecoder", new RequestDecoder)
-          pipeline.addLast("responseEncoder", new ResponseEncoder)
+          pipeline.addLast("requestDecoder", new RequestEncoder)
+          pipeline.addLast("responseEncoder", new ResponseDecoder)
           pipeline
         }
       }
-    }
+
+      override def prepareConnFactory(
+        underlying: ServiceFactory[REQUEST, Response]
+      ): ServiceFactory[REQUEST, Response] =
+        if (httpFactory._enableTracing)
+          new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
+        else
+          underlying
+      }
   }
 
-  def server = Function.const {
+  def server = { config =>
     new Codec[REQUEST, Response] {
       def pipelineFactory = new ChannelPipelineFactory {
         def getPipeline() = {
           val pipeline = httpFactory.server(null).pipelineFactory.getPipeline()
-          pipeline.addLast("requestDecoder", new RequestDecoder)
-          pipeline.addLast("responseEncoder", new ResponseEncoder)
+          pipeline.addLast("serverRequestDecoder", new RequestDecoder)
+          pipeline.addLast("serverResponseEncoder", new ResponseEncoder)
           pipeline
         }
       }
 
-      // prepareService is not defined
+      override def prepareConnFactory(
+        underlying: ServiceFactory[REQUEST, Response]
+      ): ServiceFactory[REQUEST, Response] =
+        if (httpFactory._enableTracing) {
+          val tracingFilter = new HttpServerTracingFilter[REQUEST, Response](config.serviceName, config.boundInetSocketAddress)
+          tracingFilter andThen underlying
+        } else {
+          underlying
+        }
     }
   }
 }

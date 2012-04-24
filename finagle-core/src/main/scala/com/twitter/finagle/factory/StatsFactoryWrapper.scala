@@ -5,7 +5,7 @@ package com.twitter.finagle.factory
  * creation.
  */
 
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
+import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ClientConnection}
 import com.twitter.finagle.stats.StatsReceiver
 
 class StatsFactoryWrapper[Req, Rep](
@@ -15,7 +15,7 @@ class StatsFactoryWrapper[Req, Rep](
 {
   private[this] val failureStats = statsReceiver.scope("failures")
 
-  override def make() = super.make() onFailure { e =>
+  override def apply(conn: ClientConnection) = super.apply(conn) onFailure { e =>
     failureStats.counter(e.getClass.getName).incr()
   }
 }

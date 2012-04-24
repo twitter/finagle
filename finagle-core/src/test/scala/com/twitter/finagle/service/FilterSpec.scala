@@ -1,12 +1,12 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import com.twitter.finagle.{Service, Filter}
 import com.twitter.util.{Throw, Future}
 import com.twitter.conversions.time._
 
-object FilterSpec extends Specification {
+class FilterSpec extends SpecificationWithJUnit {
   "filters" should {
     val stringToInt =
       new Filter[Int, Int, String, String] {
