@@ -70,7 +70,7 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get parameter value.  Returns value or null. */
   def getParam(name: String): String =
-    params.get(name).getOrElse(null)
+    params.get(name).orNull
 
   /** Get parameter value.  Returns value or default. */
   def getParam(name: String, default: String): String =
