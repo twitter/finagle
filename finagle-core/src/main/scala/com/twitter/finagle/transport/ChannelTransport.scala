@@ -10,8 +10,8 @@ import java.net.SocketAddress
 import org.jboss.netty.channel._
 
 /**
- * Implements a {{Transport}} based on a Netty channel. t is a
- * I{{ChannelHandler}} and must be the last in the pipeline.
+ * Implements a {{Transport}} based on a Netty channel. It is a
+ * {{ChannelHandler}} and must be the last in the pipeline.
  */
 class ChannelTransport[In, Out](ch: Channel)
   extends Transport[In, Out] with ChannelUpstreamHandler
@@ -71,6 +71,6 @@ class ChannelTransport[In, Out](ch: Channel)
 
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
-  
+
   override def toString = "Transport<%s>".format(ch)
 }

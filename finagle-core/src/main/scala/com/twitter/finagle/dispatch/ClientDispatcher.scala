@@ -1,6 +1,6 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.concurrent.AsyncQueue
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.CancelledRequestException
@@ -13,36 +13,35 @@ import java.net.InetSocketAddress
 class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
   extends ClientDispatcher[Req, Rep]
 {
-  private[this] val dispatchq = new AsyncQueue[(Req, Promise[Rep])]
+
+  private[this] val semaphore = new AsyncSemaphore(1)
   private[this] val localAddress: InetSocketAddress = trans.localAddress match {
     case ia: InetSocketAddress => ia
     case _ => new InetSocketAddress(0)
   }
 
-  private[this] def loop() {
-    dispatchq.poll() onSuccess { case (req, p) =>
-      if (p.isCancelled) {
-        p.updateIfEmpty(Throw(new CancelledRequestException))
-        loop()
-      } else {
-        trans.write(req) flatMap { _ => trans.read() } respond(p.updateIfEmpty(_))
+  private[this] def dispatch(req: Req, p: Promise[Rep]) {
+    if (p.isCancelled) {
+      p.setException(new CancelledRequestException)
+    } else {
+      Trace.recordClientAddr(localAddress)
+      trans.write(req) flatMap { _ => trans.read() } respond { p.updateIfEmpty(_) }
 
-        p.onCancellation {
-          if (p.updateIfEmpty(Throw(new CancelledRequestException)))
-            trans.close()
-        }
-
-        p ensure { loop() }
+      p.onCancellation {
+        if (p.updateIfEmpty(Throw(new CancelledRequestException)))
+          trans.close()
       }
     }
   }
 
-  loop()
-
   def apply(req: Req): Future[Rep] = {
-    Trace.recordClientAddr(localAddress)
     val p = new Promise[Rep]
-    dispatchq.offer((req, p))
+
+    semaphore.acquire() onSuccess { permit =>
+      dispatch(req, p)
+      p ensure { permit.release() }
+    } onFailure { p.setException(_) }
+
     p
   }
 }
