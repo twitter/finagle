@@ -23,6 +23,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
       <!-- excluded to prevent conflicts with caged finagle/util -->
       <exclusions>
         <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>com.twitter</groupId>
           <artifactId>util</artifactId>
         </exclusion>
