@@ -4,6 +4,7 @@ import scala.collection.mutable.{HashMap, SynchronizedMap, WeakHashMap}
 import scala.ref.WeakReference
 
 import com.twitter.util.{Future, Time, JavaSingleton}
+import java.util.concurrent.TimeUnit
 
 /**
  * A writeable Counter. Only sums are kept of Counters.  An example
@@ -38,23 +39,37 @@ trait StatsReceiver {
   val repr: AnyRef
 
   /**
+   * Time a given function using the given TimeUnit
+   */
+  def time[T](unit: TimeUnit, name: String*)(f: => T): T = {
+    val start = Time.now
+    val result = f
+    stat(name: _*).add((Time.now - start).inUnit(unit))
+    result
+  }
+
+  /**
    * Time a given function in milliseconds
    */
   def time[T](name: String*)(f: => T): T = {
+    time(TimeUnit.MILLISECONDS, name: _*)(f)
+  }
+
+  /**
+   * Time a given future using the given TimeUnit
+   */
+  def timeFuture[T](unit: TimeUnit, name: String*)(f: => Future[T]): Future[T] = {
     val start = Time.now
-    val result = f
-    stat(name: _*).add((Time.now - start).inMilliseconds)
-    result
+    f ensure {
+      stat(name: _*).add((Time.now - start).inUnit(unit))
+    }
   }
 
   /**
    * Time a given future in milliseconds
    */
   def timeFuture[T](name: String*)(f: => Future[T]): Future[T] = {
-    val start = Time.now
-    f ensure {
-      stat(name: _*).add((Time.now - start).inMilliseconds)
-    }
+    timeFuture(TimeUnit.MILLISECONDS, name: _*)(f)
   }
 
   /**
