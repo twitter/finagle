@@ -65,7 +65,7 @@ class ServiceDispatcher[Req, Rep](
 
     val service: Service[Req, Rep] = {
       val s = serviceFactory(clientConnection)
-      s.poll map(_.apply()) getOrElse (new ProxyService(s))
+      s.poll map { _.apply() } getOrElse (new ProxyService(s))
     }
 
     // Note that since ServiceDispatcher is added to the original pipeline,
