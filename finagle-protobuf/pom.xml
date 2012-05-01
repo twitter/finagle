@@ -1,0 +1,33 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.twitter</groupId>
+	<artifactId>finagle-protobuf</artifactId>
+	<packaging>jar</packaging>
+	<version>3.0.1-SNAPSHOT</version>
+	<distributionManagement>
+		<repository>
+			<id>artifactory-release</id>
+			<name>Artifactory Releases</name>
+			<url>http://build:8081/nexus/content/repositories/platform-services</url>
+		</repository>
+		<snapshotRepository>
+			<id>artifactory-snapshot</id>
+			<name>Artifactory Snapshots</name>
+			<url>http://build:8081/nexus/content/repositories/platform-services-snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<dependencies>
+		<dependency>
+			<groupId>com.twitter</groupId>
+			<artifactId>finagle-core</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+	</dependencies>
+</project>

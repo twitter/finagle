@@ -7,6 +7,8 @@ class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
   def isSBTTwitter = environment.get("SBT_TWITTER").isDefined
   def isInternal = isSBTOpenTwitter || isSBTTwitter
 
+  lazy val eclipse = "de.element34" % "sbt-eclipsify" % "0.7.0"
+
   override def repositories = if (isSBTOpenTwitter) {
     Set("twitter.artifactory" at "http://artifactory.local.twitter.com/open-source/")
   } else if (isSBTTwitter) {
