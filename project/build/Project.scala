@@ -1,6 +1,7 @@
 
 
 import com.twitter.sbt._
+import de.element34.sbteclipsify._
 import sbt._
 
 class Project(info: ProjectInfo) extends StandardParentProject(info)
@@ -174,7 +175,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
     with SubversionPublisher
 
   class CoreProject(info: ProjectInfo) extends StandardProject(info)
-    with Defaults
+    with Defaults with Eclipsify
   {
     override def compileOrder = CompileOrder.ScalaThenJava
     val netty = "io.netty" % "netty" % "3.4.0.Alpha2" withSources()
@@ -248,7 +249,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ProtobufProject(info: ProjectInfo) extends StandardProject(info)
-    with Defaults
+    with Defaults with Eclipsify
   {
     override def compileOrder = CompileOrder.JavaThenScala
 
