@@ -7,7 +7,8 @@ import com.twitter.finagle.transport.{ChannelTransport, TransportFactory}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.{ClientConnection, WriteTimedOutException}
 import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.util.{Promise, Monitor, Return}
+import com.twitter.finagle.service.FailedService
+import com.twitter.util.{Promise, Monitor, Return, Throw}
 import java.util.logging.{Logger, Level}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.group.ChannelGroup
@@ -65,7 +66,11 @@ class ServiceDispatcher[Req, Rep](
 
     val service: Service[Req, Rep] = {
       val s = serviceFactory(clientConnection)
-      s.poll map { _.apply() } getOrElse new ProxyService(s)
+      s.poll match {
+        case Some(Return(s)) => s
+        case Some(Throw(exc)) => new FailedService(exc)
+        case None => new ProxyService(s)
+      }
     }
 
     // Note that since ServiceDispatcher is added to the original pipeline,
