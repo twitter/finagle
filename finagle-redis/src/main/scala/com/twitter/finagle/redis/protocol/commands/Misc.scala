@@ -28,3 +28,7 @@ object Auth {
 case class Auth(code: String) extends Command {
   def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.AUTH, code))
 }
+
+case class Quit() extends Command {
+  def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.QUIT))
+}
