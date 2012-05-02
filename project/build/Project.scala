@@ -298,7 +298,7 @@ class Project(info: ProjectInfo) extends StandardParentProject(info)
   }
 
   class ServersetsProject(info: ProjectInfo) extends StandardProject(info)
-    with Defaults
+    with Defaults with Eclipsify
   {
     val commonsCodec    = "commons-codec" % "commons-codec" % "1.5"
     val commonClient    = "com.twitter.common.zookeeper" % "client"     % "0.0.6"
