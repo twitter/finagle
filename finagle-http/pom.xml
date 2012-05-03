@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <relativePath>../../parents/scala-parent/pom.xml</relativePath>
   </parent>
   <properties>
@@ -25,14 +25,17 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
+      <version>3.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
+      <version>3.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
+      <version>3.0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
