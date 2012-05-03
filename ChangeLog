@@ -1,3 +1,21 @@
+3.0.1		2012/05/03
+
+	* http: add AddResponseHeadersFilter, CorsFilter
+	* finagle-redis: Add ZCard, ZRem, ZRevRange, ZRevRangeByScore commands
+	* finagle-memcached: Added b3 annotations for key hits/misses
+	* finagle-memcached: getResult/getsResult for java
+	* finagle-http: fix client codec
+	* HeapBalancer: close services that are removed from cluster
+	* finagle-redis: add tracing and stats support
+	* finagle-http: Add the client address for http traces. Also record uri after service name has been set
+	* finagle-memcached: more efficient implementation of GetResult.merged
+	* finagle-redis: return pairs for hgetall, zrangebyscores, zrevrangebyscores cmds
+	* finagle-core: introduce Transports and Dispatchers
+	* tracing: annotate client connection when tracing
+	* update to netty 3.4.1.Final
+	* prevent tenuring of response objects for responses from previously idle connections
+	* 
+
 3.0.0		2012/03/14
 
 	* ServiceToChannelHandler: keep track of shutdowns with
