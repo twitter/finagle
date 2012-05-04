@@ -20,26 +20,26 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
     case _ => new InetSocketAddress(0)
   }
 
-  private[this] def dispatch(req: Req, p: Promise[Rep]) {
+  private[this] def dispatch(req: Req, p: Promise[Rep]): Future[_] =
     if (p.isCancelled) {
       p.setException(new CancelledRequestException)
+      Future.value(())
     } else {
       Trace.recordClientAddr(localAddress)
-      trans.write(req) flatMap { _ => trans.read() } respond { p.updateIfEmpty(_) }
 
       p.onCancellation {
         if (p.updateIfEmpty(Throw(new CancelledRequestException)))
           trans.close()
       }
+
+      trans.write(req) flatMap { _ => trans.read() } respond { p.updateIfEmpty(_) }
     }
-  }
 
   def apply(req: Req): Future[Rep] = {
     val p = new Promise[Rep]
 
     semaphore.acquire() onSuccess { permit =>
-      dispatch(req, p)
-      p ensure { permit.release() }
+      dispatch(req, p) ensure { permit.release() }
     } onFailure { p.setException(_) }
 
     p
