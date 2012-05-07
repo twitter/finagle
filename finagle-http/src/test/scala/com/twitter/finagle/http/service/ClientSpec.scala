@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.jboss.netty.channel.local._
 import org.jboss.netty.channel._
@@ -14,7 +14,7 @@ import com.twitter.finagle.builder.{
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.ChannelClosedException
 
-object ClientSpec extends Specification {
+class ClientSpec extends SpecificationWithJUnit {
   def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[HttpRequest, HttpResponse] => Unit) {
     val cf = new DefaultLocalServerChannelFactory()
 

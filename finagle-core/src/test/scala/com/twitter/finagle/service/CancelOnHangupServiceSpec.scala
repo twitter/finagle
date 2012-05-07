@@ -1,11 +1,11 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.util.{Future, Promise, Return}
 import com.twitter.finagle.{Service, ServiceFactory}
 
-object CancelOnHangupServiceSpec extends Specification with Mockito {
+class CancelOnHangupServiceSpec extends SpecificationWithJUnit with Mockito {
   "CancelOnHangupService" should {
     val underlying = mock[Service[Unit, Unit]]
     val service = new CancelOnHangupService(underlying)

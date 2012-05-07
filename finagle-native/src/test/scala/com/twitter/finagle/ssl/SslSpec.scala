@@ -13,7 +13,7 @@ import java.security.Provider
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 object Pwd {
   def pwd = System.getenv("PWD")
@@ -30,7 +30,7 @@ object SslConfig {
   val keyPath: String = keyFile.getAbsolutePath
 }
 
-object SslSpec extends Specification {
+class SslSpec extends SpecificationWithJUnit {
   "automatically detected available provider" should {
     "be able to send and receive various sized content" in {
       def makeContent(length: Int) = {

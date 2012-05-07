@@ -1,11 +1,11 @@
 package com.twitter.finagle.util
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import java.util.concurrent.CyclicBarrier
 import scala.collection.mutable.Buffer
 import java.util.concurrent.CountDownLatch
 
-object ChanSpec extends Specification {
+class ChanSpec extends SpecificationWithJUnit {
   "Proc" should {
     "admit one at a time, in the order received, queueing items" in {
       val threads = Buffer[Thread]()

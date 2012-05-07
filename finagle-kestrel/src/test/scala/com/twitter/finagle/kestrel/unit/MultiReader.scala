@@ -1,6 +1,6 @@
 package com.twitter.finagle.kestrel.unit
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import scala.collection.mutable.ArrayBuffer
@@ -11,7 +11,7 @@ import com.twitter.util.Time
 import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel._
 
-object MultiReaderSpec extends Specification with Mockito {
+class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
   noDetailedDiffs()
 
   class MockHandle extends ReadHandle {

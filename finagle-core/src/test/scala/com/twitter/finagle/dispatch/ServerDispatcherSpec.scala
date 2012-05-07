@@ -1,12 +1,12 @@
 package com.twitter.finagle.dispatch
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise}
 
-object ServerDispatcherSpec extends Specification with Mockito {
+class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
   "SerialServerDispatcher" should {
     "dispatch one at a time" in {
       val trans = mock[Transport[String, String]]

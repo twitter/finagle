@@ -1,6 +1,6 @@
 package com.twitter.finagle.b3.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import java.util.ArrayList
 
@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.finagle.service.TimeoutFilter
 
-object BigBrotherBirdTracerSpec extends Specification with Mockito {
+class BigBrotherBirdTracerSpec extends SpecificationWithJUnit with Mockito {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 

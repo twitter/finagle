@@ -1,6 +1,6 @@
 package com.twitter.finagle.kestrel.unit
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -13,7 +13,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 
-object ReadHandleSpec extends Specification with Mockito {
+class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
   def msg_(i: Int) = {
     val ack = new Broker[Unit]
     (ack.recv, ReadMessage(ChannelBuffers.wrappedBuffer(i.toString.getBytes), ack.send(())))

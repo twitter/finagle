@@ -1,12 +1,12 @@
 package com.twitter.finagle.memcached
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.apache.hadoop.mapreduce._
 import org.apache.hadoop.conf._
 import org.apache.hadoop.io._
 import com.twitter.conversions.time._
 
-class MemcachedOutputFormatSpec extends Specification {
+class MemcachedOutputFormatSpec extends SpecificationWithJUnit {
   "MemcachedOutputFormat" should {
 
     doBefore {

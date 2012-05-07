@@ -1,12 +1,12 @@
 package com.twitter.finagle.http
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import java.net.URL
 import scala.collection.JavaConverters._
 
-object RequeatBuilderSpec extends Specification {
+class RequeatBuilderSpec extends SpecificationWithJUnit {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
 

@@ -2,10 +2,10 @@ package com.twitter.finagle.http.util
 
 import com.twitter.util.TimeConversions._
 import java.util.Date
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 
-object StringUtilSpec extends Specification {
+class StringUtilSpec extends SpecificationWithJUnit {
 
   "StringUtilSpec" should {
     "toSomeShort" in {

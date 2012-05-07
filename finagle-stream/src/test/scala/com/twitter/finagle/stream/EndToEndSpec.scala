@@ -17,9 +17,9 @@ import org.jboss.netty.channel.{
   ChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ChannelEvent, Channels}
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.CharsetUtil
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object EndToEndSpec extends Specification {
+class EndToEndSpec extends SpecificationWithJUnit {
   case class MyStreamResponse(
       httpResponse: HttpResponse,
       messages: Offer[ChannelBuffer],

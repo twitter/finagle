@@ -1,6 +1,6 @@
 package com.twitter.finagle.kestrel.unit
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.conversions.time._
@@ -10,7 +10,7 @@ import com.twitter.util.StateMachine.InvalidStateTransition
 import com.twitter.util.{MapMaker, Time}
 import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 
-object InterpreterSpec extends Specification {
+class InterpreterSpec extends SpecificationWithJUnit {
   "Interpreter" should {
     val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
       config.compute { key =>

@@ -6,11 +6,11 @@ import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, DefaultHttpResponse, HttpVersion,
 HttpResponseStatus}
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import util.Random
 import org.specs.mock.Mockito
 
-object HttpMuxServiceSpec extends Specification with Mockito {
+class HttpMuxServiceSpec extends SpecificationWithJUnit with Mockito {
   // todo: add other metrics when they are supported
   "Default Http server" should {
     class DummyService(reply: String) extends Service[HttpRequest, HttpResponse] {

@@ -2,10 +2,10 @@ package com.twitter.finagle.http
 
 import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, DefaultHttpResponse, HttpMethod,
   HttpResponseStatus, HttpVersion}
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 
-object ResponseSpec extends Specification {
+class ResponseSpec extends SpecificationWithJUnit {
   "Response" should {
     "constructors" in {
       val nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)

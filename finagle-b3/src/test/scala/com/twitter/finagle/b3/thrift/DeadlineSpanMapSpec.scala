@@ -1,6 +1,6 @@
 package com.twitter.finagle.b3.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.finagle.tracing.{TraceId, SpanId}
 import com.twitter.conversions.time._
@@ -8,7 +8,7 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.MockTimer
 import com.twitter.util.Time
 
-class DeadlineSpanMapSpec extends Specification with Mockito {
+class DeadlineSpanMapSpec extends SpecificationWithJUnit with Mockito {
 
   "DeadlineSpanMap" should {
     "expire and log spans" in Time.withCurrentTimeFrozen { tc =>

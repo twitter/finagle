@@ -8,10 +8,10 @@ import org.jboss.netty.channel.UpstreamMessageEvent
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.mockito.ArgumentCaptor
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-object ConnectionManagerSpec extends Specification with Mockito {
+class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET
