@@ -5,7 +5,6 @@ import java.lang.Throwable;
 import java.util.concurrent.TimeUnit;
 import com.twitter.util.Try;
 import com.twitter.util.Duration;
-import sun.tools.asm.TryData;
 
 /**
  * Just a compilation test for Java.
