@@ -78,9 +78,19 @@ trait StatsReceiver {
   def counter(name: String*): Counter
 
   /**
+   * Get a Counter with the description. This method is a convenience for Java program.
+   */
+  def counter(name: String): Counter = counter(name :: Nil : _*)
+
+  /**
    * Get a Gauge with the description
    */
   def stat(name: String*): Stat
+
+  /**
+   * Get a Gauge with the description. This method is a convenience for Java programs.
+   */
+  def stat(name: String): Stat = stat(name :: Nil : _*)
 
   /**
    * Register a function to be periodically measured. This measurement
