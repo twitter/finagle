@@ -14,6 +14,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import java.util.concurrent.ExecutorService
 import com.twitter.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
+import com.twitter.finagle.ChannelClosedException
 
 class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], s: Service, executorService: ExecutorService) extends RpcChannel {
 
@@ -28,19 +29,36 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
   def callMethod(m: MethodDescriptor, controller: RpcController,
     request: Message, responsePrototype: Message,
     done: RpcCallback[Message]): Unit = {
+    // retries is a workaround for ChannelClosedException raised when servers shutdown.
+    val retries = 3
+    
+    callMethod(m, controller, request, responsePrototype, done, retries)
+  }
+
+  def callMethod(m: MethodDescriptor, controller: RpcController,
+    request: Message, responsePrototype: Message,
+    done: RpcCallback[Message], retries: Int): Unit = {
 
     val req = (m.getName(), request)
 
     client(req) onSuccess { result =>
-      futurePool({done.run(result._2)})
+      futurePool({ done.run(result._2) })
     } onFailure { e =>
-      log.warn("Failed. ", e)
-      controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
+      log.warn("#callMethod# Failed.", e)
+      e match {
+        case cc: ChannelClosedException => if (retries > 1) {
+          log.warn("#callMethod# Retrying.")
+          callMethod(m, controller, request, responsePrototype, done, retries - 1);
+        } else {
+          controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
+        }
+        case _ => controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
+      }
     }
   }
 
   def release() {
-     client.release()	
-  } 
-  
+    client.release()
+  }
+
 }
