@@ -5,7 +5,7 @@
 	<groupId>com.twitter</groupId>
 	<artifactId>finagle-protobuf</artifactId>
 	<packaging>jar</packaging>
-	<version>3.0.1-SNAPSHOT</version>
+	<version>3.0.2-SNAPSHOT</version>
 	<distributionManagement>
 		<repository>
 			<id>artifactory-release</id>
