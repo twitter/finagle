@@ -11,7 +11,51 @@ import com.twitter.finagle.tracing.Trace
 
 trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
-object RetryPolicy {
+/**
+ * A retry policy abstract class. This is convenient to use for Java programmers. Simply implement
+ * the two abstract methods `shouldRetry` and `backoffAt` and you're good to go!
+ */
+abstract class SimpleRetryPolicy[A](i: Int)
+  extends Function[A, Option[(Duration, RetryPolicy[A])]] with RetryPolicy[A]
+{
+  def this() = this(0)
+
+  final def apply(e: A) = {
+    if (shouldRetry(e)) {
+      backoffAt(i) match {
+        case Duration.forever =>
+          None
+        case howlong =>
+          Some((howlong, new SimpleRetryPolicy[A](i + 1) {
+            def shouldRetry(a: A) = SimpleRetryPolicy.this.shouldRetry(a)
+            def backoffAt(retry: Int) = SimpleRetryPolicy.this.backoffAt(retry)
+          }))
+      }
+    } else {
+      None
+    }
+  }
+
+  /**
+   * Given a value, decide whether it is retryable. Typically the value is an exception.
+   */
+  def shouldRetry(a: A): Boolean
+
+  /**
+   * Given a number of retries, return how long to wait till the next retry. Note that this is
+   * zero-indexed. To implement a finite number of retries, implement a method like:
+   *     `if (i > 3) return never`
+   */
+  def backoffAt(retry: Int): Duration
+
+  /**
+   * A convenience method to access Duration.forever from Java. This is a sentinel value that
+   * signals no-further-retries.
+   */
+  final val never = Duration.forever
+}
+
+object RetryPolicy extends JavaSingleton {
   val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
     case Throw(_: WriteException) => true
   }
