@@ -27,6 +27,14 @@ trait Transport[In, Out] {
   def close()
 
   /**
+   * The channel closed with the given exception. This is the
+   * same exception you would get if attempting to read or
+   * write on the Transport, but this allows clients to listen to
+   * close events.
+   */
+  val onClose: Future[Throwable]
+
+  /**
    * The locally bound address of this transport.
    */
   def localAddress: SocketAddress

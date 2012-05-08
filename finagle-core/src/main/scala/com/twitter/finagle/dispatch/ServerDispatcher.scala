@@ -1,8 +1,9 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Return
+import com.twitter.finagle.{Service, NoStacktrace}
+import com.twitter.util.{Future, Return}
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A {{ServerDispatcher}} dispatches requests onto services from a
@@ -21,6 +22,13 @@ object ServerDispatcher {
   }
 }
 
+object SerialServerDispatcher {
+  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
+  private val Idle = Future.never
+  private val Draining = Future.never
+  private val Closed = Future.never
+}
+
 /**
  * Dispatch requests from transport one at a time, queueing
  * concurrent requests.
@@ -31,19 +39,26 @@ object ServerDispatcher {
 class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Service[Req, Rep])
   extends ServerDispatcher
 {
-  @volatile private[this] var draining = false
-  @volatile private[this] var reading = true
+  import SerialServerDispatcher._
+
+  private[this] val state = new AtomicReference[Future[_]](Idle)
+
+  trans.onClose ensure {
+    state.getAndSet(Closed).cancel()
+  }
 
   private[this] def loop(): Unit = {
-    reading = true
-    trans.read() ensure {
-      reading = false
-    } flatMap { req =>
-      service(req)
+    state.set(Idle)
+    trans.read() flatMap { req =>
+      val f = service(req)
+      if (state.compareAndSet(Idle, f)) f else {
+        f.cancel()
+        Eof
+      }
     } flatMap { rep =>
       trans.write(rep)
     } respond {
-      case Return(()) if !draining =>
+      case Return(()) if state.get ne Draining =>
         loop()
 
       case _ =>
@@ -58,8 +73,8 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
   // protocol support). Presumably, half-closing TCP connection is
   // also possible.
   def drain() {
-    if (reading)
+    if (state.get eq Idle)
       trans.close()
-    draining = true
+    state.set(Draining)
   }
 }

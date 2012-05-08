@@ -26,7 +26,7 @@ class ChannelTransportSpec extends SpecificationWithJUnit with Mockito {
       val ctx = mock[ChannelHandlerContext]
       handler.handleUpstream(ctx, e)
     }
-    
+
     def sendUpstreamMessage(msg: Object) =
       sendUpstream({
         val e = mock[MessageEvent]
@@ -97,6 +97,19 @@ class ChannelTransportSpec extends SpecificationWithJUnit with Mockito {
           e
         })
         f.poll must beSome(Throw(ChannelException(exc, remoteAddress)))
+      }
+    }
+
+    "satisfy onClose" in {
+      "when excepting" in {
+        trans.onClose.poll must beNone
+        val exc = new Exception("close exception")
+        sendUpstream({
+          val e = mock[ExceptionEvent]
+          e.getCause returns exc
+          e
+        })
+        trans.onClose.poll must beSome(Return(ChannelException(exc, remoteAddress)))
       }
     }
   }

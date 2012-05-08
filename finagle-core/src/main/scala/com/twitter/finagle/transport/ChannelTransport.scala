@@ -5,7 +5,7 @@ import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
   CancelledWriteException, ChannelClosedException, ChannelException, WriteException}
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Return, Promise}
 import java.net.SocketAddress
 import org.jboss.netty.channel._
 import java.util.concurrent.atomic.AtomicBoolean
@@ -34,6 +34,7 @@ class ChannelTransport[In, Out](ch: Channel)
   private[this] def fail(exc: Throwable) {
     readq.fail(exc)
     close()
+    closep.updateIfEmpty(Return(exc))
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
@@ -71,6 +72,9 @@ class ChannelTransport[In, Out](ch: Channel)
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
 
+  private[this] val closep = new Promise[Throwable]
+  val onClose: Future[Throwable] = closep
+
   override def toString = "Transport<%s>".format(ch)
 }
 
@@ -106,6 +110,7 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
   }
 
   private[this] def fail(exc: Throwable) {
+    closep.updateIfEmpty(Return(exc))
     readq.fail(exc)
     close()
   }
@@ -149,6 +154,9 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
 
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
+
+  private[this] val closep = new Promise[Throwable]
+  val onClose: Future[Throwable] = closep
 
   override def toString = "Transport<%s>".format(ch)
 }

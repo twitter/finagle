@@ -5,9 +5,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.filter.{
-  HandletimeFilter, MonitorFilter, RequestSemaphoreFilter}
+  HandletimeFilter, MonitorFilter, RequestSemaphoreFilter, MaskCancelFilter}
 import com.twitter.finagle.service.{
-  CancelOnHangupService, ExpiringService, ProxyService, StatsFilter, TimeoutFilter}
+  ExpiringService, ProxyService, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{
   Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -456,20 +456,21 @@ private[builder] class MkServer[Req, Rep](
   } getOrElse Filter.identity[Req, Rep]
 
   val filter = {  // per connection filter stack
+    val maskCancelFilter =
+      if (config.cancelOnHangup) Filter.identity[Req, Rep]
+      else new MaskCancelFilter[Req, Rep]
+
     val statsFilter = statsReceiverOpt map(new StatsFilter[Req, Rep](_)) getOrElse Filter.identity[Req, Rep]
     val timeoutFilter = config.requestTimeout map { duration =>
       val e = new IndividualRequestTimeoutException(duration)
       new TimeoutFilter[Req, Rep](duration, e)
     } getOrElse Filter.identity[Req, Rep]
 
-    semaphoreFilter andThen statsFilter andThen timeoutFilter
+    maskCancelFilter andThen semaphoreFilter andThen statsFilter andThen timeoutFilter
   }
 
   val serviceFactory: ServiceFactory[Req, Rep] = {
     var factory = inputServiceFactory
-
-    if (config.cancelOnHangup)
-      factory = factory map { service => new CancelOnHangupService(service) }
 
     config.openConnectionsThresholds foreach { threshold =>
       factory = new IdleConnectionFilter(

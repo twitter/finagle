@@ -10,6 +10,7 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
   "SerialServerDispatcher" should {
     "dispatch one at a time" in {
       val trans = mock[Transport[String, String]]
+      trans.onClose returns Future.never
       val service = mock[Service[String, String]]
 
       val readp = new Promise[String]
@@ -39,8 +40,43 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
       there were two(trans).read()
     }
 
+    "cancel on hangup" in {
+      val onClose = new Promise[Throwable]
+      val trans = mock[Transport[String, String]]
+      trans.onClose returns onClose
+      val service = mock[Service[String, String]]
+      val replyp = new Promise[String]
+      service("ok") returns replyp
+
+      val readp = new Promise[String]
+      trans.read() returns readp
+
+      val disp = new SerialServerDispatcher(trans, service)
+
+      "while pending" in {
+        readp.setValue("ok")
+        there was one(service).apply("ok")
+        replyp.isCancelled must beFalse
+        onClose.setValue(new Exception)
+        replyp.isCancelled must beTrue
+      }
+
+      "while reading" in {
+        onClose.setValue(new Exception)
+        replyp.isCancelled must beFalse
+        there was no(service).apply(any)
+        readp.setValue("ok")
+        there was one(service).apply("ok")
+        replyp.isCancelled must beTrue
+        // This falls through.
+        there was one(trans).close()
+        there was one(service).release()
+      }
+    }
+
     "drain" in {
       val trans = mock[Transport[String, String]]
+      trans.onClose returns Future.never
       val service = mock[Service[String, String]]
 
       val readp = new Promise[String]
