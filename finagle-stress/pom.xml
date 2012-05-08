@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>7.0.1-SNAPSHOT</version>
+      <version>7.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
