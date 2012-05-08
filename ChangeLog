@@ -1,4 +1,4 @@
-3.0.1		2012/05/03
+4.0.0		2012/05/08
 
 	* http: add AddResponseHeadersFilter, CorsFilter
 	* finagle-redis: Add ZCard, ZRem, ZRevRange, ZRevRangeByScore commands
@@ -14,7 +14,9 @@
 	* tracing: annotate client connection when tracing
 	* update to netty 3.4.1.Final
 	* prevent tenuring of response objects for responses from previously idle connections
-	* 
+	* finagle-redis: add quit command
+	* finagle-http: add service multiplexer
+	* friendlier java interface for retries
 
 3.0.0		2012/03/14
 
