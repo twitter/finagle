@@ -44,8 +44,6 @@ class EndToEndSpec extends SpecificationWithJUnit {
       .tracerFactory((_) => serverTracer)
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
-    doAfter { server.close(20.milliseconds) }
-
     val clientTracer = new BufferingTracer
     val service = ClientBuilder()
       .hosts(Seq(serverAddr))
@@ -54,7 +52,47 @@ class EndToEndSpec extends SpecificationWithJUnit {
       .tracerFactory((_) => clientTracer)
       .build()
 
+    doBefore {
+      Trace.clear()
+    }
+
+    doAfter {
+      serverTracer.clear()
+      clientTracer.clear()
+      server.close(20.milliseconds)
+    }
+
     val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
+
+    "have unique trace ids" in Time.withCurrentTimeFrozen { tc =>
+      serverTracer must beEmpty
+      clientTracer must beEmpty
+      val sum1 = client.add(1, 2)
+      try {
+        sum1()
+      } catch {
+        case e: Exception =>
+      }
+
+      val idSet1 = Set() ++ (clientTracer map { _.traceId.traceId })
+      serverTracer.clear()
+      clientTracer.clear()
+
+      serverTracer must beEmpty
+      clientTracer must beEmpty
+      val sum2 = client.add(2, 3)
+      try {
+        sum2()
+      } catch {
+        case e: Exception =>
+      }
+
+      val idSet2 = Set() ++ (clientTracer map { _.traceId.traceId })
+      serverTracer.clear()
+      clientTracer.clear()
+
+      idSet1 must be_!=(idSet2)
+    }
 
     "work" in Time.withCurrentTimeFrozen { tc =>
       Trace.unwind {

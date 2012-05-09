@@ -116,7 +116,7 @@ object Trace {
    */
   def pushTracer(tracer: Tracer) {
     local() match {
-      case None    => local() = State(defaultId, false, tracer :: Nil)
+      case None    => local() = State(nextId, false, tracer :: Nil)
       case Some(s) => local() = s.copy(tracers = tracer :: this.tracers)
     }
   }
