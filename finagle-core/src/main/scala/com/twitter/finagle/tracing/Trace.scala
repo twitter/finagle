@@ -28,7 +28,7 @@ import com.twitter.util.{Time, Local}
  * When reporting, we report to all tracers in the list of `Tracer`s.
  */
 object Trace {
-  case class State(id: TraceId, terminal: Boolean, tracers: List[Tracer])
+  private case class State(id: Option[TraceId], terminal: Boolean, tracers: List[Tracer])
 
   private[this] val rng = new Random
 
@@ -45,7 +45,7 @@ object Trace {
   /**
    * Get the current identifier, if it exists.
    */
-  def idOption: Option[TraceId] = local() map { _.id }
+  def idOption: Option[TraceId] = local() flatMap { _.id }
 
   /**
    * @return true if the current trace id is terminal
@@ -103,8 +103,8 @@ object Trace {
   def setId(traceId: TraceId, terminal: Boolean = false): TraceId = {
     if (!isTerminal)
       local() match {
-        case None    => local() = State(traceId, terminal, tracers)
-        case Some(s) => local() = s.copy(id = traceId, terminal = terminal)
+        case None    => local() = State(Some(traceId), terminal, tracers)
+        case Some(s) => local() = s.copy(id = Some(traceId), terminal = terminal)
       }
     traceId
   }
@@ -116,7 +116,7 @@ object Trace {
    */
   def pushTracer(tracer: Tracer) {
     local() match {
-      case None    => local() = State(nextId, false, tracer :: Nil)
+      case None    => local() = State(None, false, tracer :: Nil)
       case Some(s) => local() = s.copy(tracers = tracer :: this.tracers)
     }
   }
