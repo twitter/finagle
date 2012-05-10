@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.channel.BrokerChannelHandler
+import com.twitter.util.Future
 import com.twitter.concurrent.{Offer, Broker}
 
 /**
@@ -22,7 +23,7 @@ class HttpDechunker extends BrokerChannelHandler {
     out: Broker[ChannelBuffer],
     err: Broker[Throwable],
     close: Offer[Unit],
-    lastWrite: Offer[Unit])
+    lastWrite: Future[Unit])
   {
     Offer.select(
       close { _=>
@@ -33,19 +34,19 @@ class HttpDechunker extends BrokerChannelHandler {
       upstreamEvent {
         case MessageValue(chunk: HttpChunk, _) =>
           val content = chunk.getContent
-          val sendOf =
+          val sendFuture =
             if (content.readable)
-              out.send(content)
+              out.send(content).sync().unit
             else
               lastWrite
 
           if (chunk.isLast) {
             ch.close()
-            sendOf andThen error(err, EOF)
+            sendFuture onSuccess { _ => error(err, EOF) }
           } else {
             ch.setReadable(false)
-            sendOf andThen ch.setReadable(true)
-            read(ch, out, err, close, sendOf)
+            sendFuture onSuccess { _ => ch.setReadable(true) }
+            read(ch, out, err, close, sendFuture)
           }
 
         case MessageValue(invalid, ctx) =>
@@ -92,7 +93,7 @@ class HttpDechunker extends BrokerChannelHandler {
         }
 
         Channels.fireMessageReceived(ctx, res)
-        read(ctx.getChannel, out, err, close.recv, Offer.const(()))
+        read(ctx.getChannel, out, err, close.recv, Future.Unit)
 
       case MessageValue(invalid, ctx) =>
         Channels.fireExceptionCaught(
