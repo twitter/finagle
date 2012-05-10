@@ -40,7 +40,11 @@ object Trace {
    * Get the current trace identifier.  If no identifiers have been
    * pushed, a default one is provided.
    */
-  def id: TraceId = idOption getOrElse defaultId
+  def id: TraceId = {
+    val blah = idOption getOrElse defaultId
+    println("returning id: " + blah.traceId.toLong)
+    blah
+  }
 
   /**
    * Get the current identifier, if it exists.
@@ -80,10 +84,12 @@ object Trace {
    */
   def nextId: TraceId = {
     val currentId = idOption
-    TraceId(currentId map { _.traceId },
+    val next = TraceId(currentId map { _.traceId },
       currentId map { _.spanId },
       SpanId(rng.nextLong()),
       currentId map { _.sampled } getOrElse None)
+    println("getting next id: " + next.traceId.toLong)
+    next
   }
 
   @deprecated("use setId() instead")
@@ -101,6 +107,7 @@ object Trace {
    *                 id is set will not set the traceId
    */
   def setId(traceId: TraceId, terminal: Boolean = false): TraceId = {
+    println("setting: " + traceId.traceId.toLong)
     if (!isTerminal)
       local() match {
         case None    => local() = State(traceId, terminal, tracers)
@@ -116,7 +123,9 @@ object Trace {
    */
   def pushTracer(tracer: Tracer) {
     local() match {
-      case None    => local() = State(nextId, false, tracer :: Nil)
+      case None    =>
+        println("pushing tracer with default id " + defaultId.traceId.toLong)
+        local() = State(defaultId, false, tracer :: Nil)
       case Some(s) => local() = s.copy(tracers = tracer :: this.tracers)
     }
   }
