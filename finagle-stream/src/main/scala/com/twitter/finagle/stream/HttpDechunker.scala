@@ -21,7 +21,8 @@ class HttpDechunker extends BrokerChannelHandler {
     ch: Channel,
     out: Broker[ChannelBuffer],
     err: Broker[Throwable],
-    close: Offer[Unit])
+    close: Offer[Unit]
+    lastWrite: Offer[Unit])
   {
     Offer.select(
       close { _=>
@@ -36,7 +37,7 @@ class HttpDechunker extends BrokerChannelHandler {
             if (content.readable)
               out.send(content)
             else
-              Offer.const(())
+              lastWrite
 
           if (chunk.isLast) {
             ch.close()
@@ -44,7 +45,7 @@ class HttpDechunker extends BrokerChannelHandler {
           } else {
             ch.setReadable(false)
             sendOf andThen ch.setReadable(true)
-            read(ch, out, err, close)
+            read(ch, out, err, close, sendOf)
           }
 
         case MessageValue(invalid, ctx) =>
@@ -63,7 +64,7 @@ class HttpDechunker extends BrokerChannelHandler {
 
         case e =>
           e.sendUpstream()
-          read(ch, out, err, close)
+          read(ch, out, err, close, lastWrite)
       }
     )
   }
@@ -91,7 +92,7 @@ class HttpDechunker extends BrokerChannelHandler {
         }
 
         Channels.fireMessageReceived(ctx, res)
-        read(ctx.getChannel, out, err, close.recv)
+        read(ctx.getChannel, out, err, close.recv, Offer.const(()))
 
       case MessageValue(invalid, ctx) =>
         Channels.fireExceptionCaught(
