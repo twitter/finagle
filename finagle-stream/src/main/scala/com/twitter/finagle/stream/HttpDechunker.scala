@@ -21,7 +21,7 @@ class HttpDechunker extends BrokerChannelHandler {
     ch: Channel,
     out: Broker[ChannelBuffer],
     err: Broker[Throwable],
-    close: Offer[Unit]
+    close: Offer[Unit],
     lastWrite: Offer[Unit])
   {
     Offer.select(
