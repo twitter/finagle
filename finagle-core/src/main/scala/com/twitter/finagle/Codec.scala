@@ -7,7 +7,7 @@ package com.twitter.finagle
  */
 
 import com.twitter.finagle.dispatch.{
-  ClientDispatcherFactory, SerialClientDispatcher, SerialServerDispatcher, 
+  ClientDispatcherFactory, SerialClientDispatcher, SerialServerDispatcher,
   ServerDispatcherFactory}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
@@ -47,6 +47,11 @@ trait Codec[Req, Rep] {
   val mkServerDispatcher: ServerDispatcherFactory[Req, Rep] = (mkTrans, service) =>
     new SerialServerDispatcher[Req, Rep](mkTrans(), service)
 }
+
+/**
+ * An abstract class version of the above for java compatibility.
+ */
+abstract class AbstractCodec[Req, Rep] extends Codec[Req, Rep]
 
 object Codec {
   def ofPipelineFactory[Req, Rep](makePipeline: => ChannelPipeline) = new Codec[Req, Rep] {
