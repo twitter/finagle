@@ -18,6 +18,11 @@
 			<url>http://build:8081/nexus/content/repositories/platform-services-snapshot</url>
 		</snapshotRepository>
 	</distributionManagement>
+	<scm>
+        	<connection>scm:git:https://fisheye.tendrilinc.com/git/finagle.git</connection>
+        	<developerConnection>scm:git:https://fisheye.tendrilinc.com/git/finagle.git</developerConnection>
+    	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.twitter</groupId>
