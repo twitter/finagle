@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-kestrel</artifactId>
   <packaging>jar</packaging>
-  <version>4.0.2-SNAPSHOT</version>
+  <version>4.0.2</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent</artifactId>
@@ -20,12 +20,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>4.0.2-SNAPSHOT</version>
+      <version>4.0.2</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached</artifactId>
-      <version>4.0.2-SNAPSHOT</version>
+      <version>4.0.2</version>
     </dependency>
   </dependencies>
 </project>
