@@ -15,6 +15,8 @@ import scala.collection.JavaConversions._
  */
 class ParamMap(val request: Request)
   extends MapLike[String, String, Map[String, String]] {
+  
+  def seq = Map.empty ++ iterator
 
   private[this] var _isValid = true
 
