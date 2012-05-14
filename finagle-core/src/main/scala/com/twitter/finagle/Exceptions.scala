@@ -46,6 +46,7 @@ class TooManyWaitersException                        extends RequestException
 class CancelledConnectionException                   extends RequestException
 class NoBrokersAvailableException                    extends RequestException
 class ReplyCastException                             extends RequestException
+class FailedFastException                            extends RequestException
 
 class NotServableException          extends RequestException
 class NotShardableException         extends NotServableException

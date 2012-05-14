@@ -4,8 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
-  ClientConnection, ServiceFactory, ServiceFactoryProxy}
-import com.twitter.util.{Duration, Time, Throw, Return, Timer, TimerTask}
+  ClientConnection, ServiceFactory, ServiceFactoryProxy, FailedFastException}
+import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
 import scala.util.Random
 
 private[finagle] object FailFastFactory {
@@ -20,6 +20,12 @@ private[finagle] object FailFastFactory {
 
   private val defaultBackoffs = Backoff.exponential(1.second, 2) take 5
   private val rng = new Random
+
+  // This perhaps should be a write exception, but in reality it's
+  // only dispatched when all hosts in the cluster are failed, and so
+  // we don't want to retry. This is a bit of a kludge--we should
+  // reconsider having this logic in the load balancer instead.
+  private val failedFastExc = Future.exception(new FailedFastException)
 }
 
 /**
@@ -109,10 +115,12 @@ private[finagle] class FailFastFactory[Req, Rep](
     }
 
   override def apply(conn: ClientConnection) =
-    self(conn) respond {
-      case Throw(_) => proc ! Observation.Fail
-      case Return(_) if state != Ok => proc ! Observation.Success
-      case _ =>
+    if (state != Ok) failedFastExc else {
+      self(conn) respond {
+        case Throw(_) => proc ! Observation.Fail
+        case Return(_) if state != Ok => proc ! Observation.Success
+        case _ =>
+      }
     }
 
   override def isAvailable = self.isAvailable && state == Ok
