@@ -12,7 +12,7 @@ class DeadlineSpanMapSpec extends SpecificationWithJUnit with Mockito {
 
   "DeadlineSpanMap" should {
     "expire and log spans" in Time.withCurrentTimeFrozen { tc =>
-      val tracer = mock[BigBrotherBirdTracer]
+      val tracer = mock[RawBigBrotherBirdTracer]
       val timer = new MockTimer
 
       val map = new DeadlineSpanMap(tracer, 1.milliseconds, NullStatsReceiver, timer)

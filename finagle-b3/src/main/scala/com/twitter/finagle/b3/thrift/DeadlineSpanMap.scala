@@ -10,7 +10,7 @@ import com.twitter.util.{Timer, Duration}
  * is not removed from the map it will expire after the deadline is reached
  * and sent off to B3 despite being incomplete.
  */
-class DeadlineSpanMap(tracer: BigBrotherBirdTracer,
+class DeadlineSpanMap(tracer: RawBigBrotherBirdTracer,
                       deadline: Duration,
                       statsReceiver: StatsReceiver,
                       timer: Timer) {
