@@ -22,31 +22,29 @@ class HttpDechunker extends BrokerChannelHandler {
     ch: Channel,
     out: Broker[ChannelBuffer],
     err: Broker[Throwable],
-    close: Offer[Unit],
-    lastWrite: Future[Unit])
-  {
+    close: Offer[Unit]
+  ) {
     Offer.select(
       close { _=>
         ch.close()
         error(err, EOF)
       },
-
       upstreamEvent {
         case MessageValue(chunk: HttpChunk, _) =>
           val content = chunk.getContent
-          val sendFuture =
-            if (content.readable)
-              out.send(content).sync().unit
-            else
-              lastWrite
+
+          val sendOf =
+            if (content.readable) out.send(content) else Offer.const(())
 
           if (chunk.isLast) {
             ch.close()
-            sendFuture onSuccess { _ => error(err, EOF) }
+            sendOf.sync() ensure { error(err, EOF) }
           } else {
             ch.setReadable(false)
-            sendFuture onSuccess { _ => ch.setReadable(true) }
-            read(ch, out, err, close, sendFuture)
+            sendOf.sync() ensure {
+              ch.setReadable(true)
+              read(ch, out, err, close)
+            }
           }
 
         case MessageValue(invalid, ctx) =>
@@ -65,7 +63,7 @@ class HttpDechunker extends BrokerChannelHandler {
 
         case e =>
           e.sendUpstream()
-          read(ch, out, err, close, lastWrite)
+          read(ch, out, err, close)
       }
     )
   }
@@ -93,7 +91,7 @@ class HttpDechunker extends BrokerChannelHandler {
         }
 
         Channels.fireMessageReceived(ctx, res)
-        read(ctx.getChannel, out, err, close.recv, Future.Unit)
+        read(ctx.getChannel, out, err, close.recv)
 
       case MessageValue(invalid, ctx) =>
         Channels.fireExceptionCaught(
