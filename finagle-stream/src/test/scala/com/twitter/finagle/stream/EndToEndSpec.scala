@@ -242,18 +242,12 @@ object EndToEndSpec extends Specification {
 
       "sends EOF only after buffered messages are received" in {
         val clientRes = client(httpRequest)(1.second)
-        var result = ""
-        val sendLatch = new CountDownLatch(1)
-        val receiveLatch = new CountDownLatch(1)
 
         FuturePool.defaultPool {
           messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
           messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
           error !! EOF
-          sendLatch.countDown()
         }
-
-        sendLatch.within(1.second)
 
         val firstMessage = clientRes.messages.sync()(1.second)
 
