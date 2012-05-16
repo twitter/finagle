@@ -51,12 +51,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>7.0.1</version>
+      <version>7.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>4.0.1</version>
+      <version>4.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

@@ -25,7 +25,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>7.0.1</version>
+      <version>7.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

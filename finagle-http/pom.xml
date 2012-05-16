@@ -30,12 +30,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>4.0.1</version>
+      <version>4.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>4.0.1</version>
+      <version>4.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
