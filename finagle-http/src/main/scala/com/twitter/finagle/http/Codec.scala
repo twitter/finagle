@@ -276,7 +276,7 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
       }
 
       spanId foreach { sid =>
-        Trace.pushId(TraceId(traceId, parentSpanId, sid, sampled))
+        Trace.setId(TraceId(traceId, parentSpanId, sid, sampled))
       }
     }
 

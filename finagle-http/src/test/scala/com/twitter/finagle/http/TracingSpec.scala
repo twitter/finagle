@@ -14,7 +14,7 @@ class TracingSpec extends SpecificationWithJUnit {
 
   "TracingFilters" should {
     "set header" in {
-      Trace.pushId(traceId)
+      Trace.setId(traceId)
 
       val dummyService = new Service[HttpRequest, HttpResponse] {
         def apply(request: HttpRequest) = {
