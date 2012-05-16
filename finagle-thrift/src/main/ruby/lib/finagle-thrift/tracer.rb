@@ -61,8 +61,8 @@ module Trace
     end
   end
 
-  class B3Tracer < Tracer
-    B3_CATEGORY = "b3"
+  class ZipkinTracer < Tracer
+    TRACER_CATEGORY = "zipkin"
     def initialize(scribe, max_buffer)
       @scribe = scribe
       @max_buffer = max_buffer
@@ -113,7 +113,7 @@ module Trace
           oprot = Thrift::BinaryProtocol.new(trans)
           span.to_thrift.write(oprot)
           binary = Base64.encode64(buf).gsub("\n", "")
-          @scribe.log(binary, B3_CATEGORY)
+          @scribe.log(binary, TRACER_CATEGORY)
         end
       end
       reset
