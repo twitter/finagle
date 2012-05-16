@@ -35,5 +35,6 @@
     <module>finagle-stress</module>
     <module>finagle-test</module>
     <module>finagle-thrift</module>
+    <module>finagle-zipkin</module>
   </modules>
 </project>

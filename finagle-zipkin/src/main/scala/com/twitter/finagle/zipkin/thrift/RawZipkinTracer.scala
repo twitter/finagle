@@ -1,4 +1,4 @@
-package com.twitter.finagle.b3.thrift
+package com.twitter.finagle.zipkin.thrift
 
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TIOStreamTransport
@@ -20,23 +20,22 @@ import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.util.Timer
 
-object RawBigBrotherBirdTracer {
+object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port
   private[this] val map =
-    new HashMap[String, RawBigBrotherBirdTracer] with SynchronizedMap[String, RawBigBrotherBirdTracer]
+    new HashMap[String, RawZipkinTracer] with SynchronizedMap[String, RawZipkinTracer]
 
   /**
    * @param scribeHost Host to send trace data to
    * @param scribePort Port to send trace data to
    * @param statsReceiver Where to log information about tracing success/failures
-   * @deprecated Please use ZipkinTracer in the finagle-zipkin module instead.
    */
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver): Tracer.Factory = {
 
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-      new RawBigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"))
+      new RawZipkinTracer(scribeHost, scribePort, statsReceiver.scope("zipkin"))
     })
 
     h => {
@@ -55,16 +54,15 @@ object RawBigBrotherBirdTracer {
  * @param scribeHost The scribe host used to send traces to scribe
  * @param scribePort The scribe port used to send traces to scribe
  * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
- * @deprecated Please use ZipkinTracer in the finagle-zipkin module instead.
  */
-private[thrift] class RawBigBrotherBirdTracer(
+private[thrift] class RawZipkinTracer(
   scribeHost: String,
   scribePort: Int,
   statsReceiver: StatsReceiver
 ) extends Tracer
 {
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
-  private[this] val TraceCategory = "b3" // scribe category
+  private[this] val TraceCategory = "zipkin" // scribe category
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, Timer.default)
@@ -199,7 +197,7 @@ private[thrift] class RawBigBrotherBirdTracer(
     mutate(record.traceId) { span =>
       val endpoint = Endpoint.fromSocketAddress(ia).boundEndpoint
       span.copy(_endpoint = Some(endpoint),
-        annotations = span.annotations map { a => B3Annotation(a.timestamp, a.value, endpoint)})
+        annotations = span.annotations map { a => ZipkinAnnotation(a.timestamp, a.value, endpoint)})
     }
   }
 
@@ -211,7 +209,7 @@ private[thrift] class RawBigBrotherBirdTracer(
   ) = {
     mutate(record.traceId) { span =>
       span.copy(bAnnotations = span.bAnnotations ++ Seq(
-        B3BinaryAnnotation(key, value, annotationType, span.endpoint)))
+        BinaryAnnotation(key, value, annotationType, span.endpoint)))
     }
   }
 
@@ -221,7 +219,7 @@ private[thrift] class RawBigBrotherBirdTracer(
   protected def annotate(record: Record, value: String) = {
     mutate(record.traceId) { span =>
       span.copy(annotations = span.annotations ++ Seq(
-        B3Annotation(record.timestamp, value, span.endpoint)))
+        ZipkinAnnotation(record.timestamp, value, span.endpoint)))
     }
   }
 }
