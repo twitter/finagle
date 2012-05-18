@@ -1,14 +1,14 @@
-<project 
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
   <artifactId>finagle-example</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>4.0.3-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2</version>
     <relativePath>../../parents/scala-parent/pom.xml</relativePath>
   </parent>
   <properties>
@@ -22,6 +22,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
       <version>0.0.1</version>
       <!-- excluded to prevent conflicts with caged finagle/util -->
       <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>com.twitter</groupId>
           <artifactId>util</artifactId>
@@ -74,38 +78,47 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-kestrel</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-redis</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stream</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
+      <version>4.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
+      <version>4.0.1</version>
     </dependency>
   </dependencies>
   <build>

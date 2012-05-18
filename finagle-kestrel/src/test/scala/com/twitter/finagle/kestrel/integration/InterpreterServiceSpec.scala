@@ -8,9 +8,9 @@ import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Time, RandomSocket}
 import java.net.InetSocketAddress
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object InterpreterServiceSpec extends Specification {
+class InterpreterServiceSpec extends SpecificationWithJUnit {
   "InterpreterService" should {
     var server: Server = null
     var client: Service[Command, Response] = null

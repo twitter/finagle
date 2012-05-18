@@ -4,9 +4,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{ByteArrays, Ok, Error, Cancelled}
-import com.twitter.util.Time
+import com.twitter.util.{Future, Time}
 import org.apache.thrift.protocol.{
-  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
+  TBinaryProtocol, TMessage, TMessageType, TProtocol, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
@@ -29,22 +29,29 @@ object ThriftClientFramedCodec {
   def get() = apply()
 }
 
-class ThriftClientFramedCodecFactory(clientId: Option[ClientId])
+class ThriftClientFramedCodecFactory(clientId: Option[ClientId], _useCallerSeqIds: Boolean)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
+  def this(clientId: Option[ClientId]) = this(clientId, false)
+
+  // Fix this after the API/ABI freeze (use case class builder)
+  def useCallerSeqIds(x: Boolean): ThriftClientFramedCodecFactory =
+    new ThriftClientFramedCodecFactory(clientId, x)
+
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
    */
   def apply(config: ClientCodecConfig) =
-    new ThriftClientFramedCodec(new TBinaryProtocol.Factory(), config, clientId)
+    new ThriftClientFramedCodec(new TBinaryProtocol.Factory(), config, clientId, _useCallerSeqIds)
 
 }
 
 class ThriftClientFramedCodec(
   protocolFactory: TProtocolFactory,
   config: ClientCodecConfig,
-  clientId: Option[ClientId] = None
+  clientId: Option[ClientId] = None,
+  useCallerSeqIds: Boolean = false
 ) extends Codec[ThriftClientRequest, Array[Byte]]
 {
   def pipelineFactory =
@@ -58,29 +65,31 @@ class ThriftClientFramedCodec(
       }
     }
 
-  override def prepareConnFactory(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) = underlying flatMap {  service =>
-    // Attempt to upgrade the protocol the first time around by
-    // sending a magic method invocation.
-    val buffer = new OutputBuffer()
-    buffer().writeMessageBegin(new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
+  override def prepareConnFactory(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) =
+    underlying flatMap { service =>
+      // Attempt to upgrade the protocol the first time around by
+      // sending a magic method invocation.
+      val buffer = new OutputBuffer()
+      buffer().writeMessageBegin(new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
 
-    val options = new thrift.ConnectionOptions
-    options.write(buffer())
+      val options = new thrift.ConnectionOptions
+      options.write(buffer())
 
-    buffer().writeMessageEnd()
+      buffer().writeMessageEnd()
 
-    service(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
-      val memoryTransport = new TMemoryInputTransport(bytes)
-      val iprot = protocolFactory.getProtocol(memoryTransport)
-      val reply = iprot.readMessageBegin()
-      val filter = new ThriftClientTracingFilter(
-        config.serviceName,
-        reply.`type` != TMessageType.EXCEPTION,
-        clientId)
-
-      filter andThen service
+      service(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
+        val memoryTransport = new TMemoryInputTransport(bytes)
+        val iprot = protocolFactory.getProtocol(memoryTransport)
+        val reply = iprot.readMessageBegin()
+        val tracingFilter = new ThriftClientTracingFilter(
+          config.serviceName,
+          reply.`type` != TMessageType.EXCEPTION,
+          clientId)
+        val seqIdFilter = if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
+          new SeqIdFilter else Filter.identity[ThriftClientRequest, Array[Byte]]
+        seqIdFilter andThen tracingFilter andThen service
+      }
     }
-  }
 }
 
 /**

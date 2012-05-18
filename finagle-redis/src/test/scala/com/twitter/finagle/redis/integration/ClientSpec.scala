@@ -6,9 +6,9 @@ import com.twitter.finagle.redis.util.{RedisCluster, BytesToString}
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.util.{Future, RandomSocket}
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object ClientSpec extends Specification {
+class ClientSpec extends SpecificationWithJUnit {
 
   "A BaseClient" should {
     /**
@@ -35,7 +35,6 @@ object ClientSpec extends Specification {
 
     doAfter {
       RedisCluster.stop()
-      stats.print()
     }
 
     "perform simple commands" in {
@@ -81,6 +80,10 @@ object ClientSpec extends Specification {
         client.select(1)() mustEqual "OK"
       }
 
+      "quit" in {
+        client.quit()() mustEqual ()
+      }
+
     }
 
 
@@ -100,7 +103,7 @@ object ClientSpec extends Specification {
       }
 
       "delete multiple fields" in {
-        client.hSet(foo, bar,  baz)()
+        client.hSet(foo, bar, baz)()
         client.hSet(foo, boo, moo)()
         client.hDel("foo", Seq("bar", "boo"))() mustEqual 2
       }

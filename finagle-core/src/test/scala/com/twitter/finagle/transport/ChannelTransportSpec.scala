@@ -1,6 +1,6 @@
 package com.twitter.finagle.transport
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
@@ -8,7 +8,7 @@ import com.twitter.util.{Return, Throw}
 import com.twitter.finagle.{WriteException, ChannelException}
 import java.net.SocketAddress
 
-object ChannelTransportSpec extends Specification with Mockito {
+class ChannelTransportSpec extends SpecificationWithJUnit with Mockito {
   "ChannelTransport" should {
     val ch = mock[Channel]
     val closeFuture = mock[ChannelFuture]
@@ -26,7 +26,7 @@ object ChannelTransportSpec extends Specification with Mockito {
       val ctx = mock[ChannelHandlerContext]
       handler.handleUpstream(ctx, e)
     }
-    
+
     def sendUpstreamMessage(msg: Object) =
       sendUpstream({
         val e = mock[MessageEvent]
@@ -97,6 +97,19 @@ object ChannelTransportSpec extends Specification with Mockito {
           e
         })
         f.poll must beSome(Throw(ChannelException(exc, remoteAddress)))
+      }
+    }
+
+    "satisfy onClose" in {
+      "when excepting" in {
+        trans.onClose.poll must beNone
+        val exc = new Exception("close exception")
+        sendUpstream({
+          val e = mock[ExceptionEvent]
+          e.getCause returns exc
+          e
+        })
+        trans.onClose.poll must beSome(Return(ChannelException(exc, remoteAddress)))
       }
     }
   }

@@ -46,15 +46,15 @@ class HeapBalancer[Req, Rep](
     gauges(node) = (availableGauge, loadGauge)
   }
   private[this] def removeGauges(node: Node) = gauges.remove(node)
+  private[this] val sizeGauge = statsReceiver.addGauge("size") { size }
 
   private[this] val (factories, updates) = cluster.snap
-
   // Build initial heap
   // Our heap is 1-indexed. We make heap[0] a dummy node
   // Invariants:
   //   1. heap[i].index == i
   //   2. heap.size == size + 1
-  private[this] var size = factories.size
+  @volatile private[this] var size = factories.size
   private[this] var heap = {
     val heap = new Array[Node] (size + 1)
     heap(0) = new Node(new FailingFactory(new Exception("Invalid heap operation on index 0")), 0, 0)

@@ -3,14 +3,14 @@ package com.twitter.finagle.builder
 import com.twitter.finagle.integration.DynamicCluster
 import com.twitter.util.{CountDownLatch, Promise}
 import java.net.{InetSocketAddress, SocketAddress}
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.{SimpleFilter, Codec, CodecFactory, Service, ServiceFactory}
 
-class EndToEndSpec extends Specification {
+class EndToEndSpec extends SpecificationWithJUnit {
   val constRes = new Promise[String]
   val arrivalLatch = new CountDownLatch(1)
   val service = new Service[String, String] {

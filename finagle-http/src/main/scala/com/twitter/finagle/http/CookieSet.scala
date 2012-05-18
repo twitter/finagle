@@ -16,6 +16,8 @@ import scala.collection.JavaConversions._
  */
 class CookieSet(message: Message) extends
   mutable.SetLike[Cookie, mutable.Set[Cookie]] {
+  
+  def seq = Set.empty ++ iterator
 
   private[this] var _isValid = true
 

@@ -4,9 +4,9 @@ import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.net.InetSocketAddress
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object EndToEndSpec extends Specification {
+class EndToEndSpec extends SpecificationWithJUnit {
   "Echo Server and Client with RichHttp codec" should {
     val echoService = new Service[Request, Response] {
       def apply(request: Request) = {

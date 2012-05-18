@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{WriteException, ServiceFactory, Service}
+import com.twitter.finagle.{WriteException, FailedFastException, ServiceFactory, Service}
 import com.twitter.util.{Promise, Future}
 import java.net.ConnectException
 import org.specs.mock.Mockito
@@ -30,7 +30,7 @@ class FailFastFactorySpec extends SpecificationWithJUnit with Mockito {
     }
 
     "on failure" in Time.withCurrentTimeFrozen { tc =>
-      val p, q = new Promise[Service[Int, Int]]
+      val p, q, r = new Promise[Service[Int, Int]]
       underlying() returns p
       val pp = failfast()
       pp.isDefined must beFalse
@@ -63,12 +63,26 @@ class FailFastFactorySpec extends SpecificationWithJUnit with Mockito {
         failfast.isAvailable must beTrue
       }
 
-      "become available again if an external attempts succeeds" in {
-        timer.tasks must haveSize(1)
-        underlying() returns Future.value(service)
-        failfast().poll must beSome(Return(service))
-        failfast.isAvailable must beTrue
-        timer.tasks must beEmpty  // was cancelled
+      "refuse external attempts" in {
+        failfast().poll must beLike {
+          case Some(Throw(_: FailedFastException)) => true
+        }
+        there was one(underlying).apply()  // nothing new
+      }
+
+      "admit external attempts when available again" in {
+        tc.set(timer.tasks(0).when)
+        there was one(underlying)()
+        underlying() returns q
+        timer.tick()
+        there were two(underlying)()
+        q() = Return(service)
+        underlying() returns r
+        failfast().poll must beNone
+        r() = Return(service)
+        failfast().poll must beLike {
+          case Some(Return(s)) => s eq service
+        }
       }
 
       "cancels timer on close" in {

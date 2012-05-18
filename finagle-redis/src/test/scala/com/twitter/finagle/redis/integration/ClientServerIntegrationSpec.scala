@@ -6,10 +6,10 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.util.Future
 import java.net.InetSocketAddress
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import util._
 
-class ClientServerIntegrationSpec extends Specification {
+class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   lazy val svcClient = ClientBuilder()
                 .name("redis-client")
                 .codec(Redis())

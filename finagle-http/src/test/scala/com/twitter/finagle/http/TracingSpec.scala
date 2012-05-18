@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import org.jboss.netty.handler.codec.http.{HttpResponse, HttpRequest}
@@ -8,7 +8,7 @@ import com.twitter.finagle.tracing.{SpanId, TraceId, Trace}
 import java.net.InetSocketAddress
 import HttpTracing._
 
-object TracingSpec extends Specification {
+class TracingSpec extends SpecificationWithJUnit {
 
   val traceId = TraceId(Some(SpanId(1)), None, SpanId(2), Some(true))
 

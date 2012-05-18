@@ -5,10 +5,10 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.service.NullService
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Time}
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 
-object StatsFilterSpec extends Specification {
+class StatsFilterSpec extends SpecificationWithJUnit {
   "StatsFilter" should {
     "increment stats" in {
       val receiver = new InMemoryStatsReceiver

@@ -1,6 +1,6 @@
 package com.twitter.finagle.kestrel.integration
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.kestrel.Client
@@ -12,7 +12,7 @@ import com.twitter.util.Future
 import com.twitter.conversions.time._
 import org.jboss.netty.buffer.ChannelBuffer
 
-object ClientSpec extends Specification {
+class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {
     skip("This test requires a Kestrel server to run. Please run manually")
 

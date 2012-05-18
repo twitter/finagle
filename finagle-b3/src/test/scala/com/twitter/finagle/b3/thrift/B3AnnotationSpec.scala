@@ -1,10 +1,10 @@
 package com.twitter.finagle.b3.thrift
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.util.Time
 
-class B3AnnotationSpec extends Specification with Mockito {
+class B3AnnotationSpec extends SpecificationWithJUnit with Mockito {
 
   "B3Annotation" should {
     "serialize properly" in {

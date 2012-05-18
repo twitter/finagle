@@ -12,6 +12,8 @@ import scala.collection.JavaConversions._
  */
 class HeaderMap(httpMessage: HttpMessage)
   extends mutable.MapLike[String, String, mutable.Map[String, String]] {
+  
+  def seq = Map.empty ++ iterator
 
   def get(key: String): Option[String] =
     Option(httpMessage.getHeader(key))

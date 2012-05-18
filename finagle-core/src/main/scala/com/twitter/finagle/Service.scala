@@ -39,7 +39,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
 
   /**
    * Relinquishes the use of this service instance. Behavior is
-   * undefined is apply() is called after resources are relinquished.
+   * undefined if apply() is called after resources are relinquished.
    */
   def release() = ()
 
@@ -194,8 +194,7 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
 }
 
 /**
- * A ServiceFactoryWrapper produces a ServiceFactory given a ServiceFactory through, tradionally
- * by constructing a composing ServiceFactory.
+ * A ServiceFactoryWrapper adds behavior to an underlying ServiceFactory.
  */
 trait ServiceFactoryWrapper {
   def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep]

@@ -3,7 +3,7 @@ package com.twitter.finagle.channel
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.ClientDispatcherFactory
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport, TransportFactory}
+import com.twitter.finagle.transport.{ClientChannelTransport, TransportFactory}
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
 import com.twitter.util.{Future, Promise, Time}
@@ -13,7 +13,7 @@ import java.util.logging.{Logger, Level}
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.group.{
-  ChannelGroupFuture, ChannelGroupFutureListener, DefaultChannelGroup, 
+  ChannelGroupFuture, ChannelGroupFutureListener, DefaultChannelGroup,
   DefaultChannelGroupFuture}
 import scala.collection.JavaConverters._
 
@@ -41,7 +41,7 @@ private[finagle] class ChannelService[Req, Rep](
 
   private[this] val released = new AtomicBoolean(false)
   private[this] val dispatcher = mkDispatcher(new TransportFactory {
-    def apply[In, Out]() = new ChannelTransport[In, Out](channel)
+    def apply[In, Out]() = new ClientChannelTransport[In, Out](channel, statsReceiver)
   })
 
   def apply(request: Req) = dispatcher(request)

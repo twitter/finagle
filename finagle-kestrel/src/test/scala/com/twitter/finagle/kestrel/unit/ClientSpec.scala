@@ -1,7 +1,7 @@
 package com.twitter.finagle.kestrel
 package unit
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -28,7 +28,7 @@ class MockClient extends Client {
   def close() {}
 }
 
-object ClientSpec extends Specification with Mockito {
+class ClientSpec extends SpecificationWithJUnit with Mockito {
   def buf(i: Int) = ChannelBuffers.wrappedBuffer("%d".format(i).getBytes)
   def msg(i: Int) = {
     val m = mock[ReadMessage]

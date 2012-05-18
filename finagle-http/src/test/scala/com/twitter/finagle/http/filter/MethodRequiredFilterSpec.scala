@@ -3,9 +3,9 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.util.Future
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
-object MethodRequiredFilterSpec extends Specification {
+class MethodRequiredFilterSpec extends SpecificationWithJUnit {
 
   val dummyService = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {

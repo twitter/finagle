@@ -89,7 +89,7 @@ public class ClientBase extends Client {
     Future<Object> result = underlying.set(key, value);
     return result.map(new Function<Object, Void>() {
       public Void apply(Object obj) {
-	return null;
+        return null;
       }
     });
   }
@@ -98,7 +98,7 @@ public class ClientBase extends Client {
     Future<Object> result = underlying.set(key, flags, expiry, value);
     return result.map(new Function<Object, Void>() {
       public Void apply(Object obj) {
-	return null;
+        return null;
       }
     });
   }

@@ -7,10 +7,10 @@ import org.jboss.netty.channel.{
   ChannelPipeline, ChannelEvent, DownstreamMessageEvent,
   DefaultExceptionEvent, Channel}
 import org.mockito.ArgumentCaptor
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-object ClientDispatcherSpec extends Specification with Mockito {
+class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
   "ClientDispatcher" should {
     val trans = mock[Transport[String, String]]
     val disp = new SerialClientDispatcher[String, String](trans)
