@@ -1,6 +1,6 @@
 package com.twitter.finagle.stream
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.{SunkChannel, SunkChannelFactory}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{Channels, MessageEvent}
@@ -8,7 +8,7 @@ import org.jboss.netty.handler.codec.http._
 import com.twitter.conversions.time._
 import java.nio.charset.Charset
 
-object HttpDechunkerSpec extends Specification {
+class HttpDechunkerSpec extends SpecificationWithJUnit {
 
   "HttpDechunker" should {
     "wait until last message is synced before sending EOF" in {

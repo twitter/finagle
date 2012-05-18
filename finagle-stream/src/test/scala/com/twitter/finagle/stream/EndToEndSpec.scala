@@ -239,22 +239,6 @@ object EndToEndSpec extends Specification {
         latch.within(1.second)
         result mustEqual "1223"
       }
-
-      "sends EOF only after buffered messages are received" in {
-        val clientRes = client(httpRequest)(1.second)
-
-        FuturePool.defaultPool {
-          messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-          messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-          error !! EOF
-        }
-
-        val firstMessage = clientRes.messages.sync()(1.second)
-
-        firstMessage must_== ChannelBuffers.wrappedBuffer("1".getBytes)
-        clientRes.error.sync()(1.second) must throwA[TimeoutException]
-      }
-
     }
   }
 }

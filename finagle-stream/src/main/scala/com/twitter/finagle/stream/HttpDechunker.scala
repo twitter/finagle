@@ -4,7 +4,6 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.channel.BrokerChannelHandler
-import com.twitter.util.Future
 import com.twitter.concurrent.{Offer, Broker}
 
 /**
