@@ -22,10 +22,7 @@ object JSSE {
   /**
    * Get a server
    */
-  def server(certificatePath: String,
-             keyPath: String,
-             ciphers: Array[String],
-             useCache: Boolean = true): Option[Engine] = {
+  def server(certificatePath: String, keyPath: String, useCache: Boolean = true): Option[Engine] = {
     def makeContext: SSLContext = {
       val context = SSLContext.getInstance(protocol)
       val kms = PEMEncodedKeyManager(certificatePath, keyPath)
@@ -45,16 +42,13 @@ object JSSE {
         makeContext
     }
 
-    val sslEngine = context.createSSLEngine()
-    sslEngine.setEnabledCipherSuites(ciphers)
-    Some(new Engine(sslEngine))
+    Some(new Engine(context.createSSLEngine()))
   }
 
   /**
-   * Get a dummy client, which don't support client cert.
+   * Get a client
    */
   def client(): Engine = new Engine(defaultSSLContext.createSSLEngine())
-
 
   /**
    * Get a client from the given Context
