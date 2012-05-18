@@ -20,12 +20,13 @@ object Ssl {
   private[this] val cacheContexts = true
 
   /**
-   * Get a server engine, using the native OpenSSL provider if available.
+   * Get a server engine, using the native OpenSSL provider.
    *
    * @param certificatePath The path to the PEM encoded certificate file
    * @param keyPath The path to the corresponding PEM encoded key file
-   * @param caCertPath [OpenSSL] The path to the optional PEM encoded CA cert file
-   * @param cipherSpec [OpenSSL] The cipher spec
+   * @param caCertPath The path to the optional PEM encoded CA cert file
+   * @param ciphers The cipherspec (http://www.openssl.org/docs/apps/ciphers.html)
+   * @param nextProtos Next protocol.
    * @throws RuntimeException if no provider could be initialized
    * @return an SSLEngine
    */
@@ -43,28 +44,40 @@ object Ssl {
       cacheContexts
     )
 
-    nativeInstance.getOrElse {
-      require(caCertPath == null, "'CA Certificate' parameter unsupported with JSSE SSL provider")
-      require(ciphers == null, "'Ciphers' parameter unsupported with JSSE SSL provider")
-      require(nextProtos == null, "'Next Protocols' parameter unsupported with JSSE SSL provider")
+    require(nativeInstance.isDefined, "Could not create an SSLEngine using native OpenSSL provider.")
 
-      val jsseInstance = JSSE.server(
-        certificatePath,
-        keyPath,
-        cacheContexts
-      )
-
-      require(jsseInstance.isDefined, "Could not create an SSLEngine")
-
-      jsseInstance.get
-    }
+    nativeInstance.get
   }
 
   /**
-   * Get a client engine
+   * Get a server engine, using the JSSE implementation.
+   *
+   * @param certificatePath The path to the PEM encoded certificate file
+   * @param keyPath The path to the corresponding PEM encoded key file
+   * @param ciphers http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/JSSERefGuide.html#PLUG
+   * @throws RuntimeException if no provider could be initialized
+   * @return an SSLEngine
+   */
+  def server(certificatePath: String,
+             keyPath: String,
+             ciphers: Array[String]): Engine = {
+    val jsseInstance = JSSE.server(
+      certificatePath,
+      keyPath,
+      ciphers,
+      cacheContexts
+    )
+
+    require(jsseInstance.isDefined, "Could not create an SSLEngine")
+
+    jsseInstance.get
+  }
+
+  /**
+   * Get a dummy client engine
    */
   def client(): Engine = JSSE.client()
-  
+
   /**
    * Get a client engine, from the given context
    */
