@@ -78,7 +78,6 @@ private class MemcachedTracingFilter extends ClientRequestTracingFilter[Command,
     Trace.record(Annotation.ClientSend())
 
     service(command) map { response =>
-      Trace.record(Annotation.ClientRecv())
       response match {
         case Values(values) =>
           command match {
@@ -97,6 +96,7 @@ private class MemcachedTracingFilter extends ClientRequestTracingFilter[Command,
           }
         case _  => response
       }
+      Trace.record(Annotation.ClientRecv())
       response
     }
   }
