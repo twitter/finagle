@@ -84,7 +84,7 @@ trait ReadHandle {
       Offer.select(
         if (nwait < howmany && !closed) {
           messages { m =>
-            m.ack()
+            m.ack.sync()
             out ! m.copy(ack = ack.send(()))
             loop(nwait + 1, closed)
           }
@@ -126,7 +126,7 @@ object ReadHandle {
   ): ReadHandle = new ReadHandle {
     val messages = _messages
     val error = _error
-    def close() = closeOf()
+    def close() = closeOf.sync()
   }
 
   /**
@@ -425,7 +425,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     offer: Offer[ChannelBuffer],
     closed: Promise[Throwable]
   ) {
-    offer() foreach { item =>
+    offer.sync() foreach { item =>
       set(queueName, item).unit onSuccess { _ =>
         write(queueName, offer)
       } onFailure { t =>

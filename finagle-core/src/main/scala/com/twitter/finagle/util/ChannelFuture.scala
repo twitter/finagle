@@ -170,6 +170,9 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
         case Error(theCause) =>
           cause = theCause
           maybeSatisfy()
+        case Cancelled =>
+          cause = new Exception("the Future was cancelled")
+          maybeSatisfy()
       }
     }
 

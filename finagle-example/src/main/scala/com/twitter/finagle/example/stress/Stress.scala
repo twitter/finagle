@@ -1,14 +1,16 @@
 package com.twitter.finagle.example.stress
 
+import com.google.common.util.concurrent.AtomicLongMap
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.Service
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.util.{Promise, Time, Future, MapMaker}
+import com.twitter.util.{Promise, Time, Future}
 import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.handler.codec.http._
+import scala.collection.JavaConverters._
 
 /**
  * A program to stress an HTTP server. The code below throttles request using an
@@ -22,11 +24,7 @@ object Stress {
     val totalRequests = args(2).toInt
 
     val errors    = new AtomicInteger(0)
-    val responses = MapMaker[HttpResponseStatus, AtomicInteger] { config =>
-      config.compute { k =>
-        new AtomicInteger(0)
-      }
-    }
+    val responses = AtomicLongMap.create[HttpResponseStatus]()
 
     val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getPath)
     HttpHeaders.setHost(request, uri.getHost)
@@ -47,7 +45,7 @@ object Stress {
     val requests = Future.parallel(concurrency) {
       Future.times(totalRequests / concurrency) {
         client(request) onSuccess { response =>
-          responses(response.getStatus).incrementAndGet()
+          responses.incrementAndGet(response.getStatus)
         } handle { case e =>
           errors.incrementAndGet()
         } ensure {
@@ -63,8 +61,8 @@ object Stress {
 
       val duration = start.untilNow
       println("%20s\t%s".format("Status", "Count"))
-      for ((status, stat) <- responses)
-        println("%20s\t%d".format(status, stat.get))
+      for ((status, count) <- responses.asMap.asScala)
+        println("%20s\t%d".format(status, count))
       println("================")
       println("%d requests completed in %dms (%f requests per second)".format(
         completedRequests.get, duration.inMilliseconds,

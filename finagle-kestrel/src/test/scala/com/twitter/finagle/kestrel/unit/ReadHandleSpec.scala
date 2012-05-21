@@ -54,7 +54,7 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
       sent.isDefined must beFalse
       val recvd = (buffered.messages?)
       recvd.isDefined must beTrue
-      recvd().ack()
+      recvd().ack.sync()
       sent.isDefined must beTrue
     }
 
@@ -96,11 +96,11 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
         closed.isDefined must beFalse
         val m0 = (buffered.messages?)
         m0.isDefined must beTrue
-        m0().ack()
+        m0().ack.sync()
         closed.isDefined must beFalse
         val m1 = (buffered.messages?)
         m1.isDefined must beTrue
-        m1().ack()
+        m1().ack.sync()
         closed.isDefined must beTrue
       }
     }

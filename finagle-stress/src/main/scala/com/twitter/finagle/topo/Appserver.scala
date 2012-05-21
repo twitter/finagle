@@ -4,11 +4,11 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{
-  ServerBuilder, Cluster, StaticCluster, ClientBuilder}
+  ClientBuilder, Cluster, ServerBuilder, StaticCluster}
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Future, Duration, Time, StorageUnit}
 import java.net.{SocketAddress, InetSocketAddress}
@@ -66,15 +66,11 @@ object Appserver {
   }
 
   def main(args: Array[String]) = {
-    {
-      import com.twitter.logging.config._
-      val config = new LoggerConfig {
-        node = ""
-        level = Level.INFO
-        handlers = new ConsoleHandlerConfig
-      }
-      config()
-    }
+    LoggerFactory(
+      node = "",
+      level = Some(Level.INFO),
+      handlers = ConsoleHandler() :: Nil
+    ).apply()
 
     if (args.size < 3)
       usage()

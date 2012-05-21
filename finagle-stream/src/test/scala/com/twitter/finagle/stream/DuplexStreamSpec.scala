@@ -61,12 +61,12 @@ class DuplexStreamSpec extends SpecificationWithJUnit {
       "receive and reverse" in {
         service.input.isDefined mustEqual true
         val input = service.input()
-        input() foreach { str =>
-          service.output.send(bufferToString(str).reverse)()
+        input.sync() foreach { str =>
+          service.output.send(bufferToString(str).reverse).sync()
         }
 
-        outbound.send("hello")()
-        bufferToString(inbound()()) mustEqual "olleh"
+        outbound.send("hello").sync()
+        bufferToString(inbound.sync()()) mustEqual "olleh"
       }
 
       "send two consequitive messages and receive them" in {
@@ -78,12 +78,12 @@ class DuplexStreamSpec extends SpecificationWithJUnit {
         input foreach { _ =>
           count += 1
           if (count == 2) {
-            service.output.send("done")()
+            service.output.send("done").sync()
           }
         }
-        outbound.send("hello")()
-        outbound.send("world")()
-        bufferToString(inbound()()) mustEqual "done"
+        outbound.send("hello").sync()
+        outbound.send("world").sync()
+        bufferToString(inbound.sync()()) mustEqual "done"
         count mustEqual 2
       }
 

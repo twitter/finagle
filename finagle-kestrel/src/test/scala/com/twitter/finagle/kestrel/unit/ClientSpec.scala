@@ -131,7 +131,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     val abort = Abort(queueName)
 
     "cancel current request on close" in {
-      factory.make returns Future(service)
+      factory.apply() returns Future(service)
       val promise = new Promise[Response]()
       service(open) returns promise
       service(closeAndOpen) returns promise

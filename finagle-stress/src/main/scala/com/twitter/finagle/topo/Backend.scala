@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.thrift.ThriftServerFramedCodec
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Future, JavaTimer}
 import java.net.InetSocketAddress
@@ -26,15 +26,11 @@ object Backendserver {
   private[this] val log = Logger(getClass)
 
   def main(args: Array[String]) = {
-    {
-      import com.twitter.logging.config._
-      val config = new LoggerConfig {
-        node = ""
-        level = Level.INFO
-        handlers = new ConsoleHandlerConfig
-      }
-      config()
-    }
+    LoggerFactory(
+      node = "",
+      level = Some(Level.INFO),
+      handlers = ConsoleHandler() :: Nil
+    ).apply()
 
     if (args.size != 1) {
       log.fatal("Server port")

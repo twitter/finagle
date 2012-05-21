@@ -100,7 +100,7 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
     "be safe to remove a host from cluster before releasing it" in {
       val made = 0 until N map { _ => b()() }
       cluster.add(newFactory)
-      val made2 = b.make()()
+      val made2 = b.apply().apply()
       (factories :+ newFactory) foreach { _.load must be_==(1) }
 
       cluster.del(newFactory)
