@@ -2,25 +2,25 @@ package com.twitter.finagle.protobuf.rpc.impl
 
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
 import com.twitter.finagle.protobuf.rpc.RpcServer
-
 import com.twitter.util.Future
 import com.twitter.util.Duration
 import com.twitter.util.FuturePool
 import com.twitter.finagle.builder.{ Server, ServerBuilder, ServerConfig }
-
 import java.net.InetSocketAddress
 import com.google.protobuf._
 import org.slf4j.LoggerFactory
 import scala.None
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
-
 import com.google.common.base.Preconditions
+import com.google.protobuf.Descriptors.MethodDescriptor
 
 class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, executorService: ExecutorService) extends RpcServer {
 
+  private val log = LoggerFactory.getLogger(getClass)
+
   Preconditions.checkNotNull(executorService)
-  
+
   private val futurePool = FuturePool(executorService)
 
   private val server: Server = ServerBuilder.safeBuild(ServiceDispatcher(service, futurePool),
@@ -51,16 +51,30 @@ class ServiceDispatcher(service: com.google.protobuf.Service, futurePool: Future
     // dispatch to the service method
     val task = {
       var respMessage: Message = null
-      service.callMethod(m, null, reqMessage, new RpcCallback[Message]() {
+      try {
+        service.callMethod(m, null, reqMessage, new RpcCallback[Message]() {
 
-        def run(msg: Message) = {
-          respMessage = msg;
+          def run(msg: Message) = {
+            respMessage = msg;
+          }
+        })
+      } catch {
+        case e: RuntimeException => {
+          log.warn("#apply# Exception: ", e)
+          respMessage = constructEmptyResponseMessage(m)
         }
-      })
-      if (respMessage == null) throw new RuntimeException("Service Response message is required.")
+      }
+      if (respMessage == null) {
+        log.warn("#apply# No reponse")
+        respMessage = constructEmptyResponseMessage(m)
+      }
       (methodName, respMessage)
     }
     futurePool(task)
+  }
+
+  def constructEmptyResponseMessage(m: MethodDescriptor): Message = {
+    m.getOutputType().toProto().getDefaultInstanceForType()
   }
 }
 
