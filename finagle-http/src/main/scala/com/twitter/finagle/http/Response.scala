@@ -19,6 +19,9 @@ abstract class Response extends Message with HttpResponseProxy {
 
   def getStatusCode(): Int      = statusCode
   def setStatusCode(value: Int) { statusCode = value }
+
+  override def toString =
+    "Response(\"" + version + " " + status + ")"
 }
 
 

@@ -47,7 +47,6 @@ object BigBrotherBirdTracer {
  * BigBrotherBird tracer that supports sampling. Will pass through a small subset of the records.
  * @param underlyingTracer Underlying B3 tracer that accumulates the traces and sends off to the collector.
  * @param initialSampleRate Start off with this sample rate. Can be changed later.
- * @deprecated Please use ZipkinTracer in the finagle-zipkin module instead.
  */
 class BigBrotherBirdTracer(underlyingTracer: RawBigBrotherBirdTracer, initialSampleRate: Float) extends Tracer {
   private[this] val sampler = new Sampler
