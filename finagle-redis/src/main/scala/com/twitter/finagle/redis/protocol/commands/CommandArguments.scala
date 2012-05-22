@@ -11,6 +11,7 @@ trait CommandArgument extends Command {
 // Constant case object representing WITHSCORES command arg
 case object WithScores extends CommandArgument {
   val WITHSCORES = "WITHSCORES"
+  val command = WITHSCORES
   override def toString = WITHSCORES
   def unapply(s: String) = s.toUpperCase match {
     case WITHSCORES => Some(s)
@@ -20,6 +21,7 @@ case object WithScores extends CommandArgument {
 
 case class Limit(offset: Int, count: Int) extends CommandArgument {
   override def toString = "%s %d %d".format(Limit.LIMIT, offset, count)
+  val command = Limit.LIMIT
 }
 object Limit {
   val LIMIT = "LIMIT"
@@ -39,6 +41,7 @@ class Weights(underlying: Vector[Double]) extends CommandArgument with IndexedSe
   override def apply(idx: Int) = underlying(idx)
   override def length = underlying.length
   override def toString = Weights.toString + " " + this.mkString(" ")
+  val command = Weights.WEIGHTS
 }
 
 // Handles parsing and manipulation of WEIGHTS arguments

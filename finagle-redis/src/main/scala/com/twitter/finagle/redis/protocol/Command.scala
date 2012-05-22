@@ -7,7 +7,9 @@ object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String) = new ClientError(msg)
 }
 
-abstract class Command extends RedisMessage
+abstract class Command extends RedisMessage {
+  val command: String
+}
 
 object Commands {
   // Key Commands

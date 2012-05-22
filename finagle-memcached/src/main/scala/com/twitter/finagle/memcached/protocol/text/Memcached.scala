@@ -69,12 +69,9 @@ class Memcached extends CodecFactory[Command, Response] {
  * Adds tracing information for each memcached request.
  * Including command name, when request was sent and when it was received.
  */
-private class MemcachedTracingFilter extends ClientRequestTracingFilter[Command, Response] {
-  val serviceName = "memcached"
-  def methodName(req: Command): String = req.getClass().getSimpleName()
-
-  override def apply(command: Command, service: Service[Command, Response]) = Trace.unwind {
-    Trace.recordRpcname(serviceName, methodName(command))
+private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
+  def apply(command: Command, service: Service[Command, Response]) = Trace.unwind {
+    Trace.recordRpcname("memcached", command.name)
     Trace.record(Annotation.ClientSend())
 
     service(command) map { response =>

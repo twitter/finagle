@@ -8,6 +8,7 @@ case class ZAdd(key: String, members: List[ZMember])
   extends StrictKeyCommand
   with StrictZMembersCommand
 {
+  val command = Commands.ZADD
   override def toChannelBuffer = {
     val cmds = StringToBytes.fromList(List(Commands.ZADD, key))
     RedisCodec.toUnifiedFormat(cmds ::: membersByteArray)
@@ -26,6 +27,7 @@ object ZAdd {
 
 
 case class ZCard(key: String) extends StrictKeyCommand {
+  val command = Commands.ZCARD
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.ZCARD, key))
 }
 object ZCard {
@@ -38,6 +40,7 @@ object ZCard {
 
 
 case class ZCount(key: String, min: ZInterval, max: ZInterval) extends StrictKeyCommand {
+  val command = Commands.ZCOUNT
   override def toChannelBuffer =
     RedisCodec.toInlineFormat(List(Commands.ZCOUNT, key, min.toString, max.toString))
 }
@@ -55,6 +58,7 @@ case class ZIncrBy(key: String, amount: Double, member: Array[Byte])
   extends StrictKeyCommand
   with StrictMemberCommand
 {
+  val command = Commands.ZINCRBY
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(List(
       StringToBytes(Commands.ZINCRBY),
@@ -140,6 +144,8 @@ case class ZRem(key: String, members: List[Array[Byte]]) extends StrictKeyComman
     members != null && members.length > 0,
     "Members list must not be empty for ZREM")
 
+  val command = Commands.ZREM
+
   override def toChannelBuffer = {
     RedisCodec.toUnifiedFormat(
       List(StringToBytes(Commands.ZREM), StringToBytes(key)) ::: members
@@ -161,8 +167,9 @@ object ZRem {
 
 
 case class ZRemRangeByRank(key: String, start: Int, stop: Int) extends StrictKeyCommand {
+  val command = Commands.ZREMRANGEBYRANK
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(
-    Commands.ZREMRANGEBYRANK,
+    command,
     key,
     start.toString,
     stop.toString)))
@@ -179,8 +186,9 @@ object ZRemRangeByRank {
 
 
 case class ZRemRangeByScore(key: String, min: ZInterval, max: ZInterval) extends StrictKeyCommand {
+  val command = Commands.ZREMRANGEBYSCORE
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(
-    Commands.ZREMRANGEBYSCORE,
+    command,
     key,
     min.toString,
     max.toString)))
@@ -246,8 +254,9 @@ case class ZScore(key: String, member: Array[Byte])
   extends StrictKeyCommand
   with StrictMemberCommand
 {
+  val command = Commands.ZSCORE
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(Commands.ZSCORE),
+    StringToBytes(command),
     StringToBytes(key),
     member))
 }
@@ -321,6 +330,7 @@ case class ZMember(score: Double, member: Array[Byte])
   extends StrictScoreCommand
   with StrictMemberCommand
 {
+  val command = "ZMEMBER"
   override def toChannelBuffer =
     throw new UnsupportedOperationException("ZMember doesn't support toChannelBuffer")
 }
@@ -372,7 +382,6 @@ object ZMembers {
 
 
 abstract class ZStore extends KeysCommand {
-  val command: String
   val destination: String
   val numkeys: Int
   val keys: List[String]
@@ -502,8 +511,6 @@ trait ZScoredRange extends KeyCommand { self =>
   val withScores: Option[CommandArgument]
   val limit: Option[Limit]
 
-  val command: String
-
   override def validate() {
     super.validate()
     withScores.map { s =>
@@ -629,7 +636,6 @@ abstract class ZRangeCmd extends StrictKeyCommand {
   val start: Int
   val stop: Int
   val withScores: Option[CommandArgument]
-  val command: String
 
   private def forChannelBuffer = {
     val commands = List(this.command, key, start.toString, stop.toString)
@@ -678,7 +684,6 @@ trait ZRangeCmdCompanion {
 abstract class ZRankCmd extends StrictKeyCommand with StrictMemberCommand {
   val key: String
   val member: Array[Byte]
-  val command: String
 
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
       StringToBytes(this.command),
