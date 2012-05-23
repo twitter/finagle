@@ -3,7 +3,7 @@
 	<groupId>com.twitter</groupId>
 	<artifactId>finagle-protobuf</artifactId>
 	<packaging>jar</packaging>
-	<version>3.0.4-TENDRIL-SNAPSHOT</version>
+	<version>3.0.4-TENDRIL</version>
 	<distributionManagement>
 		<repository>
 			<id>artifactory-release</id>
