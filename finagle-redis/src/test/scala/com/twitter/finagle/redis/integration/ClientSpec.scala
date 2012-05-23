@@ -115,11 +115,18 @@ class ClientSpec extends SpecificationWithJUnit {
           client.hMGet("foo", Seq("bar", "boo"))().toList) mustEqual Seq("baz", "moo")
       }
 
+      "get multiple values at once (deprecated)" in {
+        client.hSet(foo, bar, baz)()
+        client.hSet(foo, boo, moo)()
+        BytesToString.fromTuples(
+          client.hGetAll(foo)() toSeq) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
+      }
+
       "get multiple values at once" in {
         client.hSet(foo, bar, baz)()
         client.hSet(foo, boo, moo)()
-        BytesToString.fromMap(
-          client.hGetAll(foo)()) mustEqual Seq(("bar" -> "baz"), ("boo", "moo"))
+        BytesToString.fromTuples(
+          client.hGetAllAsPairs(foo)()) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
       }
 
     }
@@ -128,10 +135,10 @@ class ClientSpec extends SpecificationWithJUnit {
     "perform sorted set commands" in {
 
       "add members and get scores" in {
-        client.zAdd(foo, 10, bar)() mustEqual 1
-        client.zAdd(foo, 20, baz)() mustEqual 1
-        BytesToString(client.zScore(foo, bar)().get) mustEqual "10"
-        BytesToString(client.zScore(foo, baz)().get) mustEqual "20"
+        client.zAdd(foo, 10.5, bar)() mustEqual 1
+        client.zAdd(foo, 20.1, baz)() mustEqual 1
+        client.zScore(foo, bar)().get mustEqual 10.5
+        client.zScore(foo, baz)().get mustEqual 20.1
       }
 
       "add members and get the zcount" in {
@@ -141,12 +148,20 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zCount(foo, 40, 50)() mustEqual 0
       }
 
+      "get zRangeByScore (deprecated)" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        BytesToString.fromTuples(
+          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)() toSeq) mustEqual Seq(("bar", 10),
+            ("baz", 20))
+      }
+
       "get the zRangeByScore" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        BytesToString.fromMap(
-          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)()) mustEqual Seq(("bar", "10"),
-            ("baz", "20"))
+        BytesToString.fromTuplesWithDoubles(
+          client.zRangeByScore(foo, 0, 30, 0, 5)().asTuples) mustEqual Seq(("bar", 10),
+            ("baz", 20))
       }
 
       "get cardinality and remove members" in {
@@ -163,13 +178,20 @@ class ClientSpec extends SpecificationWithJUnit {
           client.zRevRange(foo, 0, -1)().toList) mustEqual Seq("baz", "bar")
       }
 
+      "get zRevRangeByScoreWithScores (deprecated)" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        BytesToString.fromTuples(
+          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)() toSeq) mustEqual Seq(("bar", 10))
+        client.zRevRangeByScoreWithScores(foo, 0, 0, 0, 1)() mustEqual Map()
+      }
+
       "get zRevRangeByScoreWithScores" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        BytesToString.fromMap(
-          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)()) mustEqual Seq(("bar", "10"))
-        BytesToString.fromMap(
-          client.zRevRangeByScoreWithScores(foo, 0, 0, 0, 1)()) mustEqual Seq()
+        BytesToString.fromTuplesWithDoubles(
+          client.zRevRangeByScore(foo, 0, 10, 0, 1)().asTuples) mustEqual Seq(("bar", 10))
+        client.zRevRangeByScore(foo, 0, 0, 0, 1)().asTuples == Seq()
       }
 
     }

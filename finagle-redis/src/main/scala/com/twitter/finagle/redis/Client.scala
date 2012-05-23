@@ -2,7 +2,7 @@ package com.twitter.finagle.redis
 
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.BytesToString
+import com.twitter.finagle.redis.util.{BytesToString, NumberFormat}
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 
@@ -169,13 +169,17 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets all field value pairs for given hash
    * @param hash key
-   * @return Map of field/value pairs
+   * @return Sequence of field/value pairs
    */
-  def hGetAll(key: Array[Byte]): Future[Map[Array[Byte], Array[Byte]]] =
+  def hGetAllAsPairs(key: Array[Byte]): Future[Seq[(Array[Byte], Array[Byte])]] =
     doRequest(HGetAll(key)) {
-      case MBulkReply(messages) => returnPairs(messages)
-      case EmptyMBulkReply()    => Future.value(Map())
+      case MBulkReply(messages) => Future.value(returnPairs(messages))
+      case EmptyMBulkReply()    => Future.value(Seq())
     }
+
+  @deprecated("Use hGetAllAsPairs instead")
+  def hGetAll(key: Array[Byte]): Future[Map[Array[Byte], Array[Byte]]] =
+    hGetAllAsPairs(key) map { res => res toMap }
 
   /**
    * Gets values for given fields in hash
@@ -213,11 +217,12 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets score of member in sorted set
    * @param key, member
-   * @return Score of member as a byte array
+   * @return Score of member
    */
-  def zScore(key: Array[Byte], member: Array[Byte]): Future[Option[Array[Byte]]] =
+  def zScore(key: Array[Byte], member: Array[Byte]): Future[Option[Double]] =
     doRequest(ZScore(key, member)) {
-      case BulkReply(message)   => Future.value(Some(message))
+      case BulkReply(message)   => Future.value(
+        Some(NumberFormat.toDouble(BytesToString(message))))
       case EmptyBulkReply()     => Future.value(None)
     }
 
@@ -235,8 +240,25 @@ class Client(service: Service[Command, Reply]) {
    * Gets member, score pairs from sorted set between min and max
    * Results are limited by offset and count
    * @param key, min, max, offset, count
-   * @return Map of member/score pairs
+   * @return ZRangeResults object containing item/score pairs
    */
+  def zRangeByScore(
+    key: Array[Byte], min: Double, max: Double, offset: Int, count: Int
+  ): Future[ZRangeResults] =
+    doRequest(
+      ZRangeByScore(
+        BytesToString(key),
+        ZInterval(min),
+        ZInterval(max),
+        WithScores.asArg,
+        Some(Limit(offset, count))
+      )
+    ) {
+      case MBulkReply(messages) => Future.value(ZRangeResults(returnPairs(messages)))
+      case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
+    }
+
+  @deprecated("Use zRangeByScoreWithScoresAsPairs instead")
   def zRangeByScoreWithScores(
     key: Array[Byte], min: Double, max: Double, offset: Int, count: Int
   ): Future[Map[Array[Byte], Array[Byte]]] =
@@ -245,11 +267,11 @@ class Client(service: Service[Command, Reply]) {
         BytesToString(key),
         ZInterval(min),
         ZInterval(max),
-        Some(WithScores),
+        WithScores.asArg,
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => returnPairs(messages)
+      case MBulkReply(messages) => Future.value(returnPairs(messages) toMap)
       case EmptyMBulkReply()    => Future.value(Map())
     }
 
@@ -278,7 +300,7 @@ class Client(service: Service[Command, Reply]) {
    * Returns specified range of elements in sorted set at key
    * Elements are ordered from highest to lowest score
    * @param key, start, stop
-   * @return List of element in specified range
+   * @return List of elements in specified range
    */
   def zRevRange(key: Array[Byte], start: Int, stop: Int): Future[Seq[Array[Byte]]] =
     doRequest(ZRevRange(key, start, stop)) {
@@ -291,8 +313,25 @@ class Client(service: Service[Command, Reply]) {
    * Elements are ordered from highest to lowest score
    * Results are limited by offset and count
    * @param key, max, min, offset, count
-   * @return Map of element/score pairs in specified score range
+   * @return ZRangeResults object containing item/score pairs
    */
+  def zRevRangeByScore(
+    key: Array[Byte], max: Double, min: Double, offset: Int, count: Int
+  ): Future[ZRangeResults] =
+    doRequest(
+      ZRevRangeByScore(
+        BytesToString(key),
+        ZInterval(max),
+        ZInterval(min),
+        WithScores.asArg,
+        Some(Limit(offset, count))
+      )
+    ) {
+      case MBulkReply(messages) => Future.value(ZRangeResults(returnPairs(messages)))
+      case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
+    }
+
+  @deprecated("Use zRevRangeByScoreWithScoresAsPairs instead")
   def zRevRangeByScoreWithScores(
     key: Array[Byte], max: Double, min: Double, offset: Int, count: Int
   ): Future[Map[Array[Byte], Array[Byte]]] =
@@ -301,11 +340,11 @@ class Client(service: Service[Command, Reply]) {
         BytesToString(key),
         ZInterval(max),
         ZInterval(min),
-        Some(WithScores),
+        WithScores.asArg,
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => returnPairs(messages)
+      case MBulkReply(messages) => Future.value(returnPairs(messages) toMap)
       case EmptyMBulkReply()    => Future.value(Map())
     }
 
@@ -328,11 +367,7 @@ class Client(service: Service[Command, Reply]) {
    */
   private def returnPairs(messages: List[Array[Byte]]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
-    Future.value({
-      messages.grouped(2).toList flatMap {
-        case List(a, b) => Some(a, b)
-      } toMap
-    })
+    messages.grouped(2).toList map { case List(a, b) => (a, b) }
   }
 
 }

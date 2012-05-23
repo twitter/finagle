@@ -1,7 +1,9 @@
 package com.twitter.finagle.redis
 package util
 
+import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.util.CharsetUtil
 
 trait ErrorConversion {
   def getException(msg: String): Throwable
@@ -21,23 +23,28 @@ trait ErrorConversion {
 }
 
 object BytesToString {
-  def apply(arg: Array[Byte], charset: String = "UTF-8") = new String(arg, charset)
-  def fromList(args: List[Array[Byte]], charset: String = "UTF-8") = args.map { arg =>
-    BytesToString(arg, charset)
-  }
-  def fromMap(args: Map[Array[Byte], Array[Byte]], charset: String = "UTF-8") =
-    args.toSeq map { arg =>
-      (BytesToString(arg._1, charset), BytesToString(arg._2, charset))
-    }
+  def apply(arg: Array[Byte], charset: Charset = CharsetUtil.UTF_8) = new String(arg, charset)
+
+  def fromList(args: List[Array[Byte]], charset: Charset = CharsetUtil.UTF_8) =
+    args.map { arg => BytesToString(arg, charset) }
+
+  def fromTuples(args: Seq[(Array[Byte], Array[Byte])], charset: Charset = CharsetUtil.UTF_8) =
+    args map { arg => (BytesToString(arg._1), BytesToString(arg._2)) }
+
+  def fromTuplesWithDoubles(args: Seq[(Array[Byte], Double)],
+    charset: Charset = CharsetUtil.UTF_8) =
+    args map { arg => (BytesToString(arg._1, charset), arg._2) }
+
 }
 object StringToBytes {
-  def apply(arg: String, charset: String = "UTF-8") = arg.getBytes(charset)
-  def fromList(args: List[String], charset: String = "UTF-8") = args.map { arg =>
-    arg.getBytes(charset)
-  }
+  def apply(arg: String, charset: Charset = CharsetUtil.UTF_8) = arg.getBytes(charset)
+  def fromList(args: List[String], charset: Charset = CharsetUtil.UTF_8) =
+    args.map { arg =>
+      arg.getBytes(charset)
+    }
 }
 object StringToChannelBuffer {
-  def apply(string: String, charset: String = "UTF-8") = {
+  def apply(string: String, charset: Charset = CharsetUtil.UTF_8) = {
     ChannelBuffers.wrappedBuffer(string.getBytes(charset))
   }
 }

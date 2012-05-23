@@ -293,6 +293,18 @@ object ZUnionStore extends ZStoreCompanion {
  * Internal Helpers
  */
 
+case class ZRangeResults(entries: Array[Array[Byte]], scores: Array[Double]) {
+  def asTuples(): Seq[(Array[Byte], Double)] =
+    (entries, scores).zipped map { (entry, score) => (entry, score) } toSeq
+}
+object ZRangeResults {
+  def apply(tuples: List[(Array[Byte], Array[Byte])]): ZRangeResults = {
+    val arrays = tuples.unzip
+    val doubles = arrays._2 map { score => NumberFormat.toDouble(BytesToString(score)) }
+    ZRangeResults(arrays._1.toArray, doubles.toArray)
+  }
+}
+
 // Represents part of an interval, helpers in companion object
 case class ZInterval(value: String) {
   import ZInterval._

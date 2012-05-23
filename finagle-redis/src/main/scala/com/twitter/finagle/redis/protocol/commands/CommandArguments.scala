@@ -17,6 +17,7 @@ case object WithScores extends CommandArgument {
     case WITHSCORES => Some(s)
     case _ => None
   }
+  val asArg = Some(WithScores)
 }
 
 case class Limit(offset: Int, count: Int) extends CommandArgument {
