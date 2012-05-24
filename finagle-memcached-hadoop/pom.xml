@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-eval</artifactId>
-      <version>4.0.2-SNAPSHOT</version>
+      <version>4.0.3</version>
     </dependency>
   </dependencies>
 </project>
