@@ -4,7 +4,7 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import com.twitter.util.{Future, Promise, Return, Throw}
-import com.twitter.finagle.{CancelledConnectionException, Service}
+import com.twitter.finagle.Service
 
 class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
   "ProxyService" should {
@@ -74,9 +74,8 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
 
       promise() = Return(underlying)
 
-      f123.isDefined must beTrue
-      replyPromise.isDefined must beFalse
-      f123() must throwA(new CancelledConnectionException)
+      there was one(underlying)(123)
+      replyPromise.isCancelled must beTrue
     }
   }
 }

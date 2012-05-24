@@ -1,9 +1,8 @@
 package com.twitter.finagle.builder
 
-import collection.mutable
 import com.twitter.concurrent.Spool
-import com.twitter.concurrent.Spool.*::
 import com.twitter.util.Future
+import collection.mutable
 import java.util.logging.Logger
 
 /**
@@ -16,23 +15,6 @@ import java.util.logging.Logger
  */
 trait Cluster[T] { self =>
   /**
-   * A Future object that is defined when the cluster is initialized.
-   * Cluster users can subscribe to this Future object to check or get notified of the availability of the cluster.
-   * @return the Future object
-   */
-  def ready: Future[Unit] = {
-    def flatten(spool: Spool[Cluster.Change[T]]): Future[Unit] = spool match {
-      case Cluster.Add(_) *:: tail => Future.Done
-      case _ *:: tail => tail flatMap flatten
-    }
-
-    snap match {
-      case (current, changes) if current.isEmpty => changes flatMap flatten
-      case _ => Future.Done
-    }
-  }
-
-  /**
    * Takes a snapshot of the collection; returns the current elements and a Spool of future updates
    */
   def snap: (Seq[T], Future[Spool[Cluster.Change[T]]])
@@ -44,7 +26,6 @@ trait Cluster[T] { self =>
     // Translation cache to ensure that mapping is idempotent.
     private[this] val mapped = mutable.HashMap.empty[T, mutable.Queue[U]]
 
-    override def ready = self.ready
     def snap: (Seq[U], Future[Spool[Cluster.Change[U]]]) = {
       val (seqT, changeT) = self.snap
       val seqU = seqT map { t =>
@@ -81,6 +62,7 @@ trait Cluster[T] { self =>
           }
         }
       }
+
       (seqU, changeU)
     }
   }
