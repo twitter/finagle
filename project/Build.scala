@@ -235,6 +235,17 @@ object Finagle extends Build {
     sourceDirectory <<= baseDirectory(_/"src29"),
     libraryDependencies ++= Seq("junit" % "junit" % "4.8.1" % "test", util("hashing"))
   ).dependsOn(finagleCore)
+
+  lazy val finagleMySQL = Project(
+    id = "finagle-mysql",
+    base = file("finagle-mysql"),
+    settings = Project.defaultSettings ++
+      StandardProject.newSettings ++
+      sharedSettings
+    ).settings(
+      name := "finagle-mysql",
+      libraryDependencies += "com.twitter" % "naggati" % "2.2.0" intransitive()
+    ).dependsOn(finagleCore)
   
   lazy val finagleKestrel = Project(
     id = "finagle-kestrel",
