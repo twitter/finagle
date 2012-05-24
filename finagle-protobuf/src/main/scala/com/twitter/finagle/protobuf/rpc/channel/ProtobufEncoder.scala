@@ -39,8 +39,6 @@ class CustomProtobufEncoder(val repo: MethodLookup) extends OneToOneEncoder {
     val msgLenBuf = ChannelBuffers.buffer(4)
     msgLenBuf.writeInt(message.length)
     
-    ctx.getPipeline().remove(this)  
-    
     ChannelBuffers.wrappedBuffer(methodNameBuf, msgLenBuf,
       ChannelBuffers.wrappedBuffer(message))
   }
