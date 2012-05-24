@@ -58,8 +58,7 @@ import com.twitter.finagle.stats.{
   GlobalStatsReceiver, NullStatsReceiver, RollupStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{
-  Duration, Future, Monitor, NullMonitor, Promise, Return, Try}
+import com.twitter.util.{Duration, Monitor, Promise, Return, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.{Executors, TimeUnit}
 import java.util.logging.Logger
@@ -776,7 +775,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     service = retryFilter andThen service
     service = globalTimeoutFilter andThen service
     service = exceptionSourceFilter andThen service
-    service
+    config.cluster match {
+      case Some(cluster) if !cluster.ready.isDefined =>
+        new ProxyService(cluster.ready.map { _ => service }, config.hostConnectionMaxWaiters getOrElse(Int.MaxValue))
+      case _ => service
+    }
   }
 
   /**

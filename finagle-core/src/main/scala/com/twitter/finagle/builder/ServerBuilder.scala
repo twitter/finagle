@@ -1,19 +1,16 @@
 package com.twitter.finagle.builder
 
 import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.filter.{
   HandletimeFilter, MonitorFilter, RequestSemaphoreFilter, MaskCancelFilter}
 import com.twitter.finagle.service.{
-  ExpiringService, ProxyService, StatsFilter, TimeoutFilter}
+  ExpiringService, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{
   Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.Timer._
 import com.twitter.finagle.util._
 import com.twitter.util.{Future, Duration, Monitor, NullMonitor}
 import java.net.SocketAddress
@@ -27,7 +24,6 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 import scala.collection.JavaConverters._
-import scala.collection.mutable.{HashSet, SynchronizedSet}
 
 trait Server {
   /**
