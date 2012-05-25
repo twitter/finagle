@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-memcached</artifactId>
   <packaging>jar</packaging>
-  <version>4.0.5</version>
+  <version>4.0.6-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent</artifactId>
