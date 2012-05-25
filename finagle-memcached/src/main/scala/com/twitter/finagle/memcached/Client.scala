@@ -3,6 +3,7 @@ package com.twitter.finagle.memcached
 import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 
+import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.InetSocketAddress
 import _root_.java.util.{Map => JMap}
 import _root_.java.util.concurrent.ConcurrentHashMap
@@ -112,28 +113,28 @@ trait BaseClient[T] {
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def add(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Append bytes to the end of an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def append(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Prepend bytes to the beginning of an existing key. If the key doesn't
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def prepend(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def prepend(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Replace bytes on an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def replace(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Perform a CAS operation on the key, only if the value has not
@@ -145,7 +146,7 @@ trait BaseClient[T] {
    */
   def cas(
     key: String, flags: Int, expiry: Time, value: T, casUnique: ChannelBuffer
-  ): Future[Boolean]
+  ): Future[JBoolean]
 
   /**
    * Get a key from the server.
@@ -211,21 +212,21 @@ trait BaseClient[T] {
    * Remove a key.
    * @return true if deleted, false if not found
    */
-  def delete(key: String): Future[Boolean]
+  def delete(key: String): Future[JBoolean]
 
   /**
    * Increment a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def incr(key: String, delta: Long): Future[Option[Long]]
-  def incr(key: String): Future[Option[Long]] = incr(key, 1L)
+  def incr(key: String, delta: Long): Future[Option[JLong]]
+  def incr(key: String): Future[Option[JLong]] = incr(key, 1L)
 
   /**
-   * Decrement a key. Interpret the value as an Long if it is parsable.
+   * Decrement a key. Interpret the value as an JLong if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def decr(key: String, delta: Long): Future[Option[Long]]
-  def decr(key: String): Future[Option[Long]] = decr(key, 1L)
+  def decr(key: String, delta: Long): Future[Option[JLong]]
+  def decr(key: String): Future[Option[JLong]] = decr(key, 1L)
 
   /**
    * Store a key. Override an existing values.
@@ -238,7 +239,7 @@ trait BaseClient[T] {
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, value: T): Future[Boolean] =
+  def add(key: String, value: T): Future[JBoolean] =
     add(key, 0, Time.epoch, value)
 
   /**
@@ -246,7 +247,7 @@ trait BaseClient[T] {
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, value: T): Future[Boolean] =
+  def append(key: String, value: T): Future[JBoolean] =
     append(key, 0, Time.epoch, value)
 
   /**
@@ -254,7 +255,7 @@ trait BaseClient[T] {
    * doesn't exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def prepend(key: String, value: T): Future[Boolean] =
+  def prepend(key: String, value: T): Future[JBoolean] =
     prepend(key, 0, Time.epoch, value)
 
   /**
@@ -262,7 +263,7 @@ trait BaseClient[T] {
    * effect.
    * @return true if stored, false if not stored
    */
-  def replace(key: String, value: T): Future[Boolean] = replace(key, 0, Time.epoch, value)
+  def replace(key: String, value: T): Future[JBoolean] = replace(key, 0, Time.epoch, value)
 
   /**
    * Perform a CAS operation on the key, only if the value has not
@@ -272,7 +273,7 @@ trait BaseClient[T] {
    *
    * @return true if replaced, false if not
    */
-  def cas(key: String, value: T, casUnique: ChannelBuffer): Future[Boolean] =
+  def cas(key: String, value: T, casUnique: ChannelBuffer): Future[JBoolean] =
     cas(key, 0, Time.epoch, value, casUnique)
 
   /**
@@ -404,7 +405,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
       case _            => throw new IllegalStateException
     }
 
-  def incr(key: String, delta: Long): Future[Option[Long]] = {
+  def incr(key: String, delta: Long): Future[Option[JLong]] = {
     service(Incr(key, delta)) map {
       case Number(value) => Some(value)
       case NotFound()    => None
@@ -413,7 +414,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
-  def decr(key: String, delta: Long): Future[Option[Long]] = {
+  def decr(key: String, delta: Long): Future[Option[JLong]] = {
     service(Decr(key, delta)) map {
       case Number(value) => Some(value)
       case NotFound()    => None
