@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
 import com.twitter.conversions.time._
-import com.twitter.util.Base64StringEncoder
+import com.twitter.util.{Base64StringEncoder, Timer}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
@@ -18,7 +18,7 @@ import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.util.Timer
+import com.twitter.finagle.util.{Disposable, FinagleTimer}
 
 object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port
@@ -34,8 +34,14 @@ object RawZipkinTracer {
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver): Tracer.Factory = {
 
+    val mTimer = FinagleTimer.getManaged
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-      new RawZipkinTracer(scribeHost, scribePort, statsReceiver.scope("zipkin"))
+      new RawZipkinTracer(
+        scribeHost,
+        scribePort,
+        statsReceiver.scope("zipkin"),
+        mTimer.make()
+      )
     })
 
     h => {
@@ -58,14 +64,15 @@ object RawZipkinTracer {
 private[thrift] class RawZipkinTracer(
   scribeHost: String,
   scribePort: Int,
-  statsReceiver: StatsReceiver
+  statsReceiver: StatsReceiver,
+  timer: Disposable[Timer]
 ) extends Tracer
 {
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
   private[this] val TraceCategory = "zipkin" // scribe category
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
-  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, Timer.default)
+  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, timer.get)
   private[this] var refcount = 0
   private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = null
   private[thrift] var client: scribe.ServiceToClient = null
@@ -90,6 +97,7 @@ private[thrift] class RawZipkinTracer(
       transport.release()
       transport = null
       client = null
+      timer.dispose()
     }
   }
 

@@ -2,6 +2,7 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
+import com.twitter.finagle.util.FinagleTimer
 import collection.mutable.{SynchronizedMap, HashMap}
 
 object ZipkinTracer {
@@ -21,8 +22,10 @@ object ZipkinTracer {
             statsReceiver: StatsReceiver = NullStatsReceiver,
             sampleRate: Float = Sampler.DefaultSampleRate): Tracer.Factory = {
 
+    val mTimer = FinagleTimer.getManaged
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-      val raw = new RawZipkinTracer(scribeHost, scribePort, statsReceiver.scope("zipkin"))
+      val raw = new RawZipkinTracer(
+        scribeHost, scribePort, statsReceiver.scope("zipkin"), mTimer.make())
       new ZipkinTracer(raw, sampleRate)
     })
 

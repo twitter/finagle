@@ -20,7 +20,7 @@ import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.hashing._
-import com.twitter.util.{Time, Future, Bijection, Duration}
+import com.twitter.util.{Time, Future, Bijection, Duration, Timer}
 import com.twitter.concurrent.{Broker, Offer}
 
 import org.jboss.netty.buffer.ChannelBuffer
@@ -528,9 +528,10 @@ class KetamaFailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   numFailures: Int,
   markDeadFor: Duration,
+  timer: Timer,
   key: KetamaClientKey,
   healthBroker: Broker[NodeHealth]
-) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor) {
+) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
 
   override def markDead() = {
     super.markDead()
@@ -648,7 +649,6 @@ case class KetamaClientBuilder(
   def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
     copy(oldLibMemcachedVersionComplianceMode = true)
 
-
   def build(): Client = {
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
@@ -665,7 +665,7 @@ case class KetamaClientBuilder(
     val clients = failureAccrurers map { case (key, fa) =>
       val hostBuilder = builder
         .hosts(new InetSocketAddress(key.host, key.port))
-        .failureAccrual(fa)
+        .failureAccrualFactory(fa)
       (key -> hostBuilder.build())
     } toMap
 
@@ -683,16 +683,17 @@ case class KetamaClientBuilder(
     )
   }
 
-  private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
-    val broker = new Broker[NodeHealth]
-    val filter = new ServiceFactoryWrapper {
-      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
+  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = new ServiceFactoryWrapper {
+    def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
         new KetamaFailureAccrualFactory(
-          factory, _numFailures, _markDeadFor, key, broker
+          factory, _numFailures, _markDeadFor, timer, key, broker
         )
       }
-    }
-    (filter, broker.recv)
+  }
+
+  private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
+    val broker = new Broker[NodeHealth]
+    (filter(key, broker) _, broker.recv)
   }
 }
 

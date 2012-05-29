@@ -15,7 +15,6 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.{NullStatsReceiver, OstrichStatsReceiver}
-import com.twitter.finagle.util.Timer
 import com.twitter.finagle.util.Conversions._
 
 object LoadBalancerTest {

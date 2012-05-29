@@ -70,7 +70,9 @@ class FinagleStatsSpec extends SpecificationWithJUnit with Mockito {
   "Finagle stats system" should {
 
     "correctely count connection" in {
-      Stats.getGauge("server/connections") must beSome(0.0)
+      // TODO: is this ok? We are not registering connections gauge until connection
+      // is needed.
+      Stats.getGauge("server/connections") must beNone
       Stats.getGauge("client/connections") must beNone
 
       service("Hello\n").get()

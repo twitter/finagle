@@ -1,9 +1,9 @@
 package com.twitter.finagle.service
 
 import com.twitter.util
-import com.twitter.util.{Duration, Future, TimerTask, NullTimerTask}
+import com.twitter.util.{Duration, Future, TimerTask, NullTimerTask, Timer}
 
-import com.twitter.finagle.util.{Timer, AsyncLatch}
+import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle.{
   ChannelClosedException, Service, ServiceClosedException,
   ServiceProxy, WriteException}
@@ -20,7 +20,7 @@ class ExpiringService[Req, Rep](
   self: Service[Req, Rep],
   maxIdleTime: Option[Duration],
   maxLifeTime: Option[Duration],
-  timer: util.Timer = Timer.default,
+  timer: Timer,
   stats: StatsReceiver = NullStatsReceiver)
   extends ServiceProxy[Req, Rep](self)
 {
@@ -32,7 +32,7 @@ class ExpiringService[Req, Rep](
   private[this] var idleTask = startTimer(maxIdleTime, idleCounter)
   private[this] var lifeTask = startTimer(maxLifeTime, lifeCounter)
   private[this] val wasReleased = new AtomicBoolean(false)
-  
+
   private[this] def startTimer(duration: Option[Duration], counter: Counter) =
     duration map { t: Duration =>
       timer.schedule(t.fromNow) { expire(counter) }

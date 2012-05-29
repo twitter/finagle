@@ -2,6 +2,7 @@ package com.twitter.finagle.b3.thrift
 
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
+import com.twitter.finagle.util.FinagleTimer
 import collection.mutable.{SynchronizedMap, HashMap}
 
 object BigBrotherBirdTracer {
@@ -22,8 +23,10 @@ object BigBrotherBirdTracer {
             statsReceiver: StatsReceiver = NullStatsReceiver,
             sampleRate: Float = Sampler.DefaultSampleRate): Tracer.Factory = {
 
+    val mTimer = FinagleTimer.getManaged
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
-      val raw = new RawBigBrotherBirdTracer(scribeHost, scribePort, statsReceiver.scope("b3"))
+      val raw = new RawBigBrotherBirdTracer(
+        scribeHost, scribePort, statsReceiver.scope("b3"), mTimer.make())
       new BigBrotherBirdTracer(raw, sampleRate)
     })
 

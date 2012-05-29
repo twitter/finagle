@@ -6,7 +6,7 @@ import java.util.ArrayList
 
 import com.twitter.util._
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{Timer, CloseNotifier}
+import com.twitter.finagle.util.{CloseNotifier, FinagleTimer}
 import com.twitter.finagle.stats.NullStatsReceiver
 
 import org.mockito.Matchers._
@@ -19,10 +19,11 @@ object RawBigBrotherBirdTracerSpec extends Specification with Mockito {
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
   "RawBigBrotherBirdTracer" should {
+    val b3Timer = FinagleTimer.getManaged.make()
+    doAfter { b3Timer.dispose() }
 
     "send all traces to scribe" in {
-      Timer.default.acquire()
-      val tracer = new RawBigBrotherBirdTracer("localhost", 1463, NullStatsReceiver)
+      val tracer = new RawBigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, b3Timer)
       tracer.client = mock[scribe.ServiceToClient]
 
       val expected = new ArrayList[LogEntry]()
@@ -44,7 +45,6 @@ object RawBigBrotherBirdTracerSpec extends Specification with Mockito {
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 
-      Timer.default.stop()
       there was one(tracer.client).Log(expected)
     }
 
@@ -66,12 +66,11 @@ object RawBigBrotherBirdTracerSpec extends Specification with Mockito {
       val ann2 = Annotation.Rpcname("some_service", "rpc_name")
       val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
-      val tracer = new RawBigBrotherBirdTracer("localhost", 1463, NullStatsReceiver)
+      val tracer = new RawBigBrotherBirdTracer("localhost", 1463, NullStatsReceiver, b3Timer)
       tracer.client = mock[scribe.ServiceToClient]
 
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
 
-      Timer.default.acquire()
       tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
       tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
       tracer.record(Record(traceId, Time.fromSeconds(3), ann3))

@@ -11,13 +11,13 @@ import com.twitter.util.{
 import com.twitter.conversions.time._
 
 class TimerSpec extends SpecificationWithJUnit with Mockito {
-  "Timer" should {
-    val timer = Timer.default
-    timer.acquire()
-    doAfter { timer.stop() }
+  "FinagleTimer" should {
+    val dTimer = FinagleTimer.getManaged.make()
+    val timer = dTimer.get
+    doAfter { dTimer.dispose() }
 
     val start = Time.now
-    var end = Time.now
+    var end = start
     val latch = new CountDownLatch(1)
     val task = timer.schedule(1.second.fromNow) {
       latch.countDown()
@@ -34,12 +34,59 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
       latch.await(2.seconds) must beFalse
     }
   }
+
+    "TaskTrackingTimer" should {
+    val underlying = new MockTimer
+    val timer = new TaskTrackingTimer(underlying)
+
+    "track scheduled tasks" in Time.withCurrentTimeFrozen { tc =>
+      timer.tasks.size must be_==(0)
+      1 until 10 foreach { i =>
+        timer.schedule(10.seconds.fromNow) {/*nada*/}
+        timer.tasks.size must be_==(i)
+      }
+      tc.advance(10.seconds)
+      underlying.tick()
+      timer.tasks.size must be_==(0)
+    }
+
+    "remove cancelled tasks" in Time.withCurrentTimeFrozen { tc =>
+      timer.tasks.size must be_==(0)
+      val tasks = 1 until 10 map { i =>
+        val t = timer.schedule(10.seconds.fromNow) {/*nada*/}
+        timer.tasks.size must be_==(i)
+        t
+      }
+
+      tasks.zipWithIndex.reverse foreach { case (t, i) =>
+        t.cancel()
+        timer.tasks.size must be_==(i)
+      }
+    }
+
+    "remove pending tasks when stopped" in Time.withCurrentTimeFrozen { tc =>
+      timer.schedule(1.seconds.fromNow) {/*nada*/}
+      timer.schedule(2.seconds.fromNow) {/*nada*/}
+      timer.tasks.size must be_==(2)
+
+      tc.advance(1.second)
+      underlying.tick()
+
+      timer.tasks.size must be_==(1)
+      timer.stop()
+
+      // this doesn't really verify that pending tasks were cancelled
+      // but it looks like Mockito can't mock call-by-name arguments
+      // that schedule method takes.
+      timer.tasks.size must be_==(0)
+    }
+  }
 }
 
 class TimerToNettyTimerSpec extends SpecificationWithJUnit with Mockito {
   // We have to jump through a lot of hoops here just
   // to make assertions about Timer#schedule calls.
-  class MockReferenceCountingTimer(underlying: Timer)
+  class MockReferenceCountingTimer(underlying: TimerFromNettyTimer)
     extends ReferenceCountingTimer(() => underlying)
   {
     val scheduled =
@@ -52,7 +99,7 @@ class TimerToNettyTimerSpec extends SpecificationWithJUnit with Mockito {
   }
 
   "TimerToNettyTimer" should {
-    val underlyingTimer = mock[Timer]
+    val underlyingTimer = mock[TimerFromNettyTimer]
     val underlying = spy(
       new MockReferenceCountingTimer(underlyingTimer))
     val nettyTimer = new TimerToNettyTimer(underlying)
@@ -67,12 +114,10 @@ class TimerToNettyTimerSpec extends SpecificationWithJUnit with Mockito {
 
 
     "Adding a timeout" in {
-      there was no(underlying).acquire()
       underlying.scheduled must beEmpty
 
       "schedule on underlying timer" in Time.withCurrentTimeFrozen { tc =>
         schedule()
-        there was one(underlying).acquire()
         underlying.scheduled must haveSize(1)
         underlying.scheduled(0) must beLike {
           case (t, _, _) if t == 10.seconds.fromNow => true

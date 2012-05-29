@@ -2,7 +2,7 @@ package com.twitter.finagle.stress
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.Timer
+import com.twitter.finagle.util.FinagleTimer
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
@@ -19,8 +19,6 @@ import com.twitter.util.RandomSocket
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer()
-  val timer = Timer.default
-  timer.acquire()
 }
 
 class EmbeddedServer(val addr: SocketAddress) {
@@ -29,6 +27,7 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
+  val timer = FinagleTimer.getManaged.make()
 
   // Server state:
   private[this] var isApplicationNonresponsive = false
@@ -95,7 +94,7 @@ class EmbeddedServer(val addr: SocketAddress) {
       pipeline.addLast("latency", new SimpleChannelDownstreamHandler {
         override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
           if (latency != 0.seconds)
-            timer.schedule(latency) { super.writeRequested(ctx, e) }
+            timer.get.schedule(latency) { super.writeRequested(ctx, e) }
           else
             super.writeRequested(ctx, e)
         }
@@ -124,6 +123,7 @@ class EmbeddedServer(val addr: SocketAddress) {
     channels.clear()
 
     bootstrap.releaseExternalResources()
+    timer.dispose()
   }
 
   def start() {
