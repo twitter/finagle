@@ -1,7 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.{Util, Packet}
-
+import com.twitter.finagle.mysql.util._
 
 trait Result {}
 

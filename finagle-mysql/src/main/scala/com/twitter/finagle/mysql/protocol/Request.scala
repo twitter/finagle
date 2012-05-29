@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.Util
+import com.twitter.finagle.mysql.util._
 
 object Command {
   val COM_SLEEP               = 0x00.toByte

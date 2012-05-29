@@ -2,12 +2,18 @@ package com.twitter.finagle.mysql.protocol
 
 import com.twitter.finagle.mysql._
 import collection.immutable.Queue
-import com.twitter.finagle.mysql.Util
+import com.twitter.finagle.mysql.util._
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
+
+trait Packet {
+  def size: Int
+  def number: Byte
+  def data: Array[Byte]
+}
 
 object Decoder {
   val EOF_Byte = 0xFE.toByte

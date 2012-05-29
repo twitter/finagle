@@ -1,4 +1,4 @@
-package com.twitter.finagle.mysql
+package com.twitter.finagle.mysql.util
 
 object Util {
 

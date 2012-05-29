@@ -17,7 +17,7 @@ object ExternalMemcached { self =>
     p.waitFor()
     require(p.exitValue() == 0, "memcached binary must be present.")
   }
-
+  
   private[this] def findAddress() {
     var tries = 100
     while (address == None && tries >= 0) {

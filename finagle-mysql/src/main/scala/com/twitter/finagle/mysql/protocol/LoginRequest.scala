@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.util._
 import java.security.MessageDigest
 
 case class LoginRequest(
