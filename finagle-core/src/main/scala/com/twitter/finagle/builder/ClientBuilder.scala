@@ -695,7 +695,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         config.hostConnectionMaxLifeTime.isDefined) {
       factory = factory map { service =>
         new ExpiringService(
-          service,
+          new CloseOnReleaseService(service),
           config.hostConnectionMaxIdleTime,
           config.hostConnectionMaxLifeTime,
           timer)

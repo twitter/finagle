@@ -4,10 +4,11 @@ import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.channel._
+import com.twitter.finagle.dispatch.ExpiringServerDispatcher
 import com.twitter.finagle.filter.{
   HandletimeFilter, MonitorFilter, RequestSemaphoreFilter, MaskCancelFilter}
 import com.twitter.finagle.service.{
-  ExpiringService, ProxyService, StatsFilter, TimeoutFilter}
+  ProxyService, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{
   Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -112,9 +113,6 @@ final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName](
   private val _channelFactory:                  ReferenceCountedChannelFactory           = ServerBuilder.defaultChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
-  private val _requestTimeout:                  Option[Duration]                         = None,
-  private val _readTimeout:                     Option[Duration]                         = None,
-  private val _writeCompletionTimeout:          Option[Duration]                         = None,
   private val _tracerFactory:                   Managed[Tracer]                          = Managed.const(NullTracer),
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
   private val _serverBootstrap:                 Option[ServerBootstrap]                  = None,
@@ -607,31 +605,6 @@ private[builder] class MkServer[Req, Rep] (
         // factory.
         var thisServiceFactory = serviceFactory(timer, statsReceiverOpt, gauges)
 
-        // We add the idle time after the codec. This ensures that a
-        // client couldn't DoS us by sending lots of little messages
-        // that don't produce a request object for some time. In other
-        // words, the idle time refers to the idle time from the view
-        // of the protocol.
-        val idleTime = config.hostConnectionMaxIdleTime
-        val lifeTime = config.hostConnectionMaxLifeTime
-
-        if (idleTime.isDefined || lifeTime.isDefined) {
-          val closingHandler = new ChannelClosingHandler
-          pipeline.addLast("closingHandler", closingHandler)
-          thisServiceFactory = thisServiceFactory map { service =>
-            val closingService = new ServiceProxy(service) {
-              override def release() {
-                closingHandler.close()
-                super.release()
-              }
-            }
-            new ExpiringService(
-              closingService, idleTime, lifeTime, timer,
-              statsReceiver.scope("expired")
-            )
-          }
-        }
-
         // These have to go last (ie. first in the stack) so that
         // protocol-specific trace support can override our generic
         // one here.
@@ -650,8 +623,25 @@ private[builder] class MkServer[Req, Rep] (
           tracingFilter andThen
           codec.prepareConnFactory(thisServiceFactory)
 
+        // We add the idle time after the codec. This ensures that a
+        // client couldn't DoS us by sending lots of little messages
+        // that don't produce a request object for some time. In other
+        // words, the idle time refers to the idle time from the view
+        // of the protocol.
+        val idleTime = config.hostConnectionMaxIdleTime
+        val lifeTime = config.hostConnectionMaxLifeTime
+
+        val serverDispatcherFactory = if (idleTime.isDefined || lifeTime.isDefined) {
+          val expiringServerDispatcher = new ExpiringServerDispatcher[Req, Rep](
+            idleTime, lifeTime, timer, statsReceiver.scope("expired")
+          )
+          expiringServerDispatcher(codec.mkServerDispatcher)
+        } else {
+          codec.mkServerDispatcher
+        }
+
         val dispatcher = new ServiceDispatcher(
-          connServiceFactory, codec.mkServerDispatcher, statsReceiver,
+          connServiceFactory, serverDispatcherFactory, statsReceiver,
           Logger.getLogger(config.name), monitor, channels)
         pipeline.addLast("finagleDispatcher", dispatcher)
 

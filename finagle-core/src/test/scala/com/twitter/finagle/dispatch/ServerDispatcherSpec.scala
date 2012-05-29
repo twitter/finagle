@@ -4,7 +4,7 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Return}
 
 class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
   "SerialServerDispatcher" should {
@@ -75,8 +75,9 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "drain" in {
+      val onClose = new Promise[Throwable]
       val trans = mock[Transport[String, String]]
-      trans.onClose returns Future.never
+      trans.onClose returns onClose
       val service = mock[Service[String, String]]
 
       val readp = new Promise[String]
@@ -91,6 +92,7 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
         there was no(service).release()
 
         readp.setException(new Exception("closed!"))
+        onClose.setValue(new Exception("closed!"))
         there was one(service).release()
         there was no(trans).write(any)
         there was one(trans).read()
@@ -114,8 +116,9 @@ class ServerDispatcherSpec extends SpecificationWithJUnit with Mockito {
         there was no(trans).close()
 
         writep.setValue(())
-        there was one(service).release()
         there was one(trans).close()
+        onClose.setValue(new Exception("closed!"))
+        there was one(service).release()
 
         there was one(trans).read()
       }

@@ -95,13 +95,6 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
 
           there was one(underlying).release()
         }
-
-        "throw an write exception if we attempt to use an expired service" in {
-          timeControl.advance(10.seconds)
-          timer.tick()
-
-          service(132)() must throwA[WriteException]
-        }
       }
 
       "life time of a connection" in {
@@ -123,13 +116,6 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           service(123)
           timer.tasks must haveSize(1)
           timer.tasks.head.isCancelled must beFalse
-        }
-
-        "throw an write exception if we attempt to use an expired service" in {
-          timeControl.advance(10.seconds)
-          timer.tick()
-
-          service(132)() must throwA[WriteException]
         }
       }
 
