@@ -635,10 +635,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     factory: ServiceFactory[Req, Rep], timer: Timer, statsReceiver: StatsReceiver) = {
     // These are conservative defaults, but probably the only safe
     // thing to do.
-    val lowWatermark  = config.hostConnectionCoresize   getOrElse(1)
-    val highWatermark = config.hostConnectionLimit      getOrElse(Int.MaxValue)
-    val idleTime      = config.hostConnectionIdleTime   getOrElse(5.seconds)
-    val maxWaiters    = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
+    val lowWatermark = config.hostConnectionCoresize   getOrElse(1)
+    val highWatermark = Seq(lowWatermark, config.hostConnectionLimit getOrElse(Int.MaxValue)).max
+    val idleTime = config.hostConnectionIdleTime   getOrElse(5.seconds)
+    val maxWaiters = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
 
     val underlyingFactory = if (idleTime > 0.seconds && highWatermark > lowWatermark) {
       new CachingPool(
