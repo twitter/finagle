@@ -46,7 +46,7 @@ object ZipkinTracer {
 }
 
 /**
- * BigBrotherBird tracer that supports sampling. Will pass through a small subset of the records.
+ * Zipkin tracer that supports sampling. Will pass through a small subset of the records.
  * @param underlyingTracer Underlying tracer that accumulates the traces and sends off to the collector.
  * @param initialSampleRate Start off with this sample rate. Can be changed later.
  */

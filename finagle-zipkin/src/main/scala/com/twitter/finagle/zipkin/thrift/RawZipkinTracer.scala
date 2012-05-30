@@ -56,7 +56,7 @@ object RawZipkinTracer {
 
 
 /**
- * Receives the Finagle generated traces and sends them off to BigBrotherBird via scribe.
+ * Receives the Finagle generated traces and sends them off to Zipkin via scribe.
  * @param scribeHost The scribe host used to send traces to scribe
  * @param scribePort The scribe port used to send traces to scribe
  * @param statsReceiver We generate stats to keep track of traces sent, failures and so on

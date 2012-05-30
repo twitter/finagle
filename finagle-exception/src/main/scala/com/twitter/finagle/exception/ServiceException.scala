@@ -13,7 +13,7 @@ import com.twitter.util.Time
  * These classes are private to the exception package because they must adhere to the chickadee
  * specification.
  *
- * TraceId is from BigBrotherBird.
+ * TraceId is from Zipkin.
  */
 sealed private[exception] case class ServiceException private[ServiceException] (
   private val jsonValue: Map[String,Any]) {
