@@ -86,10 +86,10 @@ object Trace {
       currentId map { _.sampled } getOrElse None)
   }
 
-  @deprecated("use setId() instead")
+  @deprecated("use setId() instead", "5.0.1")
   def pushId(): TraceId = pushId(nextId)
 
-  @deprecated("use setId() instead")
+  @deprecated("use setId() instead", "5.0.1")
   def pushId(traceId: TraceId): TraceId = setId(traceId)
 
   /**

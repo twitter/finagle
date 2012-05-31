@@ -70,6 +70,7 @@ import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.{util => nu}
+import scala.annotation.implicitNotFound
 import tracing.{NullTracer, TracingFilter, Tracer}
 
 /**
@@ -94,13 +95,13 @@ object ClientBuilder {
    * Provides a typesafe `build` for Java.
    */
   def safeBuild[Req, Rep](builder: Complete[Req, Rep]): Service[Req, Rep] =
-    builder.build()
+    builder.build()(ClientConfigEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildFactory` for Java.
    */
   def safeBuildFactory[Req, Rep](builder: Complete[Req, Rep]): ServiceFactory[Req, Rep] =
-    builder.buildFactory()
+    builder.buildFactory()(ClientConfigEvidence.FullyConfigured)
 
   private[finagle] val defaultChannelFactory =
     new ReferenceCountedChannelFactory(
@@ -116,6 +117,13 @@ object ClientBuilder {
 object ClientConfig {
   sealed abstract trait Yes
   type FullySpecified[Req, Rep] = ClientConfig[Req, Rep, Yes, Yes, Yes]
+}
+
+@implicitNotFound("Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}")
+trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
+
+object ClientConfigEvidence {
+  implicit object FullyConfigured extends ClientConfigEvidence[ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
 }
 
 // Necessary because of the 22 argument limit on case classes
@@ -353,7 +361,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     withConfig(_.copy(_codecFactory = Some(codecFactory)))
 
-  @deprecated("Use tcpConnectTimeout instead")
+  @deprecated("Use tcpConnectTimeout instead", "5.0.1")
   def connectionTimeout(duration: Duration): This = tcpConnectTimeout(duration)
 
   /**
@@ -766,7 +774,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   def buildManagedFactory()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Managed[ServiceFactory[Req, Rep]] = for {
       timer <- FinagleTimer.getManaged
       tracer <- config.tracerFactory
@@ -779,9 +787,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def buildFactory()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): ServiceFactory[Req, Rep] = {
-
     val factory = buildManagedFactory()
     new ServiceFactory[Req, Rep] {
       val inner = factory.make()
@@ -791,9 +798,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
      }
   }
 
+  @deprecated("Used for ABI compat", "5.0.1")
+  def buildFactory(
+    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): ServiceFactory[Req, Rep] = buildFactory()(
+    new ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]{})
+
   def buildManaged()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Managed[Service[Req, Rep]] = for {
     factory <- buildManagedFactory()
     timer <- FinagleTimer.getManaged
@@ -812,13 +826,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def build()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = new Service[Req, Rep] {
       val inner = buildManaged().make()
       def apply(request: Req) = inner.get(request)
       override def isAvailable = inner.get.isAvailable
       override def release() = inner.dispose()
     }
+
+  @deprecated("Used for ABI compat", "5.0.1")
+  def build(
+    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Service[Req, Rep] = build()(
+    new ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]{})
 
   /**
    * Construct a Service, with runtime checks for builder

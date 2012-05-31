@@ -26,7 +26,7 @@ import org.jboss.netty.channel.group.{ChannelGroupFuture,
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
-import org.jboss.netty.{util => nu}
+import scala.annotation.implicitNotFound
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{HashSet, SynchronizedSet}
 
@@ -65,7 +65,7 @@ object ServerBuilder {
    * Provides a typesafe `build` for Java.
    */
   def safeBuild[Req, Rep](service: Service[Req, Rep], builder: Complete[Req, Rep]): Server =
-    builder.build(service)
+    builder.build(service)(ServerConfigEvidence.FullyConfigured)
 
   val defaultChannelFactory =
     new ReferenceCountedChannelFactory(
@@ -81,6 +81,13 @@ object ServerBuilder {
 object ServerConfig {
   sealed abstract trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
+}
+
+@implicitNotFound("Builder is not fully configured: Codec: ${HasCodec}, BindTo: ${HasBindTo}, Name: ${HasName}")
+trait ServerConfigEvidence[HasCodec, HasBindTo, HasName]
+
+object ServerConfigEvidence {
+  implicit object FullyConfigured extends ServerConfigEvidence[ServerConfig.Yes, ServerConfig.Yes, ServerConfig.Yes]
 }
 
 case class BufferSize(
@@ -349,32 +356,38 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Construct the Server, given the provided Service.
    */
   def build(service: Service[Req, Rep]) (
-     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
-       ThisConfig =:= FullySpecifiedConfig
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ServerConfigEvidence[HasCodec, HasBindTo, HasName]
    ): Server = build(ServiceFactory.const(service))
+
+  @deprecated("Used for ABI compat", "5.0.1")
+  def build(service: Service[Req, Rep],
+    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+   ): Server = build(ServiceFactory.const(service), THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION)
 
   /**
    * Construct the Server, given the provided Service factory.
    */
-  @deprecated("Use the ServiceFactory variant instead")
+  @deprecated("Use the ServiceFactory variant instead", "5.0.1")
   def build(serviceFactory: () => Service[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
-  ): Server = build(_ => serviceFactory())
+  ): Server = build((_:ClientConnection) => serviceFactory())(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION)
 
   /**
    * Construct the Server, given the provided ServiceFactory. This
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
    */
-  @deprecated("Use the ServiceFactory variant instead")
+  @deprecated("Use the ServiceFactory variant instead", "5.0.1")
   def build(serviceFactory: (ClientConnection) => Service[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
       ThisConfig =:= FullySpecifiedConfig
   ): Server = build(new ServiceFactory[Req, Rep] {
     def apply(conn: ClientConnection) = Future.value(serviceFactory(conn))
     def close() = ()
-  })
+  }, THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION)
 
   /**
    * Construct the Server, given the provided ServiceFactory. This
@@ -383,7 +396,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def build(serviceFactory: ServiceFactory[Req, Rep])(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ServerConfigEvidence[HasCodec, HasBindTo, HasName]
   ): Server = {
     val managed = buildManaged(serviceFactory)
     val bound = managed.make()
@@ -392,6 +405,13 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       def localAddress = bound.get.boundAddress
     }
   }
+
+  @deprecated("Used for ABI compat", "5.0.1")
+  def build(serviceFactory: ServiceFactory[Req, Rep],
+    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Server = build(serviceFactory)(
+    new ServerConfigEvidence[HasCodec, HasBindTo, HasName]{})
 
   /**
    * Construct a Service, with runtime checks for builder
@@ -402,7 +422,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def buildManaged(serviceFactory: ServiceFactory[Req, Rep]) (
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ServerConfigEvidence[HasCodec, HasBindTo, HasName]
   ): Managed[BoundServer] = {
     val mkServer = new MkServer[Req, Rep](config, serviceFactory)
     mkServer()
@@ -410,7 +430,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def buildManaged(service: Service[Req, Rep]) (
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ServerConfigEvidence[HasCodec, HasBindTo, HasName]
   ): Managed[BoundServer] = buildManaged(ServiceFactory.const(service))
 }
 
@@ -418,7 +438,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
  * MkServer builds a server from a configuration and service factory.
  */
 private[builder] class MkServer[Req, Rep] (
-  val config: ServerConfig.FullySpecified[Req, Rep],
+  val config: ServerConfig[Req, Rep, _, _, _],
   val inputServiceFactory: ServiceFactory[Req, Rep]
   ) {
   private[this] def bootstrap() = {
