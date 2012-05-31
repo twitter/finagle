@@ -53,7 +53,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, futurePool: Future
 
     // dispatch to the service method
     val task = {
-      def promise = new Promise[(String, Message)]
+      val promise = new Promise[(String, Message)]
       try {
         service.callMethod(m, null, reqMessage, new RpcCallback[Message]() {
 
