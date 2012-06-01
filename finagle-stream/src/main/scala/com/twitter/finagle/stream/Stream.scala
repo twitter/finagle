@@ -1,17 +1,48 @@
 package com.twitter.finagle.stream
 
+import com.twitter.concurrent.Channel
+import com.twitter.finagle.ServiceNotAvailableException
+import com.twitter.finagle.{
+  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException}
+import com.twitter.util.{Future, Promise}
 import java.util.concurrent.atomic.AtomicBoolean
-
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{
-  HttpServerCodec, HttpClientCodec, HttpRequest, HttpResponse}
+  HttpClientCodec, HttpRequest, HttpResponse, HttpServerCodec}
 
-import com.twitter.concurrent.Channel
-import com.twitter.util.Future
+/**
+ * Don't release the underlying service until the response has
+ * completed.
+ */
+private[stream] class DelayedReleaseService(self: Service[HttpRequest, StreamResponse])
+  extends ServiceProxy[HttpRequest, StreamResponse](self)
+{
+  @volatile private[this] var done: Future[Unit] = Future.Done
 
-import com.twitter.finagle.{
-  Codec, CodecFactory, Service, ServiceProxy, ServiceFactory}
-import com.twitter.finagle.ServiceNotAvailableException
+  override def apply(req: HttpRequest) = {
+    if (!done.isDefined)
+      Future.exception(new TooManyConcurrentRequestsException)
+    else {
+      val p = new Promise[Unit]
+      done = p
+      self(req) map { res =>
+        new StreamResponse {
+          def httpResponse = res.httpResponse
+          def messages = res.messages
+          def error = res.error
+          def release() {
+            p.setValue(())
+            res.release()
+          }
+        }
+      } onFailure { _ => p.setValue(()) }
+    }
+  }
+
+  override def release() {
+    done ensure self.release()
+  }
+}
 
 object Stream {
   def apply(): Stream = new Stream()
@@ -42,24 +73,11 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
           pipeline
         }
       }
-      override def prepareConnFactory(
+
+      override def prepareServiceFactory(
         underlying: ServiceFactory[HttpRequest, StreamResponse]
-      ): ServiceFactory[HttpRequest, StreamResponse] =
-        underlying map { service => new UseOnceService(service) }
+      ): ServiceFactory[HttpRequest, StreamResponse] = 
+        underlying map(new DelayedReleaseService(_))
     }
-  }
-
-  private class UseOnceService(underlying: Service[HttpRequest, StreamResponse])
-    extends ServiceProxy[HttpRequest, StreamResponse](underlying)
-  {
-    private[this] val used = new AtomicBoolean(false)
-
-    override def apply(request: HttpRequest) = {
-      if (used.compareAndSet(false, true)) underlying(request) else {
-        Future.exception(new ServiceNotAvailableException)
-      }
-    }
-
-    override def isAvailable = !used.get && underlying.isAvailable
   }
 }
