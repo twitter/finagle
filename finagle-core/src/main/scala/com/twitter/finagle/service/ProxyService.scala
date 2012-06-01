@@ -1,19 +1,19 @@
 package com.twitter.finagle.service
 
-import scala.collection.mutable.ArrayBuffer
-import com.twitter.finagle.{Service, ServiceNotAvailableException}
+import collection.mutable.Queue
+import com.twitter.finagle.{CancelledConnectionException, TooManyConcurrentRequestsException, Service, ServiceNotAvailableException}
 import com.twitter.util.{Future, Promise, Throw, Return}
 
 /**
  * A service that simply proxies requests to an underlying service
  * yielded through a Future.
  */
-class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
+class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWaiters: Int = Int.MaxValue)
   extends Service[Req, Rep]
 {
   @volatile private[this] var proxy: Service[Req, Rep] =
     new Service[Req, Rep] {
-      private[this] val requestBuffer = new ArrayBuffer[(Req, Promise[Rep])]
+      private[this] val requestBuffer = new Queue[(Req, Promise[Rep])]
       private[this] var underlying: Option[Service[Req, Rep]] = None
       private[this] var didRelease = false
 
@@ -34,6 +34,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
               requestBuffer foreach { case (_, promise) => promise() = Throw(exc) }
               underlying = Some(new FailedService(new ServiceNotAvailableException))
           }
+          requestBuffer.clear()
         }
       }
 
@@ -41,9 +42,17 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]])
         underlying match {
           case Some(service) => service(request)
           case None =>
-            val promise = new Promise[Rep]
-            requestBuffer += ((request, promise))
-            promise
+            if (requestBuffer.size >= maxWaiters)
+              Future.exception(new TooManyConcurrentRequestsException)
+            else {
+              val promise = new Promise[Rep]
+              requestBuffer += ((request, promise))
+              promise onCancellation {
+                val dq = synchronized { requestBuffer.dequeueFirst { case (_, p) => p eq promise } }
+                dq foreach { case (_, p) => p() = Throw(new CancelledConnectionException)}
+              }
+              promise
+            }
         }
       }
 

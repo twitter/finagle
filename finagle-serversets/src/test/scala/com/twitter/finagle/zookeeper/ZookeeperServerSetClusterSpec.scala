@@ -4,8 +4,8 @@ import com.twitter.common.io.FileUtils.createTempDir
 import com.twitter.common.quantity._
 import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
 import com.twitter.conversions.time._
+import com.twitter.finagle.{NoBrokersAvailableException, Codec, CodecFactory, Service}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{Codec, CodecFactory, Service}
 import com.twitter.util.{Future, RandomSocket}
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
@@ -82,6 +82,46 @@ class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
 
       cluster.thread.join()
       client("hello\n")(1.seconds) mustEqual "olleh"
+    }
+
+    "Be able to block till server set is ready" in {
+      val serverSet = new ServerSetImpl(zookeeperClient, "/twitter/services/silly")
+      val cluster = new ZookeeperServerSetCluster(serverSet)
+
+      val sillyService = new Service[String, String] {
+        def apply(request: String) = Future(request.reverse)
+      }
+      val server = ServerBuilder()
+        .codec(StringCodec)
+        .bindTo(new InetSocketAddress(0))
+        .name("ZKTestServer")
+        .build(sillyService)
+
+      val client = ClientBuilder()
+        .cluster(cluster)
+        .codec(StringCodec)
+        .hostConnectionLimit(1)
+        .build()
+      var response: Future[String] = Future.value("init")
+      val clientThread = new Thread {
+        override def run {
+          response = try {
+            client("hello\n")
+          } catch {
+            case _ : NoBrokersAvailableException =>
+              true mustBe(false)
+              Future.value("fail")
+          }
+        }
+      }
+
+      clientThread.start()
+      clientThread.join()
+      cluster.ready.isDefined must beFalse
+      cluster.join(server.localAddress)
+      cluster.thread.join()
+      response() mustEqual "olleh"
+      cluster.ready.isDefined must beTrue
     }
   }
 }

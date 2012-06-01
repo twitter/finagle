@@ -1,14 +1,15 @@
 package com.twitter.finagle.builder
 
 import org.specs.SpecificationWithJUnit
-import com.twitter.concurrent.Spool
-import com.twitter.util.{Return, Promise}
 import collection.mutable
+import com.twitter.finagle.integration.DynamicCluster
 
 class ClusterSpec extends SpecificationWithJUnit {
+  case class WrappedInt(val value: Int)
+
   "Cluster map" should {
     val N = 10
-    val cluster1 = new ClusterInt()
+    val cluster1 = new DynamicCluster[Int]()
     val cluster2 = cluster1.map(a => WrappedInt(a))
 
     "provide 1-1 mapping to the result cluster" in {
@@ -59,6 +60,23 @@ class ClusterSpec extends SpecificationWithJUnit {
       changes must haveSize(9)
       for (ch <- changes take 8)
         ch.value mustNot be(changes(8).value)
+    }
+  }
+
+  "Cluster ready" should {
+    "wait on cluster initialization" in {
+      val cluster = new DynamicCluster[Int]()
+      val ready = cluster.ready
+      ready.isDefined must beFalse
+      cluster.del(1)
+      ready.isDefined must beFalse
+      cluster.add(1)
+      ready.isDefined must beTrue
+    }
+
+    "always be defined on StaticCluster" in {
+      val cluster = new StaticCluster[Int](Seq[Int](1, 2))
+      cluster.ready.isDefined must beTrue
     }
   }
 }
