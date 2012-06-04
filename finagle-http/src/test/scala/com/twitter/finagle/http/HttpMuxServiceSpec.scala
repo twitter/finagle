@@ -1,14 +1,13 @@
-package com.twitter.finagle.http.system
+package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.Response
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, DefaultHttpResponse, HttpVersion,
-HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.{
+  DefaultHttpResponse, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import org.specs.SpecificationWithJUnit
-import util.Random
 import org.specs.mock.Mockito
+import scala.util.Random
 
 class HttpMuxServiceSpec extends SpecificationWithJUnit with Mockito {
   // todo: add other metrics when they are supported

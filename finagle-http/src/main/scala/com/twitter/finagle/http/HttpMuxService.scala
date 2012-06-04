@@ -1,10 +1,11 @@
-package com.twitter.finagle.http.system
+package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.net.URI
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, DefaultHttpResponse, HttpVersion,
-HttpResponseStatus, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{
+  DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, 
+  HttpVersion}
 
 /**
  * A service that dispatches incoming requests to registered handlers.
