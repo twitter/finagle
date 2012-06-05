@@ -32,6 +32,14 @@ class TracingSpec extends SpecificationWithJUnit {
       filter(req, dummyService)
     }
 
+    "record only path of url" in {
+      val stripped = stripParameters("/1/lists/statuses.json?count=50&super_secret=ohyeah")
+      stripped mustEqual "/1/lists/statuses.json"
+
+      val invalid = stripParameters("\\")
+      invalid mustEqual "\\" // request path doesn't throw exceptions if url is invalid
+    }
+
     "parse header" in {
       val dummyService = new Service[HttpRequest, HttpResponse] {
         def apply(request: HttpRequest) = {

@@ -206,6 +206,16 @@ object HttpTracing {
     val All = Seq(TraceId, SpanId, ParentSpanId, Sampled)
     val Required = Seq(TraceId, SpanId)
   }
+
+  /**
+   * Remove any parameters from url.
+   */
+  private[http] def stripParameters(uri: String): String = {
+    uri.indexOf('?') match {
+      case -1 => uri
+      case n  => uri.substring(0, n)
+    }
+  }
 }
 
 /**
@@ -245,7 +255,7 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     }
 
     Trace.recordRpcname(serviceName, request.getMethod.getName)
-    Trace.recordBinary("http.uri", request.getUri)
+    Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
     Trace.record(Annotation.ClientSend())
     service(request) map { response =>
@@ -287,7 +297,7 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
     // with a locally generated id
     Trace.recordRpcname(serviceName, request.getMethod.getName)
     Trace.recordServerAddr(boundAddress)
-    Trace.recordBinary("http.uri", request.getUri)
+    Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
     Trace.record(Annotation.ServerRecv())
     service(request) map { response =>
