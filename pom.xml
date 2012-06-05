@@ -18,7 +18,6 @@
     </snapshotRepository>
   </distributionManagement>
   <modules>
-    <module>finagle-b3</module>
     <module>finagle-commons-stats</module>
     <module>finagle-core</module>
     <module>finagle-example</module>
