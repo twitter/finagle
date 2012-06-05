@@ -3,7 +3,7 @@ package com.twitter.finagle.stream
 import java.io.InputStream
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBufferInputStream}
 import org.jboss.netty.handler.codec.http.HttpResponse
-import com.twitter.concurrent.{Channel, ChannelSource, Offer}
+import com.twitter.concurrent.Offer
 
 trait StreamResponse {
   /**
@@ -22,18 +22,6 @@ trait StreamResponse {
    * (no more messages will be sent)
    */
   def error: Offer[Throwable]
-
-  /**
-   * A {{com.twitter.concurrent.Channel}} interface for the stream of
-   * messages in this response.  Important: use of this interface is
-   * mutually exclusive with {{messages}} and {{error}}.
-   */
-  final lazy val channel: Channel[ChannelBuffer] = {
-    val ch = new ChannelSource[ChannelBuffer]
-    messages.enumToChannel(ch)
-    error foreach { _ => ch.close() }
-    ch
-  }
 
   /**
    * Rather than reacting to channel updates, you can read the content

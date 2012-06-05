@@ -11,7 +11,6 @@ import com.twitter.util.{
 import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.concurrent.{ChannelSource, Channel}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.{ServiceFactory, Service}
 import com.twitter.concurrent.{Offer, Broker}
@@ -193,25 +192,6 @@ trait Client {
   def flush(queueName: String): Future[Response]
 
   /**
-   * Get a Channel for the given queue, for reading. Messages begin dequeueing
-   * from the Server when the first Observer responds, and pauses when all
-   * Observers have disposed. Messages are acknowledged (closed) on the remote
-   * server when all observers have successfully completed their write Future.
-   * If any observer's write Future errors, the Channel is closed and the
-   * item is rolled-back (aborted) on the remote server.
-   *
-   * @return A Channel object that you can receive items from as they arrive.
-   */
-  def from(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer]
-
-  /**
-   * Get a ChannelSource for the given queue
-   *
-   * @return  A ChannelSource that you can send items to.
-   */
-  def to(queueName: String): ChannelSource[ChannelBuffer]
-
-  /**
    * Read indefinitely from the given queue with transactions.  Note
    * that {{read}} will reserve a connection for the duration of the
    * read.  Note that this does no buffering: we await acknowledment
@@ -331,40 +311,6 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     }
   }
 
-  def from(queueName: String, waitUpTo: Duration = 10.seconds): Channel[ChannelBuffer] = {
-    val result = new ChannelSource[ChannelBuffer]
-    val isRunning = new AtomicBoolean(false)
-    result.numObservers respond { i: Int =>
-      i match {
-        case 0 =>
-          isRunning.set(false)
-        case 1 =>
-          // only start receiving if we weren't already running
-          if (!isRunning.getAndSet(true)) {
-            underlying() onSuccess { service =>
-              receive(isRunning, service, Open(queueName, Some(waitUpTo)), result)
-            } onFailure { t =>
-              log.log(Level.WARNING, "Could not make service", t)
-              result.close()
-            }
-          }
-        case _ =>
-      }
-      Future.Done
-    }
-    result
-  }
-
-  def to(queueName: String): ChannelSource[ChannelBuffer] = {
-    val to = new ChannelSource[ChannelBuffer]
-    to.respond { item =>
-      set(queueName, item).unit onFailure { _ =>
-        to.close()
-      }
-    }
-    to
-  }
-
   // note: this implementation uses "GET" requests, not "MONITOR",
   // so it will incur many roundtrips on quiet queues.
   def read(queueName: String): ReadHandle = {
@@ -430,70 +376,6 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
         write(queueName, offer)
       } onFailure { t =>
         closed() = Return(t)
-      }
-    }
-  }
-
-  private[this] def receive(
-    isRunning: AtomicBoolean,
-    service: Service[Command, Response],
-    command: GetCommand,
-    channel: ChannelSource[ChannelBuffer])
-  {
-    def receiveAgain(command: GetCommand) {
-      receive(isRunning, service, command, channel)
-    }
-
-    def cleanup() {
-      channel.close()
-      service.release()
-    }
-
-    // serialize() because of the check(isRunning)-then-act(send) idiom.
-    channel.serialized {
-      if (isRunning.get && service.isAvailable) {
-        service(command) onSuccess {
-          case Values(Seq(Value(key, item))) =>
-            try {
-              Future.join(channel.send(item)) onSuccess { _ =>
-                receiveAgain(CloseAndOpen(command.queueName, command.timeout))
-              } onFailure { t =>
-                // abort if not all observers ack the send
-                service(Abort(command.queueName)) ensure { cleanup() }
-              }
-            }
-
-          case Values(Seq()) =>
-            receiveAgain(Open(command.queueName, command.timeout))
-
-          case _ =>
-            throw new IllegalArgumentException
-
-        } onFailure { t =>
-          log.log(Level.WARNING, "service produced exception", t)
-          cleanup()
-        }
-      } else {
-        cleanup()
-      }
-    }
-  }
-
-  private[this] class ChannelSourceWithService(serviceFuture: Future[Service[Command, Response]])
-    extends ChannelSource[ChannelBuffer]
-  {
-    private[this] val log = Logger.getLogger(getClass.getName)
-
-    serviceFuture handle { case t =>
-      log.log(Level.WARNING, "service produced exception", t)
-      this.close()
-    }
-
-    override def close() {
-      try {
-        serviceFuture.foreach { _.release() }
-      } finally {
-        super.close()
       }
     }
   }

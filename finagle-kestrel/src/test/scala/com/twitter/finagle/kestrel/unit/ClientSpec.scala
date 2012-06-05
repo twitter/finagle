@@ -5,7 +5,6 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.concurrent.{ChannelSource, Channel}
 import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer, Promise}
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
@@ -21,8 +20,6 @@ class MockClient extends Client {
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]] = null
   def delete(queueName: String): Future[Response] = null
   def flush(queueName: String): Future[Response] = null
-  def from(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer] = null
-  def to(queueName: String): ChannelSource[ChannelBuffer] = null
   def read(queueName: String): ReadHandle = null
   def write(queueName: String, offer: Offer[ChannelBuffer]): Future[Throwable] = null
   def close() {}

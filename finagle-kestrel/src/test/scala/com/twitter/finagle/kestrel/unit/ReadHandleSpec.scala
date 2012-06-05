@@ -5,7 +5,6 @@ import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
-import com.twitter.concurrent.{ChannelSource, Channel}
 import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer}
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._

@@ -1,7 +1,5 @@
 package com.twitter.finagle.kestrel.java;
 
-import com.twitter.concurrent.Channel;
-import com.twitter.concurrent.ChannelSource;
 import com.twitter.concurrent.Offer;
 import com.twitter.finagle.kestrel.protocol.Response;
 import com.twitter.finagle.kestrel.ReadHandle;
@@ -51,14 +49,6 @@ public class ClientBase extends com.twitter.finagle.kestrel.java.Client {
 
   public Future<Response> flush(String key) {
     return underlying.delete(key);
-  }
-
-  public Channel<ChannelBuffer> sink(String key, Duration waitFor) {
-    return underlying.from(key, waitFor);
-  }
-
-  public ChannelSource<ChannelBuffer> source(String key) {
-    return underlying.to(key);
   }
 
   public Future<Throwable> write(String queueName, Offer<ChannelBuffer> offer) {

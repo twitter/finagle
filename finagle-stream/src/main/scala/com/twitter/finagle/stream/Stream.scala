@@ -1,6 +1,5 @@
 package com.twitter.finagle.stream
 
-import com.twitter.concurrent.Channel
 import com.twitter.finagle.ServiceNotAvailableException
 import com.twitter.finagle.{
   Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException}
