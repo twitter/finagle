@@ -43,5 +43,10 @@
       <artifactId>util-hashing</artifactId>
       <version>5.0.5-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-jvm</artifactId>
+      <version>5.0.5-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

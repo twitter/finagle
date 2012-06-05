@@ -4,22 +4,24 @@ import com.twitter.concurrent.{NamedPoolThreadFactory, AsyncSemaphore}
 import com.twitter.finagle._
 import com.twitter.finagle.channel._
 import com.twitter.finagle.dispatch.ExpiringServerDispatcher
-import com.twitter.finagle.filter.{
-  HandletimeFilter, MonitorFilter, RequestSemaphoreFilter, MaskCancelFilter}
+import com.twitter.finagle.filter._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{
   Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{Tracer, TracingFilter, NullTracer}
 import com.twitter.finagle.util._
-import com.twitter.util.{Future, Duration, Monitor, NullMonitor, Time, Timer, Promise}
+import com.twitter.jvm.Jvm
+import com.twitter.util.{
+  Duration, Future, Monitor, NullMonitor, Promise, Time, Timer}
 import java.net.SocketAddress
 import java.util.concurrent.Executors
 import java.util.logging.{Logger, Level}
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
-import org.jboss.netty.channel.group.{ChannelGroupFuture,
-  DefaultChannelGroup, DefaultChannelGroupFuture, ChannelGroupFutureListener}
+import org.jboss.netty.channel.group.{
+  ChannelGroupFuture, ChannelGroupFutureListener, DefaultChannelGroup,
+  DefaultChannelGroupFuture}
 import org.jboss.netty.channel.socket.nio._
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
@@ -73,6 +75,8 @@ object ServerBuilder {
         )
       )
     )
+
+  private[finagle] lazy val mkJvmFilter = new MkJvmFilter(Jvm())
 }
 
 object ServerConfig {
@@ -627,7 +631,8 @@ private[builder] class MkServer[Req, Rep] (
     val outerFilter =
       handletimeFilter andThen // to measure total handle time
       monitorFilter andThen // to maximize surface area for exception handling
-      tracingFilter // to prepare tracing prior to codec tracing support
+      tracingFilter andThen // to prepare tracing prior to codec tracing support
+      ServerBuilder.mkJvmFilter[Req, Rep]()  // to maximize surface area
 
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline() = {

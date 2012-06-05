@@ -16,6 +16,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import scala.util.Random
+import com.twitter.finagle.tracing.ConsoleTracer
 
 class AppService(clients: Seq[thrift.Backend.ServiceIface], responseSample: Seq[(Duration, StorageUnit)])
   extends Service[HttpRequest, HttpResponse]
@@ -53,7 +54,7 @@ object Appserver {
       .cluster(cluster)
       .codec(ThriftClientFramedCodec())
       .reportTo(new OstrichStatsReceiver)
-      .hostConnectionLimit(10)
+      .hostConnectionLimit(1)
       .build()
 
     new thrift.Backend.ServiceToClient(
@@ -101,6 +102,7 @@ object Appserver {
       .codec(Http())
       .reportTo(new OstrichStatsReceiver)
       .bindTo(new InetSocketAddress(basePort))
+      .tracerFactory(ConsoleTracer.factory)
       .build(service)
   }
 }
