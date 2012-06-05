@@ -613,6 +613,21 @@ private[builder] class MkServer[Req, Rep] (
     // it will be created only once
     val statsReceiverOpt = config.statsReceiver map { sr => sr.scope(config.name) }
     val statsReceiver = statsReceiverOpt getOrElse NullStatsReceiver
+    
+    val thisServiceFactory = serviceFactory(timer, statsReceiverOpt, gauges)
+    val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
+    val monitorFilter = new MonitorFilter[Req, Rep](
+      monitor andThen Monitor.mk { case exc =>
+        Logger.getLogger(config.name).log(Level.SEVERE, "A Service threw an exception", exc)
+        false
+      }
+    )
+    
+    // These need to sit outside of the codec:
+    val outerFilter =
+      handletimeFilter andThen // to measure total handle time
+      monitorFilter andThen // to maximize surface area for exception handling
+      tracingFilter // to prepare tracing prior to codec tracing support
 
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline() = {
@@ -620,24 +635,8 @@ private[builder] class MkServer[Req, Rep] (
 
         // Make some connection-specific changes to the service
         // factory.
-        var thisServiceFactory = serviceFactory(timer, statsReceiverOpt, gauges)
-
-        // These have to go last (ie. first in the stack) so that
-        // protocol-specific trace support can override our generic
-        // one here.
-        val monitorFilter = new MonitorFilter[Req, Rep](
-          monitor andThen Monitor.mk { case exc =>
-            Logger.getLogger(config.name).log(Level.SEVERE, "A Service threw an exception", exc)
-            false
-          }
-        )
-
-        val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
-
         val connServiceFactory =
-          handletimeFilter andThen
-          monitorFilter andThen
-          tracingFilter andThen
+          outerFilter andThen 
           codec.prepareConnFactory(thisServiceFactory)
 
         // We add the idle time after the codec. This ensures that a
