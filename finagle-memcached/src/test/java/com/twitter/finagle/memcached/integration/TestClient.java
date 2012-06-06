@@ -22,7 +22,7 @@ public class TestClient extends TestCase {
         ClientBuilder
           .get()
           .hosts("localhost:11211")
-          .codec(new Memcached())
+          .codec(new Memcached(null))
           .hostConnectionLimit(1));
 
     Client client = ClientBase.newInstance(service);

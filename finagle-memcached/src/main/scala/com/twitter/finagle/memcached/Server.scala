@@ -23,7 +23,7 @@ class Server(address: SocketAddress) {
   private[this] val serverSpec =
     ServerBuilder()
       .name("finagle")
-      .codec(new Memcached)
+      .codec(Memcached())
       .bindTo(address)
 
   private[this] var server: Option[BuiltServer] = None

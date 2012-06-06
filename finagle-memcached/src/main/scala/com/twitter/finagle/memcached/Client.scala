@@ -8,6 +8,8 @@ import _root_.java.net.InetSocketAddress
 import _root_.java.util.{Map => JMap}
 import _root_.java.util.concurrent.ConcurrentHashMap
 
+import com.google.common.base.{CharMatcher, Strings}
+
 import com.twitter.conversions.time._
 import com.twitter.finagle.{
   ChannelException, RequestException, ServiceException,
@@ -37,7 +39,7 @@ object Client {
     ClientBuilder()
       .hosts(host)
       .hostConnectionLimit(1)
-      .codec(new Memcached)
+      .codec(Memcached())
       .build())
 
   /**
@@ -346,80 +348,108 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
-  def getResult(keys: Iterable[String]) = rawGet(Get(keys.toSeq))
-  def getsResult(keys: Iterable[String]) =
-    rawGet(Gets(keys.toSeq)) map { GetsResult(_) }
+  def getResult(keys: Iterable[String]) = {
+    validateKeys(keys) { rawGet(Get(keys.toSeq)) }
+  }
+  def getsResult(keys: Iterable[String]) = {
+    validateKeys(keys) { rawGet(Gets(keys.toSeq)) map { GetsResult(_) } }
+  }
 
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Set(key, flags, expiry, value)) map {
-      case Stored() => ()
-      case Error(e) => throw e
-      case _        => throw new IllegalStateException
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Set(key, flags, expiry, value)) map {
+        case Stored() => ()
+        case Error(e) => throw e
+        case _        => throw new IllegalStateException
+      }
     }
+  }
 
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
-    service(Cas(key, flags, expiry, value, casUnique)) map {
-      case Stored() => true
-      case Exists() => false
-      case Error(e) => throw e
-      case _        => throw new IllegalStateException
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Cas(key, flags, expiry, value, casUnique)) map {
+        case Stored() => true
+        case Exists() => false
+        case Error(e) => throw e
+        case _        => throw new IllegalStateException
+      }
     }
+  }
 
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Add(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Add(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
     }
+  }
 
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Append(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Append(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
     }
+  }
 
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Prepend(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Prepend(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
     }
+  }
 
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Replace(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Replace(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
     }
+  }
 
-  def delete(key: String) =
-    service(Delete(key)) map {
-      case Deleted()    => true
-      case NotFound()   => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
+  def delete(key: String) = {
+    validateKeys(Seq(key)) {
+      service(Delete(key)) map {
+        case Deleted()    => true
+        case NotFound()   => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
     }
+  }
 
   def incr(key: String, delta: Long): Future[Option[JLong]] = {
-    service(Incr(key, delta)) map {
-      case Number(value) => Some(value)
-      case NotFound()    => None
-      case Error(e)      => throw e
-      case _             => throw new IllegalStateException
+    validateKeys(Seq(key)) {
+      service(Incr(key, delta)) map {
+        case Number(value) => Some(value)
+        case NotFound()    => None
+        case Error(e)      => throw e
+        case _             => throw new IllegalStateException
+      }
     }
   }
 
   def decr(key: String, delta: Long): Future[Option[JLong]] = {
-    service(Decr(key, delta)) map {
-      case Number(value) => Some(value)
-      case NotFound()    => None
-      case Error(e)      => throw e
-      case _             => throw new IllegalStateException
+    validateKeys(Seq(key)) {
+      service(Decr(key, delta)) map {
+        case Number(value) => Some(value)
+        case NotFound()    => None
+        case Error(e)      => throw e
+        case _             => throw new IllegalStateException
+      }
     }
   }
 
@@ -443,6 +473,15 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
   def release() {
     service.release()
   }
+
+  private def keyIsBad(key: String) =
+    Strings.isNullOrEmpty(key) || CharMatcher.WHITESPACE.matchesAnyOf(key)
+
+  private def validateKeys[T](keys: Iterable[String])(f: => Future[T]) =
+    if (keys.exists(keyIsBad(_)))
+      Future.exception(new ClientError("Key cannot be empty or have spaces!"))
+    else
+      f
 }
 
 /**
@@ -743,7 +782,7 @@ case class RubyMemCacheClientBuilder(
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
     val clients = _nodes.map { case (hostname, port, weight) =>
       require(weight == 1, "Ruby memcache node weight must be 1")
-      Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())
     }
     new RubyMemCacheClient(clients)
   }
@@ -790,7 +829,7 @@ case class PHPMemCacheClientBuilder(
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
     val clients = _nodes.map { case (hostname, port, weight) =>
-      val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      val client = Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())
       for (i <- (1 to weight)) yield client
     }.flatten.toArray
     new PHPMemCacheClient(clients, keyHasher)

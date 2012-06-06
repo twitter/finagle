@@ -5,6 +5,7 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
+import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.tracing.ConsoleTracer
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.util.CharsetUtil
@@ -17,13 +18,14 @@ class ClientSpec extends SpecificationWithJUnit {
      */
     var client: Client = null
 
+    val stats = new SummarizingStatsReceiver
+
     doBefore {
       ExternalMemcached.start()
       val service = ClientBuilder()
         .hosts(Seq(ExternalMemcached.address.get))
-        .codec(new Memcached)
+        .codec(new Memcached(stats))
         .hostConnectionLimit(1)
-        .tracerFactory(ConsoleTracer.factory)
         .build()
       client = Client(service)
     }
@@ -109,6 +111,22 @@ class ClientSpec extends SpecificationWithJUnit {
           stat must startWith("STAT")
         }
       }
+
+      "send malformed keys" in {
+        client.get("fo o")() must throwA[ClientError]
+        client.set("", "bar")() must throwA[ClientError]
+        client.get("    foo")() must throwA[ClientError]
+        client.get("foo   ")() must throwA[ClientError]
+        client.get("    foo")() must throwA[ClientError]
+        val nullString: String = null
+        client.get(nullString)() must throwA[ClientError]
+        client.set(nullString, "bar")() must throwA[ClientError]
+        client.set("    ", "bar")() must throwA[ClientError]
+        client.set("\t", "bar")() must throwA[ClientError]
+        client.set("\r", "bar")() must throwA[ClientError]
+        client.set("\n", "bar")() must throwA[ClientError]
+      }
+
     }
 
     "ketama client" in {

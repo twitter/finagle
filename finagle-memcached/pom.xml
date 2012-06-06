@@ -27,6 +27,11 @@
       <artifactId>util-hashing</artifactId>
       <version>5.0.5-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>11.0.2</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
