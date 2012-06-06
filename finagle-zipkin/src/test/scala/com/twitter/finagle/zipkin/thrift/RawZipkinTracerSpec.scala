@@ -28,10 +28,15 @@ object RawZipkinTracerSpec extends Specification with Mockito {
 
       val expected = new ArrayList[LogEntry]()
       expected.add(new LogEntry().setCategory("zipkin")
-        .setMessage("CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew8ABgwAA" +
-        "AACCgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAACgABAAAAAA" +
-        "dU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAADwAIDAAAAAELAAEAAAADa2V" +
-        "5CwACAAAABXZhbHVlCAADAAAAAQwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAAA"))
+        .setMessage("CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew" +
+        "8ABgwAAAACCgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2Vydmlj" +
+        "ZQAACgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAADw" +
+        "AIDAAAAAULAAEAAAADaTE2CwACAAAAAgAQCAADAAAAAgwABAgAAQEBAQEGAAIAAQsAAwAAAAdz" +
+        "ZXJ2aWNlAAALAAEAAAADaTMyCwACAAAABAAAACAIAAMAAAADDAAECAABAQEBAQYAAgABCwADAA" +
+        "AAB3NlcnZpY2UAAAsAAQAAAANpNjQLAAIAAAAIAAAAAAAAAEAIAAMAAAAEDAAECAABAQEBAQYA" +
+        "AgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZkb3VibGULAAIAAAAIQF7TMzMzMzMIAAMAAAAFDA" +
+        "AECAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZzdHJpbmcLAAIAAAAGd29vcGll" +
+        "CAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAAA"))
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
 
       val inetAddress = InetAddress.getByAddress(Array.fill(4) {
@@ -40,8 +45,11 @@ object RawZipkinTracerSpec extends Specification with Mockito {
       tracer.record(Record(traceId, Time.fromSeconds(123),
         Annotation.ClientAddr(new InetSocketAddress(inetAddress, 1))))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpcname("service", "method")))
-      tracer.record(Record(traceId, Time.fromSeconds(123),
-        Annotation.BinaryAnnotation("key", ByteBuffer.wrap("value".getBytes()))))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i16", 16.toShort)))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i32", 32)))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i64", 64L)))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("double", 123.3d)))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("string", "woopie")))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 

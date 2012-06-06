@@ -180,13 +180,13 @@ private[thrift] class RawZipkinTracer(
       case tracing.Annotation.BinaryAnnotation(key: String, value: ByteBuffer) =>
         binaryAnnotation(record, key, value, thrift.AnnotationType.BYTES)
       case tracing.Annotation.BinaryAnnotation(key: String, value: Short) =>
-        binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.I16)
+        binaryAnnotation(record, key, ByteBuffer.allocate(2).putShort(0, value), thrift.AnnotationType.I16)
       case tracing.Annotation.BinaryAnnotation(key: String, value: Int) =>
-        binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.I32)
+        binaryAnnotation(record, key, ByteBuffer.allocate(4).putInt(0, value), thrift.AnnotationType.I32)
       case tracing.Annotation.BinaryAnnotation(key: String, value: Long) =>
-        binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.I64)
+        binaryAnnotation(record, key, ByteBuffer.allocate(8).putLong(0, value), thrift.AnnotationType.I64)
       case tracing.Annotation.BinaryAnnotation(key: String, value: Double) =>
-        binaryAnnotation(record, key, ByteBuffer.wrap(Array(value.toByte)), thrift.AnnotationType.DOUBLE)
+        binaryAnnotation(record, key, ByteBuffer.allocate(8).putDouble(0, value), thrift.AnnotationType.DOUBLE)
       case tracing.Annotation.BinaryAnnotation(key: String, value: String) =>
         binaryAnnotation(record, key, ByteBuffer.wrap(value.getBytes), thrift.AnnotationType.STRING)
       case tracing.Annotation.BinaryAnnotation(key: String, value) => // Throw error?
