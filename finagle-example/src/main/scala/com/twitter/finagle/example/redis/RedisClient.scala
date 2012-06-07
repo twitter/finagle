@@ -1,9 +1,10 @@
 package com.twitter.finagle.example.redis
 
+/* Temporarily disabled due to build issues
+
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.{Client, Redis}
 import com.twitter.finagle.redis.util.RedisCluster
-
 
 object RedisClient {
 
@@ -33,3 +34,5 @@ object RedisClient {
   }
 
 }
+
+*/
