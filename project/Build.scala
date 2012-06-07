@@ -4,18 +4,18 @@ import com.twitter.sbt._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "4.0.1"
+  val utilVersion = "5.1.2"
   val nettyLib = "io.netty" % "netty" % "3.4.1.Final" withSources()
-  val ostrichLib = "com.twitter" %% "ostrich" % "7.0.0" withSources()
+  val ostrichLib = "com.twitter" % "ostrich" % "8.0.1" withSources()
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
 
-  def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion withSources()
+  def util(which: String) = "com.twitter" % ("util-"+which) % utilVersion withSources()
 
   val sharedSettings = Seq(
-    version := "4.0.3-SNAPSHOT",
+    version := "5.0.3-SNAPSHOT",
     organization := "com.twitter",
     SubversionPublisher.subversionRepository := Some("https://svn.twitter.biz/maven-public"),
     libraryDependencies ++= Seq(
@@ -91,7 +91,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-core",
-    libraryDependencies ++= Seq(nettyLib, util("core"), util("collection"), util("hashing"))
+    libraryDependencies ++= Seq(nettyLib, util("core"), util("collection"), util("hashing"), util("jvm"))
   ).dependsOn(finagleTest % "test")
 
   lazy val finagleOstrich4 = Project(
