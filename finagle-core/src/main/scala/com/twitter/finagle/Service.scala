@@ -17,6 +17,10 @@ object Service {
       }
     }
   }
+  
+  def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
+    def apply(req: Req) = f(req)
+  }
 }
 
 /**

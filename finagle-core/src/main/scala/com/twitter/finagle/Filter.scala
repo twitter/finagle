@@ -70,6 +70,11 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     override def release() = service.release()
     override def isAvailable = service.isAvailable
   }
+  
+  def andThen(f: ReqOut => Future[RepIn]): ReqIn => Future[RepOut] = {
+    val service = Service.mk(f)
+    (req) => Filter.this.apply(req, service)
+  }
 
   def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
     new ServiceFactory[ReqIn, RepOut] {
@@ -104,6 +109,12 @@ object Filter {
     override def andThen(factory: ServiceFactory[Req, Rep]) = factory
 
     def apply(request: Req, service: Service[Req, Rep]) = service(request)
+  }
+  
+  def mk[ReqIn, RepOut, ReqOut, RepIn](
+    f: (ReqIn, ReqOut => Future[RepIn]) => Future[RepOut]
+  ): Filter[ReqIn, RepOut, ReqOut, RepIn] = new Filter[ReqIn, RepOut, ReqOut, RepIn] {
+    def apply(request: ReqIn, service: Service[ReqOut, RepIn]) = f(request, service)
   }
 }
 
