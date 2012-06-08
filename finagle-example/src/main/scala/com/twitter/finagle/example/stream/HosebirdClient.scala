@@ -1,6 +1,5 @@
 package com.twitter.finagle.example.stream
 
-import com.twitter.concurrent.{Channel, Observer}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stream.{Stream, StreamResponse}
