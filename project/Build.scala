@@ -61,7 +61,7 @@ object Finagle extends Build {
   ) aggregate(
     // Core, support.
     finagleCore, finagleTest, finagleOstrich4,
-    finagleB3, finagleServersets,
+    finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
 
     // Protocols
@@ -105,15 +105,15 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(ostrichLib)
   ).dependsOn(finagleCore)
 
-  lazy val finagleB3 = Project(
-    id = "finagle-b3",
-    base = file("finagle-b3"),
+  lazy val finagleZipkin = Project(
+    id = "finagle-zipkin",
+    base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
       StandardProject.newSettings ++
       CompileThriftFinagle.newSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-b3",
+    name := "finagle-zipkin",
     compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq(util("codec")) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
