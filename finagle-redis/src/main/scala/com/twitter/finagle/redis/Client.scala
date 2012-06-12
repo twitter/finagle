@@ -177,7 +177,7 @@ class Client(service: Service[Command, Reply]) {
       case EmptyMBulkReply()    => Future.value(Seq())
     }
 
-  @deprecated("Use hGetAllAsPairs instead")
+  @deprecated("Use hGetAllAsPairs instead", "5.0.0")
   def hGetAll(key: Array[Byte]): Future[Map[Array[Byte], Array[Byte]]] =
     hGetAllAsPairs(key) map { res => res toMap }
 
@@ -258,7 +258,7 @@ class Client(service: Service[Command, Reply]) {
       case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
     }
 
-  @deprecated("Use zRangeByScoreWithScoresAsPairs instead")
+  @deprecated("Use zRangeByScore instead", "5.0.0")
   def zRangeByScoreWithScores(
     key: Array[Byte], min: Double, max: Double, offset: Int, count: Int
   ): Future[Map[Array[Byte], Array[Byte]]] =
@@ -331,7 +331,7 @@ class Client(service: Service[Command, Reply]) {
       case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
     }
 
-  @deprecated("Use zRevRangeByScoreWithScoresAsPairs instead")
+  @deprecated("Use zRevRangeByScore instead", "5.0.0")
   def zRevRangeByScoreWithScores(
     key: Array[Byte], max: Double, min: Double, offset: Int, count: Int
   ): Future[Map[Array[Byte], Array[Byte]]] =
@@ -367,7 +367,7 @@ class Client(service: Service[Command, Reply]) {
    */
   private def returnPairs(messages: List[Array[Byte]]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
-    messages.grouped(2).toList map { case List(a, b) => (a, b) }
+    messages.grouped(2).toList flatMap { case List(a, b) => Some(a, b); case _ => None }
   }
 
 }

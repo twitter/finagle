@@ -18,8 +18,8 @@
     <!-- library dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>naggati</artifactId>
-      <version>2.2.0</version>
+      <artifactId>naggati_2.9.2</artifactId>
+      <version>4.0.0</version>
       <!-- excluded to prevent conflicts with caged finagle/util -->
       <exclusions>
         <exclusion>
