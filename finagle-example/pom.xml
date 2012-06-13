@@ -100,11 +100,13 @@
       <artifactId>finagle-ostrich4</artifactId>
       <version>5.0.4-SNAPSHOT</version>
     </dependency>
+<!-- Temporarily removed due to breaking build
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-redis</artifactId>
       <version>5.0.4-SNAPSHOT</version>
     </dependency>
+-->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stream</artifactId>
