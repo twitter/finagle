@@ -14,43 +14,47 @@ object Redis {
 }
 
 class Redis(stats: StatsReceiver) extends CodecFactory[Command, Reply] {
-  def server = Function.const {
-    new Codec[Command, Reply] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = Channels.pipeline()
-          val commandCodec = new CommandCodec
-          val replyCodec = new ReplyCodec
 
-          pipeline.addLast("codec", new NaggatiCodec(commandCodec.decode, replyCodec.encode))
+  def this() = this(NullStatsReceiver)
 
-          pipeline
+  def server: ServerCodecConfig => Codec[Command, Reply] =
+    Function.const {
+      new Codec[Command, Reply] {
+        def pipelineFactory = new ChannelPipelineFactory {
+          def getPipeline() = {
+            val pipeline = Channels.pipeline()
+            val commandCodec = new CommandCodec
+            val replyCodec = new ReplyCodec
+
+            pipeline.addLast("codec", new NaggatiCodec(commandCodec.decode, replyCodec.encode))
+
+            pipeline
+          }
         }
       }
     }
-  }
 
-  def client = Function.const {
-    new Codec[Command, Reply] {
+  def client: ClientCodecConfig => Codec[Command, Reply] =
+    Function.const {
+      new Codec[Command, Reply] {
+        def pipelineFactory = new ChannelPipelineFactory {
+          def getPipeline() = {
+            val pipeline = Channels.pipeline()
+            val commandCodec = new CommandCodec
+            val replyCodec = new ReplyCodec
 
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = Channels.pipeline()
-          val commandCodec = new CommandCodec
-          val replyCodec = new ReplyCodec
+            pipeline.addLast("codec", new NaggatiCodec(replyCodec.decode, commandCodec.encode))
 
-          pipeline.addLast("codec", new NaggatiCodec(replyCodec.decode, commandCodec.encode))
+            pipeline
+          }
+        }
 
-          pipeline
+        override def prepareConnFactory(underlying: ServiceFactory[Command, Reply]) = {
+          new RedisTracingFilter() andThen new RedisLoggingFilter(stats) andThen underlying
         }
       }
-
-      override def prepareConnFactory(underlying: ServiceFactory[Command, Reply]) = {
-        new RedisTracingFilter() andThen new RedisLoggingFilter(stats) andThen underlying
-      }
-
     }
-  }
+
 }
 
 private class RedisTracingFilter extends SimpleFilter[Command, Reply] {

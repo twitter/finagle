@@ -152,8 +152,8 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
         BytesToString.fromTuples(
-          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)() toSeq) mustEqual Seq(("bar", 10),
-            ("baz", 20))
+          client.zRangeByScoreWithScores(foo, 0, 30, 0, 5)() toSeq) mustEqual Seq(("bar", "10"),
+            ("baz", "20"))
       }
 
       "get the zRangeByScore" in {
@@ -182,7 +182,7 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
         BytesToString.fromTuples(
-          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)() toSeq) mustEqual Seq(("bar", 10))
+          client.zRevRangeByScoreWithScores(foo, 0, 10, 0, 1)() toSeq) mustEqual Seq(("bar", "10"))
         client.zRevRangeByScoreWithScores(foo, 0, 0, 0, 1)() mustEqual Map()
       }
 
