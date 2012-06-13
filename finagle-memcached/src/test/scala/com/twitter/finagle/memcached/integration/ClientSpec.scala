@@ -1,15 +1,22 @@
 package com.twitter.finagle.memcached.integration
 
+import com.twitter.common.io.FileUtils._
+import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.memcached.{PartitionedClient, Server, Client, KetamaClientBuilder}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.tracing.ConsoleTracer
+import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
+import org.apache.zookeeper.server.{ZooKeeperServer, NIOServerCnxn}
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 
 class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {
@@ -21,9 +28,9 @@ class ClientSpec extends SpecificationWithJUnit {
     val stats = new SummarizingStatsReceiver
 
     doBefore {
-      ExternalMemcached.start()
+      var address: Option[InetSocketAddress] = ExternalMemcached.start()
       val service = ClientBuilder()
-        .hosts(Seq(ExternalMemcached.address.get))
+        .hosts(Seq(address.get))
         .codec(new Memcached(stats))
         .hostConnectionLimit(1)
         .build()
@@ -161,6 +168,150 @@ class ClientSpec extends SpecificationWithJUnit {
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      }
+    }
+  }
+
+  "Cluster client" should {
+
+    /**
+     * Note: This integration test requires a real Memcached server to run.
+     */
+    val zookeeperAddress = new InetSocketAddress(2181)
+    var connectionFactory: NIOServerCnxn.Factory = null
+    var memcachedAddress = List[Option[InetSocketAddress]]()
+
+    var zookeeperClient: ZooKeeperClient = null
+    val zkPath = "/twitter/services/cache/silly-cache"
+
+    doBefore {
+      // start zookeeper server and create zookeeper client
+      val zookeeperServer = new ZooKeeperServer(
+        new FileTxnSnapLog(createTempDir(), createTempDir()),
+        new ZooKeeperServer.BasicDataTreeBuilder)
+      connectionFactory = new NIOServerCnxn.Factory(zookeeperAddress)
+      connectionFactory.startup(zookeeperServer)
+
+      // connect to zookeeper server
+      zookeeperClient = new ZooKeeperClient(
+        Amount.of(100, Time.MILLISECONDS),
+        zookeeperAddress)
+
+      // create serverset
+      val serverSet = new ServerSetImpl(zookeeperClient, zkPath)
+      val zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
+
+      // start five memcached server and join the cluster
+      (0 to 4) foreach { _ =>
+        val address: Option[InetSocketAddress] = ExternalMemcached.start()
+        memcachedAddress ::= address
+        zkServerSetCluster.join(address.get)
+      }
+
+      Thread.sleep(1000) // give it some time for the zookeeper change to be reflected in the cluster
+
+    }
+
+    doAfter {
+      // shutdown zookeeper server
+      connectionFactory.shutdown()
+      zookeeperClient.close()
+
+      // shutdown memcached server
+      ExternalMemcached.stop()
+    }
+
+    "Simple ClusterClient using finagle load balancing" in {
+      "many keys" in {
+        // create simple cluster client
+        val mycluster = new ZookeeperServerSetCluster(new ServerSetImpl(zookeeperClient, zkPath))
+        Thread.sleep(1000) // give it sometime for the cluster to get the initial set of memberships
+        val client = Client(mycluster)
+
+        val count = 100
+        (0 until count).foreach{
+          n => {
+            client.set("foo"+n, "bar"+n)
+          }
+        }
+
+        val tmpClients = memcachedAddress map {
+          case(addr) =>
+            Client(
+              ClientBuilder()
+                .hosts(addr.get)
+                .codec(new Memcached)
+                .hostConnectionLimit(1)
+                .tracerFactory(ConsoleTracer.factory)
+                .build())
+        }
+
+        (0 until count).foreach {
+          n => {
+            var found = false
+            tmpClients foreach {
+              c =>
+                if (c.get("foo"+n)()!=None) {
+                  found mustNotBe true
+                  found = true
+                }
+            }
+            found mustBe true
+          }
+        }
+      }
+
+    }
+
+    "Ketama ClusterClient using a distributor" in {
+      "set & get" in {
+        // create my cluster client solely based on a zk client and a path
+        val mycluster =
+          new ZookeeperServerSetCluster(new ServerSetImpl(zookeeperClient, zkPath)) map {
+            socketAddr =>
+              socketAddr.asInstanceOf[InetSocketAddress]
+          }
+        Thread.sleep(1000) // give it sometime for the cluster to get the initial set of memberships
+
+        val client = KetamaClientBuilder()
+                .cluster(mycluster)
+                .build()
+                .asInstanceOf[PartitionedClient]
+
+        client.delete("foo")()
+        client.get("foo")() mustEqual None
+        client.set("foo", "bar")()
+        client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+
+      }
+
+      "many keys" in {
+        // create my cluster client solely based on a zk client and a path
+        val mycluster =
+          new ZookeeperServerSetCluster(new ServerSetImpl(zookeeperClient, zkPath)) map {
+            socketAddr =>
+              socketAddr.asInstanceOf[InetSocketAddress]
+          }
+        Thread.sleep(1000) // give it sometime for the cluster to get the initial set of memberships
+
+        val client = KetamaClientBuilder()
+                .cluster(mycluster)
+                .build()
+                .asInstanceOf[PartitionedClient]
+
+        val count = 100
+        (0 until count).foreach{
+          n => {
+            client.set("foo"+n, "bar"+n)()
+          }
+        }
+
+        (0 until count).foreach {
+          n => {
+            val c = client.clientOf("foo"+n)
+            c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+          }
+        }
       }
     }
   }

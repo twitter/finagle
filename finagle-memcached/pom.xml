@@ -24,6 +24,12 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
+      <artifactId>finagle-serversets</artifactId>
+      <version>5.0.4-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
       <version>5.1.3-SNAPSHOT</version>
     </dependency>

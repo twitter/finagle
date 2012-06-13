@@ -7,9 +7,9 @@ import collection.JavaConversions._
 
 object ExternalMemcached { self =>
   class MemcachedBinaryNotFound extends Exception
-  private[this] var process: Process = null
+  private[this] var processes: List[Process] = List()
   private[this] val forbiddenPorts = 11000.until(11900)
-  var address: Option[InetSocketAddress] = None
+  private[this] var takenPorts: Set[Int] = Set[Int]()
   // prevent us from taking a port that is anything close to a real memcached port.
 
   private[this] def assertMemcachedBinaryPresent() {
@@ -18,33 +18,42 @@ object ExternalMemcached { self =>
     require(p.exitValue() == 0, "memcached binary must be present.")
   }
 
-  private[this] def findAddress() {
+  private[this] def findAddress() = {
+    var address : Option[InetSocketAddress] = None
     var tries = 100
     while (address == None && tries >= 0) {
       address = Some(RandomSocket.nextAddress())
-      if (forbiddenPorts.contains(address.get.getPort)) {
+      if (forbiddenPorts.contains(address.get.getPort) ||
+            takenPorts.contains(address.get.getPort)) {
         address = None
         tries -= 1
         Thread.sleep(5)
       }
     }
-    address.getOrElse { error("Couldn't get an address for the external memcached") }
+    if (address==None) error("Couldn't get an address for the external memcached")
+
+    takenPorts += (address.getOrElse(new InetSocketAddress(0))).getPort
+    address
   }
 
-  def start() {
+  def start(addr:Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
+    val address:InetSocketAddress = addr getOrElse { findAddress().get }
+
     val cmd: Seq[String] = Seq("memcached",
-                    "-l", address.get.getHostName(),
-                    "-p", address.get.getPort().toString)
+                    "-l", address.getHostName(),
+                    "-p", address.getPort().toString)
 
     val builder = new ProcessBuilder(cmd.toList)
-    process = builder.start()
+    processes ::= builder.start()
     Thread.sleep(100)
+
+    Some(address)
   }
 
   def stop() {
-    if (process != null) {
-      process.destroy()
-      process.waitFor()
+    processes foreach { p =>
+      p.destroy()
+      p.waitFor()
     }
   }
 
@@ -61,5 +70,4 @@ object ExternalMemcached { self =>
   });
 
   assertMemcachedBinaryPresent()
-  findAddress()
 }

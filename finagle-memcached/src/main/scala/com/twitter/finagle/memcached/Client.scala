@@ -4,17 +4,16 @@ import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import _root_.java.net.InetSocketAddress
+import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 import _root_.java.util.concurrent.ConcurrentHashMap
 
 import com.google.common.base.{CharMatcher, Strings}
 
+import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{
-  ChannelException, RequestException, ServiceException,
-  ServiceProxy, ServiceFactory, ServiceFactoryWrapper}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import com.twitter.finagle._
+import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, StaticCluster}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
@@ -23,7 +22,6 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.hashing._
 import com.twitter.util.{Time, Future, Bijection, Duration, Timer}
-import com.twitter.concurrent.{Broker, Offer}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
@@ -40,6 +38,16 @@ object Client {
       .hosts(host)
       .hostConnectionLimit(1)
       .codec(Memcached())
+      .build())
+
+  /**
+   * Construct a client from a Cluster
+   */
+  def apply(cluster: Cluster[SocketAddress]) : Client = Client(
+    ClientBuilder()
+      .cluster(cluster)
+      .hostConnectionLimit(1)
+      .codec(new Memcached)
       .build())
 
   /**
@@ -661,8 +669,8 @@ class KetamaClient private[memcached](
   }
 }
 
-case class KetamaClientBuilder(
-  _nodes: Seq[(String, Int, Int)],
+case class KetamaClientBuilder private[memcached] (
+  _cluster: Cluster[(String, Int, Int)],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _numFailures: Int = 5,
@@ -670,11 +678,19 @@ case class KetamaClientBuilder(
   oldLibMemcachedVersionComplianceMode: Boolean = false
 ) {
 
+  def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
+    // TODO: for now, we assume all the cluster created this way has equal weight.
+    copy(
+      _cluster = cluster map {
+        socketAddr =>
+          (socketAddr.getHostName, socketAddr.getPort, 1)})
+  }
+
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_nodes = nodes)
+    copy(_cluster = new StaticCluster(nodes))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
-    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+    copy(_cluster = new StaticCluster(PartitionedClient.parseHostPortWeights(hostPortWeights)))
 
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
@@ -692,7 +708,14 @@ case class KetamaClientBuilder(
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
-    val keys = _nodes map {
+    val (clusterEndpoints, clusterUpdates) = _cluster.snap
+    // TODO: listeng to the updates here
+    // For the first version of this client, we do not listen to the cluster update yet, we only use
+    // the initial set of cluster members; later when we add the capability to listen to the updates,
+    // we'd need to modify the KetamaClient class to provide an interface for reloading a new set of
+    // cluster members whenever a serverset update happens
+
+    val keys = clusterEndpoints map {
       case (hostname, port, weight) => KetamaClientKey(hostname, port, weight)
     }
 
@@ -737,7 +760,7 @@ case class KetamaClientBuilder(
 }
 
 object KetamaClientBuilder {
-  def apply(): KetamaClientBuilder = KetamaClientBuilder(Nil, Some("ketama"), None)
+  def apply(): KetamaClientBuilder = KetamaClientBuilder(new StaticCluster(Nil), Some("ketama"), None)
   def get() = apply()
 }
 
