@@ -28,8 +28,8 @@
     <module>finagle-memcached-hadoop</module>
     <module>finagle-native</module>
     <module>finagle-ostrich4</module>
-<!-- Temporarily removed due to dependency issues -->
-<!--    <module>finagle-redis</module> -->
+    <!-- Temporarily removed due to dependency issues -->
+    <!--    <module>finagle-redis</module> -->
     <module>finagle-serversets</module>
     <module>finagle-stream</module>
     <module>finagle-stress</module>
