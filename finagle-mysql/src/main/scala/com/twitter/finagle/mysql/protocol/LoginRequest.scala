@@ -1,45 +1,58 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util._
+/**
+ * Client credentials request sent during the handshaking phase.
+ */
+
+import com.twitter.finagle.mysql.util.ByteArrayUtil
 import java.security.MessageDigest
 
 case class LoginRequest(
-  clientCapabilities: Short = 0xA685.toShort,
-  extendedClientCapabilities: Short = 0x8002.toShort,
+  clientCapabilities: Capability = Capability(0xA687),
   maxPacket: Int = 0x10000000,
   charset: Byte = 33.toByte, // TODO case class
-  username: String, // null terminated string
+  database: Option[String] = None, //initial database to use
+  username: String,
   password: String,
   salt: Array[Byte]
-) extends Packet {
+) extends Request(seq = 1.toByte) {
+  val fixedBodySize = 34
+  val dbNameSize = database map { _.size+1 } getOrElse(0)
+  val dataSize = username.size + hashPassword.size + dbNameSize + fixedBodySize
+  lazy val hashPassword = encryptPassword(password, salt)
 
-  def size = 34 + username.size + hashPassword.size
-  def number = 1
-  def data = encode()
+  override val data: Array[Byte] = {
+    val buffer = new Array[Byte](dataSize)
+    var offset = 0
 
-  def encode(): Array[Byte] = {
-    val buffer = new Array[Byte](4 + size)
-    var i = 0
     def write(n: Int, width: Int) = {
-      Util.write(n, width, buffer, i)
-      i += width
+      ByteArrayUtil.write(n, buffer, offset, width)
+      offset += width
     }
-    write(size, 3)
-    write(number, 1)
-    write(clientCapabilities, 2)
-    write(extendedClientCapabilities, 2)
+
+    write(clientCapabilities.mask, 4)
     write(maxPacket, 4)
     write(charset, 1)
-    (i until i + 23) foreach { j => buffer(j) = 0.toByte ; i += 1 }
-    Array.copy(username.getBytes, 0, buffer, i, username.size) ; i += username.size
-    buffer(i) = 0.toByte ; i += 1
-    write(hashPassword.size, 1)
-    Array.copy(hashPassword, 0, buffer, i, hashPassword.size) ; i += hashPassword.size
+
+    //23 reserved bytes - zeroed out
+    (offset until offset + 23) foreach { j => buffer(j) = 0.toByte ; offset += 1 }
+
+    //write username (including null terminating byte)
+    ByteArrayUtil.writeNullTerminatedString(username, buffer, offset)
+    offset += username.size + 1
+
+    //write password size + hash
+    ByteArrayUtil.writeLengthCodedString(new String(hashPassword), buffer, offset)
+    offset += hashPassword.size + 1
+
+    //write the initial db string if it exists
+    if(dbNameSize > 0) {
+      ByteArrayUtil.writeNullTerminatedString(database.get, buffer, offset)
+      offset += dbNameSize + 1
+    }
 
     buffer
   }
-
-  lazy val hashPassword = encryptPassword(password, salt)
 
   def encryptPassword(password: String, salt: Array[Byte]) = {
     val md = MessageDigest.getInstance("SHA-1");

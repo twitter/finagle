@@ -1,8 +1,8 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util._
+import com.twitter.finagle.mysql.util.ByteArrayUtil
 
-object Command {
+object Request {
   val COM_SLEEP               = 0x00.toByte
   val COM_QUIT                = 0x01.toByte
   val COM_INIT_DB             = 0x02.toByte
@@ -32,37 +32,32 @@ object Command {
   val COM_STMT_RESET          = 0x1A.toByte
   val COM_SET_OPTION          = 0x1B.toByte
   val COM_STMT_FETCH          = 0x1C.toByte
+
+  val COM_NOOP_GREET = 0xFF.toByte
+  val greet = new CommandRequest(COM_NOOP_GREET)
 }
 
-abstract class Request(cmd: Byte) {
-  def args(): Array[Byte]
-
-  def encode(): Array[Byte] = {
-    val arguments = args()
-    val buffer = new Array[Byte](3 + 1 + 1 + arguments.size)
-    val size = 1 + arguments.size
-    Util.write(size, 3, buffer, 0)
-    buffer(3) = 0.toByte
-    buffer(4) = cmd
-    Array.copy(arguments, 0, buffer, 5, arguments.size)
-    buffer
-  }
+abstract class Request(seq: Byte = 0) {
+  val data: Array[Byte]
+  def packet = Packet(data.size, seq, data)
+  def encoded: Array[Byte] = Array.concat(packet.header, packet.body)
 }
 
-case class Use(dbName: String) extends Request(Command.COM_INIT_DB) {
-  def args() = dbName.getBytes
+class CommandRequest(val cmd: Byte, _data: Array[Byte] = Array[Byte](), seq:Byte = 0) 
+  extends Request(seq) {
+    override val data: Array[Byte] = Array.concat(Array(cmd), _data)
 }
 
-case class CreateDb(dbName: String) extends Request(Command.COM_CREATE_DB) {
-  def args() = dbName.getBytes
-}
+case class Use(dbName: String)
+  extends CommandRequest(Request.COM_INIT_DB, dbName.getBytes)
 
-case class DropDb(dbName: String) extends Request(Command.COM_DROP_DB) {
-  def args() = dbName.getBytes
-}
+case class CreateDb(dbName: String) 
+  extends CommandRequest(Request.COM_CREATE_DB, dbName.getBytes) 
 
-case class Query(sqlStatement: String) extends Request(Command.COM_QUERY) {
-  def args() = sqlStatement.getBytes
-}
+case class DropDb(dbName: String) 
+  extends CommandRequest(Request.COM_DROP_DB, dbName.getBytes)
+
+case class Query(sqlStatement: String) 
+  extends CommandRequest(Request.COM_QUERY, sqlStatement.getBytes)
 
 

@@ -1,11 +1,11 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util._
+import com.twitter.finagle.mysql.util.ByteArrayUtil
 
 trait Result {}
 
 case object OK extends Result
-case object Error extends Result
+case class Error(errorCode: Short, sqlState: String, error: String) extends Result
 
 case class Field(
   catalog: String,
@@ -22,17 +22,20 @@ case class Field(
 )
 object Field {
   def decode(packet: Packet): Field = {
-    var i = 0
+    var offset = 0
+
     def read(n: Int) = {
-      val result = Util.read(packet.data, i, n)
-      i += n
+      val result = ByteArrayUtil.read(packet.body, offset, n)
+      offset += n
       result
     }
+
     def readString() = {
-      val result = Util.readLengthCodedString(packet.data, i)
-      i += result.size + 1
+      val result = ByteArrayUtil.readLengthCodedString(packet.body, offset)
+      offset += result.size + 1 //add 1 to account for length encoding
       result
     }
+
     new Field(
       readString(),
       readString(),
@@ -52,12 +55,14 @@ object Field {
 case class RowData(data: List[String])
 object RowData {
   def decode(packet: Packet, fieldNumber: Int) = {
-    var i = 0
+    var offset = 0
+
     def readString() = {
-      val result = Util.readLengthCodedString(packet.data, i)
-      i += result.size + 1
+      val result = ByteArrayUtil.readLengthCodedString(packet.body, offset)
+      offset += result.size + 1
       result
     }
+
     RowData(
       (0 until fieldNumber) map { _ =>
         readString()
@@ -80,7 +85,7 @@ case class ResultSet(
 object ResultSet {
   def decode(header: Packet, fields: List[Packet], data: List[Packet]) = {
     ResultSet(
-      header.data(0),
+      header.body(0),
       fields map { Field.decode(_) },
       data map { RowData.decode(_, fields.size) }
     )
