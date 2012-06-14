@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Annotation, Trace}
-import com.twitter.naggati.{Codec => NaggatiCodec}
+import com.twitter.finagle.redis.naggati.{Codec => NaggatiCodec}
 import com.twitter.util.Future
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 

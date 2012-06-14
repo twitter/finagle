@@ -159,8 +159,8 @@ object Commands {
 }
 
 class CommandCodec extends UnifiedProtocolCodec {
-  import com.twitter.naggati.{Emit, Encoder, NextStep}
-  import com.twitter.naggati.Stages._
+  import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
+  import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
   import com.twitter.logging.Logger
 

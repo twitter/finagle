@@ -69,8 +69,8 @@ case class EmptyMBulkReply() extends MultiLineReply {
 }
 
 class ReplyCodec extends UnifiedProtocolCodec {
-  import com.twitter.naggati.{Emit, Encoder, NextStep}
-  import com.twitter.naggati.Stages._
+  import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
+  import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
 
   val decode = readBytes(1) { bytes =>

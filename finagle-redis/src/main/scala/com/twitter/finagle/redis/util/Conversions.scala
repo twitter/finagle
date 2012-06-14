@@ -49,7 +49,7 @@ object StringToChannelBuffer {
   }
 }
 object NumberFormat {
-  import com.twitter.naggati.ProtocolError
+  import com.twitter.finagle.redis.naggati.ProtocolError
   def toDouble(arg: String): Double = {
     try {
       arg.toDouble
