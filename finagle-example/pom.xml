@@ -100,7 +100,7 @@
       <artifactId>finagle-ostrich4</artifactId>
       <version>5.0.4-SNAPSHOT</version>
     </dependency>
-<!-- Temporarily removed due to breaking build
+    <!-- Temporarily removed due to breaking build
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-redis</artifactId>
@@ -120,7 +120,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>5.1.3-SNAPSHOT</version>
+      <version>5.2.0</version>
     </dependency>
   </dependencies>
   <build>
