@@ -30,7 +30,7 @@ case class ErrorReply(message: String) extends SingleLineReply {
   RequireServerProtocol(message != null && message.length > 0, "ErrorReply had empty message")
   override def getMessageTuple() = (RedisCodec.ERROR_REPLY, message)
 }
-case class IntegerReply(id: Int) extends SingleLineReply {
+case class IntegerReply(id: Long) extends SingleLineReply {
   override def getMessageTuple() = (RedisCodec.INTEGER_REPLY, id.toString)
 }
 
@@ -82,7 +82,7 @@ class ReplyCodec extends UnifiedProtocolCodec {
       case INTEGER_REPLY =>
         readLine { line =>
           RequireServerProtocol.safe {
-            emit(IntegerReply(NumberFormat.toInt(line)))
+            emit(IntegerReply(NumberFormat.toLong(line)))
           }
         }
       case BULK_REPLY =>

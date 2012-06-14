@@ -39,7 +39,7 @@ class Client(service: Service[Command, Reply]) {
    * @params key, value
    * @return Length of string after append operation
    */
-  def append(key: String, value: Array[Byte]): Future[Int] =
+  def append(key: String, value: Array[Byte]): Future[Long] =
     doRequest(Append(key, value)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -51,7 +51,7 @@ class Client(service: Service[Command, Reply]) {
    * @return Value after decrement. Error if key contains value
    * of the wrong type
    */
-  def decrBy(key: String, amount: Int): Future[Int] =
+  def decrBy(key: String, amount: Int): Future[Long] =
     doRequest(DecrBy(key, amount)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -94,7 +94,7 @@ class Client(service: Service[Command, Reply]) {
    * @param list of keys to remove
    * @return Number of keys removed
    */
-  def del(keys: Seq[String]): Future[Int] =
+  def del(keys: Seq[String]): Future[Long] =
     doRequest(Del(keys.toList)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -150,7 +150,7 @@ class Client(service: Service[Command, Reply]) {
    * @param hash key, fields
    * @return Number of fields deleted
    */
-  def hDel(key: String, fields: Seq[String]): Future[Int] =
+  def hDel(key: String, fields: Seq[String]): Future[Long] =
     doRequest(HDel(key, fields)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -197,7 +197,7 @@ class Client(service: Service[Command, Reply]) {
    * @param hash key, field, value
    * @return 1 if field is new, 0 if field was updated
    */
-  def hSet(key: Array[Byte], field: Array[Byte], value: Array[Byte]): Future[Int] =
+  def hSet(key: Array[Byte], field: Array[Byte], value: Array[Byte]): Future[Long] =
     doRequest(HSet(key, field, value)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -209,7 +209,7 @@ class Client(service: Service[Command, Reply]) {
    * @params key, score, member
    * @return Number of elements added to sorted set
    */
-  def zAdd(key: Array[Byte], score: Double, member: Array[Byte]): Future[Int] =
+  def zAdd(key: Array[Byte], score: Double, member: Array[Byte]): Future[Long] =
     doRequest(ZAdd(key, ZMember(score, member))) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -231,7 +231,7 @@ class Client(service: Service[Command, Reply]) {
    * @params key, min, max
    * @return Number of elements between min and max in sorted set
    */
-  def zCount(key: Array[Byte], min: Double, max: Double): Future[Int] =
+  def zCount(key: Array[Byte], min: Double, max: Double): Future[Long] =
     doRequest(ZCount(key, ZInterval(min), ZInterval(max))) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -281,7 +281,7 @@ class Client(service: Service[Command, Reply]) {
    * @return Integer representing cardinality of sorted set,
    * or 0 if key does not exist
    */
-  def zCard(key: Array[Byte]): Future[Int] =
+  def zCard(key: Array[Byte]): Future[Long] =
     doRequest(ZCard(key)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -291,7 +291,7 @@ class Client(service: Service[Command, Reply]) {
    * @params key, member(s)
    * @return Number of members removed from sorted set
    */
-  def zRem(key: Array[Byte], members: Seq[Array[Byte]]): Future[Int] =
+  def zRem(key: Array[Byte], members: Seq[Array[Byte]]): Future[Long] =
     doRequest(ZRem(key, members)) {
       case IntegerReply(n) => Future.value(n)
     }

@@ -604,8 +604,12 @@ class NaggatiSpec extends SpecificationWithJUnit {
         codec(wrap(":-2147483648\r\n")) mustEqual List(IntegerReply(-2147483648))
         codec(wrap(":0\r\n")) mustEqual List(IntegerReply(0))
         codec(wrap(":2147483647\r\n")) mustEqual List(IntegerReply(2147483647))
-        codec(wrap(":2147483648\r\n")) must throwA[ServerError]
-        codec(wrap(":-2147483649\r\n")) must throwA[ServerError]
+        codec(wrap(":2147483648\r\n")) mustEqual List(IntegerReply(2147483648L))
+        codec(wrap(":9223372036854775807\r\n")) mustEqual List(IntegerReply(9223372036854775807L))
+        codec(wrap(":9223372036854775808\r\n")) must throwA[ServerError]
+        codec(wrap(":-9223372036854775807\r\n")) mustEqual List(IntegerReply(-9223372036854775807L))
+        codec(wrap(":-9223372036854775809\r\n")) must throwA[ServerError]
+        codec(wrap(":-2147483649\r\n")) mustEqual List(IntegerReply(-2147483649L))
         codec(wrap(":1\r\n:2\r\n")) mustEqual List(IntegerReply(1), IntegerReply(2))
         codec(wrap(":\r\n")) must throwA[ServerError]
       }
