@@ -291,6 +291,9 @@ class EndToEndSpec extends SpecificationWithJUnit {
     }
 
     "delay release until complete response" in {
+      if (System.getenv("SBT_CI") != null) {
+        skip("Test temporarily disabled due to flakiness.")
+      }
       @volatile var count: Int = 0
 
       val server = ServerBuilder()
