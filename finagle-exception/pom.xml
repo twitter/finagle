@@ -69,7 +69,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>5.2.0-SNAPSHOT</version>
+      <version>5.2.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
