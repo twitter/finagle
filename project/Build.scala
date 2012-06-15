@@ -4,7 +4,7 @@ import com.twitter.sbt._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "5.1.2"
+  val utilVersion = "5.2.0"
   val nettyLib = "io.netty" % "netty" % "3.4.1.Final" withSources()
   val ostrichLib = "com.twitter" % "ostrich" % "8.0.1" withSources()
   val thriftLibs = Seq(
@@ -15,7 +15,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" % ("util-"+which) % utilVersion withSources()
 
   val sharedSettings = Seq(
-    version := "5.0.3-SNAPSHOT",
+    version := "5.1.1-SNAPSHOT",
     organization := "com.twitter",
     SubversionPublisher.subversionRepository := Some("https://svn.twitter.biz/maven-public"),
     libraryDependencies ++= Seq(
@@ -69,7 +69,7 @@ object Finagle extends Build {
     finagleMemcached, finagleKestrel,
 
     // Use and integration
-    finagleStress, finagleExample
+    finagleStress, finagleExample, finagleBenchmark
   )
   
   lazy val finagleTest = Project(
@@ -145,7 +145,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-commons-stats",
     compileOrder := CompileOrder.JavaThenScala,
-    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.16")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.35")
   ).dependsOn(finagleCore)
   
   lazy val finagleServersets = Project(
@@ -226,15 +226,14 @@ object Finagle extends Build {
     base = file("finagle-memcached"),
     settings = Project.defaultSettings ++
       StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-memcached",
-    // Don't publish Java bindings yet with the 2.9.x build since
-    // this requires an API change.
-    sourceDirectory <<= baseDirectory(_/"src29"),
-    libraryDependencies ++= Seq("junit" % "junit" % "4.8.1" % "test", util("hashing"))
-  ).dependsOn(finagleCore)
+    libraryDependencies ++= Seq(
+      util("hashing"),
+      "com.google.guava" % "guava" % "11.0.2"
+    )
+  ).dependsOn(finagleCore, finagleServersets)
   
   lazy val finagleKestrel = Project(
     id = "finagle-kestrel",
@@ -272,8 +271,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-redis",
     libraryDependencies ++= Seq(
-      util("logging"),
-      "com.twitter" % "naggati" % "2.2.0" intransitive()
+      util("logging")
     ),
     testOptions in Test := Seq(Tests.Filter {
       case "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec" => false
@@ -313,4 +311,19 @@ object Finagle extends Build {
   ).dependsOn(
     finagleCore, finagleHttp, finagleStream, finagleThrift, 
     finagleMemcached, finagleKestrel, finagleRedis, finagleOstrich4)
+
+  lazy val finagleBenchmark = Project(
+    id = "finagle-benchmark",
+    base = file("finagle-benchmark"),
+    settings = Project.defaultSettings ++
+      StandardProject.newSettings ++
+      CompileThriftFinagle.newSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-benchmark",
+    libraryDependencies ++= Seq(
+      util("codec"),
+      "com.google.caliper" % "caliper" % "0.5-rc1"
+    )
+  ).dependsOn(finagleCore)
 }
