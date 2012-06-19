@@ -9,9 +9,9 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
-  def mkmsg(tmsg: TMessage) = {
+  def mkmsg(tmsg: TMessage, strictWrite: Boolean) = {
     val trans = new TMemoryBuffer(24)
-    val oprot = (new TBinaryProtocol.Factory).getProtocol(trans)
+    val oprot = (new TBinaryProtocol.Factory(false, strictWrite)).getProtocol(trans)
     oprot.writeMessageBegin(tmsg)
     oprot.writeMessageEnd()
     trans.getArray()
@@ -20,54 +20,65 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
   def getmsg(buf: Array[Byte]) =
     new InputBuffer(buf)().readMessageBegin
 
-  "SeqIdFilter" should {
-    val service = mock[Service[ThriftClientRequest, Array[Byte]]]
-    val p = new Promise[Array[Byte]]
-    service(any) returns p
-    val filter = new SeqIdFilter
-    val filtered = filter andThen service
+  testFilter("strict", mkmsg(_, true))
+  testFilter("nonstrict", mkmsg(_, false))
 
-    "maintain seqids passed in by the client" in {
-      val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
-      f.poll must beNone
+  def testFilter(how: String, mkmsg: TMessage => Array[Byte]) {
+    "SeqIdFilter(%s)".format(how) should {
+      val service = mock[Service[ThriftClientRequest, Array[Byte]]]
+      val p = new Promise[Array[Byte]]
+      service(any) returns p
+      val filter = new SeqIdFilter
+      val filtered = filter andThen service
 
-      val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
-      there was one(service).apply(req.capture)
-      p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, getmsg(req.getValue.message).seqid)))
+      "maintain seqids passed in by the client" in {
+        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
+        f.poll must beNone
 
-      f.poll must beLike {
-        case Some(Return(buf)) => getmsg(buf).seqid == 123
+        val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
+        there was one(service).apply(req.capture)
+        p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, getmsg(req.getValue.message).seqid)))
+
+        f.poll must beLike {
+          case Some(Return(buf)) => getmsg(buf).seqid == 123
+        }
       }
-    }
 
-    "use its own seqids to the server" in Time.withCurrentTimeFrozen { _ =>
-      val filtered = new SeqIdFilter andThen service
-      val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
-      val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
-      val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
-      there was one(service).apply(req.capture)
-      getmsg(req.getValue.message).seqid must be_==(expected)
-    }
+      "use its own seqids to the server" in Time.withCurrentTimeFrozen { _ =>
+        val filtered = new SeqIdFilter andThen service
+        val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
+        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
+        val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
+        there was one(service).apply(req.capture)
+        getmsg(req.getValue.message).seqid must be_==(expected)
+      }
 
-    "fail when sequence ids are out of order" in Time.withCurrentTimeFrozen { _ =>
-      val filtered = new SeqIdFilter andThen service
-      val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
-      val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
-      p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, 1111)))
-      f.poll must beLike {
-        case Some(Throw(SeqMismatchException(1111, expected))) => true
+      "fail when sequence ids are out of order" in Time.withCurrentTimeFrozen { _ =>
+        val filtered = new SeqIdFilter andThen service
+        val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
+        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
+        p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, 1111)))
+        f.poll must beLike {
+          case Some(Throw(SeqMismatchException(1111, expected))) => true
+        }
       }
-    }
-    
-    "handle empty TMessage" in {
-      filtered(new ThriftClientRequest(Array(), false)).poll must beLike {
-        case Some(Throw(exc: IllegalArgumentException)) => exc.getMessage == "bad TMessage"
+
+      def mustExcept(bytes: Array[Byte], exceptionMsg: String) {
+        filtered(new ThriftClientRequest(bytes, false)).poll must beLike {
+          case Some(Throw(exc: IllegalArgumentException)) => exc.getMessage == exceptionMsg
+        }
       }
-    }
-    
-    "handle short TMessage" in {
-      filtered(new ThriftClientRequest(Array(-1, 0, 0, 0, 0, 0, 0, 127), false)).poll must beLike {
-        case Some(Throw(exc: IllegalArgumentException)) => exc.getMessage == "bad TMessage"
+
+      "handle empty TMessage" in {
+        mustExcept(Array(), "short header")
+      }
+
+      "handle short name size" in {
+        mustExcept(Array(-128, 1, 0, 0, 0, 0, 0), "short name size")
+      }
+
+      "handle old short buffer" in {
+        mustExcept(Array(0, 0, 0, 1, 0, 0, 0, 0, 1), "short buffer")
       }
     }
   }
