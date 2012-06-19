@@ -1,3 +1,27 @@
+5.1.0		2012/06/14
+
+	* finagle: Upgrade util to 5.2.0, ostrich to 8.1.0
+	* finagle-redis: extend codec
+	* finagle-memcache: first phase of serverset support
+	* finagle-b3: we are using zipkin now
+	* finagle-kestrel: Kill com.twitter.concurrent.Channel
+	* finagle-core: JvmFiler, trace jvm events
+
+5.0.2		2012/06/01
+
+	* finagle-core: Refactor the new way of managing resources
+	* finagle-core: Add capability to drain dispatcher on expire
+	* finagle-core: ZookeeperServersetCluster notify client when underlying Cluster is ready
+	* finagle-exception: Upgrade jerkson to 0.5.0 and streamyj to 0.4.1
+
+5.0.0		2012/05/25
+
+	* Upgrade to scala 2.9.2
+	* finagle-core: FailFast, do not admit requests when marked failed
+	* finagle-redis: now return tuples and doubles
+	* finagle-memcached: record client recv annotation after hit/miss
+	* finagle-core: expand exception chain in StatsFilter
+
 4.0.0		2012/05/08
 
 	* http: add AddResponseHeadersFilter, CorsFilter
@@ -107,7 +131,7 @@
 	* b3: allow the user to specify sample rate
 	* exception reporter: share scribe connection across instances
 	* finagle-ostrich: remove, it's obsoleted by finagle-ostrich4
- 
+
 1.9.10	2011/12/02
 
 	* update to util 1.12.7
