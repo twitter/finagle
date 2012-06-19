@@ -1,8 +1,8 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import com.twitter.finagle.mysql.util.BufferUtil
 
-object Request {
+object Command {
   val COM_SLEEP               = 0x00.toByte
   val COM_QUIT                = 0x01.toByte
   val COM_INIT_DB             = 0x02.toByte
@@ -32,9 +32,7 @@ object Request {
   val COM_STMT_RESET          = 0x1A.toByte
   val COM_SET_OPTION          = 0x1B.toByte
   val COM_STMT_FETCH          = 0x1C.toByte
-
-  val COM_NOOP_GREET = 0xFF.toByte
-  val greet = new CommandRequest(COM_NOOP_GREET)
+  val COM_NOOP_GREET          = 0xFF.toByte //used internally, never sent to the server.
 }
 
 abstract class Request(seq: Byte = 0) {
@@ -49,15 +47,15 @@ class CommandRequest(val cmd: Byte, _data: Array[Byte] = Array[Byte](), seq:Byte
 }
 
 case class Use(dbName: String)
-  extends CommandRequest(Request.COM_INIT_DB, dbName.getBytes)
+  extends CommandRequest(Command.COM_INIT_DB, dbName.getBytes)
 
 case class CreateDb(dbName: String) 
-  extends CommandRequest(Request.COM_CREATE_DB, dbName.getBytes) 
+  extends CommandRequest(Command.COM_CREATE_DB, dbName.getBytes) 
 
 case class DropDb(dbName: String) 
-  extends CommandRequest(Request.COM_DROP_DB, dbName.getBytes)
+  extends CommandRequest(Command.COM_DROP_DB, dbName.getBytes)
 
 case class Query(sqlStatement: String) 
-  extends CommandRequest(Request.COM_QUERY, sqlStatement.getBytes)
+  extends CommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
 
 

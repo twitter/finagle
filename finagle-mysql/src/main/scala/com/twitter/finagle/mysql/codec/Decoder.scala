@@ -1,12 +1,13 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.mysql.codec
 
-import org.jboss.netty.handler.codec.frame.FrameDecoder
+import com.twitter.finagle.mysql.DecoderException
+import com.twitter.finagle.mysql.protocol._
+import com.twitter.finagle.mysql.util.BufferUtil
+import com.twitter.util.Future
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
-import com.twitter.finagle.mysql.util.ByteArrayUtil
-import com.twitter.util.Future
-import com.twitter.finagle.mysql.DecoderException
+import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 class Decoder extends FrameDecoder with StateMachine {
   val EOF_Byte = 0xFE.toByte
@@ -14,7 +15,6 @@ class Decoder extends FrameDecoder with StateMachine {
   val ERROR_Byte = 0xFF.toByte
   
   val needMoreData: Packet = null
-  val partialResult: Result = null
   state = WaitingForGreetings //initial state
 
   case object WaitingForGreetings extends State
@@ -27,49 +27,36 @@ class Decoder extends FrameDecoder with StateMachine {
   ) extends State
 
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Result = {
-    state match {
-      case WaitingForGreetings =>
-        val packet = decodePacket(buffer)
-        if(packet != needMoreData) {
+    val packet = decodePacket(buffer)
+    if(packet == needMoreData) 
+      null
+    else 
+      state match {
+        case WaitingForGreetings =>
           state = WaitingForLoginResponse
           ServersGreeting.decode(packet)
-        }
-        else
-          partialResult
-        
-      case WaitingForLoginResponse =>
-        val res = decodeResult(buffer)
-        if (res == Error)
-          state = WaitingForGreetings
-        res
 
-      case Idle =>
-        decodeResult(buffer)
+        case QueryInProgress(_,_,_) =>
+          val res = decodeResultSet(packet, buffer)
+          if (res != null) 
+            state = Idle
+          res
 
-      case QueryInProgress(_,_,_) =>
-        val res = decodeResultSet(decodePacket(buffer), buffer)
-        if (res != null)
-          state = Idle
-        res
-    }
+        case _ =>
+          decodeResult(packet, buffer)
+      }
   }
 
-  def decodeResult(buffer: ChannelBuffer): Result = {
-    val packet = decodePacket(buffer)
-    packet.body(0) match {
-      case `OK_Byte` =>
-        state = Idle
-        OK
-      case `ERROR_Byte`=>
-        state = Idle
-        val code = ByteArrayUtil.read(packet.body, 1, 2).toShort
-        val sqlState = new String(packet.body.drop(3).take(6))
-        val errorMessage = new String(packet.body.drop(9).take(packet.body.size - 9))
-        Error(packet.body(1), sqlState, errorMessage)
-      case b =>
-        state = QueryInProgress()
-        decodeResultSet(packet, buffer)
-    }
+  def decodeResult(packet: Packet, buffer: ChannelBuffer): Result = packet.body(0) match {
+    case `OK_Byte` =>
+      state = Idle
+      OK.decode(packet)
+    case `ERROR_Byte`=>
+      state = Idle
+      Error.decode(packet)
+    case byte =>
+      state = QueryInProgress()
+      decodeResultSet(packet, buffer)
   }
 
   def decodeResultSet(packet: Packet, buffer: ChannelBuffer): Result = {
@@ -102,23 +89,29 @@ class Decoder extends FrameDecoder with StateMachine {
     }
   }
 
+  /**
+   * Decodes a logical MySQL packet from a ChannelBuffer 
+   * if there are enough bytes on the buffer.
+   *
+   * A MySQL packet consists of a header,
+   * 3-bytes containing the size of the body and a 
+   * 1 byte seq number, followed by the body.
+   */
   def decodePacket(buffer: ChannelBuffer): Packet = {
     if (buffer.readableBytes < Packet.headerSize)
       needMoreData
     else {
-      //bodySize is a 3-byte numeric value
       var bodySize: Int = buffer.readByte()
       bodySize += buffer.readByte() << 8
       bodySize += buffer.readByte() << 16
-      //sequence number is 1 Byte
       val seq = buffer.readByte()
       if (buffer.readableBytes() < bodySize)
         needMoreData
       else {
-        println("<- Decoding MySQL packet (n=%d, size=%d)".format(seq,bodySize))
+        println("<- Decoding MySQL packet (n=%d, size=%d)".format(seq, bodySize))
         val body = new Array[Byte](bodySize)
         buffer.readBytes(body)
-        ByteArrayUtil.hex(body)
+        BufferUtil.hex(body)
         Packet(bodySize, seq, body)
       }
     }

@@ -1,9 +1,10 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.mysql.codec
 
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import com.twitter.finagle._
+import com.twitter.finagle.mysql._  
+import com.twitter.finagle.mysql.protocol._
 import com.twitter.util.Future
-import com.twitter.finagle.mysql._
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 
 class MySQL(username: String, password: String, database: Option[String]) 
   extends CodecFactory[Request, Result] {
@@ -23,7 +24,7 @@ class MySQL(username: String, password: String, database: Option[String])
         }
       }
 
-      /* Wrap each service with a ServiceProxyFactory that handles authentication. */
+      /* Authenticate each connection before returning it via a ServiceFactoryProxy. */
       override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) = 
         new AuthenticationProxy(underlying, username, password, database)
 
@@ -36,6 +37,7 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
                           password: String,
                           database: Option[String]) 
   extends ServiceFactoryProxy(underlying) {
+  val greet = new CommandRequest(Command.COM_NOOP_GREET)
 
   def makeLoginReq(salt: Array[Byte]) = LoginRequest(
             username = username,
@@ -46,7 +48,7 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
 
   override def apply(conn: ClientConnection) = {
     self(conn) flatMap { service => 
-      service(Request.greet) flatMap { 
+      service(greet) flatMap { 
         case sg: ServersGreeting if sg.serverCapability.has(Capability.protocol41) => 
           Future.value(sg)
         case sg: ServersGreeting => 
@@ -55,7 +57,7 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
           Future.exception(InvalidResponseException("Expected server greeting and received " + r))
         } flatMap { sg =>
           service(makeLoginReq(sg.salt)) flatMap {
-            case OK => Future.value(service)
+            case OK(_,_,_,_,_) => Future.value(service)
             case Error(c, s, m) => Future.exception(AuthenticationException("Error Code "+ c + " - " + m))  
           }
         }

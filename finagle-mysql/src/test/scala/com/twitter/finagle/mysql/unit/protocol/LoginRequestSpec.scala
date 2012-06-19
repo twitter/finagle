@@ -1,10 +1,10 @@
 package com.twitter.finagle.mysql.protocol
 
 import org.specs.SpecificationWithJUnit
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import com.twitter.finagle.mysql.util.BufferUtil
 
 class LoginRequestSpec extends SpecificationWithJUnit {
-  "Credentials Packet" should {
+  "Login Request" should {
     "encode" in {
       val username = "username"
       val password = "password"
@@ -18,19 +18,22 @@ class LoginRequestSpec extends SpecificationWithJUnit {
                                 password,
                                 salt)
       val data = req.encoded
+      val br = new BufferReader(data, Packet.headerSize)
 
       "capabilities" in {
-        val mask = ByteArrayUtil.read(data, Packet.headerSize, 4)
+        val mask = br.readInt
         mask mustEqual 0xfffff6ff
       }
 
       "maxPacket" in {
-        val max = ByteArrayUtil.read(data, Packet.headerSize+4, 4)
+        br.skip(4)
+        val max = br.readInt
         max mustEqual 0x10000000
       }
 
       "charset" in {
-        val charset = ByteArrayUtil.read(data, Packet.headerSize+8, 1)
+        br.skip(8)
+        val charset = br.readByte
         charset mustEqual 33.toByte
       }
 
@@ -40,14 +43,13 @@ class LoginRequestSpec extends SpecificationWithJUnit {
       }
 
       "username" in {
-        val uStr = Array.concat(username.getBytes, Array[Byte]('\0'.toByte))
-        data.drop(Packet.headerSize+32).take(username.size+1) must containAll(uStr)
+        br.skip(32)
+        br.readNullTerminatedString mustEqual username
       }
 
       "password" in {
-        val hash = req.hashPassword
-        val pStr = Array.concat(Array[Byte](hash.length.toByte), hash)
-        data.drop(Packet.headerSize+username.size+33) must containAll(pStr)
+        br.skip(32 + username.size+1)
+        br.readLengthCodedString.getBytes must containAll(req.hashPassword)
       }
     }
   }

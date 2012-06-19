@@ -1,19 +1,20 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.mysql.codec
 
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
+import com.twitter.finagle.mysql.protocol._
+import com.twitter.finagle.mysql.util.BufferUtil
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
 object Encoder extends OneToOneEncoder {
   override def encode(context: ChannelHandlerContext, channel: Channel, message: AnyRef) = {
     message match {
-      case req: CommandRequest if req.cmd == Request.COM_NOOP_GREET => 
+      case req: CommandRequest if req.cmd == Command.COM_NOOP_GREET => 
         ChannelBuffers.EMPTY_BUFFER
       case req: Request =>
         println("-> Encoding " + req)
         val encodedMsg = req.encoded
-        ByteArrayUtil.hex(encodedMsg)
+        BufferUtil.hex(encodedMsg)
         ChannelBuffers.wrappedBuffer(encodedMsg)
       case _ =>
         message

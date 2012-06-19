@@ -1,12 +1,54 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import com.twitter.finagle.mysql.util.BufferUtil
 
-trait Result {}
+trait Result
 
-case object OK extends Result
-case class Error(errorCode: Short, sqlState: String, error: String) extends Result
+/**
+ * Represents the OK Packet received from the server. It is sent
+ * to indicate that a command has completed succesfully. The following
+ * commands receive OK packets:
+ * - COM_PING
+ * - COM_QUERY (INSERT, UODATE, or ALTER TABLE)
+ * - COM_REFRESH
+ * - COM_REGISTER_SLAVE
+ */
+case class OK(affectedRows: Long, 
+              insertId: Long, 
+              serverStatus: Short,
+              warningCount: Short,
+              message: String) extends Result
+object OK {
+  def decode(packet: Packet) = {
+    //start reading after flag byte
+    val br = new BufferReader(packet.body, 1)
+    new OK(
+      br.readLengthCodedBinary,
+      br.readLengthCodedBinary,
+      br.readShort,
+      br.readShort,
+      new String(br.takeRest)
+    )
+  }
+}
 
+/**
+ * Represents the Error Packet received from the server
+ * and the data sent along with it.
+ */
+case class Error(code: Short, sqlState: String, message: String) extends Result
+object Error {
+  def decode(packet: Packet) = {
+    //start reading after flag byte
+    val br = new BufferReader(packet.body, 1)
+    val code = br.readShort
+    val state = new String(br.take(6))
+    val msg = new String(br.takeRest)
+    Error(code, state, msg)
+  }
+}
+
+/* Field */
 case class Field(
   catalog: String,
   db: String,
@@ -20,56 +62,69 @@ case class Field(
   flags: Short,
   decimals: Byte
 )
+
 object Field {
+  val FIELD_TYPE_DECIMAL     = 0x00;
+  val FIELD_TYPE_TINY        = 0x01;
+  val FIELD_TYPE_SHORT       = 0x02;
+  val FIELD_TYPE_LONG        = 0x03;
+  val FIELD_TYPE_FLOAT       = 0x04;
+  val FIELD_TYPE_DOUBLE      = 0x05;
+  val FIELD_TYPE_NULL        = 0x06;
+  val FIELD_TYPE_TIMESTAMP   = 0x07;
+  val FIELD_TYPE_LONGLONG    = 0x08;
+  val FIELD_TYPE_INT24       = 0x09;
+  val FIELD_TYPE_DATE        = 0x0a;
+  val FIELD_TYPE_TIME        = 0x0b;
+  val FIELD_TYPE_DATETIME    = 0x0c;
+  val FIELD_TYPE_YEAR        = 0x0d;
+  val FIELD_TYPE_NEWDATE     = 0x0e;
+  val FIELD_TYPE_VARCHAR     = 0x0f;
+  val FIELD_TYPE_BIT         = 0x10;
+  val FIELD_TYPE_NEWDECIMAL  = 0xf6;
+  val FIELD_TYPE_ENUM        = 0xf7;
+  val FIELD_TYPE_SET         = 0xf8;
+  val FIELD_TYPE_TINY_BLOB   = 0xf9;
+  val FIELD_TYPE_MEDIUM_BLOB = 0xfa;
+  val FIELD_TYPE_LONG_BLOB   = 0xfb;
+  val FIELD_TYPE_BLOB        = 0xfc;
+  val FIELD_TYPE_VAR_STRING  = 0xfd;
+  val FIELD_TYPE_STRING      = 0xfe;
+  val FIELD_TYPE_GEOMETRY    = 0xff;
+
   def decode(packet: Packet): Field = {
-    var offset = 0
-
-    def read(n: Int) = {
-      val result = ByteArrayUtil.read(packet.body, offset, n)
-      offset += n
-      result
-    }
-
-    def readString() = {
-      val result = ByteArrayUtil.readLengthCodedString(packet.body, offset)
-      offset += result.size + 1 //add 1 to account for length encoding
-      result
-    }
-
+    val br = new BufferReader(packet.body)
     new Field(
-      readString(),
-      readString(),
-      readString(),
-      readString(),
-      readString(),
-      readString(),
-      read(2).toShort,
-      read(4).toInt,
-      read(1).toByte,
-      read(2).toShort,
-      read(1).toByte
+      br.readLengthCodedString,
+      br.readLengthCodedString,
+      br.readLengthCodedString,
+      br.readLengthCodedString,
+      br.readLengthCodedString,
+      br.readLengthCodedString,
+      br.readShort,
+      br.readInt,
+      br.readByte,
+      br.readShort,
+      br.readByte
+      //TO DO: decode default value field
     )
   }
 }
 
+/* RowData */
 case class RowData(data: List[String])
 object RowData {
   def decode(packet: Packet, fieldNumber: Int) = {
-    var offset = 0
-
-    def readString() = {
-      val result = ByteArrayUtil.readLengthCodedString(packet.body, offset)
-      offset += result.size + 1
-      result
-    }
-
+    val br = new BufferReader(packet.body)
     RowData(
       (0 until fieldNumber) map { _ =>
-        readString()
+        br.readLengthCodedString
       } toList
     )
   }
 }
+
+/* ResultSet */
 case class ResultSet(
   header: Byte,
   fields: List[Field],
@@ -82,6 +137,7 @@ case class ResultSet(
     header + "\n" + content
   }
 }
+
 object ResultSet {
   def decode(header: Packet, fields: List[Packet], data: List[Packet]) = {
     ResultSet(
@@ -91,4 +147,6 @@ object ResultSet {
     )
   }
 }
+
+/* EOF */
 case object EOF extends Result

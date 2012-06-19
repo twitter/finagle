@@ -1,10 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
-/**
- * Client credentials request sent during the handshaking phase.
- */
-
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import com.twitter.finagle.mysql.util.BufferUtil
 import java.security.MessageDigest
 
 case class LoginRequest(
@@ -22,36 +18,15 @@ case class LoginRequest(
   lazy val hashPassword = encryptPassword(password, salt)
 
   override val data: Array[Byte] = {
-    val buffer = new Array[Byte](dataSize)
-    var offset = 0
-
-    def write(n: Int, width: Int) = {
-      ByteArrayUtil.write(n, buffer, offset, width)
-      offset += width
-    }
-
-    write(clientCapabilities.mask, 4)
-    write(maxPacket, 4)
-    write(charset, 1)
-
-    //23 reserved bytes - zeroed out
-    (offset until offset + 23) foreach { j => buffer(j) = 0.toByte ; offset += 1 }
-
-    //write username (including null terminating byte)
-    ByteArrayUtil.writeNullTerminatedString(username, buffer, offset)
-    offset += username.size + 1
-
-    //write password size + hash
-    ByteArrayUtil.writeLengthCodedString(new String(hashPassword), buffer, offset)
-    offset += hashPassword.size + 1
-
-    //write the initial db string if it exists
-    if(dbNameSize > 0) {
-      ByteArrayUtil.writeNullTerminatedString(database.get, buffer, offset)
-      offset += dbNameSize + 1
-    }
-
-    buffer
+    val bw = new BufferWriter(new Array[Byte](dataSize))
+    bw.writeInt(clientCapabilities.mask)
+    bw.writeInt(maxPacket)
+    bw.writeByte(charset)
+    bw.fill(23, 0.toByte) //23 reserved bytes - zeroed out 
+    bw.writeNullTerminatedString(username)
+    bw.writeLengthCodedString(new String(hashPassword))
+    if(dbNameSize > 0) bw.writeNullTerminatedString(database.get)
+    bw.buffer
   }
 
   def encryptPassword(password: String, salt: Array[Byte]) = {
@@ -69,5 +44,4 @@ case class LoginRequest(
     }
     digest
   }
-
 }

@@ -1,10 +1,10 @@
 package com.twitter.finagle.mysql.protocol
 
 /**
- * Server's greeting packet sent during the handshaking phase.
+ * Server's greeting result received during the handshaking phase.
  */
 
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import com.twitter.finagle.mysql.util.BufferUtil
 
 case class ServersGreeting(
   protocol: Byte,
@@ -19,38 +19,23 @@ case class ServersGreeting(
 object ServersGreeting {
 
   def decode(packet: Packet): ServersGreeting = {
-    var offset = 0
-
-    def read(n: Int) = {
-      val result = ByteArrayUtil.read(packet.body, offset, n)
-      offset += n
-      result
-    }
-
-    def readString() = {
-      val result = ByteArrayUtil.readNullTerminatedString(packet.body, offset)
-      offset += result.size + 1 //add 1 to account for '\0' character
-      result
-    }
-
-    val protocol = read(1).toByte
-    val version = readString()
-    val threadId = read(4).toInt
-    val salt1 = packet.body.drop(offset).take(8)
-    offset += 9 // 8 + 1 null byte
-    val serverCapabilities = Capability(read(2).toInt)
-    val language = read(1).toByte
-    val status = read(2).toShort
-    offset += 13 // unused
-    val salt2 = packet.body.drop(offset).take(12)
-    offset += 13 // 12 + 1 null byte
-    val salt = Array.concat(salt1, salt2)
+    val br = new BufferReader(packet.body)
+    val protocol = br.readByte
+    val version = br.readNullTerminatedString
+    val threadId = br.readInt
+    val salt1 = br.take(8)
+    br.skip(9)
+    val serverCapabilities = Capability(br.read(2).toInt)
+    val language = br.readByte
+    val status = br.readShort
+    br.skip(13)
+    val salt2 = br.take(12)
     
     ServersGreeting(
       protocol,
       version,
       threadId,
-      salt,
+      Array.concat(salt1, salt2),
       serverCapabilities,
       language,
       status

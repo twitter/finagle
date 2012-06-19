@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util.ByteArrayUtil
+import com.twitter.finagle.mysql.util.BufferUtil
 
 object Packet {
   val headerSize = 0x04
@@ -24,10 +24,10 @@ trait Packet {
   val body: Array[Byte]
 
   lazy val header: Array[Byte] = {
-    val hdr = new Array[Byte](Packet.headerSize)
-    ByteArrayUtil.write(size, hdr, 0, 3)
-    hdr(3) = number
-    hdr
+    val bw = new BufferWriter(new Array[Byte](Packet.headerSize))
+    bw.writeInt24(size)
+    bw.writeByte(number)
+    bw.buffer
   }
 }
 

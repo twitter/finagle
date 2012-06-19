@@ -1,10 +1,10 @@
 package com.twitter.finagle.mysql
 
-
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.{ServiceFactory, Codec, CodecFactory}
-import com.twitter.finagle.Service
+import com.twitter.finagle.mysql.codec.MySQL
 import com.twitter.finagle.mysql.protocol._
+import com.twitter.finagle.Service
+import com.twitter.finagle.{ServiceFactory, Codec, CodecFactory}
 import com.twitter.util.Future
 
 object Client {
