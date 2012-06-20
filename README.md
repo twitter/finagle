@@ -941,7 +941,7 @@ A `FuturePool` object enables you to place a blocking operation on its own threa
       val diskIoFuturePool = FuturePool(Executors.newFixedThreadPool(4))
 
       def apply(path: String) = {
-        val blockingOperation = {
+        def blockingOperation = {
           scala.Source.fromFile(path) // potential to block
         }
         // give this blockingOperation to the future pool to execute
