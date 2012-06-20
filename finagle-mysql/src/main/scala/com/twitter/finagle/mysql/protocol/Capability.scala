@@ -1,23 +1,23 @@
 package com.twitter.finagle.mysql.protocol
 
 object Capability {
-  val longPassword     = 0x0001
-  val foundRows        = 0x0002
-  val longFlag         = 0x0004
-  val connectWithDB    = 0x0008
-  val noSchema         = 0x0010
-  val compress         = 0x0020
-  val ODBC             = 0x0040
-  val localFiles       = 0x0080
-  val ignoreSpace      = 0x0100
-  val protocol41       = 0x0200
-  val interactive      = 0x0400
-  val ssl              = 0x0800
-  val ignoreSigPipe    = 0x1000
-  val transactions     = 0x2000
-  val secureConnection = 0x8000
-  val multiStatements  = 0x10000
-  val multiResults     = 0x20000
+  val longPassword     = 0x0001 /* new more secure passwords */
+  val foundRows        = 0x0002 /* Found instead of affected rows */
+  val longFlag         = 0x0004 /* Get all column flags */
+  val connectWithDB    = 0x0008 /* One can specify db on connect */
+  val noSchema         = 0x0010 /* Don't allow database.table.column */
+  val compress         = 0x0020 /* Can use compression protocol */
+  val ODBC             = 0x0040 /* Odbc client */
+  val localFiles       = 0x0080 /* Can use LOAD DATA LOCAL */
+  val ignoreSpace      = 0x0100 /* Ignore spaces before '(' */
+  val protocol41       = 0x0200 /* New 4.1 protocol */
+  val interactive      = 0x0400 /* This is an interactive client */
+  val ssl              = 0x0800 /* Switch to SSL after handshake */
+  val ignoreSigPipe    = 0x1000 /* IGNORE sigpipes */
+  val transactions     = 0x2000 /* Client knows about transactions */
+  val secureConnection = 0x8000 /* New 4.1 authentication */
+  val multiStatements  = 0x10000 /* Enable/disable multi-stmt support */
+  val multiResults     = 0x20000 /* Enable/disable multi-results */
 
   val CapabilityMap = Map(
     "CLIENT_LONG_PASSWORD"     -> Capability.longPassword,
@@ -48,8 +48,8 @@ object Capability {
 case class Capability(mask: Int) {
   def has(flag: Int) = hasAll(flag)
   def hasAll(flags: Int*) = flags map {f: Int => (f & mask) > 0} reduceLeft {_ && _}
-  /*override def toString() = {
+  override def toString() = {
     val cs = Capability.CapabilityMap filter {t => has(t._2)} map {_._1} mkString(", ")
     "Capability(" + mask + ": " + cs + ")"
-  }*/
+  }
 }

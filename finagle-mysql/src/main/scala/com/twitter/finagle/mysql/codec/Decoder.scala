@@ -10,10 +10,6 @@ import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 class Decoder extends FrameDecoder with StateMachine {
-  val EOF_Byte = 0xFE.toByte
-  val OK_Byte = 0x00.toByte
-  val ERROR_Byte = 0xFF.toByte
-  
   val needMoreData: Packet = null
   state = WaitingForGreetings //initial state
 
@@ -48,12 +44,15 @@ class Decoder extends FrameDecoder with StateMachine {
   }
 
   def decodeResult(packet: Packet, buffer: ChannelBuffer): Result = packet.body(0) match {
-    case `OK_Byte` =>
+    case Packet.okByte =>
       state = Idle
       OK.decode(packet)
-    case `ERROR_Byte`=>
+    case Packet.errorByte =>
       state = Idle
       Error.decode(packet)
+    case Packet.eofByte =>
+      state = Idle
+      EOF.decode(packet)
     case byte =>
       state = QueryInProgress()
       decodeResultSet(packet, buffer)
@@ -68,7 +67,7 @@ class Decoder extends FrameDecoder with StateMachine {
           state = QueryInProgress(Some(packet), Some(Nil), None)
           decodeResultSet(decodePacket(buffer), buffer)
 
-        case (QueryInProgress(Some(h), Some(xs), None), `EOF_Byte`) =>
+        case (QueryInProgress(Some(h), Some(xs), None), Packet.eofByte) =>
           state = QueryInProgress(Some(h), Some(xs), Some(Nil))
           decodeResultSet(decodePacket(buffer), buffer)
 
@@ -76,7 +75,7 @@ class Decoder extends FrameDecoder with StateMachine {
           state = QueryInProgress(Some(h), Some(packet :: xs), None)
           decodeResultSet(decodePacket(buffer), buffer)
 
-        case (QueryInProgress(Some(h), Some(xs), Some(ys)), `EOF_Byte`) =>
+        case (QueryInProgress(Some(h), Some(xs), Some(ys)), Packet.eofByte) =>
           state = QueryInProgress()
           ResultSet.decode(h, xs.reverse, ys.reverse)
 
@@ -92,23 +91,19 @@ class Decoder extends FrameDecoder with StateMachine {
   /**
    * Decodes a logical MySQL packet from a ChannelBuffer 
    * if there are enough bytes on the buffer.
-   *
-   * A MySQL packet consists of a header,
-   * 3-bytes containing the size of the body and a 
-   * 1 byte seq number, followed by the body.
    */
   def decodePacket(buffer: ChannelBuffer): Packet = {
     if (buffer.readableBytes < Packet.headerSize)
       needMoreData
     else {
-      var bodySize: Int = buffer.readByte()
-      bodySize += buffer.readByte() << 8
-      bodySize += buffer.readByte() << 16
-      val seq = buffer.readByte()
+      val headerBytes = new Array[Byte](Packet.headerSize)
+      buffer.readBytes(headerBytes)
+      val br = new BufferReader(headerBytes)
+      val (bodySize, seq) = (br.readInt24, br.readByte)
       if (buffer.readableBytes() < bodySize)
         needMoreData
       else {
-        println("<- Decoding MySQL packet (n=%d, size=%d)".format(seq, bodySize))
+        println("<- Decoding MySQL packet (size=%d, seq=%d)".format(bodySize, seq))
         val body = new Array[Byte](bodySize)
         buffer.readBytes(body)
         BufferUtil.hex(body)

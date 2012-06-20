@@ -39,11 +39,11 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
   extends ServiceFactoryProxy(underlying) {
   val greet = new CommandRequest(Command.COM_NOOP_GREET)
 
-  def makeLoginReq(salt: Array[Byte]) = LoginRequest(
+  def makeLoginReq(sg: ServersGreeting) = LoginRequest(
             username = username,
             password = password,
             database = database,
-            salt = salt
+            sg = sg
           )
 
   override def apply(conn: ClientConnection) = {
@@ -56,7 +56,7 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
         case r => 
           Future.exception(InvalidResponseException("Expected server greeting and received " + r))
         } flatMap { sg =>
-          service(makeLoginReq(sg.salt)) flatMap {
+          service(makeLoginReq(sg)) flatMap {
             case OK(_,_,_,_,_) => Future.value(service)
             case Error(c, s, m) => Future.exception(AuthenticationException("Error Code "+ c + " - " + m))  
           }

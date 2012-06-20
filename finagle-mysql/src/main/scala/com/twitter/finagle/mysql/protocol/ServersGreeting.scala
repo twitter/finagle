@@ -24,7 +24,7 @@ object ServersGreeting {
     val version = br.readNullTerminatedString
     val threadId = br.readInt
     val salt1 = br.take(8)
-    br.skip(9)
+    br.skip(1) //1 filler byte always 0x00
     val serverCapabilities = Capability(br.read(2).toInt)
     val language = br.readByte
     val status = br.readShort

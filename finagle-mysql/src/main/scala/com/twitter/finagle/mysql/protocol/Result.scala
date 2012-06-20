@@ -1,7 +1,5 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util.BufferUtil
-
 trait Result
 
 /**
@@ -45,6 +43,18 @@ object Error {
     val state = new String(br.take(6))
     val msg = new String(br.takeRest)
     Error(code, state, msg)
+  }
+}
+
+/** 
+ * Represents and EOF result received from the server which
+ * contains any warnings and the server status.
+*/
+case class EOF(warnings: Short, serverStatus: Short) extends Result
+object EOF {
+  def decode(packet: Packet) = {
+    val br = new BufferReader(packet.body, 1)
+    EOF(br.readShort, br.readShort)
   }
 }
 
@@ -147,6 +157,3 @@ object ResultSet {
     )
   }
 }
-
-/* EOF */
-case object EOF extends Result

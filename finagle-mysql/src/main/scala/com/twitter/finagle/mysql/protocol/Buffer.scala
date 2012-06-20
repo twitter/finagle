@@ -28,7 +28,11 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def readLong = read(8)
 
   def skip(n: Int) = offset += n
-  def take(n: Int) = buffer.drop(offset).take(n)
+  def take(n: Int) = {
+    val res = buffer.drop(offset).take(n)
+    offset += n
+    res
+  }
   def takeRest = take(buffer.size - offset)
 
   /**

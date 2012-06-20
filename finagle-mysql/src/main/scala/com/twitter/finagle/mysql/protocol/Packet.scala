@@ -1,9 +1,17 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util.BufferUtil
+/**
+ * Represents a logical packet received from MySQL.
+ * A MySQL packet consists of a header,
+ * 3-bytes containing the size of the body and a 
+ * 1 byte seq number, followed by the body.
+ */
 
 object Packet {
   val headerSize = 0x04
+  val okByte = 0x00.toByte
+  val errorByte = 0xFF.toByte
+  val eofByte = 0xFE.toByte
 
   def apply(packetSize: Int, seq: Byte) = new Packet {
     val size = packetSize
