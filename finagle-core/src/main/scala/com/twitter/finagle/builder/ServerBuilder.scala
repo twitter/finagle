@@ -16,7 +16,7 @@ import com.twitter.util.{
   Duration, Future, Monitor, NullMonitor, Promise, Time, Timer}
 import java.net.SocketAddress
 import java.util.concurrent.Executors
-import java.util.logging.{Logger, Level}
+import java.util.logging.Logger
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.group.{
@@ -620,12 +620,10 @@ private[builder] class MkServer[Req, Rep] (
     
     val thisServiceFactory = serviceFactory(timer, statsReceiverOpt, gauges)
     val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
-    val monitorFilter = new MonitorFilter[Req, Rep](
-      monitor andThen Monitor.mk { case exc =>
-        Logger.getLogger(config.name).log(Level.SEVERE, "A Service threw an exception", exc)
-        false
-      }
-    )
+    val monitorFilter = {
+      val logger = config.logger.getOrElse(Logger.getLogger(config.name))
+      new MonitorFilter[Req, Rep](monitor andThen new SourceTrackingMonitor(logger))
+    }
     
     // These need to sit outside of the codec:
     val outerFilter =

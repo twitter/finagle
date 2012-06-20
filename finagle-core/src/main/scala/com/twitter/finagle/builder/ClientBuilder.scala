@@ -863,7 +863,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   protected def monitorFilter =
     config.monitor map { monitorFactory =>
-      new MonitorFilter[Req, Rep](monitorFactory(config.name.get))
+      val name = config.name.get
+      val logger = config.logger.getOrElse(Logger.getLogger(name))
+      new MonitorFilter[Req, Rep](monitorFactory(name) andThen new SourceTrackingMonitor(logger))
     } getOrElse(identityFilter)
 
   protected def connectTimeoutFactory(factory: ServiceFactory[Req, Rep], timer: Timer) =
