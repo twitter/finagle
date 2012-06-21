@@ -2,7 +2,11 @@ Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/Run
 
 	$ ./sbt test
 
-- - -
+# Versioning
+
+After version 5.0, Finagle is only compiled against Scala 2.9.x, and sbt-style crossbuild paths are no longer used.
+
+---
 
 <a name="Top"></a>
 
