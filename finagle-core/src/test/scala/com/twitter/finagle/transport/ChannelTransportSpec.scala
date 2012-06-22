@@ -5,7 +5,7 @@ import org.mockito.{Matchers, ArgumentCaptor}
 import org.specs.mock.Mockito
 import org.jboss.netty.channel._
 import com.twitter.util.{Return, Throw}
-import com.twitter.finagle.{WriteException, ChannelException}
+import com.twitter.finagle.ChannelException
 import java.net.SocketAddress
 
 class ChannelTransportSpec extends SpecificationWithJUnit with Mockito {
@@ -49,7 +49,7 @@ class ChannelTransportSpec extends SpecificationWithJUnit with Mockito {
       "failure" in {
         val exc = new Exception("wtf")
         dsme.getFuture.setFailure(exc)
-        f.poll must beSome(Throw(new WriteException(ChannelException(exc, remoteAddress))))
+        f.poll must beSome(Throw(ChannelException(exc, remoteAddress)))
       }
     }
 
