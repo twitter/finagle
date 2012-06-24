@@ -1,5 +1,9 @@
 package com.twitter.finagle.mysql.protocol
 
+/**
+ * Defines classes to read and write to a byte buffer that adhere to the
+ * network protocol for MySQL.
+ */
 
 class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   require(offset >= 0)
@@ -22,7 +26,9 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   }
 
   def readByte = read(1).toByte
+  def readUnsignedByte = read(1).toInt
   def readShort = read(2).toShort
+  def readUnsignedShort = read(2).toInt
   def readInt24 = read(3).toInt
   def readInt = read(4).toInt
   def readLong = read(8)
@@ -84,7 +90,7 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
 
   def writeByte(n: Byte) = write(n, 1)
   def writeShort(n: Short) = write(n, 2)
-  def writeInt24(n: Int) = write(n, 3)
+  def writeInt24(n: Int) = write(n,  3)
   def writeInt(n: Int) = write(n, 4)
   def writeLong(n: Long) = write(n, 8)
 

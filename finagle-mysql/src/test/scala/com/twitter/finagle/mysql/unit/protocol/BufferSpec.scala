@@ -18,7 +18,7 @@ class BufferSpec extends SpecificationWithJUnit {
         br.readByte mustEqual 0x77
         br.readByte mustEqual 0x78
         br.readByte must throwA[ArrayIndexOutOfBoundsException]
-      } 
+      }
 
       "Short" in {
         br.readShort mustEqual 0x2211

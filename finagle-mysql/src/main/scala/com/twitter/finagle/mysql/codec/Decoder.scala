@@ -14,7 +14,6 @@ class Decoder extends FrameDecoder with StateMachine {
   state = WaitingForGreetings //initial state
 
   case object WaitingForGreetings extends State
-  case object WaitingForLoginResponse extends State
   case object Idle extends State
   case class QueryInProgress(
     header: Option[Packet] = None,
@@ -22,69 +21,24 @@ class Decoder extends FrameDecoder with StateMachine {
     data: Option[List[Packet]] = None
   ) extends State
 
+  /**
+   * Decodes a relevant Result from the ChannelBuffer
+   * based on the logical MySQL packet and the current
+   * state.
+   */
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Result = {
     val packet = decodePacket(buffer)
     if(packet == needMoreData) 
       null
-    else 
-      state match {
-        case WaitingForGreetings =>
-          state = WaitingForLoginResponse
-          ServersGreeting.decode(packet)
-
-        case QueryInProgress(_,_,_) =>
-          val res = decodeResultSet(packet, buffer)
-          if (res != null) 
-            state = Idle
-          res
-
-        case _ =>
-          decodeResult(packet, buffer)
+    else {
+      val result = state match {
+        case Idle => decodeResult(packet, buffer)
+        case WaitingForGreetings => ServersGreeting.decode(packet)
+        case QueryInProgress(_,_,_) => decodeResultSet(packet, buffer)
       }
-  }
-
-  def decodeResult(packet: Packet, buffer: ChannelBuffer): Result = packet.body(0) match {
-    case Packet.okByte =>
-      state = Idle
-      OK.decode(packet)
-    case Packet.errorByte =>
-      state = Idle
-      Error.decode(packet)
-    case Packet.eofByte =>
-      state = Idle
-      EOF.decode(packet)
-    case byte =>
-      state = QueryInProgress()
-      decodeResultSet(packet, buffer)
-  }
-
-  def decodeResultSet(packet: Packet, buffer: ChannelBuffer): Result = {
-    if (packet == null)
-      null // Need more data
-    else
-      (state, packet.body(0)) match {
-        case (QueryInProgress(None, _, _), _) =>
-          state = QueryInProgress(Some(packet), Some(Nil), None)
-          decodeResultSet(decodePacket(buffer), buffer)
-
-        case (QueryInProgress(Some(h), Some(xs), None), Packet.eofByte) =>
-          state = QueryInProgress(Some(h), Some(xs), Some(Nil))
-          decodeResultSet(decodePacket(buffer), buffer)
-
-        case (QueryInProgress(Some(h), Some(xs), None), _) =>
-          state = QueryInProgress(Some(h), Some(packet :: xs), None)
-          decodeResultSet(decodePacket(buffer), buffer)
-
-        case (QueryInProgress(Some(h), Some(xs), Some(ys)), Packet.eofByte) =>
-          state = QueryInProgress()
-          ResultSet.decode(h, xs.reverse, ys.reverse)
-
-        case (QueryInProgress(Some(h), Some(xs), Some(ys)), _) =>
-          state = QueryInProgress(Some(h), Some(xs), Some(packet :: ys))
-          decodeResultSet(decodePacket(buffer), buffer)
-
-        case (QueryInProgress(_, _, _), _) =>
-          throw new DecoderException("State inconcistency!")
+      if(result != null)
+        state = Idle
+      result
     }
   }
 
@@ -109,6 +63,64 @@ class Decoder extends FrameDecoder with StateMachine {
         BufferUtil.hex(body)
         Packet(bodySize, seq, body)
       }
+    }
+  }
+
+  /**
+   * Decode the packet into a Result object based on the
+   * first byte in the packet body.
+   */
+  def decodeResult(packet: Packet, buffer: ChannelBuffer): Result = packet.body(0) match {
+    case Packet.okByte => OK.decode(packet)
+    case Packet.errorByte => Error.decode(packet)
+    case Packet.eofByte => EOF.decode(packet)
+    case byte =>
+      state = QueryInProgress()
+      decodeResultSet(packet, buffer)
+  }
+
+  /**
+   * Decode the ChannelBuffer into a Result Set. The ChannelBuffer is expected
+   * to contain a Header Packet and 2 sequences of Packets (field and row data 
+   * packets, respectively) delimited by EOF bytes.
+   */
+  def decodeResultSet(packet: Packet, buffer: ChannelBuffer): Result = {
+    if (packet == null)
+      null // Need more data
+    else
+      (state, packet.body(0)) match {
+        //Store Result Set Header Packet.
+        case (QueryInProgress(None, _, _), _) =>
+          state = QueryInProgress(Some(packet), Some(Nil), None)
+          decodeResultSet(decodePacket(buffer), buffer)
+
+        //The first EOF byte encountered signifies that all
+        //the field data has been read.
+        case (QueryInProgress(Some(h), Some(xs), None), Packet.eofByte) =>
+          state = QueryInProgress(Some(h), Some(xs), Some(Nil))
+          decodeResultSet(decodePacket(buffer), buffer)
+
+        //The packet represents field data. Prepend the packet 
+        //to field List.
+        case (QueryInProgress(Some(h), Some(xs), None), _) =>
+          state = QueryInProgress(Some(h), Some(packet :: xs), None)
+          decodeResultSet(decodePacket(buffer), buffer)
+
+        //The second EOF byte indicates that all the Result Set data
+        //has been read. Decode the complete Result Set which
+        //includes the Header, List of Field, and List of RowData Packets.
+        case (QueryInProgress(Some(h), Some(xs), Some(ys)), Packet.eofByte) =>
+          state = QueryInProgress()
+          ResultSet.decode(h, xs.reverse, ys.reverse)
+
+        //The packet represents row data. Prepend the packet 
+        //to row data List.
+        case (QueryInProgress(Some(h), Some(xs), Some(ys)), _) =>
+          state = QueryInProgress(Some(h), Some(xs), Some(packet :: ys))
+          decodeResultSet(decodePacket(buffer), buffer)
+
+        case (QueryInProgress(_, _, _), _) =>
+          throw new DecoderException("Unexpected results when decoding result set data.")
     }
   }
 }

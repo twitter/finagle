@@ -58,9 +58,39 @@ object EOF {
   }
 }
 
-/* Field */
+/** 
+ * Represents a Result Set received from the server. A Result Set is
+ * received if the client issued a command, such as a query, 
+ * which returned a result set.
+ * A Result Set consists of:
+ * 1. A Result Set Header Packet which contains the number of columns
+ * 2. Field Packets which each contain a column descriptor (field name)
+ * 3. Row Data Packets which each contain the row contents
+ */
+case class ResultSet(fields: List[Field], rawData: List[RowData]) 
+  extends Result {
+  override def toString = {
+    val header = fields map { _.name } mkString("\t")
+    val content = rawData map { _.data.mkString("\t") } mkString("\n")
+    header + "\n" + content
+  }
+}
+
+object ResultSet {
+  def decode(header: Packet, fields: List[Packet], data: List[Packet]) = {
+    ResultSet(
+      fields map { Field.decode(_) },
+      data map { RowData.decode(_, fields.size) }
+    )
+  }
+}
+
+/**
+ * Represents a Field that is part of the Result Set. A Result Set
+ * contains a Field for each column. 
+ */
 case class Field(
-  catalog: String,
+  catalog: String, /* Catalog. For 4.1, 5.0 and 5.1 the value is "def". */
   db: String,
   table: String,
   origTable: String,
@@ -68,7 +98,7 @@ case class Field(
   origName: String,
   charset: Short,
   length: Int,
-  fType: Byte,
+  fieldType: Int,
   flags: Short,
   decimals: Byte
 )
@@ -104,56 +134,45 @@ object Field {
 
   def decode(packet: Packet): Field = {
     val br = new BufferReader(packet.body)
+    val catalog = br.readLengthCodedString
+    val db = br.readLengthCodedString
+    val table = br.readLengthCodedString
+    val origTable = br.readLengthCodedString
+    val name = br.readLengthCodedString
+    val origName = br.readLengthCodedString
+    br.skip(1) //filler
+    val charset = br.readShort
+    val length = br.readInt
+    val fieldType = br.readUnsignedByte
+    val flags = br.readShort
+    val decimals = br.readByte
     new Field(
-      br.readLengthCodedString,
-      br.readLengthCodedString,
-      br.readLengthCodedString,
-      br.readLengthCodedString,
-      br.readLengthCodedString,
-      br.readLengthCodedString,
-      br.readShort,
-      br.readInt,
-      br.readByte,
-      br.readShort,
-      br.readByte
-      //TO DO: decode default value field
+      catalog,
+      db,
+      table,
+      origTable,
+      name,
+      origName,
+      charset,
+      length,
+      fieldType,
+      flags,
+      decimals
     )
   }
 }
 
-/* RowData */
+/**
+ * Represents a Row that is part of the Result Set. 
+ */
 case class RowData(data: List[String])
 object RowData {
-  def decode(packet: Packet, fieldNumber: Int) = {
+  def decode(packet: Packet, fieldCount: Int) = {
     val br = new BufferReader(packet.body)
     RowData(
-      (0 until fieldNumber) map { _ =>
+      (0 until fieldCount) map { _ =>
         br.readLengthCodedString
       } toList
-    )
-  }
-}
-
-/* ResultSet */
-case class ResultSet(
-  header: Byte,
-  fields: List[Field],
-  rawData: List[RowData]
-) extends Result {
-
-  override def toString = {
-    val header = fields map { _.name } mkString("\t")
-    val content = rawData map { _.data.mkString("\t") } mkString("\n")
-    header + "\n" + content
-  }
-}
-
-object ResultSet {
-  def decode(header: Packet, fields: List[Packet], data: List[Packet]) = {
-    ResultSet(
-      header.body(0),
-      fields map { Field.decode(_) },
-      data map { RowData.decode(_, fields.size) }
     )
   }
 }

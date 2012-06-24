@@ -11,7 +11,7 @@ case class ServersGreeting(
   version: String,
   threadId: Int,
   salt: Array[Byte], // 20 bytes from 2 different fields
-  serverCapability: Capability,
+  serverCapabilities: Capability,
   language: Byte, // TODO case class
   status: Short // TODO case class
 ) extends Result

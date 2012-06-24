@@ -10,13 +10,11 @@ class LoginRequestSpec extends SpecificationWithJUnit {
       val password = "password"
       val salt = Array[Byte](70,38,43,66,74,48,79,126,76,66,
                               70,118,67,40,63,68,120,80,103,54)
-      val req = LoginRequest(Capability(0xfffff6ff),
-                                0x10000000,
-                                33.toByte,
-                                None,
-                                username,
-                                password,
-                                salt)
+      val req = LoginRequest(clientCapabilities = Capability(0xfffff6ff),
+                                username = username,
+                                password = password,
+                                serverCapabilities = Capability(0xf7ff),
+                                salt = salt)
       val data = req.encoded
       val br = new BufferReader(data, Packet.headerSize)
 

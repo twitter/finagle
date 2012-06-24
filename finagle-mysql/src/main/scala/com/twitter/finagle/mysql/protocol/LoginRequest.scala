@@ -10,12 +10,13 @@ case class LoginRequest(
   database: Option[String] = None, //name of schema to use initially
   username: String,
   password: String,
-  sg: ServersGreeting
+  serverCapabilities: Capability,
+  salt: Array[Byte]
 ) extends Request(seq = 1.toByte) {
   val fixedBodySize = 34
   val dbNameSize = database map { _.size+1 } getOrElse(0)
   val dataSize = username.size + hashPassword.size + dbNameSize + fixedBodySize
-  lazy val hashPassword = encryptPassword(password, sg.salt)
+  lazy val hashPassword = encryptPassword(password, salt)
 
   override val data: Array[Byte] = {
     val bw = new BufferWriter(new Array[Byte](dataSize))
@@ -25,7 +26,7 @@ case class LoginRequest(
     bw.fill(23, 0.toByte) //23 reserved bytes - zeroed out 
     bw.writeNullTerminatedString(username)
     bw.writeLengthCodedString(new String(hashPassword))
-    if(dbNameSize > 0 && sg.serverCapability.has(Capability.connectWithDB))
+    if(dbNameSize > 0 && serverCapabilities.has(Capability.connectWithDB))
       bw.writeNullTerminatedString(database.get)
     bw.buffer
   }

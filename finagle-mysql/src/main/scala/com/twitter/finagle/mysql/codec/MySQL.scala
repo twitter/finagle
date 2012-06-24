@@ -43,13 +43,14 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
             username = username,
             password = password,
             database = database,
-            sg = sg
+            serverCapabilities = sg.serverCapabilities,
+            salt = sg.salt
           )
 
   override def apply(conn: ClientConnection) = {
     self(conn) flatMap { service => 
       service(greet) flatMap { 
-        case sg: ServersGreeting if sg.serverCapability.has(Capability.protocol41) => 
+        case sg: ServersGreeting if sg.serverCapabilities.has(Capability.protocol41) => 
           Future.value(sg)
         case sg: ServersGreeting => 
           Future.exception(IncompatibleServerVersion)
