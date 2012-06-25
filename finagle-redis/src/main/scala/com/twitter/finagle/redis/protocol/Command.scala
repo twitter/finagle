@@ -61,6 +61,17 @@ object Commands {
   val ZSCORE            = "ZSCORE"
   val ZUNIONSTORE       = "ZUNIONSTORE"
 
+  // Lists
+  val RPUSH				= "RPUSH"
+  val LPUSH				= "LPUSH"
+  val LRANGE			= "LRANGE"
+
+  // Sets
+  val SADD				= "SADD"
+  val SREM				= "SREM"
+  val SMEMBERS			= "SMEMBERS"
+  val SISMEMBER			= "SISMEMBER"
+    
   // Miscellaneous
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
@@ -126,6 +137,17 @@ object Commands {
     ZSCORE            -> {ZScore(_)},
     ZUNIONSTORE       -> {ZUnionStore(_)},
 
+    // lists
+    RPUSH			  -> {RPush(_)},
+    LPUSH			  -> {LPush(_)},
+    LRANGE			  -> {LRange(_)},
+
+    // sets
+    SADD			  -> {SAdd(_)},
+    SREM			  -> {SRem(_)},
+    SMEMBERS		  -> {SMembers(_)},
+    SISMEMBER		  -> {SIsMember(_)},
+    
     // miscellaneous
     FLUSHDB           -> {_ => FlushDB()},
     SELECT            -> {Select(_)},
