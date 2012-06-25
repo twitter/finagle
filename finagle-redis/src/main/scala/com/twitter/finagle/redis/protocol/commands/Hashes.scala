@@ -19,6 +19,7 @@ object HDel {
 }
 
 case class HDel(key: String, fields: Seq[String]) extends StrictKeyCommand {
+  val command = Commands.HDEL
   override def toChannelBuffer =
     RedisCodec.toInlineFormat(List(Commands.HDEL, key) ::: fields.toList)
 }
@@ -31,6 +32,7 @@ object HGet {
 }
 
 case class HGet(key: Array[Byte], field: Array[Byte]) extends StrictByteKeyCommand {
+  val command = Commands.HGET
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(List(Commands.HGET.getBytes, key, field))
 }
@@ -43,6 +45,7 @@ object HGetAll {
 }
 
 case class HGetAll(key: Array[Byte]) extends StrictByteKeyCommand {
+  val command = Commands.HGETALL
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(List(Commands.HGETALL.getBytes, key))
 }
@@ -63,6 +66,7 @@ object HMGet {
 }
 
 case class HMGet(key: String, fields: Seq[String]) extends StrictKeyCommand {
+  val command = Commands.HMGET
   override def toChannelBuffer =
     RedisCodec.toInlineFormat(List(Commands.HMGET, key) ::: fields.toList)
 }
@@ -76,6 +80,7 @@ object HSet {
 
 case class HSet(key: Array[Byte], field: Array[Byte], value: Array[Byte])
   extends StrictByteKeyCommand {
+  val command = Commands.HSET
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(List(Commands.HSET.getBytes, key, field, value))
 }

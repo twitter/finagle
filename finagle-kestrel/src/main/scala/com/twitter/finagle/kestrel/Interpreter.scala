@@ -8,8 +8,9 @@ import _root_.java.util.concurrent.{TimeUnit, BlockingDeque}
 import com.twitter.finagle.Service
 import com.twitter.util.{StateMachine, Future}
 import com.twitter.util.StateMachine.InvalidStateTransition
+import com.google.common.cache.LoadingCache
 
-class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[ChannelBuffer]]) extends StateMachine {
+class Interpreter(queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]) extends StateMachine {
   case class NoTransaction() extends State
   case class OpenTransaction(queueName: ChannelBuffer, item: ChannelBuffer) extends State
   state = NoTransaction()
@@ -20,7 +21,7 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
         state match {
           case NoTransaction() =>
             val wait = timeout.getOrElse(0.seconds)
-            val item = queues(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
+            val item = queues.get(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
             if (item eq null)
               Values(Seq.empty)
             else
@@ -32,7 +33,7 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
         state match {
           case NoTransaction() =>
             val wait = timeout.getOrElse(0.seconds)
-            val item = queues(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
+            val item = queues.get(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
             state = OpenTransaction(queueName, item)
             if (item eq null)
               Values(Seq.empty)
@@ -69,28 +70,28 @@ class Interpreter(queues: collection.mutable.Map[ChannelBuffer, BlockingDeque[Ch
             require(queueName == txnQueueName,
               "Cannot operate on a different queue than the one for which you have an open transaction")
 
-            queues(queueName).addFirst(item)
+            queues.get(queueName).addFirst(item)
             state = NoTransaction()
             Values(Seq.empty)
         }
       case Peek(queueName, timeout) =>
         val wait = timeout.getOrElse(0.seconds)
-        val item = queues(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
+        val item = queues.get(queueName).poll(wait.inMilliseconds, TimeUnit.MILLISECONDS)
         if (item eq null)
           Values(Seq.empty)
         else
           Values(Seq(Value(wrappedBuffer(queueName), wrappedBuffer(item))))
       case Set(queueName, expiry, value) =>
-        queues(queueName).add(value)
+        queues.get(queueName).add(value)
         Stored()
       case Delete(queueName) =>
-        queues.remove(queueName)
+        queues.invalidate(queueName)
         Deleted()
       case Flush(queueName) =>
-        queues.remove(queueName)
+        queues.invalidate(queueName)
         Deleted()
       case FlushAll() =>
-        queues.clear()
+        queues.invalidateAll()
         Deleted()
       case Version() =>
         NotFound()

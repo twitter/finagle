@@ -4,80 +4,28 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-redis</artifactId>
   <packaging>jar</packaging>
-  <version>4.0.3-SNAPSHOT</version>
+  <version>5.1.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent</artifactId>
+    <artifactId>scala-parent-292</artifactId>
     <version>0.0.2</version>
-    <relativePath>../../parents/scala-parent/pom.xml</relativePath>
+    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
   </properties>
   <dependencies>
     <!-- library dependencies -->
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>naggati</artifactId>
-      <version>2.2.0</version>
-      <!-- excluded to prevent conflicts with caged finagle/util -->
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-collection</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-hashing</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-reflect</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-thrift</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-logging</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>util-eval</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>finagle-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.twitter</groupId>
-          <artifactId>finagle-thrift</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>4.0.3-SNAPSHOT</version>
+      <version>5.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>4.0.1</version>
+      <version>5.2.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -87,7 +35,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <excludes>
-            <exclude>**/*</exclude>
+            <!-- Both of these use external redis processes -->
+            <exclude>**/ClientServerIntegrationSpec.class</exclude>
+            <exclude>**/ClientSpec.class</exclude>
           </excludes>
         </configuration>
       </plugin>

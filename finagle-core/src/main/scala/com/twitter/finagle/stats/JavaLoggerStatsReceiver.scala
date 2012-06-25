@@ -4,17 +4,19 @@ import collection.mutable.HashMap
 
 import java.util.logging.Logger
 import com.twitter.conversions.time._
-import com.twitter.util
+import com.twitter.util.{Timer, TimerTask}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.Timer
+import com.twitter.finagle.util.FinagleTimer
 
-class JavaLoggerStatsReceiver(logger: Logger, timer: util.Timer)
+class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
   extends StatsReceiverWithCumulativeGauges
 {
   val repr = logger
-  var timerTasks = new HashMap[Seq[String], util.TimerTask]
+  var timerTasks = new HashMap[Seq[String], TimerTask]
 
-  def this(logger: Logger) = this(logger, Timer.default)
+  // Timer here will never be released. This is ok since this class
+  // is used for debugging only.
+  def this(logger: Logger) = this(logger, FinagleTimer.getManaged.make().get)
 
   def stat(name: String*) = new Stat {
     def add(value: Float) {

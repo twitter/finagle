@@ -7,4 +7,6 @@ package object dispatch {
   type ClientDispatcher[Req, Rep] = Req => Future[Rep]
   type ClientDispatcherFactory[Req, Rep] = TransportFactory => ClientDispatcher[Req, Rep]
   type ServerDispatcherFactory[Req, Rep] = (TransportFactory, Service[Req, Rep]) => ServerDispatcher
+  type Transformer[T] = T => T
+  type ServerDispatcherFactoryTransformer[Req, Rep] = Transformer[ServerDispatcherFactory[Req, Rep]]
 }

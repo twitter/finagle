@@ -1,0 +1,23 @@
+.sp
+.PS
+maxpswid=100
+maxpsht=100
+boxwid=1.4
+.ps +10
+
+copy "service.pic"
+
+Stack: stack
+"\s+9............\s-9" ljust with .w at last [].e+(.3,0)
+
+boxwid=Stack.wid+2
+down
+box "\fIServiceFactory - LoadBalancer\fP" with .nw at Stack.sw+(0,-.25) thickness 2 
+move .1
+box "\fIConnectTimeout\fP" thickness 2
+box "\fIStatsFactory\fP" thickness 2
+box "\fITracingFilter\fP" thickness 2
+box "\fICodec preparation\fP" thickness 2
+box with .nw at Stack.nw+(-.2,.2) ht Stack.ht+5*boxht+.1+.25+.2+.2+.5 wid boxwid+.2+.2 thickness 3
+"\fI\s+7ServiceFactory\s-7\fP" with .s at last box .s+(0,.2)
+.PE

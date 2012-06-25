@@ -5,10 +5,11 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.util.Timer
+import com.twitter.finagle.util.FinagleTimer
 import com.twitter.ostrich.stats
-import com.twitter.util.{Future, Return, Throw, Time}
+import com.twitter.util.{Future, Return, Promise, Throw, Time}
 import java.net.{SocketAddress, InetSocketAddress}
+import java.util.concurrent.CountDownLatch
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{
   DefaultHttpRequest, HttpVersion, HttpResponseStatus, HttpMethod, HttpHeaders, HttpRequest
@@ -27,14 +28,21 @@ object EndToEndStress {
     }
   }
 
-  def dispatchLoop(service: Service[HttpRequest, HttpResponse]) {
+  @volatile private[this] var running = true
+
+  def dispatchLoop(service: Service[HttpRequest, HttpResponse], latch: CountDownLatch) {
+    if (!running) {
+      latch.countDown()
+      return
+    }
+
     val request = new DefaultHttpRequest(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
     val beginTime = Time.now
 
     service(request) ensure {
-      dispatchLoop(service)
+      dispatchLoop(service, latch)
     } respond {
       case Return(_) =>
         stats.Stats.addMetric("request_msec", beginTime.untilNow.inMilliseconds.toInt)
@@ -43,33 +51,51 @@ object EndToEndStress {
     }
   }
 
-  private[this] def run(concurrency: Int, addr: SocketAddress) {
-    val service = ClientBuilder()
-      .name("stressClient")
-      .reportTo(new OstrichStatsReceiver)
-      .hosts(Seq(addr))
-      .codec(Http())
-      .hostConnectionLimit(10)
-      .build()
+  private[this] def buildServer = ServerBuilder()
+    .name("stressServer")
+    .bindTo(new InetSocketAddress(0))
+    .codec(Http())
+    .reportTo(new OstrichStatsReceiver)
+    .maxConcurrentRequests(5)
+    .buildManaged(HttpService)
 
-    0 until concurrency foreach { _ => dispatchLoop(service) }
-  }
+  private[this] def buildClient(concurrency: Int, addr: SocketAddress) = ClientBuilder()
+    .name("stressClient")
+    .reportTo(new OstrichStatsReceiver)
+    .hosts(Seq(addr))
+    .codec(Http())
+    .hostConnectionLimit(concurrency)
+    .buildManaged()
 
   def main(args: Array[String]) {
-    val server = ServerBuilder()
-      .name("stressServer")
-      .bindTo(new InetSocketAddress(0))
-      .codec(Http())
-      .reportTo(new OstrichStatsReceiver)
-      .maxConcurrentRequests(5)
-      .build(HttpService)
+    println("Starting EndToEndStress")
 
+    val concurrency = 10
+    val latch = new CountDownLatch(concurrency)
     val beginTime = Time.now
-    Timer.default.schedule(10.seconds) {
-      println("@@ %ds".format(beginTime.untilNow.inSeconds))
-      Stats.prettyPrintStats()
+
+    val testResource = for {
+      timer <- FinagleTimer.getManaged
+      server <- buildServer
+      client <- buildClient(concurrency, server.boundAddress)
+    } yield {
+      timer.schedule(10.seconds) {
+        println("@@ %ds".format(beginTime.untilNow.inSeconds))
+        Stats.prettyPrintStats()
+      }
+      0 until concurrency foreach { _ => dispatchLoop(client, latch) }
     }
 
-    run(100, server.localAddress)
+    val res = testResource.make()
+
+    Runtime.getRuntime().addShutdownHook(new Thread {
+      override def run() {
+        val start = System.currentTimeMillis()
+        running = false
+        latch.await()
+        res.dispose()
+        println("Shutdown took %dms".format(System.currentTimeMillis()-start))
+      }
+    })
   }
 }

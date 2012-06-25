@@ -1,14 +1,16 @@
 package com.twitter.finagle.service
 
 import com.twitter.util.{Time, Duration, Throw, Return, TimerTask, Timer}
-import com.twitter.finagle.{Service, ServiceFactory, ServiceFactoryWrapper, ClientConnection}
-import com.twitter.finagle.util.{Timer => FinagleTimer}
+import com.twitter.finagle.{
+  Service, ServiceFactory, ServiceFactoryWrapper, ClientConnection}
+import com.twitter.finagle.util.{Disposable, FinagleTimer}
 
-object FailureAccrualFactory {
-  def wrapper(numFailures: Int, markDeadFor: Duration): ServiceFactoryWrapper = {
+private[finagle] object FailureAccrualFactory {
+  def wrapper(
+    numFailures: Int, markDeadFor: Duration)(timer: Timer): ServiceFactoryWrapper = {
     new ServiceFactoryWrapper {
       def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
-        new FailureAccrualFactory(factory, numFailures, markDeadFor)
+        new FailureAccrualFactory(factory, numFailures, markDeadFor, timer)
     }
   }
 }
@@ -20,14 +22,13 @@ object FailureAccrualFactory {
  * TODO: treat different failures differently (eg. connect failures
  * vs. not), enable different backoff strategies.
  */
-class FailureAccrualFactory[Req, Rep](
-    underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: Duration,
-    timer: Timer = FinagleTimer.default)
-  extends ServiceFactory[Req, Rep]
+private[finagle] class FailureAccrualFactory[Req, Rep](
+  underlying: ServiceFactory[Req, Rep],
+  numFailures: Int,
+  markDeadFor: Duration,
+  timer: Timer
+) extends ServiceFactory[Req, Rep]
 {
-
   private[this] var failureCount = 0
   @volatile private[this] var markedDead = false
   private[this] var reviveTimerTask: Option[TimerTask] = None

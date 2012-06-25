@@ -62,7 +62,7 @@ object MultiReader {
         )
       }
 
-      of()
+      of.sync()
     }
 
     loop()

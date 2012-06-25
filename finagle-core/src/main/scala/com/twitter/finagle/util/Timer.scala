@@ -1,28 +1,41 @@
 package com.twitter.finagle.util
 
-import collection.mutable.HashSet
+import collection.mutable.{HashMap, SynchronizedMap}
 
-import java.util.concurrent.{TimeUnit, Executors}
+import java.util.Collections
+import java.util.concurrent.{TimeUnit, Executors, ConcurrentHashMap}
 import java.util.concurrent.atomic.{AtomicReference, AtomicInteger, AtomicBoolean}
 import org.jboss.netty.util.{HashedWheelTimer}
 import org.jboss.netty.{util => nu}
 
 import com.twitter.util.{
-  Time, Duration, TimerTask, ReferenceCountedTimer,
-  ReferenceCountingTimer, ThreadStoppingTimer}
+  Time, Duration, Future, TimerTask, NullTimerTask, ReferenceCountedTimer,
+  ReferenceCountingTimer, ThreadStoppingTimer, Timer}
 import com.twitter.concurrent.NamedPoolThreadFactory
 
 import com.twitter.finagle.stats.{StatsReceiver, GlobalStatsReceiver}
 
-private[finagle] object Timer {
+private[finagle] object FinagleTimer {
   private[this] val timerStoppingExecutor = Executors.newFixedThreadPool(
     1, new NamedPoolThreadFactory("FINAGLE-TIMER-STOPPER", true/*daemon*/))
 
-  def register(h: CloseNotifier) {
-      default.acquire()
-      h.onClose {
-        default.stop()
+  def mkManaged(timerFactory: () => Timer): Managed[Timer] = new Managed[Timer] {
+    def make(): Disposable[Timer] = new Disposable[Timer] {
+      val underlying = timerFactory()
+      def get = underlying
+      def dispose(deadline: Time) = {
+        underlying.stop()
+        Future.value(())
       }
+    }
+  }
+
+  /**
+   *  When a managed timer is disposed, all of its pending timer tasks will be cancelled.
+   */
+  def getManaged: Managed[Timer] = mkManaged { () =>
+    default.acquire()
+    new TaskTrackingTimer(default)
   }
 
   // This timer should only be used inside the context of finagle,
@@ -36,9 +49,10 @@ private[finagle] object Timer {
   //   `ThreadStoppingTimer` to ensure that timer threads themselves
   //   can shut down reliably (they cannot be shut down from the timer
   //   threads themselves.)
-  implicit val default: ReferenceCountedTimer = {
+  private[this] val default: ReferenceCountedTimer = {
+
     def factory() = {
-      val underlying = new Timer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
+      val underlying = new TimerFromNettyTimer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
       new ThreadStoppingTimer(underlying, timerStoppingExecutor)
     }
 
@@ -50,9 +64,6 @@ private[finagle] object Timer {
       def acquire() = underlying.acquire()
     }
   }
-
-  // Spin off a thread to close.
-  val defaultNettyTimer = new TimerToNettyTimer(default)
 }
 
 /**
@@ -62,7 +73,7 @@ private[finagle] object Timer {
  * slightly confusing since `default` in turn is implemented on top of
  * a Netty timer.
  */
-private[finagle] class TimerToNettyTimer(underlying: ReferenceCountedTimer)
+private[finagle] class TimerToNettyTimer(underlying: Timer)
   extends nu.Timer
 {
   private[this] object State extends Enumeration {
@@ -100,7 +111,6 @@ private[finagle] class TimerToNettyTimer(underlying: ReferenceCountedTimer)
       }
     }
 
-    underlying.acquire()
     val when = Time.now + Duration.fromTimeUnit(delay, unit)
     underlyingTask = underlying.schedule(when) { timeout.run() }
     timeout
@@ -116,7 +126,7 @@ private[finagle] class TimerToNettyTimer(underlying: ReferenceCountedTimer)
  * Implements a [[com.twitter.util.Timer]] in terms of a
  * [[org.jboss.netty.util.Timer]].
  */
-class Timer(underlying: nu.Timer) extends com.twitter.util.Timer {
+class TimerFromNettyTimer(underlying: nu.Timer) extends Timer {
   def schedule(when: Time)(f: => Unit): TimerTask = {
     val timeout = underlying.newTimeout(new nu.TimerTask {
       def run(to: nu.Timeout) {
@@ -140,9 +150,7 @@ class Timer(underlying: nu.Timer) extends com.twitter.util.Timer {
   }
 }
 
-class CountingTimer(underlying: com.twitter.util.Timer)
-  extends com.twitter.util.Timer
-{
+class CountingTimer(underlying: Timer) extends Timer {
   private[this] val npending = new AtomicInteger(0)
 
   def count = npending.get
@@ -174,3 +182,46 @@ class CountingTimer(underlying: com.twitter.util.Timer)
 
   def stop() { underlying.stop() }
 }
+
+private[finagle] class TaskTrackingTimer(underlying: Timer) extends Timer {
+  private[finagle] val tasks = Collections.newSetFromMap(new ConcurrentHashMap[TimerTask, java.lang.Boolean])
+  @volatile private[this] var stopped = false
+
+  private[this] def wrap(underlying: (=> Unit) => TimerTask, f: => Unit) = {
+
+    val wrappedTask = if (stopped)
+      NullTimerTask
+    else {
+      new TimerTask {
+        tasks.add(this)
+        private[this] val underlyingTask = underlying {
+          tasks.remove(this)
+          f
+        }
+
+        def cancel() {
+          tasks.remove(this)
+          underlyingTask.cancel()
+        }
+      }
+    }
+
+    if (stopped)
+      wrappedTask.cancel()
+    wrappedTask
+  }
+
+  def schedule(when: Time)(f: => Unit): TimerTask =
+    wrap(underlying.schedule(when), f)
+
+  def schedule(when: Time, period: Duration)(f: => Unit): TimerTask =
+    wrap(underlying.schedule(when, period), f)
+
+  def stop() = {
+    import scala.collection.JavaConverters._
+    stopped = true
+    tasks.asScala foreach { _.cancel() }
+    underlying.stop()
+  }
+}
+

@@ -8,8 +8,9 @@ case class Append(key: String, value: Array[Byte])
   extends StrictKeyCommand
   with StrictValueCommand
 {
+  val command = Commands.APPEND
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(Commands.APPEND),
+    StringToBytes(command),
     StringToBytes(key),
     value))
 }
@@ -21,7 +22,8 @@ object Append {
 }
 
 case class Decr(override val key: String) extends DecrBy(key, 1) {
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.DECR, key))
+  override val command = Commands.DECR
+  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
 }
 object Decr {
   def apply(args: List[Array[Byte]]) = {
@@ -29,8 +31,9 @@ object Decr {
   }
 }
 class DecrBy(val key: String, val amount: Int) extends StrictKeyCommand {
+  val command = Commands.DECRBY
   override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.DECRBY, key, amount.toString))
+    RedisCodec.toInlineFormat(List(command, key, amount.toString))
   override def toString = "DecrBy(%s, %d)".format(key, amount)
   override def equals(other: Any) = other match {
     case that: DecrBy => that.canEqual(this) && this.key == that.key && this.amount == that.amount
@@ -50,7 +53,8 @@ object DecrBy {
 }
 
 case class Get(key: String) extends StrictKeyCommand {
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.GET, key))
+  val command = Commands.GET
+  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
 }
 object Get {
   def apply(args: List[Array[Byte]]) = {
@@ -59,8 +63,9 @@ object Get {
 }
 
 case class GetBit(key: String, offset: Int) extends StrictKeyCommand {
+  val command = Commands.GETBIT
   override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.GETBIT, key, offset.toString))
+    RedisCodec.toInlineFormat(List(command, key, offset.toString))
 }
 object GetBit {
   def apply(args: List[Array[Byte]]) = {
@@ -71,8 +76,9 @@ object GetBit {
 }
 
 case class GetRange(key: String, start: Int, end: Int) extends StrictKeyCommand {
+  val command = Commands.GETRANGE
   override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.GETRANGE, key, start.toString, end.toString))
+    RedisCodec.toInlineFormat(List(command, key, start.toString, end.toString))
 }
 object GetRange {
   def apply(args: List[Array[Byte]]) = {
@@ -87,8 +93,9 @@ case class GetSet(key: String, value: Array[Byte])
   extends StrictKeyCommand
   with StrictValueCommand
 {
+  val command = Commands.GETSET
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(Commands.GETSET),
+    StringToBytes(command),
     StringToBytes(key),
     value))
 }
@@ -100,7 +107,8 @@ object GetSet {
 }
 
 case class Incr(override val key: String) extends IncrBy(key, 1) {
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.INCR, key))
+  override val command = Commands.INCR
+  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
 }
 object Incr {
   def apply(args: List[Array[Byte]]) = {
@@ -109,8 +117,9 @@ object Incr {
 }
 
 class IncrBy(val key: String, val amount: Int) extends StrictKeyCommand {
+  val command = Commands.INCRBY
   override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.INCRBY, key, amount.toString))
+    RedisCodec.toInlineFormat(List(command, key, amount.toString))
   override def toString = "IncrBy(%s, %d)".format(key, amount)
   override def equals(other: Any) = other match {
     case that: IncrBy => that.canEqual(this) && this.key == that.key && this.amount == that.amount
@@ -130,7 +139,8 @@ object IncrBy {
 }
 
 case class MGet(keys: List[String]) extends StrictKeysCommand {
-  override def toChannelBuffer = RedisCodec.toInlineFormat(Commands.MGET +: keys)
+  val command = Commands.MGET
+  override def toChannelBuffer = RedisCodec.toInlineFormat(command +: keys)
 }
 
 case class MSet(kv: Map[String, Array[Byte]]) extends MultiSet {
@@ -164,8 +174,9 @@ object Set extends SetCommandCompanion {
 }
 
 case class SetBit(key: String, offset: Int, value: Int) extends StrictKeyCommand {
+  val command = Commands.SETBIT
   override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.SETBIT, key, offset.toString, value.toString))
+    RedisCodec.toInlineFormat(List(command, key, offset.toString, value.toString))
 }
 object SetBit {
   def apply(args: List[Array[Byte]]) = {
@@ -180,9 +191,10 @@ case class SetEx(key: String, seconds: Long, value: Array[Byte])
   extends StrictKeyCommand
   with StrictValueCommand
 {
+  val command = Commands.SETEX
   RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(Commands.SETEX),
+    StringToBytes(command),
     StringToBytes(key),
     StringToBytes(seconds.toString),
     value
@@ -212,8 +224,9 @@ case class SetRange(key: String, offset: Int, value: Array[Byte])
   extends StrictKeyCommand
   with StrictValueCommand
 {
+  val command = Commands.SETRANGE
   override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(Commands.SETRANGE),
+    StringToBytes(command),
     StringToBytes(key),
     StringToBytes(offset.toString),
     value
@@ -230,7 +243,8 @@ object SetRange {
 }
 
 case class Strlen(key: String) extends StrictKeyCommand {
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.STRLEN, key))
+  val command = Commands.STRLEN
+  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
 }
 object Strlen {
   def apply(args: List[Array[Byte]]) = {
@@ -241,8 +255,6 @@ object Strlen {
 
 /** Helpers for common idioms */
 trait SetCommand extends KeyCommand with ValueCommand {
-  val command: String
-
   def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
     StringToBytes(command),
     StringToBytes(key),
@@ -260,7 +272,6 @@ trait SetCommandCompanion {
 
 trait MultiSet extends KeysCommand {
   val kv: Map[String, Array[Byte]]
-  val command: String
   override lazy val keys: List[String] = kv.keys.toList
 
   override def toChannelBuffer = {

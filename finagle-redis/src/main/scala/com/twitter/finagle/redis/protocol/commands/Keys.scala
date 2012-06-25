@@ -17,6 +17,7 @@ import Commands.trimList
  */
 
 case class Del(keys: List[String]) extends StrictKeysCommand {
+  val command = Commands.DEL
   override def toChannelBuffer = RedisCodec.toInlineFormat(Commands.DEL +: keys)
 }
 object Del {
@@ -24,6 +25,7 @@ object Del {
 }
 
 case class Exists(key: String) extends StrictKeyCommand {
+  val command = Commands.EXISTS
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.EXISTS, key))
 }
 object Exists {
@@ -34,6 +36,7 @@ object Exists {
 }
 
 case class Expire(key: String, seconds: Long) extends StrictKeyCommand {
+  val command = Commands.EXPIRE
   RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
   override def toChannelBuffer =
     RedisCodec.toInlineFormat(List(Commands.EXPIRE, key, seconds.toString))
@@ -48,6 +51,7 @@ object Expire {
 }
 
 case class ExpireAt(key: String, timestamp: Time) extends StrictKeyCommand {
+  val command = Commands.EXPIREAT
   RequireClientProtocol(
     timestamp != null && timestamp > Time.now,
     "Timestamp must be in the future")
@@ -69,6 +73,7 @@ object ExpireAt {
 }
 
 case class Keys(pattern: String) extends Command {
+  val command = Commands.KEYS
   RequireClientProtocol(pattern != null && pattern.length > 0, "Pattern must be specified")
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.KEYS, pattern))
 }
@@ -77,6 +82,7 @@ object Keys {
 }
 
 case class Persist(key: String) extends StrictKeyCommand {
+  val command = Commands.PERSIST
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.PERSIST, key))
 }
 object Persist {
@@ -87,10 +93,12 @@ object Persist {
 }
 
 case class Randomkey() extends Command {
+  val command = Commands.RANDOMKEY
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.RANDOMKEY))
 }
 
 case class Rename(key: String, newkey: String) extends StrictKeyCommand {
+  val command = Commands.RENAME
   RequireClientProtocol(newkey != null && newkey.length > 0, "New key must not be empty")
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.RENAME, key, newkey))
 }
@@ -102,6 +110,7 @@ object Rename {
 }
 
 case class RenameNx(key: String, newkey: String) extends StrictKeyCommand {
+  val command = Commands.RENAMENX
   RequireClientProtocol(newkey != null && newkey.length > 0, "New key must not be empty")
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.RENAMENX, key, newkey))
 }
@@ -113,6 +122,7 @@ object RenameNx {
 }
 
 case class Ttl(key: String) extends StrictKeyCommand {
+  val command = Commands.TTL
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.TTL, key))
 }
 object Ttl {
@@ -123,6 +133,7 @@ object Ttl {
 }
 
 case class Type(key: String) extends StrictKeyCommand {
+  val command = Commands.TYPE
   override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.TYPE, key))
 }
 object Type {

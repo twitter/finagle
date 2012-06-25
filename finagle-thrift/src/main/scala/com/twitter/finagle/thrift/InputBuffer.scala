@@ -28,5 +28,21 @@ private[thrift] class InputBuffer(bytes: Array[Byte]) {
 
   def apply() = iprot
 
-  def remainder = bytes drop memoryTransport.getBufferPosition
+  def remainder = {
+    val length = bytes.length
+    memoryTransport.getBufferPosition match {
+      case 0 => bytes
+      case l if l == length => InputBuffers.EmptyBytes
+      case position => {
+        val diff = length - position
+        val newBytes = new Array[Byte](diff)
+        System.arraycopy(bytes, position, newBytes, 0, diff)
+        newBytes
+      }
+    }
+  }
+}
+
+object InputBuffers {
+  val EmptyBytes = Array[Byte]()
 }

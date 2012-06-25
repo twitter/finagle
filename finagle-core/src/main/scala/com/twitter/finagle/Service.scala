@@ -17,6 +17,10 @@ object Service {
       }
     }
   }
+  
+  def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
+    def apply(req: Req) = f(req)
+  }
 }
 
 /**
@@ -115,7 +119,7 @@ abstract class ServiceFactory[-Req, +Rep]
   def apply(conn: ClientConnection): Future[Service[Req, Rep]]
   final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
 
-  @deprecated("use apply() instead")
+  @deprecated("use apply() instead", "5.0.1")
   final def make(): Future[Service[Req, Rep]] = this()
 
   /**

@@ -4,6 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
+import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import org.jboss.netty.handler.codec.http._
 
@@ -14,15 +15,11 @@ object Client {
   }
 
   def main(args: Array[String]) {
-    {
-      import com.twitter.logging.config._
-      val config = new LoggerConfig {
-        node = ""
-        level = Level.INFO
-        handlers = new ConsoleHandlerConfig
-      }
-      config()
-    }
+    LoggerFactory(
+      node = "",
+      level = Some(Level.INFO),
+      handlers = ConsoleHandler() :: Nil
+    ).apply()
 
     if (args.size != 3) {
       System.err.printf("usage: Client statsport host:port concurrency\n")

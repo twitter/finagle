@@ -3,15 +3,17 @@ package com.twitter.finagle.memcached
 import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 
-import _root_.java.net.InetSocketAddress
+import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
+import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 import _root_.java.util.concurrent.ConcurrentHashMap
 
+import com.google.common.base.{CharMatcher, Strings}
+
+import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{
-  ChannelException, RequestException, ServiceException,
-  ServiceProxy, ServiceFactory, ServiceFactoryWrapper}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import com.twitter.finagle._
+import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig, StaticCluster}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
@@ -19,8 +21,7 @@ import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.hashing._
-import com.twitter.util.{Time, Future, Bijection, Duration}
-import com.twitter.concurrent.{Broker, Offer}
+import com.twitter.util.{Time, Future, Bijection, Duration, Timer}
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
@@ -35,6 +36,16 @@ object Client {
   def apply(host: String): Client = Client(
     ClientBuilder()
       .hosts(host)
+      .hostConnectionLimit(1)
+      .codec(Memcached())
+      .build())
+
+  /**
+   * Construct a client from a Cluster
+   */
+  def apply(cluster: Cluster[SocketAddress]) : Client = Client(
+    ClientBuilder()
+      .cluster(cluster)
       .hostConnectionLimit(1)
       .codec(new Memcached)
       .build())
@@ -112,28 +123,28 @@ trait BaseClient[T] {
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def add(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Append bytes to the end of an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def append(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Prepend bytes to the beginning of an existing key. If the key doesn't
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def prepend(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def prepend(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Replace bytes on an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  def replace(key: String, flags: Int, expiry: Time, value: T): Future[Boolean]
+  def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
 
   /**
    * Perform a CAS operation on the key, only if the value has not
@@ -145,7 +156,7 @@ trait BaseClient[T] {
    */
   def cas(
     key: String, flags: Int, expiry: Time, value: T, casUnique: ChannelBuffer
-  ): Future[Boolean]
+  ): Future[JBoolean]
 
   /**
    * Get a key from the server.
@@ -211,21 +222,21 @@ trait BaseClient[T] {
    * Remove a key.
    * @return true if deleted, false if not found
    */
-  def delete(key: String): Future[Boolean]
+  def delete(key: String): Future[JBoolean]
 
   /**
    * Increment a key. Interpret the value as an Long if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def incr(key: String, delta: Long): Future[Option[Long]]
-  def incr(key: String): Future[Option[Long]] = incr(key, 1L)
+  def incr(key: String, delta: Long): Future[Option[JLong]]
+  def incr(key: String): Future[Option[JLong]] = incr(key, 1L)
 
   /**
-   * Decrement a key. Interpret the value as an Long if it is parsable.
+   * Decrement a key. Interpret the value as an JLong if it is parsable.
    * This operation has no effect if there is no value there already.
    */
-  def decr(key: String, delta: Long): Future[Option[Long]]
-  def decr(key: String): Future[Option[Long]] = decr(key, 1L)
+  def decr(key: String, delta: Long): Future[Option[JLong]]
+  def decr(key: String): Future[Option[JLong]] = decr(key, 1L)
 
   /**
    * Store a key. Override an existing values.
@@ -238,7 +249,7 @@ trait BaseClient[T] {
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  def add(key: String, value: T): Future[Boolean] =
+  def add(key: String, value: T): Future[JBoolean] =
     add(key, 0, Time.epoch, value)
 
   /**
@@ -246,7 +257,7 @@ trait BaseClient[T] {
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def append(key: String, value: T): Future[Boolean] =
+  def append(key: String, value: T): Future[JBoolean] =
     append(key, 0, Time.epoch, value)
 
   /**
@@ -254,7 +265,7 @@ trait BaseClient[T] {
    * doesn't exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  def prepend(key: String, value: T): Future[Boolean] =
+  def prepend(key: String, value: T): Future[JBoolean] =
     prepend(key, 0, Time.epoch, value)
 
   /**
@@ -262,7 +273,7 @@ trait BaseClient[T] {
    * effect.
    * @return true if stored, false if not stored
    */
-  def replace(key: String, value: T): Future[Boolean] = replace(key, 0, Time.epoch, value)
+  def replace(key: String, value: T): Future[JBoolean] = replace(key, 0, Time.epoch, value)
 
   /**
    * Perform a CAS operation on the key, only if the value has not
@@ -272,7 +283,7 @@ trait BaseClient[T] {
    *
    * @return true if replaced, false if not
    */
-  def cas(key: String, value: T, casUnique: ChannelBuffer): Future[Boolean] =
+  def cas(key: String, value: T, casUnique: ChannelBuffer): Future[JBoolean] =
     cas(key, 0, Time.epoch, value, casUnique)
 
   /**
@@ -345,80 +356,108 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
     }
   }
 
-  def getResult(keys: Iterable[String]) = rawGet(Get(keys.toSeq))
-  def getsResult(keys: Iterable[String]) =
-    rawGet(Gets(keys.toSeq)) map { GetsResult(_) }
+  def getResult(keys: Iterable[String]) = {
+    validateKeys(keys) { rawGet(Get(keys.toSeq)) }
+  }
+  def getsResult(keys: Iterable[String]) = {
+    validateKeys(keys) { rawGet(Gets(keys.toSeq)) map { GetsResult(_) } }
+  }
 
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Set(key, flags, expiry, value)) map {
-      case Stored() => ()
-      case Error(e) => throw e
-      case _        => throw new IllegalStateException
-    }
-
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
-    service(Cas(key, flags, expiry, value, casUnique)) map {
-      case Stored() => true
-      case Exists() => false
-      case Error(e) => throw e
-      case _        => throw new IllegalStateException
-    }
-
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Add(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
-    }
-
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Append(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
-    }
-
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Prepend(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
-    }
-
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
-    service(Replace(key, flags, expiry, value)) map {
-      case Stored()     => true
-      case NotStored()  => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
-    }
-
-  def delete(key: String) =
-    service(Delete(key)) map {
-      case Deleted()    => true
-      case NotFound()   => false
-      case Error(e)     => throw e
-      case _            => throw new IllegalStateException
-    }
-
-  def incr(key: String, delta: Long): Future[Option[Long]] = {
-    service(Incr(key, delta)) map {
-      case Number(value) => Some(value)
-      case NotFound()    => None
-      case Error(e)      => throw e
-      case _             => throw new IllegalStateException
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Set(key, flags, expiry, value)) map {
+        case Stored() => ()
+        case Error(e) => throw e
+        case _        => throw new IllegalStateException
+      }
     }
   }
 
-  def decr(key: String, delta: Long): Future[Option[Long]] = {
-    service(Decr(key, delta)) map {
-      case Number(value) => Some(value)
-      case NotFound()    => None
-      case Error(e)      => throw e
-      case _             => throw new IllegalStateException
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Cas(key, flags, expiry, value, casUnique)) map {
+        case Stored() => true
+        case Exists() => false
+        case Error(e) => throw e
+        case _        => throw new IllegalStateException
+      }
+    }
+  }
+
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Add(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
+    }
+  }
+
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Append(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
+    }
+  }
+
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Prepend(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
+    }
+  }
+
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+    validateKeys(Seq(key)) {
+      service(Replace(key, flags, expiry, value)) map {
+        case Stored()     => true
+        case NotStored()  => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
+    }
+  }
+
+  def delete(key: String) = {
+    validateKeys(Seq(key)) {
+      service(Delete(key)) map {
+        case Deleted()    => true
+        case NotFound()   => false
+        case Error(e)     => throw e
+        case _            => throw new IllegalStateException
+      }
+    }
+  }
+
+  def incr(key: String, delta: Long): Future[Option[JLong]] = {
+    validateKeys(Seq(key)) {
+      service(Incr(key, delta)) map {
+        case Number(value) => Some(value)
+        case NotFound()    => None
+        case Error(e)      => throw e
+        case _             => throw new IllegalStateException
+      }
+    }
+  }
+
+  def decr(key: String, delta: Long): Future[Option[JLong]] = {
+    validateKeys(Seq(key)) {
+      service(Decr(key, delta)) map {
+        case Number(value) => Some(value)
+        case NotFound()    => None
+        case Error(e)      => throw e
+        case _             => throw new IllegalStateException
+      }
     }
   }
 
@@ -442,6 +481,15 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
   def release() {
     service.release()
   }
+
+  private def keyIsBad(key: String) =
+    Strings.isNullOrEmpty(key) || CharMatcher.WHITESPACE.matchesAnyOf(key)
+
+  private def validateKeys[T](keys: Iterable[String])(f: => Future[T]) =
+    if (keys.exists(keyIsBad(_)))
+      Future.exception(new ClientError("Key cannot be empty or have spaces!"))
+    else
+      f
 }
 
 /**
@@ -527,9 +575,10 @@ class KetamaFailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   numFailures: Int,
   markDeadFor: Duration,
+  timer: Timer,
   key: KetamaClientKey,
   healthBroker: Broker[NodeHealth]
-) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor) {
+) extends FailureAccrualFactory[Req, Rep](underlying, numFailures, markDeadFor, timer) {
 
   override def markDead() = {
     super.markDead()
@@ -620,8 +669,8 @@ class KetamaClient private[memcached](
   }
 }
 
-case class KetamaClientBuilder(
-  _nodes: Seq[(String, Int, Int)],
+case class KetamaClientBuilder private[memcached] (
+  _cluster: Cluster[(String, Int, Int)],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _numFailures: Int = 5,
@@ -629,11 +678,19 @@ case class KetamaClientBuilder(
   oldLibMemcachedVersionComplianceMode: Boolean = false
 ) {
 
+  def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
+    // TODO: for now, we assume all the cluster created this way has equal weight.
+    copy(
+      _cluster = cluster map {
+        socketAddr =>
+          (socketAddr.getHostName, socketAddr.getPort, 1)})
+  }
+
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_nodes = nodes)
+    copy(_cluster = new StaticCluster(nodes))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
-    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+    copy(_cluster = new StaticCluster(PartitionedClient.parseHostPortWeights(hostPortWeights)))
 
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
@@ -647,12 +704,18 @@ case class KetamaClientBuilder(
   def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
     copy(oldLibMemcachedVersionComplianceMode = true)
 
-
   def build(): Client = {
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
-    val keys = _nodes map {
+    val (clusterEndpoints, clusterUpdates) = _cluster.snap
+    // TODO: listeng to the updates here
+    // For the first version of this client, we do not listen to the cluster update yet, we only use
+    // the initial set of cluster members; later when we add the capability to listen to the updates,
+    // we'd need to modify the KetamaClient class to provide an interface for reloading a new set of
+    // cluster members whenever a serverset update happens
+
+    val keys = clusterEndpoints map {
       case (hostname, port, weight) => KetamaClientKey(hostname, port, weight)
     }
 
@@ -664,7 +727,7 @@ case class KetamaClientBuilder(
     val clients = failureAccrurers map { case (key, fa) =>
       val hostBuilder = builder
         .hosts(new InetSocketAddress(key.host, key.port))
-        .failureAccrual(fa)
+        .failureAccrualFactory(fa)
       (key -> hostBuilder.build())
     } toMap
 
@@ -682,21 +745,22 @@ case class KetamaClientBuilder(
     )
   }
 
-  private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
-    val broker = new Broker[NodeHealth]
-    val filter = new ServiceFactoryWrapper {
-      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
+  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = new ServiceFactoryWrapper {
+    def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
         new KetamaFailureAccrualFactory(
-          factory, _numFailures, _markDeadFor, key, broker
+          factory, _numFailures, _markDeadFor, timer, key, broker
         )
       }
-    }
-    (filter, broker.recv)
+  }
+
+  private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
+    val broker = new Broker[NodeHealth]
+    (filter(key, broker) _, broker.recv)
   }
 }
 
 object KetamaClientBuilder {
-  def apply(): KetamaClientBuilder = KetamaClientBuilder(Nil, Some("ketama"), None)
+  def apply(): KetamaClientBuilder = KetamaClientBuilder(new StaticCluster(Nil), Some("ketama"), None)
   def get() = apply()
 }
 
@@ -741,7 +805,7 @@ case class RubyMemCacheClientBuilder(
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
     val clients = _nodes.map { case (hostname, port, weight) =>
       require(weight == 1, "Ruby memcache node weight must be 1")
-      Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())
     }
     new RubyMemCacheClient(clients)
   }
@@ -788,7 +852,7 @@ case class PHPMemCacheClientBuilder(
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
     val clients = _nodes.map { case (hostname, port, weight) =>
-      val client = Client(builder.hosts(hostname + ":" + port).codec(new Memcached).build())
+      val client = Client(builder.hosts(hostname + ":" + port).codec(Memcached()).build())
       for (i <- (1 to weight)) yield client
     }.flatten.toArray
     new PHPMemCacheClient(clients, keyHasher)

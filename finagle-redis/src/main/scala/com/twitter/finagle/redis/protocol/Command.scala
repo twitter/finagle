@@ -7,7 +7,9 @@ object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String) = new ClientError(msg)
 }
 
-abstract class Command extends RedisMessage
+abstract class Command extends RedisMessage {
+  val command: String
+}
 
 object Commands {
   // Key Commands
@@ -179,8 +181,8 @@ object Commands {
 }
 
 class CommandCodec extends UnifiedProtocolCodec {
-  import com.twitter.naggati.{Emit, Encoder, NextStep}
-  import com.twitter.naggati.Stages._
+  import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
+  import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
   import com.twitter.logging.Logger
 

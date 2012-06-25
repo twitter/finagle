@@ -86,18 +86,18 @@ public class ClientBase extends Client {
   }
 
   public Future<Void> set(String key, ChannelBuffer value) {
-    Future<Object> result = underlying.set(key, value);
-    return result.map(new Function<Object, Void>() {
-      public Void apply(Object obj) {
+    Future<scala.runtime.BoxedUnit> result = underlying.set(key, value);
+    return result.map(new Function<scala.runtime.BoxedUnit, Void>() {
+      public Void apply(scala.runtime.BoxedUnit obj) {
         return null;
       }
     });
   }
 
   public Future<Void> set(String key, int flags, Time expiry, ChannelBuffer value) {
-    Future<Object> result = underlying.set(key, flags, expiry, value);
-    return result.map(new Function<Object, Void>() {
-      public Void apply(Object obj) {
+    Future<scala.runtime.BoxedUnit> result = underlying.set(key, flags, expiry, value);
+    return result.map(new Function<scala.runtime.BoxedUnit, Void>() {
+      public Void apply(scala.runtime.BoxedUnit obj) {
         return null;
       }
     });
@@ -145,11 +145,11 @@ public class ClientBase extends Client {
     Future<Option<Long>> result = underlying.incr(key);
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
-	if (value.isDefined()) {
-	  return (Long) value.get();
-	} else {
-	  return -1L;
-	}
+        if (value.isDefined()) {
+          return (Long) value.get();
+        } else {
+          return -1L;
+        }
       }
     });
   }
@@ -158,11 +158,11 @@ public class ClientBase extends Client {
     Future<Option<Long>> result = underlying.incr(key, delta);
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
-	if (value.isDefined()) {
-	  return (Long) value.get();
-	} else {
-	  return -1L;
-	}
+        if (value.isDefined()) {
+          return (Long) value.get();
+        } else {
+          return -1L;
+        }
       }
     });
   }
@@ -171,11 +171,11 @@ public class ClientBase extends Client {
     Future<Option<Long>> result = underlying.decr(key);
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
-	if (value.isDefined()) {
-	  return (Long) value.get();
-	} else {
-	  return -1L;
-	}
+        if (value.isDefined()) {
+          return (Long) value.get();
+        } else {
+          return -1L;
+        }
       }
     });
   }
@@ -184,11 +184,11 @@ public class ClientBase extends Client {
     Future<Option<Long>> result = underlying.decr(key, delta);
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
-	if (value.isDefined()) {
-	  return (Long) value.get();
-	} else {
-	  return -1L;
-	}
+        if (value.isDefined()) {
+          return (Long) value.get();
+        } else {
+          return -1L;
+        }
       }
     });
   }

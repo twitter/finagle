@@ -28,10 +28,10 @@ class ProxySpec extends SpecificationWithJUnit {
     var proxyClient: MemcacheService = null
 
     doBefore {
-      ExternalMemcached.start();
+      var address: Option[InetSocketAddress] = ExternalMemcached.start();
       Thread.sleep(150) // On my box the 100ms sleep wasn't long enough
       proxyClient = ClientBuilder()
-        .hosts(Seq(ExternalMemcached.address.get))
+        .hosts(Seq(address.get))
         .codec(Memcached())
         .hostConnectionLimit(1)
         .build()

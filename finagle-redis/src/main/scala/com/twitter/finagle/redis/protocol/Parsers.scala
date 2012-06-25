@@ -4,8 +4,8 @@ package protocol
 import util._
 import RedisCodec._
 
-import com.twitter.naggati.{Emit, Encoder, NextStep, ProtocolError}
-import com.twitter.naggati.Stages._
+import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep, ProtocolError}
+import com.twitter.finagle.redis.naggati.Stages._
 
 trait UnifiedProtocolCodec {
 

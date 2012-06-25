@@ -96,7 +96,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
     "work" in Time.withCurrentTimeFrozen { tc =>
       Trace.unwind {
-        Trace.pushId()  // push an ID so we don't use the default one
+        Trace.setId(Trace.nextId)  // set an ID so we don't use the default one
         serverTracer must beEmpty
         clientTracer must beEmpty
         val future = client.multiply(10, 30)

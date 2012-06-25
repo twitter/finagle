@@ -60,7 +60,7 @@ class Kestrel extends CodecFactory[Command, Response] {
  */
 private class KestrelTracingFilter extends ClientRequestTracingFilter[Command, Response] {
   val serviceName = "kestrel"
-  def methodName(req: Command): String = req.getClass().getSimpleName()
+  def methodName(req: Command): String = req.name
 }
 
 object Kestrel {

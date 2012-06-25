@@ -6,7 +6,7 @@ import util._
 import org.specs.SpecificationWithJUnit
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.conversions.time._
-import com.twitter.naggati.test._
+import com.twitter.finagle.redis.naggati.test._
 import com.twitter.util.{Future, Time}
 import org.jboss.netty.channel.Channel
 

@@ -3,10 +3,10 @@ package com.twitter.finagle.pool
 import collection.mutable.Queue
 import scala.annotation.tailrec
 
-import com.twitter.util.{Future, Time, Duration}
+import com.twitter.util.{Future, Time, Duration, Timer}
 
 import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException, ClientConnection}
-import com.twitter.finagle.util.{Timer, Cache}
+import com.twitter.finagle.util.Cache
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 /**
@@ -17,7 +17,7 @@ private[finagle] class CachingPool[Req, Rep](
   factory: ServiceFactory[Req, Rep],
   cacheSize: Int,
   ttl: Duration,
-  timer: com.twitter.util.Timer = Timer.default,
+  timer: Timer,
   statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {

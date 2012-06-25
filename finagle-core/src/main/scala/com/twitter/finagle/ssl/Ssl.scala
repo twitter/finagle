@@ -64,7 +64,7 @@ object Ssl {
    * Get a client engine
    */
   def client(): Engine = JSSE.client()
-  
+
   /**
    * Get a client engine, from the given context
    */

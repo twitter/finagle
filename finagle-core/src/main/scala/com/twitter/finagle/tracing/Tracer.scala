@@ -8,8 +8,8 @@ import java.nio.ByteBuffer
 import java.net.InetSocketAddress
 import scala.collection.mutable.ArrayBuffer
 
-import com.twitter.finagle.util.CloseNotifier
-import com.twitter.util.{Time, TimeFormat}
+import com.twitter.finagle.util.{CloseNotifier, Disposable, Managed}
+import com.twitter.util.{Future, Time, TimeFormat}
 
 private[tracing] object RecordTimeFormat
   extends TimeFormat("MMdd HH:mm:ss.SSS")
@@ -38,6 +38,21 @@ object Annotation {
 
 object Tracer {
   type Factory = (CloseNotifier) => Tracer
+
+  def mkManaged(tracerFactory: Factory): Managed[Tracer] = new Managed[Tracer] {
+    private[this] val notifier = new CloseNotifier {
+      var handler = { () => {} }
+      def onClose(h: => Unit) = handler = { () => h }
+    }
+    def make() = new Disposable[Tracer] {
+      val underlying = tracerFactory(notifier)
+      def get = underlying
+      def dispose(deadline: Time) = {
+        notifier.handler()
+        Future.value(())
+      }
+    }
+  }
 }
 
 trait Tracer {

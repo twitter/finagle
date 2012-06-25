@@ -133,7 +133,7 @@ private[thrift] class ThriftServerTracingFilter(
         sampled)
 
 
-      Trace.pushId(traceId)
+      Trace.setId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
       Trace.recordServerAddr(boundAddress)
       Trace.record(Annotation.ServerRecv())

@@ -45,6 +45,7 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
 
   trans.onClose ensure {
     state.getAndSet(Closed).cancel()
+    service.release()
   }
 
   private[this] def loop(): Unit = {
@@ -63,7 +64,6 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
 
       case _ =>
         trans.close()
-        service.release()
     }
   }
 
@@ -73,8 +73,7 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
   // protocol support). Presumably, half-closing TCP connection is
   // also possible.
   def drain() {
-    if (state.get eq Idle)
+    if (state.getAndSet(Draining) eq Idle)
       trans.close()
-    state.set(Draining)
   }
 }

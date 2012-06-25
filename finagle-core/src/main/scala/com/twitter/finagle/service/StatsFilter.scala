@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.util.{Future, Time, Throw}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter}
+import com.twitter.finagle.{SourcedException, Service, SimpleFilter}
 
 class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   extends SimpleFilter[Req, Rep]
@@ -28,9 +28,18 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
       latencyStat.add(requestedAt.untilNow.inMilliseconds)
       response match {
         case Throw(e) =>
-          statsReceiver.scope("failures").counter(e.getClass.getName).incr()
-        case _ =>
-          successCount.incr()
+          def flatten(ex: Throwable): Seq[String] =
+            if (ex eq null) Seq[String]() else ex.getClass.getName +: flatten(ex.getCause)
+          statsReceiver.scope("failures").counter(flatten(e): _*).incr()
+          e match {
+            case sourced: SourcedException if sourced.serviceName != "unspecified" =>
+              statsReceiver
+                .scope("sourcedfailures")
+                .counter(sourced.serviceName +: flatten(sourced): _*)
+                .incr()
+            case _ =>
+          }
+        case _ => successCount.incr()
       }
     }
 

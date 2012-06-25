@@ -4,7 +4,6 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.{Client, Redis}
 import com.twitter.finagle.redis.util.RedisCluster
 
-
 object RedisClient {
 
   def main(args: Array[String]) {

@@ -92,7 +92,7 @@ object Reporter {
 
 
   private[this] def makeClient(scribeHost: String, scribePort: Int) = {
-    val service = ClientBuilder() // these are from the b3 tracer
+    val service = ClientBuilder() // these are from the zipkin tracer
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(5)

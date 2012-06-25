@@ -1,6 +1,6 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.util.{RichU64String, RichU64Long}
+import com.twitter.util.RichU64String
 
 /**
  * Defines trace identifiers.  Span IDs name a particular (unique)
@@ -9,11 +9,38 @@ import com.twitter.util.{RichU64String, RichU64Long}
  */
 
 final class SpanId(val self: Long) extends Proxy {
+  import SpanId.byteToStr
+
   def toLong = self
-  override def toString: String = new RichU64Long(self).toU64HexString
+
+  // This is invoked a lot, so they need to be fast.
+  override def toString: String = {
+    val b = new StringBuilder(16)
+    b.appendAll(byteToStr((self>>56 & 0xff).toByte))
+    b.appendAll(byteToStr((self>>48 & 0xff).toByte))
+    b.appendAll(byteToStr((self>>40 & 0xff).toByte))
+    b.appendAll(byteToStr((self>>32 & 0xff).toByte))
+    b.appendAll(byteToStr((self>>24 & 0xff).toByte))
+    b.appendAll(byteToStr((self>>16 & 0xff).toByte))
+    b.appendAll(byteToStr((self>>8 & 0xff).toByte))
+    b.appendAll(byteToStr((self & 0xff).toByte))
+    b.toString
+  }
 }
 
 object SpanId {
+  // StringBuilder.appendAll(char..) seems to be faster than
+  // StringBuilder.append(string..)
+  private val lut: Array[Array[Char]] = (
+    for (b <- Byte.MinValue to Byte.MaxValue) yield {
+      val bb = if (b < 0) b + 256 else b
+      val s = "%02x".format(bb)
+      Array(s(0), s(1))
+    }
+  ).toArray
+
+  private def byteToStr(b: Byte) = lut(b+128)
+
   def apply(spanId: Long) = new SpanId(spanId)
   def fromString(spanId: String): Option[SpanId] =
     try {

@@ -4,12 +4,12 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-exception</artifactId>
   <packaging>jar</packaging>
-  <version>4.0.3-SNAPSHOT</version>
+  <version>5.1.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent</artifactId>
+    <artifactId>scala-parent-292</artifactId>
     <version>0.0.2</version>
-    <relativePath>../../parents/scala-parent/pom.xml</relativePath>
+    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
@@ -25,13 +25,14 @@
     <!-- library dependencies -->
     <dependency>
       <groupId>com.codahale</groupId>
-      <artifactId>jerkson_2.8.1</artifactId>
-      <version>0.1.4</version>
+      <artifactId>jerkson_2.9.1</artifactId>
+      <version>0.5.0</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>streamyj_2.8.1</artifactId>
-      <version>0.3.0</version>
+      <artifactId>streamyj</artifactId>
+      <version>0.4.2-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.thrift</groupId>
@@ -58,17 +59,17 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>4.0.3-SNAPSHOT</version>
+      <version>5.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>4.0.3-SNAPSHOT</version>
+      <version>5.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>4.0.1</version>
+      <version>5.2.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

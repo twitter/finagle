@@ -3,7 +3,6 @@ package com.twitter.finagle.ssl
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
-import com.twitter.finagle.ssl.Ssl
 import com.twitter.io.TempFile
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Future

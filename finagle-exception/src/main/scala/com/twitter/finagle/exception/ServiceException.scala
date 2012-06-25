@@ -13,7 +13,7 @@ import com.twitter.util.Time
  * These classes are private to the exception package because they must adhere to the chickadee
  * specification.
  *
- * TraceId is from BigBrotherBird.
+ * TraceId is from Zipkin.
  */
 sealed private[exception] case class ServiceException private[ServiceException] (
   private val jsonValue: Map[String,Any]) {
@@ -41,7 +41,7 @@ sealed private[exception] case class ServiceException private[ServiceException] 
   /**
    * Include a source (i.e. server) address
    */
-  def withSource(address: String) = copy(jsonValue.updated("source", address))
+  def withSource(address: String) = copy(jsonValue.updated("sourceAddress", address))
 
   /**
    * Increment the cardinality of the ServiceException, adding the element if it does not
@@ -71,6 +71,6 @@ sealed private[exception] case class ExceptionContents(e: Throwable) {
   val jsonValue = Map(
     "exceptionClass" -> e.getClass.getName,
     "message" -> e.getMessage,
-    "stacktrace" -> generateStackTrace(e.getStackTrace)
+    "stackTrace" -> generateStackTrace(e.getStackTrace)
   )
 }

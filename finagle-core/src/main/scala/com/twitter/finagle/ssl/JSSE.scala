@@ -49,8 +49,7 @@ object JSSE {
    * Get a client
    */
   def client(): Engine = new Engine(defaultSSLContext.createSSLEngine())
- 
-  
+
   /**
    * Get a client from the given Context
    */

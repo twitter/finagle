@@ -4,11 +4,11 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{
-  ServerBuilder, Cluster, StaticCluster, ClientBuilder}
+  ClientBuilder, Cluster, ServerBuilder, StaticCluster}
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Future, Duration, Time, StorageUnit}
 import java.net.{SocketAddress, InetSocketAddress}
@@ -16,6 +16,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import scala.util.Random
+import com.twitter.finagle.tracing.ConsoleTracer
 
 class AppService(clients: Seq[thrift.Backend.ServiceIface], responseSample: Seq[(Duration, StorageUnit)])
   extends Service[HttpRequest, HttpResponse]
@@ -53,7 +54,7 @@ object Appserver {
       .cluster(cluster)
       .codec(ThriftClientFramedCodec())
       .reportTo(new OstrichStatsReceiver)
-      .hostConnectionLimit(10)
+      .hostConnectionLimit(1)
       .build()
 
     new thrift.Backend.ServiceToClient(
@@ -66,15 +67,11 @@ object Appserver {
   }
 
   def main(args: Array[String]) = {
-    {
-      import com.twitter.logging.config._
-      val config = new LoggerConfig {
-        node = ""
-        level = Level.INFO
-        handlers = new ConsoleHandlerConfig
-      }
-      config()
-    }
+    LoggerFactory(
+      node = "",
+      level = Some(Level.INFO),
+      handlers = ConsoleHandler() :: Nil
+    ).apply()
 
     if (args.size < 3)
       usage()
@@ -105,6 +102,7 @@ object Appserver {
       .codec(Http())
       .reportTo(new OstrichStatsReceiver)
       .bindTo(new InetSocketAddress(basePort))
+      .tracerFactory(ConsoleTracer.factory)
       .build(service)
   }
 }

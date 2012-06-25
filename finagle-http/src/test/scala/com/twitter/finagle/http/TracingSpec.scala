@@ -14,7 +14,7 @@ class TracingSpec extends SpecificationWithJUnit {
 
   "TracingFilters" should {
     "set header" in {
-      Trace.pushId(traceId)
+      Trace.setId(traceId)
 
       val dummyService = new Service[HttpRequest, HttpResponse] {
         def apply(request: HttpRequest) = {
@@ -30,6 +30,14 @@ class TracingSpec extends SpecificationWithJUnit {
       val filter = new HttpClientTracingFilter[HttpRequest, HttpResponse]("testservice")
       val req = Request("/test.json")
       filter(req, dummyService)
+    }
+
+    "record only path of url" in {
+      val stripped = stripParameters("/1/lists/statuses.json?count=50&super_secret=ohyeah")
+      stripped mustEqual "/1/lists/statuses.json"
+
+      val invalid = stripParameters("\\")
+      invalid mustEqual "\\" // request path doesn't throw exceptions if url is invalid
     }
 
     "parse header" in {

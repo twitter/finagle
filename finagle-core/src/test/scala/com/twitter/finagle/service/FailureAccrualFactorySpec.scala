@@ -20,7 +20,8 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     underlying() returns Future.value(underlyingService)
 
     val timer = new MockTimer
-    val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds, timer)
+    val factory = new FailureAccrualFactory[Int, Int](
+      underlying, 3, 10.seconds, timer)
     val service = factory()()
     there was one(underlying)()
 
@@ -111,7 +112,8 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     underlying.isAvailable returns true
     underlying() returns Future.value(underlyingService)
 
-    val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds)
+    val factory = new FailureAccrualFactory[Int, Int](
+      underlying, 3, 10.seconds, new MockTimer)
     val service = factory()()
     there was one(underlying)()
 
@@ -137,7 +139,8 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     underlying.isAvailable returns true
     val exc = new Exception("i broked :-(")
     underlying() returns Future.exception(exc)
-    val factory = new FailureAccrualFactory[Int, Int](underlying, 3, 10.seconds, new MockTimer)
+    val factory = new FailureAccrualFactory[Int, Int](
+      underlying, 3, 10.seconds, new MockTimer)
 
     "fail after the given number of tries" in {
       Time.withCurrentTimeFrozen { timeControl =>

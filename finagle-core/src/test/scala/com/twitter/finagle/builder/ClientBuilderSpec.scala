@@ -47,7 +47,7 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       there was one(m.channelFactory).releaseExternalResources()
     }
 
-    "notify resources when client is released" in {
+    "build client that disposes of resources used" in {
       val tracer = mock[Tracer]
       var called = false
 
@@ -61,6 +61,19 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       called must beFalse
       client.release()
       called must beTrue
+    }
+
+    "build managed client that disposes of resources used once all clients are released" in {
+      val m = new MockChannel
+      val mClient = m.clientBuilder.buildManaged()
+
+      val dClient1 = mClient.make()
+      val dClient2 = mClient.make()
+
+      dClient1.dispose()
+      there was no(m.channelFactory).releaseExternalResources()
+      dClient2.dispose()
+      there was one(m.channelFactory).releaseExternalResources()
     }
   }
 }

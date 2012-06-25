@@ -1,22 +1,22 @@
 package com.twitter.finagle.kestrel.unit
 
-import org.specs.SpecificationWithJUnit
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.kestrel.protocol._
+import com.google.common.cache.{CacheBuilder, CacheLoader}
 import com.twitter.conversions.time._
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.kestrel.Interpreter
+import com.twitter.finagle.kestrel.protocol._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.StateMachine.InvalidStateTransition
-import com.twitter.util.{MapMaker, Time}
+import com.twitter.util.Time
 import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.specs.SpecificationWithJUnit
 
 class InterpreterSpec extends SpecificationWithJUnit {
   "Interpreter" should {
-    val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
-      config.compute { key =>
-        new LinkedBlockingDeque[ChannelBuffer]
-      }
-    }
+    val queues = CacheBuilder.newBuilder()
+      .build(new CacheLoader[ChannelBuffer, BlockingDeque[ChannelBuffer]] {
+        def load(k: ChannelBuffer) = new LinkedBlockingDeque[ChannelBuffer]
+      })
     val interpreter = new Interpreter(queues)
 
     "set & get" in {

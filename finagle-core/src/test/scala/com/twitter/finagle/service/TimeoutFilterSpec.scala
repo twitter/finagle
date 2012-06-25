@@ -2,7 +2,6 @@ package com.twitter.finagle.service
 
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import com.twitter.finagle.util.Timer
 import com.twitter.conversions.time._
 import com.twitter.util.{Promise, Time}
 import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
