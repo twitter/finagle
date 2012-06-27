@@ -6,7 +6,7 @@ import com.google.common.base.Function
 import com.google.common.collect.Lists
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Service
-import  
+import com.google.protobuf.Message
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable._
