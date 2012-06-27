@@ -1,13 +1,13 @@
 package com.twitter.finagle.redis
 package protocol
 
-import util._
 
-import org.specs.SpecificationWithJUnit
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.naggati.test._
+import com.twitter.finagle.redis.util._
 import com.twitter.util.{Future, Time}
+import org.specs.SpecificationWithJUnit
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 
 class NaggatiSpec extends SpecificationWithJUnit {
@@ -660,7 +660,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
         codec(wrap("World\r\n")) match {
           case reply :: Nil => reply match {
             case MBulkReply(msgs) =>
-              BytesToString.fromList(msgs) mustEqual List("foo","bar","Hello","World")
+              ReplyFormat.toString(msgs) mustEqual List("foo","bar","Hello","World")
             case _ => fail("Expected MBulkReply")
           }
           case _ => fail("Expected one element in list")
@@ -674,7 +674,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
         codec(wrap("bar\r\n")) match {
           case reply :: Nil => reply match {
             case MBulkReply(msgs) =>
-              BytesToString.fromList(msgs) mustEqual List(
+              ReplyFormat.toString(msgs) mustEqual List(
                 "foo",
                 BytesToString(RedisCodec.NIL_VALUE_BA),
                 "bar")
@@ -708,8 +708,8 @@ class NaggatiSpec extends SpecificationWithJUnit {
         codec.send(BulkReply("foo\r\nbar".getBytes)) mustEqual List(expected)
       }
       "Multi Bulk Replies" >> {
-        val messages = StringToBytes.fromList(List("foo","bar","Hello","World"))
-        val expected = "*4\r\n$3\r\nfoo\r\n$3\r\nbar\r\n$5\r\nHello\r\n$5\r\nWorld\r\n"
+        val messages = List(BulkReply("foo".getBytes), BulkReply("bar".getBytes))
+        val expected = "*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"
         codec.send(MBulkReply(messages)) mustEqual List(expected)
       }
     } // Encode properly

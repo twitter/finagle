@@ -422,11 +422,11 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
       case MBulkReply(msgs) => contains match {
         case true =>
           expects.isEmpty must beFalse
-          val newMsgs = msgs.map { msg => BytesToString(msg) }
+          val newMsgs = ReplyFormat.toByteArrays(msgs) map { msg => BytesToString(msg) }
           expects.foreach { msg => newMsgs must contain(msg) }
         case false =>
           expects.isEmpty must beFalse
-          msgs.map { msg => BytesToString(msg) } mustEqual expects
+          ReplyFormat.toByteArrays(msgs) map { msg => BytesToString(msg) } mustEqual expects
       }
       case EmptyMBulkReply() => expects.isEmpty must beTrue
       case r: Reply => fail("Expected MBulkReply, got %s".format(r))

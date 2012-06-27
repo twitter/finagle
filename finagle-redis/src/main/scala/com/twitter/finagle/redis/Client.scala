@@ -2,8 +2,8 @@ package com.twitter.finagle.redis
 
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BytesToString, NumberFormat}
-import com.twitter.finagle.Service
+import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
+import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.Future
 
 
@@ -59,7 +59,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets the value associated with the given key
    * @param key
-   * @return Option containing either the value byte array, or nothing
+   * @return Option containing either the value, or nothing
    * if key doesn't exist
    */
   def get(key: String): Future[Option[Array[Byte]]] =
@@ -172,10 +172,10 @@ class Client(service: Service[Command, Reply]) {
    * @return Sequence of field/value pairs
    */
   def hGetAllAsPairs(key: Array[Byte]): Future[Seq[(Array[Byte], Array[Byte])]] =
-    doRequest(HGetAll(key)) {
-      case MBulkReply(messages) => Future.value(returnPairs(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
-    }
+   doRequest(HGetAll(key)) {
+     case MBulkReply(messages) => Future.value(returnPairs(ReplyFormat.toByteArrays(messages)))
+     case EmptyMBulkReply()    => Future.value(Seq())
+   }
 
   @deprecated("Use hGetAllAsPairs instead", "5.0.0")
   def hGetAll(key: Array[Byte]): Future[Map[Array[Byte], Array[Byte]]] =
@@ -187,10 +187,10 @@ class Client(service: Service[Command, Reply]) {
    * @return List of values
    */
   def hMGet(key: String, fields: Seq[String]): Future[Seq[Array[Byte]]] =
-    doRequest(HMGet(key, fields)) {
-      case MBulkReply(messages) => Future.value(messages)
-      case EmptyMBulkReply()    => Future.value(Seq())
-    }
+   doRequest(HMGet(key, fields)) {
+     case MBulkReply(messages) => Future.value(ReplyFormat.toByteArrays(messages))
+     case EmptyMBulkReply()    => Future.value(Seq())
+   }
 
   /**
    * Sets field value pair in given hash
@@ -254,7 +254,8 @@ class Client(service: Service[Command, Reply]) {
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => Future.value(ZRangeResults(returnPairs(messages)))
+      case MBulkReply(messages) => Future.value(
+        ZRangeResults(returnPairs(ReplyFormat.toByteArrays(messages))))
       case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
     }
 
@@ -271,9 +272,11 @@ class Client(service: Service[Command, Reply]) {
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => Future.value(returnPairs(messages) toMap)
+      case MBulkReply(messages) => Future.value(
+        returnPairs(ReplyFormat.toByteArrays(messages)) toMap)
       case EmptyMBulkReply()    => Future.value(Map())
     }
+
 
   /**
    * Returns sorted set cardinality of the sorted set at key
@@ -304,7 +307,7 @@ class Client(service: Service[Command, Reply]) {
    */
   def zRevRange(key: Array[Byte], start: Int, stop: Int): Future[Seq[Array[Byte]]] =
     doRequest(ZRevRange(key, start, stop)) {
-      case MBulkReply(messages) => Future.value(messages)
+      case MBulkReply(messages) => Future.value(ReplyFormat.toByteArrays(messages))
       case EmptyMBulkReply()    => Future.value(Seq())
     }
 
@@ -327,7 +330,8 @@ class Client(service: Service[Command, Reply]) {
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => Future.value(ZRangeResults(returnPairs(messages)))
+      case MBulkReply(messages) => Future.value(
+        ZRangeResults(returnPairs(ReplyFormat.toByteArrays(messages))))
       case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
     }
 
@@ -344,7 +348,8 @@ class Client(service: Service[Command, Reply]) {
         Some(Limit(offset, count))
       )
     ) {
-      case MBulkReply(messages) => Future.value(returnPairs(messages) toMap)
+      case MBulkReply(messages) => Future.value(
+        returnPairs(ReplyFormat.toByteArrays(messages)) toMap)
       case EmptyMBulkReply()    => Future.value(Map())
     }
 
@@ -356,7 +361,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Helper function for passing a command to the service
    */
-  private def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
+  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
     service(cmd) flatMap (handler orElse {
       case ErrorReply(message)  => Future.exception(new ServerError(message))
       case _                    => Future.exception(new IllegalStateException)
@@ -365,9 +370,109 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Helper function to convert a Redis multi-bulk reply into a map of pairs
    */
-  private def returnPairs(messages: List[Array[Byte]]) = {
+  private[redis] def returnPairs(messages: List[Array[Byte]]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
     messages.grouped(2).toList flatMap { case List(a, b) => Some(a, b); case _ => None }
   }
+
+}
+
+/**
+ * Client connected over a single connection to a
+ * single redis instance, supporting transactions
+ */
+trait TransactionalClient extends Client {
+
+  /**
+   * Flushes all previously watched keys for a transaction
+   */
+  def unwatch(): Future[Unit]
+
+  /**
+   * Marks given keys to be watched for conditional execution of a transaction
+   * @param keys to watch
+   */
+  def watch(keys: Seq[Array[Byte]]): Future[Unit]
+
+  /**
+   * Executes given vector of commands as a Redis transaction
+   * The order of the commands queued on the Redis server is not guaranteed
+   * @param Sequence of commands to be executed
+   * @return Results of each command in order
+   */
+  def transaction(cmds: Seq[Command]): Future[Seq[Reply]]
+
+}
+
+object TransactionalClient {
+
+  /**
+   * Construct a client from a single host with transaction commands
+   * @param host a String of host:port combination.
+   */
+  def apply(host: String): TransactionalClient = TransactionalClient(
+    ClientBuilder()
+      .hosts(host)
+      .hostConnectionLimit(1)
+      .codec(Redis())
+      .buildFactory())
+
+  /**
+   * Construct a client from a service factory
+   * @param raw ServiceFactory
+   */
+  def apply(raw: ServiceFactory[Command, Reply]): TransactionalClient =
+    new ConnectedTransactionalClient(raw)
+
+}
+
+/**
+ * Connects to a single Redis host supporting transactions
+ */
+private[redis] class ConnectedTransactionalClient(
+  serviceFactory: ServiceFactory[Command, Reply]
+) extends Client(serviceFactory.toService) with TransactionalClient {
+
+  def unwatch(): Future[Unit] =
+    doRequest(UnWatch()) {
+      case StatusReply(message)  => Future.Unit
+    }
+
+  def watch(keys: Seq[Array[Byte]]): Future[Unit] =
+    doRequest(Watch(keys.toList)) {
+      case StatusReply(message)  => Future.Unit
+    }
+
+  def transaction(cmds: Seq[Command]): Future[Seq[Reply]] = {
+    serviceFactory() flatMap { svc =>
+      multi(svc) flatMap { _ =>
+        val cmdQueue = cmds.toList map { cmd => svc(cmd) }
+        Future.collect(cmdQueue) flatMap { _ => exec(svc) }
+      } rescue { case e =>
+        svc(Discard()) flatMap { _ =>
+          Future.exception(ClientError("Transaction failed: " + e.toString))
+        }
+      } ensure {
+        svc.release()
+      }
+    }
+  }
+
+  private def multi(svc: Service[Command, Reply]): Future[Unit] =
+    svc(Multi()) flatMap {
+      case StatusReply(message)  => Future.Unit
+      case ErrorReply(message)   => Future.exception(new ServerError(message))
+      case _                     => Future.exception(new IllegalStateException)
+  }
+
+  private def exec(svc: Service[Command, Reply]): Future[Seq[Reply]] =
+    svc(Exec()) flatMap {
+      case MBulkReply(messages)  => Future.value(messages)
+      case EmptyMBulkReply()     => Future.value(Seq())
+      case NilMBulkReply()       => Future.exception(
+        new ServerError("One or more keys were modified before transaction"))
+      case ErrorReply(message)   => Future.exception(new ServerError(message))
+      case _                     => Future.exception(new IllegalStateException)
+    }
 
 }

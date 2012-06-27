@@ -1,6 +1,6 @@
-package com.twitter.finagle.redis
-package util
+package com.twitter.finagle.redis.util
 
+import com.twitter.finagle.redis.protocol._
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
@@ -79,4 +79,30 @@ object NumberFormat {
     }
   }
 }
+object ReplyFormat {
+  def toString(items: List[Reply]): List[String] = {
+    items flatMap {
+      case BulkReply(message)   => List(BytesToString(message))
+      case EmptyBulkReply()     => List(BytesToString(RedisCodec.NIL_VALUE_BA))
+      case IntegerReply(id)     => List(id.toString)
+      case StatusReply(message) => List(message)
+      case ErrorReply(message)  => List(message)
+      case MBulkReply(messages) => ReplyFormat.toString(messages)
+      case EmptyMBulkReply()    => List(BytesToString(RedisCodec.NIL_VALUE_BA))
+      case _                    => Nil
+    }
+  }
 
+  def toByteArrays(items: List[Reply]): List[Array[Byte]] = {
+    items flatMap {
+      case BulkReply(message)   => List(message)
+      case EmptyBulkReply()     => List(RedisCodec.NIL_VALUE_BA)
+      case IntegerReply(id)     => List(Array(id.toByte))
+      case StatusReply(message) => List(StringToBytes(message))
+      case ErrorReply(message)  => List(StringToBytes(message))
+      case MBulkReply(messages) => ReplyFormat.toByteArrays(messages)
+      case EmptyMBulkReply()    => List(RedisCodec.NIL_VALUE_BA)
+      case _                    => Nil
+    }
+  }
+}

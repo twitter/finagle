@@ -76,6 +76,13 @@ object Commands {
   val HMGET             = "HMGET"
   val HSET              = "HSET"
 
+  // Transactions
+  val DISCARD           = "DISCARD"
+  val EXEC              = "EXEC"
+  val MULTI             = "MULTI"
+  val UNWATCH           = "UNWATCH"
+  val WATCH             = "WATCH"
+
   val commandMap: Map[String,Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {args => Del(BytesToString.fromList(args))},
@@ -139,7 +146,14 @@ object Commands {
     HGET              -> {HGet(_)},
     HGETALL           -> {HGetAll(_)},
     HMGET             -> {HMGet(_)},
-    HSET              -> {HSet(_)}
+    HSET              -> {HSet(_)},
+
+    // transactions
+    DISCARD           -> {_ => Discard()},
+    EXEC              -> {_ => Exec()},
+    MULTI             -> {_ => Multi()},
+    UNWATCH           -> {_ => UnWatch()},
+    WATCH             -> {Watch(_)}
 
   )
 

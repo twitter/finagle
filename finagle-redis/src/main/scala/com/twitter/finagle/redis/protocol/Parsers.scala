@@ -42,6 +42,14 @@ trait UnifiedProtocolCodec {
                 }
               }
             }
+          case STATUS_REPLY =>
+            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+          case ARG_COUNT_MARKER =>
+            decodeRequestLines(line.drop(1).toLong, lines, doneFn)
+          case INTEGER_REPLY =>
+            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+          case ERROR_REPLY =>
+            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
           case b: Char =>
             throw new ProtocolError("Expected size marker $, got " + b)
         } // header match
