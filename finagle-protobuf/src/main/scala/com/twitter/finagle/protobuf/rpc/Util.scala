@@ -6,7 +6,7 @@ import com.google.common.base.Function
 import com.google.common.collect.Lists
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Service
-import com.google.protobuf.Message
+import  
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable._
@@ -30,9 +30,7 @@ object Util {
 
   def log(reqOrResp: String, method: String, m: Message) {
     if (log.isDebugEnabled()) {
-      val sb = new StringBuilder()
-      m.getAllFields().entrySet().toList foreach { it => sb.append(it.getKey().getFullName()).append(": ").append(it.getValue()).append(", ") }
-      log.debug("#log# {} {}: {}", Array[String](reqOrResp, method, sb.toString()))
+      log.debug("#log# {} {}: {}", Array[String](reqOrResp, method, m.toString()))
     }
   }
 }
