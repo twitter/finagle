@@ -40,11 +40,11 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
     request: Message, responsePrototype: Message,
     done: RpcCallback[Message], retries: Int): Unit = {
 
-    Util.log(m.getName(), request)
+    Util.log("Request", m.getName(), request)
     val req = (m.getName(), request)
 
     client(req) onSuccess { result =>
-      Util.log(m.getName(), result._2)
+      Util.log("Response", m.getName(), result._2)
       futurePool({ done.run(result._2) })
     } onFailure { e =>
       log.warn("#callMethod# Failed.", e)

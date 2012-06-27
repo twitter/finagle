@@ -46,7 +46,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, futurePool: Future
     val methodName = request._1
     val reqMessage = request._2
 
-    Util.log(methodName, reqMessage)
+    Util.log("Request", methodName, reqMessage)
     val m = service.getDescriptorForType().findMethodByName(methodName);
     if (m == null) {
       throw new java.lang.AssertionError("Should never happen, we already decoded " + methodName)
@@ -59,6 +59,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, futurePool: Future
         service.callMethod(m, null, reqMessage, new RpcCallback[Message]() {
 
           def run(msg: Message) = {
+            Util.log("Response", methodName, msg)
             promise.setValue((methodName, msg))
           }
 
