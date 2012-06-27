@@ -1,7 +1,7 @@
 package com.twitter.finagle.protobuf.rpc.impl
 
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
-import com.twitter.finagle.protobuf.rpc.RpcServer
+import com.twitter.finagle.protobuf.rpc.{RpcServer, Util}
 import com.twitter.util.{Future, Promise}
 import com.twitter.util.Duration
 import com.twitter.util.FuturePool
@@ -46,6 +46,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, futurePool: Future
     val methodName = request._1
     val reqMessage = request._2
 
+    Util.log(methodName, reqMessage)
     val m = service.getDescriptorForType().findMethodByName(methodName);
     if (m == null) {
       throw new java.lang.AssertionError("Should never happen, we already decoded " + methodName)
