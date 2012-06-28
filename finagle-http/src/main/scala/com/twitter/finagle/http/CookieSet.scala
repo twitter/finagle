@@ -16,7 +16,7 @@ import scala.collection.JavaConversions._
  */
 class CookieSet(message: Message) extends
   mutable.SetLike[Cookie, mutable.Set[Cookie]] {
-  
+
   def seq = Set.empty ++ iterator
 
   private[this] var _isValid = true
@@ -27,12 +27,12 @@ class CookieSet(message: Message) extends
     else
       HttpHeaders.Names.SET_COOKIE
 
-  private[this] val cookies: mutable.Set[CookieWrapper] = {
+  private[this] val cookies: mutable.Set[Cookie] = {
     val decoder = new CookieDecoder
-    mutable.Set[CookieWrapper]() ++
+    mutable.Set[Cookie]() ++
       message.getHeaders(cookieHeaderName).map { cookieHeader =>
         try {
-          decoder.decode(cookieHeader) map { c => new CookieWrapper(c) } toList
+          decoder.decode(cookieHeader) toList
         } catch {
           case e: IllegalArgumentException =>
             _isValid = false
@@ -45,21 +45,21 @@ class CookieSet(message: Message) extends
   def isValid = _isValid
 
   def +=(cookie: Cookie) = {
-    cookies += new CookieWrapper(cookie)
+    cookies += cookie
     rewriteCookieHeaders()
     this
   }
 
   def -=(cookie: Cookie) = {
-    cookies -= new CookieWrapper(cookie)
+    cookies -= cookie
     rewriteCookieHeaders()
     this
   }
 
   def contains(cookie: Cookie) =
-    cookies.contains(new CookieWrapper(cookie))
+    cookies.contains(cookie)
 
-  def iterator = cookies map { _.cookie } iterator
+  def iterator = cookies iterator
 
   def empty = mutable.Set[Cookie]()
 
@@ -70,24 +70,8 @@ class CookieSet(message: Message) extends
     // Add cookies back again
     cookies foreach { cookie =>
       val cookieEncoder = new CookieEncoder(message.isResponse)
-      cookieEncoder.addCookie(cookie.cookie)
+      cookieEncoder.addCookie(cookie)
       message.addHeader(cookieHeaderName, cookieEncoder.encode())
     }
-  }
-
-  // Wrap Cookie to handle broken equals()
-  protected[http] class CookieWrapper(val cookie: Cookie) {
-    override def equals(obj: Any): Boolean = {
-      obj match {
-        case other: CookieWrapper =>
-          cookie.getName   == other.cookie.getName &&
-          cookie.getPath   == other.cookie.getPath &&
-          cookie.getDomain == other.cookie.getDomain
-        case _ =>
-          throw new IllegalArgumentException // shouldn't happen
-      }
-    }
-
-    override def hashCode() = cookie.hashCode
   }
 }

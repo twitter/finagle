@@ -32,7 +32,7 @@ class DuplexStreamSpec extends SpecificationWithJUnit {
   }
 
   implicit def bufferToString(buf: ChannelBuffer): String = {
-    buf.toString(Charset.defaultCharset)
+    buf.toString(Charset.forName("UTF-8"))
   }
 
   "SimpleService" should {
