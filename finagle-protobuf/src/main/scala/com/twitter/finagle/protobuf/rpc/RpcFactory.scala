@@ -13,7 +13,7 @@ trait RpcFactory {
 
   def createServer(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, handler: ServiceExceptionHandler[Message], executorService: ExecutorService): RpcServer
 
-  def createStub[T <: Service](cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], service: { def newStub(c: RpcChannel): T }, executorService: ExecutorService): T
+  def createStub[T <: Service](cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], service: { def newStub(c: RpcChannel): T }, handler: ExceptionResponseHandler[Message], executorService: ExecutorService): T
 
   def createController(): RpcController
 

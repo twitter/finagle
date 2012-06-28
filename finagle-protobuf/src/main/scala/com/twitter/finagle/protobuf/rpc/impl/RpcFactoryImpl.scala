@@ -13,13 +13,14 @@ import com.google.protobuf.Message
 import com.google.protobuf.Service
 import java.util.concurrent.ExecutorService
 import com.twitter.finagle.protobuf.rpc.ServiceExceptionHandler
+import com.twitter.finagle.protobuf.rpc.ExceptionResponseHandler
 
 class RpcFactoryImpl extends RpcFactory {
 
   def createServer(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, handler: ServiceExceptionHandler[Message], executorService: ExecutorService): RpcServer = new RpcServerImpl(sb, port, service, handler, executorService)
 
-  def createStub[T <: Service](cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], service: { def newStub(c: RpcChannel): T }, executorService: ExecutorService): T = {
-    service.newStub(new RpcChannelImpl(cb, service.asInstanceOf[T], executorService))
+  def createStub[T <: Service](cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], service: { def newStub(c: RpcChannel): T }, handler: ExceptionResponseHandler[Message], executorService: ExecutorService): T = {
+    service.newStub(new RpcChannelImpl(cb, service.asInstanceOf[T], handler, executorService))
   }
 
   def createController(): RpcController = { new RpcControllerWithOnFailureCallback() }
