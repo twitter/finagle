@@ -19,11 +19,16 @@ class Sampler {
    * How much to let through? For everything, use 1 = 100.00%
    */
   def setSampleRate(sampleRate: Float) = {
-    if (sampleRate < 0 || sampleRate > 1) {
-      throw new IllegalArgumentException("Sample rate not within the valid range of 0-1, was " + sr)
+    if (!validSampleRate(sampleRate)) {
+      throw new IllegalArgumentException("Sample rate not within the valid range of 0-1, was " + sampleRate)
     }
     sr = sampleRate
   }
+
+  /**
+   * @param sampleRate is this sample rate valid (0-1f range)?
+   */
+  def validSampleRate(sampleRate: Float): Boolean = sampleRate >= 0 && sampleRate <= 1
 
   /**
    * @return the current sample rate, 0.0-1.0
@@ -34,9 +39,19 @@ class Sampler {
    * Should we drop this particular trace or send it on to Scribe?
    * True means keep.
    * False means drop.
+   * @param traceId check if this trace id passes the sampler
    */
-  def sampleTrace(traceId: TraceId): Option[Boolean] = {
-    Some(math.abs(traceId.traceId.toLong) % 10000 < sr * 10000)
+  def sampleTrace(traceId: TraceId): Option[Boolean] = sampleTrace(traceId, sr)
+
+  /**
+   * Should we drop this particular trace or send it on to Scribe?
+   * True means keep.
+   * False means drop.
+   * @param traceId check if this trace id passes the sampler
+   * @param sampleRate don't use the sampler's sample rate, instead use this one directly
+   */
+  def sampleTrace(traceId: TraceId, sampleRate: Float): Option[Boolean] = {
+    Some(math.abs(traceId.traceId.toLong) % 10000 < sampleRate * 10000)
   }
 
   /**
