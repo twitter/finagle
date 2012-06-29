@@ -30,7 +30,7 @@ object Util {
 
   def log(reqOrResp: String, method: String, m: Message) {
     if (log.isDebugEnabled()) {
-      log.debug("#log# {} {}: {}", Array[String](reqOrResp, method, m.toString()))
+      log.debug("#log# {} {}: {}", Array[AnyRef](reqOrResp, method, m.toString()))
     }
   }
 }
