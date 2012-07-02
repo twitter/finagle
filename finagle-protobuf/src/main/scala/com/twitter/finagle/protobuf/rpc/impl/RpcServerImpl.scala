@@ -67,7 +67,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
         case e: RuntimeException => {
           log.warn("#apply# Exception: ", e)
           if (handler.canHandle(e)) {
-            promise.setValue((methodName, handler.handle(e)))
+            promise.setValue((methodName, handler.handle(e, constructEmptyResponseMessage(m))))
           } else {
             // last-resort
             promise.setValue((methodName, constructEmptyResponseMessage(m)))
