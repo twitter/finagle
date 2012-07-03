@@ -46,6 +46,8 @@ object Capability {
 }
 
 case class Capability(mask: Int) {
+  def +(flag: Int) = Capability(mask, flag)
+  def -(flag: Int) = Capability(mask & ~flag)
   def has(flag: Int) = hasAll(flag)
   def hasAll(flags: Int*) = flags map {f: Int => (f & mask) > 0} reduceLeft {_ && _}
   override def toString() = {

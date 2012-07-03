@@ -58,4 +58,24 @@ case class DropDb(dbName: String)
 case class Query(sqlStatement: String) 
   extends CommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
 
+case class PrepareStatement(sqlStatement: String)
+  extends CommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
+
+case class ExecuteStatement(statementId: Int, flags: Byte, iterationCount: Int) extends Request {
+  override val data: Array[Byte] = {
+    val bw = new BufferWriter(new Array[Byte](9))
+    bw.writeInt(statementId)
+    bw.writeByte(flags)
+    bw.writeInt(iterationCount)
+    Array.concat(Array(Command.COM_STMT_EXECUTE), bw.buffer)
+  }
+}
+
+case class CloseStatement(statementId: Int) extends Request {
+  override val data: Array[Byte] = {
+    val bw = new BufferWriter(new Array[Byte](4))
+    bw.writeInt(statementId)
+    bw.buffer
+  }
+}
 

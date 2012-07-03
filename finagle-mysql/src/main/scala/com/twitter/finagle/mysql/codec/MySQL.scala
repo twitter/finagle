@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.mysql._  
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.util.Future
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
 
 class MySQL(username: String, password: String, database: Option[String]) 
   extends CodecFactory[Request, Result] {
@@ -18,8 +18,10 @@ class MySQL(username: String, password: String, database: Option[String])
         def getPipeline = {
           val pipeline = Channels.pipeline()
 
-          pipeline.addLast("decoder", new Decoder)
-          pipeline.addLast("encoder", Encoder)
+          pipeline.addLast("frameDecoder", new PacketFrameDecoder)
+          pipeline.addLast("resultDecoder", new ResultDecoder)
+          pipeline.addLast("requestEncoder", RequestEncoder)
+
           pipeline
         }
       }
@@ -43,23 +45,23 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
             username = username,
             password = password,
             database = database,
-            serverCapabilities = sg.serverCapabilities,
+            serverCap = sg.serverCap,
             salt = sg.salt
           )
 
   override def apply(conn: ClientConnection) = {
-    self(conn) flatMap { service => 
-      service(greet) flatMap { 
-        case sg: ServersGreeting if sg.serverCapabilities.has(Capability.protocol41) => 
+    self(conn) flatMap { service => service(greet) flatMap { 
+        case sg: ServersGreeting if sg.serverCap.has(Capability.protocol41) => 
           Future.value(sg)
+
         case sg: ServersGreeting => 
           Future.exception(IncompatibleServerVersion)
-        case r => 
-          Future.exception(InvalidResponseException("Expected server greeting and received " + r))
-        } flatMap { sg =>
-          service(makeLoginReq(sg)) flatMap {
-            case OK(_,_,_,_,_) => Future.value(service)
-            case Error(c, s, m) => Future.exception(AuthenticationException("Error Code "+ c + " - " + m))  
+        } flatMap { sg => service(makeLoginReq(sg)) flatMap {
+            case OK(_,_,_,_,_) => 
+              Future.value(service)
+
+            case Error(c, s, m) => 
+              Future.exception(ClientException("Error when authenticating the client "+ c + " - " + m))  
           }
         }
       }

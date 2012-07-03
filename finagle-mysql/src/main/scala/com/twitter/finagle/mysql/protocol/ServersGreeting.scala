@@ -11,7 +11,7 @@ case class ServersGreeting(
   version: String,
   threadId: Int,
   salt: Array[Byte], // 20 bytes from 2 different fields
-  serverCapabilities: Capability,
+  serverCap: Capability,
   language: Byte, // TODO case class
   status: Short // TODO case class
 ) extends Result
@@ -25,7 +25,7 @@ object ServersGreeting {
     val threadId = br.readInt
     val salt1 = br.take(8)
     br.skip(1) //1 filler byte always 0x00
-    val serverCapabilities = Capability(br.read(2).toInt)
+    val serverCap = Capability(br.readUnsignedShort)
     val language = br.readByte
     val status = br.readShort
     br.skip(13)
@@ -36,7 +36,7 @@ object ServersGreeting {
       version,
       threadId,
       Array.concat(salt1, salt2),
-      serverCapabilities,
+      serverCap,
       language,
       status
     )

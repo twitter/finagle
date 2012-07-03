@@ -4,13 +4,13 @@ import com.twitter.finagle.mysql.util.BufferUtil
 import java.security.MessageDigest
 
 case class LoginRequest(
-  clientCapabilities: Capability = Capability(0xA68F),
+  clientCap: Capability = Capability(0xA68F),
   maxPacket: Int = 0x10000000,
   charset: Byte = 33.toByte, // TODO case class
   database: Option[String] = None, //name of schema to use initially
   username: String,
   password: String,
-  serverCapabilities: Capability,
+  serverCap: Capability,
   salt: Array[Byte]
 ) extends Request(seq = 1.toByte) {
   val fixedBodySize = 34
@@ -20,13 +20,14 @@ case class LoginRequest(
 
   override val data: Array[Byte] = {
     val bw = new BufferWriter(new Array[Byte](dataSize))
-    bw.writeInt(clientCapabilities.mask)
+    val capability = if(dbNameSize == 0) clientCap - Capability.connectWithDB else clientCap
+    bw.writeInt(capability.mask)
     bw.writeInt(maxPacket)
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) //23 reserved bytes - zeroed out 
     bw.writeNullTerminatedString(username)
     bw.writeLengthCodedString(new String(hashPassword))
-    if(dbNameSize > 0 && serverCapabilities.has(Capability.connectWithDB))
+    if(dbNameSize > 0 && serverCap.has(Capability.connectWithDB))
       bw.writeNullTerminatedString(database.get)
     bw.buffer
   }

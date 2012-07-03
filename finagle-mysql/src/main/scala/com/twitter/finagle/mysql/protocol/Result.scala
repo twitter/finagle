@@ -18,6 +18,7 @@ case class OK(affectedRows: Long,
               message: String) extends Result
 object OK {
   def decode(packet: Packet) = {
+    println("OK Body: " + packet.body.mkString(", "))
     //start reading after flag byte
     val br = new BufferReader(packet.body, 1)
     new OK(
@@ -65,9 +66,9 @@ object EOF {
  * A Result Set consists of:
  * 1. A Result Set Header Packet which contains the number of columns
  * 2. Field Packets which each contain a column descriptor (field name)
- * 3. Row Data Packets which each contain the row contents
+ * 3. Row Data Packets which each contain the row contents.
  */
-case class ResultSet(fields: List[Field], rawData: List[RowData]) 
+case class ResultSet(fields: List[Field], rawData: List[RowData])
   extends Result {
   override def toString = {
     val header = fields map { _.name } mkString("\t")
@@ -163,7 +164,7 @@ object Field {
 }
 
 /**
- * Represents a Row that is part of the Result Set. 
+ * Represents a Row that is part of the Result Set.
  */
 case class RowData(data: List[String])
 object RowData {

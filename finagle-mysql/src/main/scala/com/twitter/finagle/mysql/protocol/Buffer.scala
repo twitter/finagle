@@ -1,8 +1,8 @@
 package com.twitter.finagle.mysql.protocol
 
 /**
- * Defines classes to read and write to a byte buffer that adhere to the
- * network protocol for MySQL.
+ * Defines classes to read and write to/from a byte buffer 
+ * in little endian byte order.
  */
 
 class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
@@ -63,7 +63,7 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   }
 
   def readLengthCodedString: String = {
-    val size = readByte
+    val size = readUnsignedByte
     val strBytes = new Array[Byte](size)
     Array.copy(buffer, offset, strBytes, 0, size)
     offset += size

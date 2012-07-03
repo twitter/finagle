@@ -32,8 +32,10 @@ object Client {
 
   class Client(factory: ServiceFactory[Request, Result]) {
     lazy val fService = factory.apply()
-    def use(dbName: String) = send(Use(dbName))
+
     def query(query: String) = send(Query(query))
+    def use(schema: String) = send(Use(schema))
+    def prepareStatement(query: String) = send(PrepareStatement(query))
     def create(dbName: String) = send(CreateDb(dbName))
     def drop(dbName: String) = send(DropDb(dbName))
     def close() = factory.close()

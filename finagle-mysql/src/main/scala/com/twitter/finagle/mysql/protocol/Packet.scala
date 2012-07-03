@@ -30,7 +30,7 @@ trait Packet {
   val size: Int
   val number: Byte //used for sanity checks on server side
   val body: Array[Byte]
-
+  
   lazy val header: Array[Byte] = {
     val bw = new BufferWriter(new Array[Byte](Packet.headerSize))
     bw.writeInt24(size)
@@ -38,16 +38,3 @@ trait Packet {
     bw.buffer
   }
 }
-
-
-/**
- * TODO: Implement packet compression with zlib. We 
- * can use the Inflater and Deflater in java.util.zip.
- *
- * Note: Using compression might not always be advantageous.
- * It is possible for the body (data) of the packet to remain
- * uncompressed if calling compress() does not yield a smaller
- * body. This happens in a session with small packets or
- * poorly compressable packets. (MySQL Internals, pg. 63)
- */
-//class CompressedPacket extends Packet 
