@@ -31,7 +31,7 @@ object Client {
   }
 
   class Client(factory: ServiceFactory[Request, Result]) {
-    lazy val fService = factory.apply()
+    private[this] lazy val fService = factory.apply()
 
     def query(query: String) = send(Query(query))
     def use(schema: String) = send(Use(schema))

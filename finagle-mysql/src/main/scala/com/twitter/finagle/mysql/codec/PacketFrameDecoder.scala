@@ -29,10 +29,10 @@ class PacketFrameDecoder extends FrameDecoder {
 		if(buffer.readableBytes < length)
 			return null
 
-		//println("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
+		println("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
     val body = new Array[Byte](length)
     buffer.readBytes(body)
-    //BufferUtil.hex(body)
+    BufferUtil.hex(body)
     Packet(length, seq, body)
 	}
 }

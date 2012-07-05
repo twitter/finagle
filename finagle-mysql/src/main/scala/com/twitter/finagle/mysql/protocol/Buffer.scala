@@ -46,11 +46,17 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   * Depending on the first byte, read a different width from
   * the data array.
   */
-  def readLengthCodedBinary: Long = readByte match {
-    case 252 => read(2)
-    case 253 => read(3)
-    case 254 => read(8)
-    case _ => -1
+  def readLengthCodedBinary: Long = {
+    val firstByte = readByte
+    if(firstByte < 251)
+      firstByte
+    else
+      firstByte match {
+        case 252 => read(2)
+        case 253 => read(3)
+        case 254 => read(8)
+        case _ => -1 //NULL
+      }
   }
 
   def readNullTerminatedString: String = {

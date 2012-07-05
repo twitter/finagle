@@ -13,19 +13,18 @@ trait Result
  */
 case class OK(affectedRows: Long, 
               insertId: Long, 
-              serverStatus: Short,
-              warningCount: Short,
+              serverStatus: Int,
+              warningCount: Int,
               message: String) extends Result
 object OK {
   def decode(packet: Packet) = {
-    println("OK Body: " + packet.body.mkString(", "))
     //start reading after flag byte
     val br = new BufferReader(packet.body, 1)
     new OK(
       br.readLengthCodedBinary,
       br.readLengthCodedBinary,
-      br.readShort,
-      br.readShort,
+      br.readUnsignedShort,
+      br.readUnsignedShort,
       new String(br.takeRest)
     )
   }
@@ -59,6 +58,35 @@ object EOF {
   }
 }
 
+case class PrepareOK(statementId: Int,
+                     numColumns: Int,
+                     numParams: Int,
+                     warningCount: Int) extends Result
+object PrepareOK {
+  def decode(packet: Packet) = {
+    val br = new BufferReader(packet.body, 1)
+    val stmtId = br.readInt
+    val col = br.readUnsignedShort
+    val params = br.readUnsignedShort
+    br.skip(1)
+    val warningCount = br.readUnsignedShort
+    PrepareOK(stmtId, col, params, warningCount)
+  }
+}
+
+case class PreparedStatement(statementId: Int,
+                             params: List[Field],
+                             columns: List[Field]) extends Result
+case object PreparedStatement {
+  def decode(header: Packet, paramPackets: List[Packet], colPackets: List[Packet]) = {
+    val ok = PrepareOK.decode(header)
+    PreparedStatement(
+      ok.statementId,
+      paramPackets map { Field.decode(_) },
+      colPackets map { Field.decode(_) }
+    )
+  }
+}
 /** 
  * Represents a Result Set received from the server. A Result Set is
  * received if the client issued a command, such as a query, 

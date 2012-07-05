@@ -243,7 +243,8 @@ object Finagle extends Build {
       StandardProject.newSettings ++
       sharedSettings
     ).settings(
-      name := "finagle-mysql"
+      name := "finagle-mysql",
+      libraryDependencies ++= Seq(util("logging"))
     ).dependsOn(finagleCore)
   
   lazy val finagleKestrel = Project(
