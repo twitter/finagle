@@ -26,12 +26,14 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   }
 
   def readByte = read(1).toByte
-  def readUnsignedByte = read(1).toInt
+  def readUnsignedByte = read(1).toShort
   def readShort = read(2).toShort
   def readUnsignedShort = read(2).toInt
   def readInt24 = read(3).toInt
   def readInt = read(4).toInt
   def readLong = read(8)
+  def readFloat = java.lang.Float.intBitsToFloat(readInt)
+  def readDouble = java.lang.Double.longBitsToDouble(readLong)
 
   def skip(n: Int) = offset += n
   def take(n: Int) = {

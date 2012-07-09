@@ -3,7 +3,7 @@ package com.twitter.finagle.mysql.codec
 import com.twitter.finagle.mysql.protocol.{Packet, BufferReader}
 import com.twitter.finagle.mysql.util.BufferUtil
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{Channel, ChannelHandlerContext, ExceptionEvent}
+import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 /**
@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder
  * needed to defrag a ChannelBuffer into a logical MySQL packet.
  *
  * MySQL packets are a length encoded set of bytes written
- * in LITTLE_ENDIAN byte order.
+ * in little endian byte order.
  */
 class PacketFrameDecoder extends FrameDecoder {
 	override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Packet = {

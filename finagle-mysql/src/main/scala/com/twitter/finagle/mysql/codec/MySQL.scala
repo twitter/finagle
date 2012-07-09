@@ -51,17 +51,17 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
 
   override def apply(conn: ClientConnection) = {
     self(conn) flatMap { service => service(greet) flatMap { 
-        case sg: ServersGreeting if sg.serverCap.has(Capability.protocol41) => 
+        case sg: ServersGreeting if sg.serverCap.has(Capability.protocol41) =>
           Future.value(sg)
 
         case sg: ServersGreeting => 
           Future.exception(IncompatibleServerVersion)
         } flatMap { sg => service(makeLoginReq(sg)) flatMap {
-            case OK(_,_,_,_,_) => 
+            case result: OK => 
               Future.value(service)
 
             case Error(c, s, m) => 
-              Future.exception(ClientException("Error when authenticating the client "+ c + " - " + m))  
+              Future.exception(ServerError("Error when authenticating the client "+ c + " - " + m))  
           }
         }
       }

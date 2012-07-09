@@ -61,7 +61,8 @@ case class Query(sqlStatement: String)
 case class PrepareStatement(sqlStatement: String)
   extends CommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
 
-case class ExecuteStatement(statementId: Int, flags: Byte, iterationCount: Int) extends Request {
+case class ExecuteStatement(statementId: Int, flags: Byte = 0, iterationCount: Int = 1) extends Request {
+  //TO DO: Implement this correctly.
   override val data: Array[Byte] = {
     val bw = new BufferWriter(new Array[Byte](9))
     bw.writeInt(statementId)
