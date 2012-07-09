@@ -16,23 +16,23 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder
  * in little endian byte order.
  */
 class PacketFrameDecoder extends FrameDecoder {
-	override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Packet = {
-		if(buffer.readableBytes < Packet.headerSize)
-			return null
+  override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Packet = {
+    if(buffer.readableBytes < Packet.headerSize)
+    return null
 
-		val header = new Array[Byte](Packet.headerSize)
-		buffer.readBytes(header)
-		val br = new BufferReader(header)
+    val header = new Array[Byte](Packet.headerSize)
+    buffer.readBytes(header)
+    val br = new BufferReader(header)
 
-		val (length, seq) = (br.readInt24, br.readByte)
+    val (length, seq) = (br.readInt24, br.readByte)
 
-		if(buffer.readableBytes < length)
-			return null
+    if(buffer.readableBytes < length)
+    return null
 
-		println("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
+    println("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
     val body = new Array[Byte](length)
     buffer.readBytes(body)
     BufferUtil.hex(body)
     Packet(length, seq, body)
-	}
+  }
 }
