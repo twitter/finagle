@@ -105,6 +105,12 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
       backoffs.force.toSeq must be_==(0 until 10 map { i => (1 << i).seconds })
     }
 
+    "Backoff.exponential with upper limit" in {
+      val backoffs = (Backoff.exponential(1.seconds, 2) take 5) ++ Backoff.const(32.seconds)
+      (backoffs take 10).force.toSeq must be_==(0 until 10 map {
+          i => (math.min(1 << i, 32)).seconds })
+    }
+
     "Backoff.linear" in {
       val backoffs = Backoff.linear(2.seconds, 10.seconds) take 10
       backoffs.head must be_==(2.seconds)
