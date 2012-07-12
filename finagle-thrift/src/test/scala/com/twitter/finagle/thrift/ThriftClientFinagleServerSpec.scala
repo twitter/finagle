@@ -1,25 +1,26 @@
 package com.twitter.finagle.thrift
 
-import org.specs.SpecificationWithJUnit
+import com.twitter.finagle.Service
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.test._
+import com.twitter.util.{Future, Return, Promise, Time}
+import com.twitter.util.TimeConversions._
+
+import java.net.InetSocketAddress
 
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.TBinaryProtocol
-import org.apache.thrift.protocol.{TProtocol, TBinaryProtocol}
-import org.apache.thrift.transport.{
-  TFramedTransport, TSocket, TTransportException, TTransport}
+import org.apache.thrift.transport.{TFramedTransport, TSocket}
 
-import com.twitter.util.{Future, RandomSocket, Throw, Return, Promise}
-import com.twitter.util.TimeConversions._
-import com.twitter.test._
-
-import com.twitter.finagle.builder.ServerBuilder
+import org.specs.SpecificationWithJUnit
 
 class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
   "thrift client with finagle server" should {
-    var somewayPromise = new Promise[Unit]
+    val somewayPromise = new Promise[Unit]
     val processor = new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)
-      def add_one(a: Int, b: Int) = Future.void
+      def add_one(a: Int, b: Int) = Future.Void
       def multiply(a: Int, b: Int) = Future { a / b }
       def complex_return(someString: String) =
         someString match {
@@ -30,16 +31,16 @@ class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
         }
       def someway() = {
         somewayPromise() = Return(())
-        Future.void
+        Future.Void
       }
     }
 
-    val serverAddr = RandomSocket()
     val server = ServerBuilder()
       .codec(ThriftServerFramedCodec())
-      .bindTo(serverAddr)
+      .bindTo(new InetSocketAddress(0))
       .name("ThriftServer")
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
+    val serverAddr = server.localAddress.asInstanceOf[InetSocketAddress]
 
     doAfter {
       server.close(20.milliseconds)
@@ -86,6 +87,26 @@ class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
 
       client.another_method(123) must throwA(
         new TApplicationException("Invalid method name: 'another_method'"))
+    }
+
+    "make sure we mesure protocol negotiation latency" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+        val statsReceiver = new InMemoryStatsReceiver
+        val name = "thrift_client"
+        val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()
+          .hosts(serverAddr)
+          .name(name)
+          .hostConnectionLimit(1)
+          .codec(ThriftClientFramedCodec())
+          .reportTo(statsReceiver)
+          .build()
+
+        val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
+        client.multiply(4,2).get must be_==(2)
+
+        val key = Seq(name, "codec_connection_preparation_latency_ms")
+        statsReceiver.repr.stats.contains(key) must beTrue
+      }
     }
   }
 }

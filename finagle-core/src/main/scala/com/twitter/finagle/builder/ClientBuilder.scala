@@ -695,8 +695,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     var factory: ServiceFactory[Req, Rep] = null
     val bs = buildBootstrap(codec, host, new TimerToNettyTimer(timer))
-    factory = codec.prepareConnFactory(
-      new ChannelServiceFactory[Req, Rep](bs, codec.mkClientDispatcher, hostStatsReceiver))
+    val preparedFactory = codec.prepareConnFactory(new ChannelServiceFactory[Req, Rep](
+      bs, codec.mkClientDispatcher, hostStatsReceiver
+    ))
+    factory = new ServiceFactoryProxy[Req, Rep](preparedFactory) {
+      override def apply(con: ClientConnection) =
+        hostStatsReceiver.timeFuture("codec_connection_preparation_latency_ms") {
+          self.apply(con)
+        }
+    }
 
     if (config.hostConnectionMaxIdleTime.isDefined ||
         config.hostConnectionMaxLifeTime.isDefined) {

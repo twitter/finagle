@@ -26,13 +26,13 @@ class EndToEndSpec extends SpecificationWithJUnit {
   "Thrift server" should {
     val processor =  new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)
-      def add_one(a: Int, b: Int) = Future.void
+      def add_one(a: Int, b: Int) = Future.Void
       def multiply(a: Int, b: Int) = Future { a * b }
       def complex_return(someString: String) = Future {
         Trace.record("hey it's me!")
         new SomeStruct(123, Trace.id.parentId.toString)
       }
-      def someway() = Future.void
+      def someway() = Future.Void
     }
 
     val serverAddr = RandomSocket()

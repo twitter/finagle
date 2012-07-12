@@ -17,7 +17,7 @@ object Service {
       }
     }
   }
-  
+
   def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
     def apply(req: Req) = f(req)
   }
@@ -135,6 +135,7 @@ abstract class ServiceFactory[-Req, +Rep]
         }
       def close = self.close()
       override def isAvailable = self.isAvailable
+      override def toString() = self.toString()
     }
 
   /**

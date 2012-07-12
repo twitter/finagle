@@ -4,9 +4,9 @@ import com.twitter.sbt._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "5.2.0"
-  val nettyLib = "io.netty" % "netty" % "3.4.1.Final" withSources()
-  val ostrichLib = "com.twitter" % "ostrich" % "8.0.1" withSources()
+  val utilVersion = "5.3.1-SNAPSHOT"
+  val nettyLib = "io.netty" % "netty" % "3.5.1.Final" withSources()
+  val ostrichLib = "com.twitter" % "ostrich" % "8.2.1-SNAPSHOT" withSources()
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
@@ -15,8 +15,9 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" % ("util-"+which) % utilVersion withSources()
 
   val sharedSettings = Seq(
-    version := "5.1.1-SNAPSHOT",
+    version := "5.3.1-SNAPSHOT",
     organization := "com.twitter",
+    scalaVersion := "2.9.2",
     SubversionPublisher.subversionRepository := Some("https://svn.twitter.biz/maven-public"),
     libraryDependencies ++= Seq(
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources(),
@@ -38,7 +39,7 @@ object Finagle extends Build {
 
     // This is bad news for things like com.twitter.util.Time
     parallelExecution in Test := false,
-    
+
     // This effectively disables packageDoc, which craps out
     // on generating docs for generated thrift due to the use
     // of raw java types.
@@ -65,13 +66,13 @@ object Finagle extends Build {
     finagleException, finagleCommonsStats,
 
     // Protocols
-    finagleHttp, finagleStream, finagleNative, finagleThrift, 
+    finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel,
 
     // Use and integration
     finagleStress, finagleExample, finagleBenchmark
   )
-  
+
   lazy val finagleTest = Project(
     id = "finagle-test",
     base = file("finagle-test"),
@@ -91,7 +92,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-core",
-    libraryDependencies ++= Seq(nettyLib, util("core"), util("collection"), util("hashing"), util("jvm"))
+    libraryDependencies ++= Seq(nettyLib, util("core"), util("collection"), util("hashing"),
+      util("jvm"), util("logging"))
   ).dependsOn(finagleTest % "test")
 
   lazy val finagleOstrich4 = Project(
@@ -117,7 +119,7 @@ object Finagle extends Build {
     compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq(util("codec")) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
-  
+
   lazy val finagleException = Project(
     id = "finagle-exception",
     base = file("finagle-exception"),
@@ -135,7 +137,7 @@ object Finagle extends Build {
       "com.twitter" % "streamyj_2.8.1" % "0.3.0" % "test"
     ) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift)
-  
+
   lazy val finagleCommonsStats = Project(
     id = "finagle-commons-stats",
     base = file("finagle-commons-stats"),
@@ -147,7 +149,7 @@ object Finagle extends Build {
     compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.35")
   ).dependsOn(finagleCore)
-  
+
   lazy val finagleServersets = Project(
     id = "finagle-serversets",
     base = file("finagle-serversets"),
@@ -183,7 +185,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-http",
     libraryDependencies ++= Seq(
-      util("codec"), util("logging"), 
+      util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6" withSources()
     )
   ).dependsOn(finagleCore)
@@ -234,7 +236,7 @@ object Finagle extends Build {
       "com.google.guava" % "guava" % "11.0.2"
     )
   ).dependsOn(finagleCore, finagleServersets)
-  
+
   lazy val finagleKestrel = Project(
     id = "finagle-kestrel",
     base = file("finagle-kestrel"),
@@ -244,7 +246,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-kestrel"
   ).dependsOn(finagleCore, finagleMemcached)
-  
+
 /*  notyet
   lazy val finagleProtobuf = Project(
     id = "finagle-protobuf",
@@ -279,9 +281,9 @@ object Finagle extends Build {
       case _ => true
     })
   ).dependsOn(finagleCore, finagleMemcached)
-  
+
   // Uses
-  
+
   lazy val finagleStress = Project(
     id = "finagle-stress",
     base = file("finagle-stress"),
@@ -293,7 +295,7 @@ object Finagle extends Build {
     name := "finagle-stress",
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp)
-  
+
   lazy val finagleExample = Project(
     id = "finagle-example",
     base = file("finagle-example"),
@@ -305,11 +307,11 @@ object Finagle extends Build {
     name := "finagle-example",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "flags" % "0.0.1", 
+      "com.twitter.common" % "flags" % "0.0.1",
       "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
     )
   ).dependsOn(
-    finagleCore, finagleHttp, finagleStream, finagleThrift, 
+    finagleCore, finagleHttp, finagleStream, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis, finagleOstrich4)
 
   lazy val finagleBenchmark = Project(

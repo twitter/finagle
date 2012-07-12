@@ -1,15 +1,14 @@
 package com.twitter.finagle.builder
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-import org.mockito.Matchers
-
-import com.twitter.util.{Promise, Return, Future}
-
+import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.channel.ChannelService
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.tracing.Tracer
+import com.twitter.util.{Promise, Return, Future, Time}
+
+import org.mockito.Matchers
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "ClientBuilder" should {
@@ -17,6 +16,8 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
+      preparedFactory.map(Matchers.any()) returns
+        preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 
       val m = new MockChannel
       m.codec.prepareConnFactory(any) returns preparedFactory
@@ -74,6 +75,32 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       there was no(m.channelFactory).releaseExternalResources()
       dClient2.dispose()
       there was one(m.channelFactory).releaseExternalResources()
+    }
+
+    "measure codec connection preparation latency" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+        val m = new MockChannel {
+          codec.prepareConnFactory(any) answers { s =>
+            val factory = s.asInstanceOf[ServiceFactory[String, String]]
+            // Create a fake ServiceFactory that take time to return a dummy Service
+            new ServiceFactoryProxy[String, String](factory) {
+              override def apply(con: ClientConnection) = {
+                timeControl.advance(500.milliseconds)
+                Future.value(new Service[String, String] {
+                  def apply(req: String) = Future.value(req)
+                })
+              }
+            }
+          }
+        }
+        val service = m.clientBuilder.build()
+        timeControl.advance(100.milliseconds)
+        service("blabla")
+
+        val key = Seq(m.name, "codec_connection_preparation_latency_ms")
+        val stat = m.statsReceiver.stats.get(key).get
+        stat.head must be_==(500.0f)
+      }
     }
   }
 }
