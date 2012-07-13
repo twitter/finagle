@@ -1,3 +1,9 @@
+5.3.0           2012/06/25
+        * finagle-core: ClientBuilder and ServerBuilder's MonitorFilter to report exception sources
+        * finagle-test: Add TaskTrackingTimer benchmark
+        * finagle-thirft: SeqIdFilter: helpful exceptions
+        * Dispatcher: all write exceptions are wrapped with WriteException
+
 5.1.0		2012/06/14
 
 	* finagle: Upgrade util to 5.2.0, ostrich to 8.1.0
