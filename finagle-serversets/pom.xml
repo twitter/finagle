@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.twitter.common.zookeeper</groupId>
       <artifactId>server-set</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.10</version>
       <exclusions>
         <exclusion>
           <groupId>javax.mail</groupId>
