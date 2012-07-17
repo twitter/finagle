@@ -12,9 +12,11 @@ import scala.None
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
 import com.google.common.base.Preconditions
-import com.google.protobuf._
-import com.google.protobuf.Descriptors.MethodDescriptor
 import com.twitter.finagle.protobuf.rpc.ServiceExceptionHandler
+import com.google.protobuf.DynamicMessage
+import com.google.protobuf.DynamicMessage.Builder
+import com.google.protobuf._
+import com.google.protobuf.Descriptors._
 
 class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, handler: ServiceExceptionHandler[Message], executorService: ExecutorService) extends RpcServer {
 
@@ -80,7 +82,8 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
   }
 
   def constructEmptyResponseMessage(m: MethodDescriptor): Message = {
-    m.getOutputType().toProto().getDefaultInstanceForType()
+        val outputType = m.getOutputType();
+        DynamicMessage.newBuilder(outputType).build()
   }
 }
 
