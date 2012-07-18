@@ -205,7 +205,7 @@ private[thrift] class RawZipkinTracer(
     mutate(record.traceId) { span =>
       val endpoint = Endpoint.fromSocketAddress(ia).boundEndpoint
       span.copy(_endpoint = Some(endpoint),
-        annotations = span.annotations map { a => ZipkinAnnotation(a.timestamp, a.value, endpoint)})
+        annotations = span.annotations map { a => ZipkinAnnotation(a.timestamp, a.value, endpoint, a.duration)})
     }
   }
 
@@ -226,8 +226,8 @@ private[thrift] class RawZipkinTracer(
    */
   protected def annotate(record: Record, value: String) = {
     mutate(record.traceId) { span =>
-      span.copy(annotations = span.annotations ++ Seq(
-        ZipkinAnnotation(record.timestamp, value, span.endpoint)))
+      span.copy(annotations =
+        ZipkinAnnotation(record.timestamp, value, span.endpoint, record.duration) +: span.annotations)
     }
   }
 }

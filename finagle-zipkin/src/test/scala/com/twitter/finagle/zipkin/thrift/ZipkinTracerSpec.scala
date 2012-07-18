@@ -25,7 +25,7 @@ class ZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
       val underlying = mock[RawZipkinTracer]
       val tracer = new ZipkinTracer(underlying, 0f)
       val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
-      val record = new Record(id, Time.now, Annotation.ClientSend())
+      val record = Record(id, Time.now, Annotation.ClientSend())
       tracer.record(record)
       one(underlying).record(record)
     }

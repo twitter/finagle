@@ -1,11 +1,10 @@
 package com.twitter.finagle.tracing
 
+import com.twitter.conversions.time._
+import com.twitter.util.Time
+
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-
-import com.twitter.util.Time
-import com.twitter.conversions.time._
-import java.nio.ByteBuffer
 
 class TraceSpec extends SpecificationWithJUnit with Mockito {
   "Trace" should {
@@ -132,7 +131,19 @@ class TraceSpec extends SpecificationWithJUnit with Mockito {
           Trace.enable
         }
       }
+    }
 
+    "Trace.time" in Time.withCurrentTimeFrozen { tc =>
+      val tracer = new BufferingTracer()
+      val duration = 1.second
+      Trace.pushTracer(tracer)
+      Trace.time("msg") {
+        tc.advance(duration)
+      }
+      tracer.iterator foreach { r =>
+        r.annotation mustEqual Annotation.Message("msg")
+        r.duration mustEqual Some(duration)
+      }
     }
   }
 }
