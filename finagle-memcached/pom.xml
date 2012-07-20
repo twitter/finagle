@@ -34,6 +34,18 @@
       <version>5.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>com.twitter.common</groupId>
+      <artifactId>zookeeper-testing</artifactId>
+      <version>0.0.20</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter.common_internal</groupId>
+      <artifactId>zookeeper-utils</artifactId>
+      <version>0.0.15</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>11.0.2</version>

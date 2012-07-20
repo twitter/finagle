@@ -709,7 +709,7 @@ case class KetamaClientBuilder private[memcached] (
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
     val (clusterEndpoints, clusterUpdates) = _cluster.snap
-    // TODO: listeng to the updates here
+    // TODO: listen to the updates here
     // For the first version of this client, we do not listen to the cluster update yet, we only use
     // the initial set of cluster members; later when we add the capability to listen to the updates,
     // we'd need to modify the KetamaClient class to provide an interface for reloading a new set of
