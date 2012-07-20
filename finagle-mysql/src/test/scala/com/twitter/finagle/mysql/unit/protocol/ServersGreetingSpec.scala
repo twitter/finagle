@@ -32,7 +32,7 @@ class ServersGreetingSpec extends SpecificationWithJUnit {
       }
 
       "server capabilities" in {
-        sg.serverCapabilities.mask mustEqual 0xf7ff
+        sg.serverCap.mask mustEqual 0xf7ff
       }
 
       "server collation code" in {

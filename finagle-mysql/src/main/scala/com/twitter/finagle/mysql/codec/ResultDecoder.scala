@@ -98,7 +98,7 @@ class ResultDecoder extends SimpleChannelHandler {
    */
   private def decodePacket(packet: Packet): Option[Result] = packet.body(0) match {
     case Packet.okByte if expectPrepareOK =>
-      val ok = PrepareOK.decode(packet)
+      val ok = PreparedOK.decode(packet)
       transition(PacketDefragger(setOneExpected = ok.numParams > 0, 
                                 setTwoExpected = ok.numColumns > 0,
                                 decoder = PreparedStatement.decode))

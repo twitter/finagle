@@ -39,7 +39,7 @@ class AuthenticationProxy(underlying: ServiceFactory[Request, Result],
                           password: String,
                           database: Option[String]) 
   extends ServiceFactoryProxy(underlying) {
-  val greet = new CommandRequest(Command.COM_NOOP_GREET)
+  val greet = new SimpleRequest(Command.COM_NOOP_GREET)
 
   def makeLoginReq(sg: ServersGreeting) = LoginRequest(
             username = username,

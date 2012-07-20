@@ -1,6 +1,8 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.util.BufferUtil
+import scala.math.BigInt
+import java.sql.Timestamp
+import java.util.Date
 
 object Command {
   val COM_SLEEP               = 0x00.toByte /* internal thread state */
@@ -37,46 +39,129 @@ object Command {
 
 abstract class Request(seq: Byte = 0) {
   val data: Array[Byte]
-  def packet = Packet(data.size, seq, data)
-  def encoded: Array[Byte] = Array.concat(packet.header, packet.body)
+  def toPacket = Packet(data.size, seq, data)
+  def toByteArray: Array[Byte] = {
+    val p = this.toPacket
+    Array.concat(p.header, p.body)
+  }
 }
 
-class CommandRequest(val cmd: Byte, _data: Array[Byte] = Array[Byte](), seq:Byte = 0) 
+class SimpleRequest(val cmd: Byte, _data: Array[Byte] = Array[Byte](), seq:Byte = 0) 
   extends Request(seq) {
     override val data: Array[Byte] = Array.concat(Array(cmd), _data)
 }
 
-case class Use(dbName: String)
-  extends CommandRequest(Command.COM_INIT_DB, dbName.getBytes)
+case class UseRequest(dbName: String)
+  extends SimpleRequest(Command.COM_INIT_DB, dbName.getBytes)
 
-case class CreateDb(dbName: String) 
-  extends CommandRequest(Command.COM_CREATE_DB, dbName.getBytes) 
+case class CreateRequest(dbName: String) 
+  extends SimpleRequest(Command.COM_CREATE_DB, dbName.getBytes) 
 
-case class DropDb(dbName: String) 
-  extends CommandRequest(Command.COM_DROP_DB, dbName.getBytes)
+case class DropRequest(dbName: String) 
+  extends SimpleRequest(Command.COM_DROP_DB, dbName.getBytes)
 
-case class Query(sqlStatement: String) 
-  extends CommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
+case class QueryRequest(sqlStatement: String) 
+  extends SimpleRequest(Command.COM_QUERY, sqlStatement.getBytes)
 
-case class PrepareStatement(sqlStatement: String)
-  extends CommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
+case class PrepareRequest(sqlStatement: String)
+  extends SimpleRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
 
-case class ExecuteStatement(statementId: Int, flags: Byte = 0, iterationCount: Int = 1) extends Request {
-  //TO DO: Implement this correctly.
+/**
+ * A COM_EXECUTE Request. 
+ * Uses the binary protocol to build request for the server.
+ */ 
+case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1) extends Request {
+
+  private def isNull(param: Any): Boolean = param match {
+    case null => true
+    case NullValue(_) => true
+    case _ => false
+  }
+
+  private def makeNullBitmap(parameters: List[Any], bit: Int, result: BigInt): Array[Byte] = parameters match {
+    case Nil => result.toByteArray.reverse //as little-endian byte array
+    case param :: rest => 
+      val bits = if(isNull(param)) result.setBit(bit) else result
+      makeNullBitmap(rest, bit+1, bits)
+  }
+
+  private def setTypeCode(param: Any, writer: BufferWriter): Unit = {
+    def set(code: Int) = writer.writeUnsignedShort(code)
+    param match {
+      case s: String    => set(Types.VARCHAR)
+      case b: Boolean   => set(Types.TINY)
+      case t: Timestamp => set(Types.TIMESTAMP)
+      case d: Date      => set(Types.DATE)
+      case b: Byte      => set(Types.TINY)
+      case s: Short     => set(Types.SHORT)
+      case i: Int       => set(Types.LONG)
+      case l: Long      => set(Types.LONGLONG)
+      case f: Float     => set(Types.FLOAT)
+      case d: Double    => set(Types.DOUBLE)
+      case _ => throw new IllegalArgumentException("Unhandled query parameter type for " +
+            param + " type " + param.asInstanceOf[Object].getClass.getName)
+    }
+  }
+
+  private def convertToBinary(parameters: List[Any]): Array[Byte] = {
+    def mkBuffer(len: Int) = new BufferWriter(new Array[Byte](len))
+
+    def convert(params: List[Any], result: Array[Byte]): Array[Byte] = params match {
+      case Nil => result
+      case param :: rest => 
+        val writer = param match {
+          case s: String    => mkBuffer(s.length+1).writeLengthCodedString(s)
+          case b: Boolean   => mkBuffer(1).writeBoolean(b)
+          //case t: Timestamp => buffer.writeTimestamp(t)
+          //case d: Date      => buffer.writeDate(d)
+          case b: Byte      => mkBuffer(1).writeByte(b)
+          case s: Short     => mkBuffer(2).writeShort(s)
+          case i: Int       => mkBuffer(4).writeInt(i)
+          case l: Long      => mkBuffer(8).writeLong(l)
+          case f: Float     => mkBuffer(4).writeFloat(f)
+          case d: Double    => mkBuffer(8).writeDouble(d)
+          case _ => throw new IllegalArgumentException("Unhandled query parameter type for " +
+                  param + " type " + param.asInstanceOf[Object].getClass.getName)
+        }
+
+        convert(rest, Array.concat(result, writer.buffer))
+    }
+
+    convert(parameters, Array[Byte]())
+  }
+
   override val data: Array[Byte] = {
+    val cmdByte = Array(Command.COM_STMT_EXECUTE)
     val bw = new BufferWriter(new Array[Byte](9))
-    bw.writeInt(statementId)
+    bw.writeInt(ps.statementId)
     bw.writeByte(flags)
     bw.writeInt(iterationCount)
-    Array.concat(Array(Command.COM_STMT_EXECUTE), bw.buffer)
+    
+    val paramsList = ps.parameters.toList
+    val nullBytes = makeNullBitmap(paramsList, 0, BigInt(0))
+    val newParamsBound: Byte = if(ps.hasNewParameters) 1 else 0
+
+    val result = Array.concat(cmdByte, bw.buffer, nullBytes, Array(newParamsBound))
+
+    if(ps.hasNewParameters) {
+      val types = new BufferWriter(new Array[Byte](ps.numberOfParams * 2))
+      paramsList.map { setTypeCode(_, types) }
+      println("types: " + types.buffer.mkString(", "))
+
+      val values = convertToBinary(paramsList)
+      println("values: " + values.mkString(", "))
+
+      Array.concat(result, types.buffer, values)
+    }
+    else 
+      result
   }
 }
 
-case class CloseStatement(statementId: Int) extends Request {
+case class CloseRequest(ps: PreparedStatement) extends Request {
   override val data: Array[Byte] = {
-    val bw = new BufferWriter(new Array[Byte](4))
-    bw.writeInt(statementId)
-    bw.buffer
+    val bw = new BufferWriter(new Array[Byte](4)).writeInt(ps.statementId)
+    bw.writeInt(ps.statementId)
+    Array.concat(Array(Command.COM_STMT_CLOSE), bw.buffer)
   }
 }
-

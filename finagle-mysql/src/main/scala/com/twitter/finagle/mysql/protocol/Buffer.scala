@@ -89,32 +89,42 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
    * Write multi-byte numeric values onto the the buffer by
    * widening n accross 'width' byte chunks starting at buffer(offset)
    */
-  def write(n: Long, width: Int) = {
+  def write(n: Long, width: Int): BufferWriter = {
     (0 until width) foreach { i =>
       buffer(i + offset) = ((n >> (i*8)) & 0xFF).toByte
     }
     offset += width
+    this
   }
 
+  def writeBoolean(b: Boolean) = if(b) writeByte(0) else writeByte(1)
   def writeByte(n: Byte) = write(n, 1)
   def writeShort(n: Short) = write(n, 2)
+  def writeUnsignedShort(n: Int) = write(n, 2)
   def writeInt24(n: Int) = write(n,  3)
   def writeInt(n: Int) = write(n, 4)
   def writeLong(n: Long) = write(n, 8)
+  def writeFloat(f: Float) = writeInt(java.lang.Float.floatToIntBits(f))
+  def writeDouble(d: Double) = writeLong(java.lang.Double.doubleToLongBits(d))
 
   def skip(n: Int) = offset += n
-  def fill(n: Int, b: Byte) = (offset until offset + n) foreach { j => buffer(j) = b ; offset += 1 }
+  def fill(n: Int, b: Byte) = {
+    (offset until offset + n) foreach { j => buffer(j) = b ; offset += 1 }
+    this
+  }
   def fillRest(b: Byte) = fill(buffer.size - offset, b)
 
   def writeNullTerminatedString(str: String) = {
     Array.copy(str.getBytes, 0, buffer, offset, str.length)
     buffer(offset + str.length) = '\0'.toByte
     offset += str.length + 1
+    this
   }
 
   def writeLengthCodedString(str: String) = {
     buffer(offset) = str.length.toByte
     Array.copy(str.getBytes, 0, buffer, offset+1, str.length)
     offset += str.length + 1
+    this
    }
 }

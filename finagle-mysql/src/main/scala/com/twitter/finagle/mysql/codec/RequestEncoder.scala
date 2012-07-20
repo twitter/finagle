@@ -9,13 +9,13 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 object RequestEncoder extends OneToOneEncoder {
   override def encode(context: ChannelHandlerContext, channel: Channel, message: AnyRef) = {
     message match {
-      case req: CommandRequest if req.cmd == Command.COM_NOOP_GREET => 
+      case req: SimpleRequest if req.cmd == Command.COM_NOOP_GREET => 
         ChannelBuffers.EMPTY_BUFFER
       case req: Request =>
         println("-> Encoding " + req)
-        val encodedMsg = req.encoded
-        BufferUtil.hex(encodedMsg)
-        ChannelBuffers.wrappedBuffer(encodedMsg)
+        val bytes = req.toByteArray
+        BufferUtil.hex(bytes)
+        ChannelBuffers.wrappedBuffer(bytes)
       case _ =>
         message
     }

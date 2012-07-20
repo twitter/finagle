@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
-abstract class Result
+trait Result
 
 /**
  * Represents the OK Packet received from the server. It is sent
