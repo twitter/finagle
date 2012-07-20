@@ -20,10 +20,12 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
   def getmsg(buf: Array[Byte]) =
     new InputBuffer(buf)().readMessageBegin
 
-  testFilter("strict", mkmsg(_, true))
-  testFilter("nonstrict", mkmsg(_, false))
+  for (seqId <- Seq(0, 1, -1, 123, -123, Int.MaxValue, Int.MinValue)) {
+    testFilter("strict(%d)".format(seqId), seqId, mkmsg(_, true))
+    testFilter("nonstrict(%s)".format(seqId), seqId, mkmsg(_, false))
+  }
 
-  def testFilter(how: String, mkmsg: TMessage => Array[Byte]) {
+  def testFilter(how: String, seqId: Int, mkmsg: TMessage => Array[Byte]) {
     "SeqIdFilter(%s)".format(how) should {
       val service = mock[Service[ThriftClientRequest, Array[Byte]]]
       val p = new Promise[Array[Byte]]
@@ -32,7 +34,7 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
       val filtered = filter andThen service
 
       "maintain seqids passed in by the client" in {
-        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
+        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
         f.poll must beNone
 
         val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
@@ -40,14 +42,14 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
         p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, getmsg(req.getValue.message).seqid)))
 
         f.poll must beLike {
-          case Some(Return(buf)) => getmsg(buf).seqid == 123
+          case Some(Return(buf)) => getmsg(buf).seqid == seqId
         }
       }
 
       "use its own seqids to the server" in Time.withCurrentTimeFrozen { _ =>
         val filtered = new SeqIdFilter andThen service
         val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
-        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
+        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
         val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
         there was one(service).apply(req.capture)
         getmsg(req.getValue.message).seqid must be_==(expected)
@@ -56,7 +58,7 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
       "fail when sequence ids are out of order" in Time.withCurrentTimeFrozen { _ =>
         val filtered = new SeqIdFilter andThen service
         val expected = (new scala.util.Random(Time.now.inMilliseconds)).nextInt()
-        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, 123)), false))
+        val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
         p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, 1111)))
         f.poll must beLike {
           case Some(Throw(SeqMismatchException(1111, expected))) => true
