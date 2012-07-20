@@ -1,7 +1,8 @@
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.protocol._
-import java.net.InetSocketAddress
 import com.twitter.util.Future
+import java.net.InetSocketAddress
+import java.sql.{Date, Time, Timestamp}
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -13,11 +14,11 @@ object Main {
     val dbname = "test"
 
     val client = Client(host+":"+port, username, password, dbname)
+    case class City(id: Option[Int], name: Option[String], date: Option[Timestamp])
 
-    case class City(id: Option[Int], name: Option[String])
     //Basic Queries
     /*client.select("SELECT * FROM cities WHERE id in (?)", (1,2)) { row =>
-      new City(row.getInt("id"), row.getString("name"))
+      City(row.getInt("id"), row.getString("name"), row.getTimestamp("dateadded"))
     } onSuccess {
       result => println(result)
     } onFailure {
@@ -27,9 +28,9 @@ object Main {
 
     //Prepared Statements
     client.prepareAndSelect("SELECT * FROM cities WHERE id in (?)", (1,2,3)) { row => 
-      new City(row.getInt("id"), row.getString("name"))
+      City(row.getInt("id"), row.getString("name"), row.getTimestamp("dateadded"))
     } onSuccess {
-      result => println(result)
+      case (ps, seq) => println(seq)
     } onFailure {
       e => e.printStackTrace()
     }

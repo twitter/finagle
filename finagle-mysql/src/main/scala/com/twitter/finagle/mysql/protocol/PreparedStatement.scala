@@ -13,6 +13,8 @@ trait PreparedStatement extends Result {
   def parameters: Array[Any] = params
   def hasNewParameters: Boolean = hasNewParams
   
+  def bindParameters() = hasNewParams = false
+  
   def parameters_=(arr: Array[Any]) = {
     require(arr.size == numberOfParams)
     hasNewParams = true

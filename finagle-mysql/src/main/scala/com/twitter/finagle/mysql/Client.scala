@@ -96,8 +96,12 @@ object Client {
      * rows.
      */
     def execute(ps: PreparedStatement) = send(ExecuteRequest(ps)) {
-      case rs: ResultSet => Future.value(rs)
-      case ok: OK => Future.value(ok)
+      case rs: ResultSet =>
+        ps.bindParameters() 
+        Future.value(rs)
+      case ok: OK => 
+        ps.bindParameters()
+        Future.value(ok)
     }
 
     /**
@@ -112,8 +116,15 @@ object Client {
       case ok: OK => Seq()
     }
 
-    def prepareAndSelect[T](sql: String, params: Any*)(f: Row => T): Future[Seq[T]] = 
-      prepare(sql, params: _*) flatMap { ps => select(ps)(f) }
+    /**
+     * Combines the prepare and select operation using prepared statements.
+     * @return a Future[(PreparedStatement, Seq[T])] tuple.
+     */
+    def prepareAndSelect[T](sql: String, params: Any*)(f: Row => T): Future[(PreparedStatement, Seq[T])] = 
+      prepare(sql, params: _*) flatMap { ps => select(ps)(f) map { 
+        seq => (ps, seq)
+        } 
+      }
 
     /**
      * Close a prepared statement on the server.

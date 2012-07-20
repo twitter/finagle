@@ -68,7 +68,7 @@ case class PrepareRequest(sqlStatement: String)
 
 /**
  * A COM_EXECUTE Request. 
- * Uses the binary protocol to build request for the server.
+ * Uses the binary protocol to build execute requests.
  */ 
 case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1) extends Request {
 
@@ -86,18 +86,20 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
   }
 
   private def setTypeCode(param: Any, writer: BufferWriter): Unit = {
-    def set(code: Int) = writer.writeUnsignedShort(code)
+    def setType(code: Int) = writer.writeUnsignedShort(code)
     param match {
-      case s: String    => set(Types.VARCHAR)
-      case b: Boolean   => set(Types.TINY)
-      case t: Timestamp => set(Types.TIMESTAMP)
-      case d: Date      => set(Types.DATE)
-      case b: Byte      => set(Types.TINY)
-      case s: Short     => set(Types.SHORT)
-      case i: Int       => set(Types.LONG)
-      case l: Long      => set(Types.LONGLONG)
-      case f: Float     => set(Types.FLOAT)
-      case d: Double    => set(Types.DOUBLE)
+      case s: String          => setType(Types.VARCHAR)
+      case b: Boolean         => setType(Types.TINY)
+      case t: Timestamp       => setType(Types.TIMESTAMP)
+      case d: Date            => setType(Types.DATE)
+      case b: Byte            => setType(Types.TINY)
+      case s: Short           => setType(Types.SHORT)
+      case i: Int             => setType(Types.LONG)
+      case l: Long            => setType(Types.LONGLONG)
+      case f: Float           => setType(Types.FLOAT)
+      case d: Double          => setType(Types.DOUBLE)
+      case NullValue(code)    => setType(code)
+      case null               => setType(Types.NULL)
       case _ => throw new IllegalArgumentException("Unhandled query parameter type for " +
             param + " type " + param.asInstanceOf[Object].getClass.getName)
     }
@@ -120,6 +122,8 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
           case l: Long      => mkBuffer(8).writeLong(l)
           case f: Float     => mkBuffer(4).writeFloat(f)
           case d: Double    => mkBuffer(8).writeDouble(d)
+          case NullValue(_) => mkBuffer(0)
+          case null         => mkBuffer(0)
           case _ => throw new IllegalArgumentException("Unhandled query parameter type for " +
                   param + " type " + param.asInstanceOf[Object].getClass.getName)
         }

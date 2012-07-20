@@ -44,7 +44,7 @@ object NullValues {
   val NullBoolean = NullValues(BIT)
   val NullTimestamp = NullValues(TIMESTAMP)
   val NullLong = NullValues(LONGLONG)
-
+  
   def apply(typeCode: Int) = {
     if(legalValues.contains(typeCode)) 
       NullValue(typeCode)

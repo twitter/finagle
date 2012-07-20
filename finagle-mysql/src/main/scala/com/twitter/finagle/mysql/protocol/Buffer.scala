@@ -1,5 +1,8 @@
 package com.twitter.finagle.mysql.protocol
 
+import java.lang.{Float => JFloat, Double => JDouble}
+import java.sql.{Time, Date, Timestamp}
+
 /**
  * Defines classes to read and write to/from a byte buffer 
  * in little endian byte order.
@@ -9,7 +12,7 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   require(offset >= 0)
   require(buffer != null)
 
-  def readable(width: Int = 0): Boolean = offset + width <= buffer.size
+  def readable(width: Int = 1): Boolean = offset + width <= buffer.size
 
    /**
    * Reads multi-byte numeric values stored in a byte array. 
@@ -32,8 +35,8 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def readInt24 = read(3).toInt
   def readInt = read(4).toInt
   def readLong = read(8)
-  def readFloat = java.lang.Float.intBitsToFloat(readInt)
-  def readDouble = java.lang.Double.longBitsToDouble(readLong)
+  def readFloat = JFloat.intBitsToFloat(readInt)
+  def readDouble = JDouble.longBitsToDouble(readLong)
 
   def skip(n: Int) = offset += n
   def take(n: Int) = {
@@ -72,18 +75,73 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
 
   def readLengthCodedString: String = {
     val size = readUnsignedByte
+
+    if(size == 0xFB) 
+      return "" // NULL string.
+
     val strBytes = new Array[Byte](size)
     Array.copy(buffer, offset, strBytes, 0, size)
     offset += size
     new String(strBytes)
   }
+
+  /**
+   * Read a MySQL binary encoded Timestamp from the buffer.
+   */
+  def readTimestamp: Timestamp = {
+    val len = readUnsignedByte
+    if(len == 0)
+      return new Timestamp(0)
+
+    var year, month, day, hour, min, sec, nano = 0
+
+    if(readable(4)) {
+      year = readUnsignedShort
+      month = readUnsignedByte
+      day = readUnsignedByte
+    }
+
+    if(readable(3)) {
+      hour = readUnsignedByte
+      min = readUnsignedByte
+      sec = readUnsignedByte
+    }
+
+    if(readable(4))
+      nano = readInt
+
+    val fmt = "%04d-%02d-%02d %02d:%02d:%02d"
+    val ts = Timestamp.valueOf(fmt.format(year,month,day,hour,min,sec))
+    ts.setNanos(nano)
+    ts
+  }
+
+  def readDate: Date = new Date(readTimestamp.getTime)
+
+  /**
+   * Read a MySQL binary encoded Time field from the buffer.
+   */
+   def readTime: Time = {
+    val len = readUnsignedByte
+    if(len == 0)
+      return new Time(0)
+
+    val sign = if(readByte == 1) -1 else 1
+    val days = readInt
+    val hour = readUnsignedByte
+    val min = readUnsignedByte
+    val sec = readUnsignedByte
+
+    Time.valueOf("%02d:%02d:%02d".format(hour, min, sec))
+   }
+
 }
 
 class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   require(offset >= 0)
   require(buffer != null)
 
-  def writable(width: Int = 0): Boolean = offset + width <= buffer.size
+  def writable(width: Int = 1): Boolean = offset + width <= buffer.size
 
   /**
    * Write multi-byte numeric values onto the the buffer by
@@ -104,8 +162,8 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def writeInt24(n: Int) = write(n,  3)
   def writeInt(n: Int) = write(n, 4)
   def writeLong(n: Long) = write(n, 8)
-  def writeFloat(f: Float) = writeInt(java.lang.Float.floatToIntBits(f))
-  def writeDouble(d: Double) = writeLong(java.lang.Double.doubleToLongBits(d))
+  def writeFloat(f: Float) = writeInt(JFloat.floatToIntBits(f))
+  def writeDouble(d: Double) = writeLong(JDouble.doubleToLongBits(d))
 
   def skip(n: Int) = offset += n
   def fill(n: Int, b: Byte) = {
