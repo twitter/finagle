@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql.protocol
 
 import java.lang.{Float => JFloat, Double => JDouble}
 import java.sql.{Time, Date, Timestamp}
+import java.util.Calendar
 
 /**
  * Defines classes to read and write to/from a byte buffer 
@@ -157,6 +158,7 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
 
   def writeBoolean(b: Boolean) = if(b) writeByte(0) else writeByte(1)
   def writeByte(n: Byte) = write(n, 1)
+  def writeUnsignedByte(n: Int) = write(n, 1)
   def writeShort(n: Short) = write(n, 2)
   def writeUnsignedShort(n: Int) = write(n, 2)
   def writeInt24(n: Int) = write(n,  3)
@@ -184,5 +186,20 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
     Array.copy(str.getBytes, 0, buffer, offset+1, str.length)
     offset += str.length + 1
     this
-   }
+  }
+
+  def writeTimestamp(t: Timestamp) = {
+    val cal = Calendar.getInstance
+    cal.setTimeInMillis(t.getTime)
+    writeUnsignedByte(11)
+    writeUnsignedShort(cal.get(Calendar.YEAR))
+    writeUnsignedByte(cal.get(Calendar.MONTH))
+    writeUnsignedByte(cal.get(Calendar.DATE))
+    writeUnsignedByte(cal.get(Calendar.HOUR_OF_DAY))
+    writeUnsignedByte(cal.get(Calendar.MINUTE))
+    writeUnsignedByte(cal.get(Calendar.SECOND))
+    writeInt(t.getNanos)
+  }
+
+  def writeDate(d: Date) = writeTimestamp(new Timestamp(d.getTime))
 }

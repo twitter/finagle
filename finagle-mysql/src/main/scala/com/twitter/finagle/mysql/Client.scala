@@ -51,13 +51,13 @@ object Client {
      * @return an OK Result or a ResultSet for queries that return
      * rows.
      */
-    def query(sql: String) = send(QueryRequest(sql)) {
-      case rs: ResultSet => Future.value(rs)
-      case ok: OK => Future.value(ok)
+    def query(sql: String, params: Any*) = {
+      val stmt = Query.injectParams(sql, params)
+      send(QueryRequest(stmt)) {
+        case rs: ResultSet => Future.value(rs)
+        case ok: OK => Future.value(ok)
+      }
     }
-
-    def query(sql: String, params: Any*): Future[Result] =
-      query(Query.injectParams(sql, params))
 
     /**
      * Runs a query that returns a result set. For each row
@@ -67,14 +67,11 @@ object Client {
      * @param f A function from ResultSet to any type T.
      * @return a Future of Seq[T]
      */
-    def select[T](sql: String, params: Any*)(f: Row => T): Future[Seq[T]] = {
-      val stmt = Query.injectParams(sql, params)
-      query(stmt) map {
-        case rs: ResultSet => rs.rows.map(f)
-        case ok: OK => Seq()
-      }
+    def select[T](sql: String, params: Any*)(f: Row => T): Future[Seq[T]] = query(sql, params: _*) map {
+      case rs: ResultSet => rs.rows.map(f)
+      case ok: OK => Seq()
     }
-
+    
     /**
      * Sends a query to server to be prepared for execution.
      * @param sql A query to be prepared on the server.
@@ -122,7 +119,7 @@ object Client {
      */
     def prepareAndSelect[T](sql: String, params: Any*)(f: Row => T): Future[(PreparedStatement, Seq[T])] = 
       prepare(sql, params: _*) flatMap { ps => select(ps)(f) map { 
-        seq => (ps, seq)
+          seq => (ps, seq)
         } 
       }
 

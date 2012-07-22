@@ -1,8 +1,7 @@
 package com.twitter.finagle.mysql.protocol
 
 import scala.math.BigInt
-import java.sql.Timestamp
-import java.util.Date
+import java.sql.{Timestamp, Date}
 
 object Command {
   val COM_SLEEP               = 0x00.toByte /* internal thread state */
@@ -114,8 +113,8 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
         val writer = param match {
           case s: String    => mkBuffer(s.length+1).writeLengthCodedString(s)
           case b: Boolean   => mkBuffer(1).writeBoolean(b)
-          //case t: Timestamp => buffer.writeTimestamp(t)
-          //case d: Date      => buffer.writeDate(d)
+          case t: Timestamp => mkBuffer(12).writeTimestamp(t)
+          case d: Date      => mkBuffer(12).writeDate(d)
           case b: Byte      => mkBuffer(1).writeByte(b)
           case s: Short     => mkBuffer(2).writeShort(s)
           case i: Int       => mkBuffer(4).writeInt(i)

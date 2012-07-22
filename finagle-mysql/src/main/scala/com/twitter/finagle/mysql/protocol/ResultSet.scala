@@ -15,7 +15,7 @@ trait ResultSet extends Result {
 
 class SimpleResultSet(val fields: Seq[Field], val rows: Seq[Row]) extends ResultSet {
   override def toString = {
-    val header = fields map { _.name } mkString("\t")
+    val header = fields map { _.id } mkString("\t")
     val content = rows map { _.values.mkString("\t") } mkString("\n")
     header + "\n" + content
   }
@@ -26,7 +26,7 @@ object ResultSet {
     val fieldData = fields map { Field.decode(_) }
 
     //a Field.name -> Field.index map used to allow quick lookups for rows based on name.
-    val indexMap = fieldData.map(_.name).zipWithIndex.toMap
+    val indexMap = fieldData.map(_.id).zipWithIndex.toMap
 
     /**
      * Rows can be encoded as Strings or Binary depending
@@ -119,7 +119,7 @@ class StringEncodedRow(row: Array[Byte], indexMap: Map[String, Int]) extends Row
    * into Option values.
    */
   private def getValue(index: Int): Option[String] = 
-    if(values(index) == "") None else Some(values(index))
+    if(values(index).isEmpty) None else Some(values(index))
 
   def getString(columnIndex: Option[Int]) = 
     for(idx <- columnIndex; value <- getValue(idx)) yield value
@@ -266,7 +266,9 @@ case class Field(
   fieldType: Int,
   flags: Short,
   decimals: Byte
-)
+) {
+  def id: String = if(name.isEmpty) origName else name
+}
 
 object Field {
   def decode(packet: Packet): Field = {
