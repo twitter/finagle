@@ -51,12 +51,14 @@ object Client {
      * @return an OK Result or a ResultSet for queries that return
      * rows.
      */
-    def query(sql: String, params: Any*) = {
+    def query(sql: String, params: Any*) = try {
       val stmt = Query.injectParams(sql, params)
       send(QueryRequest(stmt)) {
         case rs: ResultSet => Future.value(rs)
         case ok: OK => Future.value(ok)
       }
+    } catch {
+      case e => Future.exception(e)
     }
 
     /**
@@ -77,7 +79,7 @@ object Client {
      * @param sql A query to be prepared on the server.
      * @return PreparedStatement 
      */
-    def prepare(sql: String, params: Any*) = {
+    def prepare(sql: String, params: Any*) = try {
       val stmt = Query.expandParams(sql, params)
       send(PrepareRequest(stmt)) {
         case ps: PreparedStatement =>
@@ -85,6 +87,8 @@ object Client {
           ps.parameters = Query.flatten(params).toArray
           Future.value(ps)
       }
+    } catch {
+      case e => Future.exception(e)
     }
 
     /**
