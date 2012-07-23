@@ -622,7 +622,7 @@ private[builder] class MkServer[Req, Rep] (
     val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
     val monitorFilter = {
       val logger = config.logger.getOrElse(Logger.getLogger(config.name))
-      new MonitorFilter[Req, Rep](monitor andThen new SourceTrackingMonitor(logger))
+      new MonitorFilter[Req, Rep](monitor andThen new SourceTrackingMonitor(logger, "server"))
     }
     
     // These need to sit outside of the codec:

@@ -6,12 +6,15 @@ import java.util.logging.{Level, Logger}
 
 /**
  * A monitor that unrolls the exception causes to report source information if any
+ * @param logger
+ * @param which either client or server
  */
-class SourceTrackingMonitor(logger: Logger) extends Monitor {
+class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
   def handle(exc: Throwable) = {
     logger.log(
       Level.SEVERE,
-      "A Service " + unrollCauses(exc).mkString(" on behalf of ") + " threw an exception", exc)
+      "A " + which + " service " +
+        unrollCauses(exc).mkString(" on behalf of ") + " threw an exception", exc)
     false
   }
 
