@@ -29,26 +29,3 @@ object Types {
   val STRING      = 0xfe;
   val GEOMETRY    = 0xff;
 }
-
-sealed case class NullValue(typeCode: Int)
-object NullValues {
-  import Types._
-
-  val legalValues = Set(DECIMAL, TINY, SHORT, LONG, FLOAT, DOUBLE, NULL, TIMESTAMP, LONGLONG,
-                        INT24, DATE, DATETIME, YEAR, NEWDATE, VARCHAR, BIT, NEWDECIMAL, ENUM,
-                        SET, TINY_BLOB, MEDIUM_BLOB, LONG_BLOB, BLOB, VAR_STRING, STRING, GEOMETRY)
-
-  val NullString = NullValues(VARCHAR)
-  val NullInt = NullValues(LONG)
-  val NullDouble = NullValues(DOUBLE)
-  val NullBoolean = NullValues(BIT)
-  val NullTimestamp = NullValues(TIMESTAMP)
-  val NullLong = NullValues(LONGLONG)
-  
-  def apply(typeCode: Int) = {
-    if(legalValues.contains(typeCode)) 
-      NullValue(typeCode)
-    else
-      throw new NoSuchElementException
-  }
-}

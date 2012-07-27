@@ -1,40 +1,29 @@
 package com.twitter.finagle.mysql.protocol
 
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers._
+
 /**
- * Represents a logical packet received from MySQL.
- * A MySQL packet consists of a header,
- * 3-bytes containing the size of the body and a 
- * 1 byte seq number, followed by the body.
- */
+  * Represents a logical packet received from MySQL.
+  * A MySQL packet consists of a header and body.
+  */
+case class Packet(header: PacketHeader, body: Array[Byte])
 
-object Packet {
-  val headerSize = 0x04
-  val okByte = 0x00.toByte
-  val errorByte = 0xFF.toByte
-  val eofByte = 0xFE.toByte
-
-  def apply(packetSize: Int, seq: Byte) = new Packet {
-    val size = packetSize
-    val number = seq
-    val body = new Array[Byte](size)
-  }
-
-  def apply(packetSize: Int, seq: Byte, data: Array[Byte]) = new Packet {
-    val size = packetSize
-    val number = seq
-    val body = data
+case class PacketHeader(size: Int, seq: Short) {
+  lazy val toChannelBuffer = {
+    val bw = new BufferWriter(new Array[Byte](Packet.HeaderSize))
+    bw.writeInt24(size)
+    bw.writeUnsignedByte(seq)
+    bw.toChannelBuffer
   }
 }
 
-trait Packet {
-  val size: Int
-  val number: Byte //used for sanity checks on server side
-  val body: Array[Byte]
-  
-  lazy val header: Array[Byte] = {
-    val bw = new BufferWriter(new Array[Byte](Packet.headerSize))
-    bw.writeInt24(size)
-    bw.writeByte(number)
-    bw.buffer
-  }
+object Packet {
+  val HeaderSize = 0x04
+  val OkByte     = 0x00.toByte
+  val ErrorByte  = 0xFF.toByte
+  val EofByte    = 0xFE.toByte
+
+  def apply(size: Int, seq: Short, body: Array[Byte]): Packet = 
+    Packet(PacketHeader(size, seq), body)
 }

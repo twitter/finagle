@@ -2,12 +2,8 @@ package com.twitter.finagle.mysql.protocol
 
 import com.twitter.logging.Logger
 import scala.math.BigInt
-import java.sql.{Timestamp, Date, Time}
+import java.sql.{Timestamp, Date}
 
-/**
- * ResultSets are returned from the server for any
- * query except for INSERT, UPDATE, or ALTER TABLE.
- */
 trait ResultSet extends Result {
   val fields: Seq[Field]
   val rows: Seq[Row]
@@ -22,33 +18,33 @@ class SimpleResultSet(val fields: Seq[Field], val rows: Seq[Row]) extends Result
 }
 
 object ResultSet {
-  def decode(isBinaryEncoded: Boolean)(header: Packet, fields: Seq[Packet], rows: Seq[Packet]) = {
-    val fieldData = fields map { Field.decode(_) }
+  def decode(isBinaryEncoded: Boolean)(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]) = {
+    val fields = fieldPackets map { Field.decode(_) }
 
-    //a Field.name -> Field.index map used to allow quick lookups for rows based on name.
-    val indexMap = fieldData.map(_.id).zipWithIndex.toMap
+    // A name -> index map used to allow quick lookups for rows based on name.
+    val indexMap = fields.map(_.id).zipWithIndex.toMap
 
     /**
-     * Rows can be encoded as Strings or Binary depending
-     * on if the ResultSet is created by a normal query or
-     * a prepared statement, respectively. 
-     */
-    val rowData = rows map { p: Packet => 
-      if(!isBinaryEncoded)
+      * Rows can be encoded as Strings or Binary depending
+      * on if the ResultSet is created by a normal query or
+      * a prepared statement, respectively. 
+      */
+    val rows = rowPackets map { p: Packet => 
+      if (!isBinaryEncoded)
         new StringEncodedRow(p.body, indexMap) 
       else
-        new BinaryEncodedRow(p.body, fieldData, indexMap)
+        new BinaryEncodedRow(p.body, fields, indexMap)
     }
 
-    new SimpleResultSet(fieldData, rowData)
+    new SimpleResultSet(fields, rows)
   }
 }
 
 /**
- * Defines an interface that allows for easily
- * decoding the row (Array[Byte]) into its appropriate
- * values.
- */
+  * Defines an interface that allows for easily
+  * decoding a row (Array[Byte]) into its appropriate
+  * values.
+  */
 trait Row {
   val values: IndexedSeq[Any]
   def findColumnIndex(columnName: String): Option[Int]
@@ -97,29 +93,21 @@ trait Row {
   def getDate(columnIndex: Option[Int]): Option[Date]
   def getDate(columnName: String): Option[Date] =
     getDate(findColumnIndex(columnName))
-
-  def getTime(columnIndex: Option[Int]): Option[Time]
-  def getTime(columnName: String): Option[Time] =
-    getTime(findColumnIndex(columnName))
 }
 
 class StringEncodedRow(row: Array[Byte], indexMap: Map[String, Int]) extends Row {
   val br = new BufferReader(row)
-  val values: IndexedSeq[String] = (0 until indexMap.size) map { _ => br.readLengthCodedString }
+  val values: IndexedSeq[String] = (0 until indexMap.size) map { _ => br.readLengthCodedString() }
 
   def findColumnIndex(name: String) = indexMap.get(name)
 
   /**
-   * The readLengthCodedString method returns an empty string when
-   * a null value is returned from the database. This method handles the
-   * empty string and returns an Option[String] to avoid attempting to cast an
-   * empty string. 
-   *
-   * This also has a nice side-effect of translating null values
-   * into Option values.
-   */
-  private def getValue(index: Int): Option[String] = 
-    if(values(index).isEmpty) None else Some(values(index))
+    * The readLengthCodedString method returns null when
+    * a SQL NULL value is returned from the database. This converts
+    * the null into a None.
+    */
+  private[this] def getValue(index: Int): Option[String] = 
+    if (values(index) == null) None else Some(values(index))
 
   def getString(columnIndex: Option[Int]) = 
     for(idx <- columnIndex; value <- getValue(idx)) yield value
@@ -153,21 +141,18 @@ class StringEncodedRow(row: Array[Byte], indexMap: Map[String, Int]) extends Row
 
   def getDate(columnIndex: Option[Int]) = 
     for(idx <- columnIndex; value <- getValue(idx)) yield Date.valueOf(value)
-
-  def getTime(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield Time.valueOf(value)
 }
 
 class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
-  private val log = Logger("finagle-mysql")
-  val buffer = new BufferReader(row, 1) //skip first byte
+  private[this] val log = Logger("finagle-mysql")
+  val buffer = new BufferReader(row, 1) // skip first byte
 
   /**
-   * In a binary encoded row, null values are not sent from the
-   * server. Instead, the server sends a bit vector where
-   * each bit corresponds to the index of the column. If the bit
-   * is set, the value is null.
-   */
+    * In a binary encoded row, null values are not sent from the
+    * server. Instead, the server sends a bit vector where
+    * each bit corresponds to the index of the column. If the bit
+    * is set, the value is null.
+    */
   val nullBitmap: BigInt = {
     val len = ((fields.size + 7 + 2) / 8).toInt
     val bytesAsBigEndian = buffer.take(len).reverse
@@ -175,35 +160,35 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
   }
 
   /**
-   * Check if the bit is set. Note, the
-   * first 2 bits are reserved.
-   */
+    * Check if the bit is set. Note, the
+    * first 2 bits are reserved.
+    */
   def isNull(index: Int) = nullBitmap.testBit(index + 2)
 
   /**
-   * Read values from row. Essentially coverting 
-   * the row from Array[Byte] to a pseudo-heterogeneous
-   * Seq that stores each column value.
-   */
+    * Read values from row. Essentially coverting 
+    * the row from Array[Byte] to a pseudo-heterogeneous
+    * Seq that stores each column value.
+    */
   val values: IndexedSeq[Option[Any]] = for(idx <- 0 until fields.size) yield {
-    if(isNull(idx))
+    if (isNull(idx))
       None
     else 
       fields(idx).fieldType match {
-        case Types.STRING     => Some(buffer.readLengthCodedString)
-        case Types.VAR_STRING => Some(buffer.readLengthCodedString)
-        case Types.VARCHAR    => Some(buffer.readLengthCodedString)
-        case Types.TINY       => Some(buffer.readUnsignedByte)
-        case Types.SHORT      => Some(buffer.readShort)
-        case Types.INT24      => Some(buffer.readInt24)
-        case Types.LONG       => Some(buffer.readInt)
-        case Types.LONGLONG   => Some(buffer.readLong)
-        case Types.FLOAT      => Some(buffer.readFloat)
-        case Types.DOUBLE     => Some(buffer.readDouble)
-        case Types.TIMESTAMP  => Some(buffer.readTimestamp)
-        case Types.DATETIME   => Some(buffer.readTimestamp)
-        case Types.DATE       => Some(buffer.readDate)
-        case Types.TIME       => Some(buffer.readTime)
+        case Types.STRING     => Some(buffer.readLengthCodedString())
+        case Types.VAR_STRING => Some(buffer.readLengthCodedString())
+        case Types.VARCHAR    => Some(buffer.readLengthCodedString())
+        case Types.TINY       => Some(buffer.readUnsignedByte())
+        case Types.SHORT      => Some(buffer.readShort())
+        case Types.INT24      => Some(buffer.readInt24())
+        case Types.LONG       => Some(buffer.readInt())
+        case Types.LONGLONG   => Some(buffer.readLong())
+        case Types.FLOAT      => Some(buffer.readFloat())
+        case Types.DOUBLE     => Some(buffer.readDouble())
+        case Types.TIMESTAMP  => Some(buffer.readTimestamp())
+        case Types.DATETIME   => Some(buffer.readTimestamp())
+        case Types.DATE       => Some(buffer.readDate())
+        // case Types.TIME       => Some(buffer.readTime())
 
         case _ =>
           log.error("BinaryEncodedRow: Unsupported type " + 
@@ -246,14 +231,11 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
 
   def getDate(columnIndex: Option[Int]) = 
     for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Date]
-
-  def getTime(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Time]
 }
 
 /**
- * A ResultSet contains a Field packet for each column.
- */
+  * A ResultSet contains a Field packet for each column.
+  */
 case class Field(
   catalog: String,
   db: String,
@@ -267,24 +249,24 @@ case class Field(
   flags: Short,
   decimals: Byte
 ) {
-  def id: String = if(name.isEmpty) origName else name
+  def id: String = if (name.isEmpty) origName else name
 }
 
 object Field {
   def decode(packet: Packet): Field = {
     val br = new BufferReader(packet.body)
-    val catalog = br.readLengthCodedString
-    val db = br.readLengthCodedString
-    val table = br.readLengthCodedString
-    val origTable = br.readLengthCodedString
-    val name = br.readLengthCodedString
-    val origName = br.readLengthCodedString
-    br.skip(1) //filler
-    val charset = br.readShort
-    val length = br.readInt
-    val fieldType = br.readUnsignedByte
-    val flags = br.readShort
-    val decimals = br.readByte
+    val catalog = br.readLengthCodedString()
+    val db = br.readLengthCodedString()
+    val table = br.readLengthCodedString()
+    val origTable = br.readLengthCodedString()
+    val name = br.readLengthCodedString()
+    val origName = br.readLengthCodedString()
+    br.skip(1) // filler
+    val charset = br.readShort()
+    val length = br.readInt()
+    val fieldType = br.readUnsignedByte()
+    val flags = br.readShort()
+    val decimals = br.readByte()
     new Field(
       catalog,
       db,

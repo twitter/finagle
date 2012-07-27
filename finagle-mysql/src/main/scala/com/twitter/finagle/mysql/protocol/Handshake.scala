@@ -3,8 +3,8 @@ package com.twitter.finagle.mysql.protocol
 import java.security.MessageDigest
 
 /**
- * Initial Result received from server during handshaking.
- */
+  * Initial Result received from server during handshaking.
+  */
 case class ServersGreeting(
   protocol: Byte,
   version: String,
@@ -18,14 +18,14 @@ case class ServersGreeting(
 object ServersGreeting {
   def decode(packet: Packet): ServersGreeting = {
     val br = new BufferReader(packet.body)
-    val protocol = br.readByte
-    val version = br.readNullTerminatedString
-    val threadId = br.readInt
+    val protocol = br.readByte()
+    val version = br.readNullTerminatedString()
+    val threadId = br.readInt()
     val salt1 = br.take(8)
-    br.skip(1) //1 filler byte always 0x00
-    val serverCap = Capability(br.readUnsignedShort)
-    val language = br.readByte
-    val status = br.readShort
+    br.skip(1) // 1 filler byte always 0x00
+    val serverCap = Capability(br.readUnsignedShort())
+    val language = br.readByte()
+    val status = br.readShort()
     br.skip(13)
     val salt2 = br.take(12)
     
@@ -42,35 +42,36 @@ object ServersGreeting {
 }
 
 /**
- * Reply to ServerGreeting sent during handshaking phase.
- */
+  * Reply to ServerGreeting sent during handshaking phase.
+  */
 case class LoginRequest(
-  clientCap: Capability = Capability(0xA68F),
-  maxPacket: Int = 0x10000000,
-  charset: Byte = 33.toByte, // TODO case class
-  database: Option[String] = None,
   username: String,
   password: String,
+  database: Option[String] = None,
   serverCap: Capability,
-  salt: Array[Byte]
+  salt: Array[Byte],
+  clientCap: Capability = Capability(0xA68F),
+  maxPacket: Int = 0x10000000,
+  charset: Byte = 33.toByte // TODO case class
 ) extends Request(seq = 1.toByte) {
   val fixedBodySize = 34
   val dbNameSize = database map { _.size+1 } getOrElse(0)
   val dataSize = username.size + hashPassword.size + dbNameSize + fixedBodySize
   lazy val hashPassword = encryptPassword(password, salt)
 
-  override val data: Array[Byte] = {
+  override val data = {
     val bw = new BufferWriter(new Array[Byte](dataSize))
-    val capability = if(dbNameSize == 0) clientCap - Capability.connectWithDB else clientCap
+    val capability = if (dbNameSize == 0) clientCap - Capability.ConnectWithDB else clientCap
     bw.writeInt(capability.mask)
     bw.writeInt(maxPacket)
     bw.writeByte(charset)
-    bw.fill(23, 0.toByte) //23 reserved bytes - zeroed out 
+    bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out 
     bw.writeNullTerminatedString(username)
-    bw.writeLengthCodedString(new String(hashPassword))
-    if(dbNameSize > 0 && serverCap.has(Capability.connectWithDB))
+    bw.writeLengthCodedString(hashPassword)
+    if (dbNameSize > 0 && serverCap.has(Capability.ConnectWithDB))
       bw.writeNullTerminatedString(database.get)
-    bw.buffer
+
+    bw.toChannelBuffer
   }
 
   def encryptPassword(password: String, salt: Array[Byte]) = {

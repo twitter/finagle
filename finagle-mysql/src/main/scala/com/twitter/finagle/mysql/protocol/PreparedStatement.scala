@@ -2,13 +2,10 @@ package com.twitter.finagle.mysql.protocol
 
 import com.twitter.util.Promise
 
-trait PreparedStatement extends Result {
-  val statementId: Int
-  val numberOfParams: Int
+case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Result {
   val statement: Promise[String] = new Promise[String]()
-
-  protected var params: Array[Any] = new Array[Any](numberOfParams)
-  protected var hasNewParams: Boolean = false
+  private[this] var params: Array[Any] = new Array[Any](numberOfParams)
+  private[this] var hasNewParams: Boolean = false
 
   def parameters: Array[Any] = params
   def hasNewParameters: Boolean = hasNewParams
@@ -28,33 +25,46 @@ trait PreparedStatement extends Result {
 }
 
 object PreparedStatement {
-  def decode(header: Packet, paramData: Seq[Packet], fieldData: Seq[Packet]): PreparedStatement = {
+  /**
+    * A prepared statement is made up of the following packets:
+    * - A PrepareOK packet with meta data about the prepared statement.
+    * - A set of field packets with parameter data if number of parameters > 0
+    * - A set of field packets with column data if number of columns > 0
+    *
+    * The pipeline does not guarantee that the two sets are in order, so
+    * we need to verify which set contains what data based on the PrepareOK packet.
+    */
+  def decode(header: Packet, seqOne: Seq[Packet], seqTwo: Seq[Packet]): PreparedStatement = {
     val ok = PreparedOK.decode(header)
-    new PreparedStatement {
-      val statementId = ok.statementId
-      val numberOfParams = paramData.size
+    val (paramPackets, columnPackets) = (ok.numOfParams, ok.numOfColumns) match {
+      case (0, 0)          => (Nil, Nil)
+      case (0, c) if c > 0 => (Nil, seqOne)
+      case (p, 0) if p > 0 => (seqOne, Nil)
+      case (_, _)          => (seqOne, seqTwo)
     }
+
+    PreparedStatement(ok.statementId, ok.numOfParams)
   }
 }
 
 /**
- * Prepared statement header returned from the server
- * in response to a prepared statement initialization request 
- * COM_STMT_PREPARE.
- */
+  * Prepared statement header returned from the server
+  * in response to a prepared statement initialization request 
+  * COM_STMT_PREPARE.
+  */
 case class PreparedOK(statementId: Int, 
-                     numColumns: Int, 
-                     numParams: Int, 
+                     numOfColumns: Int, 
+                     numOfParams: Int, 
                      warningCount: Int)
 
 object PreparedOK {
   def decode(packet: Packet) = {
     val br = new BufferReader(packet.body, 1)
-    val stmtId = br.readInt
-    val col = br.readUnsignedShort
-    val params = br.readUnsignedShort
+    val stmtId = br.readInt()
+    val col = br.readUnsignedShort()
+    val params = br.readUnsignedShort()
     br.skip(1)
-    val warningCount = br.readUnsignedShort
+    val warningCount = br.readUnsignedShort()
     PreparedOK(stmtId, col, params, warningCount)
   }
 }

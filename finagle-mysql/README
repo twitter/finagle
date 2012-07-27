@@ -1,0 +1,32 @@
+A brief overview of finagle-mysql with references to MySQL Client/Server Protocol.
+
+** Packets
+The basic unit of communication for the MySQL Client/Server protocol is an application-layer packet. A MySQL packet consists of a header (3 byte size, 1 byte seq number) and a body. Packets can be fragmented across frames during transmission. To simplify the decoding of results received from the server, the codec includes a packet frame decoder on the pipeline.
+
+Relevant source files: Packet.scala, PacketFrameDecoder.scala
+
+** Handshake
+When a client connects to the server, the server sends a greeting. The greeting contains information about the server version, protocol, capabilities, etc. The client replies with a login request containing, among other information, authentication credentials. To ensure connections are authenticated before issued by the ServiceFactory, the codec implements prepareConnFactory with an AuthenticationProxy.
+
+Relevant source files: Handshake.scala, Codec.scala
+
+** Requests
+Command requests to the server contain a PacketHeader and a body containing the data. Note that the first byte of the body must contain a command byte denoting which command to issue. Each Request object has a data field which defines the body of the Request. Requests are translated into netty ChannelBuffers when they reach the Encoder.
+
+Relevant source files: Request.scala
+
+** Results
+finagle-mysql translates packets received from the server into Scala objects. Result packets can be distinguished by their first byte. Some result packets denote the start of a longer transmissions and need to be defragged by the decoder.
+
+Relevant source files: Endec.scala, Result.scala, ResultSet.scala, PreparedStatement.scala
+
+** Buffers
+The BufferReader and BufferWriter class provide convenient methods for reading/writing common data types exchanged between the client/server. Note, data exchanged between the client/server needs to be encoded with little-endian byte order.
+
+Relevant source files: Buffer.scala
+
+** Detailed resources about the MySQL protocol
+
+MySQL Forge - http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol
+
+Understanding MySQL Internals - http://my.safaribooksonline.com/book/databases/mysql/0596009577/client-server-communication/orm9780596009571-chp-4

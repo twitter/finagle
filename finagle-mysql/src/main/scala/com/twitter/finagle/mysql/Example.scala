@@ -16,31 +16,23 @@ object Main {
     val client = Client(host+":"+port, username, password, dbname)
     case class City(id: Option[Int], name: Option[String], date: Option[Timestamp])
 
-    //Select Query (Not using prepared statements) */
-    client.select("SELECT * FROM cities WHERE id in (?)", 1 to 10) { row =>
+    // Select Query (Not using prepared statements) */
+    /*client.select("SELECT * FROM cities WHERE id in (?)", 1 to 10) { row =>
       City(row.getInt("id"), row.getString("name"), row.getTimestamp("dateadded"))
     } onSuccess {
       result => println(result)
     } onFailure {
       case e => e.printStackTrace()
-    }
-
-    //Query (Not using prepared statements)
-    /*client.query("INSERT INTO cities (name, dateadded) VALUES('?', NOW())", "Boston") onSuccess {
-      case r: OK => println(r.insertId)
-      case rs: ResultSet => println(rs)
-    } onFailure {
-      e => e.printStackTrace()
     }*/
 
-    //Prepared Statements
-    /*client.prepareAndSelect("SELECT * FROM cities WHERE id in (?)", (1,2,3)) { row => 
+    // Prepared Statements
+    client.prepareAndSelect("SELECT * FROM cities WHERE id in (?)", (1,2,3)) { row => 
       City(row.getInt("id"), row.getString("name"), row.getTimestamp("dateadded"))
     } onSuccess {
-      case (ps, seq) => println(seq)
+      case (ps, seq) => seq.foreach(println)
     } onFailure {
       e => e.printStackTrace()
-    }*/
+    }
   }
 
   def parseArgs(parsed: Map[String, Any], args: List[String]): Map[String, Any] = args match {

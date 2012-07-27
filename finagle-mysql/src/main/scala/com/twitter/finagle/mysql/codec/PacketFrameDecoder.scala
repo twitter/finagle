@@ -2,37 +2,43 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.protocol.{Packet, BufferReader}
 import com.twitter.finagle.mysql.util.BufferUtil
+import com.twitter.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 /**
- * MySQL packets are a length encoded set of bytes written
- * in little endian byte order.
- *
- * The built in LengthFieldBasedFrameDecoder in Netty
- * doesn't seem to support byte buffers that are encoded in
- * little endian. Thus, a simple custom FrameDecoder is
- * needed to defrag a ChannelBuffer into a logical MySQL packet.
- */
+  * Decodes logical MySQL packets that could be fragmented across
+  * frames. MySQL packets are a length encoded set of bytes written
+  * in little endian byte order.
+  */
 class PacketFrameDecoder extends FrameDecoder {
+  private[this] val log = Logger("finagle-mysql")
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Packet = {
-    if(buffer.readableBytes < Packet.headerSize)
+    if (buffer.readableBytes < Packet.HeaderSize)
       return null
 
-    val header = new Array[Byte](Packet.headerSize)
+    buffer.markReaderIndex()
+
+    val header = new Array[Byte](Packet.HeaderSize)
     buffer.readBytes(header)
     val br = new BufferReader(header)
 
-    val (length, seq) = (br.readInt24, br.readByte)
+    val length = br.readInt24()
+    val seq  = br.readUnsignedByte()
 
-    if(buffer.readableBytes < length)
+    if (buffer.readableBytes < length) {
+      buffer.resetReaderIndex()
       return null
+    }
+      
+    log.debug("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
 
-    println("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
     val body = new Array[Byte](length)
     buffer.readBytes(body)
-    BufferUtil.hex(body)
+
+    log.debug(BufferUtil.hex(body))
+    
     Packet(length, seq, body)
   }
 }
