@@ -11,12 +11,12 @@ class TraceSpec extends SpecificationWithJUnit with Mockito {
     doBefore { Trace.clear() }
 
     val Seq(id0, id1, id2) = 0 until 3 map { i =>
-      TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i), None)
+      TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i), None, Flags(i))
     }
 
     "have a default id without parents, etc." in {
       Trace.id must beLike {
-        case TraceId(None, None, _, None) => true
+        case TraceId(None, None, _, None, Flags(0)) => true
       }
     }
 
@@ -27,7 +27,7 @@ class TraceSpec extends SpecificationWithJUnit with Mockito {
         Trace.setId(Trace.nextId)
         Trace.id must be_!=(defaultId)
         Trace.id must beLike {
-          case TraceId(None, None, _, None) => true
+          case TraceId(None, None, _, None, Flags(0)) => true
         }
       }
 
@@ -36,7 +36,7 @@ class TraceSpec extends SpecificationWithJUnit with Mockito {
         val topId = Trace.id
         Trace.setId(Trace.nextId)
         Trace.id must beLike {
-          case TraceId(Some(traceId), Some(parentId), _, None)
+          case TraceId(Some(traceId), Some(parentId), _, None, Flags(0))
           if (traceId == topId.traceId && parentId == topId.spanId) => true
         }
       }
@@ -145,5 +145,19 @@ class TraceSpec extends SpecificationWithJUnit with Mockito {
         r.duration mustEqual Some(duration)
       }
     }
+
+    "pass flags to next id" in {
+      val flags = Flags().setDebug
+      val id = TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), None, flags)
+      Trace.setId(id)
+      val nextId = Trace.nextId
+      id.flags mustEqual nextId.flags
+    }
+
+    "set empty flags in next id if no current id set" in {
+      val nextId = Trace.nextId
+      nextId.flags mustEqual Flags()
+    }
+
   }
 }

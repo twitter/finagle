@@ -202,8 +202,9 @@ object HttpTracing {
     val SpanId = "X-B3-SpanId"
     val ParentSpanId = "X-B3-ParentSpanId"
     val Sampled = "X-B3-Sampled"
+    val Flags = "X-B3-Flags"
 
-    val All = Seq(TraceId, SpanId, ParentSpanId, Sampled)
+    val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
   }
 
@@ -253,6 +254,7 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     Trace.id.sampled foreach { sampled =>
       request.addHeader(Header.Sampled, sampled.toString)
     }
+    request.addHeader(Header.Flags, Trace.id.flags.toLong)
 
     Trace.recordRpcname(serviceName, request.getMethod.getName)
     Trace.recordBinary("http.uri", stripParameters(request.getUri))
@@ -284,9 +286,15 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
       val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
         Try(sampled.toBoolean).toOption
       }
+      val flags =
+        try {
+          Flags(Option(request.getHeader(Header.Flags)).map(_.toLong).getOrElse(0L))
+        } catch {
+          case _ => Flags()
+        }
 
       spanId foreach { sid =>
-        Trace.setId(TraceId(traceId, parentSpanId, sid, sampled))
+        Trace.setId(TraceId(traceId, parentSpanId, sid, sampled, flags))
       }
     }
 

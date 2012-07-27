@@ -50,11 +50,32 @@ object SpanId {
     }
 }
 
+object TraceId {
+  /**
+   * Creates a TraceId with no flags set. See case class for more info.
+   */
+  def apply(traceId: Option[SpanId],
+            parentId: Option[SpanId],
+            spanId: SpanId,
+            sampled: Option[Boolean]): TraceId = TraceId(traceId, parentId, spanId, sampled, Flags())
+}
+
+/**
+ * A trace id represents one particular trace for one request.
+ * @param _traceId The id for this request.
+ * @param _parentId The id for the request one step up the service stack.
+ * @param spanId The id for this particular request
+ * @param sampled Should we sample this request or not? True means sample, false means don't, none means we defer
+ *                decision to someone further down in the stack.
+ * @param flags Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
+ *              be moved in here.
+ */
 final case class TraceId(
   _traceId: Option[SpanId],
   _parentId: Option[SpanId],
   spanId: SpanId,
-  sampled: Option[Boolean]) // if true this trace is collected. if none, we have not decided.
+  sampled: Option[Boolean],
+  flags: Flags)
 {
   def traceId = _traceId getOrElse parentId
   def parentId = _parentId getOrElse spanId

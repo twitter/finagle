@@ -157,6 +157,7 @@ private[thrift] class ThriftClientTracingFilter(
         case Some(s) => header.setSampled(s)
         case None => header.unsetSampled()
       }
+      header.setFlags(Trace.id.flags.toLong)
 
       new ThriftClientRequest(
         ByteArrays.concat(OutputBuffer.messageToArray(header), request.message),

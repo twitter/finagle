@@ -72,9 +72,9 @@ struct RequestHeader {
   1: i64 trace_id,
   2: i64  span_id,
   3: optional i64 parent_span_id,
-  4: bool debug,
   5: optional bool sampled // if true we should trace the request, if not set we have not decided.
   6: optional ClientId client_id
+  7: optional i64 flags // contains various flags such as debug mode on/off
 }
 
 /**

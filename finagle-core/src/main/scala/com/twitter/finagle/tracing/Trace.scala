@@ -30,7 +30,7 @@ object Trace {
 
   private[this] val rng = new Random
 
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None)
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
   private[this] val local = new Local[State]
   @volatile private[this] var tracingEnabled = true
 
@@ -81,7 +81,8 @@ object Trace {
     TraceId(currentId map { _.traceId },
       currentId map { _.spanId },
       SpanId(rng.nextLong()),
-      currentId map { _.sampled } getOrElse None)
+      currentId map { _.sampled } getOrElse None,
+      currentId map { _.flags} getOrElse Flags())
   }
 
   @deprecated("use setId() instead", "5.0.1")
