@@ -18,25 +18,25 @@ object Capability {
   val SecureConnection = 0x8000 // New 4.1 authentication
   val MultiStatements  = 0x10000 // Enable/disable multi-stmt support
   val MultiResults     = 0x20000 // Enable/disable multi-results */
-
+  
   val CapabilityMap = Map(
-    "CLIENT_LONG_PASSWORD"     -> Capability.LongPassword,
-    "CLIENT_FOUND_ROWS"        -> Capability.FoundRows,
-    "CLIENT_LONG_FLAG"         -> Capability.LongFlag,
-    "CLIENT_CONNECT_WITH_DB"   -> Capability.ConnectWithDB,
-    "CLIENT_NO_SCHEMA"         -> Capability.NoSchema,
-    "CLIENT_COMPRESS"          -> Capability.Compress,
-    "CLIENT_ODBC"              -> Capability.ODBC,
-    "CLIENT_LOCAL_FILES"       -> Capability.LocalFiles,
-    "CLIENT_IGNORE_SPACE"      -> Capability.IgnoreSpace,
-    "CLIENT_PROTOCOL_41"       -> Capability.Protocol41,
-    "CLIENT_INTERACTIVE"       -> Capability.Interactive,
-    "CLIENT_SSL"               -> Capability.SSL,
-    "CLIENT_IGNORE_SIGPIPE"    -> Capability.IgnoreSigPipe,
-    "CLIENT_TRANSACTIONS"      -> Capability.Transactions,
-    "CLIENT_SECURE_CONNECTION" -> Capability.SecureConnection,
-    "CLIENT_MULTI_STATEMENTS"  -> Capability.MultiStatements,
-    "CLIENT_MULTI_RESULTS"     -> Capability.MultiResults
+    "CLIENT_LONG_PASSWORD"     -> LongPassword,
+    "CLIENT_FOUND_ROWS"        -> FoundRows,
+    "CLIENT_LONG_FLAG"         -> LongFlag,
+    "CLIENT_CONNECT_WITH_DB"   -> ConnectWithDB,
+    "CLIENT_NO_SCHEMA"         -> NoSchema,
+    "CLIENT_COMPRESS"          -> Compress,
+    "CLIENT_ODBC"              -> ODBC,
+    "CLIENT_LOCAL_FILES"       -> LocalFiles,
+    "CLIENT_IGNORE_SPACE"      -> IgnoreSpace,
+    "CLIENT_PROTOCOL_41"       -> Protocol41,
+    "CLIENT_INTERACTIVE"       -> Interactive,
+    "CLIENT_SSL"               -> SSL,
+    "CLIENT_IGNORE_SIGPIPE"    -> IgnoreSigPipe,
+    "CLIENT_TRANSACTIONS"      -> Transactions,
+    "CLIENT_SECURE_CONNECTION" -> SecureConnection,
+    "CLIENT_MULTI_STATEMENTS"  -> MultiStatements,
+    "CLIENT_MULTI_RESULTS"     -> MultiResults
     )
 
   def apply(flags: Int*): Capability = {
