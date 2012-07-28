@@ -102,9 +102,7 @@ class StringEncodedRow(row: Array[Byte], indexMap: Map[String, Int]) extends Row
   def findColumnIndex(name: String) = indexMap.get(name)
 
   /**
-   * The readLengthCodedString method returns null when
-   * a SQL NULL value is returned from the database. This
-   * translates null into Option.
+   * Translates the value at index into an Option[String].
    */
   private[this] def getValue(index: Int): Option[String] = Option(values(index))
 
