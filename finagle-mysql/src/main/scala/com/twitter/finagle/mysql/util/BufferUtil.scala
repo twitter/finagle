@@ -2,8 +2,8 @@ package com.twitter.finagle.mysql.util
 
 object BufferUtil {
   /**
-    * Helper method to do a hex dump of a sequence of bytes.
-    */
+   * Helper method to do a hex dump of a sequence of bytes.
+   */
   def hex(data: Seq[Byte], output: String = ""): String = {
     val (begin,end) = data.splitAt(16)
     val hexline = begin.map { "%02X".format(_) } mkString(" ")

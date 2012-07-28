@@ -15,17 +15,17 @@ case class Defragging(
 ) extends State
 
 /**
-  * Encoder: Encodes a Request into a ChannelBuffer.
-  * Decoder: Decodes a Packet into a POJO.
-  * 
-  * There are specific packets received from MySQL that can
-  * be easily decoded based on their first byte. However, more complex 
-  * results need to be defragged as they arrive in the pipeline.
-  * To accomplish this, this handler needs to contain some state.
-  * 
-  * Some of state is volatile because it is shared between handleDownstream
-  * and handleUpstream events which are usually executed
-  * on separate threads.
+ * Encoder: Encodes a Request into a ChannelBuffer.
+ * Decoder: Decodes a Packet into a POJO.
+ * 
+ * There are specific packets received from MySQL that can
+ * be easily decoded based on their first byte. However, more complex 
+ * results need to be defragged as they arrive in the pipeline.
+ * To accomplish this, this handler needs to contain some state.
+ * 
+ * Some of state is volatile because it is shared between handleDownstream
+ * and handleUpstream events which are usually executed
+ * on separate threads.
  */
 class Endec extends SimpleChannelHandler {
   private[this] val log = Logger("finagle-mysql")
@@ -72,17 +72,17 @@ class Endec extends SimpleChannelHandler {
         None
     }
 
-    encodedReq map { Channels.write(ctx, evt.getFuture(), _, evt.getRemoteAddress()) }
+    encodedReq map { Channels.write(ctx, evt.getFuture, _, evt.getRemoteAddress) }
   }
 
   private[this] def transition(s: State) = state = s
 
   /**
-    * Decode the packet into a Result object based on the
-    * first byte in the packet body. Some bytes denote the
-    * start of a longer transmission. In those cases, transition
-    * into the Defragging state.
-    */
+   * Decode the packet into a Result object based on the
+   * first byte in the packet body. Some bytes denote the
+   * start of a longer transmission. In those cases, transition
+   * into the Defragging state.
+   */
   private[this] def decodePacket(packet: Packet): Option[Result] = packet.body(0) match {
     case Packet.OkByte if expectPrepareOK =>
       def expected(n: Int) = if (n > 0) 1 else 0
@@ -105,14 +105,14 @@ class Endec extends SimpleChannelHandler {
   }
 
   /**
-    * Defrags a set of packets expected from the server. This handles defragging 
-    * packets for a ResultSet and a PreparedStatement. 
-    * 
-    * For a PreparedStatement the packet sequences are not neccessarily 
-    * defragged in order and the order needs to be determined based on the 
-    * PreparedOK meta data. This happens when the PreparedStatement is decoded
-    * in order to simplify this method.
-    */
+   * Defrags a set of packets expected from the server. This handles defragging 
+   * packets for a ResultSet and a PreparedStatement. 
+   * 
+   * For a PreparedStatement the packet sequences are not neccessarily 
+   * defragged in order and the order needs to be determined based on the 
+   * PreparedOK meta data. This happens when the PreparedStatement is decoded
+   * in order to simplify this method.
+   */
   private[this] def defrag(packet: Packet): Option[Result] = (state, packet.body(0)) match {
     // header packet, no sets expected to follow
     case (Defragging(0, Nil), _) =>

@@ -3,14 +3,14 @@ package com.twitter.finagle.mysql.protocol
 trait Result
 
 /**
-  * Represents the OK Packet received from the server. It is sent
-  * to indicate that a command has completed succesfully. The following
-  * commands receive OK packets:
-  * - COM_PING
-  * - COM_QUERY (INSERT, UPDATE, or ALTER TABLE)
-  * - COM_REFRESH
-  * - COM_REGISTER_SLAVE
-  */
+ * Represents the OK Packet received from the server. It is sent
+ * to indicate that a command has completed succesfully. The following
+ * commands receive OK packets:
+ * - COM_PING
+ * - COM_QUERY (INSERT, UPDATE, or ALTER TABLE)
+ * - COM_REFRESH
+ * - COM_REGISTER_SLAVE
+ */
 case class OK(affectedRows: Long, 
               insertId: Long, 
               serverStatus: Int,
@@ -32,9 +32,9 @@ object OK {
 }
 
 /**
-  * Represents the Error Packet received from the server
-  * and the data sent along with it.
-  */
+ * Represents the Error Packet received from the server
+ * and the data sent along with it.
+ */
 case class Error(code: Short, sqlState: String, message: String) extends Result
 
 object Error {
@@ -49,9 +49,9 @@ object Error {
 }
 
 /** 
-  * Represents and EOF result received from the server which
-  * contains any warnings and the server status.
-  */
+ * Represents and EOF result received from the server which
+ * contains any warnings and the server status.
+ */
 case class EOF(warnings: Short, serverStatus: Short) extends Result
 
 object EOF {

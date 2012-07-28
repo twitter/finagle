@@ -8,10 +8,10 @@ import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 /**
-  * Decodes logical MySQL packets that could be fragmented across
-  * frames. MySQL packets are a length encoded set of bytes written
-  * in little endian byte order.
-  */
+ * Decodes logical MySQL packets that could be fragmented across
+ * frames. MySQL packets are a length encoded set of bytes written
+ * in little endian byte order.
+ */
 class PacketFrameDecoder extends FrameDecoder {
   private[this] val log = Logger("finagle-mysql")
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Packet = {

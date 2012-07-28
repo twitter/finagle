@@ -26,14 +26,14 @@ case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Resu
 
 object PreparedStatement {
   /**
-    * A prepared statement is made up of the following packets:
-    * - A PrepareOK packet with meta data about the prepared statement.
-    * - A set of field packets with parameter data if number of parameters > 0
-    * - A set of field packets with column data if number of columns > 0
-    *
-    * The pipeline does not guarantee that the two sets are in order, so
-    * we need to verify which set contains what data based on the PrepareOK packet.
-    */
+   * A prepared statement is made up of the following packets:
+   * - A PrepareOK packet with meta data about the prepared statement.
+   * - A set of field packets with parameter data if number of parameters > 0
+   * - A set of field packets with column data if number of columns > 0
+   *
+   * The pipeline does not guarantee that the two sets are in order, so
+   * we need to verify which set contains what data based on the PrepareOK packet.
+   */
   def decode(header: Packet, seqOne: Seq[Packet], seqTwo: Seq[Packet]): PreparedStatement = {
     val ok = PreparedOK.decode(header)
     val (paramPackets, columnPackets) = (ok.numOfParams, ok.numOfColumns) match {
@@ -48,10 +48,10 @@ object PreparedStatement {
 }
 
 /**
-  * Prepared statement header returned from the server
-  * in response to a prepared statement initialization request 
-  * COM_STMT_PREPARE.
-  */
+ * Prepared statement header returned from the server
+ * in response to a prepared statement initialization request 
+ * COM_STMT_PREPARE.
+ */
 case class PreparedOK(statementId: Int, 
                      numOfColumns: Int, 
                      numOfParams: Int, 

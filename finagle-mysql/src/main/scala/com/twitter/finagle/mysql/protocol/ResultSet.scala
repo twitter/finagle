@@ -25,10 +25,10 @@ object ResultSet {
     val indexMap = fields.map(_.id).zipWithIndex.toMap
 
     /**
-      * Rows can be encoded as Strings or Binary depending
-      * on if the ResultSet is created by a normal query or
-      * a prepared statement, respectively. 
-      */
+     * Rows can be encoded as Strings or Binary depending
+     * on if the ResultSet is created by a normal query or
+     * a prepared statement, respectively. 
+     */
     val rows = rowPackets map { p: Packet => 
       if (!isBinaryEncoded)
         new StringEncodedRow(p.body, indexMap) 
@@ -41,10 +41,10 @@ object ResultSet {
 }
 
 /**
-  * Defines an interface that allows for easily
-  * decoding a row (Array[Byte]) into its appropriate
-  * values.
-  */
+ * Defines an interface that allows for easily
+ * decoding a row (Array[Byte]) into its appropriate
+ * values.
+ */
 trait Row {
   val values: IndexedSeq[Any]
   def findColumnIndex(columnName: String): Option[Int]
@@ -102,12 +102,11 @@ class StringEncodedRow(row: Array[Byte], indexMap: Map[String, Int]) extends Row
   def findColumnIndex(name: String) = indexMap.get(name)
 
   /**
-    * The readLengthCodedString method returns null when
-    * a SQL NULL value is returned from the database. This converts
-    * the null into a None.
-    */
-  private[this] def getValue(index: Int): Option[String] = 
-    if (values(index) == null) None else Some(values(index))
+   * The readLengthCodedString method returns null when
+   * a SQL NULL value is returned from the database. This
+   * translates null into Option.
+   */
+  private[this] def getValue(index: Int): Option[String] = Option(values(index))
 
   def getString(columnIndex: Option[Int]) = 
     for(idx <- columnIndex; value <- getValue(idx)) yield value
@@ -148,11 +147,11 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
   val buffer = new BufferReader(row, 1) // skip first byte
 
   /**
-    * In a binary encoded row, null values are not sent from the
-    * server. Instead, the server sends a bit vector where
-    * each bit corresponds to the index of the column. If the bit
-    * is set, the value is null.
-    */
+   * In a binary encoded row, null values are not sent from the
+   * server. Instead, the server sends a bit vector where
+   * each bit corresponds to the index of the column. If the bit
+   * is set, the value is null.
+   */
   val nullBitmap: BigInt = {
     val len = ((fields.size + 7 + 2) / 8).toInt
     val bytesAsBigEndian = buffer.take(len).reverse
@@ -160,16 +159,16 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
   }
 
   /**
-    * Check if the bit is set. Note, the
-    * first 2 bits are reserved.
-    */
+   * Check if the bit is set. Note, the
+   * first 2 bits are reserved.
+   */
   def isNull(index: Int) = nullBitmap.testBit(index + 2)
 
   /**
-    * Read values from row. Essentially coverting 
-    * the row from Array[Byte] to a pseudo-heterogeneous
-    * Seq that stores each column value.
-    */
+   * Read values from row. Essentially coverting 
+   * the row from Array[Byte] to a pseudo-heterogeneous
+   * Seq that stores each column value.
+   */
   val values: IndexedSeq[Option[Any]] = for(idx <- 0 until fields.size) yield {
     if (isNull(idx))
       None
@@ -188,8 +187,7 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
         case Types.TIMESTAMP  => Some(buffer.readTimestamp())
         case Types.DATETIME   => Some(buffer.readTimestamp())
         case Types.DATE       => Some(buffer.readDate())
-        // case Types.TIME       => Some(buffer.readTime())
-
+        
         case _ =>
           log.error("BinaryEncodedRow: Unsupported type " + 
             Integer.toHexString(fields(idx).fieldType) + ".")
@@ -234,8 +232,8 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
 }
 
 /**
-  * A ResultSet contains a Field packet for each column.
-  */
+ * A ResultSet contains a Field packet for each column.
+ */
 case class Field(
   catalog: String,
   db: String,

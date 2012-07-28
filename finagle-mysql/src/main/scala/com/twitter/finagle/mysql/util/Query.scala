@@ -15,9 +15,9 @@ object Query {
   }
 
   /**
-    * Expands the wildcards in a prepared sql statement to its full representation
-    * for iterable and products.
-    */
+   * Expands the wildcards in a prepared sql statement to its full representation
+   * for Iterable and Product parameters.
+   */
   def expandParams(sql: String, params: Seq[Any]): String = {
     if (params.isEmpty) {
       return sql

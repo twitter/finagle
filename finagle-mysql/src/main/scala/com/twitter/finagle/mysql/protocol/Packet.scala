@@ -4,9 +4,9 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers._
 
 /**
-  * Represents a logical packet received from MySQL.
-  * A MySQL packet consists of a header and body.
-  */
+ * Represents a logical packet received from MySQL.
+ * A MySQL packet consists of a header and body.
+ */
 case class Packet(header: PacketHeader, body: Array[Byte])
 
 case class PacketHeader(size: Int, seq: Short) {

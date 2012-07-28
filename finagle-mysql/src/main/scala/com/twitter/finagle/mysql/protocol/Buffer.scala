@@ -8,9 +8,9 @@ import java.util.Calendar
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 /**
-  * Provides classes to decode / encode MySQL data types. Note, the MySQL
-  * protocol represents all data in little endian byte order.
-  */
+ * Provides classes to decode / encode MySQL data types. Note, the MySQL
+ * protocol represents all data in little endian byte order.
+ */
 class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   require(offset >= 0)
   require(buffer != null)
@@ -18,11 +18,11 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def readable(width: Int = 1): Boolean = offset + width <= buffer.size
 
   /**
-    * Reads multi-byte numeric values stored in a byte array. 
-    * Starts at offset and reads offset+width bytes. The values are
-    * assumed to be stored with the low byte first and the result 
-    * is returned as a Long.
-    */
+   * Reads multi-byte numeric values stored in a byte array. 
+   * Starts at offset and reads offset+width bytes. The values are
+   * assumed to be stored with the low byte first and the result 
+   * is returned as a Long.
+   */
   def read(width: Int): Long = {
     val n = (offset until offset + width).zipWithIndex.foldLeft(0L) {
       case (result, (b,i)) => result | ((buffer(b) & 0xFFL) << (i*8))
@@ -59,10 +59,10 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   }
 
   /**
-    * Read MySQL data field - a variable-length number.
-    * Depending on the first byte, read a different width from
-    * the buffer.
-    */
+   * Read MySQL data field - a variable-length number.
+   * Depending on the first byte, read a different width from
+   * the buffer.
+   */
   def readLengthCodedBinary(): Long = {
     val firstByte = readUnsignedByte()
     if (firstByte < 251)
@@ -133,9 +133,9 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def writable(width: Int = 1): Boolean = offset + width <= buffer.size
 
   /**
-    * Write multi-byte numeric values onto the the buffer by
-    * widening n accross 'width' byte chunks starting at buffer(offset)
-    */
+   * Write multi-byte numeric values onto the the buffer by
+   * widening n accross 'width' byte chunks starting at buffer(offset)
+   */
   def write(n: Long, width: Int): BufferWriter = {
     (0 until width) foreach { i =>
       buffer(i + offset) = ((n >> (i*8)) & 0xFF).toByte
@@ -174,10 +174,10 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   }
 
   /**
-    * Writes a length coded binary according to
-    * the MySQL protocol. Note, 251 is reserved to
-    * indicate SQL NULL.
-    */
+   * Writes a length coded binary according to
+   * the MySQL protocol. Note, 251 is reserved to
+   * indicate SQL NULL.
+   */
   def writeLengthCodedBinary(length: Long) = {
     if (length < 251) {
       write(length, 1)

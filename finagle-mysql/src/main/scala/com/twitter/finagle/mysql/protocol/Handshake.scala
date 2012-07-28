@@ -3,8 +3,8 @@ package com.twitter.finagle.mysql.protocol
 import java.security.MessageDigest
 
 /**
-  * Initial Result received from server during handshaking.
-  */
+ * Initial Result received from server during handshaking.
+ */
 case class ServersGreeting(
   protocol: Byte,
   version: String,
@@ -42,8 +42,8 @@ object ServersGreeting {
 }
 
 /**
-  * Reply to ServerGreeting sent during handshaking phase.
-  */
+ * Reply to ServerGreeting sent during handshaking phase.
+ */
 case class LoginRequest(
   username: String,
   password: String,

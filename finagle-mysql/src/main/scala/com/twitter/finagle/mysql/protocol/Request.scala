@@ -54,7 +54,9 @@ class SimpleCommandRequest(command: Byte, buffer: Array[Byte])
     override val data = wrappedBuffer(Array(cmd), buffer)
 }
 
-/** NOOP Request used internally by this client. */
+/** 
+ * NOOP Request used internally by this client. 
+ */
 case object ClientInternalGreet extends Request(0) {
   override val data = EMPTY_BUFFER
   override def toChannelBuffer = EMPTY_BUFFER
@@ -76,9 +78,10 @@ case class PrepareRequest(sqlStatement: String)
   extends SimpleCommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
 
 /**
-  * An Execute Request. 
-  * Uses the binary protocol to build an execute a prepared statement.
-  */ 
+ * An Execute Request. 
+ * Uses the binary protocol to build an execute request for
+ * a prepared statement.
+ */ 
 case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1) 
   extends CommandRequest(Command.COM_STMT_EXECUTE) {
 
@@ -116,9 +119,9 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
   }
 
   /** 
-    * Calculates the size needed to write each parameter
-    * in its binary encoding according to the MySQL protocol.
-    */
+   * Calculates the size needed to write each parameter
+   * in its binary encoding according to the MySQL protocol.
+   */
   private[this] def sizeOfParameters(parameters: List[Any], size: Int = 0): Int = parameters match {
     case Nil => size
     case p :: rest =>
