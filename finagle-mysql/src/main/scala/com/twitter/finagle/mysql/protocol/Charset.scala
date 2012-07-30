@@ -24,29 +24,30 @@ object Charset {
 	val Utf8_turkish_ci          = 201.toShort
 	val Utf8_unicode_ci          = 192.toShort
 
-	private[this] val Utf8Set = Set(Utf8_bin, 
-																  Utf8_czech_ci,
-																	Utf8_danish_ci,
-																	Utf8_esperanto_ci,
-																	Utf8_estonian_ci,
-																	Utf8_general_ci,
-																	Utf8_general_mysql500_ci,
-																	Utf8_hungarian_ci,
-																	Utf8_icelandic_ci,
-																	Utf8_latvian_ci,
-																	Utf8_lithuanian_ci,
-																	Utf8_persian_ci,
-																	Utf8_polish_ci,
-																	Utf8_romanian_ci,
-																	Utf8_roman_ci,
-																	Utf8_sinhala_ci,
-																	Utf8_slovak_ci,
-																	Utf8_spanish2_ci,
-																	Utf8_spanish_ci,
-																	Utf8_swedish_ci,
-																	Utf8_turkish_ci,
-																	Utf8_unicode_ci
-																	)
+	private[this] val Utf8Set = Set(
+		Utf8_bin, 
+	  Utf8_czech_ci,
+		Utf8_danish_ci,
+		Utf8_esperanto_ci,
+		Utf8_estonian_ci,
+		Utf8_general_ci,
+		Utf8_general_mysql500_ci,
+		Utf8_hungarian_ci,
+		Utf8_icelandic_ci,
+		Utf8_latvian_ci,
+		Utf8_lithuanian_ci,
+		Utf8_persian_ci,
+		Utf8_polish_ci,
+		Utf8_romanian_ci,
+		Utf8_roman_ci,
+		Utf8_sinhala_ci,
+		Utf8_slovak_ci,
+		Utf8_spanish2_ci,
+		Utf8_spanish_ci,
+		Utf8_swedish_ci,
+		Utf8_turkish_ci,
+		Utf8_unicode_ci
+		)
 	
 	def isUTF8(code: Short) = Utf8Set.contains(code)
 }

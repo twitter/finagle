@@ -1,19 +1,24 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.ClientError
 import java.lang.{Float => JFloat, Double => JDouble}
 import java.sql.{Date => SQLDate, Timestamp}
 import java.util.Date
 import java.util.Calendar
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+class BufferError(msg: String) extends Exception(msg)
+
 /**
- * Provides classes to decode / encode MySQL data types. Note, the MySQL
- * protocol represents all data in little endian byte order.
+ * Provides classes to decode / encode MySQL data types. 
+ * Note, the MySQL protocol represents all data in little endian byte order.
  */
 class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   require(offset >= 0)
   require(buffer != null)
+
+  val NULL_LENGTH = -1 // null when reading a length coded binary.
+  val EMPTY_STRING = ""
+  val EMPTY_ARRAY = new Array[Byte](0)
 
   def readable(width: Int = 1): Boolean = offset + width <= buffer.size
 
@@ -44,18 +49,10 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def skip(n: Int) = offset += n
   def takeRest() = take(buffer.size - offset)
   def take(n: Int) = {
-    val res = buffer.drop(offset).take(n)
+    val res = new Array[Byte](n)
+    Array.copy(buffer, offset, res, 0, n)
     offset += n
     res
-  }
-
-  def readNullTerminatedString(): String = {
-    val result = new StringBuilder()
-    while(buffer(offset) != 0)
-      result += readByte().toChar
-
-    readByte() // consume null byte
-    result.toString
   }
 
   /**
@@ -69,46 +66,69 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
       firstByte
     else
       firstByte match {
-        case 251 => -1 // column value is null
+        case 251 => NULL_LENGTH
         case 252 => read(2)
         case 253 => read(3)
         case 254 => read(8)
         case _ => 
-          throw new ClientError("Data is corrupt or the client and server are out of sync.")
+          throw new BufferError("Corrupt data or client/server are out of sync.")
       }
   }
 
+  def readNullTerminatedString(): String = {
+    val result = new StringBuilder()
+    while(buffer(offset) != 0)
+      result += readByte().toChar
+
+    readByte() // consume null byte
+    result.toString
+  }
+
   def readLengthCodedString(): String = {
-    val size = readLengthCodedBinary().toInt
+    val len = readLengthCodedBinary().toInt
 
-    if (size == -1)
+    if (len == NULL_LENGTH)
       return null
+    else if (len == 0)
+      EMPTY_STRING
 
-    val strBytes = new Array[Byte](size)
-    Array.copy(buffer, offset, strBytes, 0, size)
-    offset += size
-    new String(strBytes)
+    new String(take(len))
+  }
+
+  def readLengthCodedBytes(): Array[Byte] = {
+    val len = readLengthCodedBinary().toInt
+
+    if (len == NULL_LENGTH)
+      return null
+    else if (len == 0)
+      EMPTY_ARRAY
+
+    take(len)
   }
 
   def readTimestamp(): Timestamp = {
     val len = readUnsignedByte()
+    // if all fields are 0 they are not sent.
     if (len == 0)
-      return new Timestamp(0)
+      return ZeroTimestamp
 
     var year, month, day, hour, min, sec, nano = 0
 
+    // Strictly expect year, month, day.
     if (readable(4)) {
       year = readUnsignedShort()
       month = readUnsignedByte()
       day = readUnsignedByte()
-    }
+    } else throw new BufferError("Invalid Timestamp.")
 
+    // if the time-part is 00:00:00, it isn't sent
     if (readable(3)) {
       hour = readUnsignedByte()
       min = readUnsignedByte()
       sec = readUnsignedByte()
     }
 
+    // if the sub-seconds are 0, they aren't sent.
     if (readable(4))
       nano = readInt()
 
@@ -121,7 +141,13 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
     ts
   }
 
-  def readDate(): Date = new Date(readTimestamp.getTime)
+  def readDate(): SQLDate = {
+    val ts = readTimestamp()
+    if (ts.getTime == 0)
+      ZeroDate
+    else
+      new SQLDate(ts.getTime)
+  }
 
   def toChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
 }
@@ -155,11 +181,6 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def writeFloat(f: Float) = writeInt(JFloat.floatToIntBits(f))
   def writeDouble(d: Double) = writeLong(JDouble.doubleToLongBits(d))
 
-  def writeBytes(bytes: Array[Byte]) = {
-    Array.copy(bytes, 0, buffer, offset, bytes.length)
-    offset += bytes.length
-  }
-
   def skip(n: Int) = offset += n
   def fillRest(b: Byte) = fill(buffer.size - offset, b)
   def fill(n: Int, b: Byte) = {
@@ -167,10 +188,9 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
     this
   }
 
-  def writeNullTerminatedString(str: String) = {
-    writeBytes(str.getBytes)
-    writeByte('\0'.toByte)
-    this
+  def writeBytes(bytes: Array[Byte]) = {
+    Array.copy(bytes, 0, buffer, offset, bytes.length)
+    offset += bytes.length
   }
 
   /**
@@ -191,6 +211,12 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
       write(254, 1)
       write(length, 8)
     }
+  }
+
+  def writeNullTerminatedString(str: String) = {
+    writeBytes(str.getBytes)
+    writeByte('\0'.toByte)
+    this
   }
 
   def writeLengthCodedString(str: String) = {

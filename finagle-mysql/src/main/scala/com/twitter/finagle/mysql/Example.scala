@@ -17,22 +17,44 @@ object Main {
     case class City(id: Option[Int], name: Option[String], date: Option[Timestamp])
 
     // Select Query (Not using prepared statements) */
-    /*client.select("SELECT * FROM cities WHERE id in (?)", 1 to 10) { row =>
-      City(row.getInt("id"), row.getString("name"), row.getTimestamp("dateadded"))
+    client.select("SELECT * FROM cities WHERE id in (1,2,3,7)") { row =>
+      val id = row.valueOf("id") map {
+        case IntValue(i) => i
+        case _ => 0
+      }
+
+      val name = row.valueOf("name") map {
+        case StringValue(s) => s
+        case _ => ""
+      }
+
+      val date = row.valueOf("dateadded") map {
+        case TimestampValue(t) => t
+        // case NullValue =>
+        case _ => new Timestamp(0)
+      }
+
+      val time = row.valueOf("time") map {
+        case RawValue(v) => v
+        case _ => "00:00:00"
+      }
+
+      City(id, name, date)
+
     } onSuccess {
-      result => println(result)
+      seq => seq.foreach(println)
     } onFailure {
       case e => e.printStackTrace()
-    }*/
+    }
 
     // Prepared Statements
-    client.prepareAndSelect("SELECT * FROM cities WHERE id in (?)", (1,2,3)) { row => 
-      City(row.getInt("id"), row.getString("name"), row.getTimestamp("dateadded"))
+    /*client.prepareAndSelect("SELECT * FROM cities WHERE id in (?)", (1,3,7)) { row => 
+      println(row.values)
     } onSuccess {
       case (ps, seq) => seq.foreach(println)
     } onFailure {
       e => e.printStackTrace()
-    }
+    }*/
   }
 
   def parseArgs(parsed: Map[String, Any], args: List[String]): Map[String, Any] = args match {

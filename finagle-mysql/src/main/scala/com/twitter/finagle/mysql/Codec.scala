@@ -60,7 +60,6 @@ class AuthenticationProxy(
       Future.exception(IncompatibleServer("This client is only compatible with MySQL version 4.1 and later."))
 
     case sg: ServersGreeting if !Charset.isUTF8(sg.charset) => 
-      println("Server Charset: " + sg.charset)
       Future.exception(IncompatibleServer("This client is only compatible with UTF-8 charset encoding."))
 
     case sg: ServersGreeting =>

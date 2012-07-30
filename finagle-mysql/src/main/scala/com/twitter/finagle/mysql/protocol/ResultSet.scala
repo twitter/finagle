@@ -1,5 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
+import com.twitter.finagle.mysql.ClientError
 import com.twitter.logging.Logger
 import scala.math.BigInt
 import java.sql.{Timestamp, Date}
@@ -31,7 +32,7 @@ object ResultSet {
      */
     val rows = rowPackets map { p: Packet => 
       if (!isBinaryEncoded)
-        new StringEncodedRow(p.body, indexMap) 
+        new StringEncodedRow(p.body, fields, indexMap) 
       else
         new BinaryEncodedRow(p.body, fields, indexMap)
     }
@@ -42,106 +43,56 @@ object ResultSet {
 
 /**
  * Defines an interface that allows for easily
- * decoding a row (Array[Byte]) into its appropriate
- * values.
+ * decoding a row into its appropriate values.
  */
 trait Row {
-  val values: IndexedSeq[Any]
+  val values: IndexedSeq[Value]
   def findColumnIndex(columnName: String): Option[Int]
-  def getColumnValue(index: Int) = values(index)
 
-  def getString(columnIndex: Option[Int]): Option[String]
-  def getString(columnName: String): Option[String] =
-    getString(findColumnIndex(columnName))
+  def valueOf(columnIndex: Option[Int]): Option[Value] =
+    for(idx <- columnIndex) yield values(idx)
 
-  def getBoolean(columnIndex: Option[Int]): Option[Boolean]
-  def getBoolean(columnName: String): Option[Boolean] = 
-    getBoolean(findColumnIndex(columnName))
-
-  def getByte(columnIndex: Option[Int]): Option[Byte]
-  def getByte(columnName: String): Option[Byte] = 
-    getByte(findColumnIndex(columnName))
-
-  def getShort(columnIndex: Option[Int]): Option[Short]
-  def getShort(columnName: String): Option[Short] =
-    getShort(findColumnIndex(columnName))
-
-  def getInt(columnIndex: Option[Int]): Option[Int]
-  def getInt(columnName: String): Option[Int] = 
-    getInt(findColumnIndex(columnName))
-
-  def getLong(columnIndex: Option[Int]): Option[Long]
-  def getLong(columnName: String): Option[Long] =
-    getLong(findColumnIndex(columnName))
-
-  def getFloat(columnIndex: Option[Int]): Option[Float]
-  def getFloat(columnName: String): Option[Float] =
-    getFloat(findColumnIndex(columnName))
-
-  def getDouble(columnIndex: Option[Int]): Option[Double]
-  def getDouble(columnName: String): Option[Double] =
-    getDouble(findColumnIndex(columnName))
-
-  def getTimestamp(columnIndex: Option[Int]): Option[Timestamp]
-  def getTimestamp(columnName: String): Option[Timestamp] =
-    getTimestamp(findColumnIndex(columnName))
-
-  def getDatetime(columnIndex: Option[Int]): Option[Timestamp]
-  def getDatetime(columnName: String): Option[Timestamp] =
-    getDatetime(findColumnIndex(columnName))
-
-  def getDate(columnIndex: Option[Int]): Option[Date]
-  def getDate(columnName: String): Option[Date] =
-    getDate(findColumnIndex(columnName))
+  def valueOf(columnName: String): Option[Value] = 
+    valueOf(findColumnIndex(columnName))
 }
 
-class StringEncodedRow(row: Array[Byte], indexMap: Map[String, Int]) extends Row {
+class StringEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
   val br = new BufferReader(row)
-  val values: IndexedSeq[String] = (0 until indexMap.size) map { _ => br.readLengthCodedString() }
-
-  def findColumnIndex(name: String) = indexMap.get(name)
 
   /**
-   * Translates the value at index into an Option[String].
+   * Convert the string representation of each value
+   * into an appropriate Value object.
    */
-  private[this] def getValue(index: Int): Option[String] = Option(values(index))
+  val values: IndexedSeq[Value] = for(idx <- 0 until fields.size) yield {
+    val fieldType = fields(idx).fieldType
+    val value = br.readLengthCodedString()
+    if (value == null)
+      NullValue
+    else if (value.isEmpty)
+      EmptyValue
+    else
+      fieldType match {
+        case TypeCodes.STRING     => StringValue(value)
+        case TypeCodes.VAR_STRING => StringValue(value)
+        case TypeCodes.VARCHAR    => StringValue(value)
+        case TypeCodes.TINY       => ByteValue(value.toByte)
+        case TypeCodes.SHORT      => ShortValue(value.toShort)
+        case TypeCodes.INT24      => IntValue(value.toInt)
+        case TypeCodes.LONG       => IntValue(value.toInt)
+        case TypeCodes.LONGLONG   => LongValue(value.toLong)
+        case TypeCodes.FLOAT      => FloatValue(value.toFloat)
+        case TypeCodes.DOUBLE     => DoubleValue(value.toDouble)
+        case TypeCodes.TIMESTAMP  => Value.toTimestampValue(value) 
+        case TypeCodes.DATETIME   => Value.toTimestampValue(value)
+        case TypeCodes.DATE       => Value.toDateValue(value)
+        case _                    => RawValue(value)
+      }
+  }
 
-  def getString(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value
-
-  def getBoolean(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value == "1"
-
-  def getByte(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value.toByte
-
-  def getShort(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value.toShort
-
-  def getInt(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value.toInt
-
-  def getLong(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value.toLong
-
-  def getFloat(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value.toFloat
-
-  def getDouble(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield value.toDouble
-
-  def getTimestamp(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield Timestamp.valueOf(value)
-
-  def getDatetime(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield Timestamp.valueOf(value)
-
-  def getDate(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- getValue(idx)) yield Date.valueOf(value)
+  def findColumnIndex(name: String) = indexMap.get(name)
 }
 
 class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
-  private[this] val log = Logger("finagle-mysql")
   val buffer = new BufferReader(row, 1) // skip first byte
 
   /**
@@ -163,70 +114,39 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
   def isNull(index: Int) = nullBitmap.testBit(index + 2)
 
   /**
-   * Read values from row. Essentially coverting 
-   * the row from Array[Byte] to a pseudo-heterogeneous
-   * Seq that stores each column value.
+   * Convert the binary representation of each value
+   * into an appropriate Value object.
    */
-  val values: IndexedSeq[Option[Any]] = for(idx <- 0 until fields.size) yield {
+  val values: IndexedSeq[Value] = for(idx <- 0 until fields.size) yield {
     if (isNull(idx))
-      None
+      NullValue
     else 
       fields(idx).fieldType match {
-        case Types.STRING     => Some(buffer.readLengthCodedString())
-        case Types.VAR_STRING => Some(buffer.readLengthCodedString())
-        case Types.VARCHAR    => Some(buffer.readLengthCodedString())
-        case Types.TINY       => Some(buffer.readUnsignedByte())
-        case Types.SHORT      => Some(buffer.readShort())
-        case Types.INT24      => Some(buffer.readInt24())
-        case Types.LONG       => Some(buffer.readInt())
-        case Types.LONGLONG   => Some(buffer.readLong())
-        case Types.FLOAT      => Some(buffer.readFloat())
-        case Types.DOUBLE     => Some(buffer.readDouble())
-        case Types.TIMESTAMP  => Some(buffer.readTimestamp())
-        case Types.DATETIME   => Some(buffer.readTimestamp())
-        case Types.DATE       => Some(buffer.readDate())
-        
-        case _ =>
-          log.error("BinaryEncodedRow: Unsupported type " + 
-            Integer.toHexString(fields(idx).fieldType) + ".")
-          None
+        case TypeCodes.STRING      => Value.toStringValue(buffer.readLengthCodedString())
+        case TypeCodes.VAR_STRING  => Value.toStringValue(buffer.readLengthCodedString())
+        case TypeCodes.VARCHAR     => Value.toStringValue(buffer.readLengthCodedString())
+        case TypeCodes.TINY        => ByteValue(buffer.readByte())
+        case TypeCodes.SHORT       => ShortValue(buffer.readShort())
+        case TypeCodes.INT24       => IntValue(buffer.readInt24())
+        case TypeCodes.LONG        => IntValue(buffer.readInt())
+        case TypeCodes.LONGLONG    => LongValue(buffer.readLong())
+        case TypeCodes.FLOAT       => FloatValue(buffer.readFloat())
+        case TypeCodes.DOUBLE      => DoubleValue(buffer.readDouble())
+        case TypeCodes.TIMESTAMP   => TimestampValue(buffer.readTimestamp())
+        case TypeCodes.DATETIME    => TimestampValue(buffer.readTimestamp())
+        case TypeCodes.DATE        => DateValue(buffer.readDate())
+
+        // Unsure about the binary representation for these.
+        case TypeCodes.NEWDATE     => throw new ClientError("Unsupported field type: " + TypeCodes.NEWDATE)
+        case TypeCodes.ENUM        => throw new ClientError("Unsupported field type: " + TypeCodes.ENUM)
+        case TypeCodes.SET         => throw new ClientError("Unsupported field type: " + TypeCodes.SET)
+
+        // The rest can safely be read as a length coded set of bytes.
+        case _                     => RawBinaryValue(buffer.readLengthCodedBytes())
       }
   }
 
   def findColumnIndex(name: String) = indexMap.get(name)
-
-  def getString(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[String]
-
-  def getBoolean(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value == 1
-
-  def getByte(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Byte]
-
-  def getShort(columnIndex: Option[Int]) =
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Short]
-
-  def getInt(columnIndex: Option[Int]) =
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Int]
-
-  def getLong(columnIndex: Option[Int]) =
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Long]
-
-  def getFloat(columnIndex: Option[Int]) =
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Float]
-
-  def getDouble(columnIndex: Option[Int]) =
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Double]
-
-  def getTimestamp(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Timestamp]
-
-  def getDatetime(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Timestamp]
-
-  def getDate(columnIndex: Option[Int]) = 
-    for(idx <- columnIndex; value <- values(idx)) yield value.asInstanceOf[Date]
 }
 
 /**
