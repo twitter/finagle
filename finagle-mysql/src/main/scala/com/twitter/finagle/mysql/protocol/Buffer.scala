@@ -88,22 +88,22 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
     val len = readLengthCodedBinary().toInt
 
     if (len == NULL_LENGTH)
-      return null
+       null
     else if (len == 0)
       EMPTY_STRING
-
-    new String(take(len))
+    else
+      new String(take(len))
   }
 
   def readLengthCodedBytes(): Array[Byte] = {
     val len = readLengthCodedBinary().toInt
 
     if (len == NULL_LENGTH)
-      return null
+      null
     else if (len == 0)
       EMPTY_ARRAY
-
-    take(len)
+    else
+      take(len)
   }
 
   def readTimestamp(): Timestamp = {
