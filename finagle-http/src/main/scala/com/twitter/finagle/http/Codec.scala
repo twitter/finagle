@@ -279,23 +279,24 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
 
     if (Header.Required.forall { request.containsHeader(_) }) {
-      val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
       val spanId = SpanId.fromString(request.getHeader(Header.SpanId))
-      val parentSpanId = SpanId.fromString(request.getHeader(Header.ParentSpanId))
-
-      val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
-        Try(sampled.toBoolean).toOption
-      }
-      val flags =
-        try {
-          Flags(Option(request.getHeader(Header.Flags)).map(_.toLong).getOrElse(0L))
-        } catch {
-          case _ => Flags()
-        }
 
       spanId foreach { sid =>
+        val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
+        val parentSpanId = SpanId.fromString(request.getHeader(Header.ParentSpanId))
+
+        val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
+          Try(sampled.toBoolean).toOption
+        }
+
+        val flags = getFlags(request)
         Trace.setId(TraceId(traceId, parentSpanId, sid, sampled, flags))
       }
+    } else if (request.containsHeader(Header.Flags)) {
+      // even if there are no id headers we want to get the debug flag
+      // this is to allow developers to just set the debug flag to ensure their
+      // trace is collected
+      Trace.setId(Trace.id.copy(flags = getFlags(request)))
     }
 
     // remove so the header is not visible to users
@@ -311,6 +312,17 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
     service(request) map { response =>
       Trace.record(Annotation.ServerSend())
       response
+    }
+  }
+
+  /**
+   * Safely extract the flags from the header, if they exist. Otherwise return empty flag.
+   */
+  def getFlags(request: Req): Flags = {
+    try {
+      Flags(Option(request.getHeader(Header.Flags)).map(_.toLong).getOrElse(0L))
+    } catch {
+      case _ => Flags()
     }
   }
 }

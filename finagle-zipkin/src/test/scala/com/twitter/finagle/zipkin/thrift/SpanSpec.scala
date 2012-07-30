@@ -3,15 +3,15 @@ package com.twitter.finagle.zipkin.thrift
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.conversions.time._
-import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.Time
+import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 
 class SpanSpec extends SpecificationWithJUnit with Mockito {
 
   "Span" should {
     "serialize properly" in {
       val ann = ZipkinAnnotation(Time.now, "value", Endpoint(1,2), Some(1.second))
-      val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
+      val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
       val span = Span(traceId, Some("service"), Some("name"), Seq(ann), Seq(), Some(Endpoint(123, 123)))
 
       val tspan = span.toThrift
@@ -28,6 +28,7 @@ class SpanSpec extends SpecificationWithJUnit with Mockito {
       tspan.getParent_id() mustEqual 123
       tspan.isSetTrace_id mustEqual true
       tspan.getTrace_id() mustEqual 123
+      tspan.isDebug mustEqual true
     }
   }
 }

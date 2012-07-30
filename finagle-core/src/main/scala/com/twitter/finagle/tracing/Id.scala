@@ -65,7 +65,7 @@ object TraceId {
  * @param _traceId The id for this request.
  * @param _parentId The id for the request one step up the service stack.
  * @param spanId The id for this particular request
- * @param sampled Should we sample this request or not? True means sample, false means don't, none means we defer
+ * @param _sampled Should we sample this request or not? True means sample, false means don't, none means we defer
  *                decision to someone further down in the stack.
  * @param flags Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
  *              be moved in here.
@@ -74,11 +74,13 @@ final case class TraceId(
   _traceId: Option[SpanId],
   _parentId: Option[SpanId],
   spanId: SpanId,
-  sampled: Option[Boolean],
+  _sampled: Option[Boolean],
   flags: Flags)
 {
   def traceId = _traceId getOrElse parentId
   def parentId = _parentId getOrElse spanId
+  // debug flag overrides sampled to be true
+  lazy val sampled = if (flags.isDebug) Some(true) else _sampled
 
   override def equals(other: Any) = other match {
     case other: TraceId =>

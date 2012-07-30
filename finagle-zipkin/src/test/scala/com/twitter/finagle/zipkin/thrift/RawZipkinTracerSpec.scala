@@ -16,7 +16,7 @@ import com.twitter.finagle.service.TimeoutFilter
 
 class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
 
-  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
+  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
   "RawZipkinTracer" should {
     val zipkinTimer = FinagleTimer.getManaged.make()
@@ -38,7 +38,7 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
         "ADAAAAB3NlcnZpY2UAAAsAAQAAAANpNjQLAAIAAAAIAAAAAAAAAEAIAAMAAAAEDAAECAABAQEB" +
         "AQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZkb3VibGULAAIAAAAIQF7TMzMzMzMIAAMAAA" +
         "AFDAAECAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZzdHJpbmcLAAIAAAAGd29v" +
-        "cGllCAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAAA"))
+        "cGllCAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAACAAkBAA=="))
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
 
       val inetAddress = InetAddress.getByAddress(Array.fill(4) {

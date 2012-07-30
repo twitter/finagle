@@ -29,6 +29,10 @@ class IdSpec extends SpecificationWithJUnit {
       }
     }
 
+    "return sampled true if debug mode" in {
+      TraceId(None, None, SpanId(0L), None, Flags().setDebug).sampled must be_==(Some(true))
+    }
+
     "be correct" in {
       def hex(l: Long) = new RichU64Long(l).toU64HexString
 
