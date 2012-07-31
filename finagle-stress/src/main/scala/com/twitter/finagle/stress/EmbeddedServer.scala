@@ -2,7 +2,7 @@ package com.twitter.finagle.stress
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.FinagleTimer
+import com.twitter.finagle.util.ManagedTimer
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
@@ -27,7 +27,7 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
-  val timer = FinagleTimer.getManaged.make()
+  val timer = ManagedTimer.toTwitterTimer.make()
 
   // Server state:
   private[this] var isApplicationNonresponsive = false

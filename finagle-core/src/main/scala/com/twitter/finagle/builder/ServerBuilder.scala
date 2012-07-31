@@ -481,7 +481,7 @@ private[builder] class MkServer[Req, Rep] (
   }
 
   private[this] def filter(
-    timer: Timer,
+    timer: TwoTimer,
     statsReceiverOpt: Option[StatsReceiver],
     gauges: HashSet[stats.Gauge]
   ) = {  // per connection filter stack
@@ -493,14 +493,14 @@ private[builder] class MkServer[Req, Rep] (
 
     val timeoutFilter = config.requestTimeout map { duration =>
       val e = new IndividualRequestTimeoutException(duration)
-      new TimeoutFilter[Req, Rep](duration, e, timer)
+      new TimeoutFilter[Req, Rep](duration, e, timer.toTwitterTimer)
     } getOrElse Filter.identity[Req, Rep]
 
     maskCancelFilter andThen semaphoreFilter(statsReceiverOpt, gauges) andThen statsFilter andThen timeoutFilter
   }
 
   private[this] def serviceFactory(
-    timer: Timer,
+    timer: TwoTimer,
     statsReceiverOpt: Option[StatsReceiver],
     gauges: HashSet[stats.Gauge]
   ): ServiceFactory[Req, Rep] = {
@@ -518,7 +518,7 @@ private[builder] class MkServer[Req, Rep] (
   private[this] def mkPipeline(
     codec: Codec[Req, Rep],
     statsReceiverOpt: Option[StatsReceiver],
-    timer: Timer
+    timer: TwoTimer
   ) = {
     val pipeline = codec.pipelineFactory.getPipeline
     config.logger foreach { logger =>
@@ -541,13 +541,13 @@ private[builder] class MkServer[Req, Rep] (
       val (timeoutValue, timeoutUnit) = howlong.inTimeUnit
       pipeline.addLast(
         "readTimeout",
-        new ReadTimeoutHandler(new TimerToNettyTimer(timer), timeoutValue, timeoutUnit))
+        new ReadTimeoutHandler(timer, timeoutValue, timeoutUnit))
     }
 
     config.writeCompletionTimeout foreach { howlong =>
       pipeline.addLast(
         "writeCompletionTimeout",
-        new WriteCompletionTimeoutHandler(timer, howlong))
+        new WriteCompletionTimeoutHandler(timer.toTwitterTimer, howlong))
     }
 
     // SSL comes first so that ChannelSnooper gets plaintext
@@ -603,7 +603,7 @@ private[builder] class MkServer[Req, Rep] (
     bootstrap: ServerBootstrap,
     channels: DefaultChannelGroup,
     tracer: Tracer,
-    timer: Timer,
+    timer: TwoTimer,
     gauges: HashSet[stats.Gauge]
   ) {
     // Due to tracing semantics, we need to place these at the
@@ -617,14 +617,14 @@ private[builder] class MkServer[Req, Rep] (
     // it will be created only once
     val statsReceiverOpt = config.statsReceiver map { sr => sr.scope(config.name) }
     val statsReceiver = statsReceiverOpt getOrElse NullStatsReceiver
-    
+
     val thisServiceFactory = serviceFactory(timer, statsReceiverOpt, gauges)
     val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
     val monitorFilter = {
       val logger = config.logger.getOrElse(Logger.getLogger(config.name))
       new MonitorFilter[Req, Rep](monitor andThen new SourceTrackingMonitor(logger, "server"))
     }
-    
+
     // These need to sit outside of the codec:
     val outerFilter =
       handletimeFilter andThen // to measure total handle time
@@ -639,7 +639,7 @@ private[builder] class MkServer[Req, Rep] (
         // Make some connection-specific changes to the service
         // factory.
         val connServiceFactory =
-          outerFilter andThen 
+          outerFilter andThen
           codec.prepareConnFactory(thisServiceFactory)
 
         // We add the idle time after the codec. This ensures that a
@@ -652,7 +652,7 @@ private[builder] class MkServer[Req, Rep] (
 
         val serverDispatcherFactory = if (idleTime.isDefined || lifeTime.isDefined) {
           val expiringServerDispatcher = new ExpiringServerDispatcher[Req, Rep](
-            idleTime, lifeTime, timer, statsReceiver.scope("expired")
+            idleTime, lifeTime, timer.toTwitterTimer, statsReceiver.scope("expired")
           )
           expiringServerDispatcher(codec.mkServerDispatcher)
         } else {
@@ -675,7 +675,7 @@ private[builder] class MkServer[Req, Rep] (
     bootstrap: ServerBootstrap,
     channels: DefaultChannelGroup,
     gauges: HashSet[stats.Gauge],
-    timer: Timer
+    timer: TwoTimer
   ) = new Disposable[BoundServer] {
     def dispose(deadline: Time) = {
       // According to NETTY-256, the following sequence of operations
@@ -713,7 +713,7 @@ private[builder] class MkServer[Req, Rep] (
         }
       })
 
-      p.within(deadline - Time.now)(timer) ensure {
+      p.within(deadline - Time.now)(timer.toTwitterTimer) ensure {
         channels.close()
         gauges foreach { _.remove() }
         // Force close any remaining connections. Don't wait for
@@ -731,7 +731,7 @@ private[builder] class MkServer[Req, Rep] (
 
   private[this] def mkManaged(
     tracer: Tracer,
-    timer: Timer
+    timer: TwoTimer
   ) = new Managed[BoundServer] {
     def make() = {
 
@@ -749,7 +749,7 @@ private[builder] class MkServer[Req, Rep] (
   }
 
   def apply(): Managed[BoundServer] = for {
-      timer <- FinagleTimer.getManaged
+      timer <- ManagedTimer
       tracer <- config.tracerFactory
       server <- mkManaged(tracer, timer)
     } yield server

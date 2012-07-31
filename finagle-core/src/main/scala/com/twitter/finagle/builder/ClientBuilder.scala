@@ -578,7 +578,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[this] def buildBootstrap(
     codec: Codec[Req, Rep],
     host: SocketAddress,
-    timer: nu.Timer
+    timer: TwoTimer
   ) = {
     val cf = config.channelFactory getOrElse ClientBuilder.defaultChannelFactory
     cf.acquire()
@@ -639,7 +639,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   }
 
   private[this] def buildPool(
-    factory: ServiceFactory[Req, Rep], timer: Timer, statsReceiver: StatsReceiver) = {
+    factory: ServiceFactory[Req, Rep], timer: TwoTimer, statsReceiver: StatsReceiver) = {
     // These are conservative defaults, but probably the only safe
     // thing to do.
     val lowWatermark = config.hostConnectionCoresize   getOrElse(1)
@@ -652,7 +652,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         factory,
         highWatermark - lowWatermark,
         idleTime,
-        timer,
+        timer.toTwitterTimer,
         statsReceiver)
     } else {
       factory
@@ -674,7 +674,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[this] def hostToServiceFactory(
     codec: Codec[Req, Rep],
     host: SocketAddress,
-    timer: Timer
+    timer: TwoTimer
   ): ServiceFactory[Req, Rep] = {
     // The per-host stack is as follows:
     //
@@ -694,7 +694,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     )
 
     var factory: ServiceFactory[Req, Rep] = null
-    val bs = buildBootstrap(codec, host, new TimerToNettyTimer(timer))
+    val bs = buildBootstrap(codec, host, timer)
     val preparedFactory = codec.prepareConnFactory(new ChannelServiceFactory[Req, Rep](
       bs, codec.mkClientDispatcher, hostStatsReceiver
     ))
@@ -712,7 +712,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           new CloseOnReleaseService(service),
           config.hostConnectionMaxIdleTime,
           config.hostConnectionMaxLifeTime,
-          timer)
+          timer.toTwitterTimer)
       }
     }
 
@@ -722,7 +722,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     if (config.expFailFast) {
       factory = new FailFastFactory(
-        factory, hostStatsReceiver.scope("failfast"), timer)
+        factory, hostStatsReceiver.scope("failfast"), timer.toTwitterTimer)
     }
 
     val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
@@ -733,7 +733,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     factory
   }
 
-  private[this] def rawInternalBuildFactory(tracer: Tracer, timer: Timer) = {
+  private[this] def rawInternalBuildFactory(tracer: Tracer, timer: TwoTimer) = {
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
     val cluster = config.cluster.get
@@ -766,7 +766,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   private[this] def internalBuildFactory(
     tracer: Tracer,
-    timer: Timer
+    timer: TwoTimer
   ) = new Managed[ServiceFactory[Req, Rep]] {
     def make() = new Disposable[ServiceFactory[Req, Rep]] {
       val inner = rawInternalBuildFactory(tracer, timer)
@@ -782,7 +782,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Managed[ServiceFactory[Req, Rep]] = for {
-      timer <- FinagleTimer.getManaged
+      timer <- ManagedTimer
       tracer <- config.tracerFactory
       factory <- internalBuildFactory(tracer, timer)
     } yield exceptionSourceFilter andThen factory
@@ -816,7 +816,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Managed[Service[Req, Rep]] = for {
     factory <- buildManagedFactory()
-    timer <- FinagleTimer.getManaged
+    timer <- ManagedTimer
   } yield {
     var service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
     // We keep the retrying filter after the load balancer so we can
@@ -865,8 +865,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def unsafeBuildFactory(): ServiceFactory[Req, Rep] =
     withConfig(_.validated).buildFactory()
 
-  protected def failureAccrualFactory(factory: ServiceFactory[Req, Rep], timer: Timer) =
-    config.failureAccrual map { _(timer) andThen factory } getOrElse factory
+  protected def failureAccrualFactory(factory: ServiceFactory[Req, Rep], timer: TwoTimer) =
+    config.failureAccrual map { _(timer.toTwitterTimer) andThen factory } getOrElse factory
 
   protected def monitorFilter =
     config.monitor map { monitorFactory =>
@@ -875,34 +875,34 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       new MonitorFilter[Req, Rep](monitorFactory(name) andThen new SourceTrackingMonitor(logger, "client"))
     } getOrElse(identityFilter)
 
-  protected def connectTimeoutFactory(factory: ServiceFactory[Req, Rep], timer: Timer) =
+  protected def connectTimeoutFactory(factory: ServiceFactory[Req, Rep], timer: TwoTimer) =
     if (config.connectTimeout < Duration.MaxValue) {
       val exception = new ServiceTimeoutException(config.connectTimeout)
-      new TimeoutFactory(factory, config.connectTimeout, exception, timer)
+      new TimeoutFactory(factory, config.connectTimeout, exception, timer.toTwitterTimer)
     } else {
       factory
     }
 
   protected def exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](config.name.get)
 
-  protected def retryFilter(timer: Timer) =
+  protected def retryFilter(timer: TwoTimer) =
     config.retryPolicy map { retryPolicy =>
-      new RetryingFilter[Req, Rep](retryPolicy, timer, statsReceiver)
+      new RetryingFilter[Req, Rep](retryPolicy, timer.toTwitterTimer, statsReceiver)
     } getOrElse(identityFilter)
 
 
-  protected def requestTimeoutFilter(timer: Timer) =
+  protected def requestTimeoutFilter(timer: TwoTimer) =
     if (config.requestTimeout < Duration.MaxValue) {
       val exception = new IndividualRequestTimeoutException(config.requestTimeout)
-      new TimeoutFilter[Req, Rep](config.requestTimeout, exception, timer)
+      new TimeoutFilter[Req, Rep](config.requestTimeout, exception, timer.toTwitterTimer)
     } else {
       identityFilter
     }
 
-  protected def globalTimeoutFilter(timer: Timer) =
+  protected def globalTimeoutFilter(timer: TwoTimer) =
     if (config.timeout < Duration.MaxValue) {
       val exception = new GlobalRequestTimeoutException(config.timeout)
-      new TimeoutFilter[Req, Rep](config.timeout, exception, timer)
+      new TimeoutFilter[Req, Rep](config.timeout, exception, timer.toTwitterTimer)
     } else {
       identityFilter
     }

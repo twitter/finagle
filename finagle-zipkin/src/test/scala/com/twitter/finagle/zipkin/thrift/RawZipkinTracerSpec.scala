@@ -7,7 +7,7 @@ import java.util.ArrayList
 import com.twitter.conversions.time._
 import com.twitter.util._
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{CloseNotifier, FinagleTimer}
+import com.twitter.finagle.util.{CloseNotifier, ManagedTimer, TwoTimer, Disposable}
 import com.twitter.finagle.stats.NullStatsReceiver
 
 import org.mockito.Matchers._
@@ -19,11 +19,8 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
   "RawZipkinTracer" should {
-    val zipkinTimer = FinagleTimer.getManaged.make()
-    doAfter { zipkinTimer.dispose() }
-
-    "send all traces to scribe" in {
-      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, zipkinTimer)
+    "send all traces to scribe" in ManagedTimer.toTwitterTimer.foreach { timer =>
+      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, Disposable.const(timer))
       tracer.client = mock[scribe.ServiceToClient]
 
       val expected = new ArrayList[LogEntry]()
@@ -73,12 +70,12 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
       tracer.client must beNull
     }
 
-    "logSpan if a timeout occurs" in {
+    "logSpan if a timeout occurs" in ManagedTimer.toTwitterTimer.foreach { timer =>
       val ann1 = Annotation.Message("some_message")
       val ann2 = Annotation.Rpcname("some_service", "rpc_name")
       val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
-      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, zipkinTimer)
+      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, Disposable.const(timer))
       tracer.client = mock[scribe.ServiceToClient]
 
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)

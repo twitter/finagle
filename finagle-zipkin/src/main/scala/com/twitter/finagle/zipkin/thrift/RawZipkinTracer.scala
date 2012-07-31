@@ -18,7 +18,7 @@ import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.util.{Disposable, FinagleTimer}
+import com.twitter.finagle.util.{Disposable, ManagedTimer}
 
 object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port
@@ -34,7 +34,7 @@ object RawZipkinTracer {
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver): Tracer.Factory = {
 
-    val mTimer = FinagleTimer.getManaged
+    val mTimer = ManagedTimer.toTwitterTimer
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
       new RawZipkinTracer(
         scribeHost,

@@ -1,126 +1,129 @@
 package com.twitter.finagle.util
 
-import collection.mutable.{HashMap, SynchronizedMap}
-
-import java.util.Collections
-import java.util.concurrent.{TimeUnit, Executors, ConcurrentHashMap}
-import java.util.concurrent.atomic.{AtomicReference, AtomicInteger, AtomicBoolean}
-import org.jboss.netty.util.{HashedWheelTimer}
-import org.jboss.netty.{util => nu}
-
-import com.twitter.util.{
-  Time, Duration, Future, TimerTask, NullTimerTask, ReferenceCountedTimer,
-  ReferenceCountingTimer, ThreadStoppingTimer, Timer}
 import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.util.{Time, Duration, Future, TimerTask, Timer}
+import java.util.Collections
+import java.util.concurrent.{TimeUnit, ConcurrentHashMap}
+import java.util.concurrent.atomic.AtomicBoolean
+import org.jboss.netty.util.HashedWheelTimer
+import org.jboss.netty.{util => nu}
+import scala.collection.JavaConverters._
 
-import com.twitter.finagle.stats.{StatsReceiver, GlobalStatsReceiver}
+/**
+ * A Netty timer convertible to a com.twitter.util.Timer
+ */
+private[finagle] trait TwoTimer extends nu.Timer {
+  val toTwitterTimer: Timer
+}
 
-private[finagle] object FinagleTimer {
-  private[this] val timerStoppingExecutor = Executors.newFixedThreadPool(
-    1, new NamedPoolThreadFactory("FINAGLE-TIMER-STOPPER", true/*daemon*/))
+/**
+ * Maintain a view on top of `underlying` with its own set of pending
+ * timeouts. This timer is then independently stoppable.
+ */
+private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
+  private[this] val pending = Collections.newSetFromMap(
+    new ConcurrentHashMap[nu.Timeout, java.lang.Boolean])
+  private[this] val active = new AtomicBoolean(true)
 
-  def mkManaged(timerFactory: () => Timer): Managed[Timer] = new Managed[Timer] {
-    def make(): Disposable[Timer] = new Disposable[Timer] {
-      val underlying = timerFactory()
-      def get = underlying
-      def dispose(deadline: Time) = {
-        underlying.stop()
-        Future.value(())
+  def newTimeout(task: nu.TimerTask, delay: Long, unit: TimeUnit) = {
+    // This does not catch all misuses: there's a race between
+    // calling `newTimeout` and `stop()`.
+    require(active.get, "newTimeout on inactive timer")
+    val wrappedTask = new nu.TimerTask {
+      def run(timeout: nu.Timeout) {
+        pending.remove(timeout)
+        task.run(timeout)
       }
     }
+    val timeout = underlying.newTimeout(wrappedTask, delay, unit)
+    pending.add(timeout)
+    timeout
   }
 
-  /**
-   *  When a managed timer is disposed, all of its pending timer tasks will be cancelled.
-   */
-  def getManaged: Managed[Timer] = mkManaged { () =>
-    default.acquire()
-    new TaskTrackingTimer(default)
-  }
-
-  // This timer should only be used inside the context of finagle,
-  // since it requires explicit reference count management. (Via the
-  // builder routines.) We jump through a ridiculous number of hoops
-  // here to make this work reliably:
-  //
-  //   Reference counting for resource management within finagle (so
-  //   we can actually quit processes.)
-  //
-  //   `ThreadStoppingTimer` to ensure that timer threads themselves
-  //   can shut down reliably (they cannot be shut down from the timer
-  //   threads themselves.)
-  private[this] val default: ReferenceCountedTimer = {
-
-    def factory() = {
-      val underlying = new TimerFromNettyTimer(new HashedWheelTimer(10, TimeUnit.MILLISECONDS))
-      new ThreadStoppingTimer(underlying, timerStoppingExecutor)
-    }
-
-    val underlying = new ReferenceCountingTimer(factory)
-    new CountingTimer(underlying) with ReferenceCountedTimer {
-      private[this] val gauge =
-        GlobalStatsReceiver.addGauge("timeouts") { count }
-
-      def acquire() = underlying.acquire()
-    }
+  def stop(): java.util.Set[nu.Timeout] = {
+    require(active.getAndSet(false), "stop called twice")
+    for (timeout <- pending.asScala)
+      timeout.cancel()
+    pending
   }
 }
 
 /**
- * Implements the Netty timer interface on top of `default`, which is
- * reference counted. This allows us to provide a reference counted
- * (via cancellation) timer to Netty classes that need it. This may be
- * slightly confusing since `default` in turn is implemented on top of
- * a Netty timer.
+ * A Managed version of a TwoTimer. Shares an underlying timer and
+ * multiplexes several views onto it. Each view may in turn be
+ * discarded only once. For safety, a new thread is spun up in order
+ * to stop the timer, since Netty's HashedWheelTimer disallows
+ * stopping inside of a timer thread.
  */
-private[finagle] class TimerToNettyTimer(underlying: Timer)
-  extends nu.Timer
-{
-  private[this] object State extends Enumeration {
-    type State = Value
-    val Pending, Expired, Cancelled = Value
-  }
+private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Managed[TwoTimer] {
+  private[this] sealed trait State
+  private[this] object Quiet extends State
+  private[this] case class Busy(timer: nu.Timer, count: Int) extends State
 
-  def newTimeout(task: nu.TimerTask, delay: Long, unit: TimeUnit) = {
-    @volatile var underlyingTask: TimerTask = null
-    val timeout = new nu.Timeout {
-      import State._
-      private[this] val state = new AtomicReference[State](Pending)
-      private[this] def transition(newState: State)(onSucc: => Unit) {
-        if (state.compareAndSet(Pending, newState)) {
-          onSucc
-          underlying.stop()
-        }
-      }
+  @volatile private[this] var state: State = Quiet
 
-      def isCancelled = state.get == Cancelled
-      def getTask() = task
-      def getTimer = TimerToNettyTimer.this
-      def isExpired = state.get == Expired || isCancelled
-
-      def cancel() {
-        transition(Cancelled) {
-          underlyingTask.cancel()
-        }
-      }
-
-      def run() {
-        transition(Expired) {
-          task.run(this)
-        }
-      }
+  private[this] def wrap(underlying: nu.Timer) = new Disposable[TwoTimer] {
+    private[this] val timer = new NettyTimerView(underlying) with TwoTimer {
+      val toTwitterTimer = new TimerFromNettyTimer(this)
     }
 
-    val when = Time.now + Duration.fromTimeUnit(delay, unit)
-    underlyingTask = underlying.schedule(when) { timeout.run() }
-    timeout
+    def get = timer
+
+    def dispose(deadline: Time) = {
+      timer.stop()  // requires(active)
+
+      val stopTimer = ManagedNettyTimer.this.synchronized {
+        state match {
+          case Quiet =>
+            assert(false, "state is Quiet, expected Busy")
+            None
+          case Busy(timer, 1) =>
+            state = Quiet
+            Some(timer)
+          case Busy(timer, n) =>
+            state = Busy(timer, n-1)
+            None
+        }
+      }
+
+      stopTimer foreach { timer =>
+        val thr = new Thread {
+          override def run() {
+            val pending = timer.stop()
+            // At this point, every timeout should have been cancelled.
+            if (!pending.isEmpty) {
+              java.util.logging.Logger.getLogger("").warning(
+                "There were pending timeouts when timer stopped")
+              for (timeout <- pending.asScala)
+                timeout.cancel()
+            }
+          }
+        }
+        thr.start()
+      }
+
+      Future.Done
+    }
   }
 
-  def stop() = {
-    throw new Exception(
-      "stop() has not been implemented for the wrapped netty timer.")
+  def make(): Disposable[TwoTimer] = synchronized {
+    state match {
+      case Quiet =>
+        val newTimer = mkTimer()
+        state = Busy(newTimer, 1)
+        wrap(newTimer)
+      case Busy(timer, count) =>
+        state = Busy(timer, count+1)
+        wrap(timer)
+    }
   }
+
+  val toTwitterTimer = map(new TimerFromNettyTimer(_))
 }
+
+private[finagle] object TimerThreadFactory extends NamedPoolThreadFactory("Finagle Timer")
+private[finagle] object ManagedTimer extends ManagedNettyTimer(
+  () => new HashedWheelTimer(TimerThreadFactory, 10, TimeUnit.MILLISECONDS))
 
 /**
  * Implements a [[com.twitter.util.Timer]] in terms of a
@@ -147,81 +150,6 @@ class TimerFromNettyTimer(underlying: nu.Timer) extends Timer {
 
   private[this] def toTimerTask(task: nu.Timeout) = new TimerTask {
     def cancel() { task.cancel() }
-  }
-}
-
-class CountingTimer(underlying: Timer) extends Timer {
-  private[this] val npending = new AtomicInteger(0)
-
-  def count = npending.get
-
-  private[this] def wrap(underlying: (=> Unit) => TimerTask, f: => Unit) = {
-    val decr = new AtomicBoolean(false)
-    npending.incrementAndGet()
-
-    val underlyingTask = underlying {
-      if (!decr.getAndSet(true))
-        npending.decrementAndGet()
-      f
-    }
-
-    new TimerTask {
-      def cancel() {
-        if (!decr.getAndSet(true))
-          npending.decrementAndGet()
-        underlyingTask.cancel()
-      }
-    }
-  }
-
-  def schedule(when: Time)(f: => Unit): TimerTask =
-    wrap(underlying.schedule(when), f)
-
-  override def schedule(when: Time, period: Duration)(f: => Unit): TimerTask =
-    wrap(underlying.schedule(when, period), f)
-
-  def stop() { underlying.stop() }
-}
-
-private[finagle] class TaskTrackingTimer(underlying: Timer) extends Timer {
-  private[finagle] val tasks = Collections.newSetFromMap(new ConcurrentHashMap[TimerTask, java.lang.Boolean])
-  @volatile private[this] var stopped = false
-
-  private[this] def wrap(underlying: (=> Unit) => TimerTask, f: => Unit) = {
-
-    val wrappedTask = if (stopped)
-      NullTimerTask
-    else {
-      new TimerTask {
-        tasks.add(this)
-        private[this] val underlyingTask = underlying {
-          tasks.remove(this)
-          f
-        }
-
-        def cancel() {
-          tasks.remove(this)
-          underlyingTask.cancel()
-        }
-      }
-    }
-
-    if (stopped)
-      wrappedTask.cancel()
-    wrappedTask
-  }
-
-  def schedule(when: Time)(f: => Unit): TimerTask =
-    wrap(underlying.schedule(when), f)
-
-  def schedule(when: Time, period: Duration)(f: => Unit): TimerTask =
-    wrap(underlying.schedule(when, period), f)
-
-  def stop() = {
-    import scala.collection.JavaConverters._
-    stopped = true
-    tasks.asScala foreach { _.cancel() }
-    underlying.stop()
   }
 }
 
