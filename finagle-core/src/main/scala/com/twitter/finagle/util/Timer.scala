@@ -37,7 +37,16 @@ private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
     }
     val timeout = underlying.newTimeout(wrappedTask, delay, unit)
     pending.add(timeout)
-    timeout
+    new nu.Timeout {
+      def getTimer() = timeout.getTimer()
+      def getTask() = wrappedTask
+      def isExpired() = timeout.isExpired()
+      def isCancelled() = timeout.isCancelled()
+      def cancel() {
+        pending.remove(timeout)
+        timeout.cancel() 
+      }
+    }
   }
 
   def stop(): java.util.Set[nu.Timeout] = {
