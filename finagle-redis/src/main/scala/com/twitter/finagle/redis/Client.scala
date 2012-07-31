@@ -110,6 +110,17 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
+   * Returns all keys matching pattern
+   * @param pattern
+   * @return List of keys matching pattern
+   */
+  def keys(pattern: String): Future[Seq[Array[Byte]]] =
+    doRequest(Keys(pattern)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toByteArrays(messages))
+      case EmptyMBulkReply()    => Future.value(Seq())
+    }
+
+  /**
    * Deletes all keys in current DB
    */
   def flushDB(): Future[Unit] =
@@ -180,6 +191,17 @@ class Client(service: Service[Command, Reply]) {
   @deprecated("Use hGetAllAsPairs instead", "5.0.0")
   def hGetAll(key: Array[Byte]): Future[Map[Array[Byte], Array[Byte]]] =
     hGetAllAsPairs(key) map { res => res toMap }
+
+  /**
+   * Return all field names stored at key
+   * @param hash key
+   * @return List of fields in hash
+   */
+  def hKeys(key: String): Future[Seq[Array[Byte]]] =
+   doRequest(HKeys(key)) {
+     case MBulkReply(messages) => Future.value(ReplyFormat.toByteArrays(messages))
+     case EmptyMBulkReply()    => Future.value(Seq())
+   }
 
   /**
    * Gets values for given fields in hash

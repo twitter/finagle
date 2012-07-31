@@ -59,6 +59,14 @@ class ClientSpec extends SpecificationWithJUnit {
         client.exists("foo")() mustEqual true
       }
 
+      "keys" in {
+        client.set("foo", bar)()
+        client.set("moo", boo)()
+        BytesToString.fromList(client.keys("")().toList) must throwA[ClientError]
+        BytesToString.fromList(client.keys("*oo")().toList) mustEqual Seq("moo", "foo")
+        BytesToString.fromList(client.keys("*z*")().toList) mustEqual Seq()
+      }
+
       "get range" in {
         client.del(Seq("foo"))()
         client.set("foo", "boing".getBytes)()
@@ -129,6 +137,13 @@ class ClientSpec extends SpecificationWithJUnit {
         client.hSet(foo, boo, moo)()
         BytesToString.fromTuples(
           client.hGetAllAsPairs(foo)()) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
+      }
+
+      "get fields in a hash" in {
+        client.hSet(foo, bar, baz)()
+        client.hSet(foo, boo, moo)()
+        BytesToString.fromList(
+          client.hKeys("foo")().toList) mustEqual Seq("bar", "boo")
       }
 
     }

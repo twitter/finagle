@@ -73,6 +73,7 @@ object Commands {
   val HDEL              = "HDEL"
   val HGET              = "HGET"
   val HGETALL           = "HGETALL"
+  val HKEYS             = "HKEYS"
   val HMGET             = "HMGET"
   val HSET              = "HSET"
 
@@ -145,6 +146,7 @@ object Commands {
     HDEL              -> {HDel(_)},
     HGET              -> {HGet(_)},
     HGETALL           -> {HGetAll(_)},
+    HKEYS             -> {HKeys(_)},
     HMGET             -> {HMGet(_)},
     HSET              -> {HSet(_)},
 
