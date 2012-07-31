@@ -18,7 +18,7 @@ case class ServersGreeting(
 
 object ServersGreeting {
   def decode(packet: Packet): ServersGreeting = {
-    val br = new BufferReader(packet.body)
+    val br = BufferReader(packet.body)
     val protocol = br.readByte()
     val version = br.readNullTerminatedString()
     val threadId = br.readInt()
@@ -51,17 +51,17 @@ case class LoginRequest(
   database: Option[String],
   clientCap: Capability,
   salt: Array[Byte],
-  charset: Short,
   serverCap: Capability,
+  charset: Short = Charset.Utf8_general_ci,
   maxPacket: Int = 0x10000000
 ) extends Request(seq = 1.toByte) {
   private[this] val fixedBodySize = 34
   private[this] val dbNameSize = database map { _.size+1 } getOrElse(0)
   private[this] val dataSize = username.size + hashPassword.size + dbNameSize + fixedBodySize
-  private[this] lazy val hashPassword = encryptPassword(password, salt)
+  lazy val hashPassword = encryptPassword(password, salt)
 
   override val data = {
-    val bw = new BufferWriter(new Array[Byte](dataSize))
+    val bw = BufferWriter(new Array[Byte](dataSize))
     val capability = if (dbNameSize == 0) clientCap - ConnectWithDB else clientCap
     bw.writeInt(capability.mask)
     bw.writeInt(maxPacket)

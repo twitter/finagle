@@ -57,7 +57,7 @@ trait Row {
 }
 
 class StringEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
-  val br = new BufferReader(row)
+  val br = BufferReader(row)
 
   /**
    * Convert the string representation of each value
@@ -82,10 +82,10 @@ class StringEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
         case TypeCodes.LONGLONG   => LongValue(value.toLong)
         case TypeCodes.FLOAT      => FloatValue(value.toFloat)
         case TypeCodes.DOUBLE     => DoubleValue(value.toDouble)
-        case TypeCodes.TIMESTAMP  => Value.toTimestampValue(value) 
-        case TypeCodes.DATETIME   => Value.toTimestampValue(value)
-        case TypeCodes.DATE       => Value.toDateValue(value)
-        case _                    => RawValue(value)
+        case TypeCodes.TIMESTAMP  => TimestampValue(value) 
+        case TypeCodes.DATETIME   => TimestampValue(value)
+        case TypeCodes.DATE       => DateValue(value)
+        case _                    => RawStringValue(value)
       }
   }
 
@@ -93,7 +93,7 @@ class StringEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
 }
 
 class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
-  val buffer = new BufferReader(row, 1) // skip first byte
+  val buffer = BufferReader(row, 1) // skip first byte
 
   /**
    * In a binary encoded row, null values are not sent from the
@@ -122,9 +122,9 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
       NullValue
     else 
       fields(idx).fieldType match {
-        case TypeCodes.STRING      => Value.toStringValue(buffer.readLengthCodedString())
-        case TypeCodes.VAR_STRING  => Value.toStringValue(buffer.readLengthCodedString())
-        case TypeCodes.VARCHAR     => Value.toStringValue(buffer.readLengthCodedString())
+        case TypeCodes.STRING      => StringValue(buffer.readLengthCodedString())
+        case TypeCodes.VAR_STRING  => StringValue(buffer.readLengthCodedString())
+        case TypeCodes.VARCHAR     => StringValue(buffer.readLengthCodedString())
         case TypeCodes.TINY        => ByteValue(buffer.readByte())
         case TypeCodes.SHORT       => ShortValue(buffer.readShort())
         case TypeCodes.INT24       => IntValue(buffer.readInt24())
@@ -132,17 +132,13 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
         case TypeCodes.LONGLONG    => LongValue(buffer.readLong())
         case TypeCodes.FLOAT       => FloatValue(buffer.readFloat())
         case TypeCodes.DOUBLE      => DoubleValue(buffer.readDouble())
-        case TypeCodes.TIMESTAMP   => TimestampValue(buffer.readTimestamp())
-        case TypeCodes.DATETIME    => TimestampValue(buffer.readTimestamp())
-        case TypeCodes.DATE        => DateValue(buffer.readDate())
+        case TypeCodes.TIMESTAMP   => TimestampValue(buffer.readLengthCodedBytes())
+        case TypeCodes.DATETIME    => TimestampValue(buffer.readLengthCodedBytes())
+        case TypeCodes.DATE        => DateValue(buffer.readLengthCodedBytes())
 
-        // Unsure about the binary representation for these.
-        case TypeCodes.NEWDATE     => throw new ClientError("Unsupported field type: " + TypeCodes.NEWDATE)
-        case TypeCodes.ENUM        => throw new ClientError("Unsupported field type: " + TypeCodes.ENUM)
-        case TypeCodes.SET         => throw new ClientError("Unsupported field type: " + TypeCodes.SET)
-
-        // The rest can safely be read as a length coded set of bytes.
-        case _                     => RawBinaryValue(buffer.readLengthCodedBytes())
+        // TO DO: Verify that TypeCodes.{ENUM, SET, NEWDATE} can be read as
+        // a length coded set of bytes.
+        case _ => RawBinaryValue(buffer.readLengthCodedBytes())
       }
   }
 
@@ -170,7 +166,7 @@ case class Field(
 
 object Field {
   def decode(packet: Packet): Field = {
-    val br = new BufferReader(packet.body)
+    val br = BufferReader(packet.body)
     val catalog = br.readLengthCodedString()
     val db = br.readLengthCodedString()
     val table = br.readLengthCodedString()

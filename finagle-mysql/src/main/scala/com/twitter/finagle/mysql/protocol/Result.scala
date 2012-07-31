@@ -20,7 +20,7 @@ case class OK(affectedRows: Long,
 object OK {
   def decode(packet: Packet) = {
     // start reading after flag byte
-    val br = new BufferReader(packet.body, 1)
+    val br = BufferReader(packet.body, 1)
     OK(
       br.readLengthCodedBinary(),
       br.readLengthCodedBinary(),
@@ -40,7 +40,7 @@ case class Error(code: Short, sqlState: String, message: String) extends Result
 object Error {
   def decode(packet: Packet) = {
     // start reading after flag byte
-    val br = new BufferReader(packet.body, 1)
+    val br = BufferReader(packet.body, 1)
     val code = br.readShort()
     val state = new String(br.take(6))
     val msg = new String(br.takeRest())
@@ -56,7 +56,7 @@ case class EOF(warnings: Short, serverStatus: Short) extends Result
 
 object EOF {
   def decode(packet: Packet) = {
-    val br = new BufferReader(packet.body, 1)
+    val br = BufferReader(packet.body, 1)
     EOF(br.readShort(), br.readShort())
   }
 }

@@ -59,7 +59,7 @@ case class PreparedOK(statementId: Int,
 
 object PreparedOK {
   def decode(packet: Packet) = {
-    val br = new BufferReader(packet.body, 1)
+    val br = BufferReader(packet.body, 1)
     val stmtId = br.readInt()
     val col = br.readUnsignedShort()
     val params = br.readUnsignedShort()

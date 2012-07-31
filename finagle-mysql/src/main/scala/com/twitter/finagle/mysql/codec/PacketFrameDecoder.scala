@@ -22,7 +22,7 @@ class PacketFrameDecoder extends FrameDecoder {
 
     val header = new Array[Byte](Packet.HeaderSize)
     buffer.readBytes(header)
-    val br = new BufferReader(header)
+    val br = BufferReader(header)
 
     val length = br.readInt24()
     val seq  = br.readUnsignedByte()

@@ -73,7 +73,7 @@ object Client {
      * @param sql A query to be prepared on the server.
      * @return PreparedStatement 
      */
-    def prepare(sql: String, params: Any*) = try {
+    def prepare(sql: String, params: Any*) = {
       val stmt = Query.expandParams(sql, params)
       send(PrepareRequest(stmt)) {
         case ps: PreparedStatement =>
@@ -81,8 +81,6 @@ object Client {
           ps.parameters = Query.flatten(params).toArray
           Future.value(ps)
       } 
-    } catch {
-      case e => Future.exception(e)
     }
 
     /**

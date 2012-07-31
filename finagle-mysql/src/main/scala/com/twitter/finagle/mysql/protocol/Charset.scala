@@ -1,6 +1,15 @@
 package com.twitter.finagle.mysql.protocol
 
 object Charset {
+	/**
+   * Default Charset to use when decoding characters.
+   */
+  val defaultCharset = "UTF-8"
+
+  /**
+   * MySQL UTF-8 Collations. Note, MySQL conflates
+   * Collations and Charsets at the protocol level.
+   */
 	val Utf8_bin                 = 83.toShort
 	val Utf8_czech_ci            = 202.toShort
 	val Utf8_danish_ci           = 203.toShort
@@ -23,7 +32,7 @@ object Charset {
 	val Utf8_swedish_ci          = 200.toShort
 	val Utf8_turkish_ci          = 201.toShort
 	val Utf8_unicode_ci          = 192.toShort
-
+	
 	private[this] val Utf8Set = Set(
 		Utf8_bin, 
 	  Utf8_czech_ci,
@@ -47,7 +56,7 @@ object Charset {
 		Utf8_swedish_ci,
 		Utf8_turkish_ci,
 		Utf8_unicode_ci
-		)
+	)
 	
 	def isUTF8(code: Short) = Utf8Set.contains(code)
 }

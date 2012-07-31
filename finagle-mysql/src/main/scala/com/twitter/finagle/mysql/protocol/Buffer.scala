@@ -1,40 +1,34 @@
 package com.twitter.finagle.mysql.protocol
 
 import java.lang.{Float => JFloat, Double => JDouble}
-import java.sql.{Date => SQLDate, Timestamp}
-import java.util.Date
-import java.util.Calendar
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-class BufferError(msg: String) extends Exception(msg)
-
 /**
- * Provides classes to decode / encode MySQL data types. 
- * Note, the MySQL protocol represents all data in little endian byte order.
+ * BufferReader and BufferWriter provide operations to read/write
+ * to a Array[Byte] in little-endian byte order. All the operations
+ * are side-effecting. That is, a call to a method will advance
+ * the current position (offset) in the buffer.
+ * 
+ * The MySQL Client/Server protocol represents all data in little endian byte order.
  */
-class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
-  require(offset >= 0)
-  require(buffer != null)
 
-  val NULL_LENGTH = -1 // null when reading a length coded binary.
-  val EMPTY_STRING = ""
-  val EMPTY_ARRAY = new Array[Byte](0)
+case object CorruptBufferException
+  extends Exception("Corrupt data or client/server are out of sync.")
 
-  def readable(width: Int = 1): Boolean = offset + width <= buffer.size
+trait BufferReader {
+  /**
+   * Denotes if the buffer is readable upto the given width
+   * based on the current offset.
+   */
+  def readable(width: Int): Boolean
 
   /**
    * Reads multi-byte numeric values stored in a byte array. 
-   * Starts at offset and reads offset+width bytes. The values are
-   * assumed to be stored with the low byte first and the result 
-   * is returned as a Long.
+   * The values are assumed to be stored as little-endian and the result 
+   * is returned as a Long. If you are looking to read longer numeric values,
+   * use the take(n) method.
    */
-  def read(width: Int): Long = {
-    val n = (offset until offset + width).zipWithIndex.foldLeft(0L) {
-      case (result, (b,i)) => result | ((buffer(b) & 0xFFL) << (i*8))
-    }
-    offset += width
-    n
-  }
+  def read(width: Int): Long
 
   def readByte() = read(1).toByte
   def readUnsignedByte() = read(1).toShort
@@ -46,19 +40,25 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def readFloat() = JFloat.intBitsToFloat(readInt)
   def readDouble() = JDouble.longBitsToDouble(readLong)
 
-  def skip(n: Int) = offset += n
-  def takeRest() = take(buffer.size - offset)
-  def take(n: Int) = {
-    val res = new Array[Byte](n)
-    Array.copy(buffer, offset, res, 0, n)
-    offset += n
-    res
-  }
+  def skip(n: Int): Unit
+
+  /**
+   * Consumes the rest of the buffer.
+   * @return Array[Byte] containing the rest of the buffer.
+   */
+  def takeRest(): Array[Byte]
+
+  /**
+   * Consumes n bytes in the buffer.
+   * @return Array[Byte] containing bytes from offset to offset+n
+   */
+  def take(n: Int): Array[Byte]
 
   /**
    * Read MySQL data field - a variable-length number.
    * Depending on the first byte, read a different width from
-   * the buffer.
+   * the buffer. For more info, refer to MySQL Client/Server protocol
+   * documentation.
    */
   def readLengthCodedBinary(): Long = {
     val firstByte = readUnsignedByte()
@@ -66,109 +66,129 @@ class BufferReader(val buffer: Array[Byte], private[this] var offset: Int = 0) {
       firstByte
     else
       firstByte match {
-        case 251 => NULL_LENGTH
+        case 251 => BufferReader.NULL_LENGTH
         case 252 => read(2)
         case 253 => read(3)
         case 254 => read(8)
         case _ => 
-          throw new BufferError("Corrupt data or client/server are out of sync.")
+          throw CorruptBufferException
       }
   }
 
-  def readNullTerminatedString(): String = {
-    val result = new StringBuilder()
-    while(buffer(offset) != 0)
-      result += readByte().toChar
+  /**
+   * Reads a null terminated string in the given charset, where
+   * null is denoted by '\0'. Uses Charset.defaultCharset
+   * to decode strings.
+   */ 
+  def readNullTerminatedString(): String
 
-    readByte() // consume null byte
-    result.toString
-  }
-
+  /**
+   * Reads a length encoded string according to the MySQL
+   * Client/Server protocol. For more details refer to MySQL
+   * documentation. Uses Charset.defaultCharset to 
+   * decode strings.
+   */
   def readLengthCodedString(): String = {
     val len = readLengthCodedBinary().toInt
-
-    if (len == NULL_LENGTH)
+    if (len == BufferReader.NULL_LENGTH)
        null
     else if (len == 0)
-      EMPTY_STRING
+      BufferReader.EMPTY_STRING
     else
-      new String(take(len))
+      new String(take(len), Charset.defaultCharset)
   }
 
+  /**
+   * Reads a length encoded set of bytes according to the MySQL
+   * Client/Server protocol. For more details refer to MySQL
+   * documentation.
+   */
   def readLengthCodedBytes(): Array[Byte] = {
     val len = readLengthCodedBinary().toInt
-
-    if (len == NULL_LENGTH)
+    if (len == BufferReader.NULL_LENGTH)
       null
     else if (len == 0)
-      EMPTY_ARRAY
+      BufferReader.EMPTY_BYTE_ARRAY
     else
       take(len)
   }
 
-  def readTimestamp(): Timestamp = {
-    val len = readUnsignedByte()
-    // if all fields are 0 they are not sent.
-    if (len == 0)
-      return ZeroTimestamp
+  /**
+   * Returns the underlying Array[Byte].
+   */
+  def buffer: Array[Byte]
 
-    var year, month, day, hour, min, sec, nano = 0
-
-    // Strictly expect year, month, day.
-    if (readable(4)) {
-      year = readUnsignedShort()
-      month = readUnsignedByte()
-      day = readUnsignedByte()
-    } else throw new BufferError("Invalid Timestamp.")
-
-    // if the time-part is 00:00:00, it isn't sent
-    if (readable(3)) {
-      hour = readUnsignedByte()
-      min = readUnsignedByte()
-      sec = readUnsignedByte()
-    }
-
-    // if the sub-seconds are 0, they aren't sent.
-    if (readable(4))
-      nano = readInt()
-
-    val cal = Calendar.getInstance
-    cal.set(year, month-1, day, hour, min, sec)
-
-    val ts = new Timestamp(0)
-    ts.setTime(cal.getTimeInMillis)
-    ts.setNanos(nano)
-    ts
-  }
-
-  def readDate(): SQLDate = {
-    val ts = readTimestamp()
-    if (ts.getTime == 0)
-      ZeroDate
-    else
-      new SQLDate(ts.getTime)
-  }
-
-  def toChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
+  /**
+   * Wraps the underlying buffer into a 
+   * netty buffer. Note, netty wrappedBuffers
+   * avoid copying.
+   */
+  def toChannelBuffer: ChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
 }
 
-class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
+object BufferReader {
+  val NULL_LENGTH = -1 // denotes a SQL NULL value when reading a length coded binary.
+  val EMPTY_STRING = new String
+  val EMPTY_BYTE_ARRAY = new Array[Byte](0)
+
+  def apply(underlying: Array[Byte], startOffset: Int = 0): BufferReader =
+    new DefaultBufferReader(underlying, startOffset)
+}
+
+class DefaultBufferReader(val buffer: Array[Byte], var offset: Int) extends BufferReader {
   require(offset >= 0)
   require(buffer != null)
 
-  def writable(width: Int = 1): Boolean = offset + width <= buffer.size
+  def readable(width: Int = 1): Boolean = offset + width <= buffer.size
 
-  /**
-   * Write multi-byte numeric values onto the the buffer by
-   * widening n accross 'width' byte chunks starting at buffer(offset)
-   */
-  def write(n: Long, width: Int): BufferWriter = {
-    (0 until width) foreach { i =>
-      buffer(i + offset) = ((n >> (i*8)) & 0xFF).toByte
+  def read(width: Int): Long = {
+    val n = (offset until offset + width).zipWithIndex.foldLeft(0L) {
+      case (result, (b,i)) => result | ((buffer(b) & 0xFFL) << (i*8))
     }
     offset += width
-    this
+    n
   }
+
+  def skip(n: Int) = offset += n
+
+  def takeRest() = take(buffer.size - offset)
+
+  def take(n: Int) = {
+    val res = new Array[Byte](n)
+    Array.copy(buffer, offset, res, 0, n)
+    offset += n
+    res
+  }
+
+  def readNullTerminatedString(): String = {
+    val start = offset
+    var length = 0
+
+    while(buffer(offset) != 0) {
+      offset += 1
+      length += 1
+    }
+
+    offset += 1 // consume null byte
+    new String(buffer, start, length, Charset.defaultCharset)
+  }
+}
+
+trait BufferWriter {
+  /**
+   * Denotes if the buffer is writable upto the given width
+   * based on the current offset.
+   */
+  def writable(width: Int): Boolean
+
+  /**
+   * Write multi-byte numeric values onto the the buffer in little-endian
+   * byte order. Only supports writing upto 8 bytes (Long). 
+   * For larger numeric values use the writeBytes method.
+   * @param n Numeric value to write onto the buffer.
+   * @param width The number of bytes used to widen n.
+   */
+  def write(n: Long, width: Int): BufferWriter
 
   def writeBoolean(b: Boolean) = if (b) writeByte(0) else writeByte(1)
   def writeByte(n: Byte) = write(n, 1)
@@ -181,8 +201,115 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def writeFloat(f: Float) = writeInt(JFloat.floatToIntBits(f))
   def writeDouble(d: Double) = writeLong(JDouble.doubleToLongBits(d))
 
-  def skip(n: Int) = offset += n
+  def skip(n: Int): BufferWriter
+
+  /**
+   * Fills the rest of the buffer with the given byte.
+   * @param b Byte used to fill.
+   */
+  def fillRest(b: Byte): BufferWriter
+
+  /**
+   * Fills the buffer from current offset to offset+n with b.
+   * @param n width to fill
+   * @param b Byte used to fill.
+   */
+  def fill(n: Int, b: Byte): BufferWriter
+
+  /**
+   * Writes bytes onto the buffer.
+   * @param bytes Array[Byte] to copy onto the buffer.
+   */
+   def writeBytes(bytes: Array[Byte]): BufferWriter
+
+   /**
+    * Writes a length coded binary according the the MySQL
+    * Client/Server protocol. Refer to MySQL documentation for
+    * more information.
+    */
+   def writeLengthCodedBinary(length: Long): BufferWriter = {
+     if (length < 251) {
+        write(length, 1)
+      } else if (length < 65536) {
+        write(252, 1)
+        write(length, 2)
+      } else if (length < 16777216) {
+        write(253, 1)
+        write(length, 3)
+      } else {
+        write(254, 1)
+        write(length, 8)
+      }
+    }
+
+   /**
+    * Writes a null terminated string onto the buffer where
+    * '\0' denotes null. Note, uses Charset.defaultCharset to decode string.
+    * @param s String to write.
+    */
+   def writeNullTerminatedString(s: String): BufferWriter = {
+    writeBytes(s.getBytes(Charset.defaultCharset))
+    writeByte('\0'.toByte)
+    this
+   }
+
+   /**
+    * Writes a length coded string using the MySQL Client/Server
+    * protocol. Note, uses Charset.defaultCharset to decode string.
+    * @param s String to write to buffer.
+    */
+   def writeLengthCodedString(s: String): BufferWriter = {
+    writeLengthCodedBinary(s.length)
+    writeBytes(s.getBytes(Charset.defaultCharset))
+    this
+   }
+
+   def writeLengthCodedString(strAsBytes: Array[Byte]): BufferWriter = {
+    writeLengthCodedBinary(strAsBytes.length)
+    writeBytes(strAsBytes)
+    this
+  }
+
+  /**
+   * Returns the underlying Array[Byte].
+   */
+  def buffer: Array[Byte]
+
+  /**
+   * Wraps the underlying buffer into a 
+   * netty buffer. Note, netty wrappedBuffers
+   * avoid copying.
+   */
+  def toChannelBuffer: ChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
+}
+
+object BufferWriter {
+
+  def apply(underlying: Array[Byte], startOffset: Int = 0): BufferWriter =
+    new DefaultBufferWriter(underlying, startOffset)
+}
+
+class DefaultBufferWriter(val buffer: Array[Byte], private[this] var offset: Int) extends BufferWriter {
+  require(offset >= 0)
+  require(buffer != null)
+
+  def writable(width: Int = 1): Boolean = offset + width <= buffer.size
+
+  def write(n: Long, width: Int): BufferWriter = {
+    (0 until width) foreach { i =>
+      buffer(i + offset) = ((n >> (i*8)) & 0xFF).toByte
+    }
+    offset += width
+    this
+  }
+
+  def skip(n: Int) = {
+    offset += n
+    this
+  }
+
   def fillRest(b: Byte) = fill(buffer.size - offset, b)
+
   def fill(n: Int, b: Byte) = {
     (offset until offset + n) foreach { j => buffer(j) = b ; offset += 1 }
     this
@@ -191,62 +318,6 @@ class BufferWriter(val buffer: Array[Byte], private[this] var offset: Int = 0) {
   def writeBytes(bytes: Array[Byte]) = {
     Array.copy(bytes, 0, buffer, offset, bytes.length)
     offset += bytes.length
-  }
-
-  /**
-   * Writes a length coded binary according to
-   * the MySQL protocol. Note, 251 is reserved to
-   * indicate SQL NULL.
-   */
-  def writeLengthCodedBinary(length: Long) = {
-    if (length < 251) {
-      write(length, 1)
-    } else if (length < 65536) {
-      write(252, 1)
-      write(length, 2)
-    } else if (length < 16777216) {
-      write(253, 1)
-      write(length, 3)
-    } else {
-      write(254, 1)
-      write(length, 8)
-    }
-  }
-
-  def writeNullTerminatedString(str: String) = {
-    writeBytes(str.getBytes)
-    writeByte('\0'.toByte)
     this
   }
-
-  def writeLengthCodedString(str: String) = {
-    writeLengthCodedBinary(str.length)
-    writeBytes(str.getBytes)
-    this
-  }
-
-  def writeLengthCodedString(strAsBytes: Array[Byte]) = {
-    writeLengthCodedBinary(strAsBytes.length)
-    writeBytes(strAsBytes)
-    this
-  }
-
-  def writeTimestamp(t: Timestamp) = {
-    val cal = Calendar.getInstance
-    cal.setTimeInMillis(t.getTime)
-    writeUnsignedByte(11)
-    writeUnsignedShort(cal.get(Calendar.YEAR))
-    writeUnsignedByte(cal.get(Calendar.MONTH))
-    writeUnsignedByte(cal.get(Calendar.DATE))
-    writeUnsignedByte(cal.get(Calendar.HOUR_OF_DAY))
-    writeUnsignedByte(cal.get(Calendar.MINUTE))
-    writeUnsignedByte(cal.get(Calendar.SECOND))
-    writeInt(t.getNanos)
-    this
-  }
-
-  def writeDate(d: SQLDate) = writeTimestamp(new Timestamp(d.getTime))
-  def writeDate(d: Date) = writeTimestamp(new Timestamp(d.getTime))
-
-  def toChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
 }

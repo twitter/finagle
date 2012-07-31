@@ -52,8 +52,8 @@ class AuthenticationProxy(
     clientCap: Capability) 
   extends ServiceFactoryProxy(underlying) {
 
-  def makeLoginReq(sg: ServersGreeting) =
-    LoginRequest(username, password, database, clientCap, sg.salt, Charset.Utf8_general_ci, sg.serverCap)
+  def makeLoginReq(sg: ServersGreeting) = 
+    LoginRequest(username, password, database, clientCap, sg.salt, sg.serverCap)
     
   def acceptGreeting(res: Result) = res match {
     case sg: ServersGreeting if !sg.serverCap.has(Capability.Protocol41) =>

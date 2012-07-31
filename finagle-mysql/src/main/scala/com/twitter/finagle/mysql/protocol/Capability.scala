@@ -37,7 +37,7 @@ object Capability {
     "CLIENT_SECURE_CONNECTION" -> SecureConnection,
     "CLIENT_MULTI_STATEMENTS"  -> MultiStatements,
     "CLIENT_MULTI_RESULTS"     -> MultiResults
-    )
+  )
 
   def apply(flags: Int*): Capability = {
     val m = flags.foldLeft(0)(_|_)

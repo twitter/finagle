@@ -3,7 +3,7 @@ A MySQL client built for finagle.
 ---
 ## Protocol Overview  
 
-*This is meant to give a very brief overview of the MySQL Client/Server protocol and reference relevant source files within finagle-mysql. For a more detailed exposition of the MySQL Client/Server protocol, refer to [MySQL Forge](http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol)
+*This is meant to give a very brief overview of the MySQL Client/Server protocol and reference relevant source files within finagle-mysql. For an exposition of the MySQL Client/Server protocol, refer to [MySQL Forge](http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol)
 and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/databases/mysql/0596009577/client-server-communication/orm9780596009571-chp-4).*
 
 **Packets** - The basic unit of communication for the MySQL Client/Server protocol is an application-layer packet. A MySQL packet consists of a header (size and sequence number) followed by a body. Packets can be fragmented across frames during transmission. To simplify the decoding of results received from the server, the codec includes a packet frame decoder on the pipeline.
@@ -17,16 +17,17 @@ and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/database
 **Capabilities** - The client and server express their capability succinctly as bit vectors. Each set bit in the vector represents what the client/server is capable of or willing to do. Finagle-mysql provides constants of all the capability flags available (at the time of writing) and a comprehensive way to build capability bit vectors.
 
     // This clients capabilities
-		private[this] val clientCapability = 
-		  Capability(LongFlag, 
-		             Transactions, 
-		             Protocol41, 
-		             FoundRows, 
-		             Interactive, 
-		             LongPassword, 
-		             ConnectWithDB, 
-		             SecureConnection, 
-		             LocalFiles)
+    val clientCapability = Capability(
+      LongFlag, 
+      Transactions, 
+      Protocol41, 
+      FoundRows, 
+      Interactive, 
+      LongPassword, 
+      ConnectWithDB, 
+      SecureConnection, 
+      LocalFiles
+    )
     * protocol/Capability.scala, Codec.scala
  
  Note: This client only supports protocol version 4.1 and above. This is strictly enforced during authentication with a MySQL server.
@@ -37,8 +38,14 @@ and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/database
 
 **Results** - finagle-mysql translates packets received from the server into Scala objects. Each result object has a relevant decode method that translates the packet(s) into the object according to the protocol. Result packets can be distinguished by their first byte. Some result packets denote the start of a longer transmission and need to be defragged by the decoder.
 
+ResultSets are returned from the server for queries that return Rows. A Row can be String encoded or Binary encoded depending on the Request used to execute the query. For example, a QueryRequest uses the String protocol and a PreparedStatement (PrepareRequest, ExecuteRequest, CloseRequest) uses the binary protocol.
+
     * codec/Endec.scala, protocol/{Result.scala, ResultSet.scala, PreparedStatement.scala}
 
-**Buffers** - The BufferReader and BufferWriter class provide convenient methods for reading/writing common data types exchanged between the client/server. Note, data exchanged between the client/server is encoded in little-endian byte order.
+**Value** - finagle-mysql provides a Value ADT that can represent all values returned from MySQL. However, this does not include logic to decode every data type. For unsupported values finagle-mysql will return a RawStringValue and RawBinaryValue for the String and Binary protocols, respectively. Other note worthy Value objects include NullValue and EmptyValue.
+
+    * protocol/Value.scala 
+
+**Buffers** - The BufferReader and BufferWriter interfaces provide convenient methods for reading/writing primitive data types exchanged between the client/server. This includes all primitive numeric types and strings (null-terminated and length coded). All Buffer methods are side-effecting, that is, each call to a read*/write* method will increase the current read and write position. Note, the data exchanged between the client/server is encoded in little-endian byte order.
 
     * protocol/Buffer.scala

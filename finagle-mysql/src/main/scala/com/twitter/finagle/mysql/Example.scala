@@ -2,7 +2,7 @@ import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.util.Future
 import java.net.InetSocketAddress
-import java.sql.{Date, Time, Timestamp}
+import java.sql.Timestamp
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -18,9 +18,12 @@ object Main {
 
     // Select Query (Not using prepared statements) */
     client.select("SELECT * FROM cities WHERE id in (1,2,3,7)") { row =>
+
       val id = row.valueOf("id") map {
         case IntValue(i) => i
-        case _ => 0
+        // case NullValue =>
+        // case EmptyValue =>
+        case _ => -1
       }
 
       val name = row.valueOf("name") map {
@@ -28,18 +31,12 @@ object Main {
         case _ => ""
       }
 
-      val date = row.valueOf("dateadded") map {
-        case TimestampValue(t) => t
-        // case NullValue =>
+      val dateAdded = row.valueOf("dateadded") map {
+        case TimestampValue(ts) => ts
         case _ => new Timestamp(0)
       }
 
-      val time = row.valueOf("time") map {
-        case RawValue(v) => v
-        case _ => "00:00:00"
-      }
-
-      City(id, name, date)
+      City(id, name, dateAdded)
 
     } onSuccess {
       seq => seq.foreach(println)

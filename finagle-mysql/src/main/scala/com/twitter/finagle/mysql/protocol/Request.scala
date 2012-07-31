@@ -1,9 +1,9 @@
 package com.twitter.finagle.mysql.protocol
 
+import com.twitter.logging.Logger
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Date
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers._
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import scala.math.BigInt
 
 object Command {
@@ -43,7 +43,7 @@ abstract class Request(seq: Byte) {
 
   def toChannelBuffer: ChannelBuffer = {
     val headerBuffer = PacketHeader(data.capacity, seq).toChannelBuffer
-    wrappedBuffer(headerBuffer, data)
+    ChannelBuffers.wrappedBuffer(headerBuffer, data)
   }
 }
 
@@ -51,15 +51,15 @@ abstract class CommandRequest(val cmd: Byte) extends Request(0)
 
 class SimpleCommandRequest(command: Byte, buffer: Array[Byte]) 
   extends CommandRequest(command) {
-    override val data = wrappedBuffer(Array(cmd), buffer)
+    override val data = ChannelBuffers.wrappedBuffer(Array(cmd), buffer)
 }
 
 /** 
  * NOOP Request used internally by this client. 
  */
 case object ClientInternalGreet extends Request(0) {
-  override val data = EMPTY_BUFFER
-  override def toChannelBuffer = EMPTY_BUFFER
+  override val data = ChannelBuffers.EMPTY_BUFFER
+  override def toChannelBuffer = ChannelBuffers.EMPTY_BUFFER
 }
 
 case class UseRequest(dbName: String)
@@ -84,6 +84,7 @@ case class PrepareRequest(sqlStatement: String)
  */ 
 case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1) 
   extends CommandRequest(Command.COM_STMT_EXECUTE) {
+  private[this] val log = Logger("finagle-mysql")
 
   private[this] def isNull(param: Any): Boolean = param match {
     case null => true
@@ -103,18 +104,28 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     param match {
       case s: String          => writeType(TypeCodes.VARCHAR)
       case b: Boolean         => writeType(TypeCodes.TINY)
-      case t: Timestamp       => writeType(TypeCodes.TIMESTAMP)
-      case d: SQLDate         => writeType(TypeCodes.DATE)
-      case d: Date            => writeType(TypeCodes.DATE)
       case b: Byte            => writeType(TypeCodes.TINY)
       case s: Short           => writeType(TypeCodes.SHORT)
       case i: Int             => writeType(TypeCodes.LONG)
       case l: Long            => writeType(TypeCodes.LONGLONG)
       case f: Float           => writeType(TypeCodes.FLOAT)
       case d: Double          => writeType(TypeCodes.DOUBLE)
+      case t: Timestamp       => writeType(TypeCodes.TIMESTAMP)
+      case d: SQLDate         => writeType(TypeCodes.DATE)
+      case d: Date            => writeType(TypeCodes.DATETIME)
       case null               => writeType(TypeCodes.NULL)
-      case _ => throw new IllegalArgumentException("Unhandled query parameter type for " +
-            param + " type " + param.asInstanceOf[Object].getClass.getName)
+
+      // BLOBS
+      case b: Array[Byte] if b.size <= 255         => writeType(TypeCodes.TINY_BLOB)
+      case b: Array[Byte] if b.size <= 65535       => writeType(TypeCodes.BLOB)
+      case b: Array[Byte] if b.size <= 16777215    => writeType(TypeCodes.MEDIUM_BLOB)
+      case b: Array[Byte] if b.size <= 4294967295L => writeType(TypeCodes.LONG_BLOB)
+
+      // Unsupported type. Write the error to log, and write the type as null.
+      // This allows us to safely skip writing the parameter without corrupting the buffer.
+      case unknown => 
+        log.error("ExecuteRequest: Unknown parameter %s will be treated as SQL NULL.".format(unknown.getClass.getName))
+        writeType(TypeCodes.NULL)
     }
   }
 
@@ -122,50 +133,58 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
    * Calculates the size needed to write each parameter
    * in its binary encoding according to the MySQL protocol.
    */
-  private[this] def sizeOfParameters(parameters: List[Any], size: Int = 0): Int = parameters match {
-    case Nil => size
-    case p :: rest =>
-      val sizeOfParam = p match {
-        case s: String    => 
-        // calculate the space needed to store the length
-        val sizeOfLen = if (s.size < 251) 1 else if (s.size < 65536) 2 else if (s.size < 16777216) 3 else 8
-        sizeOfLen + s.size
-        case b: Boolean   => 1
-        case b: Byte      => 1
-        case s: Short     => 2
-        case i: Int       => 4
-        case l: Long      => 8
-        case f: Float     => 4
-        case d: Double    => 8
-        case t: Timestamp => 11
-        case d: SQLDate   => 11
-        case d: Date      => 11
-        case null         => 0
-        case _            => 0
-      }
+  private[this] def sizeOfParameters(parameters: List[Any]): Int = {
 
-    sizeOfParameters(rest, size + sizeOfParam)
+    /** Calculate the bytes needed to store a length. */
+    def sizeOfLen(l: Long) = if (l < 251) 1 else if (l < 65536) 2 else if (l < 16777216) 3 else 8
+
+    def calculateSize(params: List[Any], size: Int): Int = params match {
+      case Nil => size
+      case p :: rest =>
+        val sizeOfParam = p match {
+          case s: String      => sizeOfLen(s.size) + s.size
+          case b: Array[Byte] => sizeOfLen(b.size) + b.size
+          case b: Boolean     => 1
+          case b: Byte        => 1
+          case s: Short       => 2
+          case i: Int         => 4
+          case l: Long        => 8
+          case f: Float       => 4
+          case d: Double      => 8
+          case t: Timestamp   => 11
+          case d: SQLDate     => 11
+          case d: Date        => 11
+          case null           => 0
+          case _              => 0
+        }
+      calculateSize(rest, size + sizeOfParam)
+    }
+    
+    calculateSize(parameters, 0)
   }
 
+  /**
+   * Writes the parameter into its MySQL binary representation.
+   * Note, BufferWriter only has support for primitive types.
+   */ 
   private[this] def writeParam(param: Any, writer: BufferWriter) = param match {
-    case s: String    => writer.writeLengthCodedString(s)
-    case b: Boolean   => writer.writeBoolean(b)
-    case t: Timestamp => writer.writeTimestamp(t)
-    case d: SQLDate   => writer.writeDate(d)
-    case d: Date      => writer.writeDate(d)
-    case b: Byte      => writer.writeByte(b)
-    case s: Short     => writer.writeShort(s)
-    case i: Int       => writer.writeInt(i)
-    case l: Long      => writer.writeLong(l)
-    case f: Float     => writer.writeFloat(f)
-    case d: Double    => writer.writeDouble(d)
-    case null         => writer
-    case _ => throw new IllegalArgumentException("Unhandled query parameter type for " +
-            param + " type " + param.asInstanceOf[Object].getClass.getName)
+    case s: String      => writer.writeLengthCodedString(s)
+    case b: Boolean     => writer.writeBoolean(b)
+    case b: Byte        => writer.writeByte(b)
+    case s: Short       => writer.writeShort(s)
+    case i: Int         => writer.writeInt(i)
+    case l: Long        => writer.writeLong(l)
+    case f: Float       => writer.writeFloat(f)
+    case d: Double      => writer.writeDouble(d)
+    case b: Array[Byte] => writer.writeBytes(b)
+    case t: Timestamp   => Types.writeTimestamp(t, writer)
+    case d: SQLDate     => Types.writeSQLDate(d, writer)
+    case d: Date        => Types.writeDate(d, writer)
+    case _              => writer // skip null and uknown values
   }
 
   override val data = {
-    val bw = new BufferWriter(new Array[Byte](10))
+    val bw = BufferWriter(new Array[Byte](10))
     bw.writeByte(cmd)
     bw.writeInt(ps.statementId)
     bw.writeByte(flags)
@@ -175,19 +194,19 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     val nullBytes = makeNullBitmap(paramsList)
     val newParamsBound: Byte = if (ps.hasNewParameters) 1 else 0
 
-    val result = wrappedBuffer(bw.buffer, nullBytes, Array(newParamsBound))
+    val result = ChannelBuffers.wrappedBuffer(bw.buffer, nullBytes, Array(newParamsBound))
 
     // Only write the parameter data if the prepared statement
     // has new parameters.
     if (ps.hasNewParameters) {
-      val types = new BufferWriter(new Array[Byte](ps.numberOfParams * 2))
+      val types = BufferWriter(new Array[Byte](ps.numberOfParams * 2))
       paramsList.map { writeTypeCode(_, types) }
 
       val sizeOfParams = sizeOfParameters(paramsList)
-      val values = new BufferWriter(new Array[Byte](sizeOfParams))
+      val values = BufferWriter(new Array[Byte](sizeOfParams))
       paramsList.map { writeParam(_, values) }
 
-      wrappedBuffer(result, types.toChannelBuffer, values.toChannelBuffer)
+      ChannelBuffers.wrappedBuffer(result, types.toChannelBuffer, values.toChannelBuffer)
     }
     else 
       result
@@ -196,7 +215,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
 
 case class CloseRequest(ps: PreparedStatement) extends CommandRequest(Command.COM_STMT_CLOSE) {
   override val data = {
-    val bw = new BufferWriter(new Array[Byte](5))
+    val bw = BufferWriter(new Array[Byte](5))
     bw.writeByte(cmd).writeInt(ps.statementId)
     bw.toChannelBuffer
   }
