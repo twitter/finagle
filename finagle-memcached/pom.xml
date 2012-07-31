@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-memcached</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.2-SNAPSHOT</version>
+  <version>5.3.3-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -20,18 +20,18 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.2-SNAPSHOT</version>
+      <version>5.3.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-serversets</artifactId>
-      <version>5.3.2-SNAPSHOT</version>
+      <version>5.3.3-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>5.3.2-SNAPSHOT</version>
+      <version>5.3.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter.common</groupId>
