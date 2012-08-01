@@ -1,9 +1,11 @@
 package com.twitter.finagle.mysql.protocol
 
 import com.twitter.logging.Logger
+import java.nio.ByteOrder
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Date
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers._
 import scala.math.BigInt
 
 object Command {
@@ -43,7 +45,7 @@ abstract class Request(seq: Byte) {
 
   def toChannelBuffer: ChannelBuffer = {
     val headerBuffer = PacketHeader(data.capacity, seq).toChannelBuffer
-    ChannelBuffers.wrappedBuffer(headerBuffer, data)
+    wrappedBuffer(headerBuffer, data)
   }
 }
 
@@ -51,15 +53,15 @@ abstract class CommandRequest(val cmd: Byte) extends Request(0)
 
 class SimpleCommandRequest(command: Byte, buffer: Array[Byte]) 
   extends CommandRequest(command) {
-    override val data = ChannelBuffers.wrappedBuffer(Array(cmd), buffer)
+    override val data = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, Array(cmd), buffer)
 }
 
 /** 
  * NOOP Request used internally by this client. 
  */
 case object ClientInternalGreet extends Request(0) {
-  override val data = ChannelBuffers.EMPTY_BUFFER
-  override def toChannelBuffer = ChannelBuffers.EMPTY_BUFFER
+  override val data = EMPTY_BUFFER
+  override def toChannelBuffer = EMPTY_BUFFER
 }
 
 case class UseRequest(dbName: String)
@@ -100,7 +102,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     }
 
   private[this] def writeTypeCode(param: Any, writer: BufferWriter): Unit = {
-    def writeType(code: Int) = writer.writeUnsignedShort(code)
+    def writeType(code: Int) = writer.writeShort(code)
     param match {
       case s: String          => writeType(TypeCodes.VARCHAR)
       case b: Boolean         => writeType(TypeCodes.TINY)
@@ -133,34 +135,26 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
    * Calculates the size needed to write each parameter
    * in its binary encoding according to the MySQL protocol.
    */
-  private[this] def sizeOfParameters(parameters: List[Any]): Int = {
-
-    /** Calculate the bytes needed to store a length. */
-    def sizeOfLen(l: Long) = if (l < 251) 1 else if (l < 65536) 2 else if (l < 16777216) 3 else 8
-
-    def calculateSize(params: List[Any], size: Int): Int = params match {
-      case Nil => size
-      case p :: rest =>
-        val sizeOfParam = p match {
-          case s: String      => sizeOfLen(s.size) + s.size
-          case b: Array[Byte] => sizeOfLen(b.size) + b.size
-          case b: Boolean     => 1
-          case b: Byte        => 1
-          case s: Short       => 2
-          case i: Int         => 4
-          case l: Long        => 8
-          case f: Float       => 4
-          case d: Double      => 8
-          case t: Timestamp   => 11
-          case d: SQLDate     => 11
-          case d: Date        => 11
-          case null           => 0
-          case _              => 0
-        }
-      calculateSize(rest, size + sizeOfParam)
-    }
-    
-    calculateSize(parameters, 0)
+  private[this] def sizeOfParameters(parameters: List[Any], size: Int = 0): Int = parameters match {
+    case Nil => size
+    case p :: rest =>
+      val sizeOfParam = p match {
+        case s: String      => BufferWriter.sizeOfLen(s.size) + s.size
+        case b: Array[Byte] => BufferWriter.sizeOfLen(b.size) + b.size
+        case b: Boolean     => 1
+        case b: Byte        => 1
+        case s: Short       => 2
+        case i: Int         => 4
+        case l: Long        => 8
+        case f: Float       => 4
+        case d: Double      => 8
+        case t: Timestamp   => 11
+        case d: SQLDate     => 11
+        case d: Date        => 11
+        case null           => 0
+        case _              => 0
+      }
+    sizeOfParameters(rest, size + sizeOfParam)
   }
 
   /**
@@ -194,7 +188,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     val nullBytes = makeNullBitmap(paramsList)
     val newParamsBound: Byte = if (ps.hasNewParameters) 1 else 0
 
-    val result = ChannelBuffers.wrappedBuffer(bw.buffer, nullBytes, Array(newParamsBound))
+    val result = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bw.buffer, nullBytes, Array(newParamsBound))
 
     // Only write the parameter data if the prepared statement
     // has new parameters.
@@ -206,7 +200,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       val values = BufferWriter(new Array[Byte](sizeOfParams))
       paramsList.map { writeParam(_, values) }
 
-      ChannelBuffers.wrappedBuffer(result, types.toChannelBuffer, values.toChannelBuffer)
+      wrappedBuffer(result, types.toChannelBuffer, values.toChannelBuffer)
     }
     else 
       result

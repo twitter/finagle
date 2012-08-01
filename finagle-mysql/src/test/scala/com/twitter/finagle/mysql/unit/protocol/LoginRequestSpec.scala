@@ -19,45 +19,40 @@ class LoginRequestSpec extends SpecificationWithJUnit {
         Capability(0xf7ff)
       )
 
-      //val data = req.toChannelBuffer
-      //val br = BufferReader(1 mustEqual 1, Packet.HeaderSize)
+      val br = BufferReader(req.toChannelBuffer)
+      br.skip(4) // skip eader
 
       "capabilities" in {
-        //val mask = br.readInt()
-        //mask mustEqual 0xfffff6ff
-        1 mustEqual 1
+        val mask = br.readInt()
+        mask mustEqual 0xfffff6ff
       }
 
       "maxPacket" in {
-        /*br.skip(4)
+        br.skip(4)
         val max = br.readInt()
-        max mustEqual 0x10000000 */
-        1 mustEqual 1
+        max mustEqual 0x10000000
       }
 
       "charset" in {
-        /* br.skip(8)
+        br.skip(8)
         val charset = br.readByte()
-        charset mustEqual 33.toByte */
-        1 mustEqual 1
+        charset mustEqual 33.toByte
       }
 
       "reserved bytes" in {
-        /* val rbytes = data.drop(Packet.HeaderSize+9).take(23)
-        rbytes must containAll(new Array[Byte](23)) */
-        1 mustEqual 1
+        br.skip(9)
+        val rbytes = br.take(23)
+        rbytes must containAll(new Array[Byte](23))
       }
 
       "username" in {
-        /* br.skip(32)
-        br.readNullTerminatedString() mustEqual username */
-        1 mustEqual 1
+        br.skip(32)
+        br.readNullTerminatedString() mustEqual username
       }
 
       "password" in {
-        /*br.skip(32 + username.size+1)
-        br.readLengthCodedString().getBytes must containAll(req.hashPassword)*/
-        1 mustEqual 1
+        br.skip(32 + username.size + 1)
+        br.readLengthCodedBytes() must containAll(req.hashPassword)
       }
     }
   }

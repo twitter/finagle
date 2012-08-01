@@ -1,13 +1,15 @@
 package com.twitter.finagle.mysql.protocol
 
 import java.lang.{Float => JFloat, Double => JDouble}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers._
+import java.nio.ByteOrder
 
 /**
  * BufferReader and BufferWriter provide operations to read/write
  * to a Array[Byte] in little-endian byte order. All the operations
  * are side-effecting. That is, a call to a method will advance
- * the current position (offset) in the buffer.
+ * the current reader/writer position (offset) in the buffer.
  * 
  * The MySQL Client/Server protocol represents all data in little endian byte order.
  */
@@ -17,39 +19,48 @@ case object CorruptBufferException
 
 trait BufferReader {
   /**
+   * Current reader offset in the buffer.
+   */
+  def offset: Int
+
+  /**
    * Denotes if the buffer is readable upto the given width
    * based on the current offset.
    */
   def readable(width: Int): Boolean
 
   /**
-   * Reads multi-byte numeric values stored in a byte array. 
-   * The values are assumed to be stored as little-endian and the result 
-   * is returned as a Long. If you are looking to read longer numeric values,
-   * use the take(n) method.
+   * Returns the current byte at buffer(offset)
    */
-  def read(width: Int): Long
+  def getByte: Byte
 
-  def readByte() = read(1).toByte
-  def readUnsignedByte() = read(1).toShort
-  def readShort() = read(2).toShort
-  def readUnsignedShort() = read(2).toInt
-  def readInt24() = read(3).toInt
-  def readInt() = read(4).toInt
-  def readLong() = read(8)
-  def readFloat() = JFloat.intBitsToFloat(readInt)
-  def readDouble() = JDouble.longBitsToDouble(readLong)
+  def readByte(): Byte
+  def readUnsignedByte(): Short
+  def readShort(): Short
+  def readUnsignedShort(): Int
+  def readInt24(): Int
+  def readUnsignedInt24(): Int
+  def readInt(): Int
+  def readUnsignedInt(): Long
+  def readLong(): Long
+  def readFloat(): Float
+  def readDouble(): Double
 
+  /**
+   * Increases offset by n.
+   */
   def skip(n: Int): Unit
 
   /**
-   * Consumes the rest of the buffer.
+   * Consumes the rest of the buffer and copies
+   * it to a new Array.
    * @return Array[Byte] containing the rest of the buffer.
    */
   def takeRest(): Array[Byte]
 
   /**
-   * Consumes n bytes in the buffer.
+   * Consumes n bytes in the buffer and 
+   * copies them to a new Array.
    * @return Array[Byte] containing bytes from offset to offset+n
    */
   def take(n: Int): Array[Byte]
@@ -67,9 +78,9 @@ trait BufferReader {
     else
       firstByte match {
         case 251 => BufferReader.NULL_LENGTH
-        case 252 => read(2)
-        case 253 => read(3)
-        case 254 => read(8)
+        case 252 => readUnsignedShort().toLong
+        case 253 => readInt24().toLong
+        case 254 => readLong()
         case _ => 
           throw CorruptBufferException
       }
@@ -80,7 +91,18 @@ trait BufferReader {
    * null is denoted by '\0'. Uses Charset.defaultCharset
    * to decode strings.
    */ 
-  def readNullTerminatedString(): String
+  def readNullTerminatedString(): String = {
+    val start = offset
+    var length = 0
+
+    while(getByte != 0) {
+      skip(1)
+      length += 1
+    }
+
+    skip(1) // consume null byte
+    this.toChannelBuffer.toString(start, length, Charset.defaultCharset)
+  }
 
   /**
    * Reads a length encoded string according to the MySQL
@@ -88,7 +110,18 @@ trait BufferReader {
    * documentation. Uses Charset.defaultCharset to 
    * decode strings.
    */
-  def readLengthCodedString(): String
+  def readLengthCodedString(): String = {
+    val length = readLengthCodedBinary().toInt
+    if (length == BufferReader.NULL_LENGTH)
+       null
+    else if (length == 0)
+      BufferReader.EMPTY_STRING
+    else {
+      val str = this.toChannelBuffer.toString(offset, length, Charset.defaultCharset)
+      skip(length)
+      str
+    }
+  }
 
   /**
    * Reads a length encoded set of bytes according to the MySQL
@@ -111,11 +144,11 @@ trait BufferReader {
   def buffer: Array[Byte]
 
   /**
-   * Wraps the underlying buffer into a 
-   * netty buffer. Note, netty wrappedBuffers
-   * avoid copying.
+   * Returns a Netty ChannelBuffer representing
+   * the underlying buffer. The ChannelBuffer
+   * has ByteOrder.LITTLE_ENDIAN.
    */
-  def toChannelBuffer: ChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
+  def toChannelBuffer: ChannelBuffer
 }
 
 object BufferReader {
@@ -123,88 +156,86 @@ object BufferReader {
   val EMPTY_STRING = new String
   val EMPTY_BYTE_ARRAY = new Array[Byte](0)
 
-  def apply(underlying: Array[Byte], startOffset: Int = 0): BufferReader =
-    new DefaultBufferReader(underlying, startOffset)
-}
+  /**
+   * Creates a BufferReader from an Array[Byte].
+   * @param bytes Byte array to read from.
+   * @param startOffset initial offset.
+   */
+  def apply(bytes: Array[Byte], startOffset: Int = 0): BufferReader = {
+    require(bytes != null)
+    require(startOffset >= 0)
 
-class DefaultBufferReader(val buffer: Array[Byte], private[this] var offset: Int) extends BufferReader {
-  require(offset >= 0)
-  require(buffer != null)
-
-  def readable(width: Int = 1): Boolean = offset + width <= buffer.size
-
-  def read(width: Int): Long = {
-    val n = (offset until offset + width).zipWithIndex.foldLeft(0L) {
-      case (result, (b,i)) => result | ((buffer(b) & 0xFFL) << (i*8))
-    }
-    offset += width
-    n
+    val underlying = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes)
+    underlying.readerIndex(startOffset)
+    new WrappedChannelBufferReader(underlying)
   }
 
-  def skip(n: Int) = offset += n
+  /**
+   * Creates a BufferReader from a Netty ChannelBuffer.
+   */
+  def apply(underlying: ChannelBuffer): BufferReader = {
+    require(underlying.order == ByteOrder.LITTLE_ENDIAN)
+    new WrappedChannelBufferReader(underlying)
+  }
+}
 
-  def takeRest() = take(buffer.size - offset)
+/**
+ * BufferReader backed by a Netty ChannelBuffer.
+ */
+class WrappedChannelBufferReader(underlying: ChannelBuffer) extends BufferReader {
+
+  def readable(width: Int = 1): Boolean = underlying.readableBytes == width
+
+  def offset = underlying.readerIndex
+
+  def getByte = underlying.getByte(offset)
+
+  def readByte(): Byte = underlying.readByte()
+  def readUnsignedByte(): Short = underlying.readUnsignedByte()
+  def readShort(): Short = underlying.readShort()
+  def readUnsignedShort(): Int = underlying.readUnsignedShort()
+  def readInt24(): Int = underlying.readMedium()
+  def readUnsignedInt24(): Int = underlying.readUnsignedMedium()
+  def readInt(): Int = underlying.readInt()
+  def readUnsignedInt(): Long = underlying.readUnsignedInt()
+  def readLong(): Long = underlying.readLong()
+  def readFloat() = underlying.readFloat()
+  def readDouble() = underlying.readDouble()
+
+  def skip(n: Int) = underlying.skipBytes(n)
+
+  def takeRest() = take(underlying.capacity - offset)
 
   def take(n: Int) = {
     val res = new Array[Byte](n)
-    Array.copy(buffer, offset, res, 0, n)
-    offset += n
+    underlying.readBytes(res)
     res
   }
 
-  override def readLengthCodedString(): String = {
-    val length = readLengthCodedBinary().toInt
-    if (length == BufferReader.NULL_LENGTH)
-       null
-    else if (length == 0)
-      BufferReader.EMPTY_STRING
-    else {
-      val str = new String(buffer, offset, length, Charset.defaultCharset)
-      offset += length
-      str
-    }
-  }
-
-  def readNullTerminatedString(): String = {
-    val start = offset
-    var length = 0
-
-    while(buffer(offset) != 0) {
-      offset += 1
-      length += 1
-    }
-
-    offset += 1 // consume null byte
-    new String(buffer, start, length, Charset.defaultCharset)
-  }
+  def buffer = underlying.array
+  def toChannelBuffer = underlying
 }
 
 trait BufferWriter {
+  /**
+   * Current writer offset.
+   */
+  def offset: Int
+
   /**
    * Denotes if the buffer is writable upto the given width
    * based on the current offset.
    */
   def writable(width: Int): Boolean
 
-  /**
-   * Write multi-byte numeric values onto the the buffer in little-endian
-   * byte order. Only supports writing upto 8 bytes (Long). 
-   * For larger numeric values use the writeBytes method.
-   * @param n Numeric value to write onto the buffer.
-   * @param width The number of bytes used to widen n.
-   */
-  def write(n: Long, width: Int): BufferWriter
-
-  def writeBoolean(b: Boolean) = if (b) writeByte(0) else writeByte(1)
-  def writeByte(n: Byte) = write(n, 1)
-  def writeUnsignedByte(n: Int) = write(n, 1)
-  def writeShort(n: Short) = write(n, 2)
-  def writeUnsignedShort(n: Int) = write(n, 2)
-  def writeInt24(n: Int) = write(n,  3)
-  def writeInt(n: Int) = write(n, 4)
-  def writeLong(n: Long) = write(n, 8)
-  def writeFloat(f: Float) = writeInt(JFloat.floatToIntBits(f))
-  def writeDouble(d: Double) = writeLong(JDouble.doubleToLongBits(d))
+  def writeBoolean(b: Boolean): BufferWriter
+  def writeByte(n: Int): BufferWriter
+  def writeShort(n: Int): BufferWriter
+  def writeInt24(n: Int): BufferWriter
+  def writeInt(n: Int): BufferWriter
+  def writeLong(n: Long): BufferWriter
+  def writeFloat(f: Float): BufferWriter
+  def writeDouble(d: Double): BufferWriter
 
   def skip(n: Int): BufferWriter
 
@@ -212,14 +243,17 @@ trait BufferWriter {
    * Fills the rest of the buffer with the given byte.
    * @param b Byte used to fill.
    */
-  def fillRest(b: Byte): BufferWriter
+  def fillRest(b: Byte) = fill(buffer.size - offset, b)
 
   /**
    * Fills the buffer from current offset to offset+n with b.
    * @param n width to fill
    * @param b Byte used to fill.
    */
-  def fill(n: Int, b: Byte): BufferWriter
+  def fill(n: Int, b: Byte) = {
+    (offset until offset + n) foreach { j => writeByte(b) }
+    this
+  }
 
   /**
    * Writes bytes onto the buffer.
@@ -234,16 +268,16 @@ trait BufferWriter {
     */
    def writeLengthCodedBinary(length: Long): BufferWriter = {
      if (length < 251) {
-        write(length, 1)
+        writeByte(length.toInt)
       } else if (length < 65536) {
-        write(252, 1)
-        write(length, 2)
+        writeByte(252)
+        writeShort(length.toInt)
       } else if (length < 16777216) {
-        write(253, 1)
-        write(length, 3)
+        writeByte(253)
+        writeInt24(length.toInt)
       } else {
-        write(254, 1)
-        write(length, 8)
+        writeByte(254)
+        writeLong(length)
       }
     }
 
@@ -254,7 +288,7 @@ trait BufferWriter {
     */
    def writeNullTerminatedString(s: String): BufferWriter = {
     writeBytes(s.getBytes(Charset.defaultCharset))
-    writeByte('\0'.toByte)
+    writeByte('\0')
     this
    }
 
@@ -281,48 +315,101 @@ trait BufferWriter {
   def buffer: Array[Byte]
 
   /**
-   * Wraps the underlying buffer into a 
-   * netty buffer. Note, netty wrappedBuffers
-   * avoid copying.
+   * Returns a Netty ChannelBuffer representing
+   * the underlying buffer. The ChannelBuffer
+   * has ByteOrder.LITTLE_ENDIAN.
    */
-  def toChannelBuffer: ChannelBuffer = ChannelBuffers.wrappedBuffer(buffer)
+  def toChannelBuffer: ChannelBuffer
 }
 
 object BufferWriter {
+  /**
+   * Creates a BufferWriter from an Array[Byte].
+   * @param bytes Byte array to read from.
+   * @param startOffset initial offset.
+   */
+  def apply(bytes: Array[Byte], startOffset: Int = 0): BufferWriter = {
+    require(bytes != null)
+    require(startOffset >= 0)
 
-  def apply(underlying: Array[Byte], startOffset: Int = 0): BufferWriter =
-    new DefaultBufferWriter(underlying, startOffset)
+    val underlying = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes)
+    underlying.writerIndex(startOffset)
+    new WrappedChannelBufferWriter(underlying)
+  }
+
+  /**
+   * Creates a BufferWriter from a Netty ChannelBuffer.
+   */
+  def apply(underlying: ChannelBuffer): BufferWriter = {
+    require(underlying.order == ByteOrder.LITTLE_ENDIAN)
+    new WrappedChannelBufferWriter(underlying)
+  }
+
+  /**
+   * Calculates the size required to store the length
+   * according to the MySQL protocol for length coded
+   * binary.
+   */
+  def sizeOfLen(l: Long) = 
+    if (l < 251) 1 else if (l < 65536) 3 else if (l < 16777216) 4 else 9
 }
 
-class DefaultBufferWriter(val buffer: Array[Byte], private[this] var offset: Int) extends BufferWriter {
-  require(offset >= 0)
-  require(buffer != null)
+/**
+ * BufferWriter backed by a Netty ChannelBuffer.
+ */
+class WrappedChannelBufferWriter(underlying: ChannelBuffer) extends BufferWriter {
 
-  def writable(width: Int = 1): Boolean = offset + width <= buffer.size
+  def offset = underlying.writerIndex
 
-  def write(n: Long, width: Int): BufferWriter = {
-    (0 until width) foreach { i =>
-      buffer(i + offset) = ((n >> (i*8)) & 0xFF).toByte
-    }
-    offset += width
+  def writable(width: Int = 1): Boolean = underlying.writableBytes == width
+
+  def writeBoolean(b: Boolean): BufferWriter = if(b) writeByte(0) else writeByte(1)
+
+  def writeByte(n: Int): BufferWriter = {
+    underlying.writeByte(n)
+    this
+  }
+
+  def writeShort(n: Int): BufferWriter = {
+    underlying.writeShort(n)
+    this
+  }
+
+  def writeInt24(n: Int): BufferWriter = {
+    underlying.writeMedium(n)
+    this
+  }
+
+  def writeInt(n: Int): BufferWriter = {
+    underlying.writeInt(n)
+    this
+  }
+
+  def writeLong(n: Long): BufferWriter = {
+    underlying.writeLong(n)
+    this
+  }
+
+  def writeFloat(f: Float): BufferWriter = {
+    underlying.writeFloat(f)
+    this
+  }
+
+  def writeDouble(d: Double): BufferWriter = {
+    underlying.writeDouble(d)
     this
   }
 
   def skip(n: Int) = {
-    offset += n
-    this
-  }
-
-  def fillRest(b: Byte) = fill(buffer.size - offset, b)
-
-  def fill(n: Int, b: Byte) = {
-    (offset until offset + n) foreach { j => buffer(j) = b ; offset += 1 }
+    underlying.writerIndex(offset + n)  
     this
   }
 
   def writeBytes(bytes: Array[Byte]) = {
-    Array.copy(bytes, 0, buffer, offset, bytes.length)
-    offset += bytes.length
+    underlying.writeBytes(bytes)
     this
   }
+
+  def buffer = underlying.array
+  def toChannelBuffer = underlying
 }

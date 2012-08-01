@@ -1,10 +1,12 @@
 package com.twitter.finagle.mysql.protocol
 
+import java.nio.charset.{Charset => JCharset}
+
 object Charset {
   /**
    * Default Charset to use when decoding characters.
    */
-  val defaultCharset = "UTF-8"
+  val defaultCharset = JCharset.forName("UTF-8")
 
   /**
    * MySQL UTF-8 Collations. Note, MySQL conflates

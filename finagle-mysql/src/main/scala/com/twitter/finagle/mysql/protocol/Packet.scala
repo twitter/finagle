@@ -13,7 +13,7 @@ case class PacketHeader(size: Int, seq: Short) {
   lazy val toChannelBuffer = {
     val bw = BufferWriter(new Array[Byte](Packet.HeaderSize))
     bw.writeInt24(size)
-    bw.writeUnsignedByte(seq)
+    bw.writeByte(seq)
     bw.toChannelBuffer
   }
 }

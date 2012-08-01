@@ -65,7 +65,7 @@ case class LoginRequest(
     val capability = if (dbNameSize == 0) clientCap - ConnectWithDB else clientCap
     bw.writeInt(capability.mask)
     bw.writeInt(maxPacket)
-    bw.writeUnsignedByte(charset)
+    bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out 
     bw.writeNullTerminatedString(username)
     bw.writeLengthCodedString(hashPassword)
@@ -77,7 +77,7 @@ case class LoginRequest(
 
   private[this] def encryptPassword(password: String, salt: Array[Byte]) = {
     val md = MessageDigest.getInstance("SHA-1");
-    val hash1 = md.digest(password.getBytes)
+    val hash1 = md.digest(password.getBytes(Charset.defaultCharset.displayName))
     md.reset()
     val hash2 = md.digest(hash1)
     md.reset()

@@ -16,19 +16,25 @@ class CapabilitySpec extends SpecificationWithJUnit {
 
     "contain all capabilities" in {
       c.hasAll(Capability.LongPassword, Capability.NoSchema) must beFalse
-      c.hasAll(Capability.LongPassword,
-               Capability.SSL,
-               Capability.Transactions,
-               Capability.MultiResults) must beTrue
+      c.hasAll(
+        Capability.LongPassword,
+        Capability.SSL,
+        Capability.Transactions,
+        Capability.MultiResults
+      ) must beTrue
     }
 
     "subtract capability" in {
-      1 mustEqual 1
+      val c2 = c - Capability.SSL
+      c2.has(Capability.SSL) must beFalse
     }
 
     "add capability" in {
-      1 mustEqual 1
+      val c2 = c + Capability.LocalFiles + Capability.Compress
+      c2.hasAll(
+        Capability.LocalFiles, 
+        Capability.Compress
+      ) must beTrue
     }
-    
   }
 }

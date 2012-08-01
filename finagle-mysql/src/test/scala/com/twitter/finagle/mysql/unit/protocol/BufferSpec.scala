@@ -8,6 +8,7 @@ class BufferSpec extends SpecificationWithJUnit {
     "read" in {
       val bytes = Array[Byte](0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x78)
       val br = BufferReader(bytes)
+
       "Byte" in {
         br.readByte() mustEqual 0x11
         br.readByte() mustEqual 0x22
@@ -17,7 +18,6 @@ class BufferSpec extends SpecificationWithJUnit {
         br.readByte() mustEqual 0x66
         br.readByte() mustEqual 0x77
         br.readByte() mustEqual 0x78
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
       }
 
       "Short" in {
@@ -25,20 +25,17 @@ class BufferSpec extends SpecificationWithJUnit {
         br.readShort() mustEqual 0x4433
         br.readShort() mustEqual 0x6655
         br.readShort() mustEqual 0x7877
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
       }
 
       "Int24" in {
         br.readInt24() mustEqual 0x332211
         br.readInt24() mustEqual 0x665544
         br.readShort() mustEqual 0x7877
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
       }
 
       "Int" in {
         br.readInt() mustEqual 0x44332211
         br.readInt() mustEqual 0x78776655
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
       }
 
       "Signed Int" in {
@@ -49,26 +46,30 @@ class BufferSpec extends SpecificationWithJUnit {
 
       "Long" in {
         br.readLong() mustEqual 0x7877665544332211L
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
-      }
-
-      "Read length coded binary" in {
-        1 mustEqual 1
       }
 
       "Read null terminated string" in {
         val str = "Null Terminated String\0"
         val br = BufferReader(str.getBytes)
         str.take(str.size-1) mustEqual br.readNullTerminatedString()
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
       }
 
-      "Read length coded string" in {
+      "Read short length coded string" in {
         val str = "test"
-        val bytes = Array.concat(Array.concat(Array(str.size.toByte), str.getBytes))
+        val bytes = Array.concat(Array(str.size.toByte), str.getBytes)
         val br = BufferReader(bytes)
         str mustEqual br.readLengthCodedString()
-        br.readByte() must throwA[ArrayIndexOutOfBoundsException]
+      }
+
+      "Read and Write long length coded string" in {
+        val str = "test" * 100
+        val len = BufferWriter.sizeOfLen(str.size) + str.size
+        val strAsBytes = new Array[Byte](len)
+        val bw = BufferWriter(strAsBytes)
+        bw.writeLengthCodedString(str)
+
+        val br = BufferReader(strAsBytes)
+        str mustEqual br.readLengthCodedString()
       }
     }
 
@@ -88,7 +89,7 @@ class BufferSpec extends SpecificationWithJUnit {
 
       "Int24" in {
         bw.writeInt24(0x872312)
-        0x872312 mustEqual br.readInt24()
+        0x872312 mustEqual br.readUnsignedInt24()
       }
 
       "Int" in {
@@ -99,7 +100,7 @@ class BufferSpec extends SpecificationWithJUnit {
       "Long" in {
         bw.writeLong(0x7877665544332211L)
         0x7877665544332211L mustEqual br.readLong
-        bw.writeByte(0x00.toByte) must throwA[ArrayIndexOutOfBoundsException]
+        bw.writeByte(0x00.toByte) must throwA[IndexOutOfBoundsException]
       }
 
       "Write null terminated string" in {

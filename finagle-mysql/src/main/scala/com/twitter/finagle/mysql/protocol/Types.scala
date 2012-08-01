@@ -17,13 +17,13 @@ object Types {
   def writeTimestamp(ts: Timestamp, buffer: BufferWriter) = {
     val cal = Calendar.getInstance
     cal.setTimeInMillis(ts.getTime)
-    buffer.writeUnsignedByte(11)
-    buffer.writeUnsignedShort(cal.get(Calendar.YEAR))
-    buffer.writeUnsignedByte(cal.get(Calendar.MONTH))
-    buffer.writeUnsignedByte(cal.get(Calendar.DATE))
-    buffer.writeUnsignedByte(cal.get(Calendar.HOUR_OF_DAY))
-    buffer.writeUnsignedByte(cal.get(Calendar.MINUTE))
-    buffer.writeUnsignedByte(cal.get(Calendar.SECOND))
+    buffer.writeByte(11)
+    buffer.writeShort(cal.get(Calendar.YEAR))
+    buffer.writeByte(cal.get(Calendar.MONTH))
+    buffer.writeByte(cal.get(Calendar.DATE))
+    buffer.writeByte(cal.get(Calendar.HOUR_OF_DAY))
+    buffer.writeByte(cal.get(Calendar.MINUTE))
+    buffer.writeByte(cal.get(Calendar.SECOND))
     buffer.writeInt(ts.getNanos)
     buffer
   }

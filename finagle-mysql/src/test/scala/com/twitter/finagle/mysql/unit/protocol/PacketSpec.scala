@@ -6,12 +6,13 @@ import com.twitter.finagle.mysql.util.BufferUtil
 class PacketSpec extends SpecificationWithJUnit {
   "Packet" should {
     val size = 5
-    val seq = 0.toByte
-    val data = Array[Byte](116, 119, 105, 116, 116, 101, 114)
-    val p = Packet(size, seq, data)
+    val seq = 0.toShort
+    val header = PacketHeader(size, seq)
     
-    "Contain correct body" in {
-     1 mustEqual 1
+    "Encode Header" in {
+     val br = BufferReader(header.toChannelBuffer)
+     size mustEqual br.readInt24()
+     seq mustEqual br.readByte()
     }
   }
 }
