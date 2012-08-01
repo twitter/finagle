@@ -57,6 +57,36 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
+   * Gets the ttl of the given key.
+   * @param key
+   * @return Option containing either the ttl in seconds if the key exists 
+   * and has a timeout, or else nothing.
+   */
+  def ttl(key: String): Future[Option[Int]] =
+    doRequest(Ttl(key)) {
+    case IntegerReply(n) => {
+      if (n != -1) {
+        Future.value(Some(n))
+      }
+      else {
+        Future.value(None)
+      }
+    }
+  }
+
+  /**
+   * Sets how long it will take the key to expire
+   * @params key, ttl
+   * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
+   * false otherwise.
+   */
+  def expire(key: String, ttl: Int): Future[Boolean] = {
+    doRequest(Expire(key, ttl)) {
+      case IntegerReply(n) => Future.value(n == 1)
+    }
+  }
+
+  /**
    * Gets the value associated with the given key
    * @param key
    * @return Option containing either the value byte array, or nothing
@@ -67,6 +97,144 @@ class Client(service: Service[Command, Reply]) {
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
     }
+
+  /**
+   * Gets the length of the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key
+   * @return the length of the list.  Unassigned keys are considered empty
+   * lists, and return 0.
+   */
+  def lLen(key: String): Future[Int] =
+    doRequest(LLen(key)) {
+    case IntegerReply(n) => Future.value(n)
+  }
+
+  /**
+   * Gets the value of the element at the indexth position in the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key, index
+   * @return an option of the value of the element at the indexth position in the list.
+   * Nothing if the index is out of range.
+   */
+  def lIndex(key: String, index: Int): Future[Option[Array[Byte]]] =
+    doRequest(LIndex(key, index)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply()   => Future.value(None)
+  }
+
+  /**
+   * Inserts a value after another pivot value in the list.
+   * If the key is a non-list element,
+   * an exception will be thrown.
+   * @param key, pivot, value
+   * @return an option of the new length of the list, or nothing if the pivot is not found, or the list is empty.
+   */
+  def lInsertAfter(key: String, pivot: Array[Byte], value: Array[Byte]): Future[Option[Int]] =
+    doRequest(LInsert(key, "AFTER", pivot, value)) {
+      case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
+  }
+
+  /**
+   * Inserts a value before another pivot value in the list.
+   * If the key is a non-list element,
+   * an exception will be thrown.
+   * @param key, pivot, value
+   * @return an option of the new length of the list, or nothing if the pivot is not found, or the list is empty.
+   */
+  def lInsertBefore(key: String, pivot: Array[Byte], value: Array[Byte]): Future[Option[Int]] =
+    doRequest(LInsert(key, "BEFORE", pivot, value)) {
+      case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
+  }
+
+  /**
+   * Pops a value off the front of the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key
+   * @return an option of the value of the popped element, or nothing if the list is empty.
+   */
+  def lPop(key: String): Future[Option[Array[Byte]]] =
+    doRequest(LPop(key)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply() => Future.value(None)
+  }
+
+  /**
+   * Pushes a value onto the front of the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key, value
+   * @return the length of the list
+   */
+  def lPush(key: String, value: List[Array[Byte]]): Future[Int] =
+    doRequest(LPush(key, value)) {
+      case IntegerReply(n) => Future.value(n)
+  }
+
+  /**
+   * Removes count elements matching value from the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key, count: The sgn of count describes whether it will remove them from the back or the front
+   * of the list.  If count is 0, it will remove all instances, value
+   * @return the number of removed elements.
+   */
+  def lRem(key: String, count: Int, value: Array[Byte]): Future[Int] =
+    doRequest(LRem(key, count, value)) {
+      case IntegerReply(n) => Future.value(n)
+  }
+
+  /**
+   * Sets the indexth element to be value.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key, index, value
+   */
+  def lSet(key: String, index: Int, value: Array[Byte]): Future[Unit] =
+    doRequest(LSet(key, index, value)) {
+      case StatusReply(message) => Future.Unit
+  }
+
+  /**
+   * Gets the values in the range supplied.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key, start (inclusive), end (inclusive)
+   * @return a list of the value
+   */
+  def lRange(key: String, start: Int, end: Int): Future[List[Array[Byte]]] =
+    doRequest(LRange(key, start, end)) {
+      case MBulkReply(message) => Future.value(message)
+      case EmptyMBulkReply() => Future.value(List())
+  }
+
+  /**
+   * Pops a value off the end of the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key
+   * @return an option of the value of the popped element, or nothing if the list is empty.
+   */
+  def rPop(key: String): Future[Option[Array[Byte]]] =
+    doRequest(RPop(key)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply() => Future.value(None)
+  }
+
+  /**
+   * Pushes a value onto the end of the list.
+   * If the key is a non-list element, an exception will be thrown.
+   * @param key, value
+   * @return the length of the list
+   */
+  def rPush(key: String, value: List[Array[Byte]]): Future[Int] =
+    doRequest(RPush(key, value)) {
+      case IntegerReply(n) => Future.value(n)
+  }
+
+  /**
+   * Removes all of the elements from the list except for those in the range.
+   * @param key, start (inclusive), end (exclusive)
+   */
+  def lTrim(key: String, start: Int, end: Int): Future[Unit] =
+    doRequest(LTrim(key, start, end)) {
+      case StatusReply(message) => Future.Unit
+  }
 
   /**
    * Gets the substring of the value associated with given key
