@@ -30,13 +30,21 @@ private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
     // calling `newTimeout` and `stop()`.
     require(active.get, "newTimeout on inactive timer")
     val wrappedTask = new nu.TimerTask {
+      @volatile var ran = false
       def run(timeout: nu.Timeout) {
+        ran = true
         pending.remove(timeout)
         task.run(timeout)
       }
     }
     val timeout = underlying.newTimeout(wrappedTask, delay, unit)
     pending.add(timeout)
+    // Avoid a race where the task might be run before we even add it
+    // to the pending set. If ran isn't set here we know that we
+    // haven't attempted to remove the task yet. The remaining races
+    // are fine since removal is idempotent.
+    if (wrappedTask.ran)
+      pending.remove(timeout)
     new nu.Timeout {
       def getTimer() = timeout.getTimer()
       def getTask() = wrappedTask
@@ -78,8 +86,10 @@ private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Manage
 
     def get = timer
 
+    // Deadlines don't make sense in this context: we do it as fast
+    // as we can.
     def dispose(deadline: Time) = {
-      timer.stop()  // requires(active)
+      timer.stop()  // timer.stop() ensures it is called only ones
 
       val stopTimer = ManagedNettyTimer.this.synchronized {
         state match {
@@ -95,10 +105,10 @@ private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Manage
         }
       }
 
-      stopTimer foreach { timer =>
+      stopTimer foreach { stopTimer =>
         val thr = new Thread {
           override def run() {
-            val pending = timer.stop()
+            val pending = stopTimer.stop()
             // At this point, every timeout should have been cancelled.
             if (!pending.isEmpty) {
               java.util.logging.Logger.getLogger("").warning(
