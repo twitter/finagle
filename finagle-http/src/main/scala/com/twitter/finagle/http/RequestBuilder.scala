@@ -8,6 +8,7 @@ import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, Htt
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders, HttpVersion, HttpMethod, DefaultHttpRequest}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 /*
  * HTML form element.
@@ -334,7 +335,24 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       case SimpleElement(name, value) =>
         encoder.addBodyAttribute(name, value)
     }
-    encoder.finalizeRequest()
+    val encodedReq = encoder.finalizeRequest()
+
+    if (encodedReq.isChunked) {
+      val encodings = encodedReq.getHeaders(HttpHeaders.Names.TRANSFER_ENCODING)
+      encodings.remove(HttpHeaders.Values.CHUNKED)
+      if (encodings.isEmpty)
+        encodedReq.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING)
+      else
+        encodedReq.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, encodings)
+
+      val chunks = new ListBuffer[ChannelBuffer]
+      while (encoder.hasNextChunk) {
+        chunks += encoder.nextChunk().getContent()
+      }
+      encodedReq.setContent(ChannelBuffers.wrappedBuffer(chunks:_*))
+    }
+
+    encodedReq
   }
 
   // absoluteURI if proxied, otherwise relativeURI
