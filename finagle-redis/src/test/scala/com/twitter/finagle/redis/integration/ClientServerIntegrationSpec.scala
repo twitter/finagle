@@ -415,6 +415,110 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(Strlen("nosuchkey"))() mustEqual IntegerReply(0)
       }
     }
+
+    "Handle List Commands" >> {
+      "LLEN" >> {
+        val key = "llen"
+        val value = "Wassup."
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(1)
+        client(LLen(key))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(2)
+        client(LLen(key))() mustEqual IntegerReply(2)
+      }
+      "LINDEX" >> {
+        val key = "lindex"
+        val value1 = "Wassup."
+        val value2 = "different."
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        assertBulkReply(client(LIndex(key, 0)), value1)
+        client(LPush(key, List(StringToBytes(value2))))() mustEqual IntegerReply(2)
+        assertBulkReply(client(LIndex(key, 0)), value2)
+        assertBulkReply(client(LIndex(key, 1)), value1)
+      }
+      "LINSERT" >> {
+        val key = "linsert"
+        val value1 = "Wassup."
+        val value2 = "different."
+        val value3 = "more diffrent."
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        client(LInsert(key, "BEFORE", StringToBytes(value1), StringToBytes(value2)))() mustEqual IntegerReply(2)
+        //client(LInsert(key, "AFTER", StringToBytes(value1), StringToBytes(value3)))() mustEqual IntegerReply(3)
+        //assertMBulkReply(client(LRange(key, 0, -1)), List(value2, value1, value3))
+      }
+      "LPOP" >> {
+        val key = "lpop"
+        val value1 = "Wassup."
+        val value2 = "different."
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value2))))() mustEqual IntegerReply(2)
+        assertBulkReply(client(LPop(key)), value2)
+        assertBulkReply(client(LPop(key)), value1)
+      }
+      "LPUSH" >> {
+        val key = "lpush"
+        val value = "Wassup."
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(1)
+        client(LLen(key))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(2)
+        client(LLen(key))() mustEqual IntegerReply(2)
+      }
+      "LREM" >> {
+        val key = "lrem"
+        val value = "Wassup."
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(2)
+        client(LRem(key, 1, StringToBytes(value)))() mustEqual IntegerReply(1)
+        assertMBulkReply(client(LRange(key, 0, -1)), List(value))
+      }
+      "LSET" >> {
+        val key = "lset"
+        val value1 = "Wassup."
+        val value2 = "Different."
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(2)
+        client(LSet(key, 1, StringToBytes(value2)))() mustEqual StatusReply("OK")
+        assertMBulkReply(client(LRange(key, 0, -1)), List(value1, value2))
+      }
+      "LRANGE" >> {
+        val key = "lrange"
+        val value = "Wassup."
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value))))() mustEqual IntegerReply(2)
+        assertMBulkReply(client(LRange(key, 0, -1)), List(value, value))
+      }
+      "RPOP" >> {
+        val key = "rpop"
+        val value1 = "Wassup."
+        val value2 = "different."
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value2))))() mustEqual IntegerReply(2)
+        assertBulkReply(client(RPop(key)), value1)
+        assertBulkReply(client(RPop(key)), value2)
+      }
+      "RPUSH" >> {
+        val key = "rpush"
+        val value1 = "Wassup."
+        val value2 = "different."
+        client(RPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        client(RPush(key, List(StringToBytes(value2))))() mustEqual IntegerReply(2)
+        assertBulkReply(client(RPop(key)), value2)
+        assertBulkReply(client(RPop(key)), value1)
+      }
+      "LTRIM" >> {
+        val key = "ltrim"
+        val value1 = "Wassup."
+        val value2 = "different."
+        val value3 = "Watssup."
+        val value4 = "diffferent."
+        client(LPush(key, List(StringToBytes(value1))))() mustEqual IntegerReply(1)
+        client(LPush(key, List(StringToBytes(value2))))() mustEqual IntegerReply(2)
+        client(LPush(key, List(StringToBytes(value3))))() mustEqual IntegerReply(3)
+        client(LTrim(key, 0, 1))() mustEqual StatusReply("OK")
+        client(LPush(key, List(StringToBytes(value4))))() mustEqual IntegerReply(3)
+        client(LTrim(key, 0, 1))() mustEqual StatusReply("OK")
+        assertMBulkReply(client(LRange(key, 0, -1)), List(value4, value3))
+      }
+    }
   }
 
   def assertMBulkReply(reply: Future[Reply], expects: List[String], contains: Boolean = false) =
