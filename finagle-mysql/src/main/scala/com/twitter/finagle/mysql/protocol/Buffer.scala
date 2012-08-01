@@ -88,15 +88,7 @@ trait BufferReader {
    * documentation. Uses Charset.defaultCharset to 
    * decode strings.
    */
-  def readLengthCodedString(): String = {
-    val len = readLengthCodedBinary().toInt
-    if (len == BufferReader.NULL_LENGTH)
-       null
-    else if (len == 0)
-      BufferReader.EMPTY_STRING
-    else
-      new String(take(len), Charset.defaultCharset)
-  }
+  def readLengthCodedString(): String
 
   /**
    * Reads a length encoded set of bytes according to the MySQL
@@ -135,7 +127,7 @@ object BufferReader {
     new DefaultBufferReader(underlying, startOffset)
 }
 
-class DefaultBufferReader(val buffer: Array[Byte], var offset: Int) extends BufferReader {
+class DefaultBufferReader(val buffer: Array[Byte], private[this] var offset: Int) extends BufferReader {
   require(offset >= 0)
   require(buffer != null)
 
@@ -158,6 +150,19 @@ class DefaultBufferReader(val buffer: Array[Byte], var offset: Int) extends Buff
     Array.copy(buffer, offset, res, 0, n)
     offset += n
     res
+  }
+
+  override def readLengthCodedString(): String = {
+    val length = readLengthCodedBinary().toInt
+    if (length == BufferReader.NULL_LENGTH)
+       null
+    else if (length == 0)
+      BufferReader.EMPTY_STRING
+    else {
+      val str = new String(buffer, offset, length, Charset.defaultCharset)
+      offset += length
+      str
+    }
   }
 
   def readNullTerminatedString(): String = {

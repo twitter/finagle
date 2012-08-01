@@ -36,7 +36,7 @@ object Types {
  * MySQL Type codes.
  */
 object TypeCodes {
-	val DECIMAL     = 0x00;
+  val DECIMAL     = 0x00;
   val TINY        = 0x01;
   val SHORT       = 0x02;
   val LONG        = 0x03;
