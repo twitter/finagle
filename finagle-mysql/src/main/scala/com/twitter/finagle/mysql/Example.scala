@@ -14,44 +14,23 @@ object Main {
     val dbname = "test"
 
     val client = Client(host+":"+port, username, password, dbname)
-    case class City(id: Option[Int], name: Option[String], date: Option[Timestamp])
+    case class City(id: Int, name: String, date: Timestamp)
 
-    // Select Query (Not using prepared statements) */
+    // Select Query (Not using prepared statements)
     client.select("SELECT * FROM cities WHERE id in (1,2,3,7)") { row =>
 
-      val id = row.valueOf("id") map {
-        case IntValue(i) => i
-        // case NullValue =>
-        // case EmptyValue =>
-        case _ => -1
-      }
-
-      val name = row.valueOf("name") map {
-        case StringValue(s) => s
-        case _ => ""
-      }
-
-      val dateAdded = row.valueOf("dateadded") map {
-        case TimestampValue(ts) => ts
-        case _ => new Timestamp(0)
-      }
-
-      City(id, name, dateAdded)
-
+      // deconstructing a Value in this way will throw a runtime match error
+      // if valueOf returns anything but the Value on the left hand side.
+      val IntValue(id) = row.valueOf("id").getOrElse(IntValue(-1))
+      val StringValue(name) = row.valueOf("name").getOrElse(StringValue(""))
+      val TimestampValue(ts) = row.valueOf("dateadded").getOrElse(TimestampValue(new Timestamp(0)))
+      City(id, name, ts)
+      
     } onSuccess {
       seq => seq.foreach(println)
     } onFailure {
       case e => e.printStackTrace()
     }
-
-    // Prepared Statements
-    /*client.prepareAndSelect("SELECT * FROM cities WHERE id in (?)", (1,3,7)) { row => 
-      println(row.values)
-    } onSuccess {
-      case (ps, seq) => seq.foreach(println)
-    } onFailure {
-      e => e.printStackTrace()
-    }*/
   }
 
   def parseArgs(parsed: Map[String, Any], args: List[String]): Map[String, Any] = args match {

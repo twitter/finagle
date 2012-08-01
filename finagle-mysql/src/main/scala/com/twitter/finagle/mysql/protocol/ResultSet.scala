@@ -46,17 +46,39 @@ object ResultSet {
  * decoding a row into its appropriate values.
  */
 trait Row {
+  /**
+   * Contains a Field object for each
+   * Column in the Row.
+   */ 
+  val fields: Seq[Field]
+
+  /** The values for this Row. */ 
   val values: IndexedSeq[Value]
-  def findColumnIndex(columnName: String): Option[Int]
 
-  def valueOf(columnIndex: Option[Int]): Option[Value] =
-    for(idx <- columnIndex) yield values(idx)
+  /**
+   * Retrieves the index of the column with the given
+   * name.
+   * @param columnName name of the column.
+   * @return Option[Int] Some(Int) if the column
+   * exists with the given name. Otherwise, None.
+   */
+  def indexOf(columnName: String): Option[Int]
 
+  /**
+   * Retrieves the Value in the column with the 
+   * given name.
+   * @param columnName name of the column.
+   * @return Option[Value] Some(Value) if the column 
+   * exists with the given name. Otherwise, None.
+   */ 
   def valueOf(columnName: String): Option[Value] = 
-    valueOf(findColumnIndex(columnName))
+    valueOf(indexOf(columnName))
+
+  protected def valueOf(columnIndex: Option[Int]): Option[Value] =
+    for(idx <- columnIndex) yield values(idx)
 }
 
-class StringEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
+class StringEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
   val br = BufferReader(row)
 
   /**
@@ -89,10 +111,10 @@ class StringEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
       }
   }
 
-  def findColumnIndex(name: String) = indexMap.get(name)
+  def indexOf(name: String) = indexMap.get(name)
 }
 
-class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
+class BinaryEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
   val buffer = BufferReader(row, 1) // skip first byte
 
   /**
@@ -142,7 +164,7 @@ class BinaryEncodedRow(row: Array[Byte], fields: Seq[Field], indexMap: Map[Strin
       }
   }
 
-  def findColumnIndex(name: String) = indexMap.get(name)
+  def indexOf(name: String) = indexMap.get(name)
 }
 
 /**

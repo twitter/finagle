@@ -1,9 +1,9 @@
 A MySQL client built for finagle.
 
 ---
-## Protocol Overview  
+## Overview  
 
-*This is meant to give a very brief overview of the MySQL Client/Server protocol and reference relevant source files within finagle-mysql. For an exposition of the MySQL Client/Server protocol, refer to [MySQL Forge](http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol)
+*This is meant to give a very brief overview of the MySQL Client/Server protocol and reference relevant source code within finagle-mysql. For an exposition of the MySQL Client/Server protocol, refer to [MySQL Forge](http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol)
 and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/databases/mysql/0596009577/client-server-communication/orm9780596009571-chp-4).*
 
 **Packets** - The basic unit of communication for the MySQL Client/Server protocol is an application-layer packet. A MySQL packet consists of a header (size and sequence number) followed by a body. Packets can be fragmented across frames during transmission. To simplify the decoding of results received from the server, the codec includes a packet frame decoder on the pipeline.
@@ -30,7 +30,7 @@ and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/database
     )
     * protocol/Capability.scala, Codec.scala
  
- Note: This client only supports protocol version 4.1 and above. This is strictly enforced during authentication with a MySQL server.
+ Note: This client only supports protocol version 4.1 (available in MySQL version 4.1 and above). This is strictly enforced during authentication with a MySQL server.
 
 **Requests** - Most requests sent to the server are Command Requests. They contain a command byte and any arguments that are specific to the command. Command Requests are sent to the server as a MySQL Packet. The first byte of the packet body must contain a valid command byte followed by the arguments. Within finagle-mysql, each Request object has a data field which defines the body of the Packet. Requests are translated into a logical MySQL Packet by the toChannelBuffer method when they reach the Encoder.
 
@@ -42,10 +42,24 @@ ResultSets are returned from the server for queries that return Rows. A Row can 
 
     * codec/Endec.scala, protocol/{Result.scala, ResultSet.scala, PreparedStatement.scala}
 
-**Value** - finagle-mysql provides a Value ADT that can represent all values returned from MySQL. However, this does not include logic to decode every data type. For unsupported values finagle-mysql will return a RawStringValue and RawBinaryValue for the String and Binary protocols, respectively. Other note worthy Value objects include NullValue and EmptyValue.
+**Value** - finagle-mysql provides a Value ADT that can represent all values returned from MySQL. However, this does not include logic to decode every data type. For unsupported values finagle-mysql will return a RawStringValue and RawBinaryValue for the String and Binary protocols, respectively. Other note worthy Value objects include NullValue (SQL NULL) and EmptyValue.
 
-    * protocol/Value.scala 
+The following code depicts a robust, safe, and idiomatic way to extract and deconstruct a Value from a Row.
 
-**Buffers** - The BufferReader and BufferWriter interfaces provide convenient methods for reading/writing primitive data types exchanged between the client/server. This includes all primitive numeric types and strings (null-terminated and length coded). All Buffer methods are side-effecting, that is, each call to a read*/write* method will increase the current read and write position. Note, the data exchanged between the client/server is encoded in little-endian byte order.
+    // The row.valueOf(...) method returns an Option[Value].
+    val userId: Option[Long] = row.valueOf("id") map {
+      case LongValue(id) => id
+      case _ => -1
+    }
+
+Pattern matching all possible values of the Value ADT gives great flexibility and control. For example, it allows the programmer to handle NullValues and EmptyValues with specific application logic.
+
+    * protocol/Value.scala
+
+**Byte Buffers** - The BufferReader and BufferWriter interfaces provide convenient methods for reading/writing primitive data types exchanged between the client/server. This includes all primitive numeric types and strings (null-terminated and length coded). All Buffer methods are side-effecting, that is, each call to a read*/write* method will increase the current read and write position. Note, the bytes exchanged between the client/server are encoded in little-endian byte order.
 
     * protocol/Buffer.scala
+
+**Charset** - Currently, finagle-mysql only supports UTF-8 character encodings. This is strictly enforced when authenticating with a MySQL server. For more information about how to configure your MySQL instance to use UTF-8 by default refer to the [MySQL Documentation](http://dev.mysql.com/doc/refman/5.0/en/charset-applications.html).
+
+    * protocol/Charset.scala
