@@ -4,9 +4,9 @@ import com.twitter.sbt._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "5.3.1-SNAPSHOT"
-  val nettyLib = "io.netty" % "netty" % "3.5.1.Final" withSources()
-  val ostrichLib = "com.twitter" % "ostrich" % "8.2.1-SNAPSHOT" withSources()
+  val utilVersion = "5.3.6"
+  val nettyLib = "io.netty" % "netty" % "3.5.3.Final" withSources()
+  val ostrichLib = "com.twitter" % "ostrich" % "8.2.3" withSources()
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
@@ -15,7 +15,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" % ("util-"+which) % utilVersion withSources()
 
   val sharedSettings = Seq(
-    version := "5.3.1-SNAPSHOT",
+    version := "5.3.4",
     organization := "com.twitter",
     scalaVersion := "2.9.2",
     SubversionPublisher.subversionRepository := Some("https://svn.twitter.biz/maven-public"),
@@ -165,11 +165,17 @@ object Finagle extends Build {
     ),
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="0.0.5">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.10">
+          <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
           <exclude org="com.twitter" name="util-core"/>
+          <exclude org="com.twitter.common" name="jdk-logging"/>
+          <exclude org="com.twitter.common" name="stats"/>
+          <exclude org="com.twitter.common" name="util-executor-service-shutdown"/>
           <exclude org="io.netty" name="netty"/>
+          <exclude org="javax.activation" name="activation"/>
+          <exclude org="javax.mail" name="mail"/>
         </dependency>
       </dependencies>
   ).dependsOn(finagleCore)
@@ -233,7 +239,8 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
-      "com.google.guava" % "guava" % "11.0.2"
+      "com.google.guava" % "guava" % "11.0.2",
+      "com.twitter.common" % "zookeeper-testing" % "0.0.20" % "test"
     )
   ).dependsOn(finagleCore, finagleServersets)
 

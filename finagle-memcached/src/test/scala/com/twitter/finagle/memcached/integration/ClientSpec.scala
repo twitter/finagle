@@ -1,5 +1,7 @@
 package com.twitter.finagle.memcached.integration
 
+/* temporarily disabled due to internal dependency
+
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.ZooKeeperClient
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
@@ -310,3 +312,5 @@ class ClientSpec extends SpecificationWithJUnit {
     }
   }
 }
+
+*/
