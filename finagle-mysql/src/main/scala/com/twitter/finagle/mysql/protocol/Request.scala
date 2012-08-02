@@ -159,7 +159,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
 
   /**
    * Writes the parameter into its MySQL binary representation.
-   * Note, BufferWriter only has support for primitive types.
+   * BufferWriter only has support for primitive types.
    */ 
   private[this] def writeParam(param: Any, writer: BufferWriter) = param match {
     case s: String      => writer.writeLengthCodedString(s)
@@ -188,7 +188,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     val nullBytes = makeNullBitmap(paramsList)
     val newParamsBound: Byte = if (ps.hasNewParameters) 1 else 0
 
-    val result = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bw.buffer, nullBytes, Array(newParamsBound))
+    val result = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bw.array, nullBytes, Array(newParamsBound))
 
     // Only write the parameter data if the prepared statement
     // has new parameters.
