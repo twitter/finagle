@@ -21,7 +21,7 @@ module FinagleThrift
         header.parent_span_id = Trace.id.parent_id.to_i
         header.span_id = Trace.id.span_id.to_i
         header.sampled = Trace.id.sampled?
-        header.debug = false
+        header.flags = Trace.id.flags.to_i
 
         header.client_id = client_id if client_id
 
