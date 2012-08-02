@@ -5,7 +5,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.{BytesToString, NumberFormat}
 import com.twitter.finagle.Service
 import com.twitter.util.Future
-
+import scala.collection.immutable
 
 object Client {
 
@@ -113,7 +113,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets the value of the element at the indexth position in the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key, index
+   * @params key, index
    * @return an option of the value of the element at the indexth position in the list.
    * Nothing if the index is out of range.
    */
@@ -127,7 +127,7 @@ class Client(service: Service[Command, Reply]) {
    * Inserts a value after another pivot value in the list.
    * If the key is a non-list element,
    * an exception will be thrown.
-   * @param key, pivot, value
+   * @params key, pivot, value
    * @return an option of the new length of the list, or nothing if the pivot is not found, or the list is empty.
    */
   def lInsertAfter(key: String, pivot: Array[Byte], value: Array[Byte]): Future[Option[Int]] =
@@ -139,7 +139,7 @@ class Client(service: Service[Command, Reply]) {
    * Inserts a value before another pivot value in the list.
    * If the key is a non-list element,
    * an exception will be thrown.
-   * @param key, pivot, value
+   * @params key, pivot, value
    * @return an option of the new length of the list, or nothing if the pivot is not found, or the list is empty.
    */
   def lInsertBefore(key: String, pivot: Array[Byte], value: Array[Byte]): Future[Option[Int]] =
@@ -162,7 +162,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Pushes a value onto the front of the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key, value
+   * @params key, value
    * @return the length of the list
    */
   def lPush(key: String, value: List[Array[Byte]]): Future[Int] =
@@ -173,7 +173,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Removes count elements matching value from the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key, count: The sgn of count describes whether it will remove them from the back or the front
+   * @params key, count: The sgn of count describes whether it will remove them from the back or the front
    * of the list.  If count is 0, it will remove all instances, value
    * @return the number of removed elements.
    */
@@ -185,7 +185,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Sets the indexth element to be value.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key, index, value
+   * @params key, index, value
    */
   def lSet(key: String, index: Int, value: Array[Byte]): Future[Unit] =
     doRequest(LSet(key, index, value)) {
@@ -195,7 +195,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Gets the values in the range supplied.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key, start (inclusive), end (inclusive)
+   * @params key, start (inclusive), end (inclusive)
    * @return a list of the value
    */
   def lRange(key: String, start: Int, end: Int): Future[List[Array[Byte]]] =
@@ -219,7 +219,7 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Pushes a value onto the end of the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key, value
+   * @params key, value
    * @return the length of the list
    */
   def rPush(key: String, value: List[Array[Byte]]): Future[Int] =
@@ -229,11 +229,82 @@ class Client(service: Service[Command, Reply]) {
 
   /**
    * Removes all of the elements from the list except for those in the range.
-   * @param key, start (inclusive), end (exclusive)
+   * @params key, start (inclusive), end (exclusive)
    */
   def lTrim(key: String, start: Int, end: Int): Future[Unit] =
     doRequest(LTrim(key, start, end)) {
       case StatusReply(message) => Future.Unit
+  }
+
+  /**
+   * Adds elements to the set, according to the set property.
+   * Throws an exception if the key does not refer to a set.
+   * @params key, members
+   * @return the number of new members added to the set.
+   */
+  def sAdd(key: String, members: List[Array[Byte]]): Future[Int] =
+    doRequest(SAdd(key, members)) {
+      case IntegerReply(n) => Future.value(n)
+  }
+  
+  /**
+   * Gets the members of the set.
+   * Throws an exception if the key does not refer to a set.
+   * @param key
+   * @return a list of the members
+   */
+  def sMembers(key: String): Future[immutable.Set[Array[Byte]]] =
+    doRequest(SMembers(key)) {
+      case MBulkReply(list) => Future.value(list toSet)
+      case EmptyMBulkReply() => Future.value(immutable.Set())
+  }
+
+  /**
+   * Is the member in the set?
+   * Throws an exception if the key does not refer to a set.
+   * @params key, members
+   * @return a boolean, true if it is in the set, false otherwise.  Unassigned
+   * keys are considered empty sets.
+   */
+  def sIsMember(key: String, member: Array[Byte]): Future[Boolean] =
+    doRequest(SIsMember(key, member)) {
+      case IntegerReply(n) => Future.value(n == 1)
+  }
+
+  /**
+   * How many elements are in the set?
+   * Throws an exception if the key does not refer to a set.
+   * @param key
+   * @return the number of elements in the set.  Unassigned keys are considered
+   * empty sets.
+   */
+  def sCard(key: String): Future[Int] =
+    doRequest(SCard(key)) {
+      case IntegerReply(n) => Future.value(n)
+  }
+
+  /**
+   * Removes the element from the set if it is in the set.
+   * Throws an exception if the key does not refer to a set.
+   * @params key, member
+   * @return an integer, the number of elements removed from the set, can be
+   * 0 if the key is unassigned.
+   */
+  def sRem(key: String, members: List[Array[Byte]]): Future[Int] =
+    doRequest(SRem(key, members)) {
+      case IntegerReply(n) => Future.value(n)
+  }
+
+  /**
+   * Removes an element randomly from the set, and returns it.
+   * Throws an exception if the key does not refer to a set.
+   * @param key
+   * @return the member, or nothing if the set is empty.
+   */
+  def sPop(key: String): Future[Option[Array[Byte]]] =
+    doRequest(SPop(key)) {
+    case BulkReply(message) => Future.value(Some(message))
+    case EmptyBulkReply() => Future.value(None)
   }
 
   /**

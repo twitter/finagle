@@ -8,6 +8,7 @@ import com.twitter.util.Future
 import java.net.InetSocketAddress
 import org.specs.SpecificationWithJUnit
 import util._
+import scala.collection.immutable
 
 class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   lazy val svcClient = ClientBuilder()
@@ -517,6 +518,72 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(LPush(key, List(StringToBytes(value4))))() mustEqual IntegerReply(3)
         client(LTrim(key, 0, 1))() mustEqual StatusReply("OK")
         assertMBulkReply(client(LRange(key, 0, -1)), List(value4, value3))
+      }
+    }
+
+    "Handle Set Commands" >> {
+      "SADD" >> {
+        val key = "sadd"
+        val value1 = StringToBytes("value")
+        val value2 = StringToBytes("newvalue")
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(1)
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(0)
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(1)
+      }
+      "SMEMBERS" >> {
+        val key = "smembers"
+        val value1 = StringToBytes("value")
+        val value2 = StringToBytes("newvalue")
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(1)
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(1)
+        client(SMembers(key))() match {
+          case MBulkReply(message) => (message map (bytes => new String(bytes))).toSet mustEqual immutable.Set(new String(value1), new String(value2))
+          case EmptyMBulkReply() => true mustEqual false
+        }
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(0)
+      }
+      "SISMEMBER" >> {
+        val key = "sismember"
+        val value1 = StringToBytes("value")
+        val value2 = StringToBytes("newvalue")
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(1)
+        client(SIsMember(key, value1))() mustEqual IntegerReply(1)
+        client(SIsMember(key, value2))() mustEqual IntegerReply(0)
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(1)
+        client(SIsMember(key, value2))() mustEqual IntegerReply(1)
+      }
+      "SCARD" >> {
+        val key = "scard"
+        val value1 = StringToBytes("value")
+        val value2 = StringToBytes("newvalue")
+        client(SCard(key))() mustEqual IntegerReply(0)
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(1)
+        client(SCard(key))() mustEqual IntegerReply(1)
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(1)
+        client(SCard(key))() mustEqual IntegerReply(2)
+      }
+      "SREM" >> {
+        val key = "srem"
+        val value1 = StringToBytes("value")
+        val value2 = StringToBytes("newvalue")
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(1)
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(1)
+        client(SIsMember(key, value2))() mustEqual IntegerReply(1)
+        client(SIsMember(key, value1))() mustEqual IntegerReply(1)
+        client(SRem(key, List(value2)))() mustEqual IntegerReply(1)
+        client(SIsMember(key, value2))() mustEqual IntegerReply(0)
+      }
+      "SPOP" >> {
+        val key = "spop"
+        val value1 = StringToBytes("value")
+        val value2 = StringToBytes("newvalue")
+        client(SAdd(key, List(value1)))() mustEqual IntegerReply(1)
+        client(SAdd(key, List(value2)))() mustEqual IntegerReply(1)
+        client(SCard(key))() mustEqual IntegerReply(2)
+        client(SPop(key))()
+        client(SCard(key))() mustEqual IntegerReply(1)
+        client(SPop(key))()
+        client(SCard(key))() mustEqual IntegerReply(0)
       }
     }
   }

@@ -303,6 +303,62 @@ class ClientSpec extends SpecificationWithJUnit {
       }
     }
 
+    "perform set commands" in {
+      "add members to a set, then pop them off." in {
+        val key = "pushpop"
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sPop(key)()
+        client.sPop(key)()
+      }
+
+      "add members to a set, then pop them off, counting them." in {
+        val key = "scard"
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sCard(key)() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sCard(key)() mustEqual 2
+        client.sPop(key)()
+        client.sCard(key)() mustEqual 1
+        client.sPop(key)()
+        client.sCard(key)() mustEqual 0
+      }
+
+      "add members to a set, look for some, pop them off, look for some again." in {
+        val key = "members"
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sIsMember(key, bar)() mustEqual true
+        client.sIsMember(key, baz)() mustEqual false
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sIsMember(key, bar)() mustEqual true
+        client.sIsMember(key, baz)() mustEqual true
+        client.sPop(key)()
+        client.sPop(key)()
+        client.sIsMember(key, bar)() mustEqual false
+        client.sIsMember(key, baz)() mustEqual false
+      }
+
+      "add members to a set, then examine them, then pop them off, then examien them again." in {
+        val key = "members"
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sMembers(key)() map (new String(_)) mustEqual Set("bar", "baz")
+        client.sPop(key)()
+        client.sPop(key)()
+        client.sMembers(key)() mustEqual Set()
+      }
+
+      "add members to a set, then remove them." in {
+        val key = "members"
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sRem(key, List(bar))() mustEqual 1
+        client.sRem(key, List(baz))() mustEqual 1
+        client.sRem(key, List(baz))() mustEqual 0
+      }
+
+}
+
   }
 
 }
