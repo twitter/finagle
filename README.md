@@ -918,7 +918,7 @@ A more complex variation of scatter/gather pattern is to perform a sequence of a
 
     import com.twitter.finagle.util.Timer._
 
-    val results: Seq[Future[Result]] = partitions.map { partition =>
+    val timedResults: Seq[Future[Result]] = partitions.map { partition =>
       partition.get(query).within(1.second) handle {
         case _: TimeoutException => EmptyResult
       }
@@ -941,7 +941,7 @@ A `FuturePool` object enables you to place a blocking operation on its own threa
       val diskIoFuturePool = FuturePool(Executors.newFixedThreadPool(4))
 
       def apply(path: String) = {
-        val blockingOperation = {
+        def blockingOperation = {
           scala.Source.fromFile(path) // potential to block
         }
         // give this blockingOperation to the future pool to execute
