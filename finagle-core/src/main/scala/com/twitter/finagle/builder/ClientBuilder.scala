@@ -818,17 +818,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     factory <- buildManagedFactory()
     timer <- ManagedTimer
   } yield {
-    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
+    val underlying: Service[Req, Rep] = new FactoryToService[Req, Rep](factory)
+    val service = config.cluster match {
+      case Some(cluster) if !cluster.ready.isDefined =>
+        new ProxyService(cluster.ready.map { _ => underlying }, config.hostConnectionMaxWaiters getOrElse(Int.MaxValue))
+      case _ => underlying
+    }
     // We keep the retrying filter after the load balancer so we can
     // retry across different hosts rather than the same one repeatedly.
-    service = retryFilter(timer) andThen service
-    service = globalTimeoutFilter(timer) andThen service
-    service = exceptionSourceFilter andThen service
-    config.cluster match {
-      case Some(cluster) if !cluster.ready.isDefined =>
-        new ProxyService(cluster.ready.map { _ => service }, config.hostConnectionMaxWaiters getOrElse(Int.MaxValue))
-      case _ => service
-    }
+    val filter = exceptionSourceFilter andThen globalTimeoutFilter(timer) andThen retryFilter(timer)
+    filter andThen service
   }
 
   /**

@@ -8,23 +8,22 @@ import org.specs.SpecificationWithJUnit
 
 class EndToEndSpec extends SpecificationWithJUnit {
   "Finagle client" should {
-    val constRes = new Promise[String]
-    val arrivalLatch = new CountDownLatch(1)
-    val service = new Service[String, String] {
-      def apply(request: String) = {
-        arrivalLatch.countDown()
-        constRes
-      }
-    }
-
-    val address = new InetSocketAddress(0)
-    val server = ServerBuilder()
-      .codec(StringCodec)
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(service)
-
     "handle pending request after a host is deleted from cluster" in {
+      val constRes = new Promise[String]
+      val arrivalLatch = new CountDownLatch(1)
+      val service = new Service[String, String] {
+        def apply(request: String) = {
+          arrivalLatch.countDown()
+          constRes
+        }
+      }
+      val address = new InetSocketAddress(0)
+      val server = ServerBuilder()
+        .codec(StringCodec)
+        .bindTo(address)
+        .name("FinagleServer")
+        .build(service)
+
       val cluster = new DynamicCluster[SocketAddress](Seq(server.localAddress))
       val client = ClientBuilder()
         .cluster(cluster)
@@ -40,6 +39,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
       constRes.setValue("foo")
       response() must be_==("foo")
     }
+
 
     "queue requests while waiting for cluster to initialize" in {
       val echo = new Service[String, String] {
@@ -83,7 +83,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           responses(i)() must be_==(i.toString)
         }
       }
-
+      thread.start()
       thread.join()
     }
   }
