@@ -26,4 +26,17 @@ object Packet {
 
   def apply(size: Int, seq: Short, body: Array[Byte]): Packet = 
     Packet(PacketHeader(size, seq), body)
+
+  /**
+   * Creates a MySQL Packet as a Netty
+   * ChannelBuffer. Useful for sending a Packet
+   * down stream through Netty.
+   */
+  def toChannelBuffer(size: Int, seq: Short, body: ChannelBuffer) = {
+    val headerBuffer = PacketHeader(size, seq).toChannelBuffer
+    wrappedBuffer(headerBuffer, body)
+  }
+
+  def toChannelBuffer(size: Int, seq: Short, body: Array[Byte]): ChannelBuffer = 
+    toChannelBuffer(size, seq, wrappedBuffer(body))
 }

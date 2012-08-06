@@ -34,52 +34,67 @@ class Endec extends SimpleChannelHandler {
   @volatile private[this] var expectPrepareOK: Boolean = false
   @volatile private[this] var expectBinaryResults: Boolean = false
 
-  override def messageReceived(ctx: ChannelHandlerContext, evt: MessageEvent) = {
-    evt.getMessage match {
-      case packet: Packet =>
-        val decodedResult: Option[Result] = state match {
-          case WaitingForGreeting =>
-            transition(Idle)
-            Some(ServersGreeting.decode(packet))
+  /**
+   * Netty downstream handler. The message should contain a packet from
+   * the MySQL server.
+   */
+  override def messageReceived(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
+    case packet: Packet =>
+      val decodedResult = decode(packet)
+      decodedResult map { Channels.fireMessageReceived(ctx, _) }
 
-          case Idle =>
-            decodePacket(packet)
-
-          case Defragging(_,_) =>
-            defrag(packet)
-        }
-
-        decodedResult map { Channels.fireMessageReceived(ctx, _) }
-
-      case unknown =>
-        Channels.disconnect(ctx.getChannel)
-        log.error("ResultDecoder: Expected Packet and received: " + unknown.getClass.getName)
-    }
+    case unknown =>
+      Channels.disconnect(ctx.getChannel)
+      log.error("Endec: Expected Packet and received: " + unknown.getClass.getName)
   }
 
-  override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = {
-    val encodedReq: Option[ChannelBuffer] = evt.getMessage match {
-      case req: CommandRequest =>
-        expectPrepareOK = (req.cmd == Command.COM_STMT_PREPARE)
-        expectBinaryResults = (req.cmd == Command.COM_STMT_EXECUTE)
-        Some(req.toChannelBuffer)
+  /**
+   * Netty upstream handler. The message should contain a 
+   * Request object.
+   */
+  override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
+    case req: Request => 
+      val buffer = encode(req)
+      Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
 
-      case req: Request => 
-        Some(req.toChannelBuffer)
+    case unknown => 
+      log.error("Endec: Expected Request and received: " + unknown.getClass.getName)
+  }
 
-      case unknown => 
-        log.error("RequestEncoder: Expected Request and received: " + unknown.getClass.getName)
-        None
-    }
+  /**
+   * Logical entry point for the Decoder.
+   * Decodes a packet based on the current state
+   * of this decoder.
+   */
+  def decode(packet: Packet): Option[Result] = state match {
+    case WaitingForGreeting =>
+      transition(Idle)
+      Some(ServersGreeting.decode(packet))
 
-    encodedReq map { Channels.write(ctx, evt.getFuture, _, evt.getRemoteAddress) }
+    case Idle            => decodePacket(packet)
+    case Defragging(_,_) => defrag(packet)
+  }
+
+  /**
+   * Logical entry point for the Encoder.
+   * Encodes a request into ChannelBuffer. 
+   * Note, some requests change the state of the decoder.
+   */
+  def encode(req: Request): ChannelBuffer = req match {
+    case r: CommandRequest =>
+      expectPrepareOK = (r.cmd == Command.COM_STMT_PREPARE)
+      expectBinaryResults = (r.cmd == Command.COM_STMT_EXECUTE)
+      r.toChannelBuffer
+
+    case r: Request => 
+      r.toChannelBuffer
   }
 
   private[this] def transition(s: State) = state = s
 
   /**
    * Decode the packet into a Result object based on the
-   * first byte in the packet body. Some bytes denote the
+   * first byte in the packet body (field_count). Some bytes denote the
    * start of a longer transmission. In those cases, transition
    * into the Defragging state.
    */
@@ -98,7 +113,7 @@ class Endec extends SimpleChannelHandler {
     case Packet.EofByte   => Some(EOF.decode(packet))
     case Packet.ErrorByte => Some(Error.decode(packet))
 
-    case byte => 
+    case byte =>
       defragDecoder = ResultSet.decode(expectBinaryResults)
       transition(Defragging(2, Nil))
       defrag(packet)
@@ -150,6 +165,6 @@ class Endec extends SimpleChannelHandler {
       None
 
     case _ =>
-        throw new ClientError("ResultDecoder: Unexpected state when defragmenting packets.")
+        throw new ClientError("Endec: Unexpected state when defragmenting packets.")
   }
 }

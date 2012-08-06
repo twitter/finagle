@@ -38,8 +38,8 @@ object PreparedStatement {
     val ok = PreparedOK.decode(header)
     val (paramPackets, columnPackets) = (ok.numOfParams, ok.numOfColumns) match {
       case (0, 0)          => (Nil, Nil)
-      case (0, c) if c > 0 => (Nil, seqOne)
-      case (p, 0) if p > 0 => (seqOne, Nil)
+      case (0, n) if n > 0 => (Nil, seqOne)
+      case (n, 0) if n > 0 => (seqOne, Nil)
       case (_, _)          => (seqOne, seqTwo)
     }
 

@@ -59,7 +59,7 @@ trait Row {
    * Retrieves the index of the column with the given
    * name.
    * @param columnName name of the column.
-   * @return Option[Int] Some(Int) if the column
+   * @return Some(Int) if the column
    * exists with the given name. Otherwise, None.
    */
   def indexOf(columnName: String): Option[Int]
@@ -68,14 +68,14 @@ trait Row {
    * Retrieves the Value in the column with the 
    * given name.
    * @param columnName name of the column.
-   * @return Option[Value] Some(Value) if the column 
+   * @return Some(Value) if the column 
    * exists with the given name. Otherwise, None.
    */ 
   def valueOf(columnName: String): Option[Value] = 
     valueOf(indexOf(columnName))
 
   protected def valueOf(columnIndex: Option[Int]): Option[Value] =
-    for(idx <- columnIndex) yield values(idx)
+    for (idx <- columnIndex) yield values(idx)
 }
 
 class StringEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
@@ -85,30 +85,8 @@ class StringEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[S
    * Convert the string representation of each value
    * into an appropriate Value object.
    */
-  val values: IndexedSeq[Value] = for(idx <- 0 until fields.size) yield {
-    val fieldType = fields(idx).fieldType
-    val value = br.readLengthCodedString()
-    if (value == null)
-      NullValue
-    else if (value.isEmpty)
-      EmptyValue
-    else
-      fieldType match {
-        case TypeCodes.STRING     => StringValue(value)
-        case TypeCodes.VAR_STRING => StringValue(value)
-        case TypeCodes.VARCHAR    => StringValue(value)
-        case TypeCodes.TINY       => ByteValue(value.toByte)
-        case TypeCodes.SHORT      => ShortValue(value.toShort)
-        case TypeCodes.INT24      => IntValue(value.toInt)
-        case TypeCodes.LONG       => IntValue(value.toInt)
-        case TypeCodes.LONGLONG   => LongValue(value.toLong)
-        case TypeCodes.FLOAT      => FloatValue(value.toFloat)
-        case TypeCodes.DOUBLE     => DoubleValue(value.toDouble)
-        case TypeCodes.TIMESTAMP  => TimestampValue(value) 
-        case TypeCodes.DATETIME   => TimestampValue(value)
-        case TypeCodes.DATE       => DateValue(value)
-        case _                    => RawStringValue(value)
-      }
+  val values: IndexedSeq[Value] = for (idx <- 0 until fields.size) yield {
+    Value(fields(idx).fieldType, br.readLengthCodedString())
   }
 
   def indexOf(name: String) = indexMap.get(name)
@@ -139,29 +117,11 @@ class BinaryEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[S
    * Convert the binary representation of each value
    * into an appropriate Value object.
    */
-  val values: IndexedSeq[Value] = for(idx <- 0 until fields.size) yield {
+  val values: IndexedSeq[Value] = for (idx <- 0 until fields.size) yield {
     if (isNull(idx))
       NullValue
     else 
-      fields(idx).fieldType match {
-        case TypeCodes.STRING      => StringValue(buffer.readLengthCodedString())
-        case TypeCodes.VAR_STRING  => StringValue(buffer.readLengthCodedString())
-        case TypeCodes.VARCHAR     => StringValue(buffer.readLengthCodedString())
-        case TypeCodes.TINY        => ByteValue(buffer.readByte())
-        case TypeCodes.SHORT       => ShortValue(buffer.readShort())
-        case TypeCodes.INT24       => IntValue(buffer.readInt24())
-        case TypeCodes.LONG        => IntValue(buffer.readInt())
-        case TypeCodes.LONGLONG    => LongValue(buffer.readLong())
-        case TypeCodes.FLOAT       => FloatValue(buffer.readFloat())
-        case TypeCodes.DOUBLE      => DoubleValue(buffer.readDouble())
-        case TypeCodes.TIMESTAMP   => TimestampValue(buffer.readLengthCodedBytes())
-        case TypeCodes.DATETIME    => TimestampValue(buffer.readLengthCodedBytes())
-        case TypeCodes.DATE        => DateValue(buffer.readLengthCodedBytes())
-
-        // TO DO: Verify that TypeCodes.{ENUM, SET, NEWDATE} can be read as
-        // a length coded set of bytes.
-        case _ => RawBinaryValue(buffer.readLengthCodedBytes())
-      }
+      Value(fields(idx).fieldType, buffer)
   }
 
   def indexOf(name: String) = indexMap.get(name)
@@ -178,7 +138,7 @@ case class Field(
   name: String,
   origName: String,
   charset: Short,
-  length: Int,
+  displayLength: Int,
   fieldType: Int,
   flags: Short,
   decimals: Byte

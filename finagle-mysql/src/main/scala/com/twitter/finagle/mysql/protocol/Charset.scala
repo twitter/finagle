@@ -4,13 +4,12 @@ import java.nio.charset.{Charset => JCharset}
 
 object Charset {
   /**
-   * Default Charset to use when decoding characters.
+   * Default Charset to use when decoding strings.
    */
   val defaultCharset = JCharset.forName("UTF-8")
 
   /**
-   * MySQL UTF-8 Collations. Note, MySQL conflates
-   * Collations and Charsets at the protocol level.
+   * MySQL UTF-8 Collations.
    */
   val Utf8_bin                 = 83.toShort
   val Utf8_czech_ci            = 202.toShort

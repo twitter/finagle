@@ -1,11 +1,10 @@
-package com.twitter.finagle.mysql.util
+package com.twitter.finagle.mysql.protocol
 
 import org.specs.SpecificationWithJUnit
-import com.twitter.finagle.mysql.protocol.{BufferReader, BufferWriter}
 
 class BufferSpec extends SpecificationWithJUnit {
   "Buffer" should {
-    "read" in {
+    "Read" in {
       val bytes = Array[Byte](0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x78)
       val br = BufferReader(bytes)
 
@@ -48,35 +47,25 @@ class BufferSpec extends SpecificationWithJUnit {
         br.readLong() mustEqual 0x7877665544332211L
       }
 
-      "Read null terminated string" in {
+      "null terminated string" in {
         val str = "Null Terminated String\0"
         val br = BufferReader(str.getBytes)
         str.take(str.size-1) mustEqual br.readNullTerminatedString()
       }
 
-      "Read short length coded string" in {
+      "tiny length coded string" in {
         val str = "test"
         val bytes = Array.concat(Array(str.size.toByte), str.getBytes)
         val br = BufferReader(bytes)
         str mustEqual br.readLengthCodedString()
       }
-
-      "Read and Write long length coded string" in {
-        val str = "test" * 100
-        val len = BufferWriter.sizeOfLen(str.size) + str.size
-        val strAsBytes = new Array[Byte](len)
-        val bw = BufferWriter(strAsBytes)
-        bw.writeLengthCodedString(str)
-
-        val br = BufferReader(strAsBytes)
-        str mustEqual br.readLengthCodedString()
-      }
     }
 
-    "write" in {
-      val bytes = new Array[Byte](8)
+    "Write then Read" in {
+      val bytes = new Array[Byte](9)
       val bw = BufferWriter(bytes)
       val br = BufferReader(bytes)
+
       "byte" in {
         bw.writeByte(0x01.toByte)
         0x01 mustEqual br.readByte()
@@ -100,18 +89,48 @@ class BufferSpec extends SpecificationWithJUnit {
       "Long" in {
         bw.writeLong(0x7877665544332211L)
         0x7877665544332211L mustEqual br.readLong
-        bw.writeByte(0x00.toByte) must throwA[IndexOutOfBoundsException]
       }
 
-      "Write null terminated string" in {
+      "tiny length coded binary" in {
+        bw.writeLengthCodedBinary(250)
+        br.readLengthCodedBinary() mustEqual 250
+      }
+
+      "short length coded binary" in {
+        bw.writeLengthCodedBinary(65535)
+        br.readLengthCodedBinary() mustEqual 65535
+      }
+
+      "medium length coded binary" in {
+        bw.writeLengthCodedBinary(16777215)
+        br.readLengthCodedBinary() mustEqual 16777215
+      }
+
+      "large length coded binary" in {
+        bw.writeLengthCodedBinary(16777217)
+        br.readLengthCodedBinary() mustEqual 16777217
+      }
+
+      "null terminated string" in {
         val str = "test\0"
         bw.writeNullTerminatedString(str)
         str.take(str.length-1) mustEqual br.readNullTerminatedString()
       }
 
-      "Write length coded string" in {
+      "tiny length coded string" in {
         val str = "test"
         bw.writeLengthCodedString(str)
+        str mustEqual br.readLengthCodedString()
+      }
+
+      "short length coded string" in {
+        val str = "test" * 100
+        val len = Buffer.sizeOfLen(str.size) + str.size
+        val strAsBytes = new Array[Byte](len)
+        val bw = BufferWriter(strAsBytes)
+        bw.writeLengthCodedString(str)
+
+        val br = BufferReader(strAsBytes)
         str mustEqual br.readLengthCodedString()
       }
     }

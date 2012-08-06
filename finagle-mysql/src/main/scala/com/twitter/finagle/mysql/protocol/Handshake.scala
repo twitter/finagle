@@ -54,7 +54,7 @@ case class LoginRequest(
   serverCap: Capability,
   charset: Short = Charset.Utf8_general_ci,
   maxPacket: Int = 0x10000000
-) extends Request(seq = 1.toByte) {
+) extends Request(seq = 1) {
   private[this] val fixedBodySize = 34
   private[this] val dbNameSize = database map { _.size+1 } getOrElse(0)
   private[this] val dataSize = username.size + hashPassword.size + dbNameSize + fixedBodySize
@@ -68,7 +68,7 @@ case class LoginRequest(
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out 
     bw.writeNullTerminatedString(username)
-    bw.writeLengthCodedString(hashPassword)
+    bw.writeLengthCodedBytes(hashPassword)
     if (clientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))
       bw.writeNullTerminatedString(database.get)
 

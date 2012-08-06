@@ -12,13 +12,34 @@ import java.nio.ByteOrder
  * All Buffer methods are side-effecting. That is, each call to a read* or write* 
  * method will increase the current offset. 
  *
- * Because bytes exchanged between the client/server are encoded 
- * in little-endian byte order, both BufferReader and BufferWriter 
- * use ByteOrder.LITTLE_EDIAN.
+ * Both BufferReader and BufferWriter assume bytes are written
+ * in little endian. This conforms with the MySQL protocol.
  */
 
-case object CorruptBufferException
-  extends Exception("Corrupt data or client/server are out of sync.")
+object Buffer {
+  val NULL_LENGTH = -1 // denotes a SQL NULL value when reading a length coded binary.
+  val EMPTY_STRING = new String
+  val EMPTY_BYTE_ARRAY = new Array[Byte](0)
+
+  case object CorruptBufferException
+    extends Exception("Corrupt data or client/server are out of sync.")
+
+  /**
+   * Calculates the size required to store a length
+   * according to the MySQL protocol for length coded
+   * binary.
+   */
+  def sizeOfLen(l: Long) = 
+    if (l < 251) 1 else if (l < 65536) 3 else if (l < 16777216) 4 else 9
+
+  /**
+   * Wraps the arrays into a ChannelBuffer with the
+   * appropriate MySQL protocol byte order. A wrappedBuffer 
+   * avoids copying the underlying arrays.
+   */
+  def toChannelBuffer(bytes: Array[Byte]*) = 
+    wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes: _*)
+}
 
 trait BufferReader {
   /**
@@ -82,8 +103,8 @@ trait BufferReader {
    * Depending on the first byte, reads a different width from
    * the buffer. For more info, refer to MySQL Client/Server protocol
    * documentation.
-   * @return a numeric value representing the length of
-   * the bytes to follow.
+   * @return a numeric value representing the number of
+   * bytes expected to follow.
    */
   def readLengthCodedBinary(): Long = {
     val firstByte = readUnsignedByte()
@@ -91,12 +112,12 @@ trait BufferReader {
       firstByte
     else
       firstByte match {
-        case 251 => BufferReader.NULL_LENGTH
+        case 251 => Buffer.NULL_LENGTH
         case 252 => readUnsignedShort().toLong
-        case 253 => readInt24().toLong
+        case 253 => readUnsignedInt24().toLong
         case 254 => readLong()
         case _ => 
-          throw CorruptBufferException
+          throw Buffer.CorruptBufferException
       }
   }
 
@@ -110,7 +131,7 @@ trait BufferReader {
     val start = offset
     var length = 0
 
-    while(readByte() != 0)
+    while (readByte() != 0x00)
       length += 1
 
     this.toString(start, length, Charset.defaultCharset)
@@ -121,15 +142,19 @@ trait BufferReader {
    * Client/Server protocol. Uses Charset.defaultCharset to 
    * decode strings. For more details refer to MySQL
    * documentation.
-   * @return a MySQL length coded String start at
+   * @return a MySQL length coded String starting at
    * offset.
    */
   def readLengthCodedString(): String = {
+    // TO DO: Handle LONGTEXT. This will cause an issue if the length is
+    // greater than Integer.MAX_VALUE (2147483647). The max length of a BLOB
+    // in MySQL seems to be 2^32 - 1 (4294967295) which would be lost
+    // in this cast.
     val length = readLengthCodedBinary().toInt
-    if (length == BufferReader.NULL_LENGTH)
+    if (length == Buffer.NULL_LENGTH)
        null
     else if (length == 0)
-      BufferReader.EMPTY_STRING
+      Buffer.EMPTY_STRING
     else {
       val start = offset
       skip(length)
@@ -142,21 +167,23 @@ trait BufferReader {
    * Client/Server protocol. This is indentical to a length coded
    * string except the bytes are returned raw.
    * @return an Array[Byte] containing the length coded set of
-   * bytes at starting at offset.
+   * bytes starting at offset.
    */
   def readLengthCodedBytes(): Array[Byte] = {
+    // This presents the same issue as noted above
+    // for length coded strings.
     val len = readLengthCodedBinary().toInt
-    if (len == BufferReader.NULL_LENGTH)
+    if (len == Buffer.NULL_LENGTH)
       null
     else if (len == 0)
-      BufferReader.EMPTY_BYTE_ARRAY
+      Buffer.EMPTY_BYTE_ARRAY
     else
       take(len)
   }
 
   /**
    * Returns the bytes from start to start+length
-   * into a string using Charset.defaultCharset.
+   * into a string using the given java.nio.charset.Charset.
    */
   def toString(start: Int, length: Int, charset: JCharset) =
     new String(array, start, length, charset)
@@ -164,16 +191,12 @@ trait BufferReader {
   /**
    * Returns a Netty ChannelBuffer representing
    * the underlying array. The ChannelBuffer
-   * has ByteOrder.LITTLE_ENDIAN.
+   * is guaranteed ByteOrder.LITTLE_ENDIAN.
    */
   def toChannelBuffer: ChannelBuffer
 }
 
 object BufferReader {
-  val NULL_LENGTH = -1 // denotes a SQL NULL value when reading a length coded binary.
-  val EMPTY_STRING = new String
-  val EMPTY_BYTE_ARRAY = new Array[Byte](0)
-
   /**
    * Creates a BufferReader from an Array[Byte].
    * @param bytes Byte array to read from.
@@ -183,8 +206,7 @@ object BufferReader {
     require(bytes != null)
     require(startOffset >= 0)
 
-    // Note, a wrappedBuffer avoids copying the array.
-    val underlying = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes)
+    val underlying = Buffer.toChannelBuffer(bytes)
     underlying.readerIndex(startOffset)
     new BufferReaderImpl(underlying)
   }
@@ -206,7 +228,7 @@ object BufferReader {
     def offset = underlying.readerIndex
     def array = underlying.array
 
-    def readable(width: Int) = underlying.readableBytes == width 
+    def readable(width: Int) = underlying.readableBytes >= width 
 
     def readByte(): Byte = underlying.readByte()
     def readUnsignedByte(): Short = underlying.readUnsignedByte()
@@ -320,7 +342,8 @@ trait BufferWriter {
 
    /**
     * Writes a null terminated string onto the buffer where
-    * '\0' denotes null. Uses Charset.defaultCharset to decode the String.
+    * '\0' denotes null. Uses Charset.defaultCharset to decode the given
+    * String.
     * @param s String to write.
     */
    def writeNullTerminatedString(s: String): BufferWriter = {
@@ -331,7 +354,8 @@ trait BufferWriter {
 
    /**
     * Writes a length coded string using the MySQL Client/Server
-    * protocol. Uses Charset.defaultCharset to decode the String.
+    * protocol. Uses Charset.defaultCharset to decode the given
+    * String.
     * @param s String to write to buffer.
     */
    def writeLengthCodedString(s: String): BufferWriter = {
@@ -341,21 +365,19 @@ trait BufferWriter {
    }
 
    /**
-    * Writes a length coded string according to the MySQL client/server
-    * protocol. Note, it is up to the caller to ensure that the bytes
-    * are encoded using the proper charset.
-    * @param strAsBytes An Array[Byte] representing the String.
+    * Writes a length coded set of bytes according to the MySQL 
+    * client/server protocol.
     */
-   def writeLengthCodedString(strAsBytes: Array[Byte]): BufferWriter = {
-    writeLengthCodedBinary(strAsBytes.length)
-    writeBytes(strAsBytes)
+   def writeLengthCodedBytes(bytes: Array[Byte]): BufferWriter = {
+    writeLengthCodedBinary(bytes.length)
+    writeBytes(bytes)
     this
-  }
+   }
 
   /**
    * Returns a Netty ChannelBuffer representing
    * the underlying buffer. The ChannelBuffer
-   * has ByteOrder.LITTLE_ENDIAN.
+   * is guaranteed ByteOrder.LITTLE_ENDIAN.
    */
   def toChannelBuffer: ChannelBuffer
 }
@@ -371,7 +393,7 @@ object BufferWriter {
     require(startOffset >= 0)
 
     // Note, a wrappedBuffer avoids copying the the array.
-    val underlying = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes)
+    val underlying = Buffer.toChannelBuffer(bytes)
     underlying.writerIndex(startOffset)
     new BufferWriterImpl(underlying)
   }
@@ -385,24 +407,15 @@ object BufferWriter {
   }
 
   /**
-   * Calculates the size required to store a length
-   * according to the MySQL protocol for length coded
-   * binary.
-   */
-  def sizeOfLen(l: Long) = 
-    if (l < 251) 1 else if (l < 65536) 3 else if (l < 16777216) 4 else 9
-
-
-  /**
    * BufferWriter implementation backed by a Netty ChannelBuffer.
    */
   private[this] class BufferWriterImpl(underlying: ChannelBuffer) extends BufferWriter {
     override def capacity = underlying.capacity
     def offset = underlying.writerIndex
     def array = underlying.array
-    def writable(width: Int = 1): Boolean = underlying.writableBytes == width
+    def writable(width: Int = 1): Boolean = underlying.writableBytes >= width
 
-    def writeBoolean(b: Boolean): BufferWriter = if(b) writeByte(0) else writeByte(1)
+    def writeBoolean(b: Boolean): BufferWriter = if(b) writeByte(1) else writeByte(0)
 
     def writeByte(n: Int): BufferWriter = {
       underlying.writeByte(n)
