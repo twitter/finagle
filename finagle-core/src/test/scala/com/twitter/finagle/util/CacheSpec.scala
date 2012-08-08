@@ -22,9 +22,9 @@ class CacheSpec extends SpecificationWithJUnit with Mockito {
       }
     }
 
-    "return objects in FIFO order" in {
+    "return objects in LIFO order" in {
       objects take 5 foreach { cache.put(_) }
-      objects take 5 foreach { cache.get() must beSome(_) }
+      (objects take(5)).reverse foreach { cache.get() must beSome(_) }
     }
 
     "return None when empty" in {
@@ -46,6 +46,20 @@ class CacheSpec extends SpecificationWithJUnit with Mockito {
       timer.tick()
       there was one(evictor)(objects(1))
       timer.tasks must beEmpty
+    }
+
+    "not expire any items if none of them have expired yet" in {
+      cache.put(objects(0))
+      timer.tasks must haveSize(1)
+      cache.put(objects(1))
+      cache.put(objects(2))
+      timer.tasks must haveSize(1)
+      tc.advance(4.seconds)
+      timer.tick()
+      there was no(evictor)(objects(0))
+      there was no(evictor)(objects(1))
+      there was no(evictor)(objects(2))
+      cache.size must be_==(3)
     }
 
     "evictAll evicts all items" in {
