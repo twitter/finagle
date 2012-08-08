@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql.protocol
 
 import org.specs.SpecificationWithJUnit
+import com.twitter.finagle.mysql.ClientError
 
 class BufferSpec extends SpecificationWithJUnit {
   "Buffer" should {
@@ -108,7 +109,7 @@ class BufferSpec extends SpecificationWithJUnit {
 
       "large length coded binary" in {
         bw.writeLengthCodedBinary(16777217)
-        br.readLengthCodedBinary() mustEqual 16777217
+        br.readLengthCodedBinary() must throwA[ClientError]
       }
 
       "null terminated string" in {
