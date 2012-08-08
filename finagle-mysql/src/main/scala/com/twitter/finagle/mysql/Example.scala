@@ -108,7 +108,7 @@ object Main {
     preparedFuture onSuccess { ps =>
       insertResults = for (r <- SwimmingRecord.records) yield {
         ps.parameters = r.toArray
-        client.execute(ps).get(1.second) onSuccess { r => println(r) } onFailure {
+        client.execute(ps).get(1.second) onFailure {
           case e => println("Failed with %s when attempting to insert %s".format(e, r))
         }
       }
@@ -122,7 +122,7 @@ object Main {
         e => println("Unable to close PreparedStatement: %s".format(e))
       }
     }
-    
+
     preparedFuture.isReturn && insertResults.forall(_.isReturn)
   }
 
