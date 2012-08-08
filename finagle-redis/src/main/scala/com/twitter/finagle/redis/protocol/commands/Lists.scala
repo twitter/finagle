@@ -40,9 +40,14 @@ object LIndex {
   }
 }
 
-case class LInsert(key: String, relativePosition: String,
-    pivot: Array[Byte], value: Array[Byte]) extends StrictKeyCommand with
-    StrictValueCommand {
+case class LInsert(
+    key: String,
+    relativePosition: String,
+    pivot: Array[Byte],
+    value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
   val command = Commands.LINSERT
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, relativePosition,
@@ -81,11 +86,16 @@ object LPush {
   }
 }
 
-case class LRem(key: String, count: Int, value: Array[Byte]) extends StrictKeyCommand with
-  StrictValueCommand {
+case class LRem(key: String, count: Int, value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
   val command = Commands.LREM
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, count.toString, BytesToString(value))))
+  override def toChannelBuffer = {
+    val commandArgs = List(command, key, count.toString, BytesToString(value))
+    val commandBytes = StringToBytes.fromList(commandArgs)
+    RedisCodec.toUnifiedFormat(commandBytes)
+  }
 }
 
 object LRem {
@@ -98,11 +108,16 @@ object LRem {
   }
 }
 
-case class LSet(key: String, index: Int, value: Array[Byte]) extends StrictKeyCommand with
-  StrictValueCommand {
+case class LSet(key: String, index: Int, value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
   val command = Commands.LSET
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, index.toString, BytesToString(value))))
+  override def toChannelBuffer = {
+    val commandArgs = List(command, key, index.toString, BytesToString(value))
+    val commandBytes = StringToBytes.fromList(commandArgs)
+    RedisCodec.toUnifiedFormat(commandBytes)
+  }
 }
 
 object LSet {
@@ -115,10 +130,8 @@ object LSet {
   }
 }
 
-case class LRange(key: String, start: Int, end: Int) extends StrictKeyCommand {
-  val command = Commands.LRANGE
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, start.toString, end.toString)))
+case class LRange(key: String, start: Int, end: Int) extends ListRangeCommand {
+  override val command = Commands.LRANGE
 }
 
 object LRange {
@@ -157,10 +170,8 @@ object RPush {
   }
 }
 
-case class LTrim(key: String, start: Int, end: Int) extends StrictKeyCommand {
+case class LTrim(key: String, start: Int, end: Int) extends ListRangeCommand {
   val command = Commands.LTRIM
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, start.toString, end.toString)))
 }
 
 object LTrim {
@@ -170,5 +181,17 @@ object LTrim {
       Tuple2(NumberFormat.toInt(list(1)), NumberFormat.toInt(list(2)))
     }
     LTrim(list(0), start, end)
+  }
+}
+
+trait ListRangeCommand extends StrictKeyCommand {
+  val start: Int
+  val end: Int
+  val command: String
+
+  override def toChannelBuffer = {
+    val commandArgs = List(command, key, start.toString, end.toString)
+    val commandBytes = StringToBytes.fromList(commandArgs)
+    RedisCodec.toUnifiedFormat(commandBytes)
   }
 }

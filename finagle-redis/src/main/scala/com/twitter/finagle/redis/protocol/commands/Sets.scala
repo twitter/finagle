@@ -29,8 +29,10 @@ object SMembers extends StringMonad {
   }
 }
 
-case class SIsMember(key: String, value: Array[Byte]) extends StrictKeyCommand with
-  StrictValueCommand {
+case class SIsMember(key: String, value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
   val command = Commands.SISMEMBER
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(List(StringToBytes(command), StringToBytes(key), value))
@@ -74,6 +76,5 @@ case class SPop(key: String) extends StrictKeyCommand {
 }
 
 object SPop extends StringMonad {
-  def apply(args: List[Array[Byte]]): SPop =
-    SPop(getArg(args, Commands.SPOP))
+  def apply(args: List[Array[Byte]]): SPop = SPop(getArg(args, Commands.SPOP))
 }
