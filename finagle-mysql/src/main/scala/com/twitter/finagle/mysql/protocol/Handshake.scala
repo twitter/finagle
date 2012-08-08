@@ -76,7 +76,7 @@ case class LoginRequest(
   }
 
   private[this] def encryptPassword(password: String, salt: Array[Byte]) = {
-    val md = MessageDigest.getInstance("SHA-1");
+    val md = MessageDigest.getInstance("SHA-1")
     val hash1 = md.digest(password.getBytes(Charset.defaultCharset.displayName))
     md.reset()
     val hash2 = md.digest(hash1)

@@ -60,7 +60,6 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Runs a query that returns a result set. For each row
    * in the ResultSet, call f on the row and return the results.
    * @param sql A sql statement that returns a result set.
-   * @param params: Any
    * @param f A function from ResultSet to any type T.
    * @return a Future of Seq[T]
    */

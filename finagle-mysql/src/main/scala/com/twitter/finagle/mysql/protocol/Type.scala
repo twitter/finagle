@@ -73,7 +73,12 @@ object Type {
     case b: Array[Byte] if b.size <= 255         => TINY_BLOB
     case b: Array[Byte] if b.size <= 65535       => BLOB
     case b: Array[Byte] if b.size <= 16777215    => MEDIUM_BLOB
-    case b: Array[Byte] if b.size <= 4294967295L => LONG_BLOB
+    
+    // No support for LONG_BLOBS. In order to implement this correctly
+    // in Java/Scala we need to represent this set of bytes as a composition
+    // of buffers.
+    // case b: Array[Byte] if b.size <= 4294967295L => LONG_BLOB
+
     // Date and Time
     case t: java.sql.Timestamp => TIMESTAMP
     case d: java.sql.Date => DATE

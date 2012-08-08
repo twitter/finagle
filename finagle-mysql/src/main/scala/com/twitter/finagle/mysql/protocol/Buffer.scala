@@ -1,5 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
+import com.twitter.finagle.mysql.ClientError
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers._
 import java.nio.charset.{Charset => JCharset}
@@ -106,16 +107,23 @@ trait BufferReader {
    * @return a numeric value representing the number of
    * bytes expected to follow.
    */
-  def readLengthCodedBinary(): Long = {
+  def readLengthCodedBinary(): Int = {
     val firstByte = readUnsignedByte()
     if (firstByte < 251)
       firstByte
     else
       firstByte match {
         case 251 => Buffer.NULL_LENGTH
-        case 252 => readUnsignedShort().toLong
-        case 253 => readUnsignedInt24().toLong
-        case 254 => readLong()
+        case 252 => readUnsignedShort()
+        case 253 => readUnsignedInt24()
+
+        // 254 Indicates a set of bytes with length >= 2^24.
+        // The current implementation does not support
+        // this.
+        case 254 => 
+          throw new ClientError("BufferReader: LONG_BLOB is not supported!")
+          // readLong()
+
         case _ => 
           throw Buffer.CorruptBufferException
       }
@@ -146,11 +154,7 @@ trait BufferReader {
    * offset.
    */
   def readLengthCodedString(): String = {
-    // TO DO: Handle LONGTEXT. This will cause an issue if the length is
-    // greater than Integer.MAX_VALUE (2147483647). The max length of a BLOB
-    // in MySQL seems to be 2^32 - 1 (4294967295) which would be lost
-    // in this cast.
-    val length = readLengthCodedBinary().toInt
+    val length = readLengthCodedBinary()
     if (length == Buffer.NULL_LENGTH)
        null
     else if (length == 0)
@@ -170,9 +174,7 @@ trait BufferReader {
    * bytes starting at offset.
    */
   def readLengthCodedBytes(): Array[Byte] = {
-    // This presents the same issue as noted above
-    // for length coded strings.
-    val len = readLengthCodedBinary().toInt
+    val len = readLengthCodedBinary()
     if (len == Buffer.NULL_LENGTH)
       null
     else if (len == 0)

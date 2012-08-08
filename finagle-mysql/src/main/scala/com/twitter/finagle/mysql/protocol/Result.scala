@@ -32,6 +32,13 @@ object OK {
 }
 
 /**
+ * Used internally to synthesize a response from
+ * the server when sending a prepared statement 
+ * CloseRequest
+ */
+object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
+
+/**
  * Represents the Error Packet received from the server
  * and the data sent along with it.
  */

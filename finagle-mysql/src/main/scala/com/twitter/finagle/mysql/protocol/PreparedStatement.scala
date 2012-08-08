@@ -13,7 +13,7 @@ case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Resu
   def bindParameters() = hasNewParams = false
   
   def parameters_=(arr: Array[Any]) = {
-    require(arr.size == numberOfParams)
+    require(arr.size == numberOfParams, "Invalid number of parameters.")
     hasNewParams = true
     params = arr
   }
@@ -36,6 +36,9 @@ object PreparedStatement {
    */
   def decode(header: Packet, seqOne: Seq[Packet], seqTwo: Seq[Packet]): PreparedStatement = {
     val ok = PreparedOK.decode(header)
+    // The current PreparedStatement implementation does not make use of this
+    // data. However, it can be used to perform parameter type verification before
+    // sending an ExecuteRequest to the server.
     val (paramPackets, columnPackets) = (ok.numOfParams, ok.numOfColumns) match {
       case (0, 0)          => (Nil, Nil)
       case (0, n) if n > 0 => (Nil, seqOne)

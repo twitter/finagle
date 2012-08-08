@@ -34,7 +34,7 @@ object SwimmingRecord {
     PRIMARY KEY (`id`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8"""
   
-  val records = List[SwimmingRecord](
+  val records = List(
     SwimmingRecord("50 m freestyle", 20.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-12-18")),
     SwimmingRecord("100 m freestyle", 46.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-08-02")),
     SwimmingRecord("50 m backstroke", 24.04F, "Liam Tancock", "Great Britain", Date.valueOf("2009-08-02")),
@@ -108,7 +108,7 @@ object Main {
     preparedFuture onSuccess { ps =>
       insertResults = for (r <- SwimmingRecord.records) yield {
         ps.parameters = r.toArray
-        client.execute(ps).get(1.second) onFailure {
+        client.execute(ps).get(1.second) onSuccess { r => println(r) } onFailure {
           case e => println("Failed with %s when attempting to insert %s".format(e, r))
         }
       }
@@ -116,6 +116,13 @@ object Main {
       case e => println("Failed with %s when attempting to create a prepared statement".format(e))
     }
 
+    // close prepared statement on the server
+    for(ps <- preparedFuture) {
+      client.closeStatement(ps).get(1.second) onFailure {
+        e => println("Unable to close PreparedStatement: %s".format(e))
+      }
+    }
+    
     preparedFuture.isReturn && insertResults.forall(_.isReturn)
   }
 

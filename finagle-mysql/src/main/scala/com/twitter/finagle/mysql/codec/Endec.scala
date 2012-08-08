@@ -53,6 +53,13 @@ class Endec extends SimpleChannelHandler {
    * Request object.
    */
   override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
+    // Synthesize a response for a CloseRequest because we don't
+    // expect one from the server.
+    case req: CommandRequest if req.cmd == Command.COM_STMT_CLOSE =>
+      val buffer = encode(req)
+      Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
+      Channels.fireMessageReceived(ctx, CloseStatementOK)
+
     case req: Request => 
       val buffer = encode(req)
       Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
