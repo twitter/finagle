@@ -7,7 +7,7 @@ import com.twitter.common.zookeeper.ServerSet
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.concurrent.Spool
 import com.twitter.finagle.builder.Cluster
-import com.twitter.thrift.ServiceInstance
+import com.twitter.thrift.{Endpoint, ServiceInstance}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util.{Future, Return, Promise}
 
@@ -21,7 +21,12 @@ import scala.collection.mutable.HashSet
  * A Cluster of SocketAddresses that provide a certain service. Cluster
  * membership is indicated by children Zookeeper node.
  */
-class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddress] {
+class ZookeeperServerSetCluster(serverSet: ServerSet, endpointName: Option[String])
+extends Cluster[SocketAddress] {
+
+  def this(serverSet: ServerSet) = this(serverSet, None)
+  def this(serverSet: ServerSet, endpointName: String) = this(serverSet, Some(endpointName))
+
   /**
    * LIFO "queue" of length one. Last-write-wins when more than one item
    * is enqueued.
@@ -52,9 +57,16 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddr
   private[this] var changes = new Promise[Spool[Cluster.Change[SocketAddress]]]
 
   private[this] def performChange(serverSet: ImmutableSet[ServiceInstance]) = synchronized {
-    val newSet =  serverSet map { serviceInstance =>
-      val endpoint = serviceInstance.getServiceEndpoint
-      new InetSocketAddress(endpoint.getHost, endpoint.getPort): SocketAddress
+    val newSet = serverSet flatMap { serviceInstance =>
+      val endpoint =
+        endpointName match {
+          case Some(name) => Option(serviceInstance.getAdditionalEndpoints.get(name))
+          case None => Some(serviceInstance.getServiceEndpoint)
+        }
+
+      endpoint map { endpoint =>
+        new InetSocketAddress(endpoint.getHost, endpoint.getPort): SocketAddress
+      }
     }
     val added = newSet &~ underlyingSet
     val removed = underlyingSet &~ newSet
