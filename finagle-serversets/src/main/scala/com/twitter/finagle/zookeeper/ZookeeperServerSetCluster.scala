@@ -1,17 +1,21 @@
 package com.twitter.finagle.zookeeper
 
-import java.net.{InetSocketAddress, SocketAddress}
-import com.twitter.common.zookeeper.ServerSet
-import java.util.concurrent.atomic.AtomicReference
 import com.google.common.collect.ImmutableSet
+
 import com.twitter.common.net.pool.DynamicHostSet
-import scala.collection.JavaConversions._
+import com.twitter.common.zookeeper.ServerSet
+import com.twitter.common.zookeeper.ServerSet.EndpointStatus
+import com.twitter.concurrent.Spool
+import com.twitter.finagle.builder.Cluster
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
-import com.twitter.finagle.builder.Cluster
-import collection.mutable.HashSet
-import com.twitter.concurrent.Spool
 import com.twitter.util.{Future, Return, Promise}
+
+import java.net.{InetSocketAddress, SocketAddress}
+import java.util.concurrent.atomic.AtomicReference
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.HashSet
 
 /**
  * A Cluster of SocketAddresses that provide a certain service. Cluster
@@ -24,7 +28,7 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddr
    */
   private[this] val queuedChange = new AtomicReference[ImmutableSet[ServiceInstance]](null)
   // serverSet.monitor will block until initial membership is available
-  private[zookeeper] val thread: Thread = new Thread {
+  private[zookeeper] val thread: Thread = new Thread("ServerSetMonitorInit") {
     override def run{
       serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
         def onChange(serverSet: ImmutableSet[ServiceInstance]) = {
@@ -41,6 +45,7 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddr
       })
     }
   }
+  thread.setDaemon(true)
   thread.start()
 
   private[this] val underlyingSet = new HashSet[SocketAddress]
@@ -69,10 +74,10 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddr
     changes = newTail
   }
 
-  def join(
+  def joinServerSet(
     address: SocketAddress,
     endpoints: Map[String, InetSocketAddress] = Map[String, InetSocketAddress]()
-  ) {
+  ): EndpointStatus = {
     require(address.isInstanceOf[InetSocketAddress])
 
     serverSet.join(
@@ -80,6 +85,11 @@ class ZookeeperServerSetCluster(serverSet: ServerSet) extends Cluster[SocketAddr
       endpoints,
       ALIVE)
   }
+
+  def join(
+    address: SocketAddress,
+    endpoints: Map[String, InetSocketAddress] = Map[String, InetSocketAddress]()
+  ): Unit = joinServerSet(address, endpoints)
 
   def snap: (Seq[SocketAddress], Future[Spool[Cluster.Change[SocketAddress]]]) = synchronized {
     (underlyingSet.toSeq, changes)
