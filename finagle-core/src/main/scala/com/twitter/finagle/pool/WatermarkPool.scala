@@ -33,8 +33,8 @@ class WatermarkPool[Req, Rep](
   private[this] var numServices = 0
   private[this] var isOpen      = true
 
-  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") synchronized { waiters.size }
-  private[this] val sizeStat = statsReceiver.addGauge("pool_size") synchronized { numServices }
+  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { synchronized { waiters.size } }
+  private[this] val sizeStat = statsReceiver.addGauge("pool_size") { synchronized { numServices } }
 
   /**
    * Flush waiters by creating new services for them. This must
