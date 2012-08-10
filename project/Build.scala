@@ -335,4 +335,15 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
   ).dependsOn(finagleCore)
+
+  lazy val finagleMySQL = Project(
+    id = "finagle-mysql",
+    base = file("finagle-mysql"),
+    settings = Project.defaultSettings ++
+      StandardProject.newSettings ++
+      sharedSettings
+    ).settings(
+      name := "finagle-mysql",
+      libraryDependencies ++= Seq(util("logging"))
+    ).dependsOn(finagleCore)
 }

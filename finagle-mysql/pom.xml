@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.twitter</groupId>
+  <artifactId>finagle-mysql</artifactId>
+  <packaging>jar</packaging>
+  <version>5.3.6-SNAPSHOT</version>
+  <parent>
+    <groupId>com.twitter</groupId>
+    <artifactId>scala-parent-292</artifactId>
+    <version>0.0.2</version>
+    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
+  </parent>
+  <properties>
+    <git.dir>${project.basedir}/../../.git</git.dir>
+  </properties>
+  <dependencies>
+    <!-- library dependencies -->
+    <!-- project dependencies -->
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-core</artifactId>
+      <version>5.3.6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-logging</artifactId>
+      <version>5.3.7-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
