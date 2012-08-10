@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle</artifactId>
   <packaging>pom</packaging>
-  <version>5.3.5-SNAPSHOT</version>
+  <version>5.3.6-SNAPSHOT</version>
   <distributionManagement>
     <repository>
       <id>artifactory-release</id>
