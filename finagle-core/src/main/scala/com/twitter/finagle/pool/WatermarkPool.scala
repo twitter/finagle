@@ -1,14 +1,13 @@
 package com.twitter.finagle.pool
 
-import scala.annotation.tailrec
-import scala.collection.mutable.Queue
-
 import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle.{
   Service, ServiceFactory, ServiceClosedException,
   TooManyWaitersException, ServiceProxy,
   CancelledConnectionException, ClientConnection}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import scala.annotation.tailrec
+import scala.collection.mutable.Queue
 
 /**
  * The watermark pool is an object pool with low & high
@@ -34,8 +33,8 @@ class WatermarkPool[Req, Rep](
   private[this] var numServices = 0
   private[this] var isOpen      = true
 
-  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { waiters.size }
-  private[this] val sizeStat = statsReceiver.addGauge("pool_size") { numServices }
+  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") synchronized { waiters.size }
+  private[this] val sizeStat = statsReceiver.addGauge("pool_size") synchronized { numServices }
 
   /**
    * Flush waiters by creating new services for them. This must
