@@ -308,7 +308,7 @@ Use the Finagle library to implement asynchronous Remote Procedure Call (RPC) cl
 * Load Balancing
 * Failure Detection
 * Failover/Retry
-* Distributed Tracing (a la [Dapper](http://research.google.com/pubs/pub36356.html))
+* Distributed Tracing (à la [Dapper](http://research.google.com/pubs/pub36356.html))
 * Service Discovery (e.g., via Zookeeper)
 * Rich Statistics
 * Native OpenSSL Bindings
@@ -872,7 +872,7 @@ Usually a producer makes a `Promise` and casts it to a `Future` before giving it
       }
       promise
     }
-    
+
 You are discouraged from creating your own Promises. Instead, where possible, use `Future` combinators to compose actions (discussed next).
 
 [Top](#Top)
@@ -1151,7 +1151,7 @@ A client can access a cluster, as follows:
 
 ## Java Design Patterns for Finagle
 
-The implementations of RPC servers and clients in Java are similar to Scala implementations. You can write your Java services in the _imperative_ style, which is the traditional Java programming style, or you can write in the _functional_ style, which uses functions as objects and is the basis for Scala. Most differences between Java and Scala implementations are related to exception handling.  
+The implementations of RPC servers and clients in Java are similar to Scala implementations. You can write your Java services in the _imperative_ style, which is the traditional Java programming style, or you can write in the _functional_ style, which uses functions as objects and is the basis for Scala. Most differences between Java and Scala implementations are related to exception handling.
 
 [Top](#Top)
 
@@ -1445,7 +1445,7 @@ Use the `Try` and `Throw` classes in `com.twitter.util` to implement a more gene
 
 #### Handling Asynchronous Responses
 
-To handle asynchronous responses, you add a `FutureEventListener` to listen for a response. Finagle invokes the `onSuccess` method when a response arrives or invokes `onFailure` for an exception: 
+To handle asynchronous responses, you add a `FutureEventListener` to listen for a response. Finagle invokes the `onSuccess` method when a response arrives or invokes `onFailure` for an exception:
 
         httpClient.apply(request).addEventListener(new FutureEventListener<HttpResponse>() {
           @Override
@@ -1474,7 +1474,7 @@ To prevent blocking operations from executing on the main Finagle thread, you mu
 * <a href="#Setting Up Your Thread Pool">Setting Up Your Thread Pool</a>
 * <a href="#Invoking the Blocking Operation">Invoking the Blocking Operation</a>
 
-**Note:** Jakob Homan provides an example implementation of a thread pool that executes Scala closures on <a href="https://github.com/jghoman/finagle-java-example">GitHub</a>. 
+**Note:** Jakob Homan provides an example implementation of a thread pool that executes Scala closures on <a href="https://github.com/jghoman/finagle-java-example">GitHub</a>.
 
 [Top](#Top)
 
@@ -1502,8 +1502,8 @@ The following example shows a Thrift server that places the blocking operation d
     public static class HelloServer implements Hello.ServiceIface {
       ExecutorService pool = Executors.newFixedThreadPool(4);                        // Java thread pool
       ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(threads); // Java Future thread pool
-		
-      public Future<Integer> blockingOperation() {  
+
+      public Future<Integer> blockingOperation() {
 	      Function0<Integer> blockingWork = new BlockingOperation();
         return futurePool.apply(blockingWork);
       }
