@@ -5,7 +5,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.{BytesToString, NumberFormat}
 import com.twitter.finagle.Service
 import com.twitter.util.Future
-import scala.collection.immutable
+import scala.collection.{Set => CollectionSet}
 
 object Client {
 
@@ -64,15 +64,15 @@ class Client(service: Service[Command, Reply]) {
    */
   def ttl(key: String): Future[Option[Int]] =
     doRequest(Ttl(key)) {
-    case IntegerReply(n) => {
-      if (n != -1) {
-        Future.value(Some(n))
-      }
-      else {
-        Future.value(None)
+      case IntegerReply(n) => {
+        if (n != -1) {
+          Future.value(Some(n))
+        }
+        else {
+          Future.value(None)
+        }
       }
     }
-  }
 
   /**
    * Sets how long it will take the key to expire
@@ -80,11 +80,10 @@ class Client(service: Service[Command, Reply]) {
    * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
    * false otherwise.
    */
-  def expire(key: String, ttl: Int): Future[Boolean] = {
+  def expire(key: String, ttl: Int): Future[Boolean] =
     doRequest(Expire(key, ttl)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
-  }
 
   /**
    * Gets the value associated with the given key
@@ -107,8 +106,8 @@ class Client(service: Service[Command, Reply]) {
    */
   def lLen(key: String): Future[Int] =
     doRequest(LLen(key)) {
-    case IntegerReply(n) => Future.value(n)
-  }
+      case IntegerReply(n) => Future.value(n)
+    }
 
   /**
    * Gets the value of the element at the indexth position in the list.
@@ -121,31 +120,33 @@ class Client(service: Service[Command, Reply]) {
     doRequest(LIndex(key, index)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply()   => Future.value(None)
-  }
+    }
 
   /**
    * Inserts a value after another pivot value in the list.
    * If the key is a non-list element,
    * an exception will be thrown.
    * @params key, pivot, value
-   * @return an option of the new length of the list, or nothing if the pivot is not found, or the list is empty.
+   * @return an option of the new length of the list, or nothing if the pivot is not found, or
+   * the list is empty.
    */
   def lInsertAfter(key: String, pivot: Array[Byte], value: Array[Byte]): Future[Option[Int]] =
     doRequest(LInsert(key, "AFTER", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
-  }
+    }
 
   /**
    * Inserts a value before another pivot value in the list.
    * If the key is a non-list element,
    * an exception will be thrown.
    * @params key, pivot, value
-   * @return an option of the new length of the list, or nothing if the pivot is not found, or the list is empty.
+   * @return an option of the new length of the list, or nothing if the pivot is not found, or the
+   * list is empty.
    */
   def lInsertBefore(key: String, pivot: Array[Byte], value: Array[Byte]): Future[Option[Int]] =
     doRequest(LInsert(key, "BEFORE", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
-  }
+    }
 
   /**
    * Pops a value off the front of the list.
@@ -157,7 +158,7 @@ class Client(service: Service[Command, Reply]) {
     doRequest(LPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
-  }
+    }
 
   /**
    * Pushes a value onto the front of the list.
@@ -168,19 +169,19 @@ class Client(service: Service[Command, Reply]) {
   def lPush(key: String, value: List[Array[Byte]]): Future[Int] =
     doRequest(LPush(key, value)) {
       case IntegerReply(n) => Future.value(n)
-  }
+    }
 
   /**
    * Removes count elements matching value from the list.
    * If the key is a non-list element, an exception will be thrown.
-   * @params key, count: The sgn of count describes whether it will remove them from the back or the front
-   * of the list.  If count is 0, it will remove all instances, value
+   * @params key, count: The sgn of count describes whether it will remove them from the
+   * back or the front of the list.  If count is 0, it will remove all instances, value
    * @return the number of removed elements.
    */
   def lRem(key: String, count: Int, value: Array[Byte]): Future[Int] =
     doRequest(LRem(key, count, value)) {
       case IntegerReply(n) => Future.value(n)
-  }
+    }
 
   /**
    * Sets the indexth element to be value.
@@ -190,7 +191,7 @@ class Client(service: Service[Command, Reply]) {
   def lSet(key: String, index: Int, value: Array[Byte]): Future[Unit] =
     doRequest(LSet(key, index, value)) {
       case StatusReply(message) => Future.Unit
-  }
+    }
 
   /**
    * Gets the values in the range supplied.
@@ -202,7 +203,7 @@ class Client(service: Service[Command, Reply]) {
     doRequest(LRange(key, start, end)) {
       case MBulkReply(message) => Future.value(message)
       case EmptyMBulkReply() => Future.value(List())
-  }
+    }
 
   /**
    * Pops a value off the end of the list.
@@ -214,7 +215,7 @@ class Client(service: Service[Command, Reply]) {
     doRequest(RPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
-  }
+    }
 
   /**
    * Pushes a value onto the end of the list.
@@ -225,7 +226,7 @@ class Client(service: Service[Command, Reply]) {
   def rPush(key: String, value: List[Array[Byte]]): Future[Int] =
     doRequest(RPush(key, value)) {
       case IntegerReply(n) => Future.value(n)
-  }
+    }
 
   /**
    * Removes all of the elements from the list except for those in the range.
@@ -234,7 +235,7 @@ class Client(service: Service[Command, Reply]) {
   def lTrim(key: String, start: Int, end: Int): Future[Unit] =
     doRequest(LTrim(key, start, end)) {
       case StatusReply(message) => Future.Unit
-  }
+    }
 
   /**
    * Adds elements to the set, according to the set property.
@@ -245,19 +246,19 @@ class Client(service: Service[Command, Reply]) {
   def sAdd(key: String, members: List[Array[Byte]]): Future[Int] =
     doRequest(SAdd(key, members)) {
       case IntegerReply(n) => Future.value(n)
-  }
-  
+    }
+
   /**
    * Gets the members of the set.
    * Throws an exception if the key does not refer to a set.
    * @param key
    * @return a list of the members
    */
-  def sMembers(key: String): Future[immutable.Set[Array[Byte]]] =
+  def sMembers(key: String): Future[CollectionSet[Array[Byte]]] =
     doRequest(SMembers(key)) {
       case MBulkReply(list) => Future.value(list toSet)
-      case EmptyMBulkReply() => Future.value(immutable.Set())
-  }
+      case EmptyMBulkReply() => Future.value(CollectionSet())
+    }
 
   /**
    * Is the member in the set?
@@ -269,7 +270,7 @@ class Client(service: Service[Command, Reply]) {
   def sIsMember(key: String, member: Array[Byte]): Future[Boolean] =
     doRequest(SIsMember(key, member)) {
       case IntegerReply(n) => Future.value(n == 1)
-  }
+    }
 
   /**
    * How many elements are in the set?
@@ -281,7 +282,7 @@ class Client(service: Service[Command, Reply]) {
   def sCard(key: String): Future[Int] =
     doRequest(SCard(key)) {
       case IntegerReply(n) => Future.value(n)
-  }
+    }
 
   /**
    * Removes the element from the set if it is in the set.
@@ -293,7 +294,7 @@ class Client(service: Service[Command, Reply]) {
   def sRem(key: String, members: List[Array[Byte]]): Future[Int] =
     doRequest(SRem(key, members)) {
       case IntegerReply(n) => Future.value(n)
-  }
+    }
 
   /**
    * Removes an element randomly from the set, and returns it.
@@ -303,9 +304,9 @@ class Client(service: Service[Command, Reply]) {
    */
   def sPop(key: String): Future[Option[Array[Byte]]] =
     doRequest(SPop(key)) {
-    case BulkReply(message) => Future.value(Some(message))
-    case EmptyBulkReply() => Future.value(None)
-  }
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply() => Future.value(None)
+    }
 
   /**
    * Gets the substring of the value associated with given key

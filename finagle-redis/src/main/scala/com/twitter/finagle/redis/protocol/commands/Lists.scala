@@ -6,21 +6,15 @@ import com.twitter.finagle.redis.util.StringToBytes
 import Commands.trimList
 import com.twitter.finagle.redis.ClientError
 
-trait StringMonad {
-  def getArg(args: List[Array[Byte]], command: String) = {
-    BytesToString(trimList(args, 1, command)(0))
-  }
-}
-
 case class LLen(key: String) extends StrictKeyCommand {
   val command = Commands.LLEN
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(Commands.LLEN, key)))
 }
 
-object LLen extends StringMonad {
+object LLen {
   def apply(args: List[Array[Byte]]): LLen = {
-    LLen(getArg(args, Commands.LLEN))
+    LLen(BytesToString.getMonadArg(args, Commands.LLEN))
   }
 }
 
@@ -67,9 +61,9 @@ case class LPop(key: String) extends StrictKeyCommand {
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
 }
 
-object LPop extends StringMonad {
+object LPop {
   def apply(args: List[Array[Byte]]): LPop = {
-    LPop(getArg(args, Commands.LPOP))
+    LPop(BytesToString.getMonadArg(args, Commands.LPOP))
   }
 }
 
@@ -144,16 +138,15 @@ object LRange {
   }
 }
 
-
 case class RPop(key: String) extends StrictKeyCommand {
   val command = Commands.RPOP
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
 }
 
-object RPop extends StringMonad {
+object RPop extends {
   def apply(args: List[Array[Byte]]): RPop = {
-    RPop(getArg(args, Commands.RPOP))
+    RPop(BytesToString.getMonadArg(args, Commands.RPOP))
   }
 }
 

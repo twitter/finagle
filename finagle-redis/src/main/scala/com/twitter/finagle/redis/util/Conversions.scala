@@ -4,6 +4,7 @@ package util
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
+import com.twitter.finagle.redis.protocol.Commands.trimList
 
 trait ErrorConversion {
   def getException(msg: String): Throwable
@@ -35,6 +36,9 @@ object BytesToString {
     charset: Charset = CharsetUtil.UTF_8) =
     args map { arg => (BytesToString(arg._1, charset), arg._2) }
 
+  def getMonadArg(args: List[Array[Byte]], command: String) = {
+    BytesToString(trimList(args, 1, command)(0))
+  }
 }
 object StringToBytes {
   def apply(arg: String, charset: Charset = CharsetUtil.UTF_8) = arg.getBytes(charset)

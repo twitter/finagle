@@ -23,9 +23,9 @@ case class SMembers(key: String) extends StrictKeyCommand {
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
 }
 
-object SMembers extends StringMonad {
+object SMembers {
   def apply(args: List[Array[Byte]]): SMembers = {
-    SMembers(getArg(args, Commands.SMEMBERS))
+    SMembers(BytesToString.getMonadArg(args, Commands.SMEMBERS))
   }
 }
 
@@ -51,9 +51,9 @@ case class SCard(key: String) extends StrictKeyCommand {
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
 }
 
-object SCard extends StringMonad {
+object SCard {
   def apply(args: List[Array[Byte]]): SCard =
-    SCard(getArg(args, Commands.SCARD))
+    SCard(BytesToString.getMonadArg(args, Commands.SCARD))
 }
 
 case class SRem(key: String, values: List[Array[Byte]]) extends StrictKeyCommand {
@@ -75,6 +75,6 @@ case class SPop(key: String) extends StrictKeyCommand {
     RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
 }
 
-object SPop extends StringMonad {
-  def apply(args: List[Array[Byte]]): SPop = SPop(getArg(args, Commands.SPOP))
+object SPop {
+  def apply(args: List[Array[Byte]]): SPop = SPop(BytesToString.getMonadArg(args, Commands.SPOP))
 }
