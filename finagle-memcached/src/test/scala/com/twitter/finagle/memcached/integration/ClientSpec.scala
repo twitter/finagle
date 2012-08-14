@@ -122,6 +122,7 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
       "send malformed keys" in {
+        // test key validation trait
         client.get("fo o")() must throwA[ClientError]
         client.set("", "bar")() must throwA[ClientError]
         client.get("    foo")() must throwA[ClientError]
@@ -131,9 +132,30 @@ class ClientSpec extends SpecificationWithJUnit {
         client.get(nullString)() must throwA[ClientError]
         client.set(nullString, "bar")() must throwA[ClientError]
         client.set("    ", "bar")() must throwA[ClientError]
-        client.set("\t", "bar")() must throwA[ClientError]
+        client.set("\t", "bar")() mustNot throwA[ClientError] // \t is allowed
         client.set("\r", "bar")() must throwA[ClientError]
         client.set("\n", "bar")() must throwA[ClientError]
+        client.set("\0", "bar")() must throwA[ClientError]
+
+        val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        client.get(veryLongKey)() must throwA[ClientError]
+        client.set(veryLongKey, "bar").isThrow mustBe true
+
+        // test other keyed command validation
+        val nullSeq:Seq[String] = null
+        client.get(nullSeq)() must throwA[ClientError]
+        client.gets(nullSeq)() must throwA[ClientError]
+        client.gets(Seq(null))() must throwA[ClientError]
+        client.gets(Seq(""))() must throwA[ClientError]
+        client.gets(Seq("foos", "bad key", "somethingelse"))() must throwA[ClientError]
+        client.append("bad key", "rab")() must throwA[ClientError]
+        client.prepend("bad key", "rab")() must throwA[ClientError]
+        client.replace("bad key", "bar")() must throwA[ClientError]
+        client.add("bad key", "2")() must throwA[ClientError]
+        client.cas("bad key", "z", "2")() must throwA[ClientError]
+        client.incr("bad key")() must throwA[ClientError]
+        client.decr("bad key")() must throwA[ClientError]
+        client.delete("bad key")() must throwA[ClientError]
       }
 
     }

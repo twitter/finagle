@@ -357,107 +357,135 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
   }
 
   def getResult(keys: Iterable[String]) = {
-    validateKeys(keys) { rawGet(Get(keys.toSeq)) }
+    try {
+      if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
+      rawGet(Get(keys.toSeq))
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+    }
   }
   def getsResult(keys: Iterable[String]) = {
-    validateKeys(keys) { rawGet(Gets(keys.toSeq)) map { GetsResult(_) } }
+    try {
+      if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
+      rawGet(Gets(keys.toSeq)) map { GetsResult(_) }
+    }  catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+    }
   }
 
   def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Set(key, flags, expiry, value)) map {
         case Stored() => ()
         case Error(e) => throw e
         case _        => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Cas(key, flags, expiry, value, casUnique)) map {
         case Stored() => true
         case Exists() => false
         case Error(e) => throw e
         case _        => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Add(key, flags, expiry, value)) map {
         case Stored()     => true
         case NotStored()  => false
         case Error(e)     => throw e
         case _            => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Append(key, flags, expiry, value)) map {
         case Stored()     => true
         case NotStored()  => false
         case Error(e)     => throw e
         case _            => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Prepend(key, flags, expiry, value)) map {
         case Stored()     => true
         case NotStored()  => false
         case Error(e)     => throw e
         case _            => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Replace(key, flags, expiry, value)) map {
         case Stored()     => true
         case NotStored()  => false
         case Error(e)     => throw e
         case _            => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def delete(key: String) = {
-    validateKeys(Seq(key)) {
+    try {
       service(Delete(key)) map {
         case Deleted()    => true
         case NotFound()   => false
         case Error(e)     => throw e
         case _            => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def incr(key: String, delta: Long): Future[Option[JLong]] = {
-    validateKeys(Seq(key)) {
+    try {
       service(Incr(key, delta)) map {
         case Number(value) => Some(value)
         case NotFound()    => None
         case Error(e)      => throw e
         case _             => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def decr(key: String, delta: Long): Future[Option[JLong]] = {
-    validateKeys(Seq(key)) {
+    try {
       service(Decr(key, delta)) map {
         case Number(value) => Some(value)
         case NotFound()    => None
         case Error(e)      => throw e
         case _             => throw new IllegalStateException
       }
+    } catch {
+      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
@@ -481,15 +509,6 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
   def release() {
     service.release()
   }
-
-  private def keyIsBad(key: String) =
-    Strings.isNullOrEmpty(key) || CharMatcher.WHITESPACE.matchesAnyOf(key)
-
-  private def validateKeys[T](keys: Iterable[String])(f: => Future[T]) =
-    if (keys.exists(keyIsBad(_)))
-      Future.exception(new ClientError("Key cannot be empty or have spaces!"))
-    else
-      f
 }
 
 /**
