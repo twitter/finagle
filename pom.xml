@@ -25,7 +25,6 @@
     <module>finagle-http</module>
     <module>finagle-kestrel</module>
     <module>finagle-memcached</module>
-    <module>finagle-memcached-hadoop</module>
     <module>finagle-native</module>
     <module>finagle-ostrich4</module>
     <module>finagle-redis</module>
