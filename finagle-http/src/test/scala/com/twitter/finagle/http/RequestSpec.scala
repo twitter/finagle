@@ -38,6 +38,23 @@ class RequestSpec extends SpecificationWithJUnit with DataTables {
       }
     }
 
+    "file extension" in {
+      "uri"                       | "extension" |>
+      "/search.json"              ! "json"      |
+      "/1.1/search/tweets.json"   ! "json"      |
+      "/1.1/search/tweets.JSON"   ! "json"      |
+      "/1.1/search/tweets"        ! ""          |
+      "/1.1/se.arch/tweets"       ! ""          |
+      "/1.1/se.arch/tweets.json"  ! "json"      |
+      "/search"                   ! ""          |
+      "/search."                  ! ""          |
+      "/"                         ! ""          |
+      "/."                        ! ""          |
+      { (uri: String, extension: String) =>
+        Request(uri).fileExtension must_== extension
+      }
+    }
+
     "response" in {
       val request = Request("/search.json", "q" -> "twitter")
 
