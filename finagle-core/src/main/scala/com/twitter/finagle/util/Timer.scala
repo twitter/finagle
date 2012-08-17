@@ -52,7 +52,7 @@ private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
       def isCancelled() = timeout.isCancelled()
       def cancel() {
         pending.remove(timeout)
-        timeout.cancel() 
+        timeout.cancel()
       }
     }
   }
@@ -158,10 +158,22 @@ class TimerFromNettyTimer(underlying: nu.Timer) extends Timer {
     toTimerTask(timeout)
   }
 
-  def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = {
-    schedule(when) {
+  def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = new TimerTask {
+    var isCancelled = false
+    var ref: TimerTask = schedule(when) { loop() }
+
+    def loop() {
       f
-      schedule(period)(f)
+      synchronized {
+        if (!isCancelled) ref = schedule(period.fromNow) { loop() }
+      }
+    }
+
+    def cancel() {
+      synchronized {
+        isCancelled = true
+        ref.cancel()
+      }
     }
   }
 

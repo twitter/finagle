@@ -1,8 +1,11 @@
 package com.twitter.finagle.util
 
+import com.twitter.conversions.time._
+import com.twitter.util.TimerTask
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import org.jboss.netty.{util => nu}
+import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -36,10 +39,10 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
       there was one(timeout).cancel()
       there was no(timer).stop()
     }
-    
+
     "Propagate cancellation and remove from pending list when timeout is cancelled" in {
       val t = managed.make()
-      
+
       val task = mock[nu.TimerTask]
       val timeout = mock[nu.Timeout]
       timer.newTimeout(any, any, any) returns timeout
@@ -60,6 +63,22 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
       val t = managed.make()
       t.dispose()
       t.dispose() must throwA(new IllegalArgumentException("requirement failed: stop called twice"))
+    }
+
+    "Support cancelling recurring tasks" in {
+      val t = new TimerFromNettyTimer(timer)
+
+      val taskCaptor = ArgumentCaptor.forClass(classOf[nu.TimerTask])
+      val firstTimeout = mock[nu.Timeout]
+      firstTimeout.isCancelled returns false
+      timer.newTimeout(taskCaptor.capture(), any, any) returns firstTimeout
+
+      var task: TimerTask = null
+      task = t.schedule(1.second) { task.cancel() }
+
+      taskCaptor.getValue.run(firstTimeout)
+
+      there was atMostOne(timer).newTimeout(any, any, any)
     }
   }
 }
