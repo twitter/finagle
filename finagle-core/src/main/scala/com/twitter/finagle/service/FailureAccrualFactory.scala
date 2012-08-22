@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{
   ClientConnection, Service, ServiceFactory, ServiceFactoryWrapper}
-import com.twitter.util.{Time, Duration, Throw, Return, TimerTask, Timer}
+import com.twitter.util.{Duration, Return, Throw, Time, Timer, TimerTask, Try}
 
 private[finagle] object FailureAccrualFactory {
   def wrapper(
@@ -21,7 +21,7 @@ private[finagle] object FailureAccrualFactory {
  * TODO: treat different failures differently (eg. connect failures
  * vs. not), enable different backoff strategies.
  */
-private[finagle] class FailureAccrualFactory[Req, Rep](
+class FailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   numFailures: Int,
   markDeadFor: Duration,
@@ -55,16 +55,16 @@ private[finagle] class FailureAccrualFactory[Req, Rep](
     reviveTimerTask = None
   }
 
+  protected def isSuccess(response: Try[Rep]): Boolean = response.isReturn
+
   def apply(conn: ClientConnection) =
     underlying(conn) map { service =>
       new Service[Req, Rep] {
         def apply(request: Req) = {
-          val result = service(request)
-          result respond {
-            case Throw(_)  => didFail()
-            case Return(_) => didSucceed()
+          service(request) respond { response =>
+            if (isSuccess(response)) didSucceed()
+            else didFail()
           }
-          result
         }
 
         override def release() = service.release()
