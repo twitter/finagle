@@ -922,7 +922,7 @@ A more complex variation of scatter/gather pattern is to perform a sequence of a
 
     import com.twitter.finagle.util.Timer._
 
-    val results: Seq[Future[Result]] = partitions.map { partition =>
+    val timedResults: Seq[Future[Result]] = partitions.map { partition =>
       partition.get(query).within(1.second) handle {
         case _: TimeoutException => EmptyResult
       }
