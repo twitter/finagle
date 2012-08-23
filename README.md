@@ -1228,7 +1228,7 @@ When you create a server in Java, you have several options. You can create a ser
 
 * <a href="#Server Imports">Server Imports</a>
 * <a href="#Performing Synchronous Operations">Performing Synchronous Operations</a>
-* <a href="#Performing Asynchronous Operations">Performing Asynchronous Operations</a>
+* <a href="#Chaining Asynchronous Operations">Chaining Asynchronous Operations</a>
 * <a href="#Invoking the Server">Invoking the Server</a>
 
 [Top](#Top)
@@ -1277,13 +1277,23 @@ In this example, the `try` `catch` block causes the server to either return a re
 
 [Top](#Top)
 
-<a name="Performing Asynchronous Operations"></a>
+<a name="Chaining Asynchronous Operations"></a>
 
-#### Performing Asynchronous Operations
+#### Chaining Asynchronous Operations
 
-In Java, you can implement asynchronous operations by calling a `Future` object's `getContentAsync` method to obtain the content from an asynchronous request. The `Future` object's `transformedBy` method transforms the content of the `Future` object from one data type to another, with the help of a `FutureTransformer` object. You typically override the object's `map` method to perform the actual conversion. A `Throwable` object is provided when an exception occurs to communicate information about the kind of exception. The following example shows this pattern:
+In Java, you can chain multiple asynchronous operations by calling a `Future` object's `transformedBy` method.
+This is done by supplying a `FutureTransformer` object to a `Future` object's `transformedBy` method.
+You typically implement `FutureTransformer`'s `map` method to perform the actual conversion, and `FutureTransformer`'s `handle` method which is called when an exception occurs. The following example shows this pattern:
+**Note:** If you need to perform blocking operations, see: <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 
     public class HTTPServer extends Service<HttpRequest, HttpResponse> {
+
+      private Future<String> getContentAsync(HttpRequest request) {
+        // asynchronously gets content, possibly by submitting
+        // a function to a FuturePool
+        ...
+      }
+
       public Future<HttpResponse> apply(HttpRequest request) {
 
         Future<String> contentFuture = getContentAsync(request);
