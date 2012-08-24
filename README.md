@@ -54,6 +54,7 @@ After version 5.0, Finagle is only compiled against Scala 2.9.x, and sbt-style c
   - <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 * <a href="#Additional Samples">Additional Samples</a>
 * <a href="#API Reference Documentation">API Reference Documentation</a>
+* <a href="#Example Maven Project">Example Maven Project</a>
 
 <a name="Quick Start"></a>
 
@@ -1598,3 +1599,49 @@ For additional information about Finagle, see the [Finagle homepage](http://twit
 # Administrivia
 
 We use [Semantic Versioning](http://semver.org/) for published artifacts.
+
+<a name="Example Maven Project"></a>
+# Example Maven Project
+Wondering how to get started with a finagle project of your very own? Here's a good place to start:
+
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+
+      <groupId>com.myorg</groupId>
+      <artifactId>myapp</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <packaging>jar</packaging>
+
+      <name>myapp</name>
+
+      <!-- Tell maven where to find finagle -->
+      <repositories>
+        <repository>
+          <id>twitter</id>
+          <url>http://maven.twttr.com/</url>
+        </repository>
+      </repositories>
+
+      <dependencies>
+        <!-- At the very least you will need finagle-core, and probably
+             some other sub modules as well (see below) -->
+        <dependency>
+          <groupId>com.twitter</groupId>
+          <artifactId>finagle-core</artifactId>
+          <type>pom</type>
+          <version>5.3.1</version>
+        </dependency>
+
+        <!-- Be sure to depend on the various finagle sub modules that you need.
+             For example, here's how you would depend on finagle-thrift -->
+        <dependency>
+          <groupId>com.twitter</groupId>
+          <artifactId>finagle-thrift</artifactId>
+          <type>pom</type>
+          <version>5.3.1</version>
+        </dependency>
+      </dependencies>
+    </project>
+
+[Top](#Top)
