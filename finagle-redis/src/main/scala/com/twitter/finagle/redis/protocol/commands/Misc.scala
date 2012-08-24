@@ -1,38 +1,37 @@
 package com.twitter.finagle.redis.protocol
 
-import Commands.trimList
 import com.twitter.finagle.redis.util._
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-case class FlushDB() extends Command {
-  val command = Commands.FLUSHDB
-  def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.FLUSHDB))
-}
-
-object Select {
-  def apply(args: List[Array[Byte]]) = {
-    val index = BytesToString.fromList(trimList(args, 1, "SELECT"))(1).toInt
-    new Select(index)
-  }
+case object FlushDB extends Command {
+  def command = Commands.FLUSHDB
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.FLUSHDB))
 }
 
 case class Select(index: Int) extends Command {
-  val command = Commands.SELECT
-  def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.SELECT, index.toString))
+  def command = Commands.SELECT
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.SELECT,
+    StringToChannelBuffer(index.toString)))
 }
 
-object Auth {
-  def apply(args: List[Array[Byte]]) = {
-    val list = trimList(args, 1, "AUTH")
-    new Auth(BytesToString(list(0)))
+object Select {
+  def apply(index: List[Array[Byte]]) = {
+    new Select(NumberFormat.toInt(BytesToString(index.head)))
   }
 }
 
-case class Auth(code: String) extends Command {
-  val command = Commands.AUTH
-  def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.AUTH, code))
+case class Auth(code: ChannelBuffer) extends Command {
+  def command = Commands.AUTH
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.AUTH, code))
 }
 
-case class Quit() extends Command {
-  val command = Commands.QUIT
-  def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.QUIT))
+object Auth {
+  def apply(code: List[Array[Byte]]) = {
+    new Auth(ChannelBuffers.wrappedBuffer(code.head))
+  }
+}
+
+case object Quit extends Command {
+  def command = Commands.QUIT
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.QUIT))
 }

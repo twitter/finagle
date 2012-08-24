@@ -1,24 +1,25 @@
-package com.twitter.finagle.redis
-package protocol
-package integration
+package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.redis._
+import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.util._
+import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.net.InetSocketAddress
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.specs.SpecificationWithJUnit
-import util._
 
 class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   lazy val svcClient = ClientBuilder()
-                .name("redis-client")
-                .codec(Redis())
-                .hosts(RedisCluster.hostAddresses())
-                .hostConnectionLimit(2)
-                .retries(2)
-                .build()
+    .name("redis-client")
+    .codec(Redis())
+    .hosts(RedisCluster.hostAddresses())
+    .hostConnectionLimit(2)
+    .retries(2)
+    .build()
 
-  implicit def s2b(s: String) = s.getBytes
+  implicit def s2b(s: String) = StringToChannelBuffer(s)
   val service = new Service[Command, Reply] {
     def apply(cmd: Command): Future[Reply] = {
       svcClient(cmd)
@@ -26,23 +27,23 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   }
 
   val server = ServerBuilder()
-                .name("redis-server")
-                .codec(Redis())
-                .bindTo(new InetSocketAddress(0))
-                .build(service)
+    .name("redis-server")
+    .codec(Redis())
+    .bindTo(new InetSocketAddress(0))
+    .build(service)
 
 
   lazy val client = ClientBuilder()
-                .name("redis-client")
-                .codec(Redis())
-                .hosts(server.localAddress)
-                .hostConnectionLimit(2)
-                .retries(2)
-                .build()
+    .name("redis-client")
+    .codec(Redis())
+    .hosts(server.localAddress)
+    .hostConnectionLimit(2)
+    .retries(2)
+    .build()
 
 
-  val KEY = "foo"
-  val VALUE = "bar"
+  val KEY = StringToChannelBuffer("foo")
+  val VALUE = StringToChannelBuffer("bar")
 
   doBeforeSpec {
     RedisCluster.start(1)
@@ -55,18 +56,19 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
       "DEL" >> {
         client(Set("key1", "val1"))() mustEqual StatusReply("OK")
         client(Set("key2", "val2"))() mustEqual StatusReply("OK")
-        client(Del(List("key1", "key2")))() mustEqual IntegerReply(2)
-        client(Del(null:List[String]))() must throwA[ClientError]
-        client(Del(List(null)))() must throwA[ClientError]
+        client(Del(List(StringToChannelBuffer("key1"),
+        StringToChannelBuffer("key2"))))() mustEqual IntegerReply(2)
+        client(Del(null:List[ChannelBuffer]))() must throwA[ClientError]
+        client(Del(List[ChannelBuffer]()))() must throwA[ClientError]
       }
       "EXISTS" >> {
         client(Exists(KEY))() mustEqual IntegerReply(1)
         client(Exists("nosuchkey"))() mustEqual IntegerReply(0)
-        client(Exists(null:String))() must throwA[ClientError]
+        client(Exists(null:ChannelBuffer))() must throwA[ClientError]
       }
       "EXPIRE" >> {
         client(Expire("key1", 30))() mustEqual IntegerReply(0)
-        client(Expire(null, 30))() must throwA[ClientError]
+        client(Expire(null:ChannelBuffer, 30))() must throwA[ClientError]
         client(Expire(KEY, 3600))() mustEqual IntegerReply(1)
         assertIntegerReply(client(Ttl(KEY)), 3600)
       }
@@ -80,10 +82,9 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(ExpireAt(null, t))() must throwA[ClientError]
       }
       "KEYS" >> {
-        val request = client(Keys("%s*".format(KEY)))
-        val expects = List(KEY)
-        assertMBulkReply(request, expects, true)
-        client(Keys("%s.*".format(KEY)))() mustEqual EmptyMBulkReply()
+         val request = client(Keys("*"))
+         val expects = List("foo")
+         assertMBulkReply(request, expects, true)
       }
       "PERSIST" >> {
         client(Persist("nosuchkey"))() mustEqual IntegerReply(0)
@@ -92,7 +93,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(Expire("persist", 30))()
         client(Persist("persist"))() mustEqual IntegerReply(1)
         client(Ttl("persist"))() mustEqual IntegerReply(-1)
-        client(Del(List("persist")))()
+        client(Del(List(StringToChannelBuffer("persist"))))()
       }
       "RENAME" >> {
         client(Set("rename1", "foo"))()
@@ -115,7 +116,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(Randomkey())() must haveClass[BulkReply]
       }
       "TTL" >> { // tested by expire/expireat
-        client(Ttl(null:String))() must throwA[ClientError]
+        client(Ttl(""))() must throwA[ClientError]
         client(Ttl("thing"))() mustEqual IntegerReply(-1)
       }
       "TYPE" >> {
@@ -125,28 +126,28 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
     }
 
     "Handle Sorted Set Commands" >> {
-      val ZKEY = "zkey"
+      val ZKEY = StringToChannelBuffer("zkey")
       val ZVAL = List(ZMember(1, "one"), ZMember(2, "two"), ZMember(3, "three"))
 
       def zAdd(key: String, members: ZMember*) {
         members.foreach { member =>
-          client(ZAdd(key, member))() mustEqual IntegerReply(1)
+          client(ZAdd(key, List(member)))() mustEqual IntegerReply(1)
         }
       }
 
       doBefore {
         ZVAL.foreach { zv =>
-          client(ZAdd(ZKEY, zv))() mustEqual IntegerReply(1)
+          client(ZAdd(ZKEY, List(zv)))() mustEqual IntegerReply(1)
         }
       }
       doAfter {
-        client(Del(ZKEY))() mustEqual IntegerReply(1)
+        client(Del(List(ZKEY)))() mustEqual IntegerReply(1)
       }
 
       "ZADD" >> {
-        client(ZAdd("zadd1", ZMember(1, "one")))() mustEqual IntegerReply(1)
-        client(ZAdd("zadd1", ZMember(2, "two")))() mustEqual IntegerReply(1)
-        client(ZAdd("zadd1", ZMember(3, "two")))() mustEqual IntegerReply(0)
+        client(ZAdd("zadd1", List(ZMember(1, "one"))))() mustEqual IntegerReply(1)
+        client(ZAdd("zadd1", List(ZMember(2, "two"))))() mustEqual IntegerReply(1)
+        client(ZAdd("zadd1", List(ZMember(3, "two"))))() mustEqual IntegerReply(0)
         val expected = List("one", "1", "two", "3")
         assertMBulkReply(client(ZRange("zadd1", 0, -1, WithScores)), expected)
         assertMBulkReply(client(ZRange("zadd1", 0, -1)), List("one", "two"))
@@ -290,18 +291,16 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(Decr("decr1"))() mustEqual IntegerReply(-1)
         client(Decr("decr1"))() mustEqual IntegerReply(-2)
         client(Decr(KEY))() must haveClass[ErrorReply]
-        client(Decr(null:String))() must throwA[ClientError]
       }
       "DECRBY" >> {
         client(DecrBy("decrby1", 1))() mustEqual IntegerReply(-1)
         client(DecrBy("decrby1", 10))() mustEqual IntegerReply(-11)
         client(DecrBy(KEY, 1))() must haveClass[ErrorReply]
-        client(DecrBy(null: String, 1))() must throwA[ClientError]
       }
       "GET" >> {
         client(Get("thing"))() must haveClass[EmptyBulkReply]
-        assertBulkReply(client(Get(KEY)), VALUE)
-        client(Get(null:String))() must throwA[ClientError]
+        assertBulkReply(client(Get(KEY)), "bar")
+        client(Get(null:ChannelBuffer))() must throwA[ClientError]
         client(Get(null:List[Array[Byte]]))() must throwA[ClientError]
       }
       "GETBIT" >> {
@@ -330,48 +329,49 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(Incr("incr1"))() mustEqual IntegerReply(1)
         client(Incr("incr1"))() mustEqual IntegerReply(2)
         client(Incr(KEY))() must haveClass[ErrorReply]
-        client(Incr(null:String))() must throwA[ClientError]
       }
       "INCRBY" >> {
         client(IncrBy("incrby1", 1))() mustEqual IntegerReply(1)
         client(IncrBy("incrby1", 10))() mustEqual IntegerReply(11)
         client(IncrBy(KEY, 1))() must haveClass[ErrorReply]
-        client(IncrBy(null: String, 1))() must throwA[ClientError]
       }
       "MGET" >> {
         val expects = List(
-          BytesToString(RedisCodec.NIL_VALUE_BA),
-          VALUE
+          BytesToString(RedisCodec.NIL_VALUE_BA.array),
+          BytesToString(VALUE.array)
         )
-        val req = client(MGet(List("thing", KEY)))
+        val req = client(MGet(List(StringToChannelBuffer("thing"), KEY)))
         assertMBulkReply(req, expects)
-        client(MGet(null))() must throwA[ClientError]
-        client(MGet(List(null)))() must throwA[ClientError]
+        client(MGet(List[ChannelBuffer]()))() must throwA[ClientError]
       }
       "MSET" >> {
         val input = Map(
-          "thing"   -> StringToBytes("thang"),
-          KEY       -> StringToBytes(VALUE),
-          "stuff"   -> StringToBytes("bleh")
+          StringToChannelBuffer("thing")   -> StringToChannelBuffer("thang"),
+          KEY       -> VALUE,
+          StringToChannelBuffer("stuff")   -> StringToChannelBuffer("bleh")
           )
         client(MSet(input))() mustEqual StatusReply("OK")
-        val req = client(MGet(List("thing",KEY,"noexists","stuff")))
-        val expects = List("thang",VALUE,BytesToString(RedisCodec.NIL_VALUE_BA),"bleh")
+        val req = client(MGet(List(StringToChannelBuffer("thing"), KEY,
+          StringToChannelBuffer("noexists"),
+          StringToChannelBuffer("stuff"))))
+        val expects = List("thang", "bar", BytesToString(RedisCodec.NIL_VALUE_BA.array), "bleh")
         assertMBulkReply(req, expects)
       }
       "MSETNX" >> {
         val input1 = Map(
-          "msnx.key1" -> s2b("Hello"),
-          "msnx.key2" -> s2b("there")
+          StringToChannelBuffer("msnx.key1") -> s2b("Hello"),
+          StringToChannelBuffer("msnx.key2") -> s2b("there")
         )
         client(MSetNx(input1))() mustEqual IntegerReply(1)
         val input2 = Map(
-          "msnx.key2" -> s2b("there"),
-          "msnx.key3" -> s2b("world")
+          StringToChannelBuffer("msnx.key2") -> s2b("there"),
+          StringToChannelBuffer("msnx.key3") -> s2b("world")
         )
         client(MSetNx(input2))() mustEqual IntegerReply(0)
-        val expects = List("Hello", "there", BytesToString(RedisCodec.NIL_VALUE_BA))
-        assertMBulkReply(client(MGet(List("msnx.key1","msnx.key2","msnx.key3"))), expects)
+        val expects = List("Hello", "there", BytesToString(RedisCodec.NIL_VALUE_BA.array))
+        assertMBulkReply(client(MGet(List(StringToChannelBuffer("msnx.key1"),
+          StringToChannelBuffer("msnx.key2"),
+          StringToChannelBuffer("msnx.key3")))), expects)
       }
       "SET" >> {
         client(Set(null, null))() must throwA[ClientError]
@@ -422,11 +422,13 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
       case MBulkReply(msgs) => contains match {
         case true =>
           expects.isEmpty must beFalse
-          val newMsgs = ReplyFormat.toByteArrays(msgs) map { msg => BytesToString(msg) }
+          val newMsgs = ReplyFormat.toString(msgs)
           expects.foreach { msg => newMsgs must contain(msg) }
         case false =>
-          expects.isEmpty must beFalse
-          ReplyFormat.toByteArrays(msgs) map { msg => BytesToString(msg) } mustEqual expects
+          // expects.isEmpty must beFalse
+          ReplyFormat.toChannelBuffers(msgs) map {
+            msg => CBToString(msg)
+          } mustEqual expects
       }
       case EmptyMBulkReply() => expects.isEmpty must beTrue
       case r: Reply => fail("Expected MBulkReply, got %s".format(r))
@@ -434,7 +436,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
     }
 
   def assertBulkReply(reply: Future[Reply], expects: String) = reply() match {
-    case BulkReply(msg) => BytesToString(msg) mustEqual expects
+    case BulkReply(msg) => BytesToString(msg.array) mustEqual expects
     case _ => fail("Expected BulkReply")
   }
 

@@ -1,98 +1,76 @@
 package com.twitter.finagle.redis.protocol
 
-import Commands.trimList
+import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object HDel {
-  def apply(key: String, fields: List[Array[Byte]]) = {
-    RequireClientProtocol(fields.nonEmpty, "HDEL requires a hash key and at least one field")
-    val list = BytesToString.fromList(fields)
-    new HDel(key, list)
-  }
-
   def apply(args: List[Array[Byte]]) = {
     RequireClientProtocol(args.length > 2, "HDEL requires a hash key and at least one field")
-    val key = BytesToString(args(0))
-    val fields = BytesToString.fromList(args.drop(1))
-    new HDel(key, fields)
+    new HDel(ChannelBuffers.wrappedBuffer(args(0)),
+      args.drop(1).map(ChannelBuffers.wrappedBuffer(_)))
   }
 }
-
-case class HDel(key: String, fields: Seq[String]) extends StrictKeyCommand {
-  val command = Commands.HDEL
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.HDEL, key) ::: fields.toList)
+case class HDel(key: ChannelBuffer, fields: List[ChannelBuffer]) extends StrictKeyCommand {
+  def command = Commands.HDEL
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.HDEL, key) ::: fields)
 }
 
 object HGet {
   def apply(args: List[Array[Byte]]) = {
     val list = trimList(args, 2, "HGET")
-    new HGet(list(0), list(1))
+    new HGet(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
   }
 }
-
-case class HGet(key: Array[Byte], field: Array[Byte]) extends StrictByteKeyCommand {
-  val command = Commands.HGET
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(List(Commands.HGET.getBytes, key, field))
+case class HGet(key: ChannelBuffer, field: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.HGET
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.HGET, key, field))
 }
 
 object HGetAll {
   def apply(args: List[Array[Byte]]) = {
     RequireClientProtocol(args.nonEmpty, "HGETALL requires a key")
-    new HGetAll(args(0))
+    new HGetAll(ChannelBuffers.wrappedBuffer(args(0)))
   }
 }
-
-case class HGetAll(key: Array[Byte]) extends StrictByteKeyCommand {
-  val command = Commands.HGETALL
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(List(Commands.HGETALL.getBytes, key))
+case class HGetAll(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.HGETALL
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.HGETALL, key))
 }
 
 object HKeys {
   def apply(keys: List[Array[Byte]]) = {
-    new HKeys(BytesToString(keys.head))
+    new HKeys(ChannelBuffers.wrappedBuffer(keys.head))
   }
 }
-
-case class HKeys(key: String) extends StrictKeyCommand {
-  val command = Commands.HKEYS
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.HKEYS, key))
+case class HKeys(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.HKEYS
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.HKEYS, key))
 }
 
 object HMGet {
-  def apply(key: String, fields: List[Array[Byte]]) = {
-    RequireClientProtocol(fields.nonEmpty, "HMGET requires a hash key and at least one field")
-    val list = BytesToString.fromList(fields)
-    new HMGet(key, list)
-  }
-
   def apply(args: List[Array[Byte]]) = {
     RequireClientProtocol(args.length > 2, "HMGET requires a hash key and at least one field")
-    val key = BytesToString(args(0))
-    val fields = BytesToString.fromList(args.drop(1))
-    new HMGet(key, fields)
+    new HMGet(ChannelBuffers.wrappedBuffer(args(0)),
+      args.drop(1).map(ChannelBuffers.wrappedBuffer(_)))
   }
 }
-
-case class HMGet(key: String, fields: Seq[String]) extends StrictKeyCommand {
-  val command = Commands.HMGET
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.HMGET, key) ::: fields.toList)
+case class HMGet(key: ChannelBuffer, fields: List[ChannelBuffer]) extends StrictKeyCommand {
+  def command = Commands.HMGET
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.HMGET, key) ::: fields)
 }
 
 object HSet {
   def apply(args: List[Array[Byte]]) = {
     val list = trimList(args, 3, "HSET")
-    new HSet(list(0), list(1), list(2))
+    new HSet(
+      ChannelBuffers.wrappedBuffer(list(0)),
+      ChannelBuffers.wrappedBuffer(list(1)),
+      ChannelBuffers.wrappedBuffer(list(2)))
   }
 }
-
-case class HSet(key: Array[Byte], field: Array[Byte], value: Array[Byte])
-  extends StrictByteKeyCommand {
-  val command = Commands.HSET
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(List(Commands.HSET.getBytes, key, field, value))
+case class HSet(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer)
+  extends StrictKeyCommand {
+  def command = Commands.HSET
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.HSET, key, field, value))
 }

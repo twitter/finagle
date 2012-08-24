@@ -1,14 +1,17 @@
-package com.twitter.finagle.redis
-package protocol
+package com.twitter.finagle.redis.protocol
 
-import util._
+import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.redis.util._
+import java.nio.charset.Charset
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.util.CharsetUtil
 
 object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String) = new ClientError(msg)
 }
 
 abstract class Command extends RedisMessage {
-  val command: String
+  def command: String
 }
 
 object Commands {
@@ -84,9 +87,9 @@ object Commands {
   val UNWATCH           = "UNWATCH"
   val WATCH             = "WATCH"
 
-  val commandMap: Map[String,Function1[List[Array[Byte]],Command]] = Map(
+  val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
-    DEL               -> {args => Del(BytesToString.fromList(args))},
+    DEL               -> {Del(_)},
     EXISTS            -> {Exists(_)},
     EXPIRE            -> {Expire(_)},
     EXPIREAT          -> {ExpireAt(_)},
@@ -108,7 +111,7 @@ object Commands {
     GETSET            -> {GetSet(_)},
     INCR              -> {Incr(_)},
     INCRBY            -> {IncrBy(_)},
-    MGET              -> {args => MGet(BytesToString.fromList(args))},
+    MGET              -> {MGet(_)},
     MSET              -> {MSet(_)},
     MSETNX            -> {MSetNx(_)},
     SET               -> {Set(_)},
@@ -137,10 +140,10 @@ object Commands {
     ZUNIONSTORE       -> {ZUnionStore(_)},
 
     // miscellaneous
-    FLUSHDB           -> {_ => FlushDB()},
+    FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
     AUTH              -> {Auth(_)},
-    QUIT              -> {_ => Quit()},
+    QUIT              -> {_ => Quit},
 
     // hash sets
     HDEL              -> {HDel(_)},
@@ -151,10 +154,10 @@ object Commands {
     HSET              -> {HSet(_)},
 
     // transactions
-    DISCARD           -> {_ => Discard()},
-    EXEC              -> {_ => Exec()},
-    MULTI             -> {_ => Multi()},
-    UNWATCH           -> {_ => UnWatch()},
+    DISCARD           -> {_ => Discard},
+    EXEC              -> {_ => Exec},
+    MULTI             -> {_ => Multi},
+    UNWATCH           -> {_ => UnWatch},
     WATCH             -> {Watch(_)}
 
   )
@@ -174,6 +177,80 @@ object Commands {
   }
 }
 
+object CommandBytes {
+  val DEL               = StringToChannelBuffer("DEL")
+  val EXISTS            = StringToChannelBuffer("EXISTS")
+  val EXPIRE            = StringToChannelBuffer("EXPIRE")
+  val EXPIREAT          = StringToChannelBuffer("EXPIREAT")
+  val KEYS              = StringToChannelBuffer("KEYS")
+  val PERSIST           = StringToChannelBuffer("PERSIST")
+  val RANDOMKEY         = StringToChannelBuffer("RANDOMKEY")
+  val RENAME            = StringToChannelBuffer("RENAME")
+  val RENAMENX          = StringToChannelBuffer("RENAMENX")
+  val TTL               = StringToChannelBuffer("TTL")
+  val TYPE              = StringToChannelBuffer("TYPE")
+
+  // String Commands
+  val APPEND            = StringToChannelBuffer("APPEND")
+  val DECR              = StringToChannelBuffer("DECR")
+  val DECRBY            = StringToChannelBuffer("DECRBY")
+  val GET               = StringToChannelBuffer("GET")
+  val GETBIT            = StringToChannelBuffer("GETBIT")
+  val GETRANGE          = StringToChannelBuffer("GETRANGE")
+  val GETSET            = StringToChannelBuffer("GETSET")
+  val INCR              = StringToChannelBuffer("INCR")
+  val INCRBY            = StringToChannelBuffer("INCRBY")
+  val MGET              = StringToChannelBuffer("MGET")
+  val MSET              = StringToChannelBuffer("MSET")
+  val MSETNX            = StringToChannelBuffer("MSETNX")
+  val SET               = StringToChannelBuffer("SET")
+  val SETBIT            = StringToChannelBuffer("SETBIT")
+  val SETEX             = StringToChannelBuffer("SETEX")
+  val SETNX             = StringToChannelBuffer("SETNX")
+  val SETRANGE          = StringToChannelBuffer("SETRANGE")
+  val STRLEN            = StringToChannelBuffer("STRLEN")
+
+  // Sorted Sets
+  val ZADD              = StringToChannelBuffer("ZADD")
+  val ZCARD             = StringToChannelBuffer("ZCARD")
+  val ZCOUNT            = StringToChannelBuffer("ZCOUNT")
+  val ZINCRBY           = StringToChannelBuffer("ZINCRBY")
+  val ZINTERSTORE       = StringToChannelBuffer("ZINTERSTORE")
+  val ZRANGE            = StringToChannelBuffer("ZRANGE")
+  val ZRANGEBYSCORE     = StringToChannelBuffer("ZRANGEBYSCORE")
+  val ZRANK             = StringToChannelBuffer("ZRANK")
+  val ZREM              = StringToChannelBuffer("ZREM")
+  val ZREMRANGEBYRANK   = StringToChannelBuffer("ZREMRANGEBYRANK")
+  val ZREMRANGEBYSCORE  = StringToChannelBuffer("ZREMRANGEBYSCORE")
+  val ZREVRANGE         = StringToChannelBuffer("ZREVRANGE")
+  val ZREVRANGEBYSCORE  = StringToChannelBuffer("ZREVRANGEBYSCORE")
+  val ZREVRANK          = StringToChannelBuffer("ZREVRANK")
+  val ZSCORE            = StringToChannelBuffer("ZSCORE")
+  val ZUNIONSTORE       = StringToChannelBuffer("ZUNIONSTORE")
+
+  // Miscellaneous
+  val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
+  val SELECT            = StringToChannelBuffer("SELECT")
+  val AUTH              = StringToChannelBuffer("AUTH")
+  val QUIT              = StringToChannelBuffer("QUIT")
+
+  // Hash Sets
+  val HDEL              = StringToChannelBuffer("HDEL")
+  val HGET              = StringToChannelBuffer("HGET")
+  val HGETALL           = StringToChannelBuffer("HGETALL")
+  val HKEYS             = StringToChannelBuffer("HKEYS")
+  val HMGET             = StringToChannelBuffer("HMGET")
+  val HSET              = StringToChannelBuffer("HSET")
+
+  // Transactions
+  val DISCARD           = StringToChannelBuffer("DISCARD")
+  val EXEC              = StringToChannelBuffer("EXEC")
+  val MULTI             = StringToChannelBuffer("MULTI")
+  val UNWATCH           = StringToChannelBuffer("UNWATCH")
+  val WATCH             = StringToChannelBuffer("WATCH")
+}
+
+
 class CommandCodec extends UnifiedProtocolCodec {
   import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
   import com.twitter.finagle.redis.naggati.Stages._
@@ -181,6 +258,10 @@ class CommandCodec extends UnifiedProtocolCodec {
   import com.twitter.logging.Logger
 
   val log = Logger(getClass)
+
+  val encode = new Encoder[Command] {
+    def encode(obj: Command) = Some(obj.toChannelBuffer)
+  }
 
   val decode = readBytes(1) { bytes =>
     bytes(0) match {
@@ -194,19 +275,17 @@ class CommandCodec extends UnifiedProtocolCodec {
     }
   }
 
-  val encode = new Encoder[Command] {
-    def encode(obj: Command) = Some(obj.toChannelBuffer)
-  }
-
   def decodeInlineRequest(c: Char) = readLine { line =>
-    val listOfArrays = (c + line).split(' ').toList.map { args => args.getBytes("UTF-8") }
+    val listOfArrays = (c + line).split(' ').toList.map {
+      args => args.getBytes(CharsetUtil.UTF_8)
+    }
     val cmd = commandDecode(listOfArrays)
     emit(cmd)
   }
 
   def commandDecode(lines: List[Array[Byte]]): Command = {
     RequireClientProtocol(lines != null && lines.length > 0, "Invalid client command protocol")
-    val cmd = new String(lines.head)
+    val cmd = BytesToString(lines.head)
     val args = lines.tail
     try {
       Commands.doMatch(cmd, args)

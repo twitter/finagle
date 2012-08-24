@@ -1,32 +1,33 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.util._
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-case class Discard() extends Command {
-  val command = Commands.DISCARD
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.DISCARD))
+case object Discard extends Command {
+  def command = Commands.DISCARD
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.DISCARD))
 }
 
-case class Exec() extends Command {
-  val command = Commands.EXEC
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.EXEC))
+case object Exec extends Command {
+  def command = Commands.EXEC
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.EXEC))
 }
 
-case class Multi() extends Command {
-  val command = Commands.MULTI
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.MULTI))
+case object Multi extends Command {
+  def command = Commands.MULTI
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.MULTI))
 }
 
-case class UnWatch() extends Command {
-  val command = Commands.UNWATCH
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.UNWATCH))
+case object UnWatch extends Command {
+  def command = Commands.UNWATCH
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.UNWATCH))
 }
 
-case class Watch(keys: List[Array[Byte]]) extends ByteKeysCommand {
-  val command = Commands.WATCH
-  override def toChannelBuffer = RedisCodec.toUnifiedFormat(StringToBytes(Commands.WATCH) +: keys)
+case class Watch(keys: List[ChannelBuffer]) extends KeysCommand {
+  def command = Commands.WATCH
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.WATCH +: keys)
 }
-
 object Watch {
-  def apply(key: String) = new Watch(List(StringToBytes(key)))
+  def apply(args: => List[Array[Byte]]) =
+    new Watch(args.map(ChannelBuffers.wrappedBuffer(_)))
 }

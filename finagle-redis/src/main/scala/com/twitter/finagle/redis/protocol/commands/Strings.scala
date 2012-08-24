@@ -1,39 +1,40 @@
-package com.twitter.finagle.redis
-package protocol
+package com.twitter.finagle.redis.protocol
 
-import util._
-import Commands.trimList
+import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.redis.protocol.Commands.trimList
+import com.twitter.finagle.redis.util._
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-case class Append(key: String, value: Array[Byte])
+case class Append(key: ChannelBuffer, value: ChannelBuffer)
   extends StrictKeyCommand
   with StrictValueCommand
 {
   val command = Commands.APPEND
-  override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(command),
-    StringToBytes(key),
-    value))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
+    CommandBytes.APPEND, key, value))
 }
 object Append {
   def apply(args: List[Array[Byte]]) = {
     val list = trimList(args, 2)
-    new Append(BytesToString(list(0)), list(1))
+    new Append(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
   }
 }
 
-case class Decr(override val key: String) extends DecrBy(key, 1) {
+case class Decr(override val key: ChannelBuffer) extends DecrBy(key, 1) {
   override val command = Commands.DECR
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
+  override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.DECR, key))
 }
 object Decr {
   def apply(args: List[Array[Byte]]) = {
-    new Decr(BytesToString(trimList(args, 1, "DECR")(0)))
+    new Decr(ChannelBuffers.wrappedBuffer(trimList(args, 1, "DECR")(0)))
   }
 }
-class DecrBy(val key: String, val amount: Long) extends StrictKeyCommand {
+class DecrBy(val key: ChannelBuffer, val amount: Long) extends StrictKeyCommand {
   val command = Commands.DECRBY
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(command, key, amount.toString))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
+      CommandBytes.DECRBY,
+      key,
+      StringToChannelBuffer(amount.toString)))
   override def toString = "DecrBy(%s, %d)".format(key, amount)
   override def equals(other: Any) = other match {
     case that: DecrBy => that.canEqual(this) && this.key == that.key && this.amount == that.amount
@@ -42,84 +43,87 @@ class DecrBy(val key: String, val amount: Long) extends StrictKeyCommand {
   def canEqual(other: Any) = other.isInstanceOf[DecrBy]
 }
 object DecrBy {
-  def apply(key: String, amount: Long) = new DecrBy(key, amount)
   def apply(args: List[Array[Byte]]) = {
-    val list = BytesToString.fromList(trimList(args, 2, "DECRBY"))
     val amount = RequireClientProtocol.safe {
-      NumberFormat.toLong(list(1))
+      NumberFormat.toLong(BytesToString(args(1)))
     }
-    new DecrBy(list(0), amount)
+    new DecrBy(ChannelBuffers.wrappedBuffer(args(0)), amount)
+  }
+  def apply(key: ChannelBuffer, amount: Long) = {
+    new DecrBy(key, amount)
   }
 }
 
-case class Get(key: String) extends StrictKeyCommand {
+case class Get(key: ChannelBuffer) extends StrictKeyCommand {
   val command = Commands.GET
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.GET, key))
 }
 object Get {
   def apply(args: List[Array[Byte]]) = {
-    new Get(BytesToString(trimList(args, 1, "GET")(0)))
+    new Get(ChannelBuffers.wrappedBuffer(trimList(args, 1, "GET")(0)))
   }
 }
 
-case class GetBit(key: String, offset: Int) extends StrictKeyCommand {
+case class GetBit(key: ChannelBuffer, offset: Int) extends StrictKeyCommand {
   val command = Commands.GETBIT
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(command, key, offset.toString))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.GETBIT,
+    key, StringToChannelBuffer(offset.toString)))
 }
 object GetBit {
   def apply(args: List[Array[Byte]]) = {
-    val list = BytesToString.fromList(trimList(args,2,"GETBIT"))
-    val offset = RequireClientProtocol.safe { NumberFormat.toInt(list(1)) }
-    new GetBit(list(0), offset)
+    val list = trimList(args,2,"GETBIT")
+    val offset = RequireClientProtocol.safe { NumberFormat.toInt(BytesToString(list(1))) }
+    new GetBit(ChannelBuffers.wrappedBuffer(list(0)), offset)
   }
 }
 
-case class GetRange(key: String, start: Int, end: Int) extends StrictKeyCommand {
+case class GetRange(key: ChannelBuffer, start: Long, end: Long) extends StrictKeyCommand {
   val command = Commands.GETRANGE
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(command, key, start.toString, end.toString))
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(List(CommandBytes.GETRANGE, key,
+      StringToChannelBuffer(start.toString),
+      StringToChannelBuffer(end.toString)
+    ))
 }
 object GetRange {
   def apply(args: List[Array[Byte]]) = {
-    val list = BytesToString.fromList(trimList(args,3,"GETRANGE"))
-    val start = RequireClientProtocol.safe { NumberFormat.toInt(list(1)) }
-    val end = RequireClientProtocol.safe { NumberFormat.toInt(list(2)) }
-    new GetRange(list(0), start, end)
+    val list = trimList(args,3,"GETRANGE")
+    val start = RequireClientProtocol.safe { NumberFormat.toLong(BytesToString(list(1))) }
+    val end = RequireClientProtocol.safe { NumberFormat.toLong(BytesToString(list(2))) }
+    new GetRange(ChannelBuffers.wrappedBuffer(list(0)), start, end)
   }
 }
 
-case class GetSet(key: String, value: Array[Byte])
+case class GetSet(key: ChannelBuffer, value: ChannelBuffer)
   extends StrictKeyCommand
   with StrictValueCommand
 {
   val command = Commands.GETSET
-  override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(command),
-    StringToBytes(key),
-    value))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
+    CommandBytes.GETSET, key, value))
 }
 object GetSet {
   def apply(args: List[Array[Byte]]) = {
     val list = trimList(args, 2, "GETSET")
-    new GetSet(BytesToString(list(0)), list(1))
+    new GetSet(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
   }
 }
 
-case class Incr(override val key: String) extends IncrBy(key, 1) {
+case class Incr(override val key: ChannelBuffer) extends IncrBy(key, 1) {
   override val command = Commands.INCR
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
+  override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.INCR, key))
 }
 object Incr {
   def apply(args: List[Array[Byte]]) = {
-    new Incr(BytesToString(trimList(args, 1, "INCR")(0)))
+    new Incr(ChannelBuffers.wrappedBuffer(trimList(args, 1, "INCR")(0)))
   }
 }
 
-class IncrBy(val key: String, val amount: Long) extends StrictKeyCommand {
+class IncrBy(val key: ChannelBuffer, val amount: Long) extends StrictKeyCommand {
   val command = Commands.INCRBY
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(command, key, amount.toString))
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(List(CommandBytes.INCRBY, key,
+      StringToChannelBuffer(amount.toString)))
   override def toString = "IncrBy(%s, %d)".format(key, amount)
   override def equals(other: Any) = other match {
     case that: IncrBy => that.canEqual(this) && this.key == that.key && this.amount == that.amount
@@ -128,174 +132,179 @@ class IncrBy(val key: String, val amount: Long) extends StrictKeyCommand {
   def canEqual(other: Any) = other.isInstanceOf[IncrBy]
 }
 object IncrBy {
-  def apply(key: String, amount: Long) = new IncrBy(key, amount)
+  def apply(key: ChannelBuffer, amount: Long) = new IncrBy(key, amount)
   def apply(args: List[Array[Byte]]) = {
     val list = BytesToString.fromList(trimList(args, 2, "INCRBY"))
     val amount = RequireClientProtocol.safe {
       NumberFormat.toLong(list(1))
     }
-    new IncrBy(list(0), amount)
+    new IncrBy(ChannelBuffers.wrappedBuffer(args(0)), amount)
   }
 }
 
-case class MGet(keys: List[String]) extends StrictKeysCommand {
+case class MGet(keys: List[ChannelBuffer]) extends StrictKeysCommand {
   val command = Commands.MGET
-  override def toChannelBuffer = RedisCodec.toInlineFormat(command +: keys)
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.MGET +: keys)
+}
+object MGet {
+  def apply(args: => List[Array[Byte]]) =
+    new MGet(args.map(ChannelBuffers.wrappedBuffer(_)))
 }
 
-case class MSet(kv: Map[String, Array[Byte]]) extends MultiSet {
+case class MSet(kv: Map[ChannelBuffer, ChannelBuffer]) extends MultiSet {
   validate()
-  val command = MSet.command
+  val command = Commands.MSET
+
+  def toChannelBuffer = {
+    val kvList: List[ChannelBuffer] = kv.flatMap { case(k,v) =>
+      k :: v :: Nil
+    }(collection.breakOut)
+    RedisCodec.toUnifiedFormat(CommandBytes.MSET :: kvList)
+  }
 }
 object MSet extends MultiSetCompanion {
   val command = Commands.MSET
-  def get(map: Map[String, Array[Byte]]) = new MSet(map)
+  def get(map: Map[ChannelBuffer, ChannelBuffer]) = new MSet(map)
 }
 
-case class MSetNx(kv: Map[String, Array[Byte]]) extends MultiSet {
+case class MSetNx(kv: Map[ChannelBuffer, ChannelBuffer]) extends MultiSet {
   validate()
-  val command = MSetNx.command
+  val command = Commands.MSETNX
+
+  def toChannelBuffer = {
+    val kvList: List[ChannelBuffer] = kv.flatMap { case(k,v) =>
+      k :: v :: Nil
+    }(collection.breakOut)
+    RedisCodec.toUnifiedFormat(CommandBytes.MSETNX :: kvList)
+  }
 }
 object MSetNx extends MultiSetCompanion {
-  val command = Commands.MSETNX
-  def get(map: Map[String, Array[Byte]]) = new MSetNx(map)
+  def get(map: Map[ChannelBuffer, ChannelBuffer]) = new MSetNx(map)
 }
 
-case class Set(key: String, value: Array[Byte])
+case class Set(key: ChannelBuffer, value: ChannelBuffer)
   extends StrictKeyCommand
-  with SetCommand
   with StrictValueCommand
 {
-  val command = Set.command
-}
-object Set extends SetCommandCompanion {
   val command = Commands.SET
-  def get(key: String, value: Array[Byte]) = new Set(key, value)
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.SET, key, value))
+}
+object Set {
+  def apply(args: List[Array[Byte]]) = {
+    new Set(ChannelBuffers.wrappedBuffer(args(0)), ChannelBuffers.wrappedBuffer(args(1)))
+  }
 }
 
-case class SetBit(key: String, offset: Int, value: Int) extends StrictKeyCommand {
+case class SetBit(key: ChannelBuffer, offset: Int, value: Int) extends StrictKeyCommand {
   val command = Commands.SETBIT
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(command, key, offset.toString, value.toString))
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(List(CommandBytes.SETBIT, key,
+      StringToChannelBuffer(offset.toString),
+      StringToChannelBuffer(value.toString)))
 }
 object SetBit {
   def apply(args: List[Array[Byte]]) = {
     val list = BytesToString.fromList(trimList(args,3,"SETBIT"))
     val offset = RequireClientProtocol.safe { NumberFormat.toInt(list(1)) }
     val value = RequireClientProtocol.safe { NumberFormat.toInt(list(2)) }
-    new SetBit(list(0), offset, value)
+    new SetBit(ChannelBuffers.wrappedBuffer(args(0)), offset, value)
   }
 }
 
-case class SetEx(key: String, seconds: Long, value: Array[Byte])
+case class SetEx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer)
   extends StrictKeyCommand
   with StrictValueCommand
 {
   val command = Commands.SETEX
   RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
-  override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(command),
-    StringToBytes(key),
-    StringToBytes(seconds.toString),
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
+    CommandBytes.SETEX,
+    key,
+    StringToChannelBuffer(seconds.toString),
     value
-    ))
+  ))
 }
 object SetEx {
   def apply(args: List[Array[Byte]]) = {
     val list = trimList(args, 3, "SETEX")
     val seconds = RequireClientProtocol.safe { NumberFormat.toLong(BytesToString(list(1))) }
-    new SetEx(BytesToString(list(0)), seconds, list(2))
+    new SetEx(
+      ChannelBuffers.wrappedBuffer(args(0)),
+      seconds,
+      ChannelBuffers.wrappedBuffer(list(2))
+    )
   }
 }
 
-case class SetNx(key: String, value: Array[Byte])
+case class SetNx(key: ChannelBuffer, value: ChannelBuffer)
   extends StrictKeyCommand
-  with SetCommand
   with StrictValueCommand
 {
-  val command = SetNx.command
-}
-object SetNx extends SetCommandCompanion {
   val command = Commands.SETNX
-  def get(key: String, value: Array[Byte]) = new SetNx(key, value)
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.SETNX, key, value))
+}
+object SetNx {
+  def apply(args: List[Array[Byte]]) = {
+    RequireClientProtocol(args.length > 1, "SETNX requires at least one member")
+    new SetNx(ChannelBuffers.wrappedBuffer(args(0)), ChannelBuffers.wrappedBuffer(args(1)))
+  }
 }
 
-case class SetRange(key: String, offset: Int, value: Array[Byte])
+case class SetRange(key: ChannelBuffer, offset: Int, value: ChannelBuffer)
   extends StrictKeyCommand
   with StrictValueCommand
 {
   val command = Commands.SETRANGE
-  override def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(command),
-    StringToBytes(key),
-    StringToBytes(offset.toString),
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
+    CommandBytes.SETRANGE,
+    key,
+    StringToChannelBuffer(offset.toString),
     value
   ))
 }
 object SetRange {
   def apply(args: List[Array[Byte]]) = {
     val list = trimList(args,3,"SETRANGE")
-    val key = BytesToString(list(0))
     val offset = RequireClientProtocol.safe { NumberFormat.toInt(BytesToString(list(1))) }
     val value = list(2)
-    new SetRange(key, offset, value)
+    new SetRange(
+      ChannelBuffers.wrappedBuffer(list(0)),
+      offset,
+      ChannelBuffers.wrappedBuffer(value)
+    )
   }
 }
 
-case class Strlen(key: String) extends StrictKeyCommand {
+case class Strlen(key: ChannelBuffer) extends StrictKeyCommand {
   val command = Commands.STRLEN
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(command, key))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(CommandBytes.STRLEN, key))
 }
 object Strlen {
   def apply(args: List[Array[Byte]]) = {
-    val list = BytesToString.fromList(trimList(args,1,"STRLEN"))
-    new Strlen(list(0))
+    RequireClientProtocol(args.length > 0, "STRLEN requires at least one member")
+    new Strlen(ChannelBuffers.wrappedBuffer(args(0)))
   }
-}
-
-/** Helpers for common idioms */
-trait SetCommand extends KeyCommand with ValueCommand {
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(List(
-    StringToBytes(command),
-    StringToBytes(key),
-    value
-  ))
-}
-trait SetCommandCompanion {
-  val command: String
-  def apply(args: List[Array[Byte]]) = {
-    val list = trimList(args, 2, command)
-    get(BytesToString(list(0)), list(1))
-  }
-  def get(key: String, value: Array[Byte]): SetCommand
 }
 
 trait MultiSet extends KeysCommand {
-  val kv: Map[String, Array[Byte]]
-  override lazy val keys: List[String] = kv.keys.toList
-
-  override def toChannelBuffer = {
-    val kvList: List[Array[Byte]] = kv.keys.zip(kv.values).flatMap { case(k,v) =>
-      StringToBytes(k) :: v :: Nil
-    }(collection.breakOut)
-    RedisCodec.toUnifiedFormat(StringToBytes(command) :: kvList)
-  }
+  val kv: Map[ChannelBuffer, ChannelBuffer]
+  override lazy val keys: List[ChannelBuffer] = kv.keys.toList
 }
 trait MultiSetCompanion {
-  val command: String
   def apply(args: List[Array[Byte]]) = {
     val length = args.length
 
     RequireClientProtocol(
       length % 2 == 0 && length > 0,
-      "Expected even number of k/v pairs for " + command)
+      "Expected even number of k/v pairs")
 
     val map = args.grouped(2).map {
-      case key :: value :: Nil => (BytesToString(key), value)
+      case key :: value :: Nil => (ChannelBuffers.wrappedBuffer(key),
+        ChannelBuffers.wrappedBuffer(value))
       case _ => throw new ClientError("Unexpected uneven pair of elements in MSET")
     }.toMap
     RequireClientProtocol(map.size == length/2, "Broken mapping, map size not equal to group size")
     get(map)
   }
-  def get(map: Map[String, Array[Byte]]): MultiSet
+  def get(map: Map[ChannelBuffer, ChannelBuffer]): MultiSet
 }
