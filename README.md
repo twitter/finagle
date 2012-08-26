@@ -182,7 +182,7 @@ Apache Thrift is a binary communication protocol that defines available methods 
       string hi();
     }
 
-To create a Finagle Thrift service, you must use the <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">custom Thrift compiler</a>. It will generate, in addition to the regular thrift Iface interface, a ServiceIface interface that wraps all return values in a Future, which is required by Finagle.
+To create a Finagle Thrift service, you must use the <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">custom Thrift compiler</a>. It will generate, in addition to the regular Thrift `Iface` interface, a `ServiceIface` interface that wraps all return values in a `Future`, which is required by Finagle.
 
 #### Simple Thrift Server
 
