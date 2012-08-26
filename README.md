@@ -264,16 +264,16 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
 
 ##### Java Thrift Client Implementation
 
-    Service<ThriftClientRequest, byte[]> service = ClientBuilder.safeBuild(ClientBuilder.get()  // 1
+    Service<ThriftClientRequest, byte[]> service = ClientBuilder.safeBuild(ClientBuilder.get() // 1
       .hosts(new InetSocketAddress(8080))
       .codec(ThriftClientFramedCodec.get())
       .hostConnectionLimit(1));
 
     Hello.ServiceIface client =
-      new Hello.ServiceToClient(service, new TBinaryProtocol.Factory());                        // 2
+      new Hello.ServiceToClient(service, new TBinaryProtocol.Factory());                       // 2
 
     client.hi().addEventListener(new FutureEventListener<String>() {
-      public void onSuccess(String s) {                                                         // 3
+      public void onSuccess(String s) {                                                        // 3
         System.out.println(s);
       }
 
