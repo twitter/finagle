@@ -182,7 +182,7 @@ Apache Thrift is a binary communication protocol that defines available methods 
       string hi();
     }
 
-Finagle's architecture requires that Thrift services be wrapped with `Future` objects. To generate the required Finagle wrapper code with your Thrift services automatically, use the <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift 0.5.0 finagle</a> fork of Apache Thrift when compiling Thrift services.
+To create a Finagle Thrift service, you must use the <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">custom Thrift compiler</a>. It will generate, in addition to the regular thrift Iface interface, a ServiceIface interface that wraps all return values in a Future, which is required by Finagle.
 
 #### Simple Thrift Server
 
