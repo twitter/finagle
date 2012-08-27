@@ -2,7 +2,7 @@ package com.twitter.finagle.example.redis
 
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.{Client, Redis}
-import com.twitter.finagle.redis.util.RedisCluster
+import com.twitter.finagle.redis.util.{RedisCluster, StringToChannelBuffer}
 
 object RedisClient {
 
@@ -13,14 +13,11 @@ object RedisClient {
 
     val client = Client(RedisCluster.hostAddresses())
     println("Setting foo -> bar...")
-    client.set("foo", "bar".getBytes)
+    client.set(StringToChannelBuffer("foo"), StringToChannelBuffer("bar"))
     println("Getting value for key 'foo'")
-    val getResult = client.get("foo")
-    // client returns a Future containing the value byte array, so we extract the Option object
-    val optionResult = getResult.apply()
-    // check the option object for the result
-    optionResult match {
-      case Some(n) => println("Got result: " + new String(n))
+    val getResult = client.get(StringToChannelBuffer("foo"))()
+    getResult match {
+      case Some(n) => println("Got result: " + new String(n.array))
       case None => println("Didn't get the value!")
     }
 
