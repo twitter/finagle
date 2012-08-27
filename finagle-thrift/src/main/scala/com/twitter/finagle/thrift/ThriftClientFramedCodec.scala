@@ -87,7 +87,8 @@ class ThriftClientFramedCodec(
           clientId)
         val seqIdFilter = if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
           new SeqIdFilter else Filter.identity[ThriftClientRequest, Array[Byte]]
-        seqIdFilter andThen tracingFilter andThen service
+        val filtered = seqIdFilter andThen tracingFilter andThen service
+        new ValidateThriftService(filtered, protocolFactory)
       }
     }
 }
