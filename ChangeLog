@@ -1,8 +1,56 @@
-5.3.0           2012/06/25
-        * finagle-core: ClientBuilder and ServerBuilder's MonitorFilter to report exception sources
-        * finagle-test: Add TaskTrackingTimer benchmark
-        * finagle-thirft: SeqIdFilter: helpful exceptions
-        * Dispatcher: all write exceptions are wrapped with WriteException
+5.3.8		2012/08/24
+	* finagle-core: Upgrade to Netty 3.5.5
+
+5.3.7		2012/08/24
+	* Doc: Fix mistake in finagLe README that claimed Future objects have a getContentAsync method
+	* Doc: Fix typos in README
+	* finagle-thrift: ThriftChannelBufferDecoder: fix for composite buffers
+	* finagle-mysql: MySQL codec from Ruben Oanta.
+	* finagle-core: add isSuccess to FailureAccrualFactory
+	* finagle-http: Fix file extension bug in finagle-http
+
+5.3.6		2012/06/17
+	* Doc: Typos
+	* finagle-core: fix canceling recurring timers
+	* finagle: kill finagle-memcached-hadoop
+	* finagle-memcached: in-process memcache server now supports expiry
+	* finagle-memcached: Adding key length validation and refactor validation logic.
+
+5.3.5		2012/08/10
+	* finagle-core: Fixed stats visibility
+	* finagle-serversets: allow specification of an additional endpoint name in ZookeeperServerSetCluster
+	* finagle-serversets: ZookeeperServerSetCluster.join now return an EndpointStatus + Named/Daemonized init thread
+	* finagle-core: Changed Cache's internal implementation from queue to deque (to allow LIFO behavior)
+	* finagle-core: cluster initialization honors global timeout in ClientBuilder.
+	* finagle-stress: finagle: kill obsolete benchmark
+
+5.3.4		2012/08/02
+	* finagle: patch public release of OSS libraries; catch up sbt
+	* finagle-core: netty 3.5.3.Final
+	* finagle-core: Timer: address review comments, fix tiny race
+
+5.3.3		2012/07/31
+	* finagle-core: Timer: dispose timeouts on cancellation
+
+5.3.2		2012/07/31
+	* finagle-core: Fix critical bug in Timer by refactoring the Timer model
+	* finagle: Add OWNERS file to finagle-memcached, finagle-redis
+	* finagle-redis: add keys and hkeys
+	* finagle-zipkin: Add a debug flag, add an i64 bit field to the thrift request header struct and as a http header
+	* finagle-core: SourceTrackingMonitor to report whether it's in client or server
+	* finagle-zipkin: Add duration to the the JVM gc annotation.
+
+5.3.1		2012/07/20
+	* finagle-serversets: Use authenticated zookeeper client suggested for new SD cluster migration
+	* finagle-thrift: seqid filter: improved tests
+	* finagle-zipkin: Add duration to annotations for timing operations
+	* finagle-serversets: bump up server-set version to 1.0.10 (latest) in finagle-serversets
+
+5.3.0		2012/06/25
+	* finagle-core: ClientBuilder and ServerBuilder's MonitorFilter to report exception sources
+	* finagle-test: Add TaskTrackingTimer benchmark
+	* finagle-thirft: SeqIdFilter: helpful exceptions
+	* Dispatcher: all write exceptions are wrapped with WriteException
 
 5.1.0		2012/06/14
 

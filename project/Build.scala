@@ -15,7 +15,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" % ("util-"+which) % utilVersion withSources()
 
   val sharedSettings = Seq(
-    version := "5.3.7",
+    version := "5.3.8",
     organization := "com.twitter",
     scalaVersion := "2.9.2",
     SubversionPublisher.subversionRepository := Some("https://svn.twitter.biz/maven-public"),
