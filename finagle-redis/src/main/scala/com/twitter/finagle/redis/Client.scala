@@ -57,6 +57,18 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
+   * Increment number stored at key by one. If key doesn't
+   * exist, value is set to 0 before the operation
+   * @params key
+   * @return Value after i. Error if key contains value
+   * of the wrong type
+   */
+  def incr(key: String): Future[Int] =
+    doRequest(Incr(key)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
    * Gets the value associated with the given key
    * @param key
    * @return Option containing either the value, or nothing
@@ -373,6 +385,38 @@ class Client(service: Service[Command, Reply]) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toByteArrays(messages)) toMap)
       case EmptyMBulkReply()    => Future.value(Map())
+    }
+
+  def lPush(key: String, value: Array[Byte]): Future[Int] =
+    doRequest(LPush(key, value)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  def lRange(key: String, start: Int, end: Int): Future[Seq[Array[Byte]]] =
+    doRequest(LRange(key, start, end)) {
+      case MBulkReply(messages) => Future.value(messages)
+      case EmptyMBulkReply()    => Future.value(Seq())
+    }
+
+  def sAdd(key: String, value: Array[Byte]): Future[Int] =
+    doRequest(SAdd(key, value)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  def sRem(key: String, value: Array[Byte]): Future[Int] =
+    doRequest(SRem(key, value)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  def sIsMember(key: String, value: Array[Byte]): Future[Int] =
+    doRequest(SIsMember(key, value)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  def sMembers(key: String): Future[Seq[Array[Byte]]] =
+    doRequest(SMembers(key)) {
+      case MBulkReply(messages) => Future.value(messages)
+      case EmptyMBulkReply()    => Future.value(Seq())
     }
 
   /**
