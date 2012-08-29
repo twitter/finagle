@@ -1511,8 +1511,8 @@ The `Util` project contains a `Function0` class that represents a Scala closure.
 The following example shows a Thrift server that places the blocking operation defined in the `Future0` object's `apply` method in the Java thread pool, where it will eventually execute and return a result:
 
     public static class HelloServer implements Hello.ServiceIface {
-      ExecutorService pool = Executors.newFixedThreadPool(4);                        // Java thread pool
-      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(threads); // Java Future thread pool
+      ExecutorService pool = Executors.newFixedThreadPool(4);                     // Java thread pool
+      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(pool); // Java Future thread pool
 
       public Future<Integer> blockingOperation() {
 	      Function0<Integer> blockingWork = new BlockingOperation();
