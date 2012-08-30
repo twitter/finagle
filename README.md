@@ -209,14 +209,14 @@ In this Finagle example, the `ThriftServer` object implements the `Hello` servic
 
 ##### Java Thrift Server Implementation
 
-    Hello.ServiceIface processor = new Hello.ServiceIface() {                    // 1
+    Hello.FutureIface processor = new Hello.FutureIface() {                      // 1
       public Future<String> hi() {                                               // 2
         return Future.value("hi");
       }
     };
 
     ServerBuilder.safeBuild(                                                     // 4
-      new Hello.Service(processor, new TBinaryProtocol.Factory()),               // 3
+      new Hello.FinagledService(processor, new TBinaryProtocol.Factory()),       // 3
       ServerBuilder.get()
         .name("HelloService")
         .codec(ThriftServerFramedCodec.get())
@@ -269,8 +269,11 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
       .codec(ThriftClientFramedCodec.get())
       .hostConnectionLimit(1));
 
-    Hello.ServiceIface client =
-      new Hello.ServiceToClient(service, new TBinaryProtocol.Factory());                       // 2
+    Hello.FinagledClient client = new Hello.FinagledClient(                                    // 2
+      service,
+      new TBinaryProtocol.Factory(),
+      "HelloService",
+      new InMemoryStatsReceiver());
 
     client.hi().addEventListener(new FutureEventListener<String>() {
       public void onSuccess(String s) {                                                        // 3
