@@ -202,6 +202,58 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zRevRangeByScore(foo, 0, 0, 0, 1)().asTuples == Seq()
       }
 
+      "add members and zIncr, then zIncr a nonmember" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zIncrBy(foo, 10, bar)() mustEqual Some(20)
+        client.zIncrBy(foo, 10, baz)() mustEqual Some(10)
+      }
+
+      "get zRange" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        BytesToString.fromList(
+          client.zRange(foo, 0, -1)().toList) mustEqual List("bar", "baz", "boo")
+        BytesToString.fromList(
+          client.zRange(foo, 2, 3)().toList) mustEqual List("boo")
+        BytesToString.fromList(
+          client.zRange(foo, -2, -1)().toList) mustEqual List("baz", "boo")
+      }
+
+      "get zRank" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRank(foo, boo)() mustEqual Some(2)
+        client.zRank(foo, moo)() mustEqual None
+      }
+
+      "get zRemRangeByRank" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRemRangeByRank(foo, 0, 1)() mustEqual 2
+        BytesToString.fromList(
+          client.zRange(foo, 0, -1)().toList) mustEqual List("boo")
+      }
+
+      "get zRemRangeByScore" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRemRangeByScore(foo, 10, 20)() mustEqual 2
+        BytesToString.fromList(
+          client.zRange(foo, 0, -1)().toList) mustEqual List("boo")
+      }
+
+      "get zRevRank" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRevRank(foo, boo)() mustEqual Some(0)
+        client.zRevRank(foo, moo)() mustEqual None
+      }
+
     }
 
     "perform list commands" in {

@@ -467,6 +467,17 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
+   * Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.
+   * @params key, member
+   * @return the rank of the member
+   */
+  def zRevRank(key: Array[Byte], member: Array[Byte]): Future[Option[Int]] =
+    doRequest(ZRevRank(BytesToString(key), member)) {
+      case IntegerReply(n) => Future.value(Some(n))
+      case EmptyBulkReply()   => Future.value(None)
+    }
+
+  /**
    * Gets number of elements in sorted set with score between min and max
    * @params key, min, max
    * @return Number of elements between min and max in sorted set
@@ -474,6 +485,30 @@ class Client(service: Service[Command, Reply]) {
   def zCount(key: Array[Byte], min: Double, max: Double): Future[Int] =
     doRequest(ZCount(key, ZInterval(min), ZInterval(max))) {
       case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Increment the member in sorted set key by amount.
+   * Returns an option, None if the member is not found, or the set is empty, or the new value.
+   * Throws an exception if the key refers to a structure that is not a sorted set.
+   * @params key, amount, member
+   * @return the new value of the incremented member
+   */
+  def zIncrBy(key: Array[Byte], amount: Double, member: Array[Byte]): Future[Option[Double]] =
+    doRequest(ZIncrBy(BytesToString(key), amount, member)) {
+      case BulkReply(message) => Future.value(Some(NumberFormat.toDouble(BytesToString(message))))
+      case EmptyBulkReply()   => Future.value(None)
+    }
+
+  /**
+   * Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.
+   * @params, key, member
+   * @return the rank of the member
+   */
+  def zRank(key: Array[Byte], member: Array[Byte]): Future[Option[Int]] =
+    doRequest(ZRank(BytesToString(key), member)) {
+      case IntegerReply(n) => Future.value(Some(n))
+      case EmptyBulkReply()   => Future.value(None)
     }
 
   /**
@@ -534,6 +569,38 @@ class Client(service: Service[Command, Reply]) {
   def zRem(key: Array[Byte], members: Seq[Array[Byte]]): Future[Int] =
     doRequest(ZRem(key, members)) {
       case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Removes members from sorted set by sort order, from start to stop, inclusive.
+   * @params key, start, stop
+   * @return Number of members removed from sorted set.
+   */
+  def zRemRangeByRank(key: Array[Byte], start: Int, stop: Int): Future[Int] =
+    doRequest(ZRemRangeByRank(BytesToString(key), start, stop)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Removes members from sorted set by score, from min to max, inclusive.
+   * @params key, min, max
+   * @return Number of members removed from sorted set.
+   */
+  def zRemRangeByScore(key: Array[Byte], min: Double, max: Double): Future[Int] =
+    doRequest(ZRemRangeByScore(BytesToString(key), ZInterval(min), ZInterval(max))) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Returns specified range of elements in sorted set at key.
+   * Elements are ordered from lowest to highest score.
+   * @param key, start, stop
+   * @return ZRangeResults object containing item/score pairs
+   */
+  def zRange(key: Array[Byte], start: Int, stop: Int): Future[Seq[Array[Byte]]] =
+    doRequest(ZRange(BytesToString(key), start, stop)) {
+      case MBulkReply(messages) => Future.value(messages)
+      case EmptyMBulkReply()    => Future.value(Seq())
     }
 
   /**
