@@ -1,0 +1,190 @@
+package com.twitter.finagle.redis.protocol
+
+import com.twitter.finagle.redis.util.BytesToString
+import com.twitter.finagle.redis.util.NumberFormat
+import com.twitter.finagle.redis.util.StringToBytes
+import Commands.trimList
+import com.twitter.finagle.redis.ClientError
+
+case class LLen(key: String) extends StrictKeyCommand {
+  val command = Commands.LLEN
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(Commands.LLEN, key)))
+}
+
+object LLen {
+  def apply(args: List[Array[Byte]]): LLen = {
+    LLen(BytesToString.getMonadArg(args, Commands.LLEN))
+  }
+}
+
+case class LIndex(key: String, index: Int) extends StrictKeyCommand {
+  val command = Commands.LINDEX
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, index.toString)))
+}
+
+object LIndex {
+  def apply(args: List[Array[Byte]]): LIndex = {
+    val list = BytesToString.fromList(trimList(args, 2, Commands.LINDEX))
+    val index = RequireClientProtocol.safe {
+      NumberFormat.toInt(list(1))
+    }
+    LIndex(list(0), index)
+  }
+}
+
+case class LInsert(
+    key: String,
+    relativePosition: String,
+    pivot: Array[Byte],
+    value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
+  val command = Commands.LINSERT
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key, relativePosition,
+        BytesToString(pivot), BytesToString(value))))
+}
+
+object LInsert {
+  def apply(args: List[Array[Byte]]): LInsert = {
+    val list = trimList(args, 4, Commands.LINSERT)
+    LInsert(BytesToString(list(0)), BytesToString(list(1)), list(2), list(3))
+  }
+}
+
+case class LPop(key: String) extends StrictKeyCommand {
+  val command = Commands.LPOP
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
+}
+
+object LPop {
+  def apply(args: List[Array[Byte]]): LPop = {
+    LPop(BytesToString.getMonadArg(args, Commands.LPOP))
+  }
+}
+
+case class LPush(key: String, values: List[Array[Byte]]) extends StrictKeyCommand {
+  val command = Commands.LPUSH
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes(command) :: StringToBytes(key) :: values)
+}
+
+object LPush {
+  def apply(args: List[Array[Byte]]): LPush = args match {
+    case head :: tail => LPush(BytesToString(head), tail)
+    case _ => throw ClientError("Invalid use of LPush")
+  }
+}
+
+case class LRem(key: String, count: Int, value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
+  val command = Commands.LREM
+  override def toChannelBuffer = {
+    val commandArgs = List(command, key, count.toString, BytesToString(value))
+    val commandBytes = StringToBytes.fromList(commandArgs)
+    RedisCodec.toUnifiedFormat(commandBytes)
+  }
+}
+
+object LRem {
+  def apply(args: List[Array[Byte]]): LRem = {
+    val list = BytesToString.fromList(trimList(args, 3, Commands.LREM))
+    val count = RequireClientProtocol.safe {
+      NumberFormat.toInt(list(1))
+    }
+    LRem(list(0), count, StringToBytes(list(2)))
+  }
+}
+
+case class LSet(key: String, index: Int, value: Array[Byte])
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
+  val command = Commands.LSET
+  override def toChannelBuffer = {
+    val commandArgs = List(command, key, index.toString, BytesToString(value))
+    val commandBytes = StringToBytes.fromList(commandArgs)
+    RedisCodec.toUnifiedFormat(commandBytes)
+  }
+}
+
+object LSet {
+  def apply(args: List[Array[Byte]]): LSet = {
+    val list = BytesToString.fromList(trimList(args, 3, Commands.LSET))
+    val index = RequireClientProtocol.safe {
+      NumberFormat.toInt(list(1))
+    }
+    LSet(list(0), index, StringToBytes(list(2)))
+  }
+}
+
+case class LRange(key: String, start: Int, end: Int) extends ListRangeCommand {
+  override val command = Commands.LRANGE
+}
+
+object LRange {
+  def apply(args: List[Array[Byte]]): LRange = {
+    val list = BytesToString.fromList(trimList(args, 3, Commands.LRANGE))
+    val (start, end) = RequireClientProtocol.safe {
+      Tuple2(NumberFormat.toInt(list(1)), NumberFormat.toInt(list(2)))
+    }
+    LRange(list(0), start, end)
+  }
+}
+
+case class RPop(key: String) extends StrictKeyCommand {
+  val command = Commands.RPOP
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes.fromList(List(command, key)))
+}
+
+object RPop extends {
+  def apply(args: List[Array[Byte]]): RPop = {
+    RPop(BytesToString.getMonadArg(args, Commands.RPOP))
+  }
+}
+
+case class RPush(key: String, values: List[Array[Byte]]) extends StrictKeyCommand {
+  val command = Commands.RPUSH
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(StringToBytes(command) :: StringToBytes(key) :: values)
+}
+
+object RPush {
+  def apply(args: List[Array[Byte]]): RPush = args match {
+    case head :: tail => RPush(BytesToString(head), tail)
+    case _ => throw ClientError("Invalid use of RPush")
+  }
+}
+
+case class LTrim(key: String, start: Int, end: Int) extends ListRangeCommand {
+  val command = Commands.LTRIM
+}
+
+object LTrim {
+  def apply(args: List[Array[Byte]]): LTrim = {
+    val list = BytesToString.fromList(trimList(args, 3, Commands.LTRIM))
+    val (start, end) = RequireClientProtocol.safe {
+      Tuple2(NumberFormat.toInt(list(1)), NumberFormat.toInt(list(2)))
+    }
+    LTrim(list(0), start, end)
+  }
+}
+
+trait ListRangeCommand extends StrictKeyCommand {
+  val start: Int
+  val end: Int
+  val command: String
+
+  override def toChannelBuffer = {
+    val commandArgs = List(command, key, start.toString, end.toString)
+    val commandBytes = StringToBytes.fromList(commandArgs)
+    RedisCodec.toUnifiedFormat(commandBytes)
+  }
+}

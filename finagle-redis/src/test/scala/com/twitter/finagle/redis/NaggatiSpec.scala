@@ -507,6 +507,26 @@ class NaggatiSpec extends SpecificationWithJUnit {
             codec(wrap("STRLEN foo\r\n")) mustEqual List(Strlen("foo"))
           }
         } // string commands
+        "list commands" >> {
+          "LPUSH" >> {
+            unwrap(codec(wrap("LPUSH foo bar\r\n"))) {
+              case LPush(key, List(value)) => {
+                key mustEqual "foo"
+                BytesToString(value) mustEqual "bar"
+              }
+            }
+          }
+        } // list commands
+        "set commands" >> {
+          "SADD" >> {
+            unwrap(codec(wrap("SADD foo bar\r\n"))) {
+              case SAdd(key, List(member)) => {
+                key mustEqual "foo"
+                BytesToString(member) mustEqual "bar"
+              }
+            }
+          }
+        }
       } // inline
 
       def unwrap(list: List[AnyRef])(fn: PartialFunction[Command,Unit]) = list match {
