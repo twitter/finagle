@@ -25,7 +25,7 @@
     <!-- library dependencies -->
     <dependency>
       <groupId>com.codahale</groupId>
-      <artifactId>jerkson_2.9.1</artifactId>
+      <artifactId>jerkson_2.9.2</artifactId>
       <version>0.5.0</version>
     </dependency>
     <dependency>
