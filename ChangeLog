@@ -1,3 +1,11 @@
+5.3.9		2012/09/07
+	* finagle: Update/fix README
+	* finagle: Upgrade util to 5.3.10
+	* finagle: Update guava to v13
+	* finagle-redis: API v2 + update example
+	* finagle-thrift: validate connections based on TApplicationException
+	* finagle-core: SSL: fix connection failure propagation in futures
+
 5.3.8		2012/08/24
 	* finagle-core: Upgrade to Netty 3.5.5
 
