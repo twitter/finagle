@@ -20,12 +20,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.6-SNAPSHOT</version>
+      <version>5.3.10-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>5.3.7-SNAPSHOT</version>
+      <version>5.3.11-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
