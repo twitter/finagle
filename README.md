@@ -183,6 +183,11 @@ Apache Thrift is a binary communication protocol that defines available methods 
       string hi();
     }
 
+To create a Finagle Thrift service, you must implement the `FutureIface` Interface that <a href="https://github.com/twitter/scrooge">Scrooge</a> (a custom Thrift compiler) generates for your service. Scrooge wraps your service method return values with asynchronous `Future` objects to be compatible with Finagle.
+
+* If you are using <a href="https://github.com/harrah/xsbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
+* If you are using <a href="http://maven.apache.org/">maven</a> to manage your project, <a href="http://maven.twttr.com/com/twitter/maven-finagle-thrift-plugin/">maven-finagle-thrift-plugin</a> can also compile Thrift IDL for Finagle.
+
 #### Simple Thrift Server
 
 In this Finagle example, the `ThriftServer` object implements the `Hello` service defined using the Thrift IDL.
@@ -208,14 +213,14 @@ In this Finagle example, the `ThriftServer` object implements the `Hello` servic
 
 ##### Java Thrift Server Implementation
 
-    Hello.ServiceIface processor = new Hello.ServiceIface() {                    // 1
-    public Future<String> hi() {                                                 // 2
-      return Future.value("hi");
+    Hello.FutureIface processor = new Hello.FutureIface() {                      // 1
+      public Future<String> hi() {                                               // 2
+        return Future.value("hi");
       }
-    }
+    };
 
     ServerBuilder.safeBuild(                                                     // 4
-      new Hello.Service(processor, new TBinaryProtocol.Factory()),               // 3
+      new Hello.FinagledService(processor, new TBinaryProtocol.Factory()),       // 3
       ServerBuilder.get()
         .name("HelloService")
         .codec(ThriftServerFramedCodec.get())
@@ -263,13 +268,16 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
 
 ##### Java Thrift Client Implementation
 
-    Service<ThriftClientRequest, byte[]> client = ClientBuilder.safeBuild(ClientBuilder.get()  // 1
+    Service<ThriftClientRequest, byte[]> service = ClientBuilder.safeBuild(ClientBuilder.get() // 1
       .hosts(new InetSocketAddress(8080))
-      .codec(new ThriftClientFramedCodecFactory())
+      .codec(ThriftClientFramedCodec.get())
       .hostConnectionLimit(1));
 
-    Hello.ServiceIface client =
-      new Hello.ServiceToClient(client, new TBinaryProtocol.Factory());                        // 2
+    Hello.FinagledClient client = new Hello.FinagledClient(                                    // 2
+      service,
+      new TBinaryProtocol.Factory(),
+      "HelloService",
+      new InMemoryStatsReceiver());
 
     client.hi().addEventListener(new FutureEventListener<String>() {
       public void onSuccess(String s) {                                                        // 3
@@ -277,7 +285,7 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
       }
 
       public void onFailure(Throwable t) {
-        System.out.println("Exception! ", t.toString());
+        System.out.println("Exception! " + t.toString());
       }
     });
 
