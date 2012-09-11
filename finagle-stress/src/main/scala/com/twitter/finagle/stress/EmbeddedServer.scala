@@ -23,7 +23,6 @@ object EmbeddedServer {
 
 class EmbeddedServer(val addr: SocketAddress) {
   def this() = this(RandomSocket())
-  import EmbeddedServer._
 
   // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection

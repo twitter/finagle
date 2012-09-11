@@ -7,12 +7,13 @@
   <version>5.3.10-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent-292</artifactId>
+    <artifactId>service-292</artifactId>
     <version>0.0.4</version>
-    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
+    <relativePath>../../parents/service-292/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
+    <mainClass>com.twitter.finagle.stress.LoadBalancerTest</mainClass>
   </properties>
   <dependencies>
     <!-- library dependencies -->

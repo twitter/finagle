@@ -1,21 +1,18 @@
 package com.twitter.finagle.stress
 
-import scala.collection.mutable.{ArrayBuffer, HashMap}
-
-import java.util.concurrent.atomic.AtomicInteger
-
-import org.jboss.netty.handler.codec.http._
-
-import com.twitter.ostrich.stats.{Stats => OstrichStats}
-import com.twitter.ostrich.stats.{StatsCollection, StatsProvider}
-import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
 import com.twitter.conversions.time._
-
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.Service
-import com.twitter.finagle.stats.{NullStatsReceiver, OstrichStatsReceiver}
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.stats.OstrichStatsReceiver
+import com.twitter.ostrich.stats.{Stats => OstrichStats}
+import com.twitter.ostrich.stats.StatsCollection
+import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
+
+import java.util.concurrent.atomic.AtomicInteger
+import org.jboss.netty.handler.codec.http._
+
+import scala.collection.mutable.ArrayBuffer
 
 object LoadBalancerTest {
   val totalRequests = new AtomicInteger(0)
@@ -28,39 +25,39 @@ object LoadBalancerTest {
         .requestTimeout(100.milliseconds)
         .retries(10)
     )
-
-    // TODO: proper resource releasing, etc.
   }
 
   def runSuite(clientBuilder: ClientBuilder[_, _, _, _, _]) {
+    val n = 10000
+    val latency = 0.seconds
     println("testing " + clientBuilder)
     println("\n== baseline (warmup) ==\n")
-    new LoadBalancerTest(clientBuilder)({ case _ => }).run()
+    new LoadBalancerTest(clientBuilder, latency, 10*n)({ case _ => }).run()
 
     println("\n== baseline ==\n")
-    new LoadBalancerTest(clientBuilder)({ case _ => }).run()
+    new LoadBalancerTest(clientBuilder, latency, 10*n)({ case _ => }).run()
 
     println("\n== 1 server goes offline ==\n")
-    new LoadBalancerTest(clientBuilder)({
-      case (10000, servers) =>
+    new LoadBalancerTest(clientBuilder, latency, 10*n)({
+      case (`n`, servers) =>
         servers(1).stop()
     }).run()
 
     println("\n== 1 application becomes nonresponsive ==\n")
-    new LoadBalancerTest(clientBuilder)({
-      case (10000, servers) =>
+    new LoadBalancerTest(clientBuilder, latency, 10*n)({
+      case (`n`, servers) =>
         servers(1).becomeApplicationNonresponsive()
     }).run()
 
     println("\n== 1 connection becomes nonresponsive ==\n")
-    new LoadBalancerTest(clientBuilder)({
-      case (10000, servers) =>
+    new LoadBalancerTest(clientBuilder, latency, 10*n)({
+      case (`n`, servers) =>
         servers(1).becomeConnectionNonresponsive()
     }).run()
 
     println("\n== 1 server has a protocol error ==\n")
-    new LoadBalancerTest(clientBuilder)({
-      case (10000, servers) =>
+    new LoadBalancerTest(clientBuilder, latency, 10*n)({
+      case (`n`, servers) =>
         servers(1).becomeBelligerent()
     }).run()
   }
@@ -108,46 +105,13 @@ class LoadBalancerTest(
   }
 
   def run() {
-    val servers = (0 until 3).toArray map(_ => EmbeddedServer())
-
-    servers foreach { server =>
-      server.setLatency(serverLatency)
-    }
-
-    // TODO: Revive this at some point
-
-    // Capture gauges to report them at the end.
-    // val gauges = new HashMap[Seq[String], Function0[Float]]
-    // val localStatsReceiver = new NullStatsReceiver {
-    //   override def provideGauge(name: String*)(f: => Float) {
-    //     gauges += description -> (() => f)
-    //   }
-    // }
-    // Also report to the main Ostrich stats object.
     OstrichStats.clearAll()
-    // val statsReceiver = localStatsReceiver.reportTo(new OstrichStatsReceiver)
 
-    // def captureGauges() {
-    //   Timer.default.schedule(500.milliseconds) {
-    //     val now = requestNumber.get
-    //     val values = gauges map { case (description, v) =>
-    //       val options = Map(description: _*)
-    //       val host = options("host")
-    //       val serverIndex = servers.findIndexOf { _.addr.toString == host }
-    //       val shortName = options("name") match {
-    //         case "load" => "l"
-    //         case "weight" => "w"
-    //         case "available" => "a"
-    //         case _ => "u"
-    //       }
-    //
-    //       val name = "%d/%s".format(serverIndex, shortName)
-    //
-    //       (name, v())
-    //     }
-    //     gaugeValues += ((now, Map() ++ values))
-    //    }
-    // }
+    val servers = (0 until 3) map { _ =>
+      val server = EmbeddedServer()
+      server.setLatency(serverLatency)
+      server
+    }
 
     val client = clientBuilder
       .codec(Http())
@@ -157,11 +121,10 @@ class LoadBalancerTest(
       .build()
 
     val begin = Time.now
-    // captureGauges()
     0 until concurrency foreach { _ => dispatch(client, servers, behavior) }
     latch.await()
     val duration = begin.untilNow
-    val rps = (numRequests.toDouble / duration.inMilliseconds.toDouble) * 1000.0
+    val rps = numRequests.toDouble / duration.inSeconds.toDouble
 
     // Produce a "report" here instead, so we have some sort of
     // semantic information here.
@@ -197,5 +160,8 @@ class LoadBalancerTest(
 
     println("> OSTRICH counters")
     Stats.prettyPrint(OstrichStats)
+
+    client.release()
+    servers foreach { _.stop() }
   }
 }

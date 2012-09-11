@@ -16,7 +16,7 @@ object Stats {
   }
 
   def prettyPrint(stats: StatsProvider) {
-    stats.getCounters foreach { case (name, count) =>
+    stats.getCounters().toSeq.sortBy(_._1) foreach { case (name, count) =>
       print("# %-60s %d".format(name, count))
     }
 
@@ -24,7 +24,7 @@ object Stats {
       val statMap = stat.toMap
       val keys = statMap.keys.toList.sorted
 
-      keys foreach { key =>
+      keys.sorted foreach { key =>
         print("⊕ %-60s %s".format("%s/%s".format(name, key), statMap(key)))
       }
     }
