@@ -21,16 +21,61 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
       case _ => false
     }
 
+    "with RetryPolicy.tries" in {
+      val filter = new RetryingFilter[Int, Int](RetryPolicy.tries(3, shouldRetry), timer, stats)
+      val service = mock[Service[Int, Int]]
+      val retryingService = filter andThen service
+
+      "always try once" in {
+        service(123) returns Future(321)
+        retryingService(123)() must be_==(321)
+        there was one(service)(123)
+        there was one(retriesStat).add(0)
+      }
+
+      "when failing with WriteExceptions, retry n-1 times" in {
+        service(123) returns Future.exception(new WriteException(new Exception))
+        val f = retryingService(123)
+        there were three(service)(123)
+        f() must throwA[WriteException]
+      }
+
+      "when failed with a non-WriteException, fail immediately" in {
+        service(123) returns Future.exception(new Exception("WTF!"))
+        retryingService(123)() must throwA(new Exception("WTF!"))
+        there was one(service)(123)
+        there was one(retriesStat).add(0)
+      }
+
+      "when no retry occurs, no stat update" in {
+        service(123) returns Future(321)
+        retryingService(123)() must be_==(321)
+        there was one(retriesStat).add(0)
+      }
+
+      "propagate cancellation" in {
+        val replyPromise = new Promise[Int]
+        service(123) returns replyPromise
+
+        val res = retryingService(123)
+        res.isDefined must beFalse
+        replyPromise.isCancelled must beFalse
+
+        res.cancel()
+        res.isDefined must beFalse
+        replyPromise.isCancelled must beTrue
+      }
+    }
+
     "with RetryPolicy.backoff" in
       testPolicy(RetryPolicy.backoff(backoffs)(shouldRetry))
-    "with RetryPolicy.javaBackoff" in
+    "with RetryPolicy.backoffJava" in
       testPolicy(RetryPolicy.backoffJava(Backoff.toJava(backoffs), shouldRetry))
 
     def testPolicy(policy: RetryPolicy[Try[Nothing]]) {
       val filter = new RetryingFilter[Int, Int](policy, timer, stats)
       val service = mock[Service[Int, Int]]
       val retryingService = filter andThen service
-
 
       "always try once" in {
         service(123) returns Future(321)
