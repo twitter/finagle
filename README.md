@@ -83,8 +83,8 @@ The following server, which is shown in both Scala and Java, responds to a clien
 
     val address: SocketAddress = new InetSocketAddress(10000)                                  // 3
 
-    val server: Server[HttpRequest, HttpResponse] = ServerBuilder()                            // 4
-      .codec(Http)
+    val server: Server = ServerBuilder()                                                       // 4
+      .codec(Http.get())
       .bindTo(address)
       .name("HttpServer")
       .build(service)
@@ -128,7 +128,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Scala HTTP Client Implementation
 
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()                           // 1
-      .codec(Http)
+      .codec(Http.get())
       .hosts(address)
       .hostConnectionLimit(1)
       .build()
@@ -1035,7 +1035,8 @@ The following example encapsulates the filters and service in the previous examp
         = handleExceptions andThen authorize andThen respond
 
       val server: Server = ServerBuilder()
-        .codec(Http)
+        .name("myService")
+        .codec(Http.get())
         .bindTo(new InetSocketAddress(8080))
         .build(myService)
       }
@@ -1052,7 +1053,7 @@ In this example, the `HandleExceptions` filter is executed before the `authorize
 A robust client has little to do with the lines of code (SLOC) that goes into it; rather, the robustness depends on how you configure the client and the testing you put into it. Consider the following HTTP client:
 
     val client = ClientBuilder()
-      .codec(Http)
+      .codec(Http.get())
       .hosts("localhost:10000,localhost:10001,localhost:10003")
       .hostConnectionLimit(1)             // max number of connections at a time to a host
       .connectionTimeout(1.second)        // max time to spend establishing a TCP connection
