@@ -84,7 +84,7 @@ The following server, which is shown in both Scala and Java, responds to a clien
     val address: SocketAddress = new InetSocketAddress(10000)                                  // 3
 
     val server: Server = ServerBuilder()                                                       // 4
-      .codec(Http.get())
+      .codec(Http())
       .bindTo(address)
       .name("HttpServer")
       .build(service)
@@ -99,7 +99,7 @@ The following server, which is shown in both Scala and Java, responds to a clien
     };
 
     ServerBuilder.safeBuild(service, ServerBuilder.get()                                       // 4
-      .codec(Http.get())
+      .codec(Http())
       .name("HttpServer")
       .bindTo(new InetSocketAddress("localhost", 10000)));                                     // 3
 
@@ -128,7 +128,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Scala HTTP Client Implementation
 
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()                           // 1
-      .codec(Http.get())
+      .codec(Http())
       .hosts(address)
       .hostConnectionLimit(1)
       .build()
@@ -142,7 +142,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Java HTTP Client Implementation
 
     Service<HttpRequest, HttpResponse> client = ClientBuilder.safeBuild(ClientBuilder.get()    // 1
-      .codec(Http.get())
+      .codec(Http())
       .hosts("localhost:10000")
       .hostConnectionLimit(1));
 
@@ -1036,7 +1036,7 @@ The following example encapsulates the filters and service in the previous examp
 
       val server: Server = ServerBuilder()
         .name("myService")
-        .codec(Http.get())
+        .codec(Http())
         .bindTo(new InetSocketAddress(8080))
         .build(myService)
       }
@@ -1053,7 +1053,7 @@ In this example, the `HandleExceptions` filter is executed before the `authorize
 A robust client has little to do with the lines of code (SLOC) that goes into it; rather, the robustness depends on how you configure the client and the testing you put into it. Consider the following HTTP client:
 
     val client = ClientBuilder()
-      .codec(Http.get())
+      .codec(Http())
       .hosts("localhost:10000,localhost:10001,localhost:10003")
       .hostConnectionLimit(1)             // max number of connections at a time to a host
       .connectionTimeout(1.second)        // max time to spend establishing a TCP connection
@@ -1319,7 +1319,7 @@ The following example shows the instantiation and invocation of the server. Call
       public static void main(String[] args) {
         ServerBuilder.safeBuild(new HTTPServer(),
                                 ServerBuilder.get()
-                                             .codec(Http.get())
+                                             .codec(Http())
                                              .name("HTTPServer")
                                              .bindTo(new InetSocketAddress("localhost", 8080)));
 
@@ -1381,7 +1381,7 @@ The following example shows the instantiation and invocation of a client. Callin
         Service<HttpRequest, HttpResponse> httpClient =
           ClientBuilder.safeBuild(
             ClientBuilder.get()
-                         .codec(Http.get())
+                         .codec(Http())
                          .hosts(new InetSocketAddress(8080))
                          .hostConnectionLimit(1));
 
