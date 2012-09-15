@@ -6,7 +6,7 @@ module Trace
   def id
     if stack.empty?
       span_id = generate_id
-      trace_id = TraceId.new(span_id, nil, span_id, should_sample?)
+      trace_id = TraceId.new(span_id, nil, span_id, should_sample?, Flags::EMPTY)
       stack.push(trace_id)
     end
     stack.last
@@ -58,22 +58,44 @@ module Trace
   end
 
   class TraceId
-    attr_reader :trace_id, :parent_id, :span_id, :sampled
-    alias :sampled? :sampled
-    def initialize(trace_id, parent_id, span_id, sampled)
+    attr_reader :trace_id, :parent_id, :span_id, :sampled, :flags
+
+    def initialize(trace_id, parent_id, span_id, sampled, flags)
       @trace_id = SpanId.from_value(trace_id)
       @parent_id = parent_id.nil? ? nil : SpanId.from_value(parent_id)
       @span_id = SpanId.from_value(span_id)
       @sampled = !!sampled
+      @flags = flags
     end
 
     def next_id
-      TraceId.new(@trace_id, @span_id, Trace.generate_id, @sampled)
+      TraceId.new(@trace_id, @span_id, Trace.generate_id, @sampled, @flags)
+    end
+
+    # the debug flag is used to ensure the trace passes ALL samplers
+    def debug?
+      @flags & Flags::DEBUG == Flags::DEBUG
+    end
+
+    def sampled?
+      debug? || @sampled
     end
 
     def to_s
-      "TraceId(trace_id = #{@trace_id.to_s}, parent_id = #{@parent_id.to_s}, span_id = #{@span_id.to_s}, sampled = #{@sampled.to_s})"
+      "TraceId(trace_id = #{@trace_id.to_s}, parent_id = #{@parent_id.to_s}, span_id = #{@span_id.to_s}, sampled = #{@sampled.to_s}, flags = #{@flags.to_s})"
     end
+  end
+  
+  # there are a total of 64 flags that can be passed down with the various tracing headers
+  # at the time of writing only one is used (debug).
+  #
+  # Note that using the 64th bit in Ruby requires some sign conversion since Thrift i64s are signed 
+  # but Ruby won't do the right thing if you try to set 1 << 64
+  class Flags
+    # no flags set
+    EMPTY = 0
+    # the debug flag is used to ensure we pass all the sampling layers and that the trace is stored
+    DEBUG = 1
   end
 
   class SpanId

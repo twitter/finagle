@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-memcached</artifactId>
   <packaging>jar</packaging>
-  <version>5.1.1-SNAPSHOT</version>
+  <version>5.3.7-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -20,18 +20,30 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.1.1-SNAPSHOT</version>
+      <version>5.3.7-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-serversets</artifactId>
-      <version>5.1.1-SNAPSHOT</version>
+      <version>5.3.7-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>5.2.1-SNAPSHOT</version>
+      <version>5.3.8-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter.common</groupId>
+      <artifactId>zookeeper-testing</artifactId>
+      <version>0.0.20</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter.common_internal</groupId>
+      <artifactId>zookeeper-utils</artifactId>
+      <version>0.0.15</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

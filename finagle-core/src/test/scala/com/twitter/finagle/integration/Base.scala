@@ -3,14 +3,15 @@ package com.twitter.finagle.integration
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{
   ClientBuilder, ReferenceCountedChannelFactory}
-import com.twitter.finagle.channel.ChannelService
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.transport.{TransportFactory, Transport}
-import com.twitter.util.Future
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.transport.TransportFactory
+
 import java.net.SocketAddress
+
 import org.jboss.netty.channel.{
   ChannelPipeline, ChannelPipelineFactory, Channels,
-  ChannelConfig, DefaultChannelConfig, Channel, ChannelFactory}
+  DefaultChannelConfig, Channel, ChannelFactory}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -20,6 +21,8 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
    * Bootstrap enough to get a basic client connection up & running.
    */
   class MockChannel {
+    val name = "mock_channel"
+    val statsReceiver = new InMemoryStatsReceiver
 
     val codec = mock[Codec[String, String]]
     (codec.prepareConnFactory(any)
@@ -59,9 +62,11 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
     val codecFactory = Function.const(codec) _
 
     val clientBuilder = ClientBuilder()
+      .name(name)
       .codec(codecFactory)
       .channelFactory(refcountedChannelFactory)
       .hosts(Seq(clientAddress))
+      .reportTo(statsReceiver)
       .hostConnectionLimit(1)
 
     def build() = clientBuilder.build()

@@ -13,11 +13,9 @@ package com.twitter.finagle.tracing
  * the transport.
  */
 
-import scala.util.Random
-import java.nio.ByteBuffer
+import com.twitter.util.{Future, Duration, Time, Local}
 import java.net.InetSocketAddress
-
-import com.twitter.util.{Time, Local}
+import scala.util.Random
 
 /**
  * `Trace` maintains the state of the tracing stack
@@ -32,7 +30,7 @@ object Trace {
 
   private[this] val rng = new Random
 
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None)
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
   private[this] val local = new Local[State]
   @volatile private[this] var tracingEnabled = true
 
@@ -83,7 +81,8 @@ object Trace {
     TraceId(currentId map { _.traceId },
       currentId map { _.spanId },
       SpanId(rng.nextLong()),
-      currentId map { _.sampled } getOrElse None)
+      currentId map { _.sampled } getOrElse None,
+      currentId map { _.flags} getOrElse Flags())
   }
 
   @deprecated("use setId() instead", "5.0.1")
@@ -138,15 +137,47 @@ object Trace {
        tracers.toSet foreach { t: Tracer => t.record(rec) }
    }
 
+  /**
+   * Time an operation and add an annotation with that duration on it
+   * @param message The message describing the operation
+   * @param f operation to perform
+   * @tparam T return type
+   * @return return value of the operation
+   */
+  def time[T](message: String)(f: => T): T = {
+    val (rv, duration) = Duration.inMilliseconds(f)
+    record(message, duration)
+    rv
+  }
+
+  /**
+   * Runs the function f and logs that duration until the future is satisfied with the given name.
+   */
+  def timeFuture[T](message: String)(f: Future[T]): Future[T] = {
+    val start = Time.now
+    f.ensure {
+      record(message, start.untilNow)
+    }
+    f
+  }
+
    /*
     * Convenience methods that construct records of different kinds.
     */
   def record(ann: Annotation) {
-    record(Record(id, Time.now, ann))
+    record(Record(id, Time.now, ann, None))
+  }
+
+  def record(ann: Annotation, duration: Duration) {
+    record(Record(id, Time.now, ann, Some(duration)))
   }
 
   def record(message: String) {
     record(Annotation.Message(message))
+  }
+
+  def record(message: String, duration: Duration) {
+    record(Annotation.Message(message), duration)
   }
 
   def recordRpcname(service: String, rpc: String) {

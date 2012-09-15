@@ -1,11 +1,16 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.{Service, SimpleFilter, TransportException}
-import com.twitter.util.{Time, Future}
+import com.twitter.util.{Time, Future, Try, Return, Throw}
 import scala.util.Random
 
 case class SeqMismatchException(id: Int, expected: Int) extends TransportException {
   override def toString = "SeqMismatchException: got %d, expected %d".format(id, expected)
+}
+
+object SeqIdFilter {
+  val VersionMask = 0xffff0000
+  val Version1 = 0x80010000
 }
 
 /**
@@ -17,6 +22,8 @@ case class SeqMismatchException(id: Int, expected: Int) extends TransportExcepti
  * generic with mux support.
  */
 class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
+  import SeqIdFilter._
+
   // Why random? Since the underlying codec currently does serial
   // dispatching, it doesn't make any difference, but technically we
   // need to ensure that we pick IDs from a free pool.
@@ -35,35 +42,49 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
     buf(off+3) = (x & 0xff).toByte
   }
 
-  private[this] def getAndSetId(buf: Array[Byte], newId: Int): Option[Int] = {
-    if (buf.size < 4) return None
-    val size = get32(buf, 0)
-    val off = if (size < 0) {
-      if (buf.size < 8) return None
-      8+get32(buf, 4)
-    } else
-      4+size+1
+  private[this] def badMsg(why: String) = Throw(new IllegalArgumentException(why))
 
-    if (buf.size<off+4) return None
+  private[this] def getAndSetId(buf: Array[Byte], newId: Int): Try[Int] = {
+    if (buf.size < 4) return badMsg("short header")
+    val header = get32(buf, 0)
+    val off = if (header < 0) {
+      // [4]header
+      // [4]n
+      // [n]string
+      // [4]seqid
+      if ((header&VersionMask) != Version1)
+        return badMsg("bad version %d".format(header&VersionMask))
+      if (buf.size < 8) return badMsg("short name size")
+      4+4+get32(buf, 4)
+    } else {
+      // [4]n
+      // [n]name
+      // [1]type
+      // [4]seqid
+      4+header+1
+    }
+
+    if (buf.size < off+4) return badMsg("short buffer")
 
     val currentId = get32(buf, off)
     put32(buf, off, newId)
-    Some(currentId)
+    Return(currentId)
   }
 
   def apply(req: ThriftClientRequest, service: Service[ThriftClientRequest, Array[Byte]]): Future[Array[Byte]] =
     if (req.oneway) service(req) else {
       val buf = req.message
       val id = rng.nextInt()
-      val givenId = getAndSetId(buf, id) getOrElse {
-        return Future.exception(new IllegalArgumentException("bad TMessage"))
+      val givenId = getAndSetId(buf, id) match {
+        case Return(id) => id
+        case Throw(exc) => return Future.exception(exc)
       }
 
       service(req) flatMap { buf =>
         getAndSetId(buf, givenId) match {
-          case Some(`id`) => Future.value(buf)
-          case Some(badId) => Future.exception(SeqMismatchException(badId, id))
-          case None => Future.exception(new IllegalArgumentException("bad TMessage"))
+          case Return(`id`) => Future.value(buf)
+          case Return(badId) => Future.exception(SeqMismatchException(badId, id))
+          case Throw(exc) => Future.exception(exc)
         }
       }
     }

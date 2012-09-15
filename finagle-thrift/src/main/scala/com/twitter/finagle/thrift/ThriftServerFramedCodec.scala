@@ -1,20 +1,19 @@
 package com.twitter.finagle.thrift
 
 import collection.JavaConversions._
+import com.twitter.finagle._
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.util.ByteArrays
+import com.twitter.util.Future
 
+import java.net.InetSocketAddress
 import org.apache.thrift.protocol.{TMessage, TMessageType}
+import org.apache.thrift.{TApplicationException, TException}
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
-import java.net.InetSocketAddress
-
-import com.twitter.util.Future
-import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Annotation, TraceId, SpanId}
-import com.twitter.finagle.util.ByteArrays
-import org.apache.thrift.{TApplicationException, TException}
 
 object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodecFactory
@@ -130,8 +129,8 @@ private[thrift] class ThriftServerTracingFilter(
         if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
         SpanId(header.getSpan_id),
-        sampled)
-
+        sampled,
+        if (header.isSetFlags) Flags(header.getFlags) else Flags())
 
       Trace.setId(traceId)
       Trace.recordRpcname(serviceName, msg.name)

@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
-  CancelledWriteException, ChannelClosedException, ChannelException, WriteException}
+  CancelledWriteException, ChannelClosedException, ChannelException}
 import com.twitter.util.{Future, Return, Promise}
 import java.net.SocketAddress
 import org.jboss.netty.channel._
@@ -24,9 +24,9 @@ class ChannelTransport[In, Out](ch: Channel)
         if (f.isSuccess)
           p.setValue(())
         else if (f.isCancelled)
-          p.setException(new WriteException(new CancelledWriteException))
+          p.setException(new CancelledWriteException)
         else
-          p.setException(new WriteException(ChannelException(f.getCause, ch.getRemoteAddress)))
+          p.setException(ChannelException(f.getCause, ch.getRemoteAddress))
       }
     })
   }
@@ -94,16 +94,16 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
   private[this] val writer = Proc[(In, Promise[Unit])] { case (msg, p) =>
     if (!pending.compareAndSet(false, true)) {
       statsReceiver.counter("concurrent_request").incr()
-      p.setException(new WriteException(new Exception("write while request pending")))
+      p.setException(new Exception("write while request pending"))
     } else {
       Channels.write(ch, msg).addListener(new ChannelFutureListener {
         def operationComplete(f: ChannelFuture) {
           if (f.isSuccess)
             p.setValue(())
           else if (f.isCancelled)
-            p.setException(new WriteException(new CancelledWriteException))
+            p.setException(new CancelledWriteException)
           else
-            p.setException(new WriteException(ChannelException(f.getCause, ch.getRemoteAddress)))
+            p.setException(ChannelException(f.getCause, ch.getRemoteAddress))
         }
       })
     }

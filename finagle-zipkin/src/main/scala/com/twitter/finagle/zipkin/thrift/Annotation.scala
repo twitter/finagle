@@ -1,8 +1,8 @@
 package com.twitter.finagle.zipkin.thrift
 
-import java.nio.ByteBuffer
-import com.twitter.util.Time
 import com.twitter.finagle.thrift.thrift
+import com.twitter.util.{Duration, Time}
+import java.nio.ByteBuffer
 
 /**
  * Annotation for a span. An event that happened at a particular time at a particular node.
@@ -10,15 +10,17 @@ import com.twitter.finagle.thrift.thrift
 case class ZipkinAnnotation(
   timestamp: Time,
   value:     String,
-  endpoint:  Endpoint
+  endpoint:  Endpoint,
+  duration:  Option[Duration]
 ) {
 
   def toThrift: thrift.Annotation = {
     val thriftAnnotation = new thrift.Annotation
-    thriftAnnotation.setTimestamp(timestamp.inMicroseconds.toLong)
+    thriftAnnotation.setTimestamp(timestamp.inMicroseconds)
     thriftAnnotation.setValue(value)
 
     endpoint.toThrift foreach { thriftAnnotation.setHost(_) }
+    duration foreach { d => thriftAnnotation.setDuration(d.inMicroseconds.toInt) }
 
     thriftAnnotation
   }

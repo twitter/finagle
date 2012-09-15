@@ -16,7 +16,7 @@ class TracingFilter[Req, Rep](tracer: Tracer)
     Trace.unwind {
       Trace.pushTracer(tracer)
       val nextId = Trace.nextId
-      Trace.setId(nextId.copy(sampled =
+      Trace.setId(nextId.copy(_sampled =
         if (Trace.id.sampled.isDefined) Trace.id.sampled else tracer.sampleTrace(nextId)))
       service(request)
     }

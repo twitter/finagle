@@ -30,7 +30,7 @@ object Decr {
     new Decr(BytesToString(trimList(args, 1, "DECR")(0)))
   }
 }
-class DecrBy(val key: String, val amount: Int) extends StrictKeyCommand {
+class DecrBy(val key: String, val amount: Long) extends StrictKeyCommand {
   val command = Commands.DECRBY
   override def toChannelBuffer =
     RedisCodec.toInlineFormat(List(command, key, amount.toString))
@@ -42,11 +42,11 @@ class DecrBy(val key: String, val amount: Int) extends StrictKeyCommand {
   def canEqual(other: Any) = other.isInstanceOf[DecrBy]
 }
 object DecrBy {
-  def apply(key: String, amount: Int) = new DecrBy(key, amount)
+  def apply(key: String, amount: Long) = new DecrBy(key, amount)
   def apply(args: List[Array[Byte]]) = {
     val list = BytesToString.fromList(trimList(args, 2, "DECRBY"))
     val amount = RequireClientProtocol.safe {
-      NumberFormat.toInt(list(1))
+      NumberFormat.toLong(list(1))
     }
     new DecrBy(list(0), amount)
   }
@@ -116,7 +116,7 @@ object Incr {
   }
 }
 
-class IncrBy(val key: String, val amount: Int) extends StrictKeyCommand {
+class IncrBy(val key: String, val amount: Long) extends StrictKeyCommand {
   val command = Commands.INCRBY
   override def toChannelBuffer =
     RedisCodec.toInlineFormat(List(command, key, amount.toString))
@@ -128,11 +128,11 @@ class IncrBy(val key: String, val amount: Int) extends StrictKeyCommand {
   def canEqual(other: Any) = other.isInstanceOf[IncrBy]
 }
 object IncrBy {
-  def apply(key: String, amount: Int) = new IncrBy(key, amount)
+  def apply(key: String, amount: Long) = new IncrBy(key, amount)
   def apply(args: List[Array[Byte]]) = {
     val list = BytesToString.fromList(trimList(args, 2, "INCRBY"))
     val amount = RequireClientProtocol.safe {
-      NumberFormat.toInt(list(1))
+      NumberFormat.toLong(list(1))
     }
     new IncrBy(list(0), amount)
   }

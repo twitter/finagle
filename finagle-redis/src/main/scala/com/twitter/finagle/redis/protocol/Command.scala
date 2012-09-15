@@ -73,6 +73,7 @@ object Commands {
   val HDEL              = "HDEL"
   val HGET              = "HGET"
   val HGETALL           = "HGETALL"
+  val HKEYS             = "HKEYS"
   val HMGET             = "HMGET"
   val HSET              = "HSET"
 
@@ -94,6 +95,13 @@ object Commands {
   val SCARD             = "SCARD"
   val SREM              = "SREM"
   val SPOP              = "SPOP"
+
+  // Transactions
+  val DISCARD           = "DISCARD"
+  val EXEC              = "EXEC"
+  val MULTI             = "MULTI"
+  val UNWATCH           = "UNWATCH"
+  val WATCH             = "WATCH"
 
   val commandMap: Map[String,Function1[List[Array[Byte]],Command]] = Map(
     // key commands
@@ -157,6 +165,7 @@ object Commands {
     HDEL              -> {HDel(_)},
     HGET              -> {HGet(_)},
     HGETALL           -> {HGetAll(_)},
+    HKEYS             -> {HKeys(_)},
     HMGET             -> {HMGet(_)},
     HSET              -> {HSet(_)},
 
@@ -179,7 +188,15 @@ object Commands {
     SISMEMBER         -> {SIsMember(_)},
     SCARD             -> {SCard(_)},
     SREM              -> {SRem(_)},
-    SPOP              -> {SPop(_)}
+    SPOP              -> {SPop(_)},
+
+    // transactions
+    DISCARD           -> {_ => Discard()},
+    EXEC              -> {_ => Exec()},
+    MULTI             -> {_ => Multi()},
+    UNWATCH           -> {_ => UnWatch()},
+    WATCH             -> {Watch(_)}
+
   )
 
   def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd).map {

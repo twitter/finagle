@@ -5,7 +5,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.util.FinagleTimer
+import com.twitter.finagle.util.ManagedTimer
 import com.twitter.ostrich.stats
 import com.twitter.util.{Future, Return, Promise, Throw, Time}
 import java.net.{SocketAddress, InetSocketAddress}
@@ -75,7 +75,7 @@ object EndToEndStress {
     val beginTime = Time.now
 
     val testResource = for {
-      timer <- FinagleTimer.getManaged
+      timer <- ManagedTimer.toTwitterTimer
       server <- buildServer
       client <- buildClient(concurrency, server.boundAddress)
     } yield {

@@ -18,7 +18,7 @@ import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.util.{Disposable, FinagleTimer}
+import com.twitter.finagle.util.{Disposable, ManagedTimer}
 
 object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port
@@ -34,7 +34,7 @@ object RawZipkinTracer {
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver): Tracer.Factory = {
 
-    val mTimer = FinagleTimer.getManaged
+    val mTimer = ManagedTimer.toTwitterTimer
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
       new RawZipkinTracer(
         scribeHost,
@@ -205,7 +205,7 @@ private[thrift] class RawZipkinTracer(
     mutate(record.traceId) { span =>
       val endpoint = Endpoint.fromSocketAddress(ia).boundEndpoint
       span.copy(_endpoint = Some(endpoint),
-        annotations = span.annotations map { a => ZipkinAnnotation(a.timestamp, a.value, endpoint)})
+        annotations = span.annotations map { a => ZipkinAnnotation(a.timestamp, a.value, endpoint, a.duration)})
     }
   }
 
@@ -226,8 +226,8 @@ private[thrift] class RawZipkinTracer(
    */
   protected def annotate(record: Record, value: String) = {
     mutate(record.traceId) { span =>
-      span.copy(annotations = span.annotations ++ Seq(
-        ZipkinAnnotation(record.timestamp, value, span.endpoint)))
+      span.copy(annotations =
+        ZipkinAnnotation(record.timestamp, value, span.endpoint, record.duration) +: span.annotations)
     }
   }
 }

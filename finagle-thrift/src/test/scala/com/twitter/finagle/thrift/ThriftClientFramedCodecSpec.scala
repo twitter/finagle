@@ -40,5 +40,34 @@ class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
 
       header.isSampled mustBe true
     }
+
+    "create header correctly" in {
+      val traceId = TraceId(Some(SpanId(1L)), None, SpanId(2L), Some(true), Flags().setDebug)
+      Trace.setId(traceId)
+
+      val filter = new ThriftClientTracingFilter("service", true, None)
+      val buffer = new OutputBuffer()
+      buffer().writeMessageBegin(new TMessage("method", TMessageType.CALL, 0))
+
+      val options = new thrift.ConnectionOptions
+      options.write(buffer())
+      buffer().writeMessageEnd()
+
+      val service = mock[Service[ThriftClientRequest, Array[Byte]]]
+      val _request = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
+      service(_request.capture) returns Future(Array[Byte]())
+
+      filter(new ThriftClientRequest(buffer.toArray, false), service)
+
+      val header = new thrift.RequestHeader
+      InputBuffer.peelMessage(_request.getValue.message, header)
+
+      header.getTrace_id mustBe 1L
+      header.getSpan_id mustBe 2L
+      header.isSetParent_span_id mustBe false
+      header.isSampled mustBe true
+      header.isSetFlags mustBe true
+      header.getFlags mustBe 1L
+    }
   }
 }

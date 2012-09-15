@@ -1,6 +1,10 @@
 package com.twitter.finagle.redis.integration
 
 import org.specs.SpecificationWithJUnit
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.{Redis, ClientError, TransactionalClient}
+import com.twitter.finagle.redis.util.{BytesToString, RedisCluster, ReplyFormat}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.Client
@@ -16,7 +20,7 @@ class ClientSpec extends SpecificationWithJUnit {
     /**
      * Note: This integration test requires a real Redis server to run.
      */
-    var client: Client = null
+    var client: TransactionalClient = null
     val foo = "foo".getBytes
     val bar = "bar".getBytes
     val baz = "baz".getBytes
@@ -27,16 +31,17 @@ class ClientSpec extends SpecificationWithJUnit {
 
     doBefore {
       RedisCluster.start(1)
-      val service = ClientBuilder()
-        .codec(new Redis(stats))
-        .hosts(RedisCluster.hostAddresses())
-        .hostConnectionLimit(1)
-        .build()
-      client = Client(service)
+      client = TransactionalClient(
+        ClientBuilder()
+         .codec(new Redis(stats))
+         .hosts(RedisCluster.hostAddresses())
+         .hostConnectionLimit(1)
+         .buildFactory())
     }
 
     doAfter {
       RedisCluster.stop()
+      client.release
     }
 
     "perform simple commands" in {
@@ -57,6 +62,14 @@ class ClientSpec extends SpecificationWithJUnit {
         client.del(Seq("foo"))()
         client.set("foo", "bar".getBytes)()
         client.exists("foo")() mustEqual true
+      }
+
+      "keys" in {
+        client.set("foo", bar)()
+        client.set("moo", boo)()
+        BytesToString.fromList(client.keys("")().toList) must throwA[ClientError]
+        BytesToString.fromList(client.keys("*oo")().toList) mustEqual Seq("moo", "foo")
+        BytesToString.fromList(client.keys("*z*")().toList) mustEqual Seq()
       }
 
       "get range" in {
@@ -135,6 +148,13 @@ class ClientSpec extends SpecificationWithJUnit {
         client.hSet(foo, boo, moo)()
         BytesToString.fromTuples(
           client.hGetAllAsPairs(foo)()) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
+      }
+
+      "get fields in a hash" in {
+        client.hSet(foo, bar, baz)()
+        client.hSet(foo, boo, moo)()
+        BytesToString.fromList(
+          client.hKeys("foo")().toList) mustEqual Seq("bar", "boo")
       }
 
     }
@@ -409,7 +429,50 @@ class ClientSpec extends SpecificationWithJUnit {
         client.sRem(key, List(baz))() mustEqual 0
       }
 
-}
+    }
+
+    "perform commands as a transaction" in {
+      "set and get transaction" in {
+        val txResult = client.transaction(Seq(Set("foo", bar), Set("baz", boo)))()
+        ReplyFormat.toString(txResult.toList) mustEqual Seq("OK", "OK")
+      }
+
+      "hash set and multi get transaction" in {
+        val txResult = client.transaction(Seq(HSet(foo, bar, baz), HSet(foo, boo, moo),
+          HMGet("foo", Seq("bar", "boo"))))()
+        ReplyFormat.toString(txResult.toList) mustEqual Seq("1", "1", "baz", "moo")
+      }
+
+      "key command on incorrect data type" in {
+        val txResult = client.transaction(Seq(HSet(foo, boo, moo),
+          Get("foo"), HDel("foo", List(boo))))()
+        txResult.toList mustEqual Seq(IntegerReply(1),
+          ErrorReply("ERR Operation against a key holding the wrong kind of value"),
+          IntegerReply(1))
+      }
+
+      "fail after a watched key is modified" in {
+        client.set("foo", bar)()
+        client.watch(Seq(foo))()
+        client.set("foo", boo)()
+        client.transaction(Seq(Get("foo")))() must throwA[ClientError]
+      }
+
+      "watch then unwatch a key" in {
+        client.set("foo", bar)()
+        client.watch(Seq(foo))()
+        client.set("foo", boo)()
+        client.unwatch()()
+        val txResult = client.transaction(Seq(Get("foo")))()
+        ReplyFormat.toString(txResult.toList) mustEqual Seq("boo")
+      }
+
+      "set followed by get on the same key" in {
+        val txResult = client.transaction(Seq(Set("foo", bar), Get("foo")))()
+        ReplyFormat.toString(txResult.toList) mustEqual Seq("OK", "bar")
+      }
+
+    }
 
   }
 

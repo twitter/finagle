@@ -1,8 +1,11 @@
 package com.twitter.finagle.builder
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.GlobalRequestTimeoutException
+import com.twitter.finagle.integration.{StringCodec, DynamicCluster}
+import java.net.SocketAddress
 import org.specs.SpecificationWithJUnit
 import collection.mutable
-import com.twitter.finagle.integration.DynamicCluster
 
 class ClusterSpec extends SpecificationWithJUnit {
   case class WrappedInt(val value: Int)
@@ -77,6 +80,23 @@ class ClusterSpec extends SpecificationWithJUnit {
     "always be defined on StaticCluster" in {
       val cluster = new StaticCluster[Int](Seq[Int](1, 2))
       cluster.ready.isDefined must beTrue
+    }
+
+    // Cluster initialization should honor global timeout as well as timeout specified
+    // together with the requests
+    "honor timeout while waiting for cluster to initialize" in {
+      val cluster = new DynamicCluster[SocketAddress](Seq[SocketAddress]()) //empty cluster
+      val client = ClientBuilder()
+          .cluster(cluster)
+          .codec(StringCodec)
+          .hostConnectionLimit(1)
+          .timeout(1.seconds) //global time out
+          .build()
+
+      client("hello1")() must throwA[GlobalRequestTimeoutException]
+
+      // It also should honor timeout specified with the request
+      client("hello2")(10.milliseconds) must throwA[com.twitter.util.TimeoutException]
     }
   }
 }

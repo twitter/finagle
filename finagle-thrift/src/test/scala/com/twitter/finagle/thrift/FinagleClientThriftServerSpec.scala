@@ -28,7 +28,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
         def complex_return(someString: String) = new SomeStruct(123, someString)
         def someway() = {
           somewayPromise() = Return(())
-          Future.void
+          Future.Void
         }
       }
 

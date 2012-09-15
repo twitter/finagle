@@ -40,9 +40,13 @@ abstract class Request extends Message with HttpRequestProxy {
   @BeanProperty
   def fileExtension: String = {
     val p = path
-    p.lastIndexOf('.') match {
+    val leaf = p.lastIndexOf('/') match {
+      case -1 => p
+      case n  => p.substring(n + 1)
+    }
+    leaf.lastIndexOf('.') match {
       case -1 => ""
-      case n  => p.substring(n + 1).toLowerCase
+      case n  => leaf.substring(n + 1).toLowerCase
     }
   }
 

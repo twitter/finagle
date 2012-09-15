@@ -1,8 +1,12 @@
 package com.twitter.finagle.memcached.integration
 
-import com.twitter.common.io.FileUtils._
-import com.twitter.common.quantity.{Time, Amount}
-import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
+/* temporarily disabled due to internal dependency
+
+import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
+import com.twitter.common.zookeeper.ZooKeeperClient
+import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
+import com.twitter.common_internal.zookeeper.TwitterServerSet
+import com.twitter.common_internal.zookeeper.TwitterServerSet.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.{PartitionedClient, Server, Client, KetamaClientBuilder}
 import com.twitter.finagle.memcached.protocol._
@@ -12,11 +16,9 @@ import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.tracing.ConsoleTracer
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
-import org.apache.zookeeper.server.{ZooKeeperServer, NIOServerCnxn}
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 
 class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {
@@ -120,6 +122,7 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
       "send malformed keys" in {
+        // test key validation trait
         client.get("fo o")() must throwA[ClientError]
         client.set("", "bar")() must throwA[ClientError]
         client.get("    foo")() must throwA[ClientError]
@@ -129,9 +132,30 @@ class ClientSpec extends SpecificationWithJUnit {
         client.get(nullString)() must throwA[ClientError]
         client.set(nullString, "bar")() must throwA[ClientError]
         client.set("    ", "bar")() must throwA[ClientError]
-        client.set("\t", "bar")() must throwA[ClientError]
+        client.set("\t", "bar")() mustNot throwA[ClientError] // \t is allowed
         client.set("\r", "bar")() must throwA[ClientError]
         client.set("\n", "bar")() must throwA[ClientError]
+        client.set("\0", "bar")() must throwA[ClientError]
+
+        val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        client.get(veryLongKey)() must throwA[ClientError]
+        client.set(veryLongKey, "bar").isThrow mustBe true
+
+        // test other keyed command validation
+        val nullSeq:Seq[String] = null
+        client.get(nullSeq)() must throwA[ClientError]
+        client.gets(nullSeq)() must throwA[ClientError]
+        client.gets(Seq(null))() must throwA[ClientError]
+        client.gets(Seq(""))() must throwA[ClientError]
+        client.gets(Seq("foos", "bad key", "somethingelse"))() must throwA[ClientError]
+        client.append("bad key", "rab")() must throwA[ClientError]
+        client.prepend("bad key", "rab")() must throwA[ClientError]
+        client.replace("bad key", "bar")() must throwA[ClientError]
+        client.add("bad key", "2")() must throwA[ClientError]
+        client.cas("bad key", "z", "2")() must throwA[ClientError]
+        client.incr("bad key")() must throwA[ClientError]
+        client.decr("bad key")() must throwA[ClientError]
+        client.delete("bad key")() must throwA[ClientError]
       }
 
     }
@@ -177,28 +201,23 @@ class ClientSpec extends SpecificationWithJUnit {
     /**
      * Note: This integration test requires a real Memcached server to run.
      */
-    val zookeeperAddress = new InetSocketAddress(2181)
-    var connectionFactory: NIOServerCnxn.Factory = null
+    var shutdownRegistry = new ShutdownRegistryImpl
     var memcachedAddress = List[Option[InetSocketAddress]]()
 
     var zookeeperClient: ZooKeeperClient = null
-    val zkPath = "/twitter/services/cache/silly-cache"
+    val sdService: Service = new Service("cache","test","silly-cache")
 
     doBefore {
       // start zookeeper server and create zookeeper client
-      val zookeeperServer = new ZooKeeperServer(
-        new FileTxnSnapLog(createTempDir(), createTempDir()),
-        new ZooKeeperServer.BasicDataTreeBuilder)
-      connectionFactory = new NIOServerCnxn.Factory(zookeeperAddress)
-      connectionFactory.startup(zookeeperServer)
+      var zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
+      zookeeperServer.startNetwork()
 
       // connect to zookeeper server
-      zookeeperClient = new ZooKeeperClient(
-        Amount.of(100, Time.MILLISECONDS),
-        zookeeperAddress)
+      zookeeperClient = zookeeperServer.createClient(
+        ZooKeeperClient.digestCredentials(sdService.getRole(), sdService.getRole()))
 
       // create serverset
-      val serverSet = new ServerSetImpl(zookeeperClient, zkPath)
+      val serverSet = TwitterServerSet.create(zookeeperClient, sdService)
       val zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
 
       // start five memcached server and join the cluster
@@ -213,9 +232,8 @@ class ClientSpec extends SpecificationWithJUnit {
     }
 
     doAfter {
-      // shutdown zookeeper server
-      connectionFactory.shutdown()
-      zookeeperClient.close()
+      // shutdown zookeeper server and client
+      shutdownRegistry.execute()
 
       // shutdown memcached server
       ExternalMemcached.stop()
@@ -224,8 +242,9 @@ class ClientSpec extends SpecificationWithJUnit {
     "Simple ClusterClient using finagle load balancing" in {
       "many keys" in {
         // create simple cluster client
-        val mycluster = new ZookeeperServerSetCluster(new ServerSetImpl(zookeeperClient, zkPath))
-        Thread.sleep(1000) // give it sometime for the cluster to get the initial set of memberships
+        val mycluster =
+          new ZookeeperServerSetCluster(TwitterServerSet.create(zookeeperClient, sdService))
+        mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
         val client = Client(mycluster)
 
         val count = 100
@@ -267,16 +286,15 @@ class ClientSpec extends SpecificationWithJUnit {
       "set & get" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster =
-          new ZookeeperServerSetCluster(new ServerSetImpl(zookeeperClient, zkPath)) map {
+          new ZookeeperServerSetCluster(TwitterServerSet.create(zookeeperClient, sdService)) map {
             socketAddr =>
               socketAddr.asInstanceOf[InetSocketAddress]
           }
-        Thread.sleep(1000) // give it sometime for the cluster to get the initial set of memberships
+        mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
                 .cluster(mycluster)
                 .build()
-                .asInstanceOf[PartitionedClient]
 
         client.delete("foo")()
         client.get("foo")() mustEqual None
@@ -288,11 +306,11 @@ class ClientSpec extends SpecificationWithJUnit {
       "many keys" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster =
-          new ZookeeperServerSetCluster(new ServerSetImpl(zookeeperClient, zkPath)) map {
+          new ZookeeperServerSetCluster(TwitterServerSet.create(zookeeperClient, sdService)) map {
             socketAddr =>
               socketAddr.asInstanceOf[InetSocketAddress]
           }
-        Thread.sleep(1000) // give it sometime for the cluster to get the initial set of memberships
+        mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
                 .cluster(mycluster)
@@ -316,3 +334,5 @@ class ClientSpec extends SpecificationWithJUnit {
     }
   }
 }
+
+*/

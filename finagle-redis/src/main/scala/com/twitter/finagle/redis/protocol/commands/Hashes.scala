@@ -50,6 +50,18 @@ case class HGetAll(key: Array[Byte]) extends StrictByteKeyCommand {
     RedisCodec.toUnifiedFormat(List(Commands.HGETALL.getBytes, key))
 }
 
+object HKeys {
+  def apply(keys: List[Array[Byte]]) = {
+    new HKeys(BytesToString(keys.head))
+  }
+}
+
+case class HKeys(key: String) extends StrictKeyCommand {
+  val command = Commands.HKEYS
+  override def toChannelBuffer =
+    RedisCodec.toInlineFormat(List(Commands.HKEYS, key))
+}
+
 object HMGet {
   def apply(key: String, fields: List[Array[Byte]]) = {
     RequireClientProtocol(fields.nonEmpty, "HMGET requires a hash key and at least one field")

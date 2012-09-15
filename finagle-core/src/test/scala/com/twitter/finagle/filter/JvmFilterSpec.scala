@@ -40,7 +40,7 @@ class JvmFilterSpec extends SpecificationWithJUnit with Mockito {
       trace must be_==(Seq(
         Record(
           Trace.id, 1.second.ago,
-          Annotation.Message(Gc(1, "pcopy", 1.second.ago, 1.second).toString))))
+          Annotation.Message(Gc(1, "pcopy", 1.second.ago, 1.second).toString), Some(1.second))))
     }
 
     "Not record nonoverlapping Gcs" in Time.withCurrentTimeFrozen { tc =>
@@ -56,7 +56,7 @@ class JvmFilterSpec extends SpecificationWithJUnit with Mockito {
       trace must be_==(Seq(
         Record(
           Trace.id, Time.now,
-          Annotation.Message(Gc(2, "pcopy", Time.now, 1.second).toString))))
+          Annotation.Message(Gc(2, "pcopy", Time.now, 1.second).toString), Some(1.second))))
     }
   }
 }

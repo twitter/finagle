@@ -21,6 +21,16 @@ trait StrictByteKeyCommand extends ByteKeyCommand {
   validate()
 }
 
+trait ByteKeysCommand extends Command {
+  val keys: List[Array[Byte]]
+  protected def validate() {
+    RequireClientProtocol(keys.nonEmpty, "Empty key list found")
+  }
+}
+trait StrictByteKeysCommand extends ByteKeyCommand {
+  validate()
+}
+
 trait KeysCommand extends Command {
   val keys: List[String]
   protected def validate() {

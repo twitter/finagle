@@ -4,7 +4,7 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
-import com.twitter.util.{Time, Future}
+import com.twitter.util.{Duration, Future, Return, Throw, Time, Timer, Try}
 import com.twitter.conversions.time._
 
 import com.twitter.finagle.{Service, ServiceFactory, MockTimer}
@@ -151,6 +151,52 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
         factory.isAvailable must beTrue
         factory()() must throwA(exc)
         factory.isAvailable must beFalse
+      }
+    }
+  }
+
+  "a customized factory" should {
+    class CustomizedFailureAccrualFactory(
+      underlying: ServiceFactory[Int, Int],
+      numFailures: Int,
+      markDeadFor: Duration,
+      timer: Timer
+    ) extends FailureAccrualFactory[Int, Int](underlying, numFailures, markDeadFor, timer) {
+      override def isSuccess(response: Try[Int]): Boolean = {
+        response match {
+          case Throw(_)  => false
+          case Return(x) => x != 321
+        }
+      }
+    }
+
+    val underlyingService = mock[Service[Int, Int]]
+    underlyingService.isAvailable returns true
+    underlyingService(Matchers.anyInt) returns Future.value(321)
+
+    val underlying = mock[ServiceFactory[Int, Int]]
+    underlying.isAvailable returns true
+    underlying() returns Future.value(underlyingService)
+
+    val timer = new MockTimer
+    val factory = new CustomizedFailureAccrualFactory(
+      underlying, 3, 10.seconds, timer)
+    val service = factory()()
+    there was one(underlying)()
+
+    "become unavailable" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+
+        service(123)() must be_==(321)
+        service(123)() must be_==(321)
+        factory.isAvailable must beTrue
+        service.isAvailable must beTrue
+
+        // Now fail:
+        service(123)() must be_==(321)
+        service.isAvailable must beFalse
+
+        there were three(underlyingService)(123)
       }
     }
   }

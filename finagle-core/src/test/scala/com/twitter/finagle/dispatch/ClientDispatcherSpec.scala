@@ -86,5 +86,11 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
         there was one(trans).write(any)
       }
     }
+
+    "rewrite WriteExceptions" in {
+      val exc = mock[Exception]
+      trans.write(any) returns Future.exception(exc)
+      disp("hello").poll must be_==(Some(Throw(WriteException(exc))))
+    }
   }
 }

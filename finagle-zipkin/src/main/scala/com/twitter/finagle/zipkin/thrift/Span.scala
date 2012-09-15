@@ -57,6 +57,7 @@ case class Span(
     traceId._parentId foreach { parentId => span.setParent_id(parentId.toLong) }
     span.setTrace_id(traceId.traceId.toLong)
     span.setName(name)
+    span.setDebug(traceId.flags.isDebug)
 
     annotations map ( _.toThrift ) foreach { a =>
       if (a.isSetHost) a.getHost().setService_name(serviceName)

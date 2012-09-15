@@ -45,6 +45,16 @@ class CookieSetSpec extends SpecificationWithJUnit {
       request.headers("Cookie") must_== "name=value"
     }
 
+    "add same cookie only once" in {
+      val request = Request()
+      val cookie = new DefaultCookie("name", "value")
+      request.cookies += cookie
+      request.cookies += cookie
+      request.cookies.contains(new DefaultCookie("name", "value")) must beTrue
+      request.headers("Cookie") must_== "name=value"
+      request.cookies.iterator.length must_== 1
+    }
+
     "remove cookie" in {
       val request = Request()
       request.headers.add("Cookie", "name=value")
@@ -54,10 +64,10 @@ class CookieSetSpec extends SpecificationWithJUnit {
       request.cookies must haveSize(0)
     }
 
-    "netty Cookie.equals is broken" in {
+    "netty Cookie.equals is not broken in netty 3.5" in {
       val cookie1 = new DefaultCookie("name", "value")
       val cookie2 = new DefaultCookie("name", "value")
-      cookie1 must_!=(cookie2)
+      cookie1 must_==(cookie2)
     }
 
     "invalid cookies are ignored" in {

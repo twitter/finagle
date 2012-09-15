@@ -388,7 +388,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         val key = "setex"
         client(SetEx(key, 10, "Hello"))() mustEqual StatusReply("OK")
         client(Ttl(key))() match {
-          case IntegerReply(seconds) => seconds must beCloseTo(10, 2)
+          case IntegerReply(seconds) => seconds.toInt must beCloseTo(10, 2)
           case _ => fail("Expected IntegerReply")
         }
         assertBulkReply(client(Get(key)), "Hello")
@@ -593,11 +593,11 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
       case MBulkReply(msgs) => contains match {
         case true =>
           expects.isEmpty must beFalse
-          val newMsgs = msgs.map { msg => BytesToString(msg) }
+          val newMsgs = ReplyFormat.toByteArrays(msgs) map { msg => BytesToString(msg) }
           expects.foreach { msg => newMsgs must contain(msg) }
         case false =>
           expects.isEmpty must beFalse
-          msgs.map { msg => BytesToString(msg) } mustEqual expects
+          ReplyFormat.toByteArrays(msgs) map { msg => BytesToString(msg) } mustEqual expects
       }
       case EmptyMBulkReply() => expects.isEmpty must beTrue
       case r: Reply => fail("Expected MBulkReply, got %s".format(r))
@@ -610,7 +610,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   }
 
   def assertIntegerReply(reply: Future[Reply], expects: Int, delta: Int = 10) = reply() match {
-    case IntegerReply(amnt) => amnt must beCloseTo(expects, delta)
+    case IntegerReply(amnt) => amnt.toInt must beCloseTo(expects, delta)
     case _ => fail("Expected IntegerReply")
   }
 

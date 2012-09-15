@@ -18,7 +18,7 @@ class MkJvmFilter(jvm: Jvm) {
       val begin = Time.now
       service(req) ensure {
         buffer(begin) foreach { gc =>
-          val rec = Record(Trace.id, gc.timestamp, Annotation.Message(gc.toString))
+          val rec = Record(Trace.id, gc.timestamp, Annotation.Message(gc.toString), Some(gc.duration))
           Trace.record(rec)
         }
       }

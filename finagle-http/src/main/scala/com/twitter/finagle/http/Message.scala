@@ -272,7 +272,15 @@ abstract class Message extends HttpMessage {
   def getLength(): Int = length
 
   /** Get the content as a string. */
-  def contentString: String = getContent.toString(Message.Utf8)
+  def contentString: String = {
+    val encoding = try {
+      Charset.forName(charset getOrElse "UTF-8")
+    } catch {
+      case _ => Message.Utf8
+    }
+    getContent.toString(encoding)
+  }
+
   def getContentString(): String = contentString
 
   /** Set the content as a string. */
@@ -374,7 +382,7 @@ abstract class Message extends HttpMessage {
 
 
 object Message {
-  private val Utf8          = Charset.forName("UTF-8")
+  private[http] val Utf8          = Charset.forName("UTF-8")
   @deprecated("Use MediaType.Json")
   val MediaTypeJson         = "application/json"
   @deprecated("Use MediaType.Javascript")

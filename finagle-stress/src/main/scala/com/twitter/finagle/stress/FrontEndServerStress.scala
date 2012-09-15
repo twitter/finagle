@@ -1,7 +1,7 @@
 package com.twitter.finagle.stress
 
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.util.FinagleTimer
+import com.twitter.finagle.util.ManagedTimer
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.Service
 import org.jboss.netty.buffer.ChannelBuffers
@@ -75,7 +75,7 @@ object FrontEndServerStress {
     val beginTime = Time.now
 
     val testResource = for {
-      timer <- FinagleTimer.getManaged
+      timer <- ManagedTimer.toTwitterTimer
       server <- buildServer
       client <- buildClient(concurrency, server.boundAddress)
     } yield {

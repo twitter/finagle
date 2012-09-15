@@ -1,8 +1,9 @@
 package com.twitter.finagle.memcached.util
 
-import org.jboss.netty.util.CharsetUtil
 import collection.mutable.ArrayBuffer
-import org.jboss.netty.buffer.{ChannelBufferIndexFinder, ChannelBuffers, ChannelBuffer}
+import com.google.common.base.Strings
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ChannelBufferIndexFinder}
+import org.jboss.netty.util.CharsetUtil
 
 private[finagle] object ChannelBufferUtils {
   private val FIND_SPACE = new ChannelBufferIndexFinder() {
@@ -12,6 +13,21 @@ private[finagle] object ChannelBufferUtils {
 
       val space = buffer.getByte(guessedIndex)
       space == ' '
+    }
+  }
+
+  // Per memcached protocol, control characters and whitespace cannot be in the key
+  // https://github.com/memcached/memcached/blob/master/doc/protocol.txt
+  // But both memcached and twemcache are not strictly enforcing this rule currently,
+  // we are relaxing the rules here to only eliminita ' '(ws), \r, \n and \0, to
+  // make it compatible with our previous validation logic
+  val FIND_INVALID_KEY_CHARACTER = new ChannelBufferIndexFinder() {
+    def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
+      val enoughBytesForDelimeter = guessedIndex + 1
+      if (buffer.writerIndex < enoughBytesForDelimeter) return false
+
+      val control = buffer.getByte(guessedIndex)
+      control == '\0' || control == '\n' || control == '\r' || control == ' '
     }
   }
 
@@ -66,10 +82,18 @@ private[finagle] object ChannelBufferUtils {
     new RichChannelBuffer(buffer)
 
   implicit def stringToChannelBuffer(string: String) =
-    ChannelBuffers.wrappedBuffer(string.getBytes)
+    if(Strings.isNullOrEmpty(string)) null else {
+      ChannelBuffers.copiedBuffer(string, CharsetUtil.UTF_8)
+    }
 
   implicit def seqOfStringToSeqOfChannelBuffer(strings: Seq[String]) =
-    strings.map { string => ChannelBuffers.wrappedBuffer(string.getBytes) }
+    if (strings == null) null else {
+      strings.map { string =>
+        if(Strings.isNullOrEmpty(string)) null else {
+          ChannelBuffers.copiedBuffer(string, CharsetUtil.UTF_8)
+        }
+      }
+    }
 
   implicit def stringToByteArray(string: String) =
     string.getBytes

@@ -1,42 +1,41 @@
 package com.twitter.finagle.zipkin.thrift
 
-import org.specs.Specification
+import org.specs.{SpecificationWithJUnit, Specification}
 import org.specs.mock.Mockito
 import java.util.ArrayList
 
+import com.twitter.conversions.time._
 import com.twitter.util._
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{CloseNotifier, FinagleTimer}
+import com.twitter.finagle.util.{CloseNotifier, ManagedTimer, TwoTimer, Disposable}
 import com.twitter.finagle.stats.NullStatsReceiver
 
 import org.mockito.Matchers._
-import java.nio.ByteBuffer
 import java.net.{InetAddress, InetSocketAddress}
 import com.twitter.finagle.service.TimeoutFilter
 
-object RawZipkinTracerSpec extends Specification with Mockito {
+class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
 
-  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
+  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
   "RawZipkinTracer" should {
-    val zipkinTimer = FinagleTimer.getManaged.make()
-    doAfter { zipkinTimer.dispose() }
-
-    "send all traces to scribe" in {
-      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, zipkinTimer)
+    "send all traces to scribe" in ManagedTimer.toTwitterTimer.foreach { timer =>
+      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, Disposable.const(timer))
       tracer.client = mock[scribe.ServiceToClient]
 
       val expected = new ArrayList[LogEntry]()
       expected.add(new LogEntry().setCategory("zipkin")
         .setMessage("CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew" +
-        "8ABgwAAAACCgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2Vydmlj" +
-        "ZQAACgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAADw" +
-        "AIDAAAAAULAAEAAAADaTE2CwACAAAAAgAQCAADAAAAAgwABAgAAQEBAQEGAAIAAQsAAwAAAAdz" +
-        "ZXJ2aWNlAAALAAEAAAADaTMyCwACAAAABAAAACAIAAMAAAADDAAECAABAQEBAQYAAgABCwADAA" +
-        "AAB3NlcnZpY2UAAAsAAQAAAANpNjQLAAIAAAAIAAAAAAAAAEAIAAMAAAAEDAAECAABAQEBAQYA" +
-        "AgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZkb3VibGULAAIAAAAIQF7TMzMzMzMIAAMAAAAFDA" +
-        "AECAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZzdHJpbmcLAAIAAAAGd29vcGll" +
-        "CAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAAA"))
+        "8ABgwAAAAECgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2Vydmlj" +
+        "ZQAACgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAACg" +
+        "ABAAAAAAdU1MALAAIAAAAGYm9vaG9vDAADCAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UACAAE" +
+        "AA9CQAAKAAEAAAAAB1TUwAsAAgAAAANib28MAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQ" +
+        "AADwAIDAAAAAULAAEAAAADaTE2CwACAAAAAgAQCAADAAAAAgwABAgAAQEBAQEGAAIAAQsAAwAA" +
+        "AAdzZXJ2aWNlAAALAAEAAAADaTMyCwACAAAABAAAACAIAAMAAAADDAAECAABAQEBAQYAAgABCw" +
+        "ADAAAAB3NlcnZpY2UAAAsAAQAAAANpNjQLAAIAAAAIAAAAAAAAAEAIAAMAAAAEDAAECAABAQEB" +
+        "AQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZkb3VibGULAAIAAAAIQF7TMzMzMzMIAAMAAA" +
+        "AFDAAECAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZzdHJpbmcLAAIAAAAGd29v" +
+        "cGllCAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAACAAkBAA=="))
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
 
       val inetAddress = InetAddress.getByAddress(Array.fill(4) {
@@ -50,6 +49,8 @@ object RawZipkinTracerSpec extends Specification with Mockito {
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i64", 64L)))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("double", 123.3d)))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("string", "woopie")))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Message("boo")))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Message("boohoo"), Some(1.second)))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 
@@ -69,12 +70,12 @@ object RawZipkinTracerSpec extends Specification with Mockito {
       tracer.client must beNull
     }
 
-    "logSpan if a timeout occurs" in {
+    "logSpan if a timeout occurs" in ManagedTimer.toTwitterTimer.foreach { timer =>
       val ann1 = Annotation.Message("some_message")
       val ann2 = Annotation.Rpcname("some_service", "rpc_name")
       val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
-      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, zipkinTimer)
+      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, Disposable.const(timer))
       tracer.client = mock[scribe.ServiceToClient]
 
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
