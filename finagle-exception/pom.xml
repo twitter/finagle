@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-exception</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.10</version>
+  <version>5.3.11</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>streamyj</artifactId>
-      <version>0.4.2-SNAPSHOT</version>
+      <version>0.4.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
