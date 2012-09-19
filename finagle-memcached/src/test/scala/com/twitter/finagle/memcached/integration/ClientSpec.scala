@@ -2,23 +2,30 @@ package com.twitter.finagle.memcached.integration
 
 /* temporarily disabled due to internal dependency
 
+import _root_.java.io.ByteArrayOutputStream
+import _root_.java.net.InetSocketAddress
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
+import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.common.zookeeper.ZooKeeperClient
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.common_internal.zookeeper.TwitterServerSet
 import com.twitter.common_internal.zookeeper.TwitterServerSet.Service
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcached.{PartitionedClient, Server, Client, KetamaClientBuilder}
+import com.twitter.concurrent.Spool
+import com.twitter.concurrent.Spool.*::
+import com.twitter.conversions.time._
+import com.twitter.finagle.builder.{Cluster, ClientBuilder}
+import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.{Server, Client, KetamaClientBuilder}
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.tracing.ConsoleTracer
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import java.net.InetSocketAddress
+import com.twitter.thrift.Status
+import com.twitter.util.Future
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
+import scala.collection.mutable
 
 class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {
@@ -204,12 +211,14 @@ class ClientSpec extends SpecificationWithJUnit {
     var shutdownRegistry = new ShutdownRegistryImpl
     var memcachedAddress = List[Option[InetSocketAddress]]()
 
+    var zkServerSetCluster: ZookeeperServerSetCluster = null
     var zookeeperClient: ZooKeeperClient = null
     val sdService: Service = new Service("cache","test","silly-cache")
+    var zookeeperServer: ZooKeeperTestServer = null
 
     doBefore {
       // start zookeeper server and create zookeeper client
-      var zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
+      zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
       zookeeperServer.startNetwork()
 
       // connect to zookeeper server
@@ -218,7 +227,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
       // create serverset
       val serverSet = TwitterServerSet.create(zookeeperClient, sdService)
-      val zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
+      zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
 
       // start five memcached server and join the cluster
       (0 to 4) foreach { _ =>
@@ -227,11 +236,20 @@ class ClientSpec extends SpecificationWithJUnit {
         zkServerSetCluster.join(address.get)
       }
 
-      Thread.sleep(1000) // give it some time for the zookeeper change to be reflected in the cluster
+      // set cache pool config node data
+      val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = 5)
+      val output: ByteArrayOutputStream = new ByteArrayOutputStream
+      CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
+      zookeeperClient.get().setData(TwitterServerSet.getPath(sdService), output.toByteArray, -1)
 
+      // a separate client which only does zk discovery for integration test
+      zookeeperClient = zookeeperServer.createClient(
+        ZooKeeperClient.digestCredentials(sdService.getRole(), sdService.getRole()))
     }
 
     doAfter {
+      zookeeperClient.close()
+
       // shutdown zookeeper server and client
       shutdownRegistry.execute()
 
@@ -282,38 +300,201 @@ class ClientSpec extends SpecificationWithJUnit {
 
     }
 
+    "Cache specific cluster" in {
+      def updateCachePoolConfigData(size: Int) {
+        val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = size)
+        var output: ByteArrayOutputStream = new ByteArrayOutputStream
+        CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
+        zookeeperClient.get().setData(TwitterServerSet.getPath(sdService), output.toByteArray, -1)
+      }
+
+      // create temporary zk clients for additional cache servers since we will need to
+      // de-register these services by expiring corresponding zk client session
+      def addMoreServers(size: Int): List[EndpointStatus] = {
+        (1 to size) map { _ =>
+          val address: Option[InetSocketAddress] = ExternalMemcached.start()
+          zkServerSetCluster.joinServerSet(address.get)
+        } toList
+      }
+
+      var myCachePool: CachePoolCluster = null
+
+      def initializePool(expectedSize: Int,
+                         backupPool: Option[scala.collection.immutable.Set[CacheNode]]=None) = {
+        myCachePool = new ZookeeperCachePoolCluster(sdService, zookeeperClient, backupPool)
+
+        myCachePool.ready() // wait until the pool is ready
+        myCachePool.snap match {
+          case (cachePool, changes) =>
+            cachePool.size mustBe expectedSize
+        }
+      }
+
+      /**
+       * return a future which will be complete only if the cache pool changed AND the changes
+       * meet all expected conditions after executing operation passed in
+       * @param currentSize expected current pool size
+       * @param expectedPoolSize expected pool size after changes, use -1 to expect any size
+       * @param expectedAdd expected number of add event happened, use -1 to expect any number
+       * @param expectedRem expected number of rem event happened, use -1 to expect any number
+       * @param ops operation to execute
+       */
+      def expectPoolStatus(currentSize: Int, expectedPoolSize: Int, expectedAdd: Int, expectedRem: Int)(ops: => Unit): Future[Unit] = {
+        var addSeen = 0
+        var remSeen = 0
+        var poolSeen = mutable.HashSet[CacheNode]()
+
+        def expectMore(spoolChanges: Spool[Cluster.Change[CacheNode]]): Future[Unit] = {
+          spoolChanges match {
+            case change *:: tail =>
+              change match {
+                case Cluster.Add(node) =>
+                  addSeen += 1
+                  poolSeen.add(node)
+                case Cluster.Rem(node) =>
+                  remSeen += 1
+                  poolSeen.remove(node)
+              }
+              if ((expectedAdd == -1 || addSeen == expectedAdd) &&
+                  (expectedRem == -1 || remSeen == expectedRem) &&
+                  (expectedPoolSize == -1 || poolSeen.size == expectedPoolSize)) Future.Done
+              else tail flatMap expectMore
+          }
+        }
+
+        myCachePool.snap match {
+          case (cachePool, changes) =>
+            cachePool.size mustBe currentSize
+            poolSeen ++= cachePool
+            val retFuture = changes flatMap expectMore
+            ops // invoke the function now
+            retFuture
+        }
+      }
+
+      "add and remove" in {
+        // the cluster initially must have 5 members
+        initializePool(5)
+
+        var additionalServers = List[EndpointStatus]()
+
+        /***** start 5 more memcached servers and join the cluster ******/
+        // cache pool should remain the same size at this moment
+        expectPoolStatus(currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+          additionalServers = addMoreServers(5)
+        }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
+
+        // update config data node, which triggers the pool update
+        // cache pool cluster should be updated
+        expectPoolStatus(currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
+          updateCachePoolConfigData(10)
+        }.get(2.seconds)() mustNot throwA[Exception]
+
+        /***** remove 2 servers from the zk serverset ******/
+        // cache pool should remain the same size at this moment
+        expectPoolStatus(currentSize = 10, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+          additionalServers(0).update(Status.DEAD)
+          additionalServers(1).update(Status.DEAD)
+        }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
+
+        // update config data node, which triggers the pool update
+        // cache pool should be updated
+        expectPoolStatus(currentSize = 10, expectedPoolSize = 8, expectedAdd = 0, expectedRem = 2) {
+          updateCachePoolConfigData(8)
+        }.get(2.seconds)() mustNot throwA[Exception]
+
+        /***** remove 2 more then add 3 ******/
+        // cache pool should remain the same size at this moment
+        expectPoolStatus(currentSize = 8, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+          additionalServers(2).update(Status.DEAD)
+          additionalServers(3).update(Status.DEAD)
+          addMoreServers(3)
+        }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
+
+        // update config data node, which triggers the pool update
+        // cache pool should be updated
+        expectPoolStatus(currentSize = 8, expectedPoolSize = 9, expectedAdd = 3, expectedRem = 2) {
+          updateCachePoolConfigData(9)
+        }.get(2.seconds)() mustNot throwA[Exception]
+      }
+
+      "zk failures test" in {
+        // the cluster initially must have 5 members
+        initializePool(5)
+
+        /***** fail the server here to verify the pool manager will re-establish ******/
+        // cache pool cluster should remain the same
+        expectPoolStatus(currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+          zookeeperServer.expireClientSession(zookeeperClient)
+          zookeeperServer.shutdownNetwork()
+        }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
+
+        /***** start the server now ******/
+        // cache pool cluster should remain the same
+        expectPoolStatus(currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+          zookeeperServer.startNetwork
+        }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
+
+        /***** start 5 more memcached servers and join the cluster ******/
+        // update config data node, which triggers the pool update
+        // cache pool cluster should still be able to see undelrying pool changes
+        expectPoolStatus(currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
+          addMoreServers(5)
+          updateCachePoolConfigData(10)
+        }.get(2.seconds)() mustNot throwA[Exception]
+      }
+
+      "using backup pools" in {
+        // shutdown the server before initializing our cache pool cluster
+        zookeeperServer.shutdownNetwork()
+
+        // the cache pool cluster should pickup backup pools
+        // the underlying pool will continue trying to connect to zk
+        initializePool(2, Some(scala.collection.immutable.Set(
+            new CacheNode("host1", 11211, 1),
+            new CacheNode("host2", 11212, 1))))
+
+        // bring the server back online
+        // give it some time we should see the cache pool cluster pick up underlying pool
+        expectPoolStatus(currentSize = 2, expectedPoolSize = 5, expectedAdd = 5, expectedRem = 2) {
+          zookeeperServer.startNetwork
+        }.get(2.seconds)() mustNot throwA[Exception]
+
+        /***** start 5 more memcached servers and join the cluster ******/
+        // update config data node, which triggers the pool update
+        // cache pool cluster should still be able to see undelrying pool changes
+        expectPoolStatus(currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
+          addMoreServers(5)
+          updateCachePoolConfigData(10)
+        }.get(2.seconds)() mustNot throwA[Exception]
+      }
+    }
+
     "Ketama ClusterClient using a distributor" in {
       "set & get" in {
         // create my cluster client solely based on a zk client and a path
-        val mycluster =
-          new ZookeeperServerSetCluster(TwitterServerSet.create(zookeeperClient, sdService)) map {
-            socketAddr =>
-              socketAddr.asInstanceOf[InetSocketAddress]
-          }
+        // for production code:
+        // val mycluster = CachePoolCluster.newZkCluster(sdService)
+        val mycluster = new ZookeeperCachePoolCluster(sdService, zookeeperClient)
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
-                .cluster(mycluster)
+                .cachePoolCluster(mycluster)
                 .build()
 
         client.delete("foo")()
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
-
       }
 
       "many keys" in {
         // create my cluster client solely based on a zk client and a path
-        val mycluster =
-          new ZookeeperServerSetCluster(TwitterServerSet.create(zookeeperClient, sdService)) map {
-            socketAddr =>
-              socketAddr.asInstanceOf[InetSocketAddress]
-          }
+        val mycluster = new ZookeeperCachePoolCluster(sdService, zookeeperClient)
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
-                .cluster(mycluster)
+                .cachePoolCluster(mycluster)
                 .build()
                 .asInstanceOf[PartitionedClient]
 

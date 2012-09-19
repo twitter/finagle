@@ -333,7 +333,7 @@ trait Client extends BaseClient[ChannelBuffer] {
 /**
  * A Client connected to an individual Memcached server.
  *
- * @param  underlying  the underlying Memcached Service.
+ * @param  service  the underlying Memcached Service.
  */
 protected class ConnectedClient(service: Service[Command, Response]) extends Client {
   private[this] def rawGet(command: RetrievalCommand) = {
@@ -689,7 +689,7 @@ class KetamaClient private[memcached](
 }
 
 case class KetamaClientBuilder private[memcached] (
-  _cluster: Cluster[(String, Int, Int)],
+  _cluster: Cluster[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _numFailures: Int = 5,
@@ -702,14 +702,23 @@ case class KetamaClientBuilder private[memcached] (
     copy(
       _cluster = cluster map {
         socketAddr =>
-          (socketAddr.getHostName, socketAddr.getPort, 1)})
+          new CacheNode(socketAddr.getHostName, socketAddr.getPort, 1)
+      }
+    )
+  }
+
+  def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
+    copy(_cluster = cluster)
   }
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_cluster = new StaticCluster(nodes))
+    copy(_cluster = CachePoolCluster.newStaticCluster(nodes map {
+      case (host, port, weight) =>
+        new CacheNode(host, port, weight)
+    }))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
-    copy(_cluster = new StaticCluster(PartitionedClient.parseHostPortWeights(hostPortWeights)))
+    nodes(PartitionedClient.parseHostPortWeights(hostPortWeights))
 
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
@@ -727,15 +736,15 @@ case class KetamaClientBuilder private[memcached] (
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
-    val (clusterEndpoints, clusterUpdates) = _cluster.snap
+    val (cacheNodes, clusterUpdates) = _cluster.snap
     // TODO: listen to the updates here
     // For the first version of this client, we do not listen to the cluster update yet, we only use
     // the initial set of cluster members; later when we add the capability to listen to the updates,
     // we'd need to modify the KetamaClient class to provide an interface for reloading a new set of
     // cluster members whenever a serverset update happens
 
-    val keys = clusterEndpoints map {
-      case (hostname, port, weight) => KetamaClientKey(hostname, port, weight)
+    val keys = cacheNodes map {
+      case node: CacheNode => KetamaClientKey(node.host, node.port, node.weight)
     }
 
     val (failureAccrurers, healths) = keys map { key =>

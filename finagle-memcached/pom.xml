@@ -26,7 +26,6 @@
       <groupId>com.twitter</groupId>
       <artifactId>finagle-serversets</artifactId>
       <version>5.3.10</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
@@ -42,8 +41,7 @@
     <dependency>
       <groupId>com.twitter.common_internal</groupId>
       <artifactId>zookeeper-utils</artifactId>
-      <version>0.0.15</version>
-      <scope>test</scope>
+      <version>0.0.21</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
