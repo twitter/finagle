@@ -233,6 +233,41 @@ class InMemoryStatsReceiver extends StatsReceiver {
   }
 }
 
+/** Console stats receiver for testing. */
+class ConsoleStatsReceiver extends InMemoryStatsReceiver {
+
+  override def counter(name: String*): Counter = {
+    new Counter {
+      def incr(delta: Int) {
+        val oldValue = counters.get(name).getOrElse(0)
+        counters(name) = oldValue + delta
+        println("Counter %s = %d".format(name.mkString(":"), counters(name)))
+      }
+    }
+  }
+
+  override def stat(name: String*): Stat = {
+    new Stat {
+      def add(value: Float) {
+        val oldValue = stats.get(name).getOrElse(Seq.empty)
+        stats(name) = oldValue :+ value
+        println("Stat %s = %s".format(name.mkString(":"), stats(name).mkString))
+      }
+    }
+  }
+
+  override def addGauge(name: String*)(f: => Float): Gauge = {
+    val gauge = new Gauge {
+      def remove() {
+        gauges -= name
+      }
+    }
+    gauges += name -> (() => f)
+    println("Gauge %s = %f".format(name.mkString(":"), f))
+    gauge
+  }
+}
+
 /**
  * Note: currently supports only gauges, will throw
  * away other types.
