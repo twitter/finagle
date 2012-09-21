@@ -17,7 +17,7 @@ trait SortedSets { self: BaseClient =>
    * @return Number of elements added to sorted set
    */
   def zAdd(key: ChannelBuffer, score: Double, member: ChannelBuffer): Future[JLong] =
-    doRequest(ZAdd(key, List(ZMember(score, member)))) {
+    doRequest(ZAdd(key, Seq(ZMember(score, member)))) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -60,7 +60,7 @@ trait SortedSets { self: BaseClient =>
     ) {
       case MBulkReply(messages) => Future.value(
         ZRangeResults(returnPairs(ReplyFormat.toChannelBuffers(messages))))
-      case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
+      case EmptyMBulkReply()    => Future.value(ZRangeResults(Seq()))
     }
 
   /**
@@ -69,7 +69,7 @@ trait SortedSets { self: BaseClient =>
    * @return Number of members removed from sorted set
    */
   def zRem(key: ChannelBuffer, members: Seq[ChannelBuffer]): Future[JLong] =
-    doRequest(ZRem(key, members.toList)) {
+    doRequest(ZRem(key, members)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -104,7 +104,7 @@ trait SortedSets { self: BaseClient =>
     ) {
       case MBulkReply(messages) => Future.value(
         ZRangeResults(returnPairs(ReplyFormat.toChannelBuffers(messages))))
-      case EmptyMBulkReply()    => Future.value(ZRangeResults(List()))
+      case EmptyMBulkReply()    => Future.value(ZRangeResults(Seq()))
     }
 
   /**

@@ -93,9 +93,9 @@ class BaseClient(service: Service[Command, Reply]) {
   /**
    * Helper function to convert a Redis multi-bulk reply into a map of pairs
    */
-  private[redis] def returnPairs(messages: List[ChannelBuffer]) = {
+  private[redis] def returnPairs(messages: Seq[ChannelBuffer]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
-    messages.grouped(2).toList flatMap { case List(a, b) => Some(a, b); case _ => None }
+    messages.grouped(2).toSeq flatMap { case Seq(a, b) => Some(a, b); case _ => None }
   }
 
 }
@@ -120,7 +120,7 @@ trait TransactionalClient extends Client {
    * @param keys to watch
    */
   def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
-    doRequest(Watch(keys.toList)) {
+    doRequest(Watch(keys)) {
       case StatusReply(message)  => Future.Unit
     }
 
@@ -166,7 +166,7 @@ private[redis] class ConnectedTransactionalClient(
   def transaction(cmds: Seq[Command]): Future[Seq[Reply]] = {
     serviceFactory() flatMap { svc =>
       multi(svc) flatMap { _ =>
-        val cmdQueue = cmds.toList map { cmd => svc(cmd) }
+        val cmdQueue = cmds map { cmd => svc(cmd) }
         Future.collect(cmdQueue) flatMap { _ => exec(svc) }
       } rescue { case e =>
         svc(Discard) flatMap { _ =>

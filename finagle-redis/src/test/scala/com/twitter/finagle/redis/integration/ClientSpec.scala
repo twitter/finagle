@@ -23,18 +23,18 @@ class ClientSpec extends SpecificationWithJUnit {
     val moo = StringToChannelBuffer("moo")
 
     doBefore {
-      RedisCluster.start(1)
       client = TransactionalClient(
         ClientBuilder()
          .codec(new Redis())
          .hosts(RedisCluster.hostAddresses())
          .hostConnectionLimit(1)
          .buildFactory())
+      client.flushDB()()
     }
 
     doAfter {
-      RedisCluster.stop()
       client.release
+      RedisCluster.stop()
     }
 
     "perform simple commands" in {
@@ -85,6 +85,23 @@ class ClientSpec extends SpecificationWithJUnit {
         client.quit()() mustEqual ()
       }
 
+      // Once the scan/hscan pull request gets merged into Redis master,
+      // the tests can be uncommented.
+      // "scan" in {
+      //   client.set(foo, bar)()
+      //   client.set(baz, boo)()
+      //   val res = client.scan(0, None, None)()
+      //   CBToString(res(1)) mustEqual "baz"
+      //   val withCount = client.scan(0, Some(10), None)()
+      //   CBToString(withCount(0)) mustEqual "0"
+      //   CBToString(withCount(1)) mustEqual "baz"
+      //   CBToString(withCount(2)) mustEqual "foo"
+      //   val pattern = StringToChannelBuffer("b*")
+      //   val withPattern = client.scan(0, None, Some(pattern))
+      //   CBToString(withCount(0)) mustEqual "0"
+      //   CBToString(withCount(1)) mustEqual "baz"
+      // }
+
     }
 
     "perform hash commands" in {
@@ -121,6 +138,22 @@ class ClientSpec extends SpecificationWithJUnit {
         CBToString.fromTuples(
           client.hGetAll(foo)()) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
       }
+
+      // "hscan" in {
+      //   client.hSet(foo, bar, baz)()
+      //   client.hSet(foo, boo, moo)()
+      //   val res = client.hScan(foo, 0, None, None)()
+      //   CBToString(res(1)) mustEqual "bar"
+      //   val withCount = client.hScan(foo, 0, Some(2), None)()
+      //   CBToString(withCount(0)) mustEqual "0"
+      //   CBToString(withCount(1)) mustEqual "bar"
+      //   CBToString(withCount(2)) mustEqual "boo"
+      //   val pattern = StringToChannelBuffer("b*")
+      //   val withPattern = client.hScan(foo, 0, None, Some(pattern))
+      //   CBToString(withCount(0)) mustEqual "0"
+      //   CBToString(withCount(1)) mustEqual "bar"
+      //   CBToString(withCount(2)) mustEqual "boo"
+      // }
 
     }
 
@@ -184,13 +217,13 @@ class ClientSpec extends SpecificationWithJUnit {
 
       "hash set and multi get transaction" in {
         val txResult = client.transaction(Seq(HSet(foo, bar, baz), HSet(foo, boo, moo),
-          HMGet(foo, List(bar, boo))))()
+          HMGet(foo, Seq(bar, boo))))()
         ReplyFormat.toString(txResult.toList) mustEqual Seq("1", "1", "baz", "moo")
       }
 
       "key command on incorrect data type" in {
         val txResult = client.transaction(Seq(HSet(foo, boo, moo),
-          Get(foo), HDel(foo, List(boo))))()
+          Get(foo), HDel(foo, Seq(boo))))()
         txResult.toList mustEqual Seq(IntegerReply(1),
           ErrorReply("ERR Operation against a key holding the wrong kind of value"),
           IntegerReply(1))

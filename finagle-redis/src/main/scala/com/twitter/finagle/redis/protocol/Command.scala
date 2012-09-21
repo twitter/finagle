@@ -25,6 +25,7 @@ object Commands {
   val RANDOMKEY = "RANDOMKEY"
   val RENAME    = "RENAME"
   val RENAMENX  = "RENAMENX"
+  val SCAN      = "SCAN"
   val TTL       = "TTL"
   val TYPE      = "TYPE"
 
@@ -78,6 +79,7 @@ object Commands {
   val HGETALL           = "HGETALL"
   val HKEYS             = "HKEYS"
   val HMGET             = "HMGET"
+  val HSCAN             = "HSCAN"
   val HSET              = "HSET"
 
   // Transactions
@@ -98,6 +100,7 @@ object Commands {
     RANDOMKEY         -> {_ => Randomkey()},
     RENAME            -> {Rename(_)},
     RENAMENX          -> {RenameNx(_)},
+    SCAN              -> {Scan(_)},
     TTL               -> {Ttl(_)},
     TYPE              -> {Type(_)},
 
@@ -151,6 +154,7 @@ object Commands {
     HGETALL           -> {HGetAll(_)},
     HKEYS             -> {HKeys(_)},
     HMGET             -> {HMGet(_)},
+    HSCAN             -> {HScan(_)},
     HSET              -> {HSet(_)},
 
     // transactions
@@ -166,7 +170,7 @@ object Commands {
     _(args)
   }.getOrElse(throw ClientError("Unsupported command: " + cmd))
 
-  def trimList(list: List[Array[Byte]], count: Int, from: String = "") = {
+  def trimList(list: Seq[Array[Byte]], count: Int, from: String = "") = {
     RequireClientProtocol(list != null, "%s Empty list found".format(from))
     RequireClientProtocol(
       list.length == count,
@@ -187,6 +191,7 @@ object CommandBytes {
   val RANDOMKEY         = StringToChannelBuffer("RANDOMKEY")
   val RENAME            = StringToChannelBuffer("RENAME")
   val RENAMENX          = StringToChannelBuffer("RENAMENX")
+  val SCAN              = StringToChannelBuffer("SCAN")
   val TTL               = StringToChannelBuffer("TTL")
   val TYPE              = StringToChannelBuffer("TYPE")
 
@@ -240,6 +245,7 @@ object CommandBytes {
   val HGETALL           = StringToChannelBuffer("HGETALL")
   val HKEYS             = StringToChannelBuffer("HKEYS")
   val HMGET             = StringToChannelBuffer("HMGET")
+  val HSCAN             = StringToChannelBuffer("HSCAN")
   val HSET              = StringToChannelBuffer("HSET")
 
   // Transactions

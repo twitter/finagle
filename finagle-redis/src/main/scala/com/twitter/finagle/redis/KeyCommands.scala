@@ -17,7 +17,7 @@ trait Keys { self: BaseClient =>
    * @return Number of keys removed
    */
   def del(keys: Seq[ChannelBuffer]): Future[JLong] =
-    doRequest(Del(keys.toList)) {
+    doRequest(Del(keys)) {
       case IntegerReply(n) => Future.value(n)
     }
 
@@ -41,4 +41,17 @@ trait Keys { self: BaseClient =>
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.value(Seq())
     }
+
+  /**
+   * Returns keys starting at cursor
+   * @param cursor, count, pattern
+   * @return cursor followed by matching keys
+   */
+  def scan(cursor: Long, count: Option[Long], pattern: Option[ChannelBuffer]
+  ): Future[Seq[ChannelBuffer]] =
+    doRequest(Scan(cursor, count, pattern)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
+      case EmptyMBulkReply()    => Future.value(Seq())
+    }
+
 }

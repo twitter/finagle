@@ -26,7 +26,7 @@ trait ErrorConversion {
 object BytesToString {
   def apply(arg: Array[Byte], charset: Charset = CharsetUtil.UTF_8) = new String(arg, charset)
 
-  def fromList(args: List[Array[Byte]], charset: Charset = CharsetUtil.UTF_8) =
+  def fromList(args: Seq[Array[Byte]], charset: Charset = CharsetUtil.UTF_8) =
     args.map { arg => BytesToString(arg, charset) }
 
   def fromTuples(args: Seq[(Array[Byte], Array[Byte])], charset: Charset = CharsetUtil.UTF_8) =
@@ -52,7 +52,7 @@ object CBToString {
   def apply(arg: ChannelBuffer, charset: Charset = CharsetUtil.UTF_8) = {
     new String(arg.array, charset)
   }
-  def fromList(args: List[ChannelBuffer], charset: Charset = CharsetUtil.UTF_8) =
+  def fromList(args: Seq[ChannelBuffer], charset: Charset = CharsetUtil.UTF_8) =
     args.map { arg => CBToString(arg, charset) }
 
   def fromTuples(args: Seq[(ChannelBuffer, ChannelBuffer)], charset: Charset = CharsetUtil.UTF_8) =

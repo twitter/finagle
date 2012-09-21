@@ -46,17 +46,17 @@ private[redis] object RedisCodec {
   val NEG_INFINITY_BA     = StringToChannelBuffer("-inf")
 
 
-  def toUnifiedFormat(args: List[ChannelBuffer], includeHeader: Boolean = true) = {
+  def toUnifiedFormat(args: Seq[ChannelBuffer], includeHeader: Boolean = true) = {
     val header = includeHeader match {
       case true =>
-        List(ARG_COUNT_MARKER_BA, StringToChannelBuffer(args.length.toString), EOL_DELIMITER_BA)
+        Seq(ARG_COUNT_MARKER_BA, StringToChannelBuffer(args.length.toString), EOL_DELIMITER_BA)
       case false => Nil
     }
     val buffers = args.map({ arg =>
       if (arg.readableBytes == 0) {
-        List(NIL_BULK_REPLY_BA, EOL_DELIMITER_BA)
+        Seq(NIL_BULK_REPLY_BA, EOL_DELIMITER_BA)
       } else {
-        List(
+        Seq(
           ARG_SIZE_MARKER_BA,
           StringToChannelBuffer(arg.readableBytes.toString),
           EOL_DELIMITER_BA,
@@ -65,7 +65,7 @@ private[redis] object RedisCodec {
         )
       }
     }).flatten
-    ChannelBuffers.wrappedBuffer((header ::: buffers).toArray:_*)
+    ChannelBuffers.wrappedBuffer((header ++ buffers).toArray:_*)
   }
 
 }

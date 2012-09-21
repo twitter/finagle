@@ -24,13 +24,13 @@ case class Limit(offset: Long, count: Long) extends CommandArgument {
   def commandBytes = Limit.LIMIT_CB
   override def toString = "%s %d %d".format(Limit.LIMIT, offset, count)
   def toChannelBuffer = ChannelBuffers.wrappedBuffer(toChannelBuffers.toArray:_*)
-  def toChannelBuffers = List(Limit.LIMIT_CB,
+  def toChannelBuffers = Seq(Limit.LIMIT_CB,
     StringToChannelBuffer(offset.toString), StringToChannelBuffer(count.toString))
 }
 object Limit {
   val LIMIT = "LIMIT"
   val LIMIT_CB = StringToChannelBuffer(LIMIT)
-  def apply(args: List[String]) = {
+  def apply(args: Seq[String]) = {
     RequireClientProtocol(args != null && args.length == 3, "LIMIT requires two arguments")
     RequireClientProtocol(args.head == LIMIT, "LIMIT must start with LIMIT clause")
     RequireClientProtocol.safe {
@@ -48,7 +48,7 @@ class Weights(underlying: Array[Double]) extends CommandArgument with IndexedSeq
   override def toString = Weights.toString + " " + this.mkString(" ")
   def toChannelBuffer = ChannelBuffers.wrappedBuffer(toChannelBuffers.toArray:_*)
   def toChannelBuffers =
-    Weights.WEIGHTS_CB :: underlying.map(w => StringToChannelBuffer(w.toString)).toList
+    Weights.WEIGHTS_CB +: underlying.map(w => StringToChannelBuffer(w.toString)).toSeq
   def command = Weights.WEIGHTS
 }
 
@@ -58,10 +58,10 @@ object Weights {
   val WEIGHTS_CB = StringToChannelBuffer(WEIGHTS)
 
   def apply(weight: Double) = new Weights(Array(weight))
-  def apply(weights: Double*) = new Weights(List(weights:_*).toArray)
+  def apply(weights: Double*) = new Weights(weights.toArray)
   def apply(weights: Array[Double]) = new Weights(weights)
 
-  def apply(args: List[String]): Option[Weights] = {
+  def apply(args: Seq[String]): Option[Weights] = {
     val argLength = args.length
     RequireClientProtocol(
       args != null && argLength > 0,
@@ -83,7 +83,7 @@ object Weights {
 sealed abstract class Aggregate(val name: String) {
   override def toString = Aggregate.toString + " " + name.toUpperCase
   def toChannelBuffer = ChannelBuffers.wrappedBuffer(toChannelBuffers.toArray:_*)
-  def toChannelBuffers = List(Aggregate.AGGREGATE_CB, StringToChannelBuffer(name.toUpperCase))
+  def toChannelBuffers = Seq(Aggregate.AGGREGATE_CB, StringToChannelBuffer(name.toUpperCase))
   def equals(str: String) = str.equals(name)
 }
 object Aggregate {
@@ -94,7 +94,7 @@ object Aggregate {
   case object Max extends Aggregate("MAX")
   override def toString = AGGREGATE
 
-  def apply(args: List[String]): Option[Aggregate] = {
+  def apply(args: Seq[String]): Option[Aggregate] = {
     val argLength = args.length
     RequireClientProtocol(
       args != null && argLength > 0,
@@ -108,6 +108,40 @@ object Aggregate {
           case Aggregate.Min.name => Some(Aggregate.Min)
           case _ => throw new ClientError("AGGREGATE type must be one of MIN, MAX or SUM")
         }
+      case _ => None
+    }
+  }
+}
+
+
+object Count {
+  val COUNT = "COUNT"
+  val COUNT_CB = StringToChannelBuffer(COUNT)
+
+  def apply(args: Seq[String]): Option[Long] = {
+    RequireClientProtocol(
+      args != null && !args.isEmpty,
+      "COUNT can not be specified with empty list")
+    args.head.toUpperCase match {
+      case COUNT =>
+        RequireClientProtocol(args.length == 2, "COUNT requires two arguments")
+        Some(RequireClientProtocol.safe { NumberFormat.toLong(args(1)) })
+      case _ => None
+    }
+  }
+}
+
+
+object Pattern {
+  val PATTERN = "PATTERN"
+  val PATTERN_CB = StringToChannelBuffer(PATTERN)
+
+  def apply(args: Seq[String]): Option[String] = {
+    RequireClientProtocol(
+      args != null && !args.isEmpty,
+      "AGGREGATE can not be specified with empty list")
+    args.head.toUpperCase match {
+      case PATTERN => Some(args(1))
       case _ => None
     }
   }

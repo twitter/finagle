@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-redis</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.10</version>
+  <version>5.3.11</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>

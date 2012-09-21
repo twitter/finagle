@@ -13,9 +13,9 @@ trait StrictKeyCommand extends KeyCommand {
 }
 
 trait KeysCommand extends Command {
-  val keys: List[ChannelBuffer]
+  val keys: Seq[ChannelBuffer]
   protected def validate() {
-    RequireClientProtocol(keys != null && keys.length > 0, "Empty KeySet found")
+    RequireClientProtocol(keys != null && !keys.isEmpty, "Empty KeySet found")
     keys.foreach { key =>
       RequireClientProtocol(key != null && key.readableBytes > 0, "Empty key found")
     }

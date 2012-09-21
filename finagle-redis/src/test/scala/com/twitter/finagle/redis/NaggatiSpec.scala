@@ -102,7 +102,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
                 }
             }
             unwrap(codec(wrap("ZADD nums 3.14159 pi 2.71828 e\r\n"))) {
-              case ZAdd(nums, members) => members match {
+              case ZAdd(nums, members) => members.toList match {
                 case pi :: e :: Nil =>
                   unwrap(List(pi)) { case ZMember(3.14159, value) =>
                     BytesToString(value.array) mustEqual "pi"
@@ -167,7 +167,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
               "%s foo 1 a AGGREGATE SUM AGGREGATE MAX")
             List("ZINTERSTORE","ZUNIONSTORE").foreach { cmd =>
               def doCmd(rcmd: String) = codec(wrap(rcmd.format(cmd)))
-              def verify(k: String, n: Int)(f: (List[ChannelBuffer],Option[Weights],Option[Aggregate]) => Unit): PartialFunction[Command,Unit] =
+              def verify(k: String, n: Int)(f: (Seq[ChannelBuffer],Option[Weights],Option[Aggregate]) => Unit): PartialFunction[Command,Unit] =
                 cmd match {
                   case "ZINTERSTORE" => {
                     case ZInterStore(k, n, keys, w, a) => f(keys,w,a)
@@ -527,7 +527,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
         } // string commands
       } // inline
 
-      def unwrap(list: List[AnyRef])(fn: PartialFunction[Command,Unit]) = list match {
+      def unwrap(list: Seq[AnyRef])(fn: PartialFunction[Command,Unit]) = list.toList match {
         case head :: Nil => head match {
           case c: Command => fn.isDefinedAt(c) match {
             case true => fn(c)
