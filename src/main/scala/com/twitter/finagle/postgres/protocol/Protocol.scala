@@ -110,7 +110,7 @@ case class BackendKeyData(processId: Int, secretKey: Int) extends BackendMessage
 
 }
 
-case class RowDescription(fields: List[FieldDescription]) extends BackendMessage {
+case class RowDescription(fields: IndexedSeq[FieldDescription]) extends BackendMessage {
 
 }
 
@@ -124,7 +124,7 @@ case class FieldDescription(
   fieldFormat: Int) {
 }
 
-case class DataRow(data: List[Array[Byte]]) extends BackendMessage {
+case class DataRow(data: IndexedSeq[ChannelBuffer]) extends BackendMessage {
 
 }
 
@@ -208,13 +208,13 @@ class BackendMessageParser {
         None
     }
 
-    logger.info("Result " + result)
+    logger.debug("Result " + result)
     result
   }
 
   def parseR(packet: Packet): Option[BackendMessage] = {
-    logger.info("parsing R")
-    logger.info("Packet " + packet)
+    logger.debug("parsing R")
+    logger.debug("Packet " + packet)
 
     packet.length match {
       case 8 =>
@@ -242,8 +242,8 @@ class BackendMessageParser {
   }
 
   def parseE(packet: Packet): Option[BackendMessage] = {
-    logger.info("parsing E")
-    logger.info("Packet " + packet)
+    logger.debug("parsing E")
+    logger.debug("Packet " + packet)
 
     val builder = new StringBuilder()
     while (packet.content.readable) {
@@ -256,8 +256,8 @@ class BackendMessageParser {
   }
 
   def parseZ(packet: Packet): Option[BackendMessage] = {
-    logger.info("parsing Z")
-    logger.info("Packet " + packet)
+    logger.debug("parsing Z")
+    logger.debug("Packet " + packet)
 
     if (packet.length != 5) {
       throw new IllegalStateException("Unexpected message length ")
@@ -270,8 +270,8 @@ class BackendMessageParser {
   }
 
   def parseK(packet: Packet): Option[BackendMessage] = {
-    logger.info("parsing K")
-    logger.info("Packet " + packet)
+    logger.debug("parsing K")
+    logger.debug("Packet " + packet)
 
     if (packet.length != 12) {
       throw new IllegalStateException("Unexpected message length ")
@@ -289,38 +289,37 @@ class BackendMessageParser {
 
   def parseD(packet: Packet): Option[BackendMessage] = {
 
-    logger.info("parsing D")
-    logger.info("Packet " + packet)
+    logger.debug("parsing D")
+    logger.debug("Packet " + packet)
 
     val fieldNumber = packet.content.readShort
+    logger.debug("fields " + fieldNumber)
+    val fields = new Array[ChannelBuffer](fieldNumber)
 
-    val fields = new MutableList[Array[Byte]]()
-
-    0.until(fieldNumber).foreach { index =>
+    0.until(fieldNumber).foreach { i =>
       val length = packet.content.readInt
       val index = packet.content.readerIndex
       val slice = packet.content.slice(index, length)
-      val bytes = new Array[Byte](length)
-      slice.readBytes(bytes)
       packet.content.readerIndex(index + length)
 
-      fields += bytes
-      logger.info("bytes " + length)
+      logger.debug("index " + i)
+      fields(i) = slice
+      logger.debug("bytes " + length)
       packet.content.readerIndex(index + length)
     }
 
-    Some(new DataRow(fields.toList))
+    Some(new DataRow(fields))
   }
 
   def parseT(packet: Packet): Option[BackendMessage] = {
 
-    logger.info("parsing T")
-    logger.info("Packet " + packet)
+    logger.debug("parsing T")
+    logger.debug("Packet " + packet)
 
     val fieldNumber = packet.content.readShort
 
-    val fields = new MutableList[FieldDescription]()
-    logger.info(fieldNumber + " fields")
+    val fields = new Array[FieldDescription](fieldNumber)
+    logger.debug(fieldNumber + " fields")
     0.until(fieldNumber).foreach { index =>
 
       val field = new FieldDescription(
@@ -332,16 +331,16 @@ class BackendMessageParser {
         packet.content.readInt,
         packet.content.readShort)
 
-      logger.info("field " + field)
-      fields += field
+      logger.debug("field " + field)
+      fields(index) = field
     }
 
-    Some(new RowDescription(fields.toList))
+    Some(new RowDescription(fields))
   }
 
   def parseC(packet: Packet) : Option[BackendMessage] = {
-	  logger.info("Parsing C")
-	  logger.info("Packet " + packet)
+	  logger.debug("Parsing C")
+	  logger.debug("Packet " + packet)
 	  
 	  val tag = Buffers.readCString(packet.content)
 	  
@@ -349,9 +348,9 @@ class BackendMessageParser {
   }
 
   def parseS(packet: Packet): Option[BackendMessage] = {
-    logger.info("Parsing S " + packet)
+    logger.debug("Parsing S " + packet)
     val parameterStatus = new ParameterStatus(Buffers.readCString(packet.content), Buffers.readCString(packet.content))
-    logger.info("Sync " + parameterStatus)
+    logger.debug("Sync " + parameterStatus)
     Some(parameterStatus)
   }
 
