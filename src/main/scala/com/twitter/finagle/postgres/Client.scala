@@ -18,6 +18,7 @@ import com.twitter.finagle.postgres.protocol.CommandComplete
 import com.twitter.finagle.postgres.protocol.DataRow
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.postgres.protocol.PgCodec
+import com.twitter.logging.Logger
 
 sealed trait Value {
 }
@@ -36,10 +37,25 @@ case class DateValue(d: SQLDate) extends Value
 case object NullValue extends Value
 
 class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
+  private val logger = Logger(getClass.getName)
 
   private[this] val indexMap = fields.map(_.name).zipWithIndex.toMap
 
-  def get(name: String): Option[Value] = indexMap.get(name).map(vals(_))
+  def get(name: String): Option[Value] = {
+    indexMap.get(name).map(vals(_))
+  }
+
+  def getString(name: String): String = {
+    val value = get(name)
+    if (value.isDefined) {
+      value.get match {
+        case StringValue(s) => s
+        case _ => throw new IllegalStateException("Expected string value")
+      }
+    } else {
+      null
+    }
+  }
 
   def get(index: Int): Value = vals(index)
 
@@ -69,8 +85,13 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
 
         Future(new ResultSet(fieldNames, rows))
     }
+
   }
-  
+
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = {
+    query(sql).map(_.rows.map(f))
+  }
+
   def close() {
     factory.close()
   }
@@ -248,3 +269,22 @@ object StringValueParser extends ValueParser {
   UUID        -> 2950
 
 */
+
+object Test {
+
+  def main(args: Array[String]) {
+    import com.twitter.logging.config._
+
+    val config = new LoggerConfig {
+      node = ""
+      level = Logger.DEBUG
+      handlers = new ConsoleHandlerConfig {
+      }
+    }
+    config()
+
+    val v = new Row(Array(Field("name"), Field("email")), Array(StringValue("test"), StringValue("test2")))
+
+    println(v.getString("email"))
+  }
+}

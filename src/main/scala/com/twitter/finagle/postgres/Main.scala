@@ -12,6 +12,8 @@ import protocol.PgCodec
 import com.twitter.finagle.postgres.protocol.Communication
 import com.twitter.finagle.postgres.protocol.Query
 
+case class User(email: String, name: String)
+
 object Main {
   private val logger = Logger(getClass.getName)
 
@@ -28,10 +30,12 @@ object Main {
 
     val client = Client("localhost:5432", "mkhadikov", None, "testing")
 
-    val f = client.query("select * from pg_catalog.pg_stat_activity");
+    val f = client.select("select * from users") {row =>
+      User(row.getString("email"), row.getString("name"))
+    }
 
-    logger.debug("Responded " + f.get())
-    
+    logger.debug("Responded " + f.get)
+
     client.close()
 
   }
