@@ -10,7 +10,7 @@ import com.twitter.logging.Logger
 case class Packet(code: Char, length: Int, content: ChannelBuffer)
 
 trait FrontendMessage {
-  def encode(): ChannelBuffer // TODO encode to a packet
+  def encode(): ChannelBuffer
 }
 
 case class StartupMessage(user: String, database: String) extends FrontendMessage {
@@ -128,10 +128,8 @@ case class DataRow(data: IndexedSeq[ChannelBuffer]) extends BackendMessage {
 
 }
 
-// TODO parse affected rows from a string
 case class CommandComplete(tag: String) extends BackendMessage {}
 
-// TODO maybe use some enum
 case class ReadyForQuery(status: Char) extends BackendMessage {
 
 }

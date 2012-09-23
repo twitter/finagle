@@ -16,6 +16,8 @@ import com.twitter.finagle.postgres.protocol.RowDescription
 import com.twitter.finagle.postgres.protocol.ReadyForQuery
 import com.twitter.finagle.postgres.protocol.CommandComplete
 import com.twitter.finagle.postgres.protocol.DataRow
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.postgres.protocol.PgCodec
 
 sealed trait Value {
 }
@@ -42,8 +44,8 @@ class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
   def get(index: Int): Value = vals(index)
 
   def values(): IndexedSeq[Value] = vals
-  
-  override def toString() : String = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'"
+
+  override def toString(): String = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'"
 
 }
 
@@ -68,6 +70,10 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
         Future(new ResultSet(fieldNames, rows))
     }
   }
+  
+  def close() {
+    factory.close()
+  }
 
   private[this] def send[T](r: PgRequest)(handler: PartialFunction[PgResponse, Future[T]]) =
     fService flatMap { service =>
@@ -75,6 +81,20 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
         case _ => Future.exception(new UnsupportedOperationException("TODO Support exceptions correctly"));
       })
     }
+
+}
+
+object Client {
+
+  def apply(host: String, username: String, password: Option[String], database: String): Client = {
+    val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
+      .codec(new PgCodec(username, password, database))
+      .hosts(host)
+      .hostConnectionLimit(1)
+      .buildFactory()
+
+    new Client(factory)
+  }
 
 }
 
@@ -138,7 +158,7 @@ trait ValueParser {
   def parseBpChar(b: ChannelBuffer): StringValue
 
   def parseVarChar(b: ChannelBuffer): StringValue
-  
+
   def parseTimestampTZ(b: ChannelBuffer): StringValue
 
 }
@@ -163,13 +183,13 @@ object StringValueParser extends ValueParser {
   def parseFloat4(b: ChannelBuffer) = FloatValue(b.toString(Charsets.Utf8).toFloat)
 
   def parseFloat8(b: ChannelBuffer) = DoubleValue(b.toString(Charsets.Utf8).toDouble)
-  
+
   def parseInet(b: ChannelBuffer) = parseStr(b)
 
   def parseBpChar(b: ChannelBuffer) = parseStr(b)
 
   def parseVarChar(b: ChannelBuffer) = parseStr(b)
-  
+
   def parseTimestampTZ(b: ChannelBuffer) = parseStr(b)
 
   private[this] def parseInt(b: ChannelBuffer) = IntValue(b.toString(Charsets.Utf8).toInt)

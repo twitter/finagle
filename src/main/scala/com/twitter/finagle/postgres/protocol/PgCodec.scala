@@ -11,7 +11,7 @@ import java.security.MessageDigest
 import collection.mutable
 import com.twitter.logging.Level
 
-class PostgreCodec(user: String, password: Option[String], database: String) extends CodecFactory[PgRequest, PgResponse] {
+class PgCodec(user: String, password: Option[String], database: String) extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
 
   def client = Function.const {

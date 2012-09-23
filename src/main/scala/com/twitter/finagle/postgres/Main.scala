@@ -8,7 +8,7 @@ import com.twitter.logging.Logger
 import com.twitter.logging.config.FileHandlerConfig
 import com.twitter.logging.config.LoggerConfig
 import com.twitter.logging.config.Policy
-import protocol.PostgreCodec
+import protocol.PgCodec
 import com.twitter.finagle.postgres.protocol.Communication
 import com.twitter.finagle.postgres.protocol.Query
 
@@ -26,17 +26,13 @@ object Main {
     }
     config()
 
-    val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
-      .codec(new PostgreCodec("mkhadikov", None, "testing"))
-      .hosts("localhost:5432")
-      .hostConnectionLimit(1)
-      .buildFactory()
-
-    val client = new Client(factory)
+    val client = Client("localhost:5432", "mkhadikov", None, "testing")
 
     val f = client.query("select * from pg_catalog.pg_stat_activity");
 
     logger.debug("Responded " + f.get())
+    
+    client.close()
 
   }
 
