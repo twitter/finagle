@@ -154,6 +154,16 @@ class PgResponseHandler() extends SimpleChannelHandler {
 
   }
 
+  private[this] def commonTermination(msg: BackendMessage): Boolean =
+    msg match {
+      case ReadyForQuery(_) =>
+        true
+      case ErrorResponse(_) =>
+        true
+      case _ =>
+        false
+    }
+
   def processMessage(msg: BackendMessage): Option[PgResponse] = {
     mode match {
       case OneMessagePerRequest =>
@@ -161,29 +171,13 @@ class PgResponseHandler() extends SimpleChannelHandler {
         msg match {
 
           case AuthenticationOk() =>
-            mode = new MessageSequenceMode((new mutable.MutableList() += msg), newMsg => {
-              newMsg match {
-                case ReadyForQuery(_) =>
-                  true
-                case ErrorResponse(_) =>
-                  true
-                case _ =>
-                  false
-              }
-            })
+            mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
             None
-
           case RowDescription(_) =>
-            mode = new MessageSequenceMode((new mutable.MutableList() += msg), newMsg => {
-              newMsg match {
-                case ReadyForQuery(_) =>
-                  true
-                case ErrorResponse(_) =>
-                  true
-                case _ =>
-                  false
-              }
-            })
+            mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
+            None
+          case CommandComplete(_) => 
+            mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
             None
           case _ =>
             Some(SingleMessageResponse(msg))

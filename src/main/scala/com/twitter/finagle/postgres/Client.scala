@@ -19,6 +19,7 @@ import com.twitter.finagle.postgres.protocol.DataRow
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.postgres.protocol.PgCodec
 import com.twitter.logging.Logger
+import com.twitter.finagle.postgres.protocol.CommandComplete
 
 sealed trait Value {
 }
@@ -67,12 +68,20 @@ class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
 
 case class Field(name: String)
 
-case class ResultSet(fields: IndexedSeq[Field], rows: Seq[Row])
+sealed trait QueryResponse
+
+case class ResultSet(fields: IndexedSeq[Field], rows: Seq[Row]) extends QueryResponse
+
+case class Inserted(num: Int) extends QueryResponse
+
+case class Deleted(num: Int) extends QueryResponse
+
+case class Updated(num: Int) extends QueryResponse
 
 class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   private[this] lazy val fService = factory.apply()
 
-  def query(sql: String): Future[ResultSet] = {
+  def query(sql: String): Future[QueryResponse] = {
     send(Communication.request(new Query(sql))) {
       case MessageSequenceResponse(RowDescription(fields) :: entries) =>
         val fieldNames = fields.map(f => Field(f.name))
@@ -84,12 +93,45 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
         })
 
         Future(new ResultSet(fieldNames, rows))
+
+      case MessageSequenceResponse(CommandComplete(tag) :: _) =>
+
+        Future(parseTag(tag))
+
     }
 
   }
 
   def select[T](sql: String)(f: Row => T): Future[Seq[T]] = {
-    query(sql).map(_.rows.map(f))
+    query(sql).map(
+      _ match {
+        case ResultSet(_, rows) => rows.map(f)
+        case _ => throw new IllegalStateException("Select method is used for non-select operation")
+      })
+  }
+
+  def insert[T](sql: String): Future[Int] = {
+    query(sql).map(
+      _ match {
+        case Inserted(num) => num
+        case _ => throw new IllegalStateException("Insert method is used for non-insert operation")
+      })
+  }
+
+  def delete[T](sql: String): Future[Int] = {
+    query(sql).map(
+      _ match {
+        case Deleted(num) => num
+        case _ => throw new IllegalStateException("Delete method is used for non-delete operation")
+      })
+  }
+
+  def update[T](sql: String): Future[Int] = {
+    query(sql).map(
+      _ match {
+        case Updated(num) => num
+        case _ => throw new IllegalStateException("Update method is used for non-update operation")
+      })
   }
 
   def close() {
@@ -102,6 +144,17 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
         case _ => Future.exception(new UnsupportedOperationException("TODO Support exceptions correctly"));
       })
     }
+
+  private[this] def parseTag(tag: String): QueryResponse = {
+    val parts = tag.split(" ")
+
+    parts(0) match {
+      case "INSERT" => Inserted(parts(2).toInt)
+      case "DELETE" => Deleted(parts(1).toInt)
+      case "UPDATE" => Updated(parts(1).toInt)
+      case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+    }
+  }
 
 }
 
