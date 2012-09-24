@@ -82,8 +82,6 @@
             <h6>Fork on GitHub</h6>
             <p>Download, fork, pull, file issues, and more with the official Finagle repo on Github.</p>
             <p><a target="_blank" href="https://github.com/twitter/finagle" class="btn primary">Finagle on GitHub &raquo;</a></p>
-
-            <p class="current-version">Currently <a href="https://github.com/twitter/finagle/blob/master/ChangeLog">v1.9.10</a></p>
           </div>
         </div><!-- /row -->
       </div>
@@ -167,12 +165,12 @@
 								    <p>
 
 								      <ol>
-								        <li><a href="http://code.google.com/p/simple-build-tool/wiki/Setup">Install SBT</a>
-								        <li>run <code>sbt update test</code> from the command line</li>
+								        <li>Note that Finagle comes with its own <code>./sbt</code>. This is a copy of the sbt Simple Build Tool hard-wired to use SBT and library versions that work together.
+								        <li>run <code>./sbt update test</code> from the command line</li>
 								      </ol>
 								    </p> 
 								
-								    <p><b>Note: </b>Maven Artifacts are published to the public twitter maven repo at <a href="http://maven.twttr.com/">http://maven.twttr.com</a>.</p>
+								    <p><b>Note: </b>Maven Artifacts are published to the public twitter maven repo at <a href="http://maven.twttr.com/">http://maven.twttr.com</a>. Although you can't use Maven to build Finagle itself, you can use the twitter maven to build other things that depend on it.</p>
 							  
 							    </div>
 							  </div><!-- /row -->
