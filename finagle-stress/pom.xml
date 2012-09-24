@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stress</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.17</version>
+  <version>5.3.18</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-292</artifactId>
@@ -32,32 +32,32 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.17</version>
+      <version>5.3.18</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>5.3.17</version>
+      <version>5.3.18</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>5.3.17</version>
+      <version>5.3.18</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>5.3.17</version>
+      <version>5.3.18</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>8.2.6</version>
+      <version>8.2.7</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>5.3.11</version>
+      <version>5.3.12</version>
     </dependency>
   </dependencies>
   <build>
