@@ -23,6 +23,16 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
     underlyingService(Matchers.any) returns Future.value(obj)
     underlying() returns Future.value(underlyingService)
 
+    "reflect the underlying factory availability" in {
+      val pool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
+      underlying.isAvailable returns false
+      pool.isAvailable must beFalse
+      there was one(underlying).isAvailable
+      underlying.isAvailable returns true
+      pool.isAvailable must beTrue
+      there were two(underlying).isAvailable
+    }
+
     "cache objects for the specified amount of time" in {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)

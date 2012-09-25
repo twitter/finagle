@@ -64,7 +64,7 @@ private[finagle] class CachingPool[Req, Rep](
     factory.close()
   }
 
-  override def isAvailable = isOpen
+  override def isAvailable = isOpen && factory.isAvailable
 
   override val toString = "caching_pool_%s".format(factory.toString)
 }

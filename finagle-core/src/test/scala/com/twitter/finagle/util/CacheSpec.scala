@@ -8,7 +8,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.MockTimer
 
 class CacheSpec extends SpecificationWithJUnit with Mockito {
-  "Cache(5, 5.seconds)" should Time.withTimeAt(Time.epoch) { tc =>
+  "Cache(5, 5.seconds)" should {
     val timer = new MockTimer
     val evictor = mock[Object => Unit]
     val cache = spy(new Cache[Object](5, 5.seconds, timer, Some(evictor)))
@@ -31,7 +31,7 @@ class CacheSpec extends SpecificationWithJUnit with Mockito {
       cache.get() must beNone
     }
 
-    "expire items after the TTL" in {
+    "expire items after the TTL" in Time.withTimeAt(Time.epoch) { tc =>
       cache.put(objects(0))
       timer.tasks must haveSize(1)
       tc.advance(1.second)
@@ -48,7 +48,7 @@ class CacheSpec extends SpecificationWithJUnit with Mockito {
       timer.tasks must beEmpty
     }
 
-    "not expire any items if none of them have expired yet" in {
+    "not expire any items if none of them have expired yet" in Time.withTimeAt(Time.epoch)  { tc =>
       cache.put(objects(0))
       timer.tasks must haveSize(1)
       cache.put(objects(1))

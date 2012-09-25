@@ -1,21 +1,17 @@
 package com.twitter.finagle.ssl
 
-import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicReference
-import sun.security.util.HostnameChecker
-import java.security.cert.X509Certificate
-import javax.net.ssl.SSLSession
-
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.ssl.SslHandler
-
-import com.twitter.util.Try
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.{Ok, Error, Cancelled}
-import com.twitter.finagle.{
-  InconsistentStateException, ChannelClosedException,
-  SslHandshakeException,
-  SslHostVerificationException}
+import com.twitter.finagle.{CancelledConnectionException, ChannelClosedException,
+  InconsistentStateException, SslHandshakeException, SslHostVerificationException}
+import com.twitter.util.Try
+import java.net.SocketAddress
+import java.security.cert.X509Certificate
+import java.util.concurrent.atomic.AtomicReference
+import javax.net.ssl.SSLSession
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.ssl.SslHandler
+import sun.security.util.HostnameChecker
 
 /**
  * Handle client-side SSL connections:
@@ -53,6 +49,16 @@ class SslConnectHandler(
         // proxy cancellation
         val wrappedConnectFuture = Channels.future(de.getChannel, true)
         de.getFuture onCancellation { wrappedConnectFuture.cancel() }
+        // Proxy failures here so that if the connect fails, it is
+        // propagated to the listener, not just on the channel.
+        wrappedConnectFuture.addListener(new ChannelFutureListener {
+          def operationComplete(f: ChannelFuture) {
+            if (f.isSuccess || f.isCancelled)
+              return
+
+            fail(f.getChannel, f.getCause)
+          }
+        })
 
         val wrappedEvent = new DownstreamChannelStateEvent(
           de.getChannel, wrappedConnectFuture,

@@ -33,51 +33,47 @@ case class IntegerReply(id: Long) extends SingleLineReply {
   override def getMessageTuple() = (RedisCodec.INTEGER_REPLY, id.toString)
 }
 
-case class BulkReply(message: Array[Byte]) extends MultiLineReply {
-  RequireServerProtocol(message != null && message.length > 0, "BulkReply had empty message")
-
-  import RedisCodec.{ARG_SIZE_MARKER, EOL_DELIMITER}
-
-  override def toChannelBuffer = {
-    val mlen = message.length
-    val exlen = 1 + 2 + 2 // 1 byte for marker, 2 bytes for first EOL, 2 for second
-    val header = "%c%d%s".format(ARG_SIZE_MARKER, mlen, EOL_DELIMITER)
-    val buffer = ChannelBuffers.dynamicBuffer(mlen + exlen)
-    buffer.writeBytes(header.getBytes)
-    buffer.writeBytes(message)
-    buffer.writeBytes(EOL_DELIMITER.getBytes)
-    buffer
-  }
+case class BulkReply(message: ChannelBuffer) extends MultiLineReply {
+  RequireServerProtocol(message.hasArray && message.readableBytes > 0,
+    "BulkReply had empty message")
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(List(message), false)
 }
 case class EmptyBulkReply() extends MultiLineReply {
-  val message = RedisCodec.NIL_VALUE
-  val messageBytes = StringToBytes(message)
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List("$-1"))
+  val message = "$-1"
+  override def toChannelBuffer =
+    ChannelBuffers.wrappedBuffer(RedisCodec.NIL_BULK_REPLY_BA,
+      RedisCodec.EOL_DELIMITER_BA)
 }
 
 case class MBulkReply(messages: List[Reply]) extends MultiLineReply {
   RequireServerProtocol(
     messages != null && messages.length > 0,
     "Multi-BulkReply had empty message list")
-  override def toChannelBuffer = {
-    RedisCodec.toUnifiedFormat(ReplyFormat.toByteArrays(messages))
-  }
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(ReplyFormat.toChannelBuffers(messages))
 }
 case class EmptyMBulkReply() extends MultiLineReply {
-  val message = RedisCodec.NIL_VALUE
-  val messageBytes = StringToBytes(message)
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List("*0"))
+  val message = "*0"
+  override def toChannelBuffer =
+    ChannelBuffers.wrappedBuffer(RedisCodec.EMPTY_MBULK_REPLY_BA,
+      RedisCodec.EOL_DELIMITER_BA)
 }
-
 case class NilMBulkReply() extends MultiLineReply {
-  val message = RedisCodec.NIL_VALUE
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List("*-1"))
+  val message = "*-1"
+  override def toChannelBuffer =
+    ChannelBuffers.wrappedBuffer(RedisCodec.NIL_MBULK_REPLY_BA,
+      RedisCodec.EOL_DELIMITER_BA)
 }
 
 class ReplyCodec extends UnifiedProtocolCodec {
   import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
   import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
+
+  val encode = new Encoder[Reply] {
+    def encode(obj: Reply) = Some(obj.toChannelBuffer)
+  }
 
   val decode = readBytes(1) { bytes =>
     bytes(0) match {
@@ -108,10 +104,6 @@ class ReplyCodec extends UnifiedProtocolCodec {
     }
   }
 
-  val encode = new Encoder[Reply] {
-    def encode(obj: Reply) = Some(obj.toChannelBuffer)
-  }
-
   def decodeBulkReply = readLine { line =>
     RequireServerProtocol.safe {
       NumberFormat.toInt(line)
@@ -122,12 +114,11 @@ class ReplyCodec extends UnifiedProtocolCodec {
           if (eol(0) != '\r' || eol(1) != '\n') {
             throw new ServerError("Expected EOL after line data and didn't find it")
           }
-          emit(BulkReply(bytes))
-        } //readBytes
-      } // readBytes
-    } // match
-  } // decodeBulkReply
-
+          emit(BulkReply(ChannelBuffers.wrappedBuffer(bytes)))
+        }
+      }
+    }
+  }
 
   def decodeMBulkReply[T <: AnyRef](argCount: Long, doneFn: List[Reply] => T) =
     argCount match {
@@ -156,7 +147,8 @@ class ReplyCodec extends UnifiedProtocolCodec {
                   if (eol(0) != '\r' || eol(1) != '\n') {
                     throw new ProtocolError("Expected EOL after line data and didn't find it")
                   }
-                  decodeMBulkLines(i - 1, BulkReply(byteArray) :: lines, doneFn)
+                  decodeMBulkLines(i - 1,
+                    BulkReply(ChannelBuffers.wrappedBuffer(byteArray)) :: lines, doneFn)
                 }
               }
             }

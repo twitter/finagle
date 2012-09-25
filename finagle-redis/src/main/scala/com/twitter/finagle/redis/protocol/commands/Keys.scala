@@ -1,144 +1,212 @@
-package com.twitter.finagle.redis
-package protocol
-
-import util._
+package com.twitter.finagle.redis.protocol
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.redis.protocol.Commands.trimList
+import com.twitter.finagle.redis.util._
 import com.twitter.util.Time
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-import Commands.trimList
-
-/**
- * TODO
- *  - EVAL
- *  - MOVE
- *  - OBJECT
- *  - SORT
- */
-
-case class Del(keys: List[String]) extends StrictKeysCommand {
-  val command = Commands.DEL
-  override def toChannelBuffer = RedisCodec.toInlineFormat(Commands.DEL +: keys)
+case class Del(keys: Seq[ChannelBuffer]) extends StrictKeysCommand {
+  def command = Commands.DEL
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.DEL +: keys)
 }
 object Del {
-  def apply(key: String) = new Del(List(key))
+  def apply(args: => Seq[Array[Byte]]) = new Del(args.map(ChannelBuffers.wrappedBuffer(_)))
 }
 
-case class Exists(key: String) extends StrictKeyCommand {
-  val command = Commands.EXISTS
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.EXISTS, key))
+case class Exists(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.EXISTS
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXISTS, key))
 }
 object Exists {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "EXISTS")
-    new Exists(BytesToString(list(0)))
+    new Exists(ChannelBuffers.wrappedBuffer(list(0)))
   }
 }
 
-case class Expire(key: String, seconds: Long) extends StrictKeyCommand {
-  val command = Commands.EXPIRE
+case class Expire(key: ChannelBuffer, seconds: Long) extends StrictKeyCommand {
+  def command = Commands.EXPIRE
   RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.EXPIRE, key, seconds.toString))
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXPIRE, key,
+      StringToChannelBuffer(seconds.toString)))
 }
 object Expire {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "EXPIRE")
     RequireClientProtocol.safe {
-      new Expire(BytesToString(list(0)), NumberFormat.toLong(BytesToString(list(1))))
+      new Expire(ChannelBuffers.wrappedBuffer(list(0)),
+        NumberFormat.toLong(BytesToString(list(1))))
     }
   }
 }
 
-case class ExpireAt(key: String, timestamp: Time) extends StrictKeyCommand {
-  val command = Commands.EXPIREAT
+case class ExpireAt(key: ChannelBuffer, timestamp: Time) extends StrictKeyCommand {
+  def command = Commands.EXPIREAT
   RequireClientProtocol(
     timestamp != null && timestamp > Time.now,
     "Timestamp must be in the future")
 
   val seconds = timestamp.inSeconds
 
-  override def toChannelBuffer =
-    RedisCodec.toInlineFormat(List(Commands.EXPIREAT, key, seconds.toString))
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXPIREAT, key,
+      StringToChannelBuffer(seconds.toString)))
 }
 object ExpireAt {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "EXPIREAT")
     val secondsString = BytesToString(list(1))
     val seconds = RequireClientProtocol.safe {
       Time.fromSeconds(NumberFormat.toInt(secondsString))
     }
-    new ExpireAt(BytesToString(list(0)), seconds)
+    new ExpireAt(ChannelBuffers.wrappedBuffer(list(0)), seconds)
   }
 }
 
-case class Keys(pattern: String) extends Command {
-  val command = Commands.KEYS
-  RequireClientProtocol(pattern != null && pattern.length > 0, "Pattern must be specified")
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.KEYS, pattern))
+case class Keys(pattern: ChannelBuffer) extends Command {
+  def command = Commands.KEYS
+  RequireClientProtocol(pattern != null && pattern.readableBytes > 0, "Pattern must be specified")
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.KEYS, pattern))
 }
 object Keys {
-  def apply(args: List[Array[Byte]]) = new Keys(BytesToString.fromList(args).mkString)
+  def apply(args: Seq[Array[Byte]]) = new Keys(ChannelBuffers.wrappedBuffer(args.head))
 }
 
-case class Persist(key: String) extends StrictKeyCommand {
-  val command = Commands.PERSIST
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.PERSIST, key))
+case class Persist(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.PERSIST
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PERSIST, key))
 }
 object Persist {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "PERSIST")
-    new Persist(BytesToString(list(0)))
+    new Persist(ChannelBuffers.wrappedBuffer(list(0)))
   }
 }
 
 case class Randomkey() extends Command {
-  val command = Commands.RANDOMKEY
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.RANDOMKEY))
+  def command = Commands.RANDOMKEY
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.RANDOMKEY))
 }
 
-case class Rename(key: String, newkey: String) extends StrictKeyCommand {
-  val command = Commands.RENAME
-  RequireClientProtocol(newkey != null && newkey.length > 0, "New key must not be empty")
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.RENAME, key, newkey))
+case class Rename(key: ChannelBuffer, newkey: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.RENAME
+  RequireClientProtocol(newkey != null && newkey.readableBytes > 0, "New key must not be empty")
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.RENAME, key, newkey))
 }
 object Rename {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "RENAME")
-    new Rename(BytesToString(list(0)), BytesToString(list(1)))
+    new Rename(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
   }
 }
 
-case class RenameNx(key: String, newkey: String) extends StrictKeyCommand {
-  val command = Commands.RENAMENX
-  RequireClientProtocol(newkey != null && newkey.length > 0, "New key must not be empty")
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.RENAMENX, key, newkey))
+case class RenameNx(key: ChannelBuffer, newkey: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.RENAMENX
+  RequireClientProtocol(newkey != null && newkey.readableBytes > 0, "New key must not be empty")
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.RENAMENX, key, newkey))
 }
 object RenameNx {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "RENAMENX")
-    new RenameNx(BytesToString(list(0)), BytesToString(list(1)))
+    new RenameNx(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
   }
 }
 
-case class Ttl(key: String) extends StrictKeyCommand {
-  val command = Commands.TTL
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.TTL, key))
+case class Scan(cursor: Long, count: Option[Long] = None, pattern: Option[ChannelBuffer] = None)
+extends Command {
+  def command = Commands.SCAN
+  def toChannelBuffer = {
+    val bufs = Seq(CommandBytes.SCAN, StringToChannelBuffer(cursor.toString))
+    val withCount = count match {
+      case Some(count) => bufs ++ Seq(Count.COUNT_CB, StringToChannelBuffer(count.toString))
+      case None        => bufs
+    }
+    val withPattern = pattern match {
+      case Some(pattern) => withCount ++ Seq(Pattern.PATTERN_CB, pattern)
+      case None          => withCount
+    }
+    RedisCodec.toUnifiedFormat(withPattern)
+  }
+}
+object Scan {
+  import ScanCompanion._
+
+  def apply(args: Seq[Array[Byte]]) = {
+    RequireClientProtocol(
+      args != null && !args.isEmpty,
+      "Expected at least 1 arguments for scan command")
+    args match {
+      case cursor :: Nil  => new Scan(NumberFormat.toLong(BytesToString(cursor)))
+      case cursor :: tail => parseArgs(NumberFormat.toLong(BytesToString(cursor)), tail)
+      case _              => throw new ClientError("Unexpected args to scan command")
+    }
+  }
+
+  def parseArgs(cursor: Long, args: Seq[Array[Byte]]) = {
+    val sArgs = BytesToString.fromList(args)
+    val (args0, args1) = findArgs(sArgs)
+    RequireClientProtocol(args0.size > 1, "Length of arguments must be > 1")
+    val count = findCount(args0, args1)
+    val pattern = findPattern(args0, args1).map(StringToChannelBuffer(_))
+    new Scan(cursor, count, pattern)
+  }
+}
+
+case class Ttl(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.TTL
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.TTL, key))
 }
 object Ttl {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "TTL")
-    new Ttl(BytesToString(list(0)))
+    new Ttl(ChannelBuffers.wrappedBuffer(list(0)))
   }
 }
 
-case class Type(key: String) extends StrictKeyCommand {
-  val command = Commands.TYPE
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List(Commands.TYPE, key))
+case class Type(key: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.TYPE
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.TYPE, key))
 }
 object Type {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "TYPE")
-    new Type(BytesToString(list(0)))
+    new Type(ChannelBuffers.wrappedBuffer(list(0)))
   }
+}
+
+object ScanCompanion {
+
+  def findArgs(args: Seq[String]): (Seq[String], Seq[String]) = {
+    args.head.toUpperCase match {
+      case Count.COUNT     => args.splitAt(2)
+      case Pattern.PATTERN => args.splitAt(2)
+      case s => throw ClientError("COUNT or PATTERN argument expected, found %s".format(s))
+    }
+  }
+
+  def findCount(args0: Seq[String], args1: Seq[String]) = Count(args0) match {
+    case None if args1.length > 0 =>
+      Count(args1) match {
+        case None => throw ClientError("Have additional arguments but unable to process")
+        case c => c
+      }
+    case None => None
+    case c => c
+  }
+
+  def findPattern(args0: Seq[String], args1: Seq[String]) = Pattern(args0) match {
+    case None if args1.length > 0 =>
+      Pattern(args1) match {
+        case None => throw ClientError("Have additional arguments but unable to process")
+        case pattern => pattern
+      }
+    case None => None
+    case pattern => pattern
+  }
+
 }

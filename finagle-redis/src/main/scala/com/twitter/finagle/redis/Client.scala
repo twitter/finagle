@@ -6,6 +6,7 @@ import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.Future
 import scala.collection.{Set => CollectionSet}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object Client {
 
@@ -23,26 +24,23 @@ object Client {
   /**
    * Construct a client from a single Service.
    */
-  def apply(raw: Service[Command, Reply]): Client = new Client(raw)
+  def apply(raw: Service[Command, Reply]): Client =
+    new Client(raw)
 
 }
+
+class Client(service: Service[Command, Reply])
+  extends BaseClient(service)
+  with Keys
+  with Strings
+  with Hashes
+  with SortedSets
 
 /**
  * Connects to a single Redis host
  * @param service: Finagle service object built with the Redis codec
  */
-class Client(service: Service[Command, Reply]) {
-
-  /**
-   * Appends value at the given key. If key doesn't exist,
-   * behavior is similar to SET command
-   * @params key, value
-   * @return Length of string after append operation
-   */
-  def append(key: String, value: Array[Byte]): Future[Long] =
-    doRequest(Append(key, value)) {
-      case IntegerReply(n) => Future.value(n)
-    }
+class BaseClient(service: Service[Command, Reply]) {
 
   /**
    * Decrements number stored at key by given amount. If key doesn't
@@ -320,77 +318,36 @@ class Client(service: Service[Command, Reply]) {
     }
 
   /**
-   * Sets the given value to key. If a value already exists for the key,
-   * the value is overwritten with the new value
-   * @params key, value
+   * Authorizes to db
+   * @param password
    */
-  def set(key: String, value: Array[Byte]): Future[Unit] =
-    doRequest(Set(key, value)) {
+  def auth(password: ChannelBuffer): Future[Unit] =
+    doRequest(Auth(password)) {
       case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Removes keys
-   * @param list of keys to remove
-   * @return Number of keys removed
-   */
-  def del(keys: Seq[String]): Future[Long] =
-    doRequest(Del(keys.toList)) {
-      case IntegerReply(n) => Future.value(n)
-    }
-
-  /**
-   * Checks if given key exists
-   * @param key
-   * @return True if key exists, false otherwise
-   */
-  def exists(key: String): Future[Boolean] =
-    doRequest(Exists(key)) {
-      case IntegerReply(n) => Future.value((n == 1))
-    }
-
-  /**
-   * Returns all keys matching pattern
-   * @param pattern
-   * @return List of keys matching pattern
-   */
-  def keys(pattern: String): Future[Seq[Array[Byte]]] =
-    doRequest(Keys(pattern)) {
-      case MBulkReply(messages) => Future.value(ReplyFormat.toByteArrays(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
     }
 
   /**
    * Deletes all keys in current DB
    */
   def flushDB(): Future[Unit] =
-    doRequest(FlushDB()) {
+    doRequest(FlushDB) {
       case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Authorizes to db
-   */
-  def auth(token: String): Future[Unit] =
-    doRequest(Auth(token)) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Select DB with specified zero-based index
-   * @param index
-   * @return Status reply
-   */
-  def select(index: Int): Future[String] =
-    doRequest(Select(index)) {
-      case StatusReply(message) => Future.value(message)
     }
 
   /**
    * Closes connection to Redis instance
    */
   def quit(): Future[Unit] =
-    doRequest(Quit()) {
+    doRequest(Quit) {
+      case StatusReply(message) => Future.Unit
+    }
+
+  /**
+   * Select DB with specified zero-based index
+   * @param index
+   */
+  def select(index: Int): Future[Unit] =
+    doRequest(Select(index)) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -699,12 +656,13 @@ class Client(service: Service[Command, Reply]) {
   /**
    * Helper function to convert a Redis multi-bulk reply into a map of pairs
    */
-  private[redis] def returnPairs(messages: List[Array[Byte]]) = {
+  private[redis] def returnPairs(messages: Seq[ChannelBuffer]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
-    messages.grouped(2).toList flatMap { case List(a, b) => Some(a, b); case _ => None }
+    messages.grouped(2).toSeq flatMap { case Seq(a, b) => Some(a, b); case _ => None }
   }
 
 }
+
 
 /**
  * Client connected over a single connection to a
@@ -715,13 +673,19 @@ trait TransactionalClient extends Client {
   /**
    * Flushes all previously watched keys for a transaction
    */
-  def unwatch(): Future[Unit]
+  def unwatch(): Future[Unit] =
+    doRequest(UnWatch) {
+      case StatusReply(message)  => Future.Unit
+    }
 
   /**
    * Marks given keys to be watched for conditional execution of a transaction
    * @param keys to watch
    */
-  def watch(keys: Seq[Array[Byte]]): Future[Unit]
+  def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
+    doRequest(Watch(keys)) {
+      case StatusReply(message)  => Future.Unit
+    }
 
   /**
    * Executes given vector of commands as a Redis transaction
@@ -762,23 +726,13 @@ private[redis] class ConnectedTransactionalClient(
   serviceFactory: ServiceFactory[Command, Reply]
 ) extends Client(serviceFactory.toService) with TransactionalClient {
 
-  def unwatch(): Future[Unit] =
-    doRequest(UnWatch()) {
-      case StatusReply(message)  => Future.Unit
-    }
-
-  def watch(keys: Seq[Array[Byte]]): Future[Unit] =
-    doRequest(Watch(keys.toList)) {
-      case StatusReply(message)  => Future.Unit
-    }
-
   def transaction(cmds: Seq[Command]): Future[Seq[Reply]] = {
     serviceFactory() flatMap { svc =>
       multi(svc) flatMap { _ =>
-        val cmdQueue = cmds.toList map { cmd => svc(cmd) }
+        val cmdQueue = cmds map { cmd => svc(cmd) }
         Future.collect(cmdQueue) flatMap { _ => exec(svc) }
       } rescue { case e =>
-        svc(Discard()) flatMap { _ =>
+        svc(Discard) flatMap { _ =>
           Future.exception(ClientError("Transaction failed: " + e.toString))
         }
       } ensure {
@@ -788,14 +742,14 @@ private[redis] class ConnectedTransactionalClient(
   }
 
   private def multi(svc: Service[Command, Reply]): Future[Unit] =
-    svc(Multi()) flatMap {
+    svc(Multi) flatMap {
       case StatusReply(message)  => Future.Unit
       case ErrorReply(message)   => Future.exception(new ServerError(message))
       case _                     => Future.exception(new IllegalStateException)
   }
 
   private def exec(svc: Service[Command, Reply]): Future[Seq[Reply]] =
-    svc(Exec()) flatMap {
+    svc(Exec) flatMap {
       case MBulkReply(messages)  => Future.value(messages)
       case EmptyMBulkReply()     => Future.value(Seq())
       case NilMBulkReply()       => Future.exception(

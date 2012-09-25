@@ -1,11 +1,9 @@
-package com.twitter.finagle.redis
-package protocol
-
-import util._
-import RedisCodec._
+package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep, ProtocolError}
 import com.twitter.finagle.redis.naggati.Stages._
+import com.twitter.finagle.redis.protocol.RedisCodec._
+import com.twitter.finagle.redis.util._
 
 trait UnifiedProtocolCodec {
 
@@ -31,7 +29,7 @@ trait UnifiedProtocolCodec {
           case ARG_SIZE_MARKER =>
             val size = NumberFormat.toInt(line.drop(1))
             if (size < 1) {
-              decodeRequestLines(i - 1, lines.+:(RedisCodec.NIL_VALUE_BA), doneFn)
+              decodeRequestLines(i - 1, lines.+:(RedisCodec.NIL_VALUE_BA.array), doneFn)
             } else {
               readBytes(size) { byteArray =>
                 readBytes(2) { eol =>

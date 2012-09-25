@@ -109,8 +109,15 @@ object RequestBuilder {
   /**
    * Provides a typesafe `buildPut` for Java.
    */
-  def safeBuidlPut(builder: Complete, content: ChannelBuffer): HttpRequest =
+  def safeBuildPut(builder: Complete, content: ChannelBuffer): HttpRequest =
     builder.buildPut(content)(RequestEvidence.FullyConfigured)
+
+  /**
+   * Provides a typesafe `buildPut` for Java.
+   */
+  @deprecated("Typo, use safeBuildPut instead", "5.3.7")
+  def safeBuidlPut(builder: Complete, content: ChannelBuffer): HttpRequest =
+    safeBuildPut(builder, content)
 
   /**
    * Provides a typesafe `buildPost` for Java.

@@ -716,14 +716,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     }
 
-    factory = buildPool(factory, timer, hostStatsReceiver)
-    factory = requestTimeoutFilter(timer) andThen factory
-    factory = failureAccrualFactory(factory, timer)
-
     if (config.expFailFast) {
       factory = new FailFastFactory(
         factory, hostStatsReceiver.scope("failfast"), timer.toTwitterTimer)
     }
+
+    factory = buildPool(factory, timer, hostStatsReceiver)
+    factory = requestTimeoutFilter(timer) andThen factory
+    factory = failureAccrualFactory(factory, timer)
 
     val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
     factory = statsFilter andThen factory

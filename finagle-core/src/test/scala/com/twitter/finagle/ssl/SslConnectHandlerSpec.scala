@@ -1,22 +1,17 @@
 package com.twitter.finagle.ssl
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-import org.mockito.ArgumentCaptor
-
-import java.net.SocketAddress
-import javax.net.ssl.SSLSession
-import javax.net.ssl.SSLEngine
-
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.ssl.SslHandler
-
 import com.twitter.finagle.util.Conversions._
 import com.twitter.finagle.util.Error
-import com.twitter.finagle.{
-  InconsistentStateException,
-  SslHandshakeException,
+import com.twitter.finagle.{InconsistentStateException, SslHandshakeException,
   SslHostVerificationException}
+import java.net.SocketAddress
+import javax.net.ssl.SSLEngine
+import javax.net.ssl.SSLSession
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.ssl.SslHandler
+import org.mockito.ArgumentCaptor
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class SslConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
   "SslConnectHandler" should {
@@ -104,7 +99,7 @@ class SslConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
         checkDidClose()
       }
 
-      "when handshake is succesful" in {
+      "when handshake is successful" in {
         "propagate success" in {
           handshakeFuture.setSuccess()
           connectFuture.isDone must beTrue
@@ -134,6 +129,18 @@ class SslConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
           checkDidClose()
         }
       }
+    }
+
+    "propagate connection failure" in {
+      val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
+      there was one(ctx).sendDownstream(ec.capture)
+      val e = ec.getValue
+      val exc = new Exception("failed to connect")
+
+      connectFuture.isDone must beFalse
+      e.getFuture.setFailure(exc)
+      connectFuture.isDone must beTrue
+      connectFuture.getCause must be_==(exc)
     }
   }
 }

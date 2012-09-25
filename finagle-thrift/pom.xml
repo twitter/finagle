@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-thrift</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.7-SNAPSHOT</version>
+  <version>5.3.14</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.4</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -31,18 +31,19 @@
       <groupId>silly</groupId>
       <artifactId>silly-thrift</artifactId>
       <version>0.5.0</version>
+      <scope>test</scope>
     </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.7-SNAPSHOT</version>
+      <version>5.3.14</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>5.3.7-SNAPSHOT</version>
+      <version>5.3.14</version>
     </dependency>
   </dependencies>
   <build>

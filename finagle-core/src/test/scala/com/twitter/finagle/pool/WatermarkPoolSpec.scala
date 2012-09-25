@@ -9,6 +9,21 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 import com.twitter.finagle._
 
 class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
+  "WatermarkPool" should {
+    val factory = mock[ServiceFactory[Int, Int]]
+    val pool = new WatermarkPool(factory, 0)
+
+    "reflect the underlying availability" in {
+      factory.isAvailable returns true
+      pool.isAvailable must beTrue
+      there was one(factory).isAvailable
+
+      factory.isAvailable returns false
+      pool.isAvailable must beFalse
+      there were two(factory).isAvailable
+    }
+  }
+
   "WatermarkPool (lowWatermark = 0)" should {
     val factory = mock[ServiceFactory[Int, Int]]
     val service = mock[Service[Int, Int]]

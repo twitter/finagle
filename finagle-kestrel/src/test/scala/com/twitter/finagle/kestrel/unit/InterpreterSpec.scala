@@ -37,12 +37,6 @@ class InterpreterSpec extends SpecificationWithJUnit {
         interpreter(Abort("name")) must throwA[InvalidStateTransition]
       }
 
-      "set & get/open & get/open/abort" in {
-        interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Open("name"))
-        //interpreter(Get("name", collection.Set(Open(), Abort()))) must throwA[InvalidStateTransition]
-      }
-
       "set & get/open & get/close" in {
         interpreter(Set("name", Time.now, "rawr"))
         interpreter(Open("name")) mustEqual
@@ -63,7 +57,9 @@ class InterpreterSpec extends SpecificationWithJUnit {
 
     "timeouts" in {
       "set & get/t=1" in {
-
+        interpreter(Get("name", Some(1.millisecond))) mustEqual Values(Seq())
+        interpreter(Set("name", Time.now, "rawr"))
+        interpreter(Get("name", Some(1.second))) mustEqual Values(Seq(Value("name", "rawr")))
       }
     }
 
@@ -83,26 +79,6 @@ class InterpreterSpec extends SpecificationWithJUnit {
       interpreter(Set("name", Time.now, "rawr"))
       interpreter(FlushAll())
       interpreter(Get("name")) mustEqual Values(Seq.empty)
-    }
-
-    "version" in {
-
-    }
-
-    "shutDown" in {
-
-    }
-
-    "dumpConfig" in {
-
-    }
-
-    "stats" in {
-
-    }
-
-    "dumpStats" in {
-
     }
   }
 }

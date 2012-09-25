@@ -65,8 +65,13 @@ object RetryPolicy extends JavaSingleton {
     case Throw(_: WriteException) => true
   }
 
-  def tries(numTries: Int) = {
-    backoff[Try[Nothing]](Backoff.const(0.second) take (numTries - 1))(WriteExceptionsOnly)
+  def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
+
+  def tries[A](
+    numTries: Int,
+    shouldRetry: PartialFunction[A, Boolean]
+  ): RetryPolicy[A] = {
+    backoff[A](Backoff.const(0.second) take (numTries - 1))(shouldRetry)
   }
 
   /**
@@ -120,7 +125,7 @@ object RetryingFilter {
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(shouldRetry: PartialFunction[Try[Rep], Boolean])(implicit timer: Timer) =
+  )(shouldRetry: PartialFunction[Try[Nothing], Boolean])(implicit timer: Timer) =
     new RetryingFilter[Req, Rep](RetryPolicy.backoff(backoffs)(shouldRetry), timer, statsReceiver)
 }
 

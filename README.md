@@ -54,6 +54,7 @@ After version 5.0, Finagle is only compiled against Scala 2.9.x, and sbt-style c
   - <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 * <a href="#Additional Samples">Additional Samples</a>
 * <a href="#API Reference Documentation">API Reference Documentation</a>
+* <a href="#Example Maven Project">Example Maven Project</a>
 
 <a name="Quick Start"></a>
 
@@ -83,8 +84,8 @@ The following server, which is shown in both Scala and Java, responds to a clien
 
     val address: SocketAddress = new InetSocketAddress(10000)                                  // 3
 
-    val server: Server[HttpRequest, HttpResponse] = ServerBuilder()                            // 4
-      .codec(Http)
+    val server: Server = ServerBuilder()                                                       // 4
+      .codec(Http())
       .bindTo(address)
       .name("HttpServer")
       .build(service)
@@ -99,7 +100,7 @@ The following server, which is shown in both Scala and Java, responds to a clien
     };
 
     ServerBuilder.safeBuild(service, ServerBuilder.get()                                       // 4
-      .codec(Http.get())
+      .codec(Http())
       .name("HttpServer")
       .bindTo(new InetSocketAddress("localhost", 10000)));                                     // 3
 
@@ -128,7 +129,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Scala HTTP Client Implementation
 
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()                           // 1
-      .codec(Http)
+      .codec(Http())
       .hosts(address)
       .hostConnectionLimit(1)
       .build()
@@ -142,7 +143,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Java HTTP Client Implementation
 
     Service<HttpRequest, HttpResponse> client = ClientBuilder.safeBuild(ClientBuilder.get()    // 1
-      .codec(Http.get())
+      .codec(Http())
       .hosts("localhost:10000")
       .hostConnectionLimit(1));
 
@@ -182,6 +183,11 @@ Apache Thrift is a binary communication protocol that defines available methods 
       string hi();
     }
 
+To create a Finagle Thrift service, you must implement the `FutureIface` Interface that <a href="https://github.com/twitter/scrooge">Scrooge</a> (a custom Thrift compiler) generates for your service. Scrooge wraps your service method return values with asynchronous `Future` objects to be compatible with Finagle.
+
+* If you are using <a href="https://github.com/harrah/xsbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
+* If you are using <a href="http://maven.apache.org/">maven</a> to manage your project, <a href="http://maven.twttr.com/com/twitter/maven-finagle-thrift-plugin/">maven-finagle-thrift-plugin</a> can also compile Thrift IDL for Finagle.
+
 #### Simple Thrift Server
 
 In this Finagle example, the `ThriftServer` object implements the `Hello` service defined using the Thrift IDL.
@@ -207,14 +213,14 @@ In this Finagle example, the `ThriftServer` object implements the `Hello` servic
 
 ##### Java Thrift Server Implementation
 
-    Hello.ServiceIface processor = new Hello.ServiceIface() {                    // 1
-    public Future<String> hi() {                                                 // 2
-      return Future.value("hi");
+    Hello.FutureIface processor = new Hello.FutureIface() {                      // 1
+      public Future<String> hi() {                                               // 2
+        return Future.value("hi");
       }
-    }
+    };
 
     ServerBuilder.safeBuild(                                                     // 4
-      new Hello.Service(processor, new TBinaryProtocol.Factory()),               // 3
+      new Hello.FinagledService(processor, new TBinaryProtocol.Factory()),       // 3
       ServerBuilder.get()
         .name("HelloService")
         .codec(ThriftServerFramedCodec.get())
@@ -262,13 +268,16 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
 
 ##### Java Thrift Client Implementation
 
-    Service<ThriftClientRequest, byte[]> client = ClientBuilder.safeBuild(ClientBuilder.get()  // 1
+    Service<ThriftClientRequest, byte[]> service = ClientBuilder.safeBuild(ClientBuilder.get() // 1
       .hosts(new InetSocketAddress(8080))
-      .codec(new ThriftClientFramedCodecFactory())
+      .codec(ThriftClientFramedCodec.get())
       .hostConnectionLimit(1));
 
-    Hello.ServiceIface client =
-      new Hello.ServiceToClient(client, new TBinaryProtocol.Factory());                        // 2
+    Hello.FinagledClient client = new Hello.FinagledClient(                                    // 2
+      service,
+      new TBinaryProtocol.Factory(),
+      "HelloService",
+      new InMemoryStatsReceiver());
 
     client.hi().addEventListener(new FutureEventListener<String>() {
       public void onSuccess(String s) {                                                        // 3
@@ -276,7 +285,7 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
       }
 
       public void onFailure(Throwable t) {
-        System.out.println("Exception! ", t.toString());
+        System.out.println("Exception! " + t.toString());
       }
     });
 
@@ -922,7 +931,7 @@ A more complex variation of scatter/gather pattern is to perform a sequence of a
 
     import com.twitter.finagle.util.Timer._
 
-    val results: Seq[Future[Result]] = partitions.map { partition =>
+    val timedResults: Seq[Future[Result]] = partitions.map { partition =>
       partition.get(query).within(1.second) handle {
         case _: TimeoutException => EmptyResult
       }
@@ -1035,7 +1044,8 @@ The following example encapsulates the filters and service in the previous examp
         = handleExceptions andThen authorize andThen respond
 
       val server: Server = ServerBuilder()
-        .codec(Http)
+        .name("myService")
+        .codec(Http())
         .bindTo(new InetSocketAddress(8080))
         .build(myService)
       }
@@ -1052,7 +1062,7 @@ In this example, the `HandleExceptions` filter is executed before the `authorize
 A robust client has little to do with the lines of code (SLOC) that goes into it; rather, the robustness depends on how you configure the client and the testing you put into it. Consider the following HTTP client:
 
     val client = ClientBuilder()
-      .codec(Http)
+      .codec(Http())
       .hosts("localhost:10000,localhost:10001,localhost:10003")
       .hostConnectionLimit(1)             // max number of connections at a time to a host
       .connectionTimeout(1.second)        // max time to spend establishing a TCP connection
@@ -1228,7 +1238,7 @@ When you create a server in Java, you have several options. You can create a ser
 
 * <a href="#Server Imports">Server Imports</a>
 * <a href="#Performing Synchronous Operations">Performing Synchronous Operations</a>
-* <a href="#Performing Asynchronous Operations">Performing Asynchronous Operations</a>
+* <a href="#Chaining Asynchronous Operations">Chaining Asynchronous Operations</a>
 * <a href="#Invoking the Server">Invoking the Server</a>
 
 [Top](#Top)
@@ -1277,13 +1287,23 @@ In this example, the `try` `catch` block causes the server to either return a re
 
 [Top](#Top)
 
-<a name="Performing Asynchronous Operations"></a>
+<a name="Chaining Asynchronous Operations"></a>
 
-#### Performing Asynchronous Operations
+#### Chaining Asynchronous Operations
 
-In Java, you can implement asynchronous operations by calling a `Future` object's `getContentAsync` method to obtain the content from an asynchronous request. The `Future` object's `transformedBy` method transforms the content of the `Future` object from one data type to another, with the help of a `FutureTransformer` object. You typically override the object's `map` method to perform the actual conversion. A `Throwable` object is provided when an exception occurs to communicate information about the kind of exception. The following example shows this pattern:
+In Java, you can chain multiple asynchronous operations by calling a `Future` object's `transformedBy` method.
+This is done by supplying a `FutureTransformer` object to a `Future` object's `transformedBy` method.
+You typically implement `FutureTransformer`'s `map` method to perform the actual conversion, and `FutureTransformer`'s `handle` method which is called when an exception occurs. The following example shows this pattern:
+**Note:** If you need to perform blocking operations, see: <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 
     public class HTTPServer extends Service<HttpRequest, HttpResponse> {
+
+      private Future<String> getContentAsync(HttpRequest request) {
+        // asynchronously gets content, possibly by submitting
+        // a function to a FuturePool
+        ...
+      }
+
       public Future<HttpResponse> apply(HttpRequest request) {
 
         Future<String> contentFuture = getContentAsync(request);
@@ -1318,7 +1338,7 @@ The following example shows the instantiation and invocation of the server. Call
       public static void main(String[] args) {
         ServerBuilder.safeBuild(new HTTPServer(),
                                 ServerBuilder.get()
-                                             .codec(Http.get())
+                                             .codec(Http())
                                              .name("HTTPServer")
                                              .bindTo(new InetSocketAddress("localhost", 8080)));
 
@@ -1380,7 +1400,7 @@ The following example shows the instantiation and invocation of a client. Callin
         Service<HttpRequest, HttpResponse> httpClient =
           ClientBuilder.safeBuild(
             ClientBuilder.get()
-                         .codec(Http.get())
+                         .codec(Http())
                          .hosts(new InetSocketAddress(8080))
                          .hostConnectionLimit(1));
 
@@ -1500,8 +1520,8 @@ The `Util` project contains a `Function0` class that represents a Scala closure.
 The following example shows a Thrift server that places the blocking operation defined in the `Future0` object's `apply` method in the Java thread pool, where it will eventually execute and return a result:
 
     public static class HelloServer implements Hello.ServiceIface {
-      ExecutorService pool = Executors.newFixedThreadPool(4);                        // Java thread pool
-      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(threads); // Java Future thread pool
+      ExecutorService pool = Executors.newFixedThreadPool(4);                     // Java thread pool
+      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(pool); // Java Future thread pool
 
       public Future<Integer> blockingOperation() {
 	      Function0<Integer> blockingWork = new BlockingOperation();
@@ -1588,3 +1608,49 @@ For additional information about Finagle, see the [Finagle homepage](http://twit
 # Administrivia
 
 We use [Semantic Versioning](http://semver.org/) for published artifacts.
+
+<a name="Example Maven Project"></a>
+# Example Maven Project
+Wondering how to get started with a finagle project of your very own? Here's a good place to start:
+
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+
+      <groupId>com.myorg</groupId>
+      <artifactId>myapp</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <packaging>jar</packaging>
+
+      <name>myapp</name>
+
+      <!-- Tell maven where to find finagle -->
+      <repositories>
+        <repository>
+          <id>twitter</id>
+          <url>http://maven.twttr.com/</url>
+        </repository>
+      </repositories>
+
+      <dependencies>
+        <!-- At the very least you will need finagle-core, and probably
+             some other sub modules as well (see below) -->
+        <dependency>
+          <groupId>com.twitter</groupId>
+          <artifactId>finagle-core</artifactId>
+          <type>pom</type>
+          <version>5.3.1</version>
+        </dependency>
+
+        <!-- Be sure to depend on the various finagle sub modules that you need.
+             For example, here's how you would depend on finagle-thrift -->
+        <dependency>
+          <groupId>com.twitter</groupId>
+          <artifactId>finagle-thrift</artifactId>
+          <type>pom</type>
+          <version>5.3.1</version>
+        </dependency>
+      </dependencies>
+    </project>
+
+[Top](#Top)
