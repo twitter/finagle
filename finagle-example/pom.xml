@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-example</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.12</version>
+  <version>5.3.13</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -98,7 +98,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>5.3.11</version>
+      <version>5.3.12</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
