@@ -13,6 +13,7 @@ import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util._
 import org.apache.zookeeper.Watcher.Event.KeeperState
@@ -34,9 +35,9 @@ object CachePoolCluster {
 
   /**
    *  Cache pool based on a static list
-   * @param cacheNodeSeq static set of cache nodes to construct the cluster
+   * @param cacheNodeSet static set of cache nodes to construct the cluster
    */
-  def newStaticCluster(cacheNodeSeq: Seq[CacheNode]) = new StaticCachePoolCluster(cacheNodeSeq)
+  def newStaticCluster(cacheNodeSet: Set[CacheNode]) = new StaticCachePoolCluster(cacheNodeSet)
 
   /**
    * Zookeeper based cache pool cluster.
@@ -47,8 +48,8 @@ object CachePoolCluster {
    * @param sdService the SD service token representing the cache pool
    * @param backupPool Optional, the backup static pool to use in case of ZK failure
    */
-  def newZkCluster(sdService: Service, backupPool: Option[Set[CacheNode]]=None) =
-    new ZookeeperCachePoolCluster(sdService, TwitterServerSet.createClient(sdService), backupPool)
+  def newZkCluster(sdService: Service, backupPool: Option[Set[CacheNode]] = None, statsReceiver: StatsReceiver = NullStatsReceiver) =
+    new ZookeeperCachePoolCluster(sdService, TwitterServerSet.createClient(sdService), backupPool, statsReceiver)
 }
 
 trait CachePoolCluster extends Cluster[CacheNode] {
@@ -114,14 +115,11 @@ case class CachePoolConfig(cachePoolSize: Int)
 
 /**
  *  Cache pool based on a static list
- * @param cacheNodeSeq static set of cache nodes to construct the cluster
+ * @param cacheNodeSet static set of cache nodes to construct the cluster
  */
-class StaticCachePoolCluster(cacheNodeSeq: Seq[CacheNode]) extends CachePoolCluster {
-  // TODO: stats collecting here
-  private[this] var underlyingSizeGauge = cacheNodeSeq.size
-
+class StaticCachePoolCluster(cacheNodeSet: Set[CacheNode]) extends CachePoolCluster {
   // The cache pool will updated once and only once as the underlying pool never changes
-  updatePool(cacheNodeSeq.toSet)
+  updatePool(cacheNodeSet)
 }
 
 /**
@@ -132,6 +130,10 @@ object ZookeeperCachePoolCluster {
     (Backoff.exponential(1.second, 2) take 6) ++ Backoff.const(60.seconds)
   private val CachePoolWaitCompleteTimeout = 10.seconds
   private val BackupPoolFallBackTimeout = 10.seconds
+  private object UnderlyingZookeeperStatus extends Enumeration {
+    type t = Value
+    val Healthy, Disconnected, Expired = Value
+  }
 }
 
 /**
@@ -147,8 +149,11 @@ object ZookeeperCachePoolCluster {
 class ZookeeperCachePoolCluster private[memcached](
   sdService: Service,
   zkClient: ZooKeeperClient,
-  backupPool: Option[Set[CacheNode]] = None)
+  backupPool: Option[Set[CacheNode]] = None,
+  statsReceiver: StatsReceiver = NullStatsReceiver)
   extends CachePoolCluster {
+  import ZookeeperCachePoolCluster._
+
   private[this] val futurePool = FuturePool.defaultPool
 
   private[this] val zkServerSetCluster =
@@ -158,18 +163,17 @@ class ZookeeperCachePoolCluster private[memcached](
     }
 
   // continuously gauging underlying cluster size
-  // TODO: stats collecting here
-  private[this] var underlyingSizeGauge = 0
-  zkServerSetCluster.snap match {
-    case (underlyingSeq, underlyingChanges) =>
-      underlyingSizeGauge = underlyingSeq.size
-      underlyingChanges foreach { spool =>
-        spool foreach {
-          case Cluster.Add(node) => underlyingSizeGauge += 1
-          case Cluster.Rem(node) => underlyingSizeGauge -= 1
-        }
-      }
+  private[this] val underlyingSizeGauge = statsReceiver.addGauge("underlyingPoolSize") {
+    val (seq, _) = zkServerSetCluster.snap
+    seq.size
   }
+
+  private[this] var underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
+  private[this] val underlyingHealthGauge = statsReceiver.addGauge("underlyingPoolHealth") { underlyingPoolHealth.id }
+  private[this] val readCachePoolFailedCounter = statsReceiver.counter("readCachePoolConfig.failed")
+  private[this] val readCachePoolSucceededCounter = statsReceiver.counter("readCachePoolConfig.succeeded")
+  private[this] val reloadCachePoolWorkCounter = statsReceiver.counter("reloadCachePool")
+  private[this] val reEstablishZkConnWorkCounter = statsReceiver.counter("reEstablishZkConnection")
 
   private sealed trait ZKPoolWork
   private case object LoadCachePoolConfig extends ZKPoolWork
@@ -189,18 +193,20 @@ class ZookeeperCachePoolCluster private[memcached](
   private[this] def loopZookeeperWork {
     def scheduleReadCachePoolConfig(
       alsoUpdatePool: Boolean,
-      backoff: Stream[Duration] = ZookeeperCachePoolCluster.DefaultZkConnectionRetryBackoff
+      backoff: Stream[Duration] = DefaultZkConnectionRetryBackoff
     ): Unit = {
       futurePool {
         readCachePoolConfigData(alsoUpdatePool)
       } onFailure { ex =>
-        // TODO: stat here
+        readCachePoolFailedCounter.incr()
         backoff match {
           case wait #:: rest =>
             CachePoolCluster.timer.doLater(wait) { scheduleReadCachePoolConfig(alsoUpdatePool, rest) }
         }
       } onSuccess { _ =>
-      // If succeeded, loop back to consume the next work queued at the broker
+        // If succeeded, loop back to consume the next work queued at the broker
+        readCachePoolSucceededCounter.incr()
+        underlyingPoolHealth = UnderlyingZookeeperStatus.Healthy
         loopZookeeperWork
       }
     }
@@ -209,8 +215,14 @@ class ZookeeperCachePoolCluster private[memcached](
     // if there's no work available yet, this only registers a call back to the broker so that whoever
     // provides work item would then do the scheduling
     zookeeperWorkQueue.recv.sync() onSuccess {
-      case LoadCachePoolConfig => scheduleReadCachePoolConfig(alsoUpdatePool = true)
-      case ReEstablishZKConn => scheduleReadCachePoolConfig(alsoUpdatePool = false)
+      case LoadCachePoolConfig => {
+        reloadCachePoolWorkCounter.incr()
+        scheduleReadCachePoolConfig(alsoUpdatePool = true)
+      }
+      case ReEstablishZKConn => {
+        reEstablishZkConnWorkCounter.incr()
+        scheduleReadCachePoolConfig(alsoUpdatePool = false)
+      }
     }
   }
 
@@ -221,11 +233,11 @@ class ZookeeperCachePoolCluster private[memcached](
     // NOTE: Ensure that the processing of events is not a blocking operation.
     override def process(event: WatchedEvent) = {
       if (event.getType == Watcher.Event.EventType.None)
+        statsReceiver.counter("zkConnectionEvent." + event.getState).incr()
         event.getState match {
-          case KeeperState.Disconnected | KeeperState.SyncConnected =>
-            // TODO: stat here
+          case KeeperState.Disconnected =>
+            underlyingPoolHealth = UnderlyingZookeeperStatus.Disconnected
           case KeeperState.Expired =>
-            // TODO: stat here
             // we only need to re-establish the zk connection and re-register the config data
             // watcher when Expired event happens because this is the event that will close
             // the zk client (which will lose all attached watchers). We could also do this
@@ -233,9 +245,14 @@ class ZookeeperCachePoolCluster private[memcached](
             // assuming other components sharing the zk client (e.g. ZookeeperServerSetCluster)
             // will always actively attempts to re-establish the zk connection. For now, I'm
             // making it actively re-establishing the connection itself here.
-            // TODO: signaling that the underlying zk pool management in unhealthy and let
-            // the scheduled work to set it back to healthy once the work is done
+            underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
             zookeeperWorkQueue ! ReEstablishZKConn
+          case KeeperState.SyncConnected =>
+            // only set the underlyingPoolHealth if it is currently disconnected, otherwise if expired
+            // leave it to the readConfigWork to set it back to healthy
+            if (underlyingPoolHealth == UnderlyingZookeeperStatus.Disconnected) {
+              underlyingPoolHealth = UnderlyingZookeeperStatus.Healthy
+            }
         }
     }
   }
@@ -244,10 +261,10 @@ class ZookeeperCachePoolCluster private[memcached](
     // NOTE: Ensure that the processing of events is not a blocking operation.
     override def process(event: WatchedEvent) = {
       if (event.getState == KeeperState.SyncConnected) {
+        statsReceiver.counter("cachePoolChangeEvent." + event.getType).incr()
         event.getType match {
           case Watcher.Event.EventType.NodeDataChanged =>
             // handle node data change event
-            // TODO: stat here
             zookeeperWorkQueue ! LoadCachePoolConfig
         }
       }
@@ -270,7 +287,7 @@ class ZookeeperCachePoolCluster private[memcached](
   // This backup pool is mainly provided in case of long time SD cluster outage during which
   // cache client needs to be restarted.
   backupPool foreach  { pool =>
-    ready within (CachePoolCluster.timer, ZookeeperCachePoolCluster.BackupPoolFallBackTimeout) onFailure {
+    ready within (CachePoolCluster.timer, BackupPoolFallBackTimeout) onFailure {
         _ => updatePool(pool)
     }
   }
@@ -284,7 +301,7 @@ class ZookeeperCachePoolCluster private[memcached](
   private[this] def readCachePoolConfigData(alsoUpdatePool: Boolean): Unit = synchronized {
     // read cache pool config data and attach the node data change watcher
     val data = zkClient
-        .get(Amount.of(ZookeeperCachePoolCluster.CachePoolWaitCompleteTimeout.inMilliseconds, Time.MILLISECONDS))
+        .get(Amount.of(CachePoolWaitCompleteTimeout.inMilliseconds, Time.MILLISECONDS))
         .getData(TwitterServerSet.getPath(sdService), cachePoolConfigDataWatcher, null)
 
     if (alsoUpdatePool && data != null) {
@@ -300,9 +317,9 @@ class ZookeeperCachePoolCluster private[memcached](
       // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
       // another try
       val newSet = waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges)
-          .get(ZookeeperCachePoolCluster.CachePoolWaitCompleteTimeout)()
+          .get(CachePoolWaitCompleteTimeout)()
 
-      updatePool(newSet.toSet)
+      updatePool(newSet)
     }
   }
 

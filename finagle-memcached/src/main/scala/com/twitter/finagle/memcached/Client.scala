@@ -715,7 +715,7 @@ case class KetamaClientBuilder private[memcached] (
     copy(_cluster = CachePoolCluster.newStaticCluster(nodes map {
       case (host, port, weight) =>
         new CacheNode(host, port, weight)
-    }))
+    } toSet))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
     nodes(PartitionedClient.parseHostPortWeights(hostPortWeights))
