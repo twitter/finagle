@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-example</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.15</version>
+  <version>5.3.16</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -78,42 +78,42 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-kestrel</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-memcached</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-redis</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stream</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>5.3.15</version>
+      <version>5.3.16</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>

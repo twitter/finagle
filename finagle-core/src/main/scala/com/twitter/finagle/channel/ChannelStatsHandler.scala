@@ -6,12 +6,11 @@ package com.twitter.finagle.channel
  */
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Time, Future}
-
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.Logger
-
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext, MessageEvent}
+import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
+  ExceptionEvent, MessageEvent, SimpleChannelHandler}
 
 class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
@@ -25,6 +24,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
+  private[this] val closeChans = statsReceiver.counter("closechans")
 
   private[this] val connectionCount = new AtomicInteger(0)
 
@@ -37,6 +37,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
     val connectTime = Time.now
     onClose ensure {
+      closeChans.incr()
       val (channelReadCount, channelWriteCount) =
         ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
 
@@ -75,5 +76,25 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     }
 
     super.messageReceived(ctx, e)
+  }
+
+  private[this] val pendingClose = new AtomicInteger(0)
+  private[this] val closesCount = statsReceiver.counter("closes")
+  private[this] val closedCount = statsReceiver.counter("closed")
+
+  override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    closesCount.incr()
+    super.closeRequested(ctx, e)
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    closedCount.incr()
+    super.channelClosed(ctx, e)
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    val m = if (e.getCause != null) e.getCause.getMessage else "unknown"
+    statsReceiver.scope("exn").counter(m).incr()
+    super.exceptionCaught(ctx, e)
   }
 }
