@@ -6,10 +6,8 @@ import _root_.java.io.ByteArrayOutputStream
 import _root_.java.net.InetSocketAddress
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus
-import com.twitter.common.zookeeper.ZooKeeperClient
+import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
-import com.twitter.common_internal.zookeeper.TwitterServerSet
-import com.twitter.common_internal.zookeeper.TwitterServerSet.Service
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
@@ -213,7 +211,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     var zkServerSetCluster: ZookeeperServerSetCluster = null
     var zookeeperClient: ZooKeeperClient = null
-    val sdService: Service = new Service("cache","test","silly-cache")
+    val zkPath = "/cache/test/silly-cache"
     var zookeeperServer: ZooKeeperTestServer = null
 
     doBefore {
@@ -222,11 +220,10 @@ class ClientSpec extends SpecificationWithJUnit {
       zookeeperServer.startNetwork()
 
       // connect to zookeeper server
-      zookeeperClient = zookeeperServer.createClient(
-        ZooKeeperClient.digestCredentials(sdService.getRole(), sdService.getRole()))
+      zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
 
       // create serverset
-      val serverSet = TwitterServerSet.create(zookeeperClient, sdService)
+      val serverSet = ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)
       zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
 
       // start five memcached server and join the cluster
@@ -240,11 +237,10 @@ class ClientSpec extends SpecificationWithJUnit {
       val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = 5)
       val output: ByteArrayOutputStream = new ByteArrayOutputStream
       CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
-      zookeeperClient.get().setData(TwitterServerSet.getPath(sdService), output.toByteArray, -1)
+      zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
 
       // a separate client which only does zk discovery for integration test
-      zookeeperClient = zookeeperServer.createClient(
-        ZooKeeperClient.digestCredentials(sdService.getRole(), sdService.getRole()))
+      zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
     }
 
     doAfter {
@@ -261,7 +257,8 @@ class ClientSpec extends SpecificationWithJUnit {
       "many keys" in {
         // create simple cluster client
         val mycluster =
-          new ZookeeperServerSetCluster(TwitterServerSet.create(zookeeperClient, sdService))
+          new ZookeeperServerSetCluster(
+            ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath))
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
         val client = Client(mycluster)
 
@@ -305,7 +302,7 @@ class ClientSpec extends SpecificationWithJUnit {
         val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = size)
         var output: ByteArrayOutputStream = new ByteArrayOutputStream
         CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
-        zookeeperClient.get().setData(TwitterServerSet.getPath(sdService), output.toByteArray, -1)
+        zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
       }
 
       // create temporary zk clients for additional cache servers since we will need to
@@ -321,7 +318,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
       def initializePool(expectedSize: Int,
                          backupPool: Option[scala.collection.immutable.Set[CacheNode]]=None) = {
-        myCachePool = new ZookeeperCachePoolCluster(sdService, zookeeperClient, backupPool)
+        myCachePool = CachePoolCluster.newZkCluster(zkPath, zookeeperClient, backupPool)
 
         myCachePool.ready() // wait until the pool is ready
         myCachePool.snap match {
@@ -473,9 +470,7 @@ class ClientSpec extends SpecificationWithJUnit {
     "Ketama ClusterClient using a distributor" in {
       "set & get" in {
         // create my cluster client solely based on a zk client and a path
-        // for production code:
-        // val mycluster = CachePoolCluster.newZkCluster(sdService)
-        val mycluster = new ZookeeperCachePoolCluster(sdService, zookeeperClient)
+        val mycluster = CachePoolCluster.newZkCluster(zkPath, zookeeperClient)
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
@@ -490,7 +485,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
       "many keys" in {
         // create my cluster client solely based on a zk client and a path
-        val mycluster = new ZookeeperCachePoolCluster(sdService, zookeeperClient)
+        val mycluster = CachePoolCluster.newZkCluster(zkPath, zookeeperClient)
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()

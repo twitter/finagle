@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-memcached</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.16</version>
+  <version>5.3.17</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -20,12 +20,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.16</version>
+      <version>5.3.17</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-serversets</artifactId>
-      <version>5.3.16</version>
+      <version>5.3.17</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
@@ -37,11 +37,6 @@
       <artifactId>zookeeper-testing</artifactId>
       <version>0.0.20</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter.common_internal</groupId>
-      <artifactId>zookeeper-utils</artifactId>
-      <version>0.0.21</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
