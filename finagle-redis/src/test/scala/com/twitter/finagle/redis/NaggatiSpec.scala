@@ -529,8 +529,8 @@ class NaggatiSpec extends SpecificationWithJUnit {
           "LPUSH" >> {
             unwrap(codec(wrap("LPUSH foo bar\r\n"))) {
               case LPush(key, List(value)) => {
-                key mustEqual "foo"
-                BytesToString(value) mustEqual "bar"
+                CBToString(key) mustEqual "foo"
+                CBToString(value) mustEqual "bar"
               }
             }
           }
@@ -539,8 +539,8 @@ class NaggatiSpec extends SpecificationWithJUnit {
           "SADD" >> {
             unwrap(codec(wrap("SADD foo bar\r\n"))) {
               case SAdd(key, List(member)) => {
-                key mustEqual "foo"
-                BytesToString(member) mustEqual "bar"
+                CBToString(key) mustEqual "foo"
+                CBToString(member) mustEqual "bar"
               }
             }
           }

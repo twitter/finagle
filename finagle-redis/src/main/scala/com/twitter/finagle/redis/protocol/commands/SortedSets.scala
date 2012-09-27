@@ -167,7 +167,7 @@ object ZRem {
   }
 }
 
-case class ZRemRangeByRank(key: ChannelBuffer, start: Int, stop: Int) extends StrictKeyCommand {
+case class ZRemRangeByRank(key: ChannelBuffer, start: Long, stop: Long) extends StrictKeyCommand {
   def command = Commands.ZREMRANGEBYRANK
   def toChannelBuffer = RedisCodec.toUnifiedFormat(
     Seq(CommandBytes.ZREMRANGEBYRANK, key) ++ Seq(

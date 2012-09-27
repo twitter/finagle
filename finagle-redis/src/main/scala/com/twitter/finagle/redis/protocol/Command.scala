@@ -94,6 +94,8 @@ object Commands {
   val RPOP              = "RPOP"
   val RPUSH             = "RPUSH"
   val LTRIM             = "LTRIM"
+
+  // Sets
   val SADD              = "SADD"
   val SMEMBERS          = "SMEMBERS"
   val SISMEMBER         = "SISMEMBER"
@@ -210,7 +212,10 @@ object Commands {
     _(args)
   }.getOrElse(throw ClientError("Unsupported command: " + cmd))
 
-  def trimList(list: Seq[Array[Byte]], count: Int, from: String = "") = {
+  def trimList(
+    list: Seq[Array[Byte]],
+    count: Int,
+    from: String = "") = {
     RequireClientProtocol(list != null, "%s Empty list found".format(from))
     RequireClientProtocol(
       list.length == count,
@@ -287,6 +292,27 @@ object CommandBytes {
   val HMGET             = StringToChannelBuffer("HMGET")
   val HSCAN             = StringToChannelBuffer("HSCAN")
   val HSET              = StringToChannelBuffer("HSET")
+
+  // Lists
+  val LLEN              = StringToChannelBuffer("LLEN")
+  val LINDEX            = StringToChannelBuffer("LINDEX")
+  val LINSERT           = StringToChannelBuffer("LINSERT")
+  val LPOP              = StringToChannelBuffer("LPOP")
+  val LPUSH             = StringToChannelBuffer("LPUSH")
+  val LREM              = StringToChannelBuffer("LREM")
+  val LSET              = StringToChannelBuffer("LSET")
+  val LRANGE            = StringToChannelBuffer("LRANGE")
+  val RPOP              = StringToChannelBuffer("RPOP")
+  val RPUSH             = StringToChannelBuffer("RPUSH")
+  val LTRIM             = StringToChannelBuffer("LTRIM")
+
+  // Sets
+  val SADD              = StringToChannelBuffer("SADD")
+  val SMEMBERS          = StringToChannelBuffer("SMEMBERS")
+  val SISMEMBER         = StringToChannelBuffer("SISMEMBER")
+  val SCARD             = StringToChannelBuffer("SCARD")
+  val SREM              = StringToChannelBuffer("SREM")
+  val SPOP              = StringToChannelBuffer("SPOP")
 
   // Transactions
   val DISCARD           = StringToChannelBuffer("DISCARD")

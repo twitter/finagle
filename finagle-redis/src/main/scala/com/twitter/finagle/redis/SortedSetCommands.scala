@@ -1,12 +1,16 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Boolean => JBoolean, Double => JDouble, Long => JLong}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import java.lang.{Boolean => JBoolean}
+import java.lang.{Double => JDouble}
+import java.lang.{Long => JLong}
+
+import org.jboss.netty.buffer.ChannelBuffer
+
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.redis.util.BytesToString
+import com.twitter.finagle.redis.util.NumberFormat
+import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 
 trait SortedSets { self: BaseClient =>
@@ -118,4 +122,73 @@ trait SortedSets { self: BaseClient =>
         Future.value(Some(NumberFormat.toDouble(BytesToString(message.array))))
       case EmptyBulkReply()     => Future.value(None)
     }
+
+  /**
+   * Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.
+   * @params key, member
+   * @return the rank of the member
+   */
+  def zRevRank(key: ChannelBuffer, member: ChannelBuffer): Future[Option[JLong]] =
+    doRequest(ZRevRank(key, member)) {
+      case IntegerReply(n) => Future.value(Some(n))
+      case EmptyBulkReply()   => Future.value(None)
+    }
+
+  /**
+   * Increment the member in sorted set key by amount.
+   * Returns an option, None if the member is not found, or the set is empty, or the new value.
+   * Throws an exception if the key refers to a structure that is not a sorted set.
+   * @params key, amount, member
+   * @return the new value of the incremented member
+   */
+  def zIncrBy(key: ChannelBuffer, amount: JDouble, member: ChannelBuffer): Future[Option[JDouble]] =
+    doRequest(ZIncrBy(key, amount, member)) {
+      case BulkReply(message) =>
+        Future.value(Some(NumberFormat.toDouble(BytesToString(message.array))))
+      case EmptyBulkReply()   => Future.value(None)
+    }
+
+  /**
+   * Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.
+   * @params, key, member
+   * @return the rank of the member
+   */
+  def zRank(key: ChannelBuffer, member: ChannelBuffer): Future[Option[JLong]] =
+    doRequest(ZRank(key, member)) {
+      case IntegerReply(n) => Future.value(Some(n))
+      case EmptyBulkReply()   => Future.value(None)
+    }
+
+  /**
+   * Removes members from sorted set by sort order, from start to stop, inclusive.
+   * @params key, start, stop
+   * @return Number of members removed from sorted set.
+   */
+  def zRemRangeByRank(key: ChannelBuffer, start: JLong, stop: JLong): Future[JLong] =
+    doRequest(ZRemRangeByRank(key, start, stop)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Removes members from sorted set by score, from min to max, inclusive.
+   * @params key, min, max
+   * @return Number of members removed from sorted set.
+   */
+  def zRemRangeByScore(key: ChannelBuffer, min: ZInterval, max: ZInterval): Future[JLong] =
+    doRequest(ZRemRangeByScore(key, min, max)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Returns specified range of elements in sorted set at key.
+   * Elements are ordered from lowest to highest score.
+   * @param key, start, stop
+   * @return ZRangeResults object containing item/score pairs
+   */
+  def zRange(key: ChannelBuffer, start: JLong, stop: JLong): Future[Seq[ChannelBuffer]] =
+    doRequest(ZRange(key, start, stop)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
+      case EmptyMBulkReply()    => Future.value(Seq())
+    }
+
 }

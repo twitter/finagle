@@ -301,7 +301,7 @@ trait MultiSetCompanion {
     val map = args.grouped(2).map {
       case key :: value :: Nil => (ChannelBuffers.wrappedBuffer(key),
         ChannelBuffers.wrappedBuffer(value))
-      case _ => throw new ClientError("Unexpected uneven pair of elements in MSET")
+      case _ => throw ClientError("Unexpected uneven pair of elements in MSET")
     }.toMap
     RequireClientProtocol(map.size == length/2, "Broken mapping, map size not equal to group size")
     get(map)

@@ -37,10 +37,13 @@ object BytesToString {
     charset: Charset = CharsetUtil.UTF_8) =
     args map { arg => (BytesToString(arg._1, charset), arg._2) }
 
-  def getMonadArg(args: List[Array[Byte]], command: String) = {
-    BytesToString(trimList(args, 1, command)(0))
-  }
 }
+
+object GetMonadArg {
+  def apply(args: Seq[Array[Byte]], command: ChannelBuffer): ChannelBuffer =
+    ChannelBuffers.wrappedBuffer(trimList(args, 1, CBToString(command))(0))
+}
+
 object StringToBytes {
   def apply(arg: String, charset: Charset = CharsetUtil.UTF_8) = arg.getBytes(charset)
   def fromList(args: List[String], charset: Charset = CharsetUtil.UTF_8) =

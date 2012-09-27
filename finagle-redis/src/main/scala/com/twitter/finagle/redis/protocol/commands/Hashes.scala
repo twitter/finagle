@@ -1,9 +1,9 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import com.twitter.finagle.redis.ClientError
 
 object HDel {
   def apply(args: Seq[Array[Byte]]) = {
@@ -94,7 +94,7 @@ object HScan {
           NumberFormat.toLong(BytesToString(cursor)))
       case key :: cursor :: tail =>
         parseArgs(key, NumberFormat.toLong(BytesToString(cursor)), tail)
-      case _ => throw new ClientError("Unexpected args to hscan command")
+      case _ => throw ClientError("Unexpected args to hscan command")
     }
   }
 
