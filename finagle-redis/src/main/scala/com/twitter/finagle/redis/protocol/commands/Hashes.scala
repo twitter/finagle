@@ -94,7 +94,7 @@ object HScan {
           NumberFormat.toLong(BytesToString(cursor)))
       case key :: cursor :: tail =>
         parseArgs(key, NumberFormat.toLong(BytesToString(cursor)), tail)
-      case _ => throw new ClientError("Unexpected args to hscan command")
+      case _ => throw ClientError("Unexpected args to hscan command")
     }
   }
 

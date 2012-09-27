@@ -82,6 +82,27 @@ object Commands {
   val HSCAN             = "HSCAN"
   val HSET              = "HSET"
 
+  // Lists
+  val LLEN              = "LLEN"
+  val LINDEX            = "LINDEX"
+  val LINSERT           = "LINSERT"
+  val LPOP              = "LPOP"
+  val LPUSH             = "LPUSH"
+  val LREM              = "LREM"
+  val LSET              = "LSET"
+  val LRANGE            = "LRANGE"
+  val RPOP              = "RPOP"
+  val RPUSH             = "RPUSH"
+  val LTRIM             = "LTRIM"
+
+  // Sets
+  val SADD              = "SADD"
+  val SMEMBERS          = "SMEMBERS"
+  val SISMEMBER         = "SISMEMBER"
+  val SCARD             = "SCARD"
+  val SREM              = "SREM"
+  val SPOP              = "SPOP"
+
   // Transactions
   val DISCARD           = "DISCARD"
   val EXEC              = "EXEC"
@@ -156,6 +177,27 @@ object Commands {
     HMGET             -> {HMGet(_)},
     HSCAN             -> {HScan(_)},
     HSET              -> {HSet(_)},
+
+    // Lists
+    LLEN              -> {LLen(_)},
+    LINDEX            -> {LIndex(_)},
+    LINSERT           -> {LInsert(_)},
+    LPOP              -> {LPop(_)},
+    LPUSH             -> {LPush(_)},
+    LREM              -> {LRem(_)},
+    LSET              -> {LSet(_)},
+    LRANGE            -> {LRange(_)},
+    RPUSH             -> {RPush(_)},
+    RPOP              -> {RPop(_)},
+    LTRIM             -> {LTrim(_)},
+
+    // Sets
+    SADD              -> {SAdd(_)},
+    SMEMBERS          -> {SMembers(_)},
+    SISMEMBER         -> {SIsMember(_)},
+    SCARD             -> {SCard(_)},
+    SREM              -> {SRem(_)},
+    SPOP              -> {SPop(_)},
 
     // transactions
     DISCARD           -> {_ => Discard},
@@ -247,6 +289,27 @@ object CommandBytes {
   val HMGET             = StringToChannelBuffer("HMGET")
   val HSCAN             = StringToChannelBuffer("HSCAN")
   val HSET              = StringToChannelBuffer("HSET")
+
+  // Lists
+  val LLEN              = StringToChannelBuffer("LLEN")
+  val LINDEX            = StringToChannelBuffer("LINDEX")
+  val LINSERT           = StringToChannelBuffer("LINSERT")
+  val LPOP              = StringToChannelBuffer("LPOP")
+  val LPUSH             = StringToChannelBuffer("LPUSH")
+  val LREM              = StringToChannelBuffer("LREM")
+  val LSET              = StringToChannelBuffer("LSET")
+  val LRANGE            = StringToChannelBuffer("LRANGE")
+  val RPOP              = StringToChannelBuffer("RPOP")
+  val RPUSH             = StringToChannelBuffer("RPUSH")
+  val LTRIM             = StringToChannelBuffer("LTRIM")
+
+  // Sets
+  val SADD              = StringToChannelBuffer("SADD")
+  val SMEMBERS          = StringToChannelBuffer("SMEMBERS")
+  val SISMEMBER         = StringToChannelBuffer("SISMEMBER")
+  val SCARD             = StringToChannelBuffer("SCARD")
+  val SREM              = StringToChannelBuffer("SREM")
+  val SPOP              = StringToChannelBuffer("SPOP")
 
   // Transactions
   val DISCARD           = StringToChannelBuffer("DISCARD")
