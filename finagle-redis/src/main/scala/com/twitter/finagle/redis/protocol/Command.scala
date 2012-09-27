@@ -212,10 +212,7 @@ object Commands {
     _(args)
   }.getOrElse(throw ClientError("Unsupported command: " + cmd))
 
-  def trimList(
-    list: Seq[Array[Byte]],
-    count: Int,
-    from: String = "") = {
+  def trimList(list: Seq[Array[Byte]], count: Int, from: String = "") = {
     RequireClientProtocol(list != null, "%s Empty list found".format(from))
     RequireClientProtocol(
       list.length == count,

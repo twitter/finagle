@@ -1,9 +1,9 @@
 package com.twitter.finagle.redis.protocol
 
+import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.finagle.redis.ClientError
 
 object HDel {
   def apply(args: Seq[Array[Byte]]) = {

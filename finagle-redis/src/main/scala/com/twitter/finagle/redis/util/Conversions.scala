@@ -36,7 +36,6 @@ object BytesToString {
   def fromTuplesWithDoubles(args: Seq[(Array[Byte], Double)],
     charset: Charset = CharsetUtil.UTF_8) =
     args map { arg => (BytesToString(arg._1, charset), arg._2) }
-
 }
 
 object GetMonadArg {
