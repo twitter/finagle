@@ -30,6 +30,7 @@ class ClientSpec extends SpecificationWithJUnit {
     val moo = StringToChannelBuffer("moo")
 
     doBefore {
+      RedisCluster.start()
       client = TransactionalClient(
         ClientBuilder()
          .codec(new Redis())
