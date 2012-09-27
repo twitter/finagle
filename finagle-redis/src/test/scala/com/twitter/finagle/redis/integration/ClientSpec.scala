@@ -1,13 +1,20 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.{ClientError, Redis, TransactionalClient}
-import com.twitter.finagle.redis.util._
-import com.twitter.finagle.Service
-import com.twitter.util.Future
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.redis.Redis
+import com.twitter.finagle.redis.TransactionalClient
+import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.stats.SummarizingStatsReceiver
+import com.twitter.util.Future
+import com.twitter.finagle.redis.util.StringToChannelBuffer
+import com.twitter.finagle.redis.util.RedisCluster
+import com.twitter.finagle.redis.util.CBToString
+import scala.collection.{Set => CollectionSet}
+import com.twitter.finagle.redis.util.ReplyFormat
+import com.twitter.finagle.redis.ClientError
+
 
 class ClientSpec extends SpecificationWithJUnit {
 
@@ -23,6 +30,7 @@ class ClientSpec extends SpecificationWithJUnit {
     val moo = StringToChannelBuffer("moo")
 
     doBefore {
+      RedisCluster.start()
       client = TransactionalClient(
         ClientBuilder()
          .codec(new Redis())
@@ -85,6 +93,12 @@ class ClientSpec extends SpecificationWithJUnit {
         client.quit()() mustEqual ()
       }
 
+      "ttl" in {
+        client.set(foo, bar)()
+        client.expire(foo, 20)() mustEqual true
+        client.ttl(foo)() map (_ must beLessThanOrEqualTo(20L))
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {
@@ -101,7 +115,6 @@ class ClientSpec extends SpecificationWithJUnit {
       //   CBToString(withCount(0)) mustEqual "0"
       //   CBToString(withCount(1)) mustEqual "baz"
       // }
-
     }
 
     "perform hash commands" in {
@@ -206,8 +219,214 @@ class ClientSpec extends SpecificationWithJUnit {
           Some(Limit(0, 1)))().asTuples == Seq()
       }
 
+      "add members and zIncr, then zIncr a nonmember" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zIncrBy(foo, 10, bar)() mustEqual Some(20)
+        client.zIncrBy(foo, 10, baz)() mustEqual Some(10)
+      }
+
+      "get zRange" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        CBToString.fromList(client.zRange(foo, 0, -1)().toList) mustEqual List("bar", "baz", "boo")
+        CBToString.fromList(
+          client.zRange(foo, 2, 3)().toList) mustEqual List("boo")
+        CBToString.fromList(
+          client.zRange(foo, -2, -1)().toList) mustEqual List("baz", "boo")
+      }
+
+      "get zRank" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRank(foo, boo)() mustEqual Some(2)
+        client.zRank(foo, moo)() mustEqual None
+      }
+
+      "get zRemRangeByRank" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRemRangeByRank(foo, 0, 1)() mustEqual 2
+        CBToString.fromList(
+          client.zRange(foo, 0, -1)().toList) mustEqual List("boo")
+      }
+
+      "get zRemRangeByScore" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRemRangeByScore(foo, ZInterval(10), ZInterval(20))() mustEqual 2
+        CBToString.fromList(
+          client.zRange(foo, 0, -1)().toList) mustEqual List("boo")
+      }
+
+      "get zRevRank" in {
+        client.zAdd(foo, 10, bar)() mustEqual 1
+        client.zAdd(foo, 20, baz)() mustEqual 1
+        client.zAdd(foo, 30, boo)() mustEqual 1
+        client.zRevRank(foo, boo)() mustEqual Some(0)
+        client.zRevRank(foo, moo)() mustEqual None
+      }
+
     }
 
+    "perform list commands" in {
+      "push members and pop them off" in {
+        val key = StringToChannelBuffer("push")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lPop(key)() map (CBToString(_) mustEqual "baz")
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+      }
+
+      "push members and measure their length, then pop them off" in {
+        val key = StringToChannelBuffer("llen")
+        client.lLen(key)() mustEqual 0
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lLen(key)() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lLen(key)() mustEqual 2
+        client.lPop(key)() map (CBToString(_) mustEqual "baz")
+        client.lLen(key)() mustEqual 1
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+        client.lLen(key)() mustEqual 0
+      }
+
+      "push members and index them, then pop them off, and index them" in {
+        val key = StringToChannelBuffer("lindex")
+        client.lIndex(key, 0)() mustEqual None
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lIndex(key, 0)() map (CBToString(_) mustEqual "bar")
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lIndex(key, 0)() map (CBToString(_) mustEqual "baz")
+        client.lPop(key)() map (CBToString(_) mustEqual "baz")
+        client.lIndex(key, 0)() map (CBToString(_) mustEqual "bar")
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+      }
+
+      "push a member, then insert some values, then pop them off" in {
+        val key = StringToChannelBuffer("linsert")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lInsertAfter(key, bar, baz)
+        client.lInsertBefore(key, bar, moo)
+        client.lPop(key)() map (CBToString(_) mustEqual "moo")
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+        client.lPop(key)() map (CBToString(_) mustEqual "baz")
+      }
+
+      "push members and remove one, then pop the other off" in {
+        val key = StringToChannelBuffer("lremove")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lRem(key, 1, baz)() mustEqual 1
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+      }
+
+      "push members and set one, then pop them off" in {
+        val key = StringToChannelBuffer("lset")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lSet(key, 0, moo)()
+        client.lPop(key)() map (CBToString(_) mustEqual "moo")
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+      }
+
+      "push members examine the entire range, then pop them off" in {
+        val key = StringToChannelBuffer("lrange")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lRange(key, 0, -1)() map (CBToString(_)) mustEqual List("baz", "bar")
+        client.lPop(key)() map (CBToString(_) mustEqual "baz")
+        client.lPop(key)() map (CBToString(_) mustEqual "bar")
+      }
+
+      "push members, then pop them off of the other side, queue style" in {
+        val key = StringToChannelBuffer("rpop")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.rPop(key)() map (CBToString(_) mustEqual "bar")
+        client.rPop(key)() map (CBToString(_) mustEqual "baz")
+      }
+
+      "push members and then pop them off, except from the other side." in {
+        val key = StringToChannelBuffer("rpop")
+        client.rPush(key, List(bar))() mustEqual 1
+        client.rPush(key, List(baz))() mustEqual 2
+        client.rPop(key)() map (CBToString(_) mustEqual "baz")
+        client.rPop(key)() map (CBToString(_) mustEqual "bar")
+      }
+
+      "push members, trimming as we go.  then pop off the two remaining." in {
+        val key = StringToChannelBuffer("ltrim")
+        client.lPush(key, List(bar))() mustEqual 1
+        client.lPush(key, List(baz))() mustEqual 2
+        client.lPush(key, List(boo))() mustEqual 3
+        client.lTrim(key, 0, 1)()
+        client.lPush(key, List(moo))() mustEqual 3
+        client.lTrim(key, 0, 1)()
+        client.rPop(key)() map (CBToString(_) mustEqual "boo")
+        client.rPop(key)() map (CBToString(_) mustEqual "moo")
+      }
+    }
+
+    "perform set commands" in {
+      "add members to a set, then pop them off." in {
+        val key = StringToChannelBuffer("pushpop")
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sPop(key)()
+        client.sPop(key)()
+      }
+
+      "add members to a set, then pop them off, counting them." in {
+        val key = StringToChannelBuffer("scard")
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sCard(key)() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sCard(key)() mustEqual 2
+        client.sPop(key)()
+        client.sCard(key)() mustEqual 1
+        client.sPop(key)()
+        client.sCard(key)() mustEqual 0
+      }
+
+      "add members to a set, look for some, pop them off, look for some again." in {
+        val key = StringToChannelBuffer("members")
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sIsMember(key, bar)() mustEqual true
+        client.sIsMember(key, baz)() mustEqual false
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sIsMember(key, bar)() mustEqual true
+        client.sIsMember(key, baz)() mustEqual true
+        client.sPop(key)()
+        client.sPop(key)()
+        client.sIsMember(key, bar)() mustEqual false
+        client.sIsMember(key, baz)() mustEqual false
+      }
+
+      "add members to a set, then examine them, then pop them off, then examien them again." in {
+        val key = StringToChannelBuffer("members")
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        val strings: CollectionSet[String] = (client.sMembers(key)() map (CBToString(_)))
+        strings mustEqual CollectionSet("bar", "baz")
+        client.sPop(key)()
+        client.sPop(key)()
+        client.sMembers(key)() mustEqual CollectionSet()
+      }
+
+      "add members to a set, then remove them." in {
+        val key = StringToChannelBuffer("members")
+        client.sAdd(key, List(bar))() mustEqual 1
+        client.sAdd(key, List(baz))() mustEqual 1
+        client.sRem(key, List(bar))() mustEqual 1
+        client.sRem(key, List(baz))() mustEqual 1
+        client.sRem(key, List(baz))() mustEqual 0
+      }
+
+    }
 
     "perform commands as a transaction" in {
       "set and get transaction" in {

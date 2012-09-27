@@ -4,6 +4,7 @@ import com.twitter.finagle.redis.protocol._
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
+import com.twitter.finagle.redis.protocol.Commands.trimList
 import scala.runtime.RichDouble
 
 trait ErrorConversion {
@@ -36,6 +37,12 @@ object BytesToString {
     charset: Charset = CharsetUtil.UTF_8) =
     args map { arg => (BytesToString(arg._1, charset), arg._2) }
 }
+
+object GetMonadArg {
+  def apply(args: Seq[Array[Byte]], command: ChannelBuffer): ChannelBuffer =
+    ChannelBuffers.wrappedBuffer(trimList(args, 1, CBToString(command))(0))
+}
+
 object StringToBytes {
   def apply(arg: String, charset: Charset = CharsetUtil.UTF_8) = arg.getBytes(charset)
   def fromList(args: List[String], charset: Charset = CharsetUtil.UTF_8) =

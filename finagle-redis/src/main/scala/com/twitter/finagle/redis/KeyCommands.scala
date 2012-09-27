@@ -54,4 +54,32 @@ trait Keys { self: BaseClient =>
       case EmptyMBulkReply()    => Future.value(Seq())
     }
 
+  /**
+   * Gets the ttl of the given key.
+   * @param key
+   * @return Option containing either the ttl in seconds if the key exists 
+   * and has a timeout, or else nothing.
+   */
+  def ttl(key: ChannelBuffer): Future[Option[JLong]] =
+    doRequest(Ttl(key)) {
+      case IntegerReply(n) => {
+        if (n != -1) {
+          Future.value(Some(n))
+        }
+        else {
+          Future.value(None)
+        }
+      }
+    }
+
+  /**
+   * Sets how long it will take the key to expire
+   * @params key, ttl
+   * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
+   * false otherwise.
+   */
+  def expire(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
+    doRequest(Expire(key, ttl)) {
+      case IntegerReply(n) => Future.value(n == 1)
+    }
 }

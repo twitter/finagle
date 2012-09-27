@@ -287,7 +287,7 @@ object Finagle extends Build {
       case "com.twitter.finagle.redis.integration.ClientSpec" => false
       case _ => true
     })
-  ).dependsOn(finagleCore, finagleMemcached)
+  ).dependsOn(finagleCore)
 
   // Uses
 
