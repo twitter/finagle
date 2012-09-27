@@ -132,7 +132,8 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
       case e: ExceptionEvent =>
         fail(ChannelException(e.getCause, ch.getRemoteAddress))
 
-      case _ =>  // drop.
+      case e =>
+        statsReceiver.scope("droppedevents").counter(e.getClass.toString).incr()
     }
 
     // We terminate the upstream here on purpose: this must always

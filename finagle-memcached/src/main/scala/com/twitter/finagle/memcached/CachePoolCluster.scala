@@ -5,9 +5,7 @@ import _root_.java.net.InetSocketAddress
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
 import com.twitter.common.quantity.{Amount,Time}
-import com.twitter.common.zookeeper.ZooKeeperClient
-import com.twitter.common_internal.zookeeper.TwitterServerSet
-import com.twitter.common_internal.zookeeper.TwitterServerSet.Service
+import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
@@ -45,11 +43,13 @@ object CachePoolCluster {
    * pool size. The cluster snapshot will be updated during cache-team's managed operation, and
    * the Future spool will be updated with corresponding changes
    *
-   * @param sdService the SD service token representing the cache pool
+   * @param zkPath the zookeeper path representing the cache pool
+   * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
    * @param backupPool Optional, the backup static pool to use in case of ZK failure
+   * @param statsReceiver Optional, the destination to report the stats to
    */
-  def newZkCluster(sdService: Service, backupPool: Option[Set[CacheNode]] = None, statsReceiver: StatsReceiver = NullStatsReceiver) =
-    new ZookeeperCachePoolCluster(sdService, TwitterServerSet.createClient(sdService), backupPool, statsReceiver)
+  def newZkCluster(zkPath: String, zkClient: ZooKeeperClient, backupPool: Option[Set[CacheNode]] = None, statsReceiver: StatsReceiver = NullStatsReceiver) =
+    new ZookeeperCachePoolCluster(zkPath, zkClient, backupPool, statsReceiver)
 }
 
 trait CachePoolCluster extends Cluster[CacheNode] {
@@ -137,17 +137,18 @@ object ZookeeperCachePoolCluster {
 }
 
 /**
- * SD cluster based cache pool cluster with a zookeeper serverset as the underlying pool.
+ * Zookeeper based cache pool cluster with a serverset as the underlying pool.
  * It will monitor the underlying serverset changes and report the detected underlying pool size.
  * It will also monitor the serverset parent node for cache pool config data, cache pool cluster
  * update will be triggered whenever cache config data change event happens.
  *
- * @param sdService the SD service token representing the cache pool
- * @param zkClient zookeeper client talking to the SD cluster
+ * @param zkPath the zookeeper path representing the cache pool
+ * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
  * @param backupPool Optional, the backup static pool to use in case of ZK failure
+ * @param statsReceiver Optional, the destination to report the stats to
  */
 class ZookeeperCachePoolCluster private[memcached](
-  sdService: Service,
+  zkPath: String,
   zkClient: ZooKeeperClient,
   backupPool: Option[Set[CacheNode]] = None,
   statsReceiver: StatsReceiver = NullStatsReceiver)
@@ -157,7 +158,8 @@ class ZookeeperCachePoolCluster private[memcached](
   private[this] val futurePool = FuturePool.defaultPool
 
   private[this] val zkServerSetCluster =
-    new ZookeeperServerSetCluster(TwitterServerSet.create(zkClient, sdService)) map {
+    new ZookeeperServerSetCluster(
+      ServerSets.create(zkClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)) map {
       case addr: InetSocketAddress =>
         CacheNode(addr.getHostName, addr.getPort, 1)
     }
@@ -284,7 +286,7 @@ class ZookeeperCachePoolCluster private[memcached](
   // Meanwhile, the first time invoke of updating pool will still proceed once it successfully
   // get the underlying pool config data and a complete pool members ready, by then it
   // will overwrite the backup pool.
-  // This backup pool is mainly provided in case of long time SD cluster outage during which
+  // This backup pool is mainly provided in case of long time zookeeper outage during which
   // cache client needs to be restarted.
   backupPool foreach  { pool =>
     ready within (CachePoolCluster.timer, BackupPoolFallBackTimeout) onFailure {
@@ -302,7 +304,7 @@ class ZookeeperCachePoolCluster private[memcached](
     // read cache pool config data and attach the node data change watcher
     val data = zkClient
         .get(Amount.of(CachePoolWaitCompleteTimeout.inMilliseconds, Time.MILLISECONDS))
-        .getData(TwitterServerSet.getPath(sdService), cachePoolConfigDataWatcher, null)
+        .getData(zkPath, cachePoolConfigDataWatcher, null)
 
     if (alsoUpdatePool && data != null) {
       val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))

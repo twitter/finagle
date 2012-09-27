@@ -171,7 +171,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _tracerFactory             : Managed[Tracer]               = Managed.const(NullTracer),
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
-  private val _expFailFast               : Boolean                       = false)
+  private val _failFast                  : Boolean                       = true)
 {
   import ClientConfig._
 
@@ -207,7 +207,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val tls                       = _tls
   val failureAccrual            = _failureAccrual
   val tracerFactory             = _tracerFactory
-  val expFailFast               = _expFailFast
+  val failFast                  = _failFast
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -236,7 +236,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "tls"                       -> _tls,
     "failureAccrual"            -> _failureAccrual,
     "tracerFactory"             -> Some(_tracerFactory),
-    "expFailFast"               -> expFailFast
+    "failFast"                  -> failFast
   )
 
   override def toString = {
@@ -561,16 +561,22 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_failureAccrual = Some(factory)))
   }
 
+  @deprecated(
+    "No longer experimental: Use failFast()." +
+    "The new default value is true, so replace .expFailFast(true) with nothing at all",
+    "5.3.10")
+  def expFailFast(onOrOff: Boolean): This =
+    failFast(onOrOff)
+
   /**
-   * An experimental "fail-fast" mode that marks a host dead on
-   * connection failure. The host remains dead until we
-   * succesfully connect.
+   * Marks a host dead on connection failure. The host remains dead
+   * until we succesfully connect.
    *
    * Intermediate connection attempts *are* respected, but host
    * availability is turned off during the reconnection period.
    */
-  def expFailFast(onOrOff: Boolean): This =
-   withConfig(_.copy(_expFailFast = onOrOff))
+  def failFast(onOrOff: Boolean): This =
+   withConfig(_.copy(_failFast = onOrOff))
 
   /* BUILDING */
   /* ======== */
@@ -716,7 +722,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     }
 
-    if (config.expFailFast) {
+    if (config.failFast) {
       factory = new FailFastFactory(
         factory, hostStatsReceiver.scope("failfast"), timer.toTwitterTimer)
     }
