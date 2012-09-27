@@ -28,7 +28,7 @@ object Main {
     }
     config()
 
-    val client = Client("localhost:5432", "mkhadikov", None, "testing")
+    val client = Client("localhost:5432", "mkhadikov", Some("pass"), "contacts")
 
     val f = client.select("select * from users") {row =>
       User(row.getString("email"), row.getString("name"))

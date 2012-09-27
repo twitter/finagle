@@ -40,16 +40,20 @@ case class StartupMessage(user: String, database: String) extends FrontendMessag
 }
 
 case class PasswordMessage(password: String) extends FrontendMessage {
+  private val logger = Logger(getClass.getName)
+
   def encode(): ChannelBuffer = {
+
+    logger.debug("Encoding password messsage")
     val buffer: ChannelBuffer = ChannelBuffers.dynamicBuffer()
 
-    buffer.writeByte('Q')
-    buffer.writeByte(0)
+    buffer.writeByte('p')
+    buffer.writeInt(0)
 
     Buffers.writeCString(buffer, password)
     buffer.writeByte(0)
 
-    val index = buffer.writerIndex()
+    val index = buffer.writerIndex() - 1
     buffer.markWriterIndex()
     buffer.writerIndex(1)
     buffer.writeInt(index)
