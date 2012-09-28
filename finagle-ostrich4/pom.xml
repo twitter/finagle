@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-ostrich4</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.18</version>
+  <version>5.3.19-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -20,12 +20,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>5.3.18</version>
+      <version>5.3.19-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>8.2.7</version>
+      <version>8.2.8-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
