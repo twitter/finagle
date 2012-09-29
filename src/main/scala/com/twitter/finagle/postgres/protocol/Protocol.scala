@@ -233,13 +233,19 @@ class BackendMessageParser {
         }
 
       case 12 =>
-        val salt = Array[Byte](4)
-        packet.content.readBytes(salt)
-        Some(new AuthenticationMD5Password(salt))
+        val code = packet.content.readInt
+        if (code == 5) {
+	        val salt = new Array[Byte](4)
+	        packet.content.readBytes(salt)
+	        Some(new AuthenticationMD5Password(salt))
+        } else {
+          None
+        }
 
       case _ =>
         None
     }
+
 
   }
 
@@ -340,13 +346,13 @@ class BackendMessageParser {
     Some(new RowDescription(fields))
   }
 
-  def parseC(packet: Packet) : Option[BackendMessage] = {
-	  logger.debug("Parsing C")
-	  logger.debug("Packet " + packet)
-	  
-	  val tag = Buffers.readCString(packet.content)
-	  
-	  Some(new CommandComplete(tag))
+  def parseC(packet: Packet): Option[BackendMessage] = {
+    logger.debug("Parsing C")
+    logger.debug("Packet " + packet)
+
+    val tag = Buffers.readCString(packet.content)
+
+    Some(new CommandComplete(tag))
   }
 
   def parseS(packet: Packet): Option[BackendMessage] = {

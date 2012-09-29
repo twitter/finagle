@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import com.twitter.logging.Logger
 import com.twitter.util.Future
-import java.security.MessageDigest
 import collection.mutable
 import com.twitter.logging.Level
 
@@ -54,13 +53,18 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
     startupResponse match {
 
       case SingleMessageResponse(AuthenticationMD5Password(salt)) =>
-        service(Communication.request(new PasswordMessage(encrypt(salt))))
+        if (password.isEmpty) {
+          Future.exception(new IllegalArgumentException("Password has to be specified for md5 authentication connection"))
+        } else {
+          service(Communication.request(new PasswordMessage(new String(Md5Encriptor.encript(user.getBytes, password.get.getBytes, salt)))))
+        }
 
       case SingleMessageResponse(AuthenticationCleartextPassword()) =>
         if (password.isEmpty) {
-          // TODO throw exception
+          Future.exception(new IllegalArgumentException("Password has to be specified for cleartext authentication connection"))
+        } else {
+          service(Communication.request(new PasswordMessage(password.get)))
         }
-        service(Communication.request(new PasswordMessage(password.get)))
 
       case MessageSequenceResponse(AuthenticationOk() :: _) =>
         Future.value(startupResponse)
@@ -79,31 +83,6 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
         Future.exception(new IllegalStateException("Cannot authenticate"))
     }
   }
-
-  /**
-   * Encodes user/password/salt information in the following way:
-   * MD5(MD5(password + user) + salt)
-   */
-  private[this] def encrypt(salt: Array[Byte]): String = {
-    val inner = MessageDigest.getInstance("MD5")
-
-    if (password.isEmpty) {
-      // TODO throw exception here
-    }
-
-    inner.update(password.get.getBytes)
-    inner.update(user.getBytes)
-
-    val outer = MessageDigest.getInstance("MD5")
-
-    outer.update("md5".getBytes)
-    outer.update(inner.digest.map(byteToHex))
-    outer.update(salt)
-
-    new String(outer.digest.map(byteToHex))
-  }
-
-  def byteToHex(b: Byte) = HexDigits((b & 0xFF) >> 4).toByte
 
 }
 
@@ -176,7 +155,7 @@ class PgResponseHandler() extends SimpleChannelHandler {
           case RowDescription(_) =>
             mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
             None
-          case CommandComplete(_) => 
+          case CommandComplete(_) =>
             mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
             None
           case _ =>
@@ -259,4 +238,6 @@ class PacketDecoder extends FrameDecoder {
 
   }
 }
+
+
 

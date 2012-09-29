@@ -3,6 +3,7 @@ package com.twitter.finagle.postgres.protocol
 import org.jboss.netty.buffer.ChannelBuffer
 import java.nio.charset.Charset
 import scala.StringBuilder
+import java.security.MessageDigest
 
 object Charsets {
 
@@ -35,11 +36,23 @@ object Buffers {
 
 }
 
-object HexDigits {
-  private[this] val values = Array(
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f')
+object Md5Encriptor {
 
-  def apply(i: Int) = values(i)
+  def encript(user: Array[Byte], password: Array[Byte], salt: Array[Byte]): Array[Byte] = {
 
+    val inner = MessageDigest.getInstance("MD5")
+    inner.update(password)
+    inner.update(user)
+
+    val outer = MessageDigest.getInstance("MD5")
+    outer.update(Hex.valueOf(inner.digest).getBytes)
+    outer.update(salt)
+
+    ("md5" + Hex.valueOf(outer.digest)).getBytes
+  }
+
+}
+
+object Hex {
+  def valueOf(buf: Array[Byte]): String = buf.map("%02X" format _).mkString.toLowerCase
 }
