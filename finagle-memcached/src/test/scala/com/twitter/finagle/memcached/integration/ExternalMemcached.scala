@@ -30,7 +30,7 @@ object ExternalMemcached { self =>
         Thread.sleep(5)
       }
     }
-    if (address==None) error("Couldn't get an address for the external memcached")
+    if (address==None) sys.error("Couldn't get an address for the external memcached")
 
     takenPorts += (address.getOrElse(new InetSocketAddress(0))).getPort
     address
