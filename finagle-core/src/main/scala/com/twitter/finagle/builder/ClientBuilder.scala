@@ -722,7 +722,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     }
 
-    if (config.failFast) {
+    if (config.failFast && codec.failFastOk) {
       factory = new FailFastFactory(
         factory, hostStatsReceiver.scope("failfast"), timer.toTwitterTimer)
     }

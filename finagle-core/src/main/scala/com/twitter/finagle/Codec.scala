@@ -46,6 +46,12 @@ trait Codec[Req, Rep] {
 
   val mkServerDispatcher: ServerDispatcherFactory[Req, Rep] = (mkTrans, service) =>
     new SerialServerDispatcher[Req, Rep](mkTrans(), service)
+
+  /**
+   * Is this Codec OK for failfast? This is a temporary hack to
+   * disable failFast for codecs for which it isn't well-behaved.
+   */
+  def failFastOk = true
 }
 
 /**
