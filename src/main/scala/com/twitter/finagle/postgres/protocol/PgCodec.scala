@@ -218,7 +218,7 @@ class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChan
 class PacketDecoder extends FrameDecoder {
   private val logger = Logger(getClass.getName)
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): AnyRef = {
-    logger.debug("decoding..")
+    logger.ifDebug("decoding..")
     if (buffer.readableBytes() < 5) {
       return null
     }
@@ -233,7 +233,7 @@ class PacketDecoder extends FrameDecoder {
       return null
     }
 
-    logger.debug("packet with code " + code)
+    logger.ifDebug("packet with code " + code)
     new Packet(code, totalLength, buffer.readSlice(length))
 
   }
