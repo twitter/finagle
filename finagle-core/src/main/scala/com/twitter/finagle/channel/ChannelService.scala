@@ -39,12 +39,24 @@ private[finagle] class ChannelService[Req, Rep](
     channel, mkDispatcher, statsReceiver,
     Logger.getLogger(classOf[ChannelService[Req, Rep]].getName))
 
+  private[this] val handletime = statsReceiver.stat("handletime_us")
   private[this] val released = new AtomicBoolean(false)
   private[this] val dispatcher = mkDispatcher(new TransportFactory {
     def apply[In, Out]() = new ClientChannelTransport[In, Out](channel, statsReceiver)
   })
 
-  def apply(request: Req) = dispatcher(request)
+  def apply(request: Req) = {
+    // We proxy here so that we can measure the handletime.
+    val p = new Promise[Rep]
+    val f = dispatcher(request)
+    p.linkTo(f)
+    f respond { res =>
+      val begin = Time.now
+      p.update(res)
+      handletime.add((Time.now - begin).inMicroseconds)
+    }
+    p
+  }
 
   override def release() =
     if (released.compareAndSet(false, true)) {
