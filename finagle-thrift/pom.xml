@@ -24,7 +24,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
-      <version>1.5.8</version>
+      <version>1.6.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
