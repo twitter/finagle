@@ -119,6 +119,15 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
     "always return NoBrokersAvailableException" in {
       val b = new HeapBalancer(new StaticCluster[ServiceFactory[Unit, LoadedFactory]](Seq()))
       b()() must throwA[NoBrokersAvailableException]
+      val heapBalancerEmptyCluster = "HeapBalancerEmptyCluster"
+      val c = new HeapBalancer(
+        new StaticCluster[ServiceFactory[Unit, LoadedFactory]](Seq()),
+        NullStatsReceiver,
+        new NoBrokersAvailableException(heapBalancerEmptyCluster)
+      )
+      c()() must throwA[NoBrokersAvailableException].like {
+        case m => m.getMessage must beMatching(heapBalancerEmptyCluster)
+      }
     }
   }
 }

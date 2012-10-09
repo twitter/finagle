@@ -9,11 +9,13 @@ import com.twitter.util._
 import com.twitter.finagle.service.FailingFactory
 
 /**
- * An efficient load balancer that operates of Clusters.
+ * An efficient load balancer that operates on Clusters.
  */
 class HeapBalancer[Req, Rep](
   cluster: Cluster[ServiceFactory[Req, Rep]],
-  statsReceiver: StatsReceiver = NullStatsReceiver)
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  exception: NoBrokersAvailableException = new NoBrokersAvailableException
+)
   extends ServiceFactory[Req, Rep]
 {
   case class Node(
@@ -137,7 +139,7 @@ class HeapBalancer[Req, Rep](
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    if (size == 0) return Future.exception(new NoBrokersAvailableException)
+    if (size == 0) return Future.exception(exception)
 
     val n = synchronized {
       val n = get(1)
