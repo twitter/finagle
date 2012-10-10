@@ -600,7 +600,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         )
 
         if (config.readerIdleTimeout.isDefined || config.writerIdleTimeout.isDefined) {
-          pipeline.addFirst("idleReactor", new IdleChannelHandler)
+          pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
           pipeline.addFirst("idleDetector",
             new IdleStateHandler(timer,
               config.readerIdleTimeout.map(_.inMilliseconds).getOrElse(0L),
