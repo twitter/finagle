@@ -49,6 +49,8 @@ class HeapBalancer[Req, Rep](
   }
   private[this] def removeGauges(node: Node) = gauges.remove(node)
   private[this] val sizeGauge = statsReceiver.addGauge("size") { size }
+  private[this] val adds = statsReceiver.counter("adds")
+  private[this] val removes = statsReceiver.counter("removes")
 
   private[this] val (factories, updates) = cluster.snap
   // Build initial heap
@@ -74,6 +76,7 @@ class HeapBalancer[Req, Rep](
         heap = heap :+ newNode
         fixUp(heap, size)
         addGauges(newNode)
+        adds.incr()
       }
       case Cluster.Rem(elem) => synchronized {
         val i = heap.indexWhere(n => n.factory eq elem, 1)
@@ -85,6 +88,7 @@ class HeapBalancer[Req, Rep](
         removeGauges(node)
         node.index = -1 // sentinel value indicating node is no longer in the heap.
         elem.close()
+        removes.incr()
       }
     }
   }
