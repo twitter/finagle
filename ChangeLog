@@ -1,3 +1,23 @@
+5.3.?	2012/09/27
+
+	* Doc: update README with working thrift Java example
+	* Doc: fix compile errors in examples
+	* finagle-http: fix typo in RequestBuilder API
+	* finagle-stress: FrontEndServerStress refactor; now generates 
+	runnable binary
+	* finagle-core: add optional `shouldRetry` argument to
+	RetryPolicy.tries
+	* finagle-core: pools propagate underlying availability correctly
+	* finagle-core: move fail-fast before the pool. This prevents it from
+	masking errors from the failure accrual mechanism, and is arguably
+	the "correct" placement
+	* finagle-core: fix argument type in RetryingFilter.apply
+	* finagle-core: failFast by default; disable for Kestrel
+	* finagle-memcached: cache-pool specific Cluster implementation
+	* finagle-memcached: add stat to cache-pool cluster
+	* finagle-redis: add scan, hscan commands
+	* finagle-redis: add list commands
+
 5.3.9		2012/09/07
 	* finagle: Update/fix README
 	* finagle: Upgrade util to 5.3.10
