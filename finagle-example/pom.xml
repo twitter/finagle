@@ -118,7 +118,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>5.3.13-SNAPSHOT</version>
+      <version>5.3.14-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
