@@ -1,9 +1,22 @@
-5.3.?	2012/09/27
+5.3.19		2012/10/16
+	* Upgrade ostrich to 8.2.9
+	* Upgrade util to 5.3.13
+	* Upgrading slf4j to 1.6.1
+	* finagle: Rm usage of deprecated Predef.error.
+	* finagle-core: Changed stats name in ChannelStatsHandler from exception msg to getClass.getName
+	* finagle-core: Add counters to track disconnections due to Idle activity (both read/write)
+	* finagle-core: Add "adds"/"removes" counters in HeapBalancer to track modifications
+	* finagle-core: Added name to HeapBalancer init (via exception) if HB size is 0
+	* finagle-core: Don't log dropped events: they are actually quite numerous.
+	* finagle-kestrel: Disable failFast for kestrel.
+	* finagle-memcached: Cluster support within finagle-memcached (phase 2)
+	* finagle-redis: added new commands
 
+5.3.18		2012/09/27
 	* Doc: update README with working thrift Java example
 	* Doc: fix compile errors in examples
 	* finagle-http: fix typo in RequestBuilder API
-	* finagle-stress: FrontEndServerStress refactor; now generates 
+	* finagle-stress: FrontEndServerStress refactor; now generates
 	runnable binary
 	* finagle-core: add optional `shouldRetry` argument to
 	RetryPolicy.tries
