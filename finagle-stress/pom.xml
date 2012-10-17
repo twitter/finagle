@@ -52,7 +52,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>8.2.9-SNAPSHOT</version>
+      <version>8.2.10-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
