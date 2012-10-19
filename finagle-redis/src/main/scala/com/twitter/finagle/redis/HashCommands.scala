@@ -73,7 +73,7 @@ trait Hashes { self: BaseClient =>
    * @param hash key, cursor, count, pattern
    * @return cursor followed by matching keys
    */
-  def hScan(key: ChannelBuffer, cursor: Long, count: Option[Long], pattern: Option[ChannelBuffer]
+  def hScan(key: ChannelBuffer, cursor: JLong, count: Option[JLong], pattern: Option[ChannelBuffer]
   ): Future[Seq[ChannelBuffer]] =
     doRequest(HScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))

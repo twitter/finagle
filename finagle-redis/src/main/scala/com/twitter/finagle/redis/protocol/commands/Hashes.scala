@@ -1,5 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
+import _root_.java.lang.{Long => JLong}
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
@@ -64,7 +65,7 @@ case class HMGet(key: ChannelBuffer, fields: Seq[ChannelBuffer]) extends StrictK
 case class HScan(
   key: ChannelBuffer,
   cursor: Long,
-  count: Option[Long] = None,
+  count: Option[JLong] = None,
   pattern: Option[ChannelBuffer] = None
 ) extends Command {
   def command = Commands.HSCAN

@@ -541,6 +541,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
           case MBulkReply(message) =>
             ReplyFormat.toString(message).toSet mustEqual immutable.Set(value1, value2)
           case EmptyMBulkReply() => true mustEqual false
+          case _ => fail("Received incorrect reply type")
         }
         client(SAdd(key, List(value2)))() mustEqual IntegerReply(0)
       }

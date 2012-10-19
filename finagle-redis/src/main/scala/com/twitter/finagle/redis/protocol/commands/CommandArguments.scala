@@ -1,5 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
+import _root_.java.lang.{Long => JLong}
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -118,7 +119,7 @@ object Count {
   val COUNT = "COUNT"
   val COUNT_CB = StringToChannelBuffer(COUNT)
 
-  def apply(args: Seq[String]): Option[Long] = {
+  def apply(args: Seq[String]): Option[JLong] = {
     RequireClientProtocol(
       args != null && !args.isEmpty,
       "COUNT can not be specified with empty list")

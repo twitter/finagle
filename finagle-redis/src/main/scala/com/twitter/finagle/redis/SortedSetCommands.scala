@@ -1,16 +1,12 @@
 package com.twitter.finagle.redis
 
-import java.lang.{Boolean => JBoolean}
-import java.lang.{Double => JDouble}
-import java.lang.{Long => JLong}
-
-import org.jboss.netty.buffer.ChannelBuffer
-
+import _root_.java.lang.{Boolean => JBoolean, Double => JDouble, Long => JLong}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.BytesToString
 import com.twitter.finagle.redis.util.NumberFormat
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
+import org.jboss.netty.buffer.ChannelBuffer
 
 
 trait SortedSets { self: BaseClient =>
@@ -20,7 +16,7 @@ trait SortedSets { self: BaseClient =>
    * @params key, score, member
    * @return Number of elements added to sorted set
    */
-  def zAdd(key: ChannelBuffer, score: Double, member: ChannelBuffer): Future[JLong] =
+  def zAdd(key: ChannelBuffer, score: JDouble, member: ChannelBuffer): Future[JLong] =
     doRequest(ZAdd(key, Seq(ZMember(score, member)))) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -56,7 +52,7 @@ trait SortedSets { self: BaseClient =>
     key: ChannelBuffer,
     min: ZInterval,
     max: ZInterval,
-    withScores: Boolean,
+    withScores: JBoolean,
     limit: Option[Limit]
   ): Future[ZRangeResults] =
     doRequest(
@@ -83,7 +79,7 @@ trait SortedSets { self: BaseClient =>
    * @param key, start, stop
    * @return List of elements in specified range
    */
-  def zRevRange(key: ChannelBuffer, start: Long, stop: Long): Future[Seq[ChannelBuffer]] =
+  def zRevRange(key: ChannelBuffer, start: JLong, stop: JLong): Future[Seq[ChannelBuffer]] =
     doRequest(ZRevRange(key, start, stop)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply()    => Future.value(Seq())
@@ -100,7 +96,7 @@ trait SortedSets { self: BaseClient =>
     key: ChannelBuffer,
     max: ZInterval,
     min: ZInterval,
-    withScores: Boolean,
+    withScores: JBoolean,
     limit: Option[Limit]
   ): Future[ZRangeResults] =
     doRequest(

@@ -131,6 +131,19 @@ case class ZRangeByScore(
   validate()
   override def toChannelBuffer =
     RedisCodec.toUnifiedFormat(commandBytes +: forChannelBuffer)
+
+  def forChannelBuffer = {
+    def command = Seq(key, min.toChannelBuffer, max.toChannelBuffer)
+    val scores: Seq[ChannelBuffer] = withScores match {
+      case Some(WithScores) => Seq(WithScores.toChannelBuffer)
+      case None => Nil
+    }
+    val limits: Seq[ChannelBuffer] = limit match {
+      case Some(limit) => limit.toChannelBuffers
+      case None => Nil
+    }
+    (command ++ scores ++ limits)
+  }
 }
 object ZRangeByScore extends ZScoredRangeCompanion {
   def get(
@@ -231,6 +244,19 @@ case class ZRevRangeByScore(
   validate()
   def toChannelBuffer =
     RedisCodec.toUnifiedFormat(commandBytes +: forChannelBuffer)
+
+  def forChannelBuffer = {
+    def command = Seq(key, max.toChannelBuffer, min.toChannelBuffer)
+    val scores: Seq[ChannelBuffer] = withScores match {
+      case Some(WithScores) => Seq(WithScores.toChannelBuffer)
+      case None => Nil
+    }
+    val limits: Seq[ChannelBuffer] = limit match {
+      case Some(limit) => limit.toChannelBuffers
+      case None => Nil
+    }
+    (command ++ scores ++ limits)
+  }
 
 }
 object ZRevRangeByScore extends ZScoredRangeCompanion {
@@ -537,6 +563,8 @@ trait ZScoredRange extends KeyCommand { self =>
   val withScores: Option[CommandArgument]
   val limit: Option[Limit]
 
+  def forChannelBuffer: Seq[ChannelBuffer]
+
   override def validate() {
     super.validate()
     withScores.map { s =>
@@ -547,19 +575,6 @@ trait ZScoredRange extends KeyCommand { self =>
     }
     RequireClientProtocol(min != null, "min must not be null")
     RequireClientProtocol(max != null, "max must not be null")
-  }
-
-  def forChannelBuffer = {
-    def command = Seq(key, min.toChannelBuffer, max.toChannelBuffer)
-    val scores: Seq[ChannelBuffer] = withScores match {
-      case Some(WithScores) => Seq(WithScores.toChannelBuffer)
-      case None => Nil
-    }
-    val limits: Seq[ChannelBuffer] = limit match {
-      case Some(limit) => limit.toChannelBuffers
-      case None => Nil
-    }
-    (command ++ scores ++ limits)
   }
 }
 trait ZScoredRangeCompanion { self =>

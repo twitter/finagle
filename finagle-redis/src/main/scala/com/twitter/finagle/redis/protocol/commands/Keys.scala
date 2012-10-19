@@ -1,5 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
+import _root_.java.lang.{Long => JLong}
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
@@ -117,7 +118,7 @@ object RenameNx {
   }
 }
 
-case class Scan(cursor: Long, count: Option[Long] = None, pattern: Option[ChannelBuffer] = None)
+case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[ChannelBuffer] = None)
 extends Command {
   def command = Commands.SCAN
   def toChannelBuffer = {

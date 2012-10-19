@@ -193,6 +193,8 @@ class ClientSpec extends SpecificationWithJUnit {
         CBToString.fromTuplesWithDoubles(
           client.zRangeByScore(foo, ZInterval(0), ZInterval(30), true,
             Some(Limit(0, 5)))().asTuples) mustEqual Seq(("bar", 10), ("baz", 20))
+        client.zRangeByScore(foo, ZInterval(30), ZInterval(0), true,
+          Some(Limit(0, 5)))().asTuples mustEqual Seq()
       }
 
       "get cardinality and remove members" in {
@@ -213,10 +215,12 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
         CBToString.fromTuplesWithDoubles(
-          client.zRevRangeByScore(foo, ZInterval(0), ZInterval(10), true,
+          client.zRevRangeByScore(foo, ZInterval(10), ZInterval(0), true,
             Some(Limit(0, 1)))().asTuples) mustEqual Seq(("bar", 10))
+        client.zRevRangeByScore(foo, ZInterval(0), ZInterval(10), true,
+            Some(Limit(0, 1)))().asTuples mustEqual Seq()
         client.zRevRangeByScore(foo, ZInterval(0), ZInterval(0), true,
-          Some(Limit(0, 1)))().asTuples == Seq()
+          Some(Limit(0, 1)))().asTuples mustEqual Seq()
       }
 
       "add members and zIncr, then zIncr a nonmember" in {
