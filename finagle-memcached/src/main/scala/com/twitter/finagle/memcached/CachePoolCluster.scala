@@ -45,7 +45,8 @@ object CachePoolCluster {
    *
    * @param zkPath the zookeeper path representing the cache pool
    * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
-   * @param backupPool Optional, the backup static pool to use in case of ZK failure
+   * @param backupPool Optional, the backup static pool to use in case of ZK failure. Empty pool means
+   *                   the same as no backup pool.
    * @param statsReceiver Optional, the destination to report the stats to
    */
   def newZkCluster(zkPath: String, zkClient: ZooKeeperClient, backupPool: Option[Set[CacheNode]] = None, statsReceiver: StatsReceiver = NullStatsReceiver) =
@@ -144,7 +145,8 @@ object ZookeeperCachePoolCluster {
  *
  * @param zkPath the zookeeper path representing the cache pool
  * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
- * @param backupPool Optional, the backup static pool to use in case of ZK failure
+ * @param backupPool Optional, the backup static pool to use in case of ZK failure. Empty pool means
+ *                   the same as no backup pool.
  * @param statsReceiver Optional, the destination to report the stats to
  */
 class ZookeeperCachePoolCluster private[memcached](
@@ -164,10 +166,21 @@ class ZookeeperCachePoolCluster private[memcached](
         CacheNode(addr.getHostName, addr.getPort, 1)
     }
 
+  @volatile private[this] var underlyingSize = 0
+  zkServerSetCluster.snap match {
+    case (current, changes) =>
+      underlyingSize = current.size
+      changes foreach { spool =>
+        spool foreach {
+          case Cluster.Add(node) => underlyingSize += 1
+          case Cluster.Rem(node) => underlyingSize -= 1
+        }
+      }
+  }
+
   // continuously gauging underlying cluster size
   private[this] val underlyingSizeGauge = statsReceiver.addGauge("underlyingPoolSize") {
-    val (seq, _) = zkServerSetCluster.snap
-    seq.size
+    underlyingSize
   }
 
   private[this] var underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
@@ -289,8 +302,10 @@ class ZookeeperCachePoolCluster private[memcached](
   // This backup pool is mainly provided in case of long time zookeeper outage during which
   // cache client needs to be restarted.
   backupPool foreach  { pool =>
-    ready within (CachePoolCluster.timer, BackupPoolFallBackTimeout) onFailure {
-        _ => updatePool(pool)
+      if (!pool.isEmpty) {
+        ready within (CachePoolCluster.timer, BackupPoolFallBackTimeout) onFailure {
+            _ => updatePool(pool)
+      }
     }
   }
 
