@@ -15,8 +15,75 @@ case class Append(key: ChannelBuffer, value: ChannelBuffer)
 }
 object Append {
   def apply(args: Seq[Array[Byte]]) = {
-    val list = trimList(args, 2)
+    val list = trimList(args, 2, "APPEND")
     new Append(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
+  }
+}
+
+case class BitCount(key: ChannelBuffer, start: Option[Int] = None,
+    end: Option[Int] = None) extends StrictKeyCommand {
+  val command = Commands.BITCOUNT
+  RequireClientProtocol(start.isEmpty && end.isEmpty ||
+    start.isDefined && end.isDefined, "Both start and end must be specified")
+  def toChannelBuffer = {
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.BITCOUNT, key) ++
+      (start match {
+        case Some(i) => Seq(StringToChannelBuffer(i.toString))
+        case None => Seq.empty
+      }) ++ (end match {
+        case Some(i) => Seq(StringToChannelBuffer(i.toString))
+        case None => Seq.empty
+      }))
+  }
+}
+object BitCount {
+  def apply(args: Seq[Array[Byte]]) = {
+    if (args != null && args.size == 1) {
+      new BitCount(ChannelBuffers.wrappedBuffer(args(0)))
+    } else {
+      val list = trimList(args, 3, "BITCOUNT")
+      val start = RequireClientProtocol.safe {
+        NumberFormat.toInt(BytesToString(list(1)))
+      }
+      val end = RequireClientProtocol.safe {
+        NumberFormat.toInt(BytesToString(list(2)))
+      }
+      new BitCount(ChannelBuffers.wrappedBuffer(list(0)),
+        Some(start), Some(end))
+    }
+  }
+}
+
+case class BitOp(op: ChannelBuffer, dstKey: ChannelBuffer,
+    srcKeys: Seq[ChannelBuffer]) extends Command {
+  val command = Commands.BITOP
+  RequireClientProtocol((op equals BitOp.And) || (op equals BitOp.Or) ||
+    (op equals BitOp.Xor) || (op equals BitOp.Not),
+    "BITOP supports only AND/OR/XOR/NOT")
+  RequireClientProtocol(srcKeys.size > 0, "srcKeys must not be empty")
+  RequireClientProtocol(!op.equals(BitOp.Not) || srcKeys.size == 1,
+    "NOT operation takes only 1 input key")
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(
+    CommandBytes.BITOP, op, dstKey) ++ srcKeys)
+}
+
+object BitOp {
+  val And = StringToChannelBuffer("AND")
+  val Or = StringToChannelBuffer("OR")
+  val Xor = StringToChannelBuffer("XOR")
+  val Not = StringToChannelBuffer("NOT")
+
+  def apply(args: Seq[Array[Byte]]) = {
+    RequireClientProtocol(args != null && args.size >= 3,
+      "BITOP expected at least 3 elements, found %d".format(args.size))
+    val list = args map (ChannelBuffers.wrappedBuffer)
+    if (list(0) equals Not) {
+      RequireClientProtocol(args.size == 3,
+        "BITOP expected 3 elements when op is NOT, found %d".format(args.size))
+      new BitOp(list(0), list(1), Seq(list(2)))
+    } else {
+      new BitOp(list(0), list(1), list.drop(2))
+    }
   }
 }
 
@@ -180,6 +247,31 @@ case class MSetNx(kv: Map[ChannelBuffer, ChannelBuffer]) extends MultiSet {
 }
 object MSetNx extends MultiSetCompanion {
   def get(map: Map[ChannelBuffer, ChannelBuffer]) = new MSetNx(map)
+}
+
+case class PSetEx(key: ChannelBuffer, millis: Long, value: ChannelBuffer)
+  extends StrictKeyCommand
+  with StrictValueCommand
+{
+  val command = Commands.PSETEX
+  RequireClientProtocol(millis > 0, "Milliseconds must be greater than 0")
+  def toChannelBuffer = {
+    RedisCodec.toUnifiedFormat(Seq(
+      CommandBytes.PSETEX,
+      key,
+      StringToChannelBuffer(millis.toString),
+      value))
+  }
+}
+object PSetEx {
+  def apply(args: Seq[Array[Byte]]) = {
+    val list = trimList(args, 3, "PSETEX")
+    val millis = RequireClientProtocol.safe {
+      NumberFormat.toLong(BytesToString(list(1)))
+    }
+    new PSetEx(ChannelBuffers.wrappedBuffer(args(0)), millis,
+      ChannelBuffers.wrappedBuffer(list(2)))
+  }
 }
 
 case class Set(key: ChannelBuffer, value: ChannelBuffer)

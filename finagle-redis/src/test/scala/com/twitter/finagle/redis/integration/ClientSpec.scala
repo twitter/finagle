@@ -46,7 +46,6 @@ class ClientSpec extends SpecificationWithJUnit {
     }
 
     "perform simple commands" in {
-
       "append" in {
         client.set(foo, bar)()
         client.append(foo, baz)() mustEqual 6
@@ -115,6 +114,92 @@ class ClientSpec extends SpecificationWithJUnit {
       //   CBToString(withCount(0)) mustEqual "0"
       //   CBToString(withCount(1)) mustEqual "baz"
       // }
+    }
+
+    "perform string commands" in {
+      "bit operations" in {
+        client.bitCount(foo)() mustEqual 0L
+        client.getBit(foo, 0)() mustEqual 0L
+        client.setBit(foo, 0, 1)() mustEqual 0L
+        client.getBit(foo, 0)() mustEqual 1L
+        client.setBit(foo, 0, 0)() mustEqual 1L
+
+        client.setBit(foo, 2, 1)() mustEqual 0L
+        client.setBit(foo, 3, 1)() mustEqual 0L
+
+        client.setBit(foo, 8, 1)() mustEqual 0L
+        client.bitCount(foo)() mustEqual 3L
+        client.bitCount(foo, Some(0), Some(0))() mustEqual 2L
+        client.setBit(foo, 8, 0)() mustEqual 1L
+
+        client.setBit(bar, 0, 1)() mustEqual 0L
+        client.setBit(bar, 3, 1)() mustEqual 0L
+
+        client.bitOp(BitOp.And, baz, Seq(foo, bar))() mustEqual 2L
+        client.bitCount(baz)() mustEqual 1L
+        client.getBit(baz, 0)() mustEqual 0L
+        client.getBit(baz, 3)() mustEqual 1L
+
+        client.bitOp(BitOp.Or, baz, Seq(foo, bar))() mustEqual 2L
+        client.bitCount(baz)() mustEqual 3L
+        client.getBit(baz, 0)() mustEqual 1L
+        client.getBit(baz, 1)() mustEqual 0L
+
+        client.bitOp(BitOp.Xor, baz, Seq(foo, bar))() mustEqual 2L
+        client.bitCount(baz)() mustEqual 2L
+        client.getBit(baz, 0)() mustEqual 1L
+        client.getBit(baz, 1)() mustEqual 0L
+
+        client.bitOp(BitOp.Not, baz, Seq(foo))() mustEqual 2L
+        client.bitCount(baz)() mustEqual 14
+        client.getBit(baz, 0)() mustEqual 1
+        client.getBit(baz, 2)() mustEqual 0
+        client.getBit(baz, 4)() mustEqual 1
+      }
+
+      "getSet" in {
+        client.getSet(foo, bar)() mustEqual None
+        client.get(foo)() mustEqual Some(bar)
+        client.getSet(foo, baz)() mustEqual Some(bar)
+        client.get(foo)() mustEqual Some(baz)
+      }
+
+      "incr / incrBy" in {
+        client.incr(foo)() mustEqual 1L
+        client.incrBy(foo, 10L)() mustEqual 11L
+        client.incrBy(bar, 10L)() mustEqual 10L
+        client.incr(bar)() mustEqual 11L
+      }
+
+      "mGet / mSet / mSetNx" in {
+        client.mSet(Map(foo -> bar, bar -> baz))()
+        client.mGet(Seq(foo, bar, baz))() mustEqual Seq(Some(bar), Some(baz), None)
+        client.mSetNx(Map(foo -> bar, baz -> foo, boo -> moo))() mustEqual false
+        client.mSetNx(Map(baz -> foo, boo -> moo))() mustEqual true
+        client.mGet(Seq(baz, boo))() mustEqual Seq(Some(foo), Some(moo))
+      }
+
+      "set variations" in {
+        client.pSetEx(foo, 10000L, bar)()
+        client.get(foo)() mustEqual Some(bar)
+        client.ttl(foo)() map (_ must beLessThanOrEqualTo(10L))
+
+        client.setEx(bar, 10L, foo)()
+        client.get(bar)() mustEqual Some(foo)
+        client.ttl(bar)() map (_ must beLessThanOrEqualTo(10L))
+
+        client.setNx(baz, foo)() mustEqual true
+        client.setNx(baz, bar)() mustEqual false
+
+        client.setRange(baz, 1, baz)() mustEqual 4L
+        client.get(baz)() mustEqual Some(StringToChannelBuffer("fbaz"))
+      }
+
+      "strlen" in {
+        client.strlen(foo)() mustEqual 0L
+        client.set(foo, bar)()
+        client.strlen(foo)() mustEqual 3L
+      }
     }
 
     "perform hash commands" in {
