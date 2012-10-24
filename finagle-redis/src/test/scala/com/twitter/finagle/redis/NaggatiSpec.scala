@@ -432,6 +432,20 @@ class NaggatiSpec extends SpecificationWithJUnit {
               case Append(foo, value) => BytesToString(value.array) mustEqual "bar"
             }
           }
+          "BITCOUNT" >> {
+            codec(wrap("BITCOUNT foo\r\n")) mustEqual List(BitCount("foo"))
+            codec(wrap("BITCOUNT foo 0\r\n")) must throwA[ClientError]
+            codec(wrap("BITCOUNT foo 0 1\r\n")) mustEqual
+              List(BitCount("foo", Some(0), Some(1)))
+          }
+          "BITOP" >> {
+            codec(wrap("BITOP\r\n")) must throwA[ClientError]
+            codec(wrap("BITOP AND baz foo bar\r\n")) mustEqual
+              List(BitOp(BitOp.And, "baz", Seq(s2cb("foo"), s2cb("bar"))))
+            codec(wrap("BITOP NOT foo bar baz\r\n")) must throwA[ClientError]
+            codec(wrap("BITOP NOT foo bar\r\n")) mustEqual
+              List(BitOp(BitOp.Not, "foo", Seq("bar")))
+          }
           "DECR" >> {
             codec(wrap("DECR 1\r\n")) mustEqual List(Decr("1"))
             codec(wrap("DECR foo\r\n")) mustEqual List(Decr("foo"))
@@ -485,6 +499,10 @@ class NaggatiSpec extends SpecificationWithJUnit {
                 map must haveKey(foo)
                 BytesToString(map(foo).array) mustEqual "bar"
             }
+          }
+          "PSETEX" >> {
+            codec(wrap("PSETEX\r\n")) must throwA[ClientError]
+            codec(wrap("PSETEX foo 1000 bar\r\n")) mustEqual List(PSetEx("foo", 1000L, "bar"))
           }
           "SET" >> {
             unwrap(codec(wrap("SET foo bar\r\n"))) {

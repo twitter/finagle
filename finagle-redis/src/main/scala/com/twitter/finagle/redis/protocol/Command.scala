@@ -31,6 +31,8 @@ object Commands {
 
   // String Commands
   val APPEND    = "APPEND"
+  val BITCOUNT  = "BITCOUNT"
+  val BITOP     = "BITOP"
   val DECR      = "DECR"
   val DECRBY    = "DECRBY"
   val GET       = "GET"
@@ -42,6 +44,7 @@ object Commands {
   val MGET      = "MGET"
   val MSET      = "MSET"
   val MSETNX    = "MSETNX"
+  val PSETEX    = "PSETEX"
   val SET       = "SET"
   val SETBIT    = "SETBIT"
   val SETEX     = "SETEX"
@@ -127,6 +130,8 @@ object Commands {
 
     // string commands
     APPEND            -> {Append(_)},
+    BITCOUNT          -> {BitCount(_)},
+    BITOP             -> {BitOp(_)},
     DECR              -> {Decr(_)},
     DECRBY            -> {DecrBy(_)},
     GET               -> {Get(_)},
@@ -138,6 +143,7 @@ object Commands {
     MGET              -> {MGet(_)},
     MSET              -> {MSet(_)},
     MSETNX            -> {MSetNx(_)},
+    PSETEX            -> {PSetEx(_)},
     SET               -> {Set(_)},
     SETBIT            -> {SetBit(_)},
     SETEX             -> {SetEx(_)},
@@ -239,6 +245,8 @@ object CommandBytes {
 
   // String Commands
   val APPEND            = StringToChannelBuffer("APPEND")
+  val BITCOUNT          = StringToChannelBuffer("BITCOUNT")
+  val BITOP             = StringToChannelBuffer("BITOP")
   val DECR              = StringToChannelBuffer("DECR")
   val DECRBY            = StringToChannelBuffer("DECRBY")
   val GET               = StringToChannelBuffer("GET")
@@ -250,6 +258,7 @@ object CommandBytes {
   val MGET              = StringToChannelBuffer("MGET")
   val MSET              = StringToChannelBuffer("MSET")
   val MSETNX            = StringToChannelBuffer("MSETNX")
+  val PSETEX            = StringToChannelBuffer("PSETEX")
   val SET               = StringToChannelBuffer("SET")
   val SETBIT            = StringToChannelBuffer("SETBIT")
   val SETEX             = StringToChannelBuffer("SETEX")

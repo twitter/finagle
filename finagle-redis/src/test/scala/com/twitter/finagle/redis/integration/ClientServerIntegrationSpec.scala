@@ -289,6 +289,35 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         client(Append("append1", " World"))() mustEqual IntegerReply(11)
         assertBulkReply(client(Get("append1")), "Hello World")
       }
+      "BITCOUNT" >> {
+        client(BitCount("bitcount"))() mustEqual IntegerReply(0L)
+        client(Set("bitcount", "bar"))() mustEqual StatusReply("OK")
+        client(BitCount("bitcount"))() mustEqual IntegerReply(10L)
+        client(BitCount("bitcount", Some(2), Some(4)))() mustEqual IntegerReply(4L)
+      }
+      "BITOP" >> {
+        client(SetBit("bitop1", 0, 1))() mustEqual IntegerReply(0L)
+        client(SetBit("bitop1", 3, 1))() mustEqual IntegerReply(0L)
+        client(SetBit("bitop2", 2, 1))() mustEqual IntegerReply(0L)
+        client(SetBit("bitop2", 3, 1))() mustEqual IntegerReply(0L)
+
+        client(BitOp(BitOp.And, "bitop3", Seq("bitop1", "bitop2")))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 0))() mustEqual IntegerReply(0L)
+        client(GetBit("bitop3", 3))() mustEqual IntegerReply(1L)
+
+        client(BitOp(BitOp.Or, "bitop3", Seq("bitop1", "bitop2")))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 0))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 1))() mustEqual IntegerReply(0L)
+
+        client(BitOp(BitOp.Xor, "bitop3", Seq("bitop1", "bitop2")))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 0))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 1))() mustEqual IntegerReply(0L)
+
+        client(BitOp(BitOp.Not, "bitop3", Seq("bitop1")))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 0))() mustEqual IntegerReply(0L)
+        client(GetBit("bitop3", 1))() mustEqual IntegerReply(1L)
+        client(GetBit("bitop3", 4))() mustEqual IntegerReply(1L)
+      }
       "DECR" >> {
         client(Decr("decr1"))() mustEqual IntegerReply(-1)
         client(Decr("decr1"))() mustEqual IntegerReply(-2)
@@ -374,6 +403,12 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
         assertMBulkReply(client(MGet(List(StringToChannelBuffer("msnx.key1"),
           StringToChannelBuffer("msnx.key2"),
           StringToChannelBuffer("msnx.key3")))), expects)
+      }
+      "PSETEX" >> {
+        client(PSetEx(null, 300000L, "value"))() must throwA[ClientError]
+        client(PSetEx("psetex1", 300000L, null))() must throwA[ClientError]
+        client(PSetEx("psetex1", 0L, "value"))() must throwA[ClientError]
+        client(PSetEx("psetex1", 300000L, "value"))() mustEqual StatusReply("OK")
       }
       "SET" >> {
         client(Set(null, null))() must throwA[ClientError]
