@@ -95,6 +95,6 @@ object Cluster {
 /**
  * A simple static cluster implementation.
  */
-class StaticCluster[T](underlying: Seq[T]) extends Cluster[T] {
+case class StaticCluster[T](underlying: Seq[T]) extends Cluster[T] {
   def snap: (Seq[T], Future[Spool[Cluster.Change[T]]]) = (underlying, Future.value(Spool.empty))
 }

@@ -745,10 +745,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val cluster = config.cluster.get
     val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
 
-    val exception = new NoBrokersAvailableException(config.name.get)
-    val hostFactories = cluster map { host => hostToServiceFactory(codec, host, timer) }
-    var factory: ServiceFactory[Req, Rep] =
-      new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"), exception)
+    var factory: ServiceFactory[Req, Rep] = cluster match {
+      // Special case one service, bypassing the load balancer
+      // entirely.
+      case StaticCluster(Seq(host)) =>
+        hostToServiceFactory(codec, host, timer)
+      case cluster =>
+        val hostFactories = cluster map { host => hostToServiceFactory(codec, host, timer) }        
+        val exception = new NoBrokersAvailableException(config.name.get)
+        new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"), exception)
+    }
 
     /*
      * Everything above this point in the stack (load balancer, pool)
