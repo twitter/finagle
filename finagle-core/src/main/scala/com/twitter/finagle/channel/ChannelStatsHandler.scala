@@ -93,7 +93,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    val m = if (e.getCause != null) getClass.getName else "unknown"
+    val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
     statsReceiver.scope("exn").counter(m).incr()
     super.exceptionCaught(ctx, e)
   }
