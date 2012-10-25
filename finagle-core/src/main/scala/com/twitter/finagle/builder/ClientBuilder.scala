@@ -132,14 +132,15 @@ final case class ClientHostConfig(
   private val _hostConnectionIdleTime    : Option[Duration]              = None,
   private val _hostConnectionMaxWaiters  : Option[Int]                   = None,
   private val _hostConnectionMaxIdleTime : Option[Duration]              = None,
-  private val _hostConnectionMaxLifeTime : Option[Duration]              = None) {
-
+  private val _hostConnectionMaxLifeTime : Option[Duration]              = None,
+  private val _hostConnectionBufferSize  : Option[Int]                   = None) {
   val hostConnectionCoresize    = _hostConnectionCoresize
   val hostConnectionLimit       = _hostConnectionLimit
   val hostConnectionIdleTime    = _hostConnectionIdleTime
   val hostConnectionMaxWaiters  = _hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConnectionMaxLifeTime
+  val hostConnectionBufferSize  = _hostConnectionBufferSize
 }
 
 /**
@@ -198,6 +199,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val hostConnectionMaxWaiters  = _hostConfig.hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConfig.hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConfig.hostConnectionMaxLifeTime
+  val hostConnectionBufferSize   = _hostConfig.hostConnectionBufferSize
   val hostConfig                = _hostConfig
   val sendBufferSize            = _sendBufferSize
   val recvBufferSize            = _recvBufferSize
@@ -228,6 +230,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
     "hostConnectionMaxWaiters"  -> _hostConfig.hostConnectionMaxWaiters,
     "hostConnectionMaxIdleTime" -> _hostConfig.hostConnectionMaxIdleTime,
     "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
+    "hostConnectionBufferSize"  -> _hostConfig.hostConnectionBufferSize,
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
     "retryPolicy"               -> _retryPolicy,
@@ -473,6 +476,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxLifeTime = Some(timeout))))
 
   /**
+   * Experimental option to buffer `size` connections from the pool.
+   * The buffer is fast and lock-free, reducing contention for
+   * services with very high requests rates. The buffer size should
+   * be sized roughly to the expected concurrency. Buffers sized by
+   * power-of-twos may be faster due to the use of modular
+   * arithmetic.
+   *
+   * '''Note:''' This will be integrated into the mainline pool, at
+   * which time the experimental option will go away.
+   */
+  def expHostConnectionBufferSize(size: Int): This =
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionBufferSize = Some(size))))
+
+  /**
    * The number of retries applied. Only applicable to service-builds ({{build()}})
    */
   def retries(value: Int): This =
@@ -664,9 +681,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       factory
     }
 
-    new WatermarkPool[Req, Rep](
+    val pool = new WatermarkPool[Req, Rep](
       underlyingFactory, lowWatermark, highWatermark,
       statsReceiver, maxWaiters)
+
+    config.hostConnectionBufferSize match {
+      case Some(size) => new BufferingPool(pool, size)
+      case None => pool
+    }
   }
 
   private[finagle] lazy val statsReceiver = {
@@ -751,7 +773,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       case StaticCluster(Seq(host)) =>
         hostToServiceFactory(codec, host, timer)
       case cluster =>
-        val hostFactories = cluster map { host => hostToServiceFactory(codec, host, timer) }        
+        val hostFactories = cluster map { host => hostToServiceFactory(codec, host, timer) }
         val exception = new NoBrokersAvailableException(config.name.get)
         new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"), exception)
     }
