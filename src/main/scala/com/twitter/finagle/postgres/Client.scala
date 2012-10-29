@@ -141,7 +141,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   private[this] def send[T](r: PgRequest)(handler: PartialFunction[PgResponse, Future[T]]) =
     fService flatMap { service =>
       service(r) flatMap (handler orElse {
-        case _ => Future.exception(new UnsupportedOperationException("TODO Support exceptions correctly"));
+        case some => Future.exception(new UnsupportedOperationException("TODO Support exceptions correctly " + some));
       })
     }
 
