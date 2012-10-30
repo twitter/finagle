@@ -1,17 +1,27 @@
 package com.twitter.finagle.postgres.protocol
 
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
 
-class PacketBuilder(header: Option[Char]) {
-  private val underlying = ChannelBuffers.dynamicBuffer()
-  private val startingPos = header match {
-    case Some(char) => {
-      writeChar(char)
-      1
+object Packet {
+  val INT_SIZE = 4
+}
+
+case class Packet(code: Option[Char], length: Int, content: ChannelBuffer) {
+  
+  def encode(): ChannelBuffer = {
+    val result = ChannelBuffers.dynamicBuffer()
+    code.map { c =>
+      result.writeByte(c)
     }
-    case None => 0
+    result.writeInt(length + Packet.INT_SIZE)
+    result.writeBytes(content)
+    result
   }
-  writeInt(0)
+}
+
+class PacketBuilder(val code: Option[Char]) {
+  private val underlying = ChannelBuffers.dynamicBuffer()
 
   def writeByte(byte: Byte) = {
     underlying.writeByte(byte)
@@ -19,8 +29,8 @@ class PacketBuilder(header: Option[Char]) {
   }
 
   def writeChar(char: Char) = {
-   underlying.writeByte(char)
-   this
+    underlying.writeByte(char)
+    this
   }
   def writeInt(int: Int) = {
     underlying.writeInt(int)
@@ -38,15 +48,7 @@ class PacketBuilder(header: Option[Char]) {
     this
   }
 
-  def toChannelBuffer = {
-    val index = underlying.writerIndex() - startingPos
-    underlying.markWriterIndex()
-    underlying.writerIndex(startingPos)
-    underlying.writeInt(index)
-    underlying.resetWriterIndex()
-
-    underlying
-  }
+  def toPacket = new Packet(code, underlying.writerIndex(), underlying)
 
 }
 

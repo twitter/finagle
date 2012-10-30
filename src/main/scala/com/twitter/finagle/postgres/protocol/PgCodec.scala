@@ -69,8 +69,8 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
       case MessageSequenceResponse(AuthenticationOk() :: _) =>
         Future.value(startupResponse)
 
-      case _ =>
-        throw new IllegalStateException("Unknown response message")
+      case e =>
+        throw new IllegalStateException("Unknown response message " + e)
     }
   }
 
@@ -94,7 +94,7 @@ class FrontendEncoder extends OneToOneEncoder {
 
     msg match {
       case req: PgRequest =>
-        req.msg.encode()
+        req.msg.asPacket().encode
       case _ =>
         logger.ifDebug("Cannot convert message... Skipping")
         msg
@@ -234,8 +234,8 @@ class PacketDecoder extends FrameDecoder {
     }
 
     logger.ifDebug("packet with code " + code)
-    new Packet(code, totalLength, buffer.readSlice(length))
-
+    new Packet(Some(code), totalLength, buffer.readSlice(length))
+ 
   }
 }
 
