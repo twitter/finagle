@@ -12,8 +12,8 @@ case class User(email: String, name: String)
 @RunWith(classOf[JUnitRunner])
 class IntegrationSpec extends Specification {
 
-  args(sequential = false)
-  val on = true // only manual running
+  args(sequential = true)
+  val on = false // only manual running
 
   if (on) {
     "Postgres client" >> {
