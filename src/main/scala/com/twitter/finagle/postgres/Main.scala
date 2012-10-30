@@ -30,23 +30,23 @@ object Main {
 
     val client = Client("localhost:5432", "mkhadikov", Some("pass"), "contacts")
 
-    val f = client.select("select * from users") {row =>
+    val f = client.select("select * from users") { row =>
       User(row.getString("email"), row.getString("name"))
     }
 
     logger.debug("Responded " + f.get)
 
     val fi = client.insert("insert into users(email, name) values ('mickey@mouse.com', 'Mickey Mouse')," +
-    		" ('bugs@bunny.com', 'Bugs Bunny')")
+      " ('bugs@bunny.com', 'Bugs Bunny')")
 
     logger.debug("Responded " + fi.get)
 
     val fd = client.delete("delete from users where name = 'Mickey Mouse'")
-    
+
     logger.debug("Responded " + fd.get)
 
     val fu = client.update("update users set email = 'bugs@bunny.org' where name = 'Bugs Bunny'")
-    
+
     logger.debug("Responded " + fu.get)
 
     client.close()

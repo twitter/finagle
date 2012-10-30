@@ -13,11 +13,6 @@ object Charsets {
 
 object Buffers {
 
-  def writeCString(b: ChannelBuffer, content: String) {
-    b.writeBytes(content.getBytes(Charsets.Utf8))
-    b.writeByte(0)
-  }
-
   def readCString(buffer: ChannelBuffer): String = {
 
     buffer.markReaderIndex()

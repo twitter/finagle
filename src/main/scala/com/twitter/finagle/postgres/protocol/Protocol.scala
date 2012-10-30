@@ -14,75 +14,31 @@ trait FrontendMessage {
 }
 
 case class StartupMessage(user: String, database: String) extends FrontendMessage {
-  def encode(): ChannelBuffer = {
-    val buffer = ChannelBuffers.dynamicBuffer()
-    buffer.writeInt(0)
-    buffer.writeShort(3)
-    buffer.writeShort(0)
-
-    Buffers.writeCString(buffer, "user")
-    Buffers.writeCString(buffer, user)
-
-    Buffers.writeCString(buffer, "database")
-    Buffers.writeCString(buffer, database)
-
-    buffer.writeByte(0)
-
-    val index = buffer.writerIndex()
-
-    buffer.markWriterIndex()
-    buffer.writerIndex(0)
-    buffer.writeInt(index)
-    buffer.resetWriterIndex()
-
-    buffer
-  }
+  def encode(): ChannelBuffer = PacketBuilder()
+    .writeShort(3)
+    .writeShort(0)
+    .writeCString("user")
+    .writeCString(user)
+    .writeCString("database")
+    .writeCString(database)
+    .writeByte(0)
+    .toChannelBuffer
 }
 
 case class PasswordMessage(password: String) extends FrontendMessage {
   private val logger = Logger(getClass.getName)
 
-  def encode(): ChannelBuffer = {
-
-    logger.ifDebug("Encoding password messsage")
-    val buffer: ChannelBuffer = ChannelBuffers.dynamicBuffer()
-
-    buffer.writeByte('p')
-    buffer.writeInt(0)
-
-    Buffers.writeCString(buffer, password)
-    buffer.writeByte(0)
-
-    val index = buffer.writerIndex() - 1
-    buffer.markWriterIndex()
-    buffer.writerIndex(1)
-    buffer.writeInt(index)
-    buffer.resetWriterIndex()
-
-    buffer
-  }
+  def encode(): ChannelBuffer = PacketBuilder('p')
+    .writeCString(password)
+    .toChannelBuffer
 }
 
 case class Query(str: String) extends FrontendMessage {
   private val logger = Logger(getClass.getName)
 
-  def encode(): ChannelBuffer = {
-    val buffer: ChannelBuffer = ChannelBuffers.dynamicBuffer()
-
-    buffer.writeByte('Q')
-    buffer.writeInt(0)
-    Buffers.writeCString(buffer, str)
-
-    val index = buffer.writerIndex() - 1
-    buffer.markWriterIndex()
-    buffer.writerIndex(1)
-    buffer.writeInt(index)
-    buffer.resetWriterIndex()
-
-    logger.ifDebug("buffer " + buffer)
-
-    buffer
-  }
+  def encode(): ChannelBuffer = PacketBuilder('Q')
+  	.writeCString(str)
+  	.toChannelBuffer
 }
 
 /**
@@ -235,9 +191,9 @@ class BackendMessageParser {
       case 12 =>
         val code = packet.content.readInt
         if (code == 5) {
-	        val salt = new Array[Byte](4)
-	        packet.content.readBytes(salt)
-	        Some(new AuthenticationMD5Password(salt))
+          val salt = new Array[Byte](4)
+          packet.content.readBytes(salt)
+          Some(new AuthenticationMD5Password(salt))
         } else {
           None
         }
@@ -245,7 +201,6 @@ class BackendMessageParser {
       case _ =>
         None
     }
-
 
   }
 

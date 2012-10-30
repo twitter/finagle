@@ -102,36 +102,24 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
 
   }
 
-  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = {
-    query(sql).map(
-      _ match {
-        case ResultSet(_, rows) => rows.map(f)
-        case _ => throw new IllegalStateException("Select method is used for non-select operation")
-      })
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = query(sql).map {
+    case ResultSet(_, rows) => rows.map(f)
+    case _ => throw new IllegalStateException("Select method is used for non-select operation")
   }
 
-  def insert[T](sql: String): Future[Int] = {
-    query(sql).map(
-      _ match {
-        case Inserted(num) => num
-        case _ => throw new IllegalStateException("Insert method is used for non-insert operation")
-      })
+  def insert[T](sql: String): Future[Int] = query(sql).map {
+    case Inserted(num) => num
+    case _ => throw new IllegalStateException("Insert method is used for non-insert operation")
   }
 
-  def delete[T](sql: String): Future[Int] = {
-    query(sql).map(
-      _ match {
-        case Deleted(num) => num
-        case _ => throw new IllegalStateException("Delete method is used for non-delete operation")
-      })
+  def delete[T](sql: String): Future[Int] = query(sql).map {
+    case Deleted(num) => num
+    case _ => throw new IllegalStateException("Delete method is used for non-delete operation")
   }
 
-  def update[T](sql: String): Future[Int] = {
-    query(sql).map(
-      _ match {
-        case Updated(num) => num
-        case _ => throw new IllegalStateException("Update method is used for non-update operation")
-      })
+  def update[T](sql: String): Future[Int] = query(sql).map {
+    case Updated(num) => num
+    case _ => throw new IllegalStateException("Update method is used for non-update operation")
   }
 
   def close() {
@@ -322,22 +310,3 @@ object StringValueParser extends ValueParser {
   UUID        -> 2950
 
 */
-
-object Test {
-
-  def main(args: Array[String]) {
-    import com.twitter.logging.config._
-
-    val config = new LoggerConfig {
-      node = ""
-      level = Logger.DEBUG
-      handlers = new ConsoleHandlerConfig {
-      }
-    }
-    config()
-
-    val v = new Row(Array(Field("name"), Field("email")), Array(StringValue("test"), StringValue("test2")))
-
-    println(v.getString("email"))
-  }
-}

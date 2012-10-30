@@ -3,10 +3,8 @@ package com.twitter.finagle.postgres.integration
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
+
 import com.twitter.finagle.postgres.Client
-import java.net.ServerSocket
-import java.net.BindException
-import java.io.IOException
 
 case class User(email: String, name: String)
 
@@ -14,8 +12,8 @@ case class User(email: String, name: String)
 @RunWith(classOf[JUnitRunner])
 class IntegrationSpec extends Specification {
 
-  args(sequential = true)
-  val on = false // only manual running
+  args(sequential = false)
+  val on = true // only manual running
 
   if (on) {
     "Postgres client" >> {
