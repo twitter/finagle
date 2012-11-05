@@ -9,6 +9,7 @@ import com.twitter.logging.Logger
 import com.twitter.util.Future
 import collection.mutable
 import com.twitter.logging.Level
+import com.twitter.util.StateMachine
 
 class PgCodec(user: String, password: Option[String], database: String) extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
@@ -51,33 +52,27 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
   private[this] def sendPassword(startupResponse: PgResponse, service: Service[PgRequest, PgResponse]): Future[PgResponse] = {
     logger.ifDebug("Startup response -- " + startupResponse)
     startupResponse match {
-
-      case SingleMessageResponse(AuthenticationMD5Password(salt)) =>
+      
+      case PasswordRequired(encoding) =>
         if (password.isEmpty) {
           Future.exception(new IllegalArgumentException("Password has to be specified for md5 authentication connection"))
         } else {
-          service(Communication.request(new PasswordMessage(new String(Md5Encriptor.encript(user.getBytes, password.get.getBytes, salt)))))
+          val msg = encoding match {
+            case ClearText => PasswordMessage(password.get)
+            case Md5(salt) => PasswordMessage(new String(Md5Encriptor.encript(user.getBytes, password.get.getBytes, salt)))
+          }
+          service(Communication.request(msg))
         }
 
-      case SingleMessageResponse(AuthenticationCleartextPassword()) =>
-        if (password.isEmpty) {
-          Future.exception(new IllegalArgumentException("Password has to be specified for cleartext authentication connection"))
-        } else {
-          service(Communication.request(new PasswordMessage(password.get)))
-        }
-
-      case MessageSequenceResponse(AuthenticationOk() :: _) =>
-        Future.value(startupResponse)
-
-      case e =>
-        throw new IllegalStateException("Unknown response message " + e)
+      case r => Future.value(r)
     }
   }
 
   private[this] def verifyResponse(response: PgResponse): Future[Unit] = {
     response match {
-      case MessageSequenceResponse(AuthenticationOk() :: _) =>
-        Future.value(Unit)
+      case AuthenticatedResponse(statuses, processId, secretKey) =>
+        logger.ifInfo("Authenticated " + processId + " " + secretKey + "\n" + statuses)
+        Future(Unit)
       case _ =>
         // TODO change exception
         Future.exception(new IllegalStateException("Cannot authenticate"))
@@ -108,16 +103,22 @@ class FrontendEncoder extends OneToOneEncoder {
  * Aggregates `BackendMessage` to `PgResponse`.
  *
  */
-class PgResponseHandler() extends SimpleChannelHandler {
-  trait Mode
+class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
 
-  case object OneMessagePerRequest extends Mode
+  case object OneMessagePerRequest extends State
 
-  case class MessageSequenceMode(messages: mutable.MutableList[BackendMessage], termintation: BackendMessage => Boolean) extends Mode
+  case object AuthenticationRequired extends State
+
+  case class MessageSequenceMode(messages: mutable.MutableList[BackendMessage], termintation: BackendMessage => Boolean) extends State
+
+  case class AggregatingAuthData(statuses: Map[String, String], processId: Int, secretKey: Int) extends State {
+    def addStatus(name: String, value: String) = AggregatingAuthData(statuses + (name -> value), processId, secretKey)
+    def setKeyData(processId: Int, secretKey: Int) = AggregatingAuthData(statuses, processId, secretKey)
+  }
 
   private val logger = Logger(getClass.getName)
 
-  private var mode: Mode = OneMessagePerRequest
+  state = AuthenticationRequired
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val message = e.getMessage
@@ -144,32 +145,59 @@ class PgResponseHandler() extends SimpleChannelHandler {
     }
 
   def processMessage(msg: BackendMessage): Option[PgResponse] = {
-    mode match {
+    state match {
+
+      case AuthenticationRequired =>
+        val (response, newState) = handleAuthentication(msg)
+        state = newState
+        response
       case OneMessagePerRequest =>
 
         msg match {
 
-          case AuthenticationOk() =>
-            mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
-            None
           case RowDescription(_) =>
-            mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
+            state = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
             None
           case CommandComplete(_) =>
-            mode = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
+            state = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
             None
           case _ =>
             Some(SingleMessageResponse(msg))
         }
 
+      case s @ AggregatingAuthData(_, _, _) =>
+        val (response, newState) = aggregateAuthData(msg, s)
+        state = newState
+        response
+
       case MessageSequenceMode(messages, termination) =>
         messages += msg
         if (termination(msg)) {
-          mode = OneMessagePerRequest
+          state = OneMessagePerRequest
           Some(Communication.sequence(messages.toList))
         } else {
           None
         }
+    }
+  }
+
+  def handleAuthentication(msg: BackendMessage): (Option[PgResponse], State) = {
+    logger.ifDebug("handling authentication")
+    msg match {
+      case AuthenticationCleartextPassword() => (Some(PasswordRequired(ClearText)), AuthenticationRequired)
+      case AuthenticationMD5Password(salt) => (Some(PasswordRequired(Md5(salt))), AuthenticationRequired)
+      case AuthenticationOk() => (None, AggregatingAuthData(Map(), -1, -1))
+      case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
+    }
+  }
+
+  def aggregateAuthData(msg: BackendMessage, state: AggregatingAuthData): (Option[PgResponse], State) = {
+    logger.ifDebug("aggregating authentication data")
+    msg match {
+      case ParameterStatus(name, value) => (None, state.addStatus(name, value))
+      case BackendKeyData(processId, secretKey) => (None, state.setKeyData(processId, secretKey))
+      case ReadyForQuery(_) => (Some(AuthenticatedResponse(state.statuses, state.processId, state.secretKey)), OneMessagePerRequest)
+      case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
     }
   }
 
@@ -235,7 +263,7 @@ class PacketDecoder extends FrameDecoder {
 
     logger.ifDebug("packet with code " + code)
     new Packet(Some(code), totalLength, buffer.readSlice(length))
- 
+
   }
 }
 
