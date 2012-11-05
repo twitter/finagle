@@ -52,7 +52,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
   private[this] def sendPassword(startupResponse: PgResponse, service: Service[PgRequest, PgResponse]): Future[PgResponse] = {
     logger.ifDebug("Startup response -- " + startupResponse)
     startupResponse match {
-      
+
       case PasswordRequired(encoding) =>
         if (password.isEmpty) {
           Future.exception(new IllegalArgumentException("Password has to be specified for md5 authentication connection"))
@@ -89,7 +89,8 @@ class FrontendEncoder extends OneToOneEncoder {
 
     msg match {
       case req: PgRequest =>
-        req.msg.asPacket().encode
+        val packet = req.msg.asPacket()
+        packet.encode
       case _ =>
         logger.ifDebug("Cannot convert message... Skipping")
         msg
@@ -105,11 +106,13 @@ class FrontendEncoder extends OneToOneEncoder {
  */
 class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
 
-  case object OneMessagePerRequest extends State
-
   case object AuthenticationRequired extends State
 
-  case class MessageSequenceMode(messages: mutable.MutableList[BackendMessage], termintation: BackendMessage => Boolean) extends State
+  case object WaitingForQuery extends State
+
+  case class SelectQuery(fields: IndexedSeq[FieldDescription], rows: Seq[DataRow]) extends State
+
+  case class UpdateQuery(tag: String) extends State
 
   case class AggregatingAuthData(statuses: Map[String, String], processId: Int, secretKey: Int) extends State {
     def addStatus(name: String, value: String) = AggregatingAuthData(statuses + (name -> value), processId, secretKey)
@@ -134,16 +137,6 @@ class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
 
   }
 
-  private[this] def commonTermination(msg: BackendMessage): Boolean =
-    msg match {
-      case ReadyForQuery(_) =>
-        true
-      case ErrorResponse(_) =>
-        true
-      case _ =>
-        false
-    }
-
   def processMessage(msg: BackendMessage): Option[PgResponse] = {
     state match {
 
@@ -151,38 +144,58 @@ class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
         val (response, newState) = handleAuthentication(msg)
         state = newState
         response
-      case OneMessagePerRequest =>
 
-        msg match {
-
-          case RowDescription(_) =>
-            state = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
-            None
-          case CommandComplete(_) =>
-            state = new MessageSequenceMode((new mutable.MutableList() += msg), commonTermination)
-            None
-          case _ =>
-            Some(SingleMessageResponse(msg))
-        }
-
-      case s @ AggregatingAuthData(_, _, _) =>
-        val (response, newState) = aggregateAuthData(msg, s)
+      case WaitingForQuery =>
+        val (response, newState) = handleQueryResponse(msg)
         state = newState
         response
 
-      case MessageSequenceMode(messages, termination) =>
-        messages += msg
-        if (termination(msg)) {
-          state = OneMessagePerRequest
-          Some(Communication.sequence(messages.toList))
-        } else {
-          None
-        }
+      case s @ UpdateQuery(_) =>
+        val (response, newState) = handleUpdateQuery(msg, s)
+        state = newState
+        response
+
+      case s @ SelectQuery(_, _) =>
+        val (response, newState) = processSelectQuery(msg, s)
+        state = newState
+        response
+
+      case s @ AggregatingAuthData(_, _, _) =>
+        val (response, newState) = accumulateAuthData(msg, s)
+        state = newState
+        response
     }
   }
 
-  def handleAuthentication(msg: BackendMessage): (Option[PgResponse], State) = {
-    logger.ifDebug("handling authentication")
+  private[this] def processSelectQuery(msg: BackendMessage, state: SelectQuery): (Option[PgResponse], State) = {
+    logger.ifDebug("handling select data. [msg " + msg + " state " + state + "]")
+    msg match {
+      case row @ DataRow(_) => (None, SelectQuery(state.fields, state.rows ++ Seq(row)))
+      case CommandComplete(_) => (None, state)
+      case ReadyForQuery(_) => (Some(converToResultSet(state)), WaitingForQuery)
+      case ErrorResponse(details) => (Some(Error(details)), WaitingForQuery)
+    }
+  }
+
+  private[this] def handleQueryResponse(msg: BackendMessage): (Option[PgResponse], State) = {
+    logger.ifDebug("handling query response. [msg " + msg + " state " + state + "]")
+    msg match {
+      case RowDescription(fields) => (None, SelectQuery(fields, Seq()))
+      case CommandComplete(tag) => (None, UpdateQuery(tag))
+      case ErrorResponse(details) => (Some(Error(details)), WaitingForQuery)
+    }
+  }
+
+  private[this] def handleUpdateQuery(msg: BackendMessage, state: UpdateQuery): (Option[PgResponse], State) = {
+    logger.ifDebug("handling update query response. [msg " + msg + " state " + state + "]")
+    msg match {
+      case ReadyForQuery(_) => (Some(parseTag(state.tag)), WaitingForQuery)
+      case ErrorResponse(details) => (Some(Error(details)), WaitingForQuery)
+    }
+  }
+
+  private[this] def handleAuthentication(msg: BackendMessage): (Option[PgResponse], State) = {
+    logger.ifDebug("handling authentication. [msg " + msg + " state " + state + "]")
     msg match {
       case AuthenticationCleartextPassword() => (Some(PasswordRequired(ClearText)), AuthenticationRequired)
       case AuthenticationMD5Password(salt) => (Some(PasswordRequired(Md5(salt))), AuthenticationRequired)
@@ -191,14 +204,37 @@ class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
     }
   }
 
-  def aggregateAuthData(msg: BackendMessage, state: AggregatingAuthData): (Option[PgResponse], State) = {
-    logger.ifDebug("aggregating authentication data")
+  private[this] def accumulateAuthData(msg: BackendMessage, state: AggregatingAuthData): (Option[PgResponse], State) = {
+    logger.ifDebug("aggregating authentication data. [msg " + msg + " state " + state + "]")
     msg match {
       case ParameterStatus(name, value) => (None, state.addStatus(name, value))
       case BackendKeyData(processId, secretKey) => (None, state.setKeyData(processId, secretKey))
-      case ReadyForQuery(_) => (Some(AuthenticatedResponse(state.statuses, state.processId, state.secretKey)), OneMessagePerRequest)
+      case ReadyForQuery(_) => (Some(AuthenticatedResponse(state.statuses, state.processId, state.secretKey)), WaitingForQuery)
       case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
     }
+  }
+
+  private[this] def parseTag(tag: String): QueryResponse = {
+    val parts = tag.split(" ")
+
+    parts(0) match {
+      case "INSERT" => Inserted(parts(2).toInt)
+      case "DELETE" => Deleted(parts(1).toInt)
+      case "UPDATE" => Updated(parts(1).toInt)
+      case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+    }
+  }
+
+  private[this] def converToResultSet(selectQuery: SelectQuery) = {
+    val fieldNames = selectQuery.fields.map(f => Field(f.name))
+    val fieldParsers = selectQuery.fields.map(f => ValueParser.parserOf(f))
+
+    val dataRows = selectQuery.rows.filter(_.isInstanceOf[DataRow]).map(_.asInstanceOf[DataRow])
+    val rows = dataRows.map { r =>
+      new Row(fieldNames, r.data.zip(fieldParsers).map(pair => pair._2(pair._1)))
+    }
+
+    ResultSet(fieldNames, rows)
   }
 
 }
@@ -266,6 +302,8 @@ class PacketDecoder extends FrameDecoder {
 
   }
 }
+
+
 
 
 
