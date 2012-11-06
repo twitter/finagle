@@ -600,7 +600,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         )
 
         if (config.readerIdleTimeout.isDefined || config.writerIdleTimeout.isDefined) {
-          pipeline.addFirst("idleReactor", new IdleChannelHandler)
+          pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
           pipeline.addFirst("idleDetector",
             new IdleStateHandler(timer,
               config.readerIdleTimeout.map(_.inMilliseconds).getOrElse(0L),
@@ -722,7 +722,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       }
     }
 
-    if (config.failFast) {
+    if (config.failFast && codec.failFastOk) {
       factory = new FailFastFactory(
         factory, hostStatsReceiver.scope("failfast"), timer.toTwitterTimer)
     }
@@ -745,13 +745,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val cluster = config.cluster.get
     val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
 
+    val exception = new NoBrokersAvailableException(config.name.get)
     val hostFactories = cluster map { host => hostToServiceFactory(codec, host, timer) }
     var factory: ServiceFactory[Req, Rep] =
-      new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
+      new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"), exception)
 
     /*
      * Everything above this point in the stack (load balancer, pool)
-     * expect that the we only release after the last request is done.
+     * expects that we will only release after the last request is done.
      * Thus, the Refcounted factory serves as a rectifier.
      */
     factory = new RefcountedFactory(factory)

@@ -40,11 +40,16 @@ class GlobalRequestTimeoutException(timeout: Duration)
     timeout,
     "waiting for a response for the request, including retries (if applicable)")
 
+class NoBrokersAvailableException(
+  name: String = "unknown"
+) extends RequestException {
+  override def getMessage = "No hosts are available for client " + name
+}
+
 class RetryFailureException(cause: Throwable)        extends RequestException(cause)
 class CancelledRequestException                      extends RequestException
 class TooManyWaitersException                        extends RequestException
 class CancelledConnectionException                   extends RequestException
-class NoBrokersAvailableException                    extends RequestException
 class ReplyCastException                             extends RequestException
 class FailedFastException                            extends RequestException
 

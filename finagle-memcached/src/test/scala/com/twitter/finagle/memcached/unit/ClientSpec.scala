@@ -42,7 +42,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       ("10.0.1.7", 11211, 950)  -> mock[Service[Command, Response]],
       ("10.0.1.8", 11211, 100)  -> mock[Service[Command, Response]]
     ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
-    val broker = new Broker[NodeHealth]
+    val broker = new Broker[NodeEvent]
     val ketamaClient = new KetamaClient(clients, broker.recv, KeyHasher.KETAMA, 160)
 
     "pick the correct node" in {
@@ -83,7 +83,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       value.key returns key
       serviceA(any) returns Future.value(Values(Seq(value)))
 
-      val broker = new Broker[NodeHealth]
+      val broker = new Broker[NodeEvent]
       val ketamaClient = new KetamaClient(services, broker.recv, KeyHasher.KETAMA, 160)
 
       ketamaClient.get("foo")()
