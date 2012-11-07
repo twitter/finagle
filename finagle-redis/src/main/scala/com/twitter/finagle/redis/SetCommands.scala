@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Long => JLong,Boolean => JBoolean}
-import scala.collection.{Set => CollectionSet}
+import scala.collection.immutable.{Set => ImmutableSet}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
@@ -25,10 +25,10 @@ trait Sets { self: BaseClient =>
    * @param key
    * @return a list of the members
    */
-  def sMembers(key: ChannelBuffer): Future[CollectionSet[ChannelBuffer]] =
+  def sMembers(key: ChannelBuffer): Future[ImmutableSet[ChannelBuffer]] =
     doRequest(SMembers(key)) {
       case MBulkReply(list) => Future.value(ReplyFormat.toChannelBuffers(list) toSet)
-      case EmptyMBulkReply() => Future.value(CollectionSet())
+      case EmptyMBulkReply() => Future.value(ImmutableSet())
     }
 
   /**
