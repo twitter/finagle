@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-test</artifactId>
   <packaging>jar</packaging>
-  <version>5.3.21-SNAPSHOT</version>
+  <version>5.3.23-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>

@@ -1,3 +1,10 @@
+5.3.22		2012/11/08
+
+	* finagle-redis: String commands
+	* finagle-redis: collection.Set => collection.immutable.Set per #116
+	* finagle-thrift: SeqIdFilter: Don't modify thrift requests.
+	* BackupRequestFilter: experimental service filter to perform backup requests
+
 5.3.20		2012/10/26
 
 	* finagle-redis: fix zrevrangebyscore (https://github.com/twitter/finagle/issues/114)
