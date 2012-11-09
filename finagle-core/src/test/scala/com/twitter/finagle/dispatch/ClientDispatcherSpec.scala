@@ -3,10 +3,6 @@ package com.twitter.finagle.dispatch
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledRequestException, WriteException}
 import com.twitter.util.{Return, Throw, Promise, Future}
-import org.jboss.netty.channel.{
-  ChannelPipeline, ChannelEvent, DownstreamMessageEvent,
-  DefaultExceptionEvent, Channel}
-import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -90,7 +86,14 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
     "rewrite WriteExceptions" in {
       val exc = mock[Exception]
       trans.write(any) returns Future.exception(exc)
-      disp("hello").poll must be_==(Some(Throw(WriteException(exc))))
+      val resultOpt = disp("hello").poll
+
+      resultOpt.isDefined must beTrue
+      resultOpt.get.isThrow must beTrue
+
+      val result: Throwable = resultOpt.get.asInstanceOf[Throw[String]].e
+      result.isInstanceOf[WriteException] must beTrue
+      result.getCause must be_==(exc)
     }
   }
 }

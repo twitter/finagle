@@ -49,6 +49,6 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
 
 object SerialClientDispatcher {
   private val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = { case exc: Throwable =>
-    Future.exception(new WriteException(exc))
+    Future.exception(WriteException(exc))
   }
 }

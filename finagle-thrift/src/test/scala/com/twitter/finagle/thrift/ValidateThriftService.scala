@@ -60,8 +60,14 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         f.isDefined must beTrue
         f() must be_==(arr)
         validate.isAvailable must beFalse
-        validate(req).poll must beSome(
-          Throw(WriteException(InvalidThriftConnectionException())))
+        val resp = validate(req).poll
+
+        resp.isDefined must beTrue
+        resp.get.isThrow must beTrue
+
+        val thrown = resp.get.asInstanceOf[Throw[Array[Byte]]].e
+        thrown.isInstanceOf[WriteException] must beTrue
+        thrown.getCause.isInstanceOf[InvalidThriftConnectionException] must beTrue
       }
     }
 

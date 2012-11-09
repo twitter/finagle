@@ -4,7 +4,7 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import com.twitter.util.Promise
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{SourcedException, RequestException, WriteException, Service}
+import com.twitter.finagle.{RequestException, WriteException, Service}
 
 class StatsFilterSpec extends SpecificationWithJUnit with Mockito {
   "Stats Filter" should {
@@ -19,7 +19,7 @@ class StatsFilterSpec extends SpecificationWithJUnit with Mockito {
     "report exceptions" in {
       val e1 = new Exception("e1")
       val e2 = new RequestException(e1)
-      val e3 = new WriteException(e2)
+      val e3 = WriteException(e2)
       e3.serviceName = "bogus"
       promise.setException(e3)
       val res = statsService("foo")

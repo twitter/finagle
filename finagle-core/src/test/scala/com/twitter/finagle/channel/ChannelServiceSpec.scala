@@ -2,15 +2,13 @@ package com.twitter.finagle.channel
 
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, ClientDispatcherFactory}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.util.{Promise, Return, Throw, Future}
+import com.twitter.finagle.stats.NullStatsReceiver
 import java.net.SocketAddress
 import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.channel._
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import scala.collection.JavaConversions._
 
 class ChannelServiceSpec extends SpecificationWithJUnit with Mockito {
   // TODO: we should really mock/drive the dispatcher here. his is
@@ -23,7 +21,6 @@ class ChannelServiceSpec extends SpecificationWithJUnit with Mockito {
     val channel = mock[Channel]
     val sink = mock[ChannelSink]
     val closeFuture = Channels.future(channel)
-    val factory = mock[ChannelServiceFactory[String, String]]
     val address = mock[SocketAddress]
     channel.getPipeline returns pipeline
     channel.isOpen returns true
@@ -222,7 +219,7 @@ class ChannelServiceSpec extends SpecificationWithJUnit with Mockito {
       channelFuture.setFailure(new Exception("oh crap"))
 
       f.isDefined must beTrue
-      f() must throwA(new WriteException(new Exception("oh crap")))
+      f() must throwA(WriteException(new Exception("oh crap")))
 
       // The factory should also be directly closable now.
       factory.close()

@@ -5,7 +5,7 @@ import com.twitter.finagle.dispatch.ClientDispatcherFactory
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ClientChannelTransport, TransportFactory}
 import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled, AsyncLatch}
+import com.twitter.finagle.util.{Ok, Error, Cancelled}
 import com.twitter.util.{Future, Promise, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -118,11 +118,11 @@ private[finagle] class ChannelServiceFactory[Req, Rep](
 
         case Error(cause) =>
           failedConnectLatencyStat.add(begin.untilNow.inMilliseconds)
-          promise.setException(new WriteException(cause))
+          promise.setException(WriteException(cause))
 
         case Cancelled =>
           cancelledConnects.incr()
-          promise.setException(new WriteException(new CancelledConnectionException))
+          promise.setException(WriteException(new CancelledConnectionException))
       }
 
       promise

@@ -38,4 +38,24 @@ class ExceptionsSpec extends SpecificationWithJUnit with Mockito {
       ex.remoteAddress mustEqual address
     }
   }
+
+  "WriteException" should {
+    "apply and unapply" in {
+      val rootCause = new RuntimeException("howdy")
+      val writeEx = WriteException(rootCause)
+      writeEx.getCause mustEq(rootCause)
+
+      writeEx match {
+        case WriteException(cause) => cause mustEqual(rootCause)
+      }
+    }
+
+    "no cause" in {
+      val writeEx = WriteException(null)
+      writeEx match {
+        case WriteException(cause) => cause must beNull
+      }
+    }
+  }
+
 }

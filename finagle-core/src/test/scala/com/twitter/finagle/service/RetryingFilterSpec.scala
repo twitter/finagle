@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{MockTimer, RetryFailureException, Service, WriteException}
+import com.twitter.finagle.{MockTimer, Service, WriteException}
 import com.twitter.finagle.stats.{StatsReceiver, Stat}
 import com.twitter.util._
 import org.specs.SpecificationWithJUnit
@@ -34,7 +34,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "when failing with WriteExceptions, retry n-1 times" in {
-        service(123) returns Future.exception(new WriteException(new Exception))
+        service(123) returns Future.exception(WriteException(new Exception))
         val f = retryingService(123)
         there were three(service)(123)
         f() must throwA[WriteException]
@@ -85,7 +85,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "when failed with a WriteException, consult the retry strategy" in Time.withCurrentTimeFrozen { tc =>
-        service(123) returns Future.exception(new WriteException(new Exception))
+        service(123) returns Future.exception(WriteException(new Exception))
         val f = retryingService(123)
         there was one(service)(123)
         f.isDefined must beFalse
@@ -100,7 +100,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "give up when the retry strategy is exhausted" in Time.withCurrentTimeFrozen { tc =>
-        service(123) returns Future.exception(new WriteException(new Exception("i'm exhausted")))
+        service(123) returns Future.exception(WriteException(new Exception("i'm exhausted")))
         val f = retryingService(123)
         1 to 3 foreach { i =>
           f.isDefined must beFalse
@@ -112,7 +112,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
         there was one(retriesStat).add(3)
         f.isDefined must beTrue
         f.isThrow must beTrue
-        f() must throwA(new WriteException(new Exception("i'm exhausted")))
+        f() must throwA(WriteException(new Exception("i'm exhausted")))
       }
 
       "when failed with a non-WriteException, fail immediately" in {

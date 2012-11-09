@@ -3,9 +3,9 @@ package com.twitter.finagle.service
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-import com.twitter.finagle.{Service, WriteException}
+import com.twitter.finagle.Service
 import com.twitter.finagle.MockTimer
-import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
 
 import com.twitter.util.{Time, Promise, Return}
 import com.twitter.conversions.time._
