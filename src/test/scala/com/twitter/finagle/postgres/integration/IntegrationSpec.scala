@@ -3,8 +3,8 @@ package com.twitter.finagle.postgres.integration
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-
 import com.twitter.finagle.postgres.Client
+import com.twitter.finagle.postgres.protocol.OK
 
 case class User(email: String, name: String)
 
@@ -13,12 +13,12 @@ case class User(email: String, name: String)
 class IntegrationSpec extends Specification {
 
   args(sequential = true)
-  val on = false // only manual running
+  val on = true // only manual running
 
   if (on) {
     "Postgres client" >> {
       val client = Client("localhost:5432", "mkhadikov", Some("pass"), "contacts")
-      val i = client.delete("delete from users").get
+      val i = client.execute("delete from users").get
 
       "select on empty table should return empty list" in {
         val f = client.select("select  * from users") { row =>
@@ -29,15 +29,15 @@ class IntegrationSpec extends Specification {
       }
 
       "inserting item should work" in {
-        val fi = client.insert("insert into users(email, name) values ('mickey@mouse.com', 'Mickey Mouse')," +
+        val fi = client.execute("insert into users(email, name) values ('mickey@mouse.com', 'Mickey Mouse')," +
           " ('bugs@bunny.com', 'Bugs Bunny')")
 
-        fi.get === 2
+        fi.get === OK(2)
       }
 
       "deleting item should work" in {
-        val fd = client.delete("delete from users where email='bugs@bunny.com'")
-        fd.get === 1
+        val fd = client.execute("delete from users where email='bugs@bunny.com'")
+        fd.get === OK(1)
 
         val f = client.select("select  * from users") { row =>
           User(row.getString("email"), row.getString("name"))
@@ -47,8 +47,8 @@ class IntegrationSpec extends Specification {
       }
 
       "updating item should work" in {
-        val fd = client.update("update users set name = 'Michael Mouse' where email='mickey@mouse.com'")
-        fd.get === 1
+        val fd = client.execute("update users set name = 'Michael Mouse' where email='mickey@mouse.com'")
+        fd.get === OK(1)
 
         val f = client.select("select  * from users") { row =>
           User(row.getString("email"), row.getString("name"))

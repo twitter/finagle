@@ -1,10 +1,10 @@
 package com.twitter.finagle.postgres.protocol
 
-import java.sql.{Date => SQLDate}
+import java.sql.{ Date => SQLDate }
 import java.sql.Timestamp
-
 import com.twitter.logging.Logger
-
+import com.twitter.concurrent.Spool
+import com.twitter.util.Future
 
 case class PgRequest(msg: FrontendMessage) {
 
@@ -50,7 +50,6 @@ case object NullValue extends Value
 // TODO any sense of having Field instead of string???
 case class Field(name: String)
 
-
 class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
   private val logger = Logger(getClass.getName)
 
@@ -76,13 +75,19 @@ class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
 
 }
 
-case class ResultSet(fields: IndexedSeq[Field], rows: Seq[Row]) extends QueryResponse
+case class ResultSet(fields: IndexedSeq[Field], rows: Future[Spool[Row]]) extends QueryResponse {
+  def map[T](f: Row => T): Future[Spool[T]] =
+    rows.map { spool =>
+      spool.map { row =>
+        f(row)
+      }
+    }
 
-case class Inserted(num: Int) extends QueryResponse
+  def foreach[T](f: Row => T) = rows.map(_.foreach(f))
 
-case class Deleted(num: Int) extends QueryResponse
+}
 
-case class Updated(num: Int) extends QueryResponse
+case class OK(affectedRows: Int) extends QueryResponse
 
 object Communication {
 
