@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import java.nio.charset.Charset
 import scala.StringBuilder
 import java.security.MessageDigest
+import scala.annotation.tailrec
 
 object Charsets {
 
@@ -14,18 +15,20 @@ object Charsets {
 object Buffers {
 
   def readCString(buffer: ChannelBuffer): String = {
+    @tailrec
+    def countChars(buf: ChannelBuffer, count: Int): Int = {
+      if (buffer.readByte() == 0)
+        count
+      else
+        countChars(buf, count + 1)
+    }
 
     buffer.markReaderIndex()
-    var count = 0
-    var done = false
-    while (!done) {
-      done = buffer.readByte() == 0
-      count += 1
-    }
+    val count = countChars(buffer, 0)
     buffer.resetReaderIndex()
 
-    val result = buffer.toString(buffer.readerIndex(), count - 1, Charsets.Utf8)
-    buffer.readerIndex(buffer.readerIndex() + count)
+    val result = buffer.toString(buffer.readerIndex(), count, Charsets.Utf8)
+    buffer.readerIndex(buffer.readerIndex() + count + 1)
     result
   }
 

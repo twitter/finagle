@@ -57,16 +57,17 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
     logger.ifDebug("Startup response -- " + startupResponse)
     startupResponse match {
 
-      case PasswordRequired(encoding) =>
-        if (password.isEmpty) {
-          Future.exception(new IllegalArgumentException("Password has to be specified for md5 authentication connection"))
-        } else {
+      case PasswordRequired(encoding) => password match {
+        case Some(pass) =>
           val msg = encoding match {
-            case ClearText => PasswordMessage(password.get)
-            case Md5(salt) => PasswordMessage(new String(Md5Encriptor.encript(user.getBytes, password.get.getBytes, salt)))
+            case ClearText => PasswordMessage(pass)
+            case Md5(salt) => PasswordMessage(new String(Md5Encriptor.encript(user.getBytes, pass.getBytes, salt)))
           }
           service(Communication.request(msg))
-        }
+
+        case None => Future.exception(new IllegalArgumentException("Password has to be specified for md5 authentication connection"))
+
+      }
 
       case r => Future.value(r)
     }
@@ -258,21 +259,16 @@ class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChan
       case packet: Packet =>
         logger.ifDebug("Packet passed. Trying to parse...")
 
-        val result = parser.parse(packet)
-
-        if (result.isDefined) {
-          val backendMessage = result.get
-
-          logger.ifDebug("Decoded message  " + backendMessage)
-
-          Channels.fireMessageReceived(ctx, backendMessage)
-
-        } else {
-          logger.warning("Cannot parse the packet. Disconnecting...")
-          Channels.disconnect(ctx.getChannel)
+        parser.parse(packet) match {
+          case Some(backendMessage) =>
+            logger.ifDebug("Decoded message  " + backendMessage)
+            Channels.fireMessageReceived(ctx, backendMessage)
+          case None =>
+            logger.warning("Cannot parse the packet. Disconnecting...")
+            Channels.disconnect(ctx.getChannel)
         }
 
-      case unsupported =>
+      case _ =>
         logger.warning("Only packet is supported...")
         Channels.disconnect(ctx.getChannel)
     }
