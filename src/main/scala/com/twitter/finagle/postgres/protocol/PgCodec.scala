@@ -199,6 +199,7 @@ class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
         val promise: Promise[Spool[Row]] = new Promise()
         (Some(ResultSet(fieldNames, promise)), SelectQuery(fieldNames, fieldParsers, promise))
       case CommandComplete(tag) => (None, UpdateQuery(tag))
+      case NoticeResponse(details) => (None, state)
       case ErrorResponse(details) => (Some(Error(details)), WaitingForQuery)
     }
   }
@@ -232,13 +233,19 @@ class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
   }
 
   private[this] def parseTag(tag: String): QueryResponse = {
-    val parts = tag.split(" ")
+    if (tag == "CREATE TABLE") {
+      OK(1)
+    } else if (tag == "DROP TABLE") {
+      OK(1)
+    } else {
+      val parts = tag.split(" ")
 
-    parts(0) match {
-      case "INSERT" => OK(parts(2).toInt)
-      case "DELETE" => OK(parts(1).toInt)
-      case "UPDATE" => OK(parts(1).toInt)
-      case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+      parts(0) match {
+        case "INSERT" => OK(parts(2).toInt)
+        case "DELETE" => OK(parts(1).toInt)
+        case "UPDATE" => OK(parts(1).toInt)
+        case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+      }
     }
   }
 

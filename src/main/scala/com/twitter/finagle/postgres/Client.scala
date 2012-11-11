@@ -1,7 +1,5 @@
 package com.twitter.finagle.postgres
 
-import scala.annotation.implicitNotFound
-
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.postgres.protocol.Communication

@@ -14,6 +14,8 @@ trait BackendMessage
 
 case class ErrorResponse(msg: Option[String]) extends BackendMessage
 
+case class NoticeResponse(msg: Option[String]) extends BackendMessage
+
 case class AuthenticationOk() extends BackendMessage
 
 case class AuthenticationMD5Password(salt: Array[Byte]) extends BackendMessage
@@ -84,9 +86,7 @@ class BackendMessageParser {
 
         throw new UnsupportedOperationException("'n' Not implemented yet")
       case 'N' =>
-        logger.error("'N' Not implemented yet")
-
-        throw new UnsupportedOperationException("'N' Not implemented yet")
+        parseN(packet)
       case 'A' =>
         logger.error("'A' Not implemented yet")
 
@@ -165,6 +165,20 @@ class BackendMessageParser {
     }
 
     Some(new ErrorResponse(Some(builder.toString)))
+  }
+
+  def parseN(packet: Packet): Option[BackendMessage] = {
+	  logger.ifDebug("parsing N")
+	  logger.ifDebug("Packet " + packet)
+	  
+	  val Packet(_, length, content) = packet
+	  
+	  val builder = new StringBuilder()
+	  while (content.readable) {
+		  builder.append(Buffers.readCString(content))
+	  }
+	  
+	  Some(new NoticeResponse(Some(builder.toString)))
   }
 
   def parseZ(packet: Packet): Option[BackendMessage] = {
