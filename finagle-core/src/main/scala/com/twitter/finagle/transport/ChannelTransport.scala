@@ -32,9 +32,9 @@ class ChannelTransport[In, Out](ch: Channel)
   }
 
   private[this] def fail(exc: Throwable) {
-    readq.fail(exc)
     close()
     closep.updateIfEmpty(Return(exc))
+    readq.fail(exc)
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
@@ -110,9 +110,9 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
   }
 
   private[this] def fail(exc: Throwable) {
+    close()
     closep.updateIfEmpty(Return(exc))
     readq.fail(exc)
-    close()
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
