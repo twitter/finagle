@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Time, JavaSingleton}
 import java.util.concurrent.TimeUnit
 
 /**
- * A writeable Counter. Only sums are kept of Counters.  An example
+ * A writeable Counter. Only sums are kept of Counters. An example
  * Counter is "number of requests served".
  */
 trait Counter extends {
@@ -16,12 +16,17 @@ trait Counter extends {
 }
 
 /**
- * TODO: doc
+ * An append-only collection of time-series data. Example Stats are
+ * "queue depth" or "query width in a stream of requests".
  */
 trait Stat {
   def add(value: Float)
 }
 
+/**
+ * Exposes the value of a function. For example, one could add a gauge for a
+ * computed health metric.
+ */
 trait Gauge {
   def remove()
 }
@@ -83,12 +88,12 @@ trait StatsReceiver {
   def counter0(name: String): Counter = counter(name)
 
   /**
-   * Get a Gauge with the description
+   * Get a Stat with the description
    */
   def stat(name: String*): Stat
 
   /**
-   * Get a Gauge with the description. This method is a convenience for Java programs.
+   * Get a Stat with the description. This method is a convenience for Java programs.
    */
   def stat0(name: String): Stat = stat(name)
 
