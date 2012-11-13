@@ -14,6 +14,9 @@ object Charsets {
 
 object Buffers {
 
+  /**
+   * Reads a string with C-style '\0' terminator at the end from a buffer
+   */
   def readCString(buffer: ChannelBuffer): String = {
     @tailrec
     def countChars(buf: ChannelBuffer, count: Int): Int = {
@@ -24,11 +27,19 @@ object Buffers {
     }
 
     buffer.markReaderIndex()
-    val count = countChars(buffer, 0)
+    // search for '\0'
+    var count = 0
+    var done = false
+    while (!done) {
+      done = buffer.readByte() == 0
+      count += 1
+    }
     buffer.resetReaderIndex()
 
-    val result = buffer.toString(buffer.readerIndex(), count, Charsets.Utf8)
-    buffer.readerIndex(buffer.readerIndex() + count + 1)
+    // read a string without '\0'
+    val result = buffer.toString(buffer.readerIndex(), count - 1, Charsets.Utf8)
+    // set reader index to the whole string length - including '\0'
+    buffer.readerIndex(buffer.readerIndex() + count)
     result
   }
 
