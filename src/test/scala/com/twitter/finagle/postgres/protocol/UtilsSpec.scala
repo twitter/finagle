@@ -41,5 +41,11 @@ class UtilsSpec extends Specification {
 
       buffer.readerIndex() === cStr.length
     }
+
+    "throw appropriate exception if string passed is not C style" in {
+      val bufferWithWrongString = ChannelBuffers.copiedBuffer("not a C style string", Charsets.Utf8)
+      
+      Buffers.readCString(bufferWithWrongString) must throwAn[IndexOutOfBoundsException]
+    }
   }  
 }

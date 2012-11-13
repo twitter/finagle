@@ -31,6 +31,7 @@ object Buffers {
     var count = 0
     var done = false
     while (!done) {
+      if(!buffer.readable) throw new IndexOutOfBoundsException("buffer ended, but '\0' was not found")
       done = buffer.readByte() == 0
       count += 1
     }
