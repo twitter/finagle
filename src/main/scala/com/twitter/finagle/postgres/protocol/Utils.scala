@@ -17,6 +17,7 @@ object Buffers {
   /**
    * Reads a string with C-style '\0' terminator at the end from a buffer
    */
+  @throws(classOf[IndexOutOfBoundsException])
   def readCString(buffer: ChannelBuffer): String = {
     @tailrec
     def countChars(buf: ChannelBuffer, count: Int): Int = {
@@ -46,10 +47,15 @@ object Buffers {
 
 }
 
-object Md5Encriptor {
+object Md5Encryptor {
 
-  def encript(user: Array[Byte], password: Array[Byte], salt: Array[Byte]): Array[Byte] = {
+  @throws(classOf[IllegalArgumentException])
+  def encrypt(user: Array[Byte], password: Array[Byte], salt: Array[Byte]): Array[Byte] = {
 
+    require(user != null && user.length > 0, "user should not be empty")
+    require(password != null && password.length > 0, "password should not be empty")
+    require(salt != null && salt.length > 0, "salt should not be empty")
+    
     val inner = MessageDigest.getInstance("MD5")
     inner.update(password)
     inner.update(user)

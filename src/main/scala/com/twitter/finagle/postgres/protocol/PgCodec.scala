@@ -61,7 +61,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
         case Some(pass) =>
           val msg = encoding match {
             case ClearText => PasswordMessage(pass)
-            case Md5(salt) => PasswordMessage(new String(Md5Encriptor.encript(user.getBytes, pass.getBytes, salt)))
+            case Md5(salt) => PasswordMessage(new String(Md5Encryptor.encrypt(user.getBytes, pass.getBytes, salt)))
           }
           service(Communication.request(msg))
 
