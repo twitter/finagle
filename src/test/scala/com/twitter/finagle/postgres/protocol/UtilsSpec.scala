@@ -64,5 +64,19 @@ class UtilsSpec extends Specification with DataTables {
       ba("lomack")  ! ba("lowmuck245$3") ! Array[Byte] (15, 19, 33, 1) ! "md56aa29016af76de6b793f3e7e009a26c2" |> {
       (user, password, salt, result) => new String(Md5Encryptor.encrypt(user, password, salt)) must_== result  
     }
+      
+    "throw exception if any of the parameters is missing or empty" in {
+      val user = ba("john")
+      val password = ba("john25")
+      val salt = Array[Byte] (1, 2, 3, 4)
+      val empty = Array[Byte]()
+ 
+      Md5Encryptor.encrypt(empty, password, salt) must throwAn[IllegalArgumentException]
+	  Md5Encryptor.encrypt(null, password, salt) must throwAn[IllegalArgumentException]
+      Md5Encryptor.encrypt(user, empty, salt) must throwAn[IllegalArgumentException]
+	  Md5Encryptor.encrypt(user, null, salt) must throwAn[IllegalArgumentException]
+      Md5Encryptor.encrypt(user, password, empty) must throwAn[IllegalArgumentException]
+      Md5Encryptor.encrypt(user, password, null) must throwAn[IllegalArgumentException]
+    }  
   }
 }
