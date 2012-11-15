@@ -28,7 +28,6 @@ import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConverters._
 import scala.collection.mutable.HashSet
-import java.util.concurrent.atomic.AtomicLong
 
 trait Server {
   /**
@@ -528,11 +527,7 @@ private[builder] class MkServer[Req, Rep] (
     }
 
     // We share some filters & handlers for cumulative stats.
-    val connectionCount = new AtomicLong(0)
-    statsReceiverOpt foreach { _.provideGauge("connections") { connectionCount.get } }
-    val channelStatsHandler = statsReceiverOpt map {
-      statsReceiver => new ChannelStatsHandler(statsReceiver, connectionCount)
-    }
+    val channelStatsHandler = statsReceiverOpt map { new ChannelStatsHandler(_) }
     val channelRequestStatsHandler = statsReceiverOpt map { new ChannelRequestStatsHandler(_) }
 
     channelStatsHandler foreach { handler =>

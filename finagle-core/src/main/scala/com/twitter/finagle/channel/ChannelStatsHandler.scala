@@ -12,7 +12,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
   ExceptionEvent, MessageEvent, SimpleChannelHandler}
 
-class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicLong)
+class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
 {
@@ -24,7 +24,11 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val closeChans              = statsReceiver.counter("closechans")
+  private[this] val closeChans = statsReceiver.counter("closechans")
+
+  private[this] val connectionCount = new AtomicInteger(0)
+
+  private[this] val connectionGauge = statsReceiver.addGauge("connections") { connectionCount.get }
 
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))

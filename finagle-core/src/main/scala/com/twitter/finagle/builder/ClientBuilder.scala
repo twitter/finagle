@@ -71,7 +71,6 @@ import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.jboss.netty.{util => nu}
 import scala.annotation.implicitNotFound
 import tracing.{NullTracer, TracingFilter, Tracer}
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -612,11 +611,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       override def getPipeline = {
         val pipeline = codec.pipelineFactory.getPipeline
 
-        val connectionCount = new AtomicLong(0)
-        statsReceiver.provideGauge("connections") { connectionCount.get }
-
-        pipeline.addFirst("channelStatsHandler",
-          new ChannelStatsHandler(statsReceiver, connectionCount))
+        pipeline.addFirst("channelStatsHandler", new ChannelStatsHandler(statsReceiver))
         pipeline.addFirst("channelRequestStatsHandler",
           new ChannelRequestStatsHandler(statsReceiver)
         )
