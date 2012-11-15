@@ -15,6 +15,7 @@ import com.twitter.jvm.Jvm
 import com.twitter.util.{
   Duration, Future, Monitor, NullMonitor, Promise, Time, Timer}
 import java.net.SocketAddress
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.Executors
 import java.util.logging.Logger
 import org.jboss.netty.bootstrap.ServerBootstrap
@@ -518,7 +519,8 @@ private[builder] class MkServer[Req, Rep] (
   private[this] def mkPipeline(
     codec: Codec[Req, Rep],
     statsReceiverOpt: Option[StatsReceiver],
-    timer: TwoTimer
+    timer: TwoTimer,
+    channelStatsHandler: Option[ChannelStatsHandler]
   ) = {
     val pipeline = codec.pipelineFactory.getPipeline
     config.logger foreach { logger =>
@@ -527,7 +529,6 @@ private[builder] class MkServer[Req, Rep] (
     }
 
     // We share some filters & handlers for cumulative stats.
-    val channelStatsHandler = statsReceiverOpt map { new ChannelStatsHandler(_) }
     val channelRequestStatsHandler = statsReceiverOpt map { new ChannelRequestStatsHandler(_) }
 
     channelStatsHandler foreach { handler =>
@@ -632,9 +633,15 @@ private[builder] class MkServer[Req, Rep] (
       tracingFilter andThen // to prepare tracing prior to codec tracing support
       ServerBuilder.mkJvmFilter[Req, Rep]()  // to maximize surface area
 
+    val connectionCount = new AtomicLong(0)
+    val channelStatsHandler = statsReceiverOpt map { statsReceiver =>
+      new ChannelStatsHandler(statsReceiver, connectionCount)
+    }
+    gauges += statsReceiver.addGauge("connections") { connectionCount.get }
+
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline() = {
-        val pipeline = mkPipeline(codec, statsReceiverOpt, timer)
+        val pipeline = mkPipeline(codec, statsReceiverOpt, timer, channelStatsHandler)
 
         // Make some connection-specific changes to the service
         // factory.

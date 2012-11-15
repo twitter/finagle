@@ -60,6 +60,7 @@ import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Future, Monitor, Time, Timer, Try}
 import java.net.{InetSocketAddress, SocketAddress}
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.{Executors, TimeUnit}
 import java.util.logging.Logger
 import javax.net.ssl.SSLContext
@@ -601,7 +602,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[this] def buildBootstrap(
     codec: Codec[Req, Rep],
     host: SocketAddress,
-    timer: TwoTimer
+    timer: TwoTimer,
+    channelStatsHandler: ChannelStatsHandler
   ) = {
     val cf = config.channelFactory getOrElse ClientBuilder.defaultChannelFactory
     cf.acquire()
@@ -611,7 +613,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       override def getPipeline = {
         val pipeline = codec.pipelineFactory.getPipeline
 
-        pipeline.addFirst("channelStatsHandler", new ChannelStatsHandler(statsReceiver))
+        pipeline.addFirst("channelStatsHandler", channelStatsHandler)
         pipeline.addFirst("channelRequestStatsHandler",
           new ChannelRequestStatsHandler(statsReceiver)
         )
@@ -702,7 +704,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[this] def hostToServiceFactory(
     codec: Codec[Req, Rep],
     host: SocketAddress,
-    timer: TwoTimer
+    timer: TwoTimer,
+    channelStatsHandler: ChannelStatsHandler
   ): ServiceFactory[Req, Rep] = {
     // The per-host stack is as follows:
     //
@@ -722,7 +725,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     )
 
     var factory: ServiceFactory[Req, Rep] = null
-    val bs = buildBootstrap(codec, host, timer)
+    val bs = buildBootstrap(codec, host, timer, channelStatsHandler)
     val preparedFactory = codec.prepareConnFactory(new ChannelServiceFactory[Req, Rep](
       bs, codec.mkClientDispatcher, hostStatsReceiver
     ))
@@ -767,13 +770,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val cluster = config.cluster.get
     val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
 
+    val connectionCount = new AtomicLong(0)
+    statsReceiver.provideGauge("connections") { connectionCount.get }
+    val channelStatsHandler = new ChannelStatsHandler(statsReceiver, connectionCount)
+
     var factory: ServiceFactory[Req, Rep] = cluster match {
       // Special case one service, bypassing the load balancer
       // entirely.
       case StaticCluster(Seq(host)) =>
-        hostToServiceFactory(codec, host, timer)
+        hostToServiceFactory(codec, host, timer, channelStatsHandler)
       case cluster =>
-        val hostFactories = cluster map { host => hostToServiceFactory(codec, host, timer) }
+        val hostFactories = cluster map { host =>
+          hostToServiceFactory(codec, host, timer, channelStatsHandler) }
         val exception = new NoBrokersAvailableException(config.name.get)
         new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"), exception)
     }
