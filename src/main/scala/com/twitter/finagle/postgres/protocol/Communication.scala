@@ -68,7 +68,7 @@ class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value]) {
 
   def values(): IndexedSeq[Value] = vals
 
-  override def toString(): String = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'"
+  override def toString(): String = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'}"
 
 }
 

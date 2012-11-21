@@ -88,7 +88,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
           }
           service(Communication.request(msg))
 
-        case None => Future.exception(Errors.client("Password has to be specified for md5 authentication connection"))
+        case None => Future.exception(Errors.client("Password has to be specified for authenticated connection"))
 
       }
 
