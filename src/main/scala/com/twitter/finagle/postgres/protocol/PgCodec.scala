@@ -181,7 +181,7 @@ class PgResponseHandler() extends SimpleChannelHandler {
     }
 
     def rollback() = {
-      promise.update(Throw(new IllegalStateException("TODO: Introduce exception")))
+      promise.update(Throw(Errors.server("Failed to execute select query")))
       WaitingForQuery
     }
   }
@@ -247,8 +247,15 @@ class PgResponseHandler() extends SimpleChannelHandler {
   def processMessage(msg: BackendMessage): Option[PgResponse] = {
 
     val handleMessage: PartialFunction[BackendMessage, (Option[PgResponse], State)] = state.process.orElse {
+      // TODO not sure that this should work correctly in case if select query failed
       case ErrorResponse(details) => (Some(Error(details)), state.rollback)
-      case NoticeResponse(details) => (Some(Error(details)), state)
+      case NoticeResponse(details) =>
+        logger.ifInfo("Notice from backend " + details)
+        (None, state)
+      case ParameterStatus(name, value) =>
+        logger.ifInfo("Param '" + name + "' has changed to '" + value + "'")
+        (None, state)
+
       case _ => throw new UnsupportedMessage("Unknown message from backend " + msg + " for state " + state)
     }
 
