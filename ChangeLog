@@ -1,3 +1,14 @@
+5.3.23		2012/11/21
+
+	* finagle-spdy: new codec
+	* finagle-core: ServiceTimeoutException is now a
+	WriteException (so they can be retried)
+	* finagle-core: close channels owned by ChannelTransport
+	before failing queues
+	* finagle-core: share ChannelStatsHandler in clients and
+	servers to avoid excessive stats-related weakrefs
+	* finagle-core: don't leak Spooled updates in the HeapBalancer
+
 5.3.22		2012/11/08
 
 	* finagle-redis: String commands
