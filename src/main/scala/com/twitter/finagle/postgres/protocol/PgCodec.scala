@@ -31,10 +31,33 @@ class PgCodec(user: String, password: Option[String], database: String) extends 
         }
       }
 
-      override def prepareServiceFactory(underlying: ServiceFactory[PgRequest, PgResponse]) =
-        new AuthenticationProxy(underlying, user, password, database)
+      override def prepareServiceFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
+        val errorHandling = new HandleErrorsProxy(underlying)
+        new AuthenticationProxy(errorHandling, user, password, database)
+      }
 
     }
+  }
+
+}
+
+class HandleErrorsProxy(delegate: ServiceFactory[PgRequest, PgResponse])
+  extends ServiceFactoryProxy(delegate) {
+
+  private val logger = Logger(getClass.getName)
+
+  override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
+    for {
+      service <- delegate.apply(conn)
+    } yield HandleErrors.andThen(service)
+  }
+
+  object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
+    def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) =
+      service.apply(request).flatMap {
+        case Error(details) => Future.exception(Errors.server(details.getOrElse("")))
+        case r => Future.value(r)
+      }
   }
 
 }
@@ -65,7 +88,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
           }
           service(Communication.request(msg))
 
-        case None => Future.exception(new IllegalArgumentException("Password has to be specified for md5 authentication connection"))
+        case None => Future.exception(Errors.client("Password has to be specified for md5 authentication connection"))
 
       }
 
@@ -78,9 +101,6 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
       case AuthenticatedResponse(statuses, processId, secretKey) =>
         logger.ifInfo("Authenticated " + processId + " " + secretKey + "\n" + statuses)
         Future(Unit)
-      case _ =>
-        // TODO change exception
-        Future.exception(new IllegalStateException("Cannot authenticate"))
     }
   }
 
@@ -109,24 +129,106 @@ class FrontendEncoder extends OneToOneEncoder {
  * Aggregates `BackendMessage` to `PgResponse`.
  *
  */
-class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
+class PgResponseHandler() extends SimpleChannelHandler {
 
-  case object AuthenticationRequired extends State
+  sealed trait State {
 
-  case object WaitingForQuery extends State
+    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)]
 
-  case class SelectQuery(fieldNames: IndexedSeq[Field], fieldParsers: IndexedSeq[ChannelBuffer => Value], promise: Promise[Spool[Row]]) extends State
+    def rollback(): State
 
-  case class UpdateQuery(tag: String) extends State
+  }
+
+  case object AuthenticationRequired extends State {
+    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
+      case AuthenticationCleartextPassword() => (Some(PasswordRequired(ClearText)), AuthenticationRequired)
+      case AuthenticationMD5Password(salt) => (Some(PasswordRequired(Md5(salt))), AuthenticationRequired)
+      case AuthenticationOk() => (None, AggregatingAuthData(Map(), -1, -1))
+    }
+
+    def rollback() = AuthenticationRequired
+
+  }
+
+  case object WaitingForQuery extends State {
+    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
+      case RowDescription(fields) =>
+        val fieldNames = fields.map(f => Field(f.name))
+        val fieldParsers = fields.map(f => ValueParser.parserOf(f))
+        val promise: Promise[Spool[Row]] = new Promise()
+        (Some(ResultSet(fieldNames, promise)), SelectQuery(fieldNames, fieldParsers, promise))
+      case CommandComplete(tag) => (None, UpdateQuery(tag))
+    }
+
+    def rollback() = WaitingForQuery
+
+  }
+
+  case class SelectQuery(fieldNames: IndexedSeq[Field], fieldParsers: IndexedSeq[ChannelBuffer => Value], promise: Promise[Spool[Row]]) extends State {
+    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
+      case row: DataRow => processRow(row)
+      case CommandComplete(_) => (None, state)
+      case ReadyForQuery(_) =>
+        promise.update(Return(Spool.empty))
+        (None, WaitingForQuery)
+    }
+
+    private[this] def processRow(dataRow: DataRow): (Option[PgResponse], State) = {
+      val row = new Row(fieldNames, dataRow.data.zip(fieldParsers).map(pair => pair._2(pair._1)))
+      val tail = new Promise[Spool[Row]]
+      promise.update(Return(row *:: tail))
+      (None, SelectQuery(fieldNames, fieldParsers, tail))
+    }
+
+    def rollback() = {
+      promise.update(Throw(new IllegalStateException("TODO: Introduce exception")))
+      WaitingForQuery
+    }
+  }
+
+  case class UpdateQuery(tag: String) extends State {
+    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
+      case ReadyForQuery(_) => (Some(parseTag(tag)), WaitingForQuery)
+    }
+
+    def rollback() = WaitingForQuery
+
+    private[this] def parseTag(tag: String): QueryResponse = {
+      if (tag == "CREATE TABLE") {
+        OK(1)
+      } else if (tag == "DROP TABLE") {
+        OK(1)
+      } else {
+        val parts = tag.split(" ")
+
+        parts(0) match {
+          case "INSERT" => OK(parts(2).toInt)
+          case "DELETE" => OK(parts(1).toInt)
+          case "UPDATE" => OK(parts(1).toInt)
+          case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+        }
+      }
+    }
+
+  }
 
   case class AggregatingAuthData(statuses: Map[String, String], processId: Int, secretKey: Int) extends State {
     def addStatus(name: String, value: String) = AggregatingAuthData(statuses + (name -> value), processId, secretKey)
     def setKeyData(processId: Int, secretKey: Int) = AggregatingAuthData(statuses, processId, secretKey)
+
+    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
+      case ParameterStatus(name, value) => (None, addStatus(name, value))
+      case BackendKeyData(processId, secretKey) => (None, setKeyData(processId, secretKey))
+      case ReadyForQuery(_) => (Some(AuthenticatedResponse(statuses, processId, secretKey)), WaitingForQuery)
+    }
+
+    def rollback() = WaitingForQuery // TODO is authentication successful here?
+
   }
 
   private val logger = Logger(getClass.getName)
 
-  state = AuthenticationRequired
+  var state: State = AuthenticationRequired
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val message = e.getMessage
@@ -143,110 +245,17 @@ class PgResponseHandler() extends SimpleChannelHandler with StateMachine {
   }
 
   def processMessage(msg: BackendMessage): Option[PgResponse] = {
-    val (response, newState) = state match {
 
-      case AuthenticationRequired =>
-        handleAuthentication(msg)
-
-      case WaitingForQuery =>
-        handleQueryResponse(msg)
-
-      case s: UpdateQuery =>
-        handleUpdateQuery(msg, s)
-
-      case s: SelectQuery =>
-        processSelectQuery(msg, s)
-
-      case s: AggregatingAuthData =>
-        accumulateAuthData(msg, s)
+    val handleMessage: PartialFunction[BackendMessage, (Option[PgResponse], State)] = state.process.orElse {
+      case ErrorResponse(details) => (Some(Error(details)), state.rollback)
+      case NoticeResponse(details) => (Some(Error(details)), state)
+      case _ => throw new UnsupportedMessage("Unknown message from backend " + msg + " for state " + state)
     }
+
+    val (response, newState) = handleMessage(msg)
+
     state = newState
     response
-  }
-
-  private[this] def processSelectQuery(msg: BackendMessage, state: SelectQuery): (Option[PgResponse], State) = {
-    logger.ifDebug("handling select data. [msg " + msg + " state " + state + "]")
-    msg match {
-      case row: DataRow => processRow(row, state)
-      case CommandComplete(_) => (None, state)
-      case ReadyForQuery(_) =>
-        logger.ifDebug("Select query comleted state '" + state + "'")
-        state.promise.update(Return(Spool.empty))
-        (None, WaitingForQuery)
-      case ErrorResponse(details) =>
-        logger.ifDebug("Select query failed state '" + state + "'")
-        state.promise.update(Throw(new IllegalStateException("TODO: Introduce exception")))
-        (Some(Error(details)), WaitingForQuery)
-    }
-  }
-
-  private[this] def processRow(dataRow: DataRow, state: SelectQuery): (Option[PgResponse], State) = {
-    logger.ifDebug("Processing row '" + state + "'")
-
-    val SelectQuery(fieldNames, fieldParsers, promise) = state
-    val row = new Row(fieldNames, dataRow.data.zip(fieldParsers).map(pair => pair._2(pair._1)))
-    val tail = new Promise[Spool[Row]]
-    promise.update(Return(row *:: tail))
-    (None, SelectQuery(fieldNames, fieldParsers, tail))
-  }
-
-  private[this] def handleQueryResponse(msg: BackendMessage): (Option[PgResponse], State) = {
-    logger.ifDebug("handling query response. [msg " + msg + " state " + state + "]")
-    msg match {
-      case RowDescription(fields) =>
-        val fieldNames = fields.map(f => Field(f.name))
-        val fieldParsers = fields.map(f => ValueParser.parserOf(f))
-        val promise: Promise[Spool[Row]] = new Promise()
-        (Some(ResultSet(fieldNames, promise)), SelectQuery(fieldNames, fieldParsers, promise))
-      case CommandComplete(tag) => (None, UpdateQuery(tag))
-      case NoticeResponse(details) => (None, state)
-      case ErrorResponse(details) => (Some(Error(details)), WaitingForQuery)
-    }
-  }
-
-  private[this] def handleUpdateQuery(msg: BackendMessage, state: UpdateQuery): (Option[PgResponse], State) = {
-    logger.ifDebug("handling update query response. [msg " + msg + " state " + state + "]")
-    msg match {
-      case ReadyForQuery(_) => (Some(parseTag(state.tag)), WaitingForQuery)
-      case ErrorResponse(details) => (Some(Error(details)), WaitingForQuery)
-    }
-  }
-
-  private[this] def handleAuthentication(msg: BackendMessage): (Option[PgResponse], State) = {
-    logger.ifDebug("handling authentication. [msg " + msg + " state " + state + "]")
-    msg match {
-      case AuthenticationCleartextPassword() => (Some(PasswordRequired(ClearText)), AuthenticationRequired)
-      case AuthenticationMD5Password(salt) => (Some(PasswordRequired(Md5(salt))), AuthenticationRequired)
-      case AuthenticationOk() => (None, AggregatingAuthData(Map(), -1, -1))
-      case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
-    }
-  }
-
-  private[this] def accumulateAuthData(msg: BackendMessage, state: AggregatingAuthData): (Option[PgResponse], State) = {
-    logger.ifDebug("aggregating authentication data. [msg " + msg + " state " + state + "]")
-    msg match {
-      case ParameterStatus(name, value) => (None, state.addStatus(name, value))
-      case BackendKeyData(processId, secretKey) => (None, state.setKeyData(processId, secretKey))
-      case ReadyForQuery(_) => (Some(AuthenticatedResponse(state.statuses, state.processId, state.secretKey)), WaitingForQuery)
-      case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
-    }
-  }
-
-  private[this] def parseTag(tag: String): QueryResponse = {
-    if (tag == "CREATE TABLE") {
-      OK(1)
-    } else if (tag == "DROP TABLE") {
-      OK(1)
-    } else {
-      val parts = tag.split(" ")
-
-      parts(0) match {
-        case "INSERT" => OK(parts(2).toInt)
-        case "DELETE" => OK(parts(1).toInt)
-        case "UPDATE" => OK(parts(1).toInt)
-        case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
-      }
-    }
   }
 
 }
@@ -309,6 +318,8 @@ class PacketDecoder extends FrameDecoder {
 
   }
 }
+
+class UnsupportedMessage(message: String) extends Exception(message)
 
 
 

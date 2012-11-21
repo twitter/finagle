@@ -5,9 +5,9 @@ import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import com.twitter.finagle.postgres.Client
 import com.twitter.finagle.postgres.protocol.OK
+import com.twitter.finagle.postgres.protocol.ServerError
 
 case class User(email: String, name: String)
-
 
 @RunWith(classOf[JUnitRunner])
 class IntegrationSpec extends Specification {
@@ -56,6 +56,11 @@ class IntegrationSpec extends Specification {
 
         f.get.size === 1
         f.get.head.name === "Michael Mouse"
+      }
+
+      "wrong query should throw exception" in {
+        val fd = client.execute("this is wrong query")
+        fd.get must throwA[ServerError]
       }
     }
   }
