@@ -52,7 +52,7 @@ class HeapBalancer[Req, Rep](
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
 
-  private[this] val (factories, updates) = cluster.snap
+  private[this] var (factories, updates) = cluster.snap
   // Build initial heap
   // Our heap is 1-indexed. We make heap[0] a dummy node
   // Invariants:
@@ -92,6 +92,11 @@ class HeapBalancer[Req, Rep](
       }
     }
   }
+  // Zero out updates so that we don't hold
+  // on to the head of the spool; factories so
+  // we don't hold on to the initial list.
+  updates = null
+  factories = null
 
   private[this] def put(n: Node) = synchronized {
     n.load -= 1
