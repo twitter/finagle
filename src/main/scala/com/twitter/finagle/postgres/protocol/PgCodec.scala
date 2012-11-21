@@ -153,7 +153,7 @@ class PgResponseHandler() extends SimpleChannelHandler {
   case object WaitingForQuery extends State {
     def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
       case RowDescription(fields) =>
-        val fieldNames = fields.map(f => Field(f.name))
+        val fieldNames = fields.map(f => f.name)
         val fieldParsers = fields.map(f => ValueParser.parserOf(f))
         val promise: Promise[Spool[Row]] = new Promise()
         (Some(ResultSet(fieldNames, promise)), SelectQuery(fieldNames, fieldParsers, promise))
@@ -164,7 +164,7 @@ class PgResponseHandler() extends SimpleChannelHandler {
 
   }
 
-  case class SelectQuery(fieldNames: IndexedSeq[Field], fieldParsers: IndexedSeq[ChannelBuffer => Value], promise: Promise[Spool[Row]]) extends State {
+  case class SelectQuery(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value], promise: Promise[Spool[Row]]) extends State {
     def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
       case row: DataRow => processRow(row)
       case CommandComplete(_) => (None, state)

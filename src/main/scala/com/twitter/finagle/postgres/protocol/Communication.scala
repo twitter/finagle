@@ -47,13 +47,10 @@ case class DateValue(d: SQLDate) extends Value
 
 case object NullValue extends Value
 
-// TODO any sense of having Field instead of string???
-case class Field(name: String)
-
-class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
+class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value]) {
   private val logger = Logger(getClass.getName)
 
-  private[this] val indexMap = fields.map(_.name).zipWithIndex.toMap
+  private[this] val indexMap = fields.zipWithIndex.toMap
 
   def get(name: String): Option[Value] = {
     indexMap.get(name).map(vals(_))
@@ -75,7 +72,7 @@ class Row(val fields: IndexedSeq[Field], val vals: IndexedSeq[Value]) {
 
 }
 
-case class ResultSet(fields: IndexedSeq[Field], rows: Future[Spool[Row]]) extends QueryResponse {
+case class ResultSet(fields: IndexedSeq[String], rows: Future[Spool[Row]]) extends QueryResponse {
   def map[T](f: Row => T): Future[Spool[T]] =
     rows.map { spool =>
       spool.map { row =>
