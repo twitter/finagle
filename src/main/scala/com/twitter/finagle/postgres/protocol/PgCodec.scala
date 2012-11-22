@@ -2,18 +2,10 @@ package com.twitter.finagle.postgres.protocol
 
 import com.twitter.finagle._
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import com.twitter.logging.Logger
 import com.twitter.util.Future
-import collection.mutable
-import com.twitter.logging.Level
-import com.twitter.util.StateMachine
-import com.twitter.concurrent.Spool
-import com.twitter.util.Promise
-import com.twitter.util.Return
-import com.twitter.util.Throw
 
 class PgCodec(user: String, password: Option[String], database: String) extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
@@ -25,8 +17,7 @@ class PgCodec(user: String, password: Option[String], database: String) extends 
           val pipeline = Channels.pipeline()
           pipeline.addLast("binary_to_packet", new PacketDecoder)
           pipeline.addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
-          pipeline.addLast("backend_messages_to_postgres_response", new PgResponseHandler())
-          pipeline.addLast("frontend", new FrontendEncoder)
+          pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler())
           pipeline
         }
       }
@@ -106,166 +97,6 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
 
 }
 
-class FrontendEncoder extends OneToOneEncoder {
-  private val logger = Logger(getClass.getName)
-
-  def encode(ctx: ChannelHandlerContext, channel: Channel, msg: AnyRef) = {
-    logger.ifDebug("Encoding message " + msg)
-
-    msg match {
-      case req: PgRequest =>
-        val packet = req.msg.asPacket()
-        packet.encode
-      case _ =>
-        logger.ifDebug("Cannot convert message... Skipping")
-        msg
-    }
-
-  }
-
-}
-
-/**
- * Aggregates `BackendMessage` to `PgResponse`.
- *
- */
-class PgResponseHandler() extends SimpleChannelHandler {
-
-  sealed trait State {
-
-    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)]
-
-    def rollback(): State
-
-  }
-
-  case object AuthenticationRequired extends State {
-    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
-      case AuthenticationCleartextPassword() => (Some(PasswordRequired(ClearText)), AuthenticationRequired)
-      case AuthenticationMD5Password(salt) => (Some(PasswordRequired(Md5(salt))), AuthenticationRequired)
-      case AuthenticationOk() => (None, AggregatingAuthData(Map(), -1, -1))
-    }
-
-    def rollback() = AuthenticationRequired
-
-  }
-
-  case object WaitingForQuery extends State {
-    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
-      case RowDescription(fields) =>
-        val fieldNames = fields.map(f => f.name)
-        val fieldParsers = fields.map(f => ValueParser.parserOf(f))
-        val promise: Promise[Spool[Row]] = new Promise()
-        (Some(ResultSet(fieldNames, promise)), SelectQuery(fieldNames, fieldParsers, promise))
-      case CommandComplete(tag) => (None, UpdateQuery(tag))
-    }
-
-    def rollback() = WaitingForQuery
-
-  }
-
-  case class SelectQuery(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value], promise: Promise[Spool[Row]]) extends State {
-    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
-      case row: DataRow => processRow(row)
-      case CommandComplete(_) => (None, state)
-      case ReadyForQuery(_) =>
-        promise.update(Return(Spool.empty))
-        (None, WaitingForQuery)
-    }
-
-    private[this] def processRow(dataRow: DataRow): (Option[PgResponse], State) = {
-      val row = new Row(fieldNames, dataRow.data.zip(fieldParsers).map(pair => pair._2(pair._1)))
-      val tail = new Promise[Spool[Row]]
-      promise.update(Return(row *:: tail))
-      (None, SelectQuery(fieldNames, fieldParsers, tail))
-    }
-
-    def rollback() = {
-      promise.update(Throw(Errors.server("Failed to execute select query")))
-      WaitingForQuery
-    }
-  }
-
-  case class UpdateQuery(tag: String) extends State {
-    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
-      case ReadyForQuery(_) => (Some(parseTag(tag)), WaitingForQuery)
-    }
-
-    def rollback() = WaitingForQuery
-
-    private[this] def parseTag(tag: String): QueryResponse = {
-      if (tag == "CREATE TABLE") {
-        OK(1)
-      } else if (tag == "DROP TABLE") {
-        OK(1)
-      } else {
-        val parts = tag.split(" ")
-
-        parts(0) match {
-          case "INSERT" => OK(parts(2).toInt)
-          case "DELETE" => OK(parts(1).toInt)
-          case "UPDATE" => OK(parts(1).toInt)
-          case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
-        }
-      }
-    }
-
-  }
-
-  case class AggregatingAuthData(statuses: Map[String, String], processId: Int, secretKey: Int) extends State {
-    def addStatus(name: String, value: String) = AggregatingAuthData(statuses + (name -> value), processId, secretKey)
-    def setKeyData(processId: Int, secretKey: Int) = AggregatingAuthData(statuses, processId, secretKey)
-
-    def process: PartialFunction[BackendMessage, (Option[PgResponse], State)] = {
-      case ParameterStatus(name, value) => (None, addStatus(name, value))
-      case BackendKeyData(processId, secretKey) => (None, setKeyData(processId, secretKey))
-      case ReadyForQuery(_) => (Some(AuthenticatedResponse(statuses, processId, secretKey)), WaitingForQuery)
-    }
-
-    def rollback() = WaitingForQuery // TODO is authentication successful here?
-
-  }
-
-  private val logger = Logger(getClass.getName)
-
-  var state: State = AuthenticationRequired
-
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val message = e.getMessage
-
-    message match {
-      case msg: BackendMessage =>
-        processMessage(msg).map(Channels.fireMessageReceived(ctx, _))
-
-      case unsupported =>
-        logger.warning("Only backend message is supported...")
-        Channels.disconnect(ctx.getChannel)
-    }
-
-  }
-
-  def processMessage(msg: BackendMessage): Option[PgResponse] = {
-
-    val handleMessage: PartialFunction[BackendMessage, (Option[PgResponse], State)] = state.process.orElse {
-      // TODO not sure that this should work correctly in case if select query failed
-      case ErrorResponse(details) => (Some(Error(details)), state.rollback)
-      case NoticeResponse(details) =>
-        logger.ifInfo("Notice from backend " + details)
-        (None, state)
-      case ParameterStatus(name, value) =>
-        logger.ifInfo("Param '" + name + "' has changed to '" + value + "'")
-        (None, state)
-
-      case _ => throw new UnsupportedMessage("Unknown message from backend " + msg + " for state " + state)
-    }
-
-    val (response, newState) = handleMessage(msg)
-
-    state = newState
-    response
-  }
-
-}
 
 /**
  * Decodes `Packet` to the `BackendMessage`.
@@ -304,6 +135,7 @@ class BackendMessageDecoder(val parser: BackendMessageParser) extends SimpleChan
  */
 class PacketDecoder extends FrameDecoder {
   private val logger = Logger(getClass.getName)
+
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): AnyRef = {
     logger.ifDebug("decoding..")
     if (buffer.readableBytes() < 5) {
@@ -326,7 +158,6 @@ class PacketDecoder extends FrameDecoder {
   }
 }
 
-class UnsupportedMessage(message: String) extends Exception(message)
 
 
 

@@ -28,6 +28,11 @@ class PacketBuilder(val code: Option[Char]) {
     this
   }
 
+  def writeBytes(bytes: Array[Byte]) = {
+	  underlying.writeBytes(bytes)
+	  this
+  }
+
   def writeChar(char: Char) = {
     underlying.writeByte(char)
     this

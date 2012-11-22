@@ -1,18 +1,20 @@
 package com.twitter.finagle.postgres.protocol
 
-import scala.collection.mutable.MutableList
 
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
 
 import com.twitter.logging.Logger
+
+import Convert._
+
+trait Message
 
 /**
  * Response sent from Postgres back to the client.
  */
-trait BackendMessage
+trait BackendMessage extends Message
 
-case class ErrorResponse(msg: Option[String]) extends BackendMessage
+case class ErrorResponse(msg: Option[String] = None) extends BackendMessage
 
 case class NoticeResponse(msg: Option[String]) extends BackendMessage
 
@@ -25,6 +27,8 @@ case class AuthenticationCleartextPassword() extends BackendMessage
 case class ParameterStatus(name: String, value: String) extends BackendMessage
 
 case class BackendKeyData(processId: Int, secretKey: Int) extends BackendMessage
+
+case class ParameterDescription(types: IndexedSeq[Int]) extends BackendMessage
 
 case class RowDescription(fields: IndexedSeq[FieldDescription]) extends BackendMessage
 
@@ -43,12 +47,22 @@ case class CommandComplete(tag: String) extends BackendMessage
 
 case class ReadyForQuery(status: Char) extends BackendMessage
 
+case object ParseComplete extends BackendMessage
+
+case object BindComplete extends BackendMessage
+
+case object NoData extends BackendMessage
+
+case object PortalSuspended extends BackendMessage
+
+case object EmptyQueryResponse extends BackendMessage
+
 class BackendMessageParser {
 
   private val logger = Logger(getClass.getName)
 
   def parse(packet: Packet): Option[BackendMessage] = {
-    
+
     val result: Option[BackendMessage] = packet.code.get match {
       case 'R' =>
         parseR(packet)
@@ -76,15 +90,12 @@ class BackendMessageParser {
 
         throw new UnsupportedOperationException("'W' Not implemented yet")
       case 'I' =>
-        logger.error("'I' Not implemented yet")
-        throw new UnsupportedOperationException("'I'Not implemented yet")
+        parseI(packet)
       case 'V' =>
         logger.error("'V' Not implemented yet")
         throw new UnsupportedOperationException("'V' Not implemented yet")
       case 'n' =>
-        logger.error("'n' Not implemented yet")
-
-        throw new UnsupportedOperationException("'n' Not implemented yet")
+        parseSmallN(packet)
       case 'N' =>
         parseN(packet)
       case 'A' =>
@@ -92,19 +103,15 @@ class BackendMessageParser {
 
         throw new UnsupportedOperationException("'A' Not implemented yet")
       case 't' =>
-        logger.error("'T' Not implemented yet")
-
-        throw new UnsupportedOperationException("'T' Not implemented yet")
+        parseSmallT(packet)
       case 'S' =>
         parseS(packet)
       case '1' =>
-        logger.error("'1' Not implemented yet")
-
-        throw new UnsupportedOperationException("'1' Not implemented yet")
+        parse1(packet)
+      case '2' =>
+        parse2(packet)
       case 's' =>
-        logger.error("'s' Not implemented yet")
-
-        throw new UnsupportedOperationException("'s' Not implemented yet")
+        parseSmallS(packet)
       case 'Z' =>
         parseZ(packet)
       case 'T' =>
@@ -168,17 +175,17 @@ class BackendMessageParser {
   }
 
   def parseN(packet: Packet): Option[BackendMessage] = {
-	  logger.ifDebug("parsing N")
-	  logger.ifDebug("Packet " + packet)
-	  
-	  val Packet(_, length, content) = packet
-	  
-	  val builder = new StringBuilder()
-	  while (content.readable) {
-		  builder.append(Buffers.readCString(content))
-	  }
-	  
-	  Some(new NoticeResponse(Some(builder.toString)))
+    logger.ifDebug("parsing N")
+    logger.ifDebug("Packet " + packet)
+
+    val Packet(_, length, content) = packet
+
+    val builder = new StringBuilder()
+    while (content.readable) {
+      builder.append(Buffers.readCString(content))
+    }
+
+    Some(new NoticeResponse(Some(builder.toString)))
   }
 
   def parseZ(packet: Packet): Option[BackendMessage] = {
@@ -286,8 +293,168 @@ class BackendMessageParser {
     val Packet(_, length, content) = packet
 
     val parameterStatus = new ParameterStatus(Buffers.readCString(content), Buffers.readCString(content))
-    logger.ifDebug("Sync " + parameterStatus)
+    logger.ifDebug("ParameterStatus " + parameterStatus)
     Some(parameterStatus)
   }
 
+  def parse1(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("Parsing 1 " + packet)
+    val Packet(_, length, content) = packet
+
+    Some(ParseComplete)
+  }
+
+  def parse2(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("Parsing 2 " + packet)
+    val Packet(_, length, content) = packet
+
+    Some(BindComplete)
+  }
+
+  def parseSmallT(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("parsing t")
+    logger.ifDebug("Packet " + packet)
+
+    val Packet(_, length, content) = packet
+
+    val paramNumber = content.readShort
+
+    val params = new Array[Int](paramNumber)
+    0.until(paramNumber).foreach { index =>
+      val param = content.readInt
+      logger.ifDebug("param " + param)
+      params(index) = param
+    }
+
+    Some(new ParameterDescription(params))
+
+  }
+
+  def parseSmallN(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("parsing n" + packet)
+    Some(NoData)
+  }
+
+  def parseSmallS(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("parsing s" + packet)
+    Some(PortalSuspended)
+  }
+
+  def parseI(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("parsing I " + packet)
+    Some(EmptyQueryResponse)
+  }
+
+}
+
+trait FrontendMessage extends Message {
+  def asPacket(): Packet
+}
+
+case class StartupMessage(user: String, database: String) extends FrontendMessage {
+  def asPacket() = PacketBuilder()
+    .writeShort(3)
+    .writeShort(0)
+    .writeCString("user")
+    .writeCString(user)
+    .writeCString("database")
+    .writeCString(database)
+    .writeByte(0)
+    .toPacket
+}
+
+case class PasswordMessage(password: String) extends FrontendMessage {
+
+  def asPacket() = PacketBuilder('p')
+    .writeCString(password)
+    .toPacket
+}
+
+case class Query(str: String) extends FrontendMessage {
+
+  def asPacket() = PacketBuilder('Q')
+    .writeCString(str)
+    .toPacket
+}
+
+case class Parse(name: String = Strings.empty, query: String = "", paramTypes: Seq[Int] = Seq()) extends FrontendMessage {
+
+  def asPacket() = {
+    val builder = PacketBuilder('P')
+      .writeCString(name)
+      .writeCString(query)
+      .writeShort(asShort(paramTypes.length))
+
+    for (param <- paramTypes) {
+      builder.writeInt(param)
+    }
+    builder.toPacket
+  }
+}
+
+case class Bind(portal: String = Strings.empty, name: String = Strings.empty, formats: Seq[Int] = Seq(),
+                params: Seq[Array[Byte]] = Seq(), resultFormats: Seq[Int] = Seq()) extends FrontendMessage {
+
+  def asPacket() = {
+    val builder = PacketBuilder('B')
+      .writeCString(portal)
+      .writeCString(name)
+
+    if (formats.isEmpty) {
+      builder.writeShort(0)
+    } else {
+      for (format <- formats) {
+        builder.writeShort(format.toShort)
+      }
+    }
+
+    builder.writeShort(asShort(params.length))
+
+    for (param <- params) {
+      builder.writeInt(param.length)
+      builder.writeBytes(param)
+    }
+
+    if (resultFormats.isEmpty) {
+      builder.writeShort(0)
+    } else {
+      for (format <- resultFormats) {
+        builder.writeShort(format.toShort)
+      }
+    }
+
+    builder.toPacket
+  }
+}
+
+case class Execute(name: String = Strings.empty, maxRows: Int = 0) extends FrontendMessage {
+  def asPacket() = {
+    PacketBuilder('E')
+      .writeCString(name)
+      .writeInt(maxRows)
+      .toPacket
+  }
+}
+
+case class Describe(portal: Boolean = true, name: String = new String) extends FrontendMessage {
+  def asPacket() = {
+    PacketBuilder('D')
+      .writeChar(if (portal) 'P' else 'S')
+      .writeCString(name)
+      .toPacket
+  }
+}
+
+object Flush extends FrontendMessage {
+  def asPacket() = {
+    PacketBuilder('H')
+      .toPacket
+  }
+}
+
+object Sync extends FrontendMessage {
+  def asPacket() = {
+    PacketBuilder('S')
+      .toPacket
+  }
 }

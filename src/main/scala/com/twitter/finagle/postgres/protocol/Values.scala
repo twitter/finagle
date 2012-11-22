@@ -2,6 +2,56 @@ package com.twitter.finagle.postgres.protocol
 
 import org.jboss.netty.buffer.ChannelBuffer
 
+object Type {
+  val BOOL = 16
+  val BYTE_A = 17
+  val CHAR = 18
+  val NAME = 19
+  val INT_8 = 20
+  val INT_2 = 21
+  val INT_4 = 23
+  val REG_PROC = 24
+  val TEXT = 25
+  val OID = 26
+  val TID = 27
+  val XID = 28
+  val CID = 29
+  val XML = 142
+  val POINT = 600
+  val L_SEG = 601
+  val PATH = 602
+  val BOX = 603
+  val POLYGON = 604
+  val LINE = 628
+  val CIDR = 650
+  val FLOAT_4 = 700
+  val FLOAT_8 = 701
+  val ABS_TIME = 702
+  val REL_TIME = 703
+  val T_INTERVAL = 704
+  val UNKNOWN = 705
+  val CIRCLE = 718
+  val MONEY = 790
+  val MAC_ADDR = 829
+  val INET = 869
+  val BP_CHAR = 1042
+  val VAR_CHAR = 1043
+  val DATE = 1082
+  val TIME = 1083
+  val TIMESTAMP = 1114
+  val TIMESTAMP_TZ = 1184
+  val INTERVAL = 1186
+  val TIME_TZ = 1266
+  val BIT = 1560
+  val VAR_BIT = 1562
+  val NUMERIC = 1700
+  val REF_CURSOR = 1790
+  val RECORD = 2249
+  val VOID = 2278
+  val UUID = 2950
+
+}
+
 trait ValueParser {
   def parseBoolean(b: ChannelBuffer): BooleanValue
 
@@ -72,84 +122,39 @@ object StringValueParser extends ValueParser {
 
 object ValueParser {
 
-  def parserOf(f: FieldDescription): ChannelBuffer => Value = {
-    val valueParser: ValueParser = f.fieldFormat match {
+  def parserOf(format: Int, dataType: Int): ChannelBuffer => Value = {
+    val valueParser: ValueParser = format match {
       case 0 => StringValueParser
       case _ => throw new UnsupportedOperationException("TODO Add support for binary format")
     }
 
+    import Type._
     val r: ChannelBuffer => Value =
-      f.dataType match {
-        case 16 => valueParser.parseBoolean
-        case 18 => valueParser.parseChar
-        case 19 => valueParser.parseName
-        case 20 => valueParser.parseInt8
-        case 21 => valueParser.parseInt2
-        case 23 => valueParser.parseInt4
-        case 25 => valueParser.parseText
-        case 26 => valueParser.parseOid
-        case 700 => valueParser.parseFloat4
-        case 701 => valueParser.parseFloat8
-        case 869 => valueParser.parseInet
-        case 1042 => valueParser.parseBpChar
-        case 1043 => valueParser.parseVarChar
-        case 1184 => valueParser.parseTimestampTZ
-        case _ => throw new UnsupportedOperationException("TODO Add support for data type '" + f.dataType + "'")
+      dataType match {
+        case BOOL => valueParser.parseBoolean
+        case CHAR => valueParser.parseChar
+        case NAME => valueParser.parseName
+        case INT_8 => valueParser.parseInt8
+        case INT_2 => valueParser.parseInt2
+        case INT_4 => valueParser.parseInt4
+        case TEXT => valueParser.parseText
+        case OID => valueParser.parseOid
+        case FLOAT_4 => valueParser.parseFloat4
+        case FLOAT_8 => valueParser.parseFloat8
+        case INET => valueParser.parseInet
+        case BP_CHAR => valueParser.parseBpChar
+        case VAR_CHAR => valueParser.parseVarChar
+        case TIMESTAMP_TZ => valueParser.parseTimestampTZ
+        case _ => throw Errors.client("Data type '" + dataType + "' is not supported")
       }
     r
 
   }
 
+  def encoderOf(format: Int, dataType: Int): Value => ChannelBuffer = {
+    val result: Value => ChannelBuffer = throw new UnsupportedOperationException("Encoders are not supported yet")
+    result
+  }
+
 }
 
-
-/*
-
-  Bool        ->   16
-  ByteA       ->   17
-  Char        ->   18
-  Name        ->   19
-  Int8        ->   20
-  Int2        ->   21
-  Int4        ->   23
-  RegProc     ->   24
-  Text        ->   25
-  Oid         ->   26
-  Tid         ->   27
-  Xid         ->   28
-  Cid         ->   29
-  Xml         ->  142
-  Point       ->  600
-  LSeg        ->  601
-  Path        ->  602
-  Box         ->  603
-  Polygon     ->  604
-  Line        ->  628
-  Cidr        ->  650
-  Float4      ->  700
-  Float8      ->  701
-  AbsTime     ->  702
-  RelTime     ->  703
-  TInterval   ->  704
-  Unknown     ->  705
-  Circle      ->  718
-  Money       ->  790
-  MacAddr     ->  829
-  Inet        ->  869
-  BpChar      -> 1042
-  VarChar     -> 1043
-  Date        -> 1082
-  Time        -> 1083
-  Timestamp   -> 1114
-  TimestampTZ -> 1184
-  Interval    -> 1186
-  TimeTZ      -> 1266
-  Bit         -> 1560
-  VarBit      -> 1562
-  Numeric     -> 1700
-  RefCursor   -> 1790
-  Record      -> 2249
-  Void        -> 2278
-  UUID        -> 2950
-
-*/

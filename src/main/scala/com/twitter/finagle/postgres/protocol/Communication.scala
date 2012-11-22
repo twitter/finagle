@@ -1,23 +1,21 @@
 package com.twitter.finagle.postgres.protocol
 
-import java.sql.{ Date => SQLDate }
+import java.sql.{Date => SQLDate}
 import java.sql.Timestamp
-import com.twitter.logging.Logger
-import com.twitter.concurrent.Spool
-import com.twitter.util.Future
 
-case class PgRequest(msg: FrontendMessage) {
+case class PgRequest(msg: FrontendMessage, flush: Boolean)
 
-}
+trait PgResponse
 
-trait PgResponse {
-}
+case class SingleMessageResponse(msg: BackendMessage) extends PgResponse
 
-case class SingleMessageResponse(msg: BackendMessage) extends PgResponse {
-}
+case class Error(msg: Option[String]) extends PgResponse
 
-case class Error(msg: Option[String]) extends PgResponse {
-}
+case object ParseCompletedResponse extends PgResponse
+
+case object BindCompletedResponse extends PgResponse
+
+case object ReadyForQueryResponse extends PgResponse
 
 sealed trait PasswordEncoding
 
@@ -27,67 +25,48 @@ case class Md5(salt: Array[Byte]) extends PasswordEncoding
 
 case class PasswordRequired(encoding: PasswordEncoding) extends PgResponse
 
-case class AuthenticatedResponse(params: Map[String, String], processId: Int, secretKey: Int) extends PgResponse {
-}
+case class AuthenticatedResponse(params: Map[String, String], processId: Int, secretKey: Int) extends PgResponse
 
-sealed trait QueryResponse extends PgResponse
-sealed trait Value {
-}
+sealed trait Value
 
 case class StringValue(s: String) extends Value
+
 case class BooleanValue(b: Boolean) extends Value
+
 case class ByteValue(b: Byte) extends Value
+
 case class ShortValue(s: Short) extends Value
+
 case class IntValue(i: Int) extends Value
+
 case class LongValue(l: Long) extends Value
+
 case class FloatValue(f: Float) extends Value
+
 case class DoubleValue(d: Double) extends Value
+
 case class TimestampValue(t: Timestamp) extends Value
+
 case class DateValue(d: SQLDate) extends Value
 
 case object NullValue extends Value
 
-class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value]) {
-  private val logger = Logger(getClass.getName)
+case class Rows(rows: List[DataRow], completed: Boolean) extends PgResponse
 
-  private[this] val indexMap = fields.zipWithIndex.toMap
+case class Field(name: String, format: Int, dataType: Int)
 
-  def get(name: String): Option[Value] = {
-    indexMap.get(name).map(vals(_))
-  }
+case class RowDescriptions(fields: IndexedSeq[Field]) extends PgResponse
 
-  def getString(name: String): String = {
-    val value = get(name) map {
-      case StringValue(s) => s
-      case _ => throw new IllegalStateException("Expected string value")
-    }
-    value.get
-  }
+case class Descriptions(params: IndexedSeq[Int], fields: IndexedSeq[Field]) extends PgResponse
 
-  def get(index: Int): Value = vals(index)
+case class ParamsResponse(types: IndexedSeq[Int]) extends PgResponse
 
-  def values(): IndexedSeq[Value] = vals
+case class SelectResult(fields: IndexedSeq[Field], rows: List[DataRow]) extends PgResponse
 
-  override def toString(): String = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'}"
-
-}
-
-case class ResultSet(fields: IndexedSeq[String], rows: Future[Spool[Row]]) extends QueryResponse {
-  def map[T](f: Row => T): Future[Spool[T]] =
-    rows.map { spool =>
-      spool.map { row =>
-        f(row)
-      }
-    }
-
-  def foreach[T](f: Row => T) = rows.map(_.foreach(f))
-
-}
-
-case class OK(affectedRows: Int) extends QueryResponse
+case class CommandCompleteResponse(affectedRows: Int) extends PgResponse
 
 object Communication {
 
-  def request(msg: FrontendMessage) = new PgRequest(msg)
+  def request(msg: FrontendMessage, flush: Boolean = false) = new PgRequest(msg, flush)
 
 }

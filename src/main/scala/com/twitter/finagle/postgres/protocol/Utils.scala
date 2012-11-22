@@ -55,7 +55,7 @@ object Md5Encryptor {
     require(user != null && user.length > 0, "user should not be empty")
     require(password != null && password.length > 0, "password should not be empty")
     require(salt != null && salt.length > 0, "salt should not be empty")
-    
+
     val inner = MessageDigest.getInstance("MD5")
     inner.update(password)
     inner.update(user)
@@ -71,4 +71,12 @@ object Md5Encryptor {
 
 object Hex {
   def valueOf(buf: Array[Byte]): String = buf.map("%02X" format _).mkString.toLowerCase
+}
+
+object Convert {
+  def asShort(i : Int) = i.asInstanceOf[Short]
+}
+
+object Strings {
+  val empty = new String
 }
