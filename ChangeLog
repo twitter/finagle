@@ -1,3 +1,8 @@
+6.0.0			2012/11/26
+
+	* util 6.0.0 dependency
+	* finagle-core: new client/server APIs; not yet exposed to users
+
 5.3.23		2012/11/21
 
 	* finagle-spdy: new codec
