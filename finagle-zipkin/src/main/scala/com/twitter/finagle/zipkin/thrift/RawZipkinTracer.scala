@@ -1,24 +1,22 @@
 package com.twitter.finagle.zipkin.thrift
 
+import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
+import com.twitter.conversions.time._
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.thrift.{
+  ThriftClientFramedCodec, ThriftClientRequest, thrift}
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.util.{Disposable, SharedTimer, FinagleTimer}
+import com.twitter.finagle.{Service, SimpleFilter, tracing}
+import com.twitter.util.{Base64StringEncoder, Timer}
+import java.io.ByteArrayOutputStream
+import java.net.InetSocketAddress
+import java.nio.ByteBuffer
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TIOStreamTransport
-
-import java.net.InetSocketAddress
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-
-import com.twitter.conversions.time._
-import com.twitter.util.{Base64StringEncoder, Timer}
-import com.twitter.finagle.tracing._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ThriftClientRequest, thrift}
-
-import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import scala.collection.JavaConversions._
-import com.twitter.finagle.{Service, SimpleFilter, tracing}
-import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.util.{Disposable, ManagedTimer}
 
 object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port
@@ -34,13 +32,11 @@ object RawZipkinTracer {
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver): Tracer.Factory = {
 
-    val mTimer = ManagedTimer.toTwitterTimer
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
       new RawZipkinTracer(
         scribeHost,
         scribePort,
-        statsReceiver.scope("zipkin"),
-        mTimer.make()
+        statsReceiver.scope("zipkin")
       )
     })
 
@@ -64,39 +60,49 @@ object RawZipkinTracer {
 private[thrift] class RawZipkinTracer(
   scribeHost: String,
   scribePort: Int,
-  statsReceiver: StatsReceiver,
-  timer: Disposable[Timer]
+  statsReceiver: StatsReceiver
 ) extends Tracer
 {
   private[this] val protocolFactory = new TBinaryProtocol.Factory()
   private[this] val TraceCategory = "zipkin" // scribe category
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
-  private[this] val spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, timer.get)
+  private[this] var spanMap: DeadlineSpanMap = _
   private[this] var refcount = 0
-  private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = null
-  private[thrift] var client: scribe.ServiceToClient = null
+  private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = _
+  private[thrift] var client: scribe.ServiceToClient = _
+  private[thrift] var timer: FinagleTimer = _
+
+  protected def newClient(): scribe.ServiceToClient = {
+    transport = ClientBuilder()
+      .hosts(new InetSocketAddress(scribeHost, scribePort))
+      .codec(ThriftClientFramedCodec())
+      .hostConnectionLimit(5)
+      .build()
+
+    new scribe.ServiceToClient(
+      new TracelessFilter andThen transport,
+      new TBinaryProtocol.Factory())
+  }
 
   def acquire() = synchronized {
     refcount += 1
     if (refcount == 1) {
-      transport = ClientBuilder()
-        .hosts(new InetSocketAddress(scribeHost, scribePort))
-        .codec(ThriftClientFramedCodec())
-        .hostConnectionLimit(5)
-        .build()
-
-      client = new scribe.ServiceToClient(new TracelessFilter andThen transport,
-                                          new TBinaryProtocol.Factory())
+      timer = SharedTimer.acquire()
+      spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, timer.twitter)
+      client = newClient()
     }
   }
 
   override def release() = synchronized {
     refcount -= 1
     if (refcount == 0) {
-      transport.release()
-      transport = null
+      if (transport != null) {
+        transport.release()
+        transport = null
+      }
       client = null
+      spanMap = null
       timer.dispose()
     }
   }

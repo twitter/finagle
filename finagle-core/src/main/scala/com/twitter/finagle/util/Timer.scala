@@ -10,11 +10,27 @@ import org.jboss.netty.{util => nu}
 import scala.collection.JavaConverters._
 
 /**
- * A Netty timer convertible to a com.twitter.util.Timer
+ * A Finagle-managed timer, with interfaces for both
+ * {{com.twitter.util.Timer}} and {{org.jboss.netty.util.Timer}}.
+ * These are backed by the same underlying timer.
  */
-private[finagle] trait TwoTimer extends nu.Timer {
-  val toTwitterTimer: Timer
+trait FinagleTimer {
+  val twitter: com.twitter.util.Timer
+  val netty: org.jboss.netty.util.Timer
+
+  /**
+   * Dispose of the timer. This will cancel pending timeouts. It is
+   * invalid to create new timeouts after a call to {{dispose()}}.
+   */
+  def dispose()
 }
+
+/**
+ * The global {{SharedTimer}}, backed with a Netty {{HashedWheelTimer}}.
+ */
+private[finagle] object SharedTimer extends SharedTimer(
+  () => new HashedWheelTimer(TimerThreadFactory, 10, TimeUnit.MILLISECONDS))
+private[finagle] object TimerThreadFactory extends NamedPoolThreadFactory("Finagle Timer")
 
 /**
  * Maintain a view on top of `underlying` with its own set of pending
@@ -66,32 +82,23 @@ private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
 }
 
 /**
- * A Managed version of a TwoTimer. Shares an underlying timer and
- * multiplexes several views onto it. Each view may in turn be
- * discarded only once. For safety, a new thread is spun up in order
- * to stop the timer, since Netty's HashedWheelTimer disallows
- * stopping inside of a timer thread.
+ * Share an underlying timer with a managed lifecycle.
  */
-private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Managed[TwoTimer] {
+private[finagle] class SharedTimer(mkTimer: () => nu.Timer) {
   private[this] sealed trait State
   private[this] object Quiet extends State
   private[this] case class Busy(timer: nu.Timer, count: Int) extends State
 
   @volatile private[this] var state: State = Quiet
 
-  private[this] def wrap(underlying: nu.Timer) = new Disposable[TwoTimer] {
-    private[this] val timer = new NettyTimerView(underlying) with TwoTimer {
-      val toTwitterTimer = new TimerFromNettyTimer(this)
-    }
+  private[this] def wrap(underlying: nu.Timer) = new FinagleTimer {
+    val netty = new NettyTimerView(underlying)
+    val twitter = new TimerFromNettyTimer(netty)
 
-    def get = timer
+    def dispose() {
+      netty.stop()  // timer.stop() ensures it is called only once
 
-    // Deadlines don't make sense in this context: we do it as fast
-    // as we can.
-    def dispose(deadline: Time) = {
-      timer.stop()  // timer.stop() ensures it is called only ones
-
-      val stopTimer = ManagedNettyTimer.this.synchronized {
+      val stopTimer = SharedTimer.this.synchronized {
         state match {
           case Quiet =>
             assert(false, "state is Quiet, expected Busy")
@@ -105,7 +112,7 @@ private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Manage
         }
       }
 
-      stopTimer foreach { stopTimer =>
+      for (stopTimer <- stopTimer) {
         val thr = new Thread {
           override def run() {
             val pending = stopTimer.stop()
@@ -120,12 +127,14 @@ private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Manage
         }
         thr.start()
       }
-
-      Future.Done
     }
   }
 
-  def make(): Disposable[TwoTimer] = synchronized {
+  /**
+   * Get a new {{FinagleTimer}}, creating the underlying timer if
+   * necessary.
+   */
+  def acquire(): FinagleTimer = synchronized {
     state match {
       case Quiet =>
         val newTimer = mkTimer()
@@ -136,13 +145,7 @@ private[finagle] class ManagedNettyTimer(mkTimer: () => nu.Timer) extends Manage
         wrap(timer)
     }
   }
-
-  val toTwitterTimer = map(new TimerFromNettyTimer(_))
 }
-
-private[finagle] object TimerThreadFactory extends NamedPoolThreadFactory("Finagle Timer")
-private[finagle] object ManagedTimer extends ManagedNettyTimer(
-  () => new HashedWheelTimer(TimerThreadFactory, 10, TimeUnit.MILLISECONDS))
 
 /**
  * Implements a [[com.twitter.util.Timer]] in terms of a
@@ -184,3 +187,9 @@ class TimerFromNettyTimer(underlying: nu.Timer) extends Timer {
   }
 }
 
+object DefaultTimer extends HashedWheelTimer(
+    new NamedPoolThreadFactory("Finagle Default Timer", true/*daemons*/),
+    10, TimeUnit.MILLISECONDS
+) {
+  val twitter = new TimerFromNettyTimer(this)
+}

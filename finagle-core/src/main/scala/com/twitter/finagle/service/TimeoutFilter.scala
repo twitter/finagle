@@ -22,8 +22,8 @@ class TimeoutFilter[Req, Rep](
     val res = service(request)
 
     res.within(timer, timeout) rescue {
-      case _: java.util.concurrent.TimeoutException =>
-        res.cancel()
+      case exc: java.util.concurrent.TimeoutException =>
+        res.raise(exc)
         Trace.record(TimeoutFilter.TimeoutAnnotation)
         Future.exception(exception)
     }

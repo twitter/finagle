@@ -43,8 +43,7 @@ class WatermarkPool[Req, Rep](
   private[this] def flushWaiters() = synchronized {
     while (numServices < highWatermark && !waiters.isEmpty) {
       val waiter = waiters.dequeue()
-      val res = this() respond { waiter() = _ }
-      waiter.linkTo(res)
+      waiter.become(this())
     }
   }
 
@@ -108,14 +107,15 @@ class WatermarkPool[Req, Rep](
       case None if waiters.size >= maxWaiters =>
         Future.exception(new TooManyWaitersException)
       case None =>
-        val promise = new Promise[Service[Req, Rep]]
-        waiters += promise
-        promise onCancellation {
-          // remove ourselves from the waitlist if we're still there.
-          val dq = synchronized { waiters.dequeueFirst { _ eq promise } }
-          dq foreach { _() = Throw(new CancelledConnectionException) }
+        val p = new Promise[Service[Req, Rep]]
+        waiters += p
+        p.setInterruptHandler { case _cause =>
+          // TODO: use cause
+          if (WatermarkPool.this.synchronized(waiters.dequeueFirst(_ eq p).isDefined))
+            p.setException(new CancelledConnectionException)
         }
-        promise
+
+        p
     }
   }
 

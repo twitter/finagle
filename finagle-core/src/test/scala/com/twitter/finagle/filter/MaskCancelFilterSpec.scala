@@ -11,16 +11,19 @@ class MaskCancelFilterSpec extends SpecificationWithJUnit with Mockito {
     val filter = new MaskCancelFilter[Int, Int]
 
     val filtered = filter andThen service
-    val p = new Promise[Int]
+    val p = new Promise[Int] {
+      @volatile var interrupted: Option[Throwable] = None
+      setInterruptHandler { case exc => interrupted = Some(exc) }
+    }
     service(1) returns p
 
     val f = filtered(1)
     there was one(service).apply(1)
 
-    "mask cancellations" in {
-      p.isCancelled must beFalse
+    "mask interrupts" in {
+      p.interrupted must beNone
       f.cancel()
-      p.isCancelled must beFalse
+      p.interrupted must beNone
     }
 
     "propagate results" in {

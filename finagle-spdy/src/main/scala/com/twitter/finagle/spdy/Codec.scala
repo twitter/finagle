@@ -8,7 +8,8 @@ import org.jboss.netty.handler.codec.spdy._
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
-import com.twitter.finagle.dispatch.{ClientDispatcherFactory, ServerDispatcherFactory}
+import com.twitter.finagle.dispatch.{ClientDispatcherFactory, ServerDispatcher}
+import com.twitter.finagle.transport.{Transport, TransportFactory}
 import com.twitter.util.StorageUnit
 
 class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
@@ -68,8 +69,8 @@ case class Spdy(
         new GenerateSpdyStreamId andThen super.prepareConnFactory(underlying)
       }
 
-      override val mkClientDispatcher: ClientDispatcherFactory[HttpRequest, HttpResponse] = (mkTrans) =>
-        new SpdyClientDispatcher(mkTrans())
+      override def newClientDispatcher(transport: Transport[HttpRequest, HttpResponse]) =
+        new SpdyClientDispatcher(transport)
     }
   }
 
@@ -94,8 +95,11 @@ case class Spdy(
         new AnnotateSpdyStreamId andThen super.prepareConnFactory(underlying)
       }
 
-      override val mkServerDispatcher: ServerDispatcherFactory[HttpRequest, HttpResponse] = (mkTrans, service) =>
-        new SpdyServerDispatcher(mkTrans(), service)
+      override def newServerDispatcher(
+          newTransport: TransportFactory, 
+          service: Service[HttpRequest, HttpResponse]
+      ): ServerDispatcher =
+        new SpdyServerDispatcher(newTransport(), service)
     }
   }
 }

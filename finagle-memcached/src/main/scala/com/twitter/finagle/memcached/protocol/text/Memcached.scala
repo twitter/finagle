@@ -20,46 +20,48 @@ object Memcached {
   def get() = apply()
 }
 
+object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
+  def getPipeline() = {
+    val pipeline = Channels.pipeline()
+
+    pipeline.addLast("decoder", new ClientDecoder)
+    pipeline.addLast("decoding2response", new DecodingToResponse)
+
+    pipeline.addLast("encoder", new Encoder)
+    pipeline.addLast("command2encoding", new CommandToEncoding)
+    pipeline
+  }
+}
+
+object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
+  private val storageCommands = collection.Set[ChannelBuffer](
+    "set", "add", "replace", "append", "prepend")
+
+  def getPipeline() = {
+    val pipeline = Channels.pipeline()
+
+  //        pipeline.addLast("exceptionHandler", new ExceptionHandler)
+  
+    pipeline.addLast("decoder", new ServerDecoder(storageCommands))
+    pipeline.addLast("decoding2command", new DecodingToCommand)
+  
+    pipeline.addLast("encoder", new Encoder)
+    pipeline.addLast("response2encoding", new ResponseToEncoding)
+    pipeline
+  }
+}
 class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
 
   def this() = this(NullStatsReceiver)
-
-  private[this] val storageCommands = collection.Set[ChannelBuffer](
-    "set", "add", "replace", "append", "prepend")
-
   def server = Function.const {
     new Codec[Command, Response] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = Channels.pipeline()
-
-  //        pipeline.addLast("exceptionHandler", new ExceptionHandler)
-
-          pipeline.addLast("decoder", new ServerDecoder(storageCommands))
-          pipeline.addLast("decoding2command", new DecodingToCommand)
-
-          pipeline.addLast("encoder", new Encoder)
-          pipeline.addLast("response2encoding", new ResponseToEncoding)
-          pipeline
-        }
-      }
+      def pipelineFactory = MemcachedServerPipelineFactory
     }
   }
 
   def client = Function.const {
     new Codec[Command, Response] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline() = {
-          val pipeline = Channels.pipeline()
-
-          pipeline.addLast("decoder", new ClientDecoder)
-          pipeline.addLast("decoding2response", new DecodingToResponse)
-
-          pipeline.addLast("encoder", new Encoder)
-          pipeline.addLast("command2encoding", new CommandToEncoding)
-          pipeline
-        }
-      }
+      def pipelineFactory = MemcachedClientPipelineFactory
 
       // pass every request through a filter to create trace data
       override def prepareConnFactory(underlying: ServiceFactory[Command, Response]) =

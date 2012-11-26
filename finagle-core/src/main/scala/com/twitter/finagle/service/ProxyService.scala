@@ -1,7 +1,8 @@
 package com.twitter.finagle.service
 
 import collection.mutable.Queue
-import com.twitter.finagle.{CancelledConnectionException, TooManyConcurrentRequestsException, Service, ServiceNotAvailableException}
+import com.twitter.finagle.{CancelledConnectionException, Service, ServiceNotAvailableException,
+  TooManyConcurrentRequestsException}
 import com.twitter.util.{Future, Promise, Throw, Return}
 
 /**
@@ -22,8 +23,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
           r match {
             case Return(service) =>
               requestBuffer foreach { case (request, promise) =>
-                val res = service(request) respond { promise() = _ }
-                promise.linkTo(res)
+                promise.become(service(request))
               }
 
               underlying = Some(service)
@@ -45,13 +45,18 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
             if (requestBuffer.size >= maxWaiters)
               Future.exception(new TooManyConcurrentRequestsException)
             else {
-              val promise = new Promise[Rep]
-              requestBuffer += ((request, promise))
-              promise onCancellation {
-                val dq = synchronized { requestBuffer.dequeueFirst { case (_, p) => p eq promise } }
-                dq foreach { case (_, p) => p() = Throw(new CancelledConnectionException)}
+              val p = new Promise[Rep]
+              requestBuffer += ((request, p))
+              p.setInterruptHandler { case cause =>
+                val didRemove = ProxyService.this.synchronized {
+                  val removed = requestBuffer.dequeueFirst { case (_, q) => p eq q }
+                  removed.isDefined
+                }
+                if (didRemove)
+                  p.setException(new CancelledConnectionException)
               }
-              promise
+
+              p
             }
         }
       }

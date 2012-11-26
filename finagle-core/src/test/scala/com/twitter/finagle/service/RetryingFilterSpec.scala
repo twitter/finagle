@@ -53,17 +53,21 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
         there was one(retriesStat).add(0)
       }
 
-      "propagate cancellation" in {
-        val replyPromise = new Promise[Int]
+      "propagate interrupts" in {
+        val replyPromise = new Promise[Int] {
+          @volatile var interrupted: Option[Throwable] = None
+          setInterruptHandler { case exc => interrupted = Some(exc) }
+        }
         service(123) returns replyPromise
 
         val res = retryingService(123)
         res.isDefined must beFalse
-        replyPromise.isCancelled must beFalse
+        replyPromise.interrupted must beNone
 
-        res.cancel()
+        val exc = new Exception
+        res.raise(exc)
         res.isDefined must beFalse
-        replyPromise.isCancelled must beTrue
+        replyPromise.interrupted must beSome(exc)
       }
     }
 
@@ -130,16 +134,20 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "propagate cancellation" in {
-        val replyPromise = new Promise[Int]
+        val replyPromise = new Promise[Int] {
+          @volatile var interrupted: Option[Throwable] = None
+          setInterruptHandler { case exc => interrupted = Some(exc) }
+        }
         service(123) returns replyPromise
 
         val res = retryingService(123)
         res.isDefined must beFalse
-        replyPromise.isCancelled must beFalse
+        replyPromise.interrupted must beNone
 
-        res.cancel()
+        val exc = new Exception
+        res.raise(exc)
         res.isDefined must beFalse
-        replyPromise.isCancelled must beTrue
+        replyPromise.interrupted must beSome(exc)
       }
     }
   }

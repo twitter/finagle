@@ -6,6 +6,15 @@ import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
+import org.jboss.netty.channel._
+
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.Ok
+import com.twitter.finagle.{WriteException, CancelledConnectionException}
+
+import com.twitter.conversions.time._
+
 class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "Cancellation" should {
     "cancel while waiting for connect()" in {
@@ -24,11 +33,14 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
 
     "cancel while waiting for a reply" in {
       val m = new MockChannel
-      val client = m.build()
-      val f = client("123")
+      val cli = m.build()
+
+      val f = cli("123")
       f.isDefined must beFalse
       m.connectFuture.setSuccess()
       m.channel.isOpen returns true
+
+      f.isDefined must beFalse
 
       // the request was sent.
       val meCaptor = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])

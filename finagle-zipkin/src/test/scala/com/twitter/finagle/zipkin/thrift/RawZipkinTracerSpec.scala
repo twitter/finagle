@@ -7,7 +7,7 @@ import java.util.ArrayList
 import com.twitter.conversions.time._
 import com.twitter.util._
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{CloseNotifier, ManagedTimer, TwoTimer, Disposable}
+import com.twitter.finagle.util.{CloseNotifier, SharedTimer}
 import com.twitter.finagle.stats.NullStatsReceiver
 
 import org.mockito.Matchers._
@@ -19,9 +19,12 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
   "RawZipkinTracer" should {
-    "send all traces to scribe" in ManagedTimer.toTwitterTimer.foreach { timer =>
-      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, Disposable.const(timer))
-      tracer.client = mock[scribe.ServiceToClient]
+    "send all traces to scribe" in {
+      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
+        override def newClient() = mock[scribe.ServiceToClient]
+      }
+      tracer.acquire()
+      doAfter { tracer.release() }
 
       val expected = new ArrayList[LogEntry]()
       expected.add(new LogEntry().setCategory("zipkin")
@@ -70,13 +73,16 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
       tracer.client must beNull
     }
 
-    "logSpan if a timeout occurs" in ManagedTimer.toTwitterTimer.foreach { timer =>
+    "logSpan if a timeout occurs" in {
       val ann1 = Annotation.Message("some_message")
       val ann2 = Annotation.Rpcname("some_service", "rpc_name")
       val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
-      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver, Disposable.const(timer))
-      tracer.client = mock[scribe.ServiceToClient]
+      val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
+        override def newClient() = mock[scribe.ServiceToClient]
+      }
+      tracer.acquire()
+      doAfter { tracer.release() }
 
       tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
 

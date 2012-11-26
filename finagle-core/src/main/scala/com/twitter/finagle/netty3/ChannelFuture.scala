@@ -1,4 +1,4 @@
-package com.twitter.finagle.util
+package com.twitter.finagle.netty3
 
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import com.twitter.util.Promise
@@ -149,35 +149,6 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
   }
 
   def andThen(next: ChannelFuture): ChannelFuture = flatMap { _ => next }
-
-  def joinWith(other: RichChannelFuture): ChannelFuture = {
-    val joined = Channels.future(self.getChannel)
-    val latch = new AtomicBoolean(false)
-    @volatile var cause: Throwable = null
-
-    def maybeSatisfy() =
-      if (!latch.compareAndSet(false, true)) {
-        if (cause ne null)
-          joined.setFailure(cause)
-        else
-          joined.setSuccess()
-      }
-
-    for (f <- List(this, other)) {
-      f {
-        case Ok(_) =>
-          maybeSatisfy()
-        case Error(theCause) =>
-          cause = theCause
-          maybeSatisfy()
-        case Cancelled =>
-          cause = new Exception("the Future was cancelled")
-          maybeSatisfy()
-      }
-    }
-
-    joined
-  }
 
   def close() {
     self.addListener(ChannelFutureListener.CLOSE)

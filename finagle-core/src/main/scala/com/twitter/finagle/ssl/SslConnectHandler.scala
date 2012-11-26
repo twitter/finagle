@@ -1,7 +1,7 @@
 package com.twitter.finagle.ssl
 
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Ok, Error, Cancelled}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
 import com.twitter.finagle.{CancelledConnectionException, ChannelClosedException,
   InconsistentStateException, SslHandshakeException, SslHostVerificationException}
 import com.twitter.util.Try

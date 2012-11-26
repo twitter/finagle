@@ -10,7 +10,7 @@ import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
 import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
-import com.twitter.util.{Future, Duration, Time, StorageUnit}
+import com.twitter.util.{Future, Duration, Stopwatch, StorageUnit}
 import java.net.{SocketAddress, InetSocketAddress}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.buffer.ChannelBuffers
@@ -32,14 +32,14 @@ class AppService(clients: Seq[thrift.Backend.ServiceIface], responseSample: Seq[
       client.request(size.inBytes.toInt, latency.inMilliseconds.toInt)
     }
 
-    val begin = Time.now
+    val elapsed = Stopwatch.start()
 
     Future.collect(responses) map { bodies =>
       val response = new DefaultHttpResponse(req.getProtocolVersion, HttpResponseStatus.OK)
       val bytes = (bodies mkString "").getBytes
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
       response.setHeader("Content-Lenth", "%d".format(bytes.size))
-      response.setHeader("X-Finagle-Latency-Ms", "%d".format(begin.untilNow.inMilliseconds))
+      response.setHeader("X-Finagle-Latency-Ms", "%d".format(elapsed().inMilliseconds))
       response
     }
   }

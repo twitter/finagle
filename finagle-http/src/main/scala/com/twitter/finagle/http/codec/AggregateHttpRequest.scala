@@ -15,7 +15,7 @@ import org.jboss.netty.handler.codec.http.{
 import org.jboss.netty.buffer.{
   ChannelBuffer, ChannelBuffers}
 
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.channel.LeftFoldUpstreamHandler
 
 

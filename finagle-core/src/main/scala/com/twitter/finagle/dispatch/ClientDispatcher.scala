@@ -21,19 +21,26 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
     case _ => new InetSocketAddress(0)
   }
 
-  private[this] def dispatch(req: Req, p: Promise[Rep]): Future[_] =
-    if (p.isCancelled) {
-      p.setException(new CancelledRequestException)
-      Future.value(())
-    } else {
-      Trace.recordClientAddr(localAddress)
+  protected def dispatch(req: Req, p: Promise[Rep]): Future[_] =
+    p.isInterrupted match {
+      case Some(intr) =>
+        p.setException(WriteException(intr))
+        Future.value(())
+      case None =>
+        Trace.recordClientAddr(localAddress)
 
-      p.onCancellation {
-        if (p.updateIfEmpty(Throw(new CancelledRequestException)))
-          trans.close()
-      }
+        p.setInterruptHandler { case intr =>
+          if (p.updateIfEmpty(Throw(intr)))
+            trans.close()
+        }
 
-      trans.write(req) rescue(wrapWriteException) flatMap { _ => trans.read() } respond { p.updateIfEmpty(_) }
+        trans.write(req) rescue(
+          wrapWriteException
+        ) flatMap { unit =>
+          trans.read()
+        } respond {
+          p.updateIfEmpty(_)
+        }
     }
 
   def apply(req: Req): Future[Rep] = {

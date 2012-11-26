@@ -7,7 +7,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.ostrich.stats.{Stats => OstrichStats}
 import com.twitter.ostrich.stats.StatsCollection
-import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Time}
+import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Stopwatch}
 
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.handler.codec.http._
@@ -84,13 +84,13 @@ class LoadBalancerTest(
     if (f.isDefinedAt((num, servers)))
       f((num, servers))
 
-    val beginTime = Time.now
+    val elapsed = Stopwatch.start()
 
     client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")) respond { result =>
       result match {
         case Return(_) =>
-          val duration = beginTime.untilNow
-          stats.addMetric("request_msec", duration.inMilliseconds.toInt)
+          val duration = elapsed()
+          stats.addMetric("request_msec", elapsed().inMilliseconds.toInt)
           stats.incr("success")
         case Throw(exc) =>
           stats.incr("fail")
@@ -120,10 +120,10 @@ class LoadBalancerTest(
       .reportTo(new OstrichStatsReceiver)
       .build()
 
-    val begin = Time.now
+    val elapsed = Stopwatch.start()
     0 until concurrency foreach { _ => dispatch(client, servers, behavior) }
     latch.await()
-    val duration = begin.untilNow
+    val duration = elapsed()
     val rps = numRequests.toDouble / duration.inSeconds.toDouble
 
     // Produce a "report" here instead, so we have some sort of

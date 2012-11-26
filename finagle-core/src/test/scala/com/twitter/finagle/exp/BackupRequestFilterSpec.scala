@@ -11,7 +11,14 @@ class BackupRequestFilterSpec extends SpecificationWithJUnit with Mockito {
   "BackupRequestFilter" should {
     val statsReceiver = new InMemoryStatsReceiver
     val timer = new MockTimer
-    val p = new Promise[String]
+    class P extends Promise[String] {
+      @volatile var interrupted: Throwable = null
+
+      setInterruptHandler {
+        case exc => interrupted = exc
+      }
+    }
+    val p = new P
     val underlying = mock[Service[String, String]]
     underlying(any) returns p
     val service = new BackupRequestFilter(10.milliseconds, timer, statsReceiver) andThen underlying
@@ -35,7 +42,7 @@ class BackupRequestFilterSpec extends SpecificationWithJUnit with Mockito {
       f.isDefined must beFalse
       timer.tasks must haveSize(1)
       there was one(underlying)("ok")
-      val p1 = new Promise[String]
+      val p1 = new P
       underlying(any) returns p1
       tc.advance(10.milliseconds)
       timer.tick()
@@ -48,13 +55,13 @@ class BackupRequestFilterSpec extends SpecificationWithJUnit with Mockito {
       statsReceiver.counters must havePair(Seq("backup", "timeouts") -> 1)
     }
 
-    "when original wins, choose it and cancel backup" in Time.withCurrentTimeFrozen { tc =>
+    "when original wins, choose it and interrupt backup" in Time.withCurrentTimeFrozen { tc =>
       val b = new BackupSpec(tc)
       import b._
-      p1.isCancelled must beFalse
+      p1.interrupted must beNull
       p.setValue("yay")
       f.poll must beSome(Return("yay"))
-      p1.isCancelled must beTrue
+      p1.interrupted must be_==(BackupRequestLost)
       statsReceiver.counters must havePair(Seq("backup", "timeouts") -> 1)
       statsReceiver.counters must havePair(Seq("backup", "won") -> 1)
     }
@@ -62,10 +69,10 @@ class BackupRequestFilterSpec extends SpecificationWithJUnit with Mockito {
     "when backup wins, choose it and cancel original" in Time.withCurrentTimeFrozen { tc =>
       val b = new BackupSpec(tc)
       import b._
-      p.isCancelled must beFalse
+      p.interrupted must beNull
       p1.setValue("okay!")
       f.poll must beSome(Return("okay!"))
-      p.isCancelled must beTrue
+      p.interrupted must be_==(BackupRequestLost)
       statsReceiver.counters must havePair(Seq("backup", "timeouts") -> 1)
       statsReceiver.counters must havePair(Seq("backup", "lost") -> 1)
     }

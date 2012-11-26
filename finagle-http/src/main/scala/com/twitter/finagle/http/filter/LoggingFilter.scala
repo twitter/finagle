@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Future, Return, Throw, Time}
+import com.twitter.util.{Duration, Future, Return, Throw, Time, Stopwatch}
 import java.util.TimeZone
 import org.apache.commons.lang.time.FastDateFormat
 
@@ -127,15 +127,15 @@ class LoggingFilter[REQUEST <: Request](log: Logger, formatter: LogFormatter)
   extends SimpleFilter[REQUEST, Response] {
 
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
-    val startTime = Time.now
+    val elapsed = Stopwatch.start()
     val future = service(request)
     future respond {
       case Return(response) =>
-        log(startTime.untilNow, request, response)
+        log(elapsed(), request, response)
       case Throw(_) =>
         // Treat exceptions as empty 500 errors
         val response = Response(request.version, Status.InternalServerError)
-        log(startTime.untilNow, request, response)
+        log(elapsed(), request, response)
     }
     future
   }

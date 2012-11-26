@@ -127,18 +127,22 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
     val abort = Abort(queueName)
 
-    "cancel current request on close" in {
+    "interrupt current request on close" in {
       factory.apply() returns Future(service)
       val promise = new Promise[Response]()
+      @volatile var wasInterrupted = false
+      promise.setInterruptHandler { case _cause =>
+        wasInterrupted = true
+      }
       service(open) returns promise
       service(closeAndOpen) returns promise
       service(abort) returns Future(Values(Seq()))
 
       val rh = client.read(queueName)
 
-      promise.isCancelled must beFalse
+      wasInterrupted must beFalse
       rh.close()
-      promise.isCancelled must beTrue
+      wasInterrupted must beTrue
     }
   }
 }

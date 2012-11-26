@@ -84,11 +84,15 @@ trait Tracer {
   def release() {}
 }
 
-object NullTracer extends Tracer {
+class NullTracer extends Tracer {
   val factory: Tracer.Factory = (_) => this
   def record(record: Record) {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
+
+object NullTracer extends NullTracer
+// TODO
+object DefaultTracer extends NullTracer
 
 class BufferingTracer extends Tracer
   with Iterable[Record]

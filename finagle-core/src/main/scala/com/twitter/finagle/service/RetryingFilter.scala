@@ -149,9 +149,7 @@ class RetryingFilter[Req, Rep](
     if (d > 0.seconds) {
       val promise = new Promise[Rep]
       timer.schedule(Time.now + d) {
-        val rep = f
-        promise.linkTo(rep)
-        rep.proxyTo(promise)
+        promise.become(f)
       }
       promise
     } else f

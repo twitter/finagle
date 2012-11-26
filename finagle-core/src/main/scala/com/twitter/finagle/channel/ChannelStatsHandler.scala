@@ -5,7 +5,7 @@ package com.twitter.finagle.channel
  * shared as to keep statistics across a number of channels.
  */
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Time, Future}
+import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
@@ -31,7 +31,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
     connects.incr()
     connectionCount.incrementAndGet()
 
-    val connectTime = Time.now
+    val elapsed = Stopwatch.start()
     onClose ensure {
       closeChans.incr()
       val (channelReadCount, channelWriteCount) =
@@ -40,7 +40,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
       connectionReceivedBytes.add(channelReadCount.get)
       connectionSentBytes.add(channelWriteCount.get)
 
-      connectionDuration.add(connectTime.untilNow.inMilliseconds)
+      connectionDuration.add(elapsed().inMilliseconds)
       connectionCount.decrementAndGet()
     }
   }

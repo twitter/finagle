@@ -1,12 +1,13 @@
 package com.twitter.finagle.stress
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.ManagedTimer
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.util.SharedTimer
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.Duration
-import java.net.InetSocketAddress
-import java.net.SocketAddress
+import com.twitter.util.RandomSocket
+import java.net.{InetSocketAddress, SocketAddress}
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.{Executors}
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.buffer._
@@ -15,7 +16,6 @@ import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.handler.codec.http._
 import scala.collection.JavaConversions._
-import com.twitter.util.RandomSocket
 
 object EmbeddedServer {
   def apply() = new EmbeddedServer()
@@ -26,7 +26,8 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
-  val timer = ManagedTimer.toTwitterTimer.make()
+  val timer = SharedTimer.acquire()
+  val stopped = new AtomicBoolean(false)
 
   // Server state:
   private[this] var isApplicationNonresponsive = false
@@ -93,7 +94,7 @@ class EmbeddedServer(val addr: SocketAddress) {
       pipeline.addLast("latency", new SimpleChannelDownstreamHandler {
         override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
           if (latency != 0.seconds)
-            timer.get.schedule(latency) { super.writeRequested(ctx, e) }
+            timer.twitter.schedule(latency) { super.writeRequested(ctx, e) }
           else
             super.writeRequested(ctx, e)
         }
@@ -115,6 +116,9 @@ class EmbeddedServer(val addr: SocketAddress) {
   private[this] var serverChannel = bootstrap.bind(addr)
 
   def stop() {
+    if (stopped.getAndSet(true))
+      return
+
     if (serverChannel.isOpen)
       serverChannel.close().awaitUninterruptibly()
 

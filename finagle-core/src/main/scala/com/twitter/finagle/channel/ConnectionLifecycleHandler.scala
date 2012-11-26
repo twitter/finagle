@@ -6,7 +6,7 @@ import org.jboss.netty.channel.{
 
 import com.twitter.util.{Future, Promise, Return}
 
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 
 private[finagle] trait ConnectionLifecycleHandler
   extends SimpleChannelHandler

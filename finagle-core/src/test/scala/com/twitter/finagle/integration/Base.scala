@@ -1,17 +1,14 @@
 package com.twitter.finagle.integration
 
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{
-  ClientBuilder, ReferenceCountedChannelFactory}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.dispatch.SerialClientDispatcher
+import com.twitter.finagle.netty3.NewChannelFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.transport.TransportFactory
-
+import com.twitter.finagle.transport.Transport
 import java.net.SocketAddress
-
-import org.jboss.netty.channel.{
-  ChannelPipeline, ChannelPipelineFactory, Channels,
-  DefaultChannelConfig, Channel, ChannelFactory}
+import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
+  ChannelPipelineFactory, Channels, DefaultChannelConfig}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -29,9 +26,8 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
      answers { s => s.asInstanceOf[ServiceFactory[String, String]] })
     (codec.prepareServiceFactory(Matchers.any[ServiceFactory[String, String]])
      answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
-    codec.mkClientDispatcher returns { mkTrans: TransportFactory =>
-      new SerialClientDispatcher(mkTrans())
-    }
+    (codec.newClientDispatcher(Matchers.any[Transport[String, String]])
+     answers { t => new SerialClientDispatcher[String, String](t.asInstanceOf[Transport[String, String]]) })
 
     val clientAddress = new SocketAddress{}
 
@@ -48,7 +44,6 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
 */
     // Channel
     val channelFactory = mock[ChannelFactory]
-    val refcountedChannelFactory = new ReferenceCountedChannelFactory(channelFactory)
     val channel = mock[Channel]
     val connectFuture = spy(Channels.future(channel, true))
     val closeFuture = spy(Channels.future(channel))
@@ -64,11 +59,12 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
     val clientBuilder = ClientBuilder()
       .name(name)
       .codec(codecFactory)
-      .channelFactory(refcountedChannelFactory)
+      .newChannelFactory(new NewChannelFactory(() => channelFactory))
       .hosts(Seq(clientAddress))
       .reportTo(statsReceiver)
       .hostConnectionLimit(1)
 
     def build() = clientBuilder.build()
+    def buildFactory() = clientBuilder.buildFactory()
   }
 }

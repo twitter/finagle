@@ -1,9 +1,9 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Future, Promise, Return, Throw, Duration, Timer}
+import com.twitter.util.{Future, Return, Throw, Duration, Timer}
 
 /**
  * Issue a backup request after `delay` time has elapsed. This is
@@ -32,9 +32,11 @@ class BackupRequestFilter[Req, Rep](delay: Duration, timer: Timer, statsReceiver
     Future.select(Seq(service(req), backup)) flatMap {
       case (Return(res), Seq(other)) =>
         if (other eq backup) won.incr() else lost.incr()
-        other.cancel()
+        other.raise(BackupRequestLost)
         Future.value(res)
       case (Throw(_), Seq(other)) => other
     }
   }
 }
+
+object BackupRequestLost extends Exception with NoStacktrace

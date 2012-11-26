@@ -1,14 +1,12 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.MockTimer
+import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.{Service, WriteException}
+import com.twitter.util.{Time, Promise, Return, Duration, Timer}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-
-import com.twitter.finagle.Service
-import com.twitter.finagle.MockTimer
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
-
-import com.twitter.util.{Time, Promise, Return}
-import com.twitter.conversions.time._
 
 class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
   "ExpiringService" should {
@@ -25,14 +23,28 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
       underlying(123) returns promise
       underlying.isAvailable returns true
 
+      class ReleasingExpiringService[Req, Rep](
+          self: Service[Req, Rep],
+          maxIdleTime: Option[Duration],
+          maxLifeTime: Option[Duration],
+          timer: Timer,
+          stats: StatsReceiver)
+      extends ExpiringService[Req, Rep](
+          self, maxIdleTime, maxLifeTime,
+          timer, stats)
+      {
+        def onExpire() { self.release() }
+      }
+
       "releasing" in {
-        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer)
+        val service = new ReleasingExpiringService[Any, Any](
+          underlying, Some(10.seconds), None, timer, NullStatsReceiver)
         there was no(underlying).release()
 
         "cancel timers on release" in {
           val count = timer.tasks.size
-          val service = new ExpiringService[Any, Any](
-            underlying, Some(10.seconds), Some(5.seconds), timer)
+          val service = new ReleasingExpiringService[Any, Any](
+            underlying, Some(10.seconds), Some(5.seconds), timer, NullStatsReceiver)
           timer.tasks.size mustEqual count + 2
           service.release()
           timer.tasks.size mustEqual count
@@ -51,7 +63,7 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "idle time between requests" in {
-        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer)
+        val service = new ReleasingExpiringService[Any, Any](underlying, Some(10.seconds), None, timer, NullStatsReceiver)
         timer.tasks must haveSize(1)
         "expire after the given idle time" in {
           // For some reason, this complains of different types:
@@ -66,7 +78,8 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
         }
 
         "increments the counter when the timer fires" in {
-          val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), None, timer, stats)
+          val service = new ReleasingExpiringService[Any, Any](
+            underlying, Some(10.seconds), None, timer, stats)
           timeControl.advance(10.seconds)
           timer.tick()
           there was one(idleCounter).incr()
@@ -98,7 +111,8 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "life time of a connection" in {
-        val service = new ExpiringService[Any, Any](underlying, None, Some(10.seconds), timer)
+        val service = new ReleasingExpiringService[Any, Any](
+          underlying, None, Some(10.seconds), timer, NullStatsReceiver)
         timer.tasks must haveSize(1)
         "expire after the given idle time" in {
           // For some reason, this complains of different types:
@@ -120,7 +134,8 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "idle timer fires before life timer fires" in {
-        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(1.minute), timer)
+        val service = new ReleasingExpiringService[Any, Any](
+          underlying, Some(10.seconds), Some(1.minute), timer, NullStatsReceiver)
         timer.tasks must haveSize(2)
 
         "expire after the given idle time" in {
@@ -137,7 +152,8 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "life timer fires before idle timer fires" in {
-        val service = new ExpiringService[Any, Any](underlying, Some(10.seconds), Some(15.seconds), timer, stats)
+        val service = new ReleasingExpiringService[Any, Any](
+          underlying, Some(10.seconds), Some(15.seconds), timer, stats)
         timer.tasks must haveSize(2)
         timer.tasks forall(!_.isCancelled) must beTrue
 
@@ -166,7 +182,7 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
       }
 
       "increments the counter when the timer fires" in {
-        val service = new ExpiringService[Any, Any](underlying, None, Some(10.seconds), timer, stats)
+        val service = new ReleasingExpiringService[Any, Any](underlying, None, Some(10.seconds), timer, stats)
         timeControl.advance(10.seconds)
         timer.tick()
         there was one(lifeCounter).incr()

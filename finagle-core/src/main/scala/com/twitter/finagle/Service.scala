@@ -104,6 +104,7 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   def apply(request: Req) = self(request)
   override def release() = self.release()
   override def isAvailable = self.isAvailable
+  override def toString = self.toString
 }
 
 abstract class ServiceFactory[-Req, +Rep]
@@ -203,4 +204,10 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
  */
 trait ServiceFactoryWrapper {
   def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep]
+}
+
+object ServiceFactoryWrapper {
+  val identity: ServiceFactoryWrapper = new ServiceFactoryWrapper {
+    def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = factory
+  }
 }
