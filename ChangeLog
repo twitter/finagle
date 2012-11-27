@@ -1,3 +1,8 @@
+6.0.1			2012/11/26
+
+	* Use java.util.ArrayDeque in place of mutable.Queue due to 
+	https://issues.scala-lang.org/browse/SI-6690
+
 6.0.0			2012/11/26
 
 	* util 6.0.0 dependency
