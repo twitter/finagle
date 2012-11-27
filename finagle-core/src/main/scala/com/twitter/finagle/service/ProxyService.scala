@@ -1,9 +1,10 @@
 package com.twitter.finagle.service
 
-import collection.mutable.Queue
 import com.twitter.finagle.{CancelledConnectionException, Service, ServiceNotAvailableException,
   TooManyConcurrentRequestsException}
 import com.twitter.util.{Future, Promise, Throw, Return}
+import java.util.ArrayDeque
+import scala.collection.JavaConverters._
 
 /**
  * A service that simply proxies requests to an underlying service
@@ -14,7 +15,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
 {
   @volatile private[this] var proxy: Service[Req, Rep] =
     new Service[Req, Rep] {
-      private[this] val requestBuffer = new Queue[(Req, Promise[Rep])]
+      private[this] val requestBuffer = new ArrayDeque[(Req, Promise[Rep])]
       private[this] var underlying: Option[Service[Req, Rep]] = None
       private[this] var didRelease = false
 
@@ -22,7 +23,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
         synchronized {
           r match {
             case Return(service) =>
-              requestBuffer foreach { case (request, promise) =>
+              requestBuffer.asScala foreach { case (request, promise) =>
                 promise.become(service(request))
               }
 
@@ -31,7 +32,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
               if (didRelease) service.release()
 
             case Throw(exc) =>
-              requestBuffer foreach { case (_, promise) => promise() = Throw(exc) }
+              requestBuffer.asScala foreach { case (_, promise) => promise() = Throw(exc) }
               underlying = Some(new FailedService(new ServiceNotAvailableException))
           }
           requestBuffer.clear()
@@ -46,13 +47,10 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
               Future.exception(new TooManyConcurrentRequestsException)
             else {
               val p = new Promise[Rep]
-              requestBuffer += ((request, p))
+              val waiting = (request, p)
+              requestBuffer.addLast(waiting)
               p.setInterruptHandler { case cause =>
-                val didRemove = ProxyService.this.synchronized {
-                  val removed = requestBuffer.dequeueFirst { case (_, q) => p eq q }
-                  removed.isDefined
-                }
-                if (didRemove)
+                if (ProxyService.this.synchronized(requestBuffer.remove(waiting)))
                   p.setException(new CancelledConnectionException)
               }
 

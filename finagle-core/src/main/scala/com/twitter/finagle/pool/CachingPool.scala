@@ -1,13 +1,11 @@
 package com.twitter.finagle.pool
 
-import collection.mutable.Queue
-import scala.annotation.tailrec
-
-import com.twitter.util.{Future, Time, Duration, Timer}
-
-import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException, ClientConnection}
-import com.twitter.finagle.util.Cache
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util.Cache
+import com.twitter.finagle.{ClientConnection, Service, ServiceClosedException, 
+  ServiceFactory, ServiceProxy}
+import com.twitter.util.{Future, Time, Duration, Timer}
+import scala.annotation.tailrec
 
 /**
  * A pool that temporarily caches items from the underlying one, up to
