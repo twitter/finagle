@@ -2,7 +2,7 @@ package com.twitter.finagle.postgres.protocol
 
 import com.twitter.finagle._
 import org.jboss.netty.channel._
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import com.twitter.logging.Logger
 import com.twitter.util.Future
@@ -156,6 +156,54 @@ class PacketDecoder extends FrameDecoder {
     new Packet(Some(code), totalLength, buffer.readSlice(length))
 
   }
+}
+
+/**
+ * PgRequest -> PgResponse
+ */
+class PgClientChannelHandler extends SimpleChannelHandler {
+
+  private[this] val logger = Logger(getClass.getName)
+
+  private[this] val connection = new Connection()
+
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val message = e.getMessage
+
+    message match {
+      case msg: BackendMessage =>
+        connection.receive(msg).map {
+          Channels.fireMessageReceived(ctx, _)
+        }
+
+      case unsupported =>
+        logger.warning("Only backend message is supported...")
+        Channels.disconnect(ctx.getChannel)
+    }
+
+  }
+
+  override def writeRequested(ctx: ChannelHandlerContext, event: MessageEvent) = {
+    logger.ifDebug("Encoding message " + event.getMessage)
+
+    val buf = event.getMessage match {
+      case PgRequest(msg, flush) =>
+        // TODO this could be extracted as a separate handler
+        val packet = msg.asPacket()
+        val c = ChannelBuffers.dynamicBuffer()
+        c.writeBytes(packet.encode)
+        if (flush) {
+          c.writeBytes(Flush.asPacket.encode)
+        }
+        connection.send(msg)
+        c
+      case _ =>
+        logger.ifDebug("Cannot convert message... Skipping")
+        event.getMessage
+    }
+    Channels.write(ctx, event.getFuture, buf, event.getRemoteAddress)
+  }
+
 }
 
 
