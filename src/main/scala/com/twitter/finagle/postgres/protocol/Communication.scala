@@ -3,7 +3,7 @@ package com.twitter.finagle.postgres.protocol
 import java.sql.{Date => SQLDate}
 import java.sql.Timestamp
 
-case class PgRequest(msg: FrontendMessage, flush: Boolean)
+case class PgRequest(msg: FrontendMessage, flush: Boolean = false)
 
 trait PgResponse
 
@@ -64,9 +64,3 @@ case class ParamsResponse(types: IndexedSeq[Int]) extends PgResponse
 case class SelectResult(fields: IndexedSeq[Field], rows: List[DataRow]) extends PgResponse
 
 case class CommandCompleteResponse(affectedRows: Int) extends PgResponse
-
-object Communication {
-
-  def request(msg: FrontendMessage, flush: Boolean = false) = new PgRequest(msg, flush)
-
-}

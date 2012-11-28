@@ -61,7 +61,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
   override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
     for {
       service <- delegate.apply(conn)
-      startupResponse <- service(Communication.request(new StartupMessage(user, database)))
+      startupResponse <- service(PgRequest(new StartupMessage(user, database)))
       passwordResponse <- sendPassword(startupResponse, service)
       _ <- verifyResponse(passwordResponse)
     } yield service
@@ -77,7 +77,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
             case ClearText => PasswordMessage(pass)
             case Md5(salt) => PasswordMessage(new String(Md5Encryptor.encrypt(user.getBytes, pass.getBytes, salt)))
           }
-          service(Communication.request(msg))
+          service(PgRequest(msg))
 
         case None => Future.exception(Errors.client("Password has to be specified for authenticated connection"))
 

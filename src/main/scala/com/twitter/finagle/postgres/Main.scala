@@ -1,19 +1,8 @@
 package com.twitter.finagle.postgres
 
-import com.twitter.finagle.postgres.protocol.Bind
-import com.twitter.finagle.postgres.protocol.Describe
-import com.twitter.finagle.postgres.protocol.Execute
-import com.twitter.finagle.postgres.protocol.Parse
-import com.twitter.finagle.postgres.protocol.PgResponse
-import com.twitter.logging.config.FileHandlerConfig
-import com.twitter.logging.config.LoggerConfig
-import com.twitter.logging.config.Policy
 import com.twitter.logging.Logger
-import com.twitter.util.Future
-import protocol.Communication
-import protocol.Parse
-import protocol.PgCodec
-import com.twitter.finagle.postgres.protocol.Sync
+//import com.twitter.util.Future
+//import protocol.Communication
 
 case class User(email: String, name: String)
 
@@ -33,11 +22,11 @@ object Main {
 
     val client = Client("localhost:5432", "mkhadikov", Some("pass"), "contacts")
 
-    val f: Future[List[Row]] = client.prepare("select * from users").flatMap {
-      ps =>
-        ps.execute()
-    }
-    logger.ifDebug("Rows " + f.get)
+//    val f: Future[List[Row]] = client.prepare("select * from users").flatMap {
+//      ps =>
+//        ps.exec
+//    }
+//    logger.ifDebug("Rows " + f.get)
 
 //    val fp = client.send(Communication.request(new Parse(name = "1", query = "select * from users"), flush = true)) {
 //      case a => Future.value(a)

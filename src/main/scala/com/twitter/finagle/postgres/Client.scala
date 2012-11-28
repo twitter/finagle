@@ -50,27 +50,27 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
 
   private[this] def parse(sql: String): Future[String] = {
     val name = genName()
-    send(Communication.request(Parse(name, sql), flush = true)) {
+    send(PgRequest(Parse(name, sql), flush = true)) {
       case ParseCompletedResponse => Future.value(name)
     }
   }
 
-  private[this] def bind(name: String): Future[Unit] = send(Communication.request(Bind(portal = name, name = name), flush = true)) {
+  private[this] def bind(name: String): Future[Unit] = send(PgRequest(Bind(portal = name, name = name), flush = true)) {
     case BindCompletedResponse => Future.value(())
   }
 
-  private[this] def describe(name: String): Future[(IndexedSeq[String], IndexedSeq[ChannelBuffer => Value])] = send(Communication.request(Describe(portal = true, name = name), flush = true)) {
+  private[this] def describe(name: String): Future[(IndexedSeq[String], IndexedSeq[ChannelBuffer => Value])] = send(PgRequest(Describe(portal = true, name = name), flush = true)) {
     case RowDescriptions(fields) => Future.value(processFields(fields))
   }
 
-  private[this] def execute(name: String, maxRows: Int = 0) = fire(Communication.request(Execute(name, maxRows), flush = true))
+  private[this] def execute(name: String, maxRows: Int = 0) = fire(PgRequest(Execute(name, maxRows), flush = true))
 
-  private[this] def sync(): Future[Unit] = send(Communication.request(Sync)) {
+  private[this] def sync(): Future[Unit] = send(PgRequest(Sync)) {
     case ReadyForQueryResponse => Future.value(())
   }
 
 
-  private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = send(Communication.request(new Query(sql)))(handler)
+  private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = send(PgRequest(new Query(sql)))(handler)
 
   private[this] def fire(r: PgRequest) = underlying flatMap {
     service => service(r)
