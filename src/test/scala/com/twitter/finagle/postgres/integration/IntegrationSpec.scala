@@ -25,7 +25,7 @@ class IntegrationSpec extends Specification {
 
 
   args(sequential = true)
-  val on = true // only manual running
+  val on = false // only manual running
 
   if (on) {
     "Postgres client" >> {
