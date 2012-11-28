@@ -12,7 +12,11 @@ import org.specs.mock.Mockito
 class TimerSpec extends SpecificationWithJUnit with Mockito {
   "ManagedNettyTimer" should {
     val timer = mock[nu.Timer]
-    timer.stop() returns Collections.emptySet()
+    @volatile var running = true
+    timer.stop() answers { args =>
+      running = false
+      Collections.emptySet()
+    }
     val shared = new SharedTimer(() =>timer)
 
     "Stop the underlying timer when the reference count reaches 0" in {
@@ -56,7 +60,7 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
 
       t.dispose()
       there was one(timeout).cancel()  // pending is empty
-      there was one(timer).stop()
+      running must eventually(beFalse)
     }
 
     "Complain when dispose() is called twice" in {
