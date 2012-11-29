@@ -121,8 +121,7 @@ class DefaultTransport[Req, Rep] protected(config: DefaultTransport.Config[Req, 
     }
 
     val monitored: Transformer[Req, Rep] = {
-      val sourceMonitor = new SourceTrackingMonitor(logger, "client")
-      val filter = new MonitorFilter[Req, Rep](monitor andThen sourceMonitor)
+      val filter = new MonitorFilter[Req, Rep](monitor)
       factory => filter andThen factory
     }
 

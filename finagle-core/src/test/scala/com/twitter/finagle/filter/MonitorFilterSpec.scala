@@ -123,10 +123,6 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
 
       there was no(monitor).handle(inner)
       there was one(monitor).handle(outer)
-      there was one(mockLogger).log(
-        Matchers.eq(Level.SEVERE),
-        Matchers.eq("A client service FakeService2 on behalf of FakeService1 threw an exception"),
-        Matchers.eq(outer))
     }
   }
 }
