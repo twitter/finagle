@@ -15,15 +15,24 @@ import com.twitter.io.{Files, TempDirectory, StreamIO}
  *
  * @param certificatePath the path to the PEM-encoded certificate
  * @param keyPath the path to the PEM-encoded private key
+ * @param caCertPath the path to the PEM-encoded intermediate/root certs;
+ * multiple certs should be concatenated into a single file. If caCertPath
+ *   is set, use it in setting up the connection instead of certificatePath.
+ *   The cert chain should contain the certificate.
  * @return Array[KeyManager]
  */
 object PEMEncodedKeyManager {
   class ExternalExecutableFailed(message: String) extends Exception(message)
 
-  def apply(certificatePath: String, keyPath: String): Array[KeyManager] =
+  def apply(
+    certificatePath: String,
+    keyPath: String,
+    caCertPath: Option[String]
+  ): Array[KeyManager] =
     makeKeystore(
       Files.readBytes(new File(certificatePath)),
-      Files.readBytes(new File(keyPath))
+      Files.readBytes(new File(keyPath)),
+      caCertPath map { filename => Files.readBytes(new File(filename)) }
     )
 
   private[this] def secret(length: Int): Array[Char] = {
@@ -37,7 +46,12 @@ object PEMEncodedKeyManager {
     b
   }
 
-  private[this] def makeKeystore(certificate: Array[Byte], key: Array[Byte]): Array[KeyManager] = {
+  private[this] def makeKeystore(
+    certificate: Array[Byte],
+    key: Array[Byte],
+    caCert: Option[Array[Byte]]
+  ) : Array[KeyManager] = {
+
     // Create a secure directory for the conversion
     val path = TempDirectory.create()
     Shell.run(Array("chmod", "0700", path.getAbsolutePath()))
@@ -54,9 +68,14 @@ object PEMEncodedKeyManager {
 
     // Write out the certificate and key
     val f = new FileOutputStream(new File(pemPath))
-    StreamIO.copy(new ByteArrayInputStream(certificate), f)
+    // if the chain is present, use it instead of the cert (chain contains cert)
+    caCert match {
+      case Some(c) => StreamIO.copy(new ByteArrayInputStream(c), f)
+      case None => StreamIO.copy(new ByteArrayInputStream(certificate), f)
+    }
     StreamIO.copy(new ByteArrayInputStream(key), f)
     f.close()
+
 
     // Import the PEM-encoded certificate and key to a PKCS12 file
     Shell.run(
