@@ -1,6 +1,8 @@
 package com.twitter.finagle.postgres
 
 import com.twitter.logging.Logger
+import com.twitter.util.Future
+
 //import com.twitter.util.Future
 //import protocol.Communication
 
@@ -22,11 +24,11 @@ object Main {
 
     val client = Client("localhost:5432", "mkhadikov", Some("pass"), "contacts")
 
-//    val f: Future[List[Row]] = client.prepare("select * from users").flatMap {
-//      ps =>
-//        ps.exec
-//    }
-//    logger.ifDebug("Rows " + f.get)
+    val f: Future[QueryResponse] = client.prepare("select * from users where email = $1").flatMap {
+      ps =>
+        ps.exec("mickey@mouse.com")
+    }
+    logger.ifDebug("Rows " + f.get)
 
 //    val fp = client.send(Communication.request(new Parse(name = "1", query = "select * from users"), flush = true)) {
 //      case a => Future.value(a)

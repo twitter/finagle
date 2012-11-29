@@ -234,16 +234,17 @@ class BackendMessageParser {
     logger.ifDebug("fields " + fieldNumber)
     val fields = new Array[ChannelBuffer](fieldNumber)
 
-    0.until(fieldNumber).foreach { i =>
-      val length = content.readInt
-      val index = content.readerIndex
-      val slice = content.slice(index, length)
-      content.readerIndex(index + length)
+    0.until(fieldNumber).foreach {
+      i =>
+        val length = content.readInt
+        val index = content.readerIndex
+        val slice = content.slice(index, length)
+        content.readerIndex(index + length)
 
-      logger.ifDebug("index " + i)
-      fields(i) = slice
-      logger.ifDebug("bytes " + length)
-      content.readerIndex(index + length)
+        logger.ifDebug("index " + i)
+        fields(i) = slice
+        logger.ifDebug("bytes " + length)
+        content.readerIndex(index + length)
     }
 
     Some(new DataRow(fields))
@@ -259,19 +260,20 @@ class BackendMessageParser {
 
     val fields = new Array[FieldDescription](fieldNumber)
     logger.ifDebug(fieldNumber + " fields")
-    0.until(fieldNumber).foreach { index =>
+    0.until(fieldNumber).foreach {
+      index =>
 
-      val field = new FieldDescription(
-        Buffers.readCString(content),
-        content.readInt,
-        content.readShort,
-        content.readInt,
-        content.readShort,
-        content.readInt,
-        content.readShort)
+        val field = new FieldDescription(
+          Buffers.readCString(content),
+          content.readInt,
+          content.readShort,
+          content.readInt,
+          content.readShort,
+          content.readInt,
+          content.readShort)
 
-      logger.ifDebug("field " + field)
-      fields(index) = field
+        logger.ifDebug("field " + field)
+        fields(index) = field
     }
 
     Some(new RowDescription(fields))
@@ -320,10 +322,11 @@ class BackendMessageParser {
     val paramNumber = content.readShort
 
     val params = new Array[Int](paramNumber)
-    0.until(paramNumber).foreach { index =>
-      val param = content.readInt
-      logger.ifDebug("param " + param)
-      params(index) = param
+    0.until(paramNumber).foreach {
+      index =>
+        val param = content.readInt
+        logger.ifDebug("param " + param)
+        params(index) = param
     }
 
     Some(new ParameterDescription(params))
@@ -393,7 +396,7 @@ case class Parse(name: String = Strings.empty, query: String = "", paramTypes: S
 }
 
 case class Bind(portal: String = Strings.empty, name: String = Strings.empty, formats: Seq[Int] = Seq(),
-                params: Seq[Array[Byte]] = Seq(), resultFormats: Seq[Int] = Seq()) extends FrontendMessage {
+                params: Seq[ChannelBuffer] = Seq(), resultFormats: Seq[Int] = Seq()) extends FrontendMessage {
 
   def asPacket() = {
     val builder = PacketBuilder('B')
@@ -411,8 +414,8 @@ case class Bind(portal: String = Strings.empty, name: String = Strings.empty, fo
     builder.writeShort(asShort(params.length))
 
     for (param <- params) {
-      builder.writeInt(param.length)
-      builder.writeBytes(param)
+      builder.writeInt(param.readableBytes)
+      builder.writeBuf(param)
     }
 
     if (resultFormats.isEmpty) {

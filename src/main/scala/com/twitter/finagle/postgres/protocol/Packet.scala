@@ -33,6 +33,11 @@ class PacketBuilder(val code: Option[Char]) {
 	  this
   }
 
+  def writeBuf(bytes: ChannelBuffer) = {
+	  underlying.writeBytes(bytes)
+	  this
+  }
+
   def writeChar(char: Char) = {
     underlying.writeByte(char)
     this

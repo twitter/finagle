@@ -1,6 +1,6 @@
 package com.twitter.finagle.postgres.protocol
 
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object Type {
   val BOOL = 16
@@ -150,11 +150,17 @@ object ValueParser {
     r
 
   }
+}
 
-  def encoderOf(format: Int, dataType: Int): Value => ChannelBuffer = {
-    val result: Value => ChannelBuffer = throw new UnsupportedOperationException("Encoders are not supported yet")
+object StringValueEncoder {
+  def encode(value: Any): ChannelBuffer = {
+    val result = ChannelBuffers.dynamicBuffer()
+    if (value == null) {
+      result.writeInt(-1)
+    } else {
+      result.writeBytes(value.toString.getBytes(Charsets.Utf8))
+    }
     result
   }
-
 }
 

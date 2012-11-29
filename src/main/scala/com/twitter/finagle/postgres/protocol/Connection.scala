@@ -130,11 +130,13 @@ case object AwaitUpdateQueryResult extends State {
     case ErrorResponse(details) => (Some(Error(details)), Connected)
   }
 
-  private[this] def parseTag(tag: String): CommandCompleteResponse = {
+  private[this] def parseTag(tag: String) = {
     if (tag == "CREATE TABLE") {
       CommandCompleteResponse(1)
     } else if (tag == "DROP TABLE") {
       CommandCompleteResponse(1)
+    } else if (tag == "SELECT 0") {
+      Rows(List(), completed = true)
     } else {
       val parts = tag.split(" ")
 

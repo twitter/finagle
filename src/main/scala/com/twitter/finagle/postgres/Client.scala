@@ -55,9 +55,10 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
     }
   }
 
-  private[this] def bind(name: String): Future[Unit] = send(PgRequest(Bind(portal = name, name = name), flush = true)) {
-    case BindCompletedResponse => Future.value(())
-  }
+  private[this] def bind(name: String, params: Seq[ChannelBuffer] = Seq()): Future[Unit] =
+    send(PgRequest(Bind(portal = name, name = name, params = params), flush = true)) {
+      case BindCompletedResponse => Future.value(())
+    }
 
   private[this] def describe(name: String): Future[(IndexedSeq[String], IndexedSeq[ChannelBuffer => Value])] = send(PgRequest(Describe(portal = true, name = name), flush = true)) {
     case RowDescriptions(fields) => Future.value(processFields(fields))
@@ -94,9 +95,10 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   }
 
   private[this] class PreparedStatementImpl(name: String) extends PreparedStatement {
-    def exec(params: AnyRef*): Future[QueryResponse] = {
+    def exec(params: Any*): Future[QueryResponse] = {
+      val binaryParams = params.map(p => StringValueEncoder.encode(p))
       for {
-        _ <- bind(name)
+        _ <- bind(name, binaryParams)
         (fieldNames, fieldParsers) <- describe(name)
         exec <- execute(name)
         _ <- sync()
@@ -176,5 +178,5 @@ object ResultSet {
 }
 
 trait PreparedStatement {
-  def exec(params: AnyRef*): Future[QueryResponse]
+  def exec(params: Any*): Future[QueryResponse]
 }
