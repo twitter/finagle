@@ -31,8 +31,8 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
     case rs: SelectResult => Future(rs)
   }
 
-  def executeUpdate(sql: String): Future[CommandCompleteResponse] = sendQuery(sql) {
-    case ok: CommandCompleteResponse => Future(ok)
+  def executeUpdate(sql: String): Future[OK] = sendQuery(sql) {
+    case CommandCompleteResponse(rows) => Future(OK(rows))
   }
 
   def select[T](sql: String)(f: Row => T): Future[Seq[T]] = fetch(sql) map {
@@ -70,7 +70,6 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
     case ReadyForQueryResponse => Future.value(())
   }
 
-
   private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = send(PgRequest(new Query(sql)))(handler)
 
   private[this] def fire(r: PgRequest) = underlying flatMap {
@@ -95,7 +94,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   }
 
   private[this] class PreparedStatementImpl(name: String) extends PreparedStatement {
-    def exec(params: Any*): Future[QueryResponse] = {
+    def fire(params: Any*): Future[QueryResponse] = {
       val binaryParams = params.map(p => StringValueEncoder.encode(p))
       for {
         _ <- bind(name, binaryParams)
@@ -178,5 +177,16 @@ object ResultSet {
 }
 
 trait PreparedStatement {
-  def exec(params: Any*): Future[QueryResponse]
+  def fire(params: Any*): Future[QueryResponse]
+
+  def exec(params: Any*): Future[OK] = fire(params: _*) map {
+    case ok:OK => ok
+    case ResultSet(_) => throw Errors.client("Update query expected")
+  }
+
+  def select[T](params: Any*)(f: Row => T): Future[Seq[T]] = fire(params: _*) map {
+    case ResultSet(rows) => rows.map(f)
+    case OK(_) => throw Errors.client("Select query expected")
+  }
+
 }

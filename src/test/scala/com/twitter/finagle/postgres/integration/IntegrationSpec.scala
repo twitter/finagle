@@ -3,8 +3,7 @@ package com.twitter.finagle.postgres.integration
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import com.twitter.finagle.postgres.Client
-import com.twitter.finagle.postgres.protocol.CommandCompleteResponse
+import com.twitter.finagle.postgres.{OK, Client}
 import com.twitter.finagle.postgres.protocol.ServerError
 import com.twitter.logging.Logger
 
@@ -25,7 +24,7 @@ class IntegrationSpec extends Specification {
 
 
   args(sequential = true)
-  val on = false // only manual running
+  val on = true // only manual running
 
   if (on) {
     "Postgres client" >> {
@@ -51,12 +50,25 @@ class IntegrationSpec extends Specification {
         val fi = client.executeUpdate("insert into users(email, name) values ('mickey@mouse.com', 'Mickey Mouse')," +
           " ('bugs@bunny.com', 'Bugs Bunny')")
 
-        fi.get === CommandCompleteResponse(2)
+        fi.get === OK(2)
+      }
+
+      "select query in prepared statement should work fine" in {
+        val f = for {
+          prep <- client.prepare("select * from users where email=$1 and name=$2")
+          users <- prep.select("mickey@mouse.com", "Mickey Mouse") {
+            row => User(row.getString("email"), row.getString("name"))
+          }
+        } yield users
+
+
+        f.get.size === 1
+        f.get.head.name === "Mickey Mouse"
       }
 
       "deleting item should work" in {
         val fd = client.executeUpdate("delete from users where email='bugs@bunny.com'")
-        fd.get === CommandCompleteResponse(1)
+        fd.get === OK(1)
 
         val f = client.select("select  * from users") { row =>
           User(row.getString("email"), row.getString("name"))
@@ -67,7 +79,7 @@ class IntegrationSpec extends Specification {
 
       "updating item should work" in {
         val fd = client.executeUpdate("update users set name = 'Michael Mouse' where email='mickey@mouse.com'")
-        fd.get === CommandCompleteResponse(1)
+        fd.get === OK(1)
 
         val f = client.select("select  * from users") { row =>
           User(row.getString("email"), row.getString("name"))
@@ -75,6 +87,42 @@ class IntegrationSpec extends Specification {
 
         f.get.size === 1
         f.get.head.name === "Michael Mouse"
+      }
+
+      "updating item with prepared statement should work" in {
+        val fu = for {
+          prep <- client.prepare("update users set name=$1, email=$2 where email='mickey@mouse.com'")
+          res <- prep.exec("Mr. Michael Mouse", "mr.mouse@mouse.com")
+        } yield res
+
+        fu.get === OK(1)
+
+        val f = client.select("select  * from users") {
+          row =>
+            User(row.getString("email"), row.getString("name"))
+        }
+
+        f.get.size === 1
+        f.get.head.name === "Mr. Michael Mouse"
+        f.get.head.email === "mr.mouse@mouse.com"
+      }
+
+
+      "inserting item with prepared statement should work" in {
+        val fi = for {
+          prep <- client.prepare("insert into users(email, name) values ($1, $2)")
+          one <- prep.exec("Daisy Duck", "daisy@duck.com")
+          two <- prep.exec("Minnie Mouse", "ms.mouse@mouse.com")
+        } yield one.affectedRows + two.affectedRows
+
+        fi.get === 2
+
+        val f = client.select("select  * from users") {
+          row =>
+            User(row.getString("email"), row.getString("name"))
+        }
+
+        f.get.size === 3
       }
 
       "wrong query should throw exception" in {

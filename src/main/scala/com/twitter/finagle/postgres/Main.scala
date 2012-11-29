@@ -26,7 +26,7 @@ object Main {
 
     val f: Future[QueryResponse] = client.prepare("select * from users where email = $1").flatMap {
       ps =>
-        ps.exec("mickey@mouse.com")
+        ps.fire("mickey@mouse.com")
     }
     logger.ifDebug("Rows " + f.get)
 
