@@ -214,7 +214,7 @@ object Commands {
 
   )
 
-  def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd).map {
+  def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd.toUpperCase).map {
     _(args)
   }.getOrElse(throw ClientError("Unsupported command: " + cmd))
 
