@@ -96,14 +96,19 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   private[this] class PreparedStatementImpl(name: String) extends PreparedStatement {
     def fire(params: Any*): Future[QueryResponse] = {
       val binaryParams = params.map(p => StringValueEncoder.encode(p))
-      for {
+      val f = for {
         _ <- bind(name, binaryParams)
         (fieldNames, fieldParsers) <- describe(name)
         exec <- execute(name)
-        _ <- sync()
       } yield exec match {
-        case CommandCompleteResponse(rows) => OK(rows)
-        case Rows(rows, true) => ResultSet(fieldNames, fieldParsers, rows)
+          case CommandCompleteResponse(rows) => OK(rows)
+          case Rows(rows, true) => ResultSet(fieldNames, fieldParsers, rows)
+        }
+      f transform {
+        result =>
+          sync().flatMap {
+            _ => Future.const(result)
+          }
       }
     }
   }
@@ -180,7 +185,7 @@ trait PreparedStatement {
   def fire(params: Any*): Future[QueryResponse]
 
   def exec(params: Any*): Future[OK] = fire(params: _*) map {
-    case ok:OK => ok
+    case ok: OK => ok
     case ResultSet(_) => throw Errors.client("Update query expected")
   }
 

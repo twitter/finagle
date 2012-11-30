@@ -24,7 +24,7 @@ class IntegrationSpec extends Specification {
 
 
   args(sequential = true)
-  val on = true // only manual running
+  val on = false // only manual running
 
   if (on) {
     "Postgres client" >> {
@@ -32,14 +32,14 @@ class IntegrationSpec extends Specification {
       val i = client.executeUpdate("delete from users").get
 
       "select on empty table should return empty list" in {
-        val f = client.select("select  * from users") { row =>
+        val f = client.select("select  * from users") {row =>
           User(row.getString("email"), row.getString("name"))
         }
 
         f.get.size === 0
       }
       "Empty query" in {
-        val f = client.select("") { row =>
+        val f = client.select("") {row =>
           User(row.getString("email"), row.getString("name"))
         }
 
@@ -64,6 +64,17 @@ class IntegrationSpec extends Specification {
 
         f.get.size === 1
         f.get.head.name === "Mickey Mouse"
+      }
+
+      "prepared statement with wrong params must fail" in {
+        val f = for {
+          prep <- client.prepare("select * from users where email=$1 and name=$2")
+          users <- prep.select("one param only") {
+            row => User(row.getString("email"), row.getString("name"))
+          }
+        } yield users
+
+        f.get must throwA[ServerError]
       }
 
       "deleting item should work" in {

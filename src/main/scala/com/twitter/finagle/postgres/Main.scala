@@ -2,6 +2,7 @@ package com.twitter.finagle.postgres
 
 import com.twitter.logging.Logger
 import com.twitter.util.Future
+import protocol.ServerError
 
 //import com.twitter.util.Future
 //import protocol.Communication
@@ -26,65 +27,78 @@ object Main {
 
     val f: Future[QueryResponse] = client.prepare("select * from users where email = $1").flatMap {
       ps =>
-        ps.fire("mickey@mouse.com")
+        ps.fire()
     }
-    logger.ifDebug("Rows " + f.get)
+    try {
+      logger.ifDebug("Rows " + f.get)
+    }
+    catch {
+      case s: ServerError => logger.ifDebug("error error")
+    }
 
-//    val fp = client.send(Communication.request(new Parse(name = "1", query = "select * from users"), flush = true)) {
-//      case a => Future.value(a)
-//    }
+    val f2 = client.select("select * from users") {
+      row =>
+        User(row.getString("email"), row.getString("name"))
+    }
+    //
+    logger.debug("Responded " + f2.get)
 
-//    logger.ifDebug("Responded " + fp.get)
+
+    //    val fp = client.send(Communication.request(new Parse(name = "1", query = "select * from users"), flush = true)) {
+    //      case a => Future.value(a)
+    //    }
+
+    //    logger.ifDebug("Responded " + fp.get)
     //    val f = client.select("select * from users") { row =>
     //      User(row.getString("email"), row.getString("name"))
     //    }
     //
     //    logger.debug("Responded " + f.get)
 
-//    val fb = client.send(Communication.request(new Bind(portal = "1", name = "1"), flush = true)) {
-//      case b => Future.value(b)
-//    }
-//
-//    logger.ifDebug("Responded " + fb.get)
-//
-//    val fd = client.send(Communication.request(new Describe(portal = true, name = "1"), flush = true)) {
-//      case b => Future.value(b)
-//    }
-//
-//    logger.ifDebug("Responded " + fd.get)
+    //    val fb = client.send(Communication.request(new Bind(portal = "1", name = "1"), flush = true)) {
+    //      case b => Future.value(b)
+    //    }
+    //
+    //    logger.ifDebug("Responded " + fb.get)
+    //
+    //    val fd = client.send(Communication.request(new Describe(portal = true, name = "1"), flush = true)) {
+    //      case b => Future.value(b)
+    //    }
+    //
+    //    logger.ifDebug("Responded " + fd.get)
 
-//
-//    val fe = client.send(Communication.request(new Execute(name = "1", maxRows = 2), flush = true)) {
-//      case b => Future.value(b)
-//    }
-//
-//    fe.get
-//
-//    val fe2 = client.send(Communication.request(new Execute(name = "1", maxRows = 2), flush = true)) {
-//      case b => Future.value(b)
-//    }
-//
-//    fe2.get
-//
-//    println("TODO")
-//
-//    //    val fs = client.send(Communication.request(Sync, flush = true)) {
-//    //      case b => Future.value(b)
-//    //    }
-//    //
-//    //    fs.get
-//
-//    //    client.send(Communication.requestAndFlush(new Describe(false))) {
-//    //      case b => Future.value(b)
-//    //    }
-//
-//    val f = client.select("select * from users") { row =>
-//      User(row.getString("email"), row.getString("name"))
-//    }
-//    //
-//    logger.debug("Responded " + f.get)
-//
-//    //
+    //
+    //    val fe = client.send(Communication.request(new Execute(name = "1", maxRows = 2), flush = true)) {
+    //      case b => Future.value(b)
+    //    }
+    //
+    //    fe.get
+    //
+    //    val fe2 = client.send(Communication.request(new Execute(name = "1", maxRows = 2), flush = true)) {
+    //      case b => Future.value(b)
+    //    }
+    //
+    //    fe2.get
+    //
+    //    println("TODO")
+    //
+    //    //    val fs = client.send(Communication.request(Sync, flush = true)) {
+    //    //      case b => Future.value(b)
+    //    //    }
+    //    //
+    //    //    fs.get
+    //
+    //    //    client.send(Communication.requestAndFlush(new Describe(false))) {
+    //    //      case b => Future.value(b)
+    //    //    }
+    //
+    //    val f = client.select("select * from users") { row =>
+    //      User(row.getString("email"), row.getString("name"))
+    //    }
+    //    //
+    //    logger.debug("Responded " + f.get)
+    //
+    //    //
     //    val fi = client.executeUpdate("insert into users(email, name) values ('mickey@mouse.com', 'Mickey Mouse')," +
     //      " ('bugs@bunny.com', 'Bugs Bunny')")
     //
