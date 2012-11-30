@@ -157,7 +157,7 @@ class TimerFromNettyTimer(underlying: nu.Timer) extends Timer {
       def run(to: nu.Timeout) {
         if (!to.isCancelled) f
       }
-    }, (when - Time.now).inMilliseconds max 0, TimeUnit.MILLISECONDS)
+    }, math.max(0, (when - Time.now).inMilliseconds), TimeUnit.MILLISECONDS)
     toTimerTask(timeout)
   }
 
