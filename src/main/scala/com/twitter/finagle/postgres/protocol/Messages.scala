@@ -18,6 +18,8 @@ case class ErrorResponse(msg: Option[String] = None) extends BackendMessage
 
 case class NoticeResponse(msg: Option[String]) extends BackendMessage
 
+case class NotificationResponse(processId: Int, channel: String, payload: String) extends BackendMessage
+
 case class AuthenticationOk() extends BackendMessage
 
 case class AuthenticationMD5Password(salt: Array[Byte]) extends BackendMessage
@@ -99,9 +101,7 @@ class BackendMessageParser {
       case 'N' =>
         parseN(packet)
       case 'A' =>
-        logger.error("'A' Not implemented yet")
-
-        throw new UnsupportedOperationException("'A' Not implemented yet")
+        parseA(packet)
       case 't' =>
         parseSmallT(packet)
       case 'S' =>
@@ -164,7 +164,7 @@ class BackendMessageParser {
     logger.ifDebug("parsing E")
     logger.ifDebug("Packet " + packet)
 
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val builder = new StringBuilder()
     while (content.readable) {
@@ -178,7 +178,7 @@ class BackendMessageParser {
     logger.ifDebug("parsing N")
     logger.ifDebug("Packet " + packet)
 
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val builder = new StringBuilder()
     while (content.readable) {
@@ -228,7 +228,7 @@ class BackendMessageParser {
     logger.ifDebug("parsing D")
     logger.ifDebug("Packet " + packet)
 
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val fieldNumber = content.readShort
     logger.ifDebug("fields " + fieldNumber)
@@ -254,7 +254,7 @@ class BackendMessageParser {
     logger.ifDebug("parsing T")
     logger.ifDebug("Packet " + packet)
 
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val fieldNumber = content.readShort
 
@@ -283,7 +283,7 @@ class BackendMessageParser {
     logger.ifDebug("Parsing C")
     logger.ifDebug("Packet " + packet)
 
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val tag = Buffers.readCString(content)
 
@@ -292,7 +292,7 @@ class BackendMessageParser {
 
   def parseS(packet: Packet): Option[BackendMessage] = {
     logger.ifDebug("Parsing S " + packet)
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val parameterStatus = new ParameterStatus(Buffers.readCString(content), Buffers.readCString(content))
     logger.ifDebug("ParameterStatus " + parameterStatus)
@@ -301,14 +301,12 @@ class BackendMessageParser {
 
   def parse1(packet: Packet): Option[BackendMessage] = {
     logger.ifDebug("Parsing 1 " + packet)
-    val Packet(_, length, content) = packet
 
     Some(ParseComplete)
   }
 
   def parse2(packet: Packet): Option[BackendMessage] = {
     logger.ifDebug("Parsing 2 " + packet)
-    val Packet(_, length, content) = packet
 
     Some(BindComplete)
   }
@@ -317,7 +315,7 @@ class BackendMessageParser {
     logger.ifDebug("parsing t")
     logger.ifDebug("Packet " + packet)
 
-    val Packet(_, length, content) = packet
+    val Packet(_, _, content) = packet
 
     val paramNumber = content.readShort
 
@@ -346,6 +344,16 @@ class BackendMessageParser {
   def parseI(packet: Packet): Option[BackendMessage] = {
     logger.ifDebug("parsing I " + packet)
     Some(EmptyQueryResponse)
+  }
+
+  def parseA(packet: Packet): Option[BackendMessage] = {
+    logger.ifDebug("parsing A " + packet)
+    val Packet(_, _, content) = packet
+    val processId = content.readInt
+    val channel = Buffers.readCString(content)
+    val payload = Buffers.readCString(content)
+
+    Some(NotificationResponse(processId, channel, payload))
   }
 
 }

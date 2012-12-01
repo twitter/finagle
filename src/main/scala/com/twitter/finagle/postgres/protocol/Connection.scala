@@ -1,7 +1,5 @@
 package com.twitter.finagle.postgres.protocol
 
-import org.jboss.netty.channel.{Channels, MessageEvent, ChannelHandlerContext, SimpleChannelHandler}
-import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.logging.Logger
 import java.util.concurrent.ConcurrentLinkedQueue
 import collection.mutable.ListBuffer
@@ -205,7 +203,7 @@ class Connection(@volatile private[this] var state: State = AuthenticationRequir
       busy = true
     }
 
-    val (result, newState) = state.accept(msg)
+    val (result, newState) = handleMisc.orElse(state.accept)(msg)
     state = newState
     if (result.isDefined) {
       busy = false
@@ -213,6 +211,19 @@ class Connection(@volatile private[this] var state: State = AuthenticationRequir
     }
     logger.ifDebug("Result " + result + " new state " + state)
     result
+  }
+
+  def handleMisc: PartialFunction[Message, (Option[PgResponse], State)] = {
+    case NoticeResponse(details) =>
+      logger.ifInfo("Notice from server " + details)
+      (None, state)
+    case notification:NotificationResponse =>
+      logger.ifInfo("Notification from server " + notification)
+      (None, state)
+    case ParameterStatus(name, value) =>
+      logger.ifInfo("Params changed " + name + " " + value)
+      (None, state)
+
   }
 
 }
