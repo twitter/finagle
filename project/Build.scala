@@ -4,9 +4,9 @@ import com.twitter.sbt._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "5.3.6"
+  val utilVersion = "6.0.1"
   val nettyLib = "io.netty" % "netty" % "3.5.5.Final" withSources()
-  val ostrichLib = "com.twitter" % "ostrich" % "8.2.3" withSources()
+  val ostrichLib = "com.twitter" % "ostrich" % "9.0.2" withSources()
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
