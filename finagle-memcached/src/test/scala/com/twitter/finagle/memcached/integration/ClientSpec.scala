@@ -1,7 +1,5 @@
 package com.twitter.finagle.memcached.integration
 
-/* temporarily disabled due to internal dependency
-
 import _root_.java.io.ByteArrayOutputStream
 import _root_.java.net.InetSocketAddress
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
@@ -574,5 +572,3 @@ class ClientSpec extends SpecificationWithJUnit {
     }
   }
 }
-
-*/
