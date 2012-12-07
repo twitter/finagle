@@ -3,15 +3,17 @@ package com.twitter.finagle.builder
 import com.twitter.finagle._
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.netty3.{ChannelSnooper, Netty3Server}
+import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{  NullTracer, Tracer, TracingFilter}
 import com.twitter.finagle.util._
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise,
+import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Promise, 
   Time, Timer}
 import java.net.SocketAddress
-import java.util.logging.{Logger, Level}
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.logging.{Logger, Level}
+import javax.net.ssl.SSLEngine
 import org.jboss.netty.channel.ServerChannelFactory
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
@@ -91,7 +93,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
   private val _backlog:                         Option[Int]                              = None,
   private val _bindTo:                          Option[SocketAddress]                    = None,
   private val _logger:                          Option[Logger]                           = None,
-  private val _tls:                             Option[(String, String, String, String, String)] = None,
+  private val _sslEngine:                       Option[Engine]                           = None,
   private val _newChannelFactory:               () => ServerChannelFactory               = Netty3Server.defaultNewChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
@@ -116,7 +118,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
   val backlog                         = _backlog
   lazy val bindTo                     = _bindTo.get
   val logger                          = _logger
-  val tls                             = _tls
+  val sslEngine                       = _sslEngine
   val newChannelFactory               = _newChannelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
   val hostConnectionMaxIdleTime       = _timeoutConfig.hostConnectionMaxIdleTime
@@ -140,7 +142,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
     "backlog"                         -> _backlog,
     "bindTo"                          -> _bindTo,
     "logger"                          -> _logger,
-    "tls"                             -> _tls,
+    "sslEngine"                       -> _sslEngine,
     "newChannelFactory"               -> Some(_newChannelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime"       -> _timeoutConfig.hostConnectionMaxIdleTime,
@@ -285,7 +287,16 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def tls(certificatePath: String, keyPath: String,
           caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
-    withConfig(_.copy(_tls = Some(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)))
+    sslEngine(Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos))
+
+  /**
+   * Provide a raw SSL engine that is used to establish SSL sessions.
+   */
+  def sslEngine(engine: SSLEngine): This =
+    withConfig(_.copy(_sslEngine = Some(new Engine(engine))))
+
+  def sslEngine(engine: Engine): This =
+    withConfig(_.copy(_sslEngine = Some(engine)))
 
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
@@ -406,7 +417,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.MaxValue,
       channelReadTimeout = config.readTimeout getOrElse Duration.MaxValue,
       channelWriteCompletionTimeout = config.writeCompletionTimeout getOrElse Duration.MaxValue,
-      tlsParams = config.tls,
+      sslEngine = config.sslEngine,
       newServerDispatcher = codec.newServerDispatcher _,
       timer = timer,
       nettyTimer = nettyTimer,

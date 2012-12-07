@@ -2,12 +2,12 @@ package com.twitter.finagle.netty3
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler,
+import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, 
   ServiceDispatcher, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.dispatch.ServerDispatcher
 import com.twitter.finagle.dispatch.{ExpiringServerDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.ssl.{Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, NullStatsReceiver,
+import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, NullStatsReceiver, 
   StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport, TransportFactory}
 import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor, DefaultTimer}
@@ -15,11 +15,12 @@ import com.twitter.util.{Future, Promise, Duration, Monitor, Timer}
 import java.net.SocketAddress
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
+import javax.net.ssl.SSLEngine
 import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.group.{ChannelGroup, ChannelGroupFuture,
+import org.jboss.netty.channel.group.{ChannelGroup, ChannelGroupFuture, 
   ChannelGroupFutureListener, DefaultChannelGroup, DefaultChannelGroupFuture}
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelHandler,
+import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelHandler, 
   ChannelPipeline, ChannelPipelineFactory, ServerChannelFactory}
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler
@@ -70,8 +71,8 @@ object Netty3Server {
    * @param channelWriteCompletionTimeout Channels are given this much
    * time to complete a write.
    *
-   * @param tlsParams TLS configuration: certificate, key path, CA
-   * certificate path, permitted cipher list, and next protos.
+   * @param sslEngine The SSL engine, if any, to use for connecting.
+   * SSLEngine.useClientMode() will be set to false
    *
    * @param newServerDispatcher Glues together a transport with a
    * service. Requests read from the transport are dispatched onto the
@@ -90,7 +91,7 @@ object Netty3Server {
     channelMaxLifeTime: Duration = Duration.MaxValue,
     channelReadTimeout: Duration = Duration.MaxValue,
     channelWriteCompletionTimeout: Duration = Duration.MaxValue,
-    tlsParams: Option[(String, String, String, String, String)] = None,
+    sslEngine: Option[Engine] = None,
     newServerDispatcher: (TransportFactory, Service[Req, Rep]) => ServerDispatcher =
       (newTransport: TransportFactory, service: Service[Req, Rep]) =>
         new SerialServerDispatcher[Req, Rep](newTransport(), service),
@@ -173,12 +174,9 @@ object Netty3Server {
     }
   }
 
-  private def addTlsToPipeline(pipeline: ChannelPipeline, certPath: String, keyPath: String,
-      caCertPath: String, ciphers: String, nextProtos: String) {
-    val engine = Ssl.server(certPath, keyPath, caCertPath, ciphers, nextProtos)
+  private def addTlsToPipeline(pipeline: ChannelPipeline, engine: Engine) {
     engine.self.setUseClientMode(false)
     engine.self.setEnableSessionCreation(true)
-
     val handler = new SslHandler(engine.self)
 
     // Certain engine implementations need to handle renegotiation internally,
@@ -198,17 +196,9 @@ object Netty3Server {
       "sslShutdown",
       new SslShutdownHandler(engine)
     )
-
-    // Information useful for debugging SSL issues, such as the certificate, cipher spec,
-    // remote address is provided to the SSLEngine implementation by the SslIdentifierHandler.
-    // The SslIdentifierHandler will invoke the setIdentifier method on implementations
-    // that define setIdentifier(String): Unit.
-    pipeline.addFirst(
-      "sslIdentifier",
-      new SslIdentifierHandler(engine, certPath, ciphers)
-    )
   }
 }
+
 /**
  * A `Server` implemented using  [[http://netty.io Netty3]]. Given a
  * pipeline factory and a dispatcher, requests are dispatched to the
@@ -278,8 +268,8 @@ class Netty3Server[Req, Rep] protected(config: Netty3Server.Config[Req, Rep])
             new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
         }
 
-        for ((certPath, keyPath, caCertPath, ciphers, nextProtos) <- tlsParams)
-          addTlsToPipeline(pipeline, certPath, keyPath, caCertPath, ciphers, nextProtos)
+        for (sslEngine <- sslEngine)
+          addTlsToPipeline(pipeline, sslEngine)
 
         if (statsReceiver ne NullStatsReceiver) {
           pipeline.addLast(
