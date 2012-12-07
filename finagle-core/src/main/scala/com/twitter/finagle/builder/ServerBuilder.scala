@@ -93,7 +93,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
   private val _backlog:                         Option[Int]                              = None,
   private val _bindTo:                          Option[SocketAddress]                    = None,
   private val _logger:                          Option[Logger]                           = None,
-  private val _sslEngine:                       Option[Engine]                           = None,
+  private val _newEngine:                       Option[() => Engine]                     = None,
   private val _newChannelFactory:               () => ServerChannelFactory               = Netty3Server.defaultNewChannelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
@@ -118,7 +118,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
   val backlog                         = _backlog
   lazy val bindTo                     = _bindTo.get
   val logger                          = _logger
-  val sslEngine                       = _sslEngine
+  val newEngine                       = _newEngine
   val newChannelFactory               = _newChannelFactory
   val maxConcurrentRequests           = _maxConcurrentRequests
   val hostConnectionMaxIdleTime       = _timeoutConfig.hostConnectionMaxIdleTime
@@ -142,7 +142,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
     "backlog"                         -> _backlog,
     "bindTo"                          -> _bindTo,
     "logger"                          -> _logger,
-    "sslEngine"                       -> _sslEngine,
+    "newEngine"                       -> _newEngine,
     "newChannelFactory"               -> Some(_newChannelFactory),
     "maxConcurrentRequests"           -> _maxConcurrentRequests,
     "hostConnectionMaxIdleTime"       -> _timeoutConfig.hostConnectionMaxIdleTime,
@@ -287,16 +287,16 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def tls(certificatePath: String, keyPath: String,
           caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
-    sslEngine(Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos))
+    newFinagleSslEngine(() => Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos))
 
   /**
    * Provide a raw SSL engine that is used to establish SSL sessions.
    */
-  def sslEngine(engine: SSLEngine): This =
-    withConfig(_.copy(_sslEngine = Some(new Engine(engine))))
+  def newSslEngine(newSsl: () => SSLEngine): This =
+    newFinagleSslEngine(() => new Engine(newSsl()))
 
-  def sslEngine(engine: Engine): This =
-    withConfig(_.copy(_sslEngine = Some(engine)))
+  def newFinagleSslEngine(v: () => Engine): This =
+    withConfig(_.copy(_newEngine = Some(v)))
 
   def maxConcurrentRequests(max: Int): This =
     withConfig(_.copy(_maxConcurrentRequests = Some(max)))
@@ -417,7 +417,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.MaxValue,
       channelReadTimeout = config.readTimeout getOrElse Duration.MaxValue,
       channelWriteCompletionTimeout = config.writeCompletionTimeout getOrElse Duration.MaxValue,
-      sslEngine = config.sslEngine,
+      newEngine = config.newEngine,
       newServerDispatcher = codec.newServerDispatcher _,
       timer = timer,
       nettyTimer = nettyTimer,

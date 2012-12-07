@@ -6,7 +6,7 @@ import com.twitter.finagle.channel.{ChannelRequestStatsHandler, ChannelStatsHand
   ServiceDispatcher, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.dispatch.ServerDispatcher
 import com.twitter.finagle.dispatch.{ExpiringServerDispatcher, SerialServerDispatcher}
-import com.twitter.finagle.ssl.{Engine, Ssl, SslIdentifierHandler, SslShutdownHandler}
+import com.twitter.finagle.ssl.{Engine, Ssl, SslShutdownHandler}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, NullStatsReceiver, 
   StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport, TransportFactory}
@@ -71,8 +71,8 @@ object Netty3Server {
    * @param channelWriteCompletionTimeout Channels are given this much
    * time to complete a write.
    *
-   * @param sslEngine The SSL engine, if any, to use for connecting.
-   * SSLEngine.useClientMode() will be set to false
+   * @param newEngine A function used to create a new ssl.Engine for every
+   * new connections.
    *
    * @param newServerDispatcher Glues together a transport with a
    * service. Requests read from the transport are dispatched onto the
@@ -91,7 +91,7 @@ object Netty3Server {
     channelMaxLifeTime: Duration = Duration.MaxValue,
     channelReadTimeout: Duration = Duration.MaxValue,
     channelWriteCompletionTimeout: Duration = Duration.MaxValue,
-    sslEngine: Option[Engine] = None,
+    newEngine: Option[() => Engine] = None,
     newServerDispatcher: (TransportFactory, Service[Req, Rep]) => ServerDispatcher =
       (newTransport: TransportFactory, service: Service[Req, Rep]) =>
         new SerialServerDispatcher[Req, Rep](newTransport(), service),
@@ -174,7 +174,8 @@ object Netty3Server {
     }
   }
 
-  private def addTlsToPipeline(pipeline: ChannelPipeline, engine: Engine) {
+  private def addTlsToPipeline(pipeline: ChannelPipeline, newEngine: () => Engine) {
+    val engine = newEngine()
     engine.self.setUseClientMode(false)
     engine.self.setEnableSessionCreation(true)
     val handler = new SslHandler(engine.self)
@@ -268,8 +269,8 @@ class Netty3Server[Req, Rep] protected(config: Netty3Server.Config[Req, Rep])
             new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
         }
 
-        for (sslEngine <- sslEngine)
-          addTlsToPipeline(pipeline, sslEngine)
+        for (newEngine <- newEngine)
+          addTlsToPipeline(pipeline, newEngine)
 
         if (statsReceiver ne NullStatsReceiver) {
           pipeline.addLast(
