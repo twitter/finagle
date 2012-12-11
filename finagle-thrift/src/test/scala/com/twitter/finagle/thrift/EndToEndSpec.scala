@@ -17,7 +17,7 @@ import com.twitter.test.{B, SomeStruct, AnException, F}
 import com.twitter.finagle.tracing
 import com.twitter.finagle.tracing.{Trace, BufferingTracer, Annotation, Record}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 import com.twitter.silly.Silly
 import com.twitter.util.{Future, RandomSocket, Return, Promise, Time}
 import com.twitter.util.TimeConversions._
@@ -45,12 +45,13 @@ class EndToEndSpec extends SpecificationWithJUnit {
       .build(new B.Service(processor, new TBinaryProtocol.Factory()))
 
     val clientTracer = new BufferingTracer
-    val service = ClientBuilder()
+    val serviceFactory = ClientBuilder()
       .hosts(Seq(serverAddr))
       .codec(ThriftClientFramedCodec())
-      .hostConnectionLimit(1)
+      .hostConnectionLimit(2)
       .tracerFactory((_) => clientTracer)
-      .build()
+      .buildFactory()
+    val service = serviceFactory.toService
 
     doBefore {
       Trace.clear()
@@ -155,6 +156,19 @@ class EndToEndSpec extends SpecificationWithJUnit {
         client.another_method(123)() must throwA(
           new TApplicationException("Invalid method name: 'another_method'"))
       }
+    }
+    
+    "handle multiple connections" in {
+      val s1 = serviceFactory()()
+      val s2 = serviceFactory()()
+      
+      val c1 = new B.ServiceToClient(s1, new TBinaryProtocol.Factory())
+      val c2 = new B.ServiceToClient(s2, new TBinaryProtocol.Factory())
+      
+      val f1 = c1.multiply(10, 10)
+      val f2 = c2.multiply(10, 10)
+      
+      f1() must be_==(f2())
     }
   }
 

@@ -1,3 +1,38 @@
+6.0.1			2012/11/26
+
+	* Use java.util.ArrayDeque in place of mutable.Queue due to 
+	https://issues.scala-lang.org/browse/SI-6690
+
+6.0.0			2012/11/26
+
+	* util 6.0.0 dependency
+	* finagle-core: new client/server APIs; not yet exposed to users
+
+5.3.23		2012/11/21
+
+	* finagle-spdy: new codec
+	* finagle-core: ServiceTimeoutException is now a
+	WriteException (so they can be retried)
+	* finagle-core: close channels owned by ChannelTransport
+	before failing queues
+	* finagle-core: share ChannelStatsHandler in clients and
+	servers to avoid excessive stats-related weakrefs
+	* finagle-core: don't leak Spooled updates in the HeapBalancer
+
+5.3.22		2012/11/08
+
+	* finagle-redis: String commands
+	* finagle-redis: collection.Set => collection.immutable.Set per #116
+	* finagle-thrift: SeqIdFilter: Don't modify thrift requests.
+	* BackupRequestFilter: experimental service filter to perform backup requests
+
+5.3.20		2012/10/26
+
+	* finagle-redis: fix zrevrangebyscore (https://github.com/twitter/finagle/issues/114)
+	* finagle-memcached: fix space leak when using clustering
+	* finagle-core: special case 1-hosted (static) clients to bypass loadbalancer
+	* finagle-core: Introduce an experimental buffer-based pool
+
 5.3.19		2012/10/16
 	* Upgrade ostrich to 8.2.9
 	* Upgrade util to 5.3.13

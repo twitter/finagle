@@ -52,4 +52,6 @@ package com.twitter.finagle
   *  b) ref counted instance of the underlying resource or
   *  c) same instance when resource doesn't need to be actually disposed, etc.
   */
-package object util
+package object util {
+  val DefaultLogger = java.util.logging.Logger.getLogger("com.twitter.finagle")
+}

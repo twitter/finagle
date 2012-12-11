@@ -17,6 +17,7 @@ class ResponseSpec extends SpecificationWithJUnit {
            Response(nettyRequest)).foreach { response =>
         response.version must_== HttpVersion.HTTP_1_1
         response.status  must_== HttpResponseStatus.OK
+        response.toString mustMatch """Response\("HTTP/1.1 200 OK"\)"""
       }
     }
   }

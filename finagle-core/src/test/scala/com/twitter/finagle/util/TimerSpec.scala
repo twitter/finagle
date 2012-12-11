@@ -12,11 +12,15 @@ import org.specs.mock.Mockito
 class TimerSpec extends SpecificationWithJUnit with Mockito {
   "ManagedNettyTimer" should {
     val timer = mock[nu.Timer]
-    timer.stop() returns Collections.emptySet()
-    val managed = new ManagedNettyTimer(() =>timer)
+    @volatile var running = true
+    timer.stop() answers { args =>
+      running = false
+      Collections.emptySet()
+    }
+    val shared = new SharedTimer(() =>timer)
 
     "Stop the underlying timer when the reference count reaches 0" in {
-      val t0, t1 = managed.make()
+      val t0, t1 = shared.acquire()
 
       t1.dispose()
       there was no(timer).stop()
@@ -25,13 +29,13 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "Cancel pending timeouts when a timer is disposed" in {
-      val t0, t1 = managed.make()
+      val t0, t1 = shared.acquire()
 
       val task = mock[nu.TimerTask]
       val timeout = mock[nu.Timeout]
       timer.newTimeout(any, any, any) returns timeout
 
-      t1.get.newTimeout(task, 1, TimeUnit.MILLISECONDS)
+      t1.netty.newTimeout(task, 1, TimeUnit.MILLISECONDS)
       there was one(timer).newTimeout(any, any, any)
       there was no(timeout).cancel()
 
@@ -41,13 +45,13 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "Propagate cancellation and remove from pending list when timeout is cancelled" in {
-      val t = managed.make()
+      val t = shared.acquire()
 
       val task = mock[nu.TimerTask]
       val timeout = mock[nu.Timeout]
       timer.newTimeout(any, any, any) returns timeout
 
-      val newTimeout = t.get.newTimeout(task, 1, TimeUnit.MILLISECONDS)
+      val newTimeout = t.netty.newTimeout(task, 1, TimeUnit.MILLISECONDS)
       there was one(timer).newTimeout(any, any, any)
 
       there was no(timeout).cancel()
@@ -56,11 +60,11 @@ class TimerSpec extends SpecificationWithJUnit with Mockito {
 
       t.dispose()
       there was one(timeout).cancel()  // pending is empty
-      there was one(timer).stop()
+      running must eventually(beFalse)
     }
 
     "Complain when dispose() is called twice" in {
-      val t = managed.make()
+      val t = shared.acquire()
       t.dispose()
       t.dispose() must throwA(new IllegalArgumentException("requirement failed: stop called twice"))
     }

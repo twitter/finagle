@@ -17,7 +17,7 @@ private[finagle] class CloseOnReleaseService[Req, Rep](underlying: Service[Req, 
       super.apply(request)
     } else {
       Future.exception(
-        new WriteException(new ServiceClosedException))
+        WriteException(new ServiceClosedException))
     }
   }
 

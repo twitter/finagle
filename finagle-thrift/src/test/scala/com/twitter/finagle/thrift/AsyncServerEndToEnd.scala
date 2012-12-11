@@ -10,7 +10,7 @@ import com.twitter.util.{Promise, Return}
 import com.twitter.util.TimeConversions._
 import com.twitter.silly.Silly
 
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 
 class AsyncServerEndToEndSpec extends SpecificationWithJUnit {
   "async Thrift server" should {

@@ -1,4 +1,4 @@
-package com.twitter.finagle.util
+package com.twitter.finagle.netty3
 
 import java.io.PrintStream
 import java.nio.charset.Charset
@@ -6,11 +6,14 @@ import java.nio.charset.Charset
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+/** Log events on channels */
 trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandler {
   val name: String
 
+  private[this] lazy val printStream = new PrintStream(System.out, true, "UTF-8")
+
   def printer(message: String) {
-    (new PrintStream(System.out, true, "UTF-8")).println(message)
+    printStream.println(message)
   }
 
   def print(id: java.lang.Integer, indicator: String, message: String) {
@@ -24,6 +27,7 @@ trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandle
   def printDown(ch: Channel, message: String) = print(ch.getId, downIndicator, message)
 }
 
+/** Log message events */
 class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
   // TODO: provide hexdump also. for now we deal only in ASCII
   // characters.
@@ -52,7 +56,6 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
     ctx.sendDownstream(e)
   }
 
-  // 67 characters
   def dump(printer: (Channel, String) => Unit, ch: Channel, buf: ChannelBuffer) {
     val rawStr = buf.toString(buf.readerIndex, buf.readableBytes, Charset.forName("UTF-8"))
     val str = rawStr.replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n")
@@ -68,6 +71,7 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
   }
 }
 
+/** Log raw channel events */
 class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     printUp(ctx.getChannel, e.toString)

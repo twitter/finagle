@@ -13,6 +13,18 @@ object Redis {
   def get() = apply()
 }
 
+object RedisClientPipelineFactory extends ChannelPipelineFactory {
+  def getPipeline() = {
+    val pipeline = Channels.pipeline()
+    val commandCodec = new CommandCodec
+    val replyCodec = new ReplyCodec
+  
+    pipeline.addLast("codec", new NaggatiCodec(replyCodec.decode, commandCodec.encode))
+  
+    pipeline
+  }
+}
+
 class Redis(stats: StatsReceiver) extends CodecFactory[Command, Reply] {
 
   def this() = this(NullStatsReceiver)
@@ -37,17 +49,7 @@ class Redis(stats: StatsReceiver) extends CodecFactory[Command, Reply] {
   def client: ClientCodecConfig => Codec[Command, Reply] =
     Function.const {
       new Codec[Command, Reply] {
-        def pipelineFactory = new ChannelPipelineFactory {
-          def getPipeline() = {
-            val pipeline = Channels.pipeline()
-            val commandCodec = new CommandCodec
-            val replyCodec = new ReplyCodec
-
-            pipeline.addLast("codec", new NaggatiCodec(replyCodec.decode, commandCodec.encode))
-
-            pipeline
-          }
-        }
+        def pipelineFactory = RedisClientPipelineFactory
 
         override def prepareConnFactory(underlying: ServiceFactory[Command, Reply]) = {
           new RedisTracingFilter() andThen new RedisLoggingFilter(stats) andThen underlying

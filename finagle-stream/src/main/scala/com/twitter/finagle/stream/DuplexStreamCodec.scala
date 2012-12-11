@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.frame.{LengthFieldBasedFrameDecoder, Length
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.{
   Codec, CodecFactory, Service, Filter, ServerCodecConfig, ClientCodecConfig}
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 import com.twitter.util.{Future, Promise, Return}
 
 /**

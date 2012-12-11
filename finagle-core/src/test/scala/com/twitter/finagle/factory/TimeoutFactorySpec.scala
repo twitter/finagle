@@ -12,7 +12,10 @@ class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
   "TimeoutFactory" should {
     val timer = new MockTimer
     val underlying = mock[ServiceFactory[String, String]]
-    val promise = new Promise[Service[String, String]]
+    val promise = new Promise[Service[String, String]] {
+      @volatile var interrupted: Option[Throwable] = None
+      setInterruptHandler { case exc => interrupted = Some(exc) }
+    }
     underlying(any) returns promise
     val timeout = 1.second
     val exception = new ServiceTimeoutException(timeout)
@@ -21,7 +24,7 @@ class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
     "after the timeout" in Time.withCurrentTimeFrozen { tc =>
       val res = factory()
       there was one(underlying)(any)
-      promise.isCancelled must beFalse
+      promise.interrupted must beNone
       res.isDefined must beFalse
       tc.advance(5.seconds)
       timer.tick()
@@ -31,8 +34,10 @@ class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
         res() must throwA(exception)
       }
 
-      "cancel the underlying promise" in {
-        promise.isCancelled must beTrue
+      "interrupt the underlying promise with a TimeoutException" in {
+        promise.interrupted must beLike {
+          case Some(_: java.util.concurrent.TimeoutException) => true
+        }
       }
     }
 

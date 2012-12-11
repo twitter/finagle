@@ -89,6 +89,12 @@ object RequestBuilder {
   def create() = apply()
 
   /**
+   * Provides a typesafe `build` with content for Java.
+   */
+  def safeBuild(builder: Complete, method: HttpMethod, content: Option[ChannelBuffer]): HttpRequest =
+    builder.build(method, content)(RequestEvidence.FullyConfigured)
+
+  /**
    * Provides a typesafe `buildGet` for Java.
    */
   def safeBuildGet(builder: Complete): HttpRequest =
@@ -289,6 +295,18 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     } getOrElse config.headers
 
     new RequestBuilder(config.copy(headers = headers, proxied = true))
+  }
+
+  /**
+   * Construct an HTTP request with a specified method.
+   */
+  def build(method: HttpMethod, content: Option[ChannelBuffer])(
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+  ): HttpRequest = {
+    content match {
+      case Some(content) => withContent(method, content)
+      case None => withoutContent(method)
+    }
   }
 
   /**

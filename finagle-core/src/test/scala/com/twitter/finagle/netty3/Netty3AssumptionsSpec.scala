@@ -1,4 +1,4 @@
-package com.twitter.finagle.integration
+package com.twitter.finagle.netty3
 
 import java.util.concurrent.Executors
 
@@ -9,8 +9,8 @@ import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
 import org.jboss.netty.channel._
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.Ok
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.{Ok, Error, Cancelled, Netty3Transport}
 
 import com.twitter.util.{CountDownLatch, RandomSocket}
 import com.twitter.conversions.time._
@@ -24,7 +24,7 @@ import com.twitter.conversions.time._
  * And if nothing else, they document the kinds of assumptions we
  * *are* making of Netty :-)
  */
-class NettyAssumptionsSpec extends SpecificationWithJUnit {
+class Netty3AssumptionsSpec extends SpecificationWithJUnit {
   private[this] val executor = Executors.newCachedThreadPool()
   def makeServer() = {
     val bootstrap = new ServerBootstrap(
@@ -51,8 +51,8 @@ class NettyAssumptionsSpec extends SpecificationWithJUnit {
     // This test, like any involving timing, is of course fraught with
     // races.
     "leave the channel in a closed state [immediately]" in {
-      val bootstrap = new ClientBootstrap(
-        ClientBuilder.defaultChannelFactory)
+      val newCf = Netty3Transport.defaultNewChannelFactory
+      val bootstrap = new ClientBootstrap(newCf())
 
       val pipeline = Channels.pipeline
       pipeline.addLast("stfu", new SimpleChannelUpstreamHandler {
@@ -70,8 +70,8 @@ class NettyAssumptionsSpec extends SpecificationWithJUnit {
           Channels.close(channel)
           channel.isOpen must beFalse
           latch.countDown()
-        case _ =>
-          throw new Exception("Failed to connect to the expected socket.")
+        case wtf =>
+          throw new Exception("connect attempt failed: "+wtf)
       }
 
       latch.await(1.second) must beTrue

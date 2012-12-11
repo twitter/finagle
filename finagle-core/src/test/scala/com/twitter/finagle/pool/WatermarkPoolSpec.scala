@@ -101,14 +101,15 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
       f1.poll must beSome(Return(service0))
     }
 
-    "throw CancelledConnectionException if an enqueued waiter is cancelled" in {
+    "throw if an enqueued waiter is cancelled" in {
       pool().isDefined must beTrue  // consume item
       there was one(factory)()
 
       val f1 = pool()
       f1.isDefined must beFalse
 
-      f1.cancel()
+      val cause = new Exception
+      f1.raise(cause)
       f1.isDefined must beTrue
       f1() must throwA(new CancelledConnectionException)
     }
@@ -130,7 +131,10 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
 
     "when giving an unhealthy item back" in {
       val service1 = mock[Service[Int, Int]]
-      val service1Promise = new Promise[Service[Int, Int]]
+      val service1Promise = new Promise[Service[Int, Int]] {
+        @volatile var interrupted: Option[Throwable] = None
+        setInterruptHandler { case exc => interrupted = Some(exc) }
+      }
       service1(123) returns Future.value(111)
 
       val f0 = pool()
@@ -160,12 +164,13 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
         there was no(service1).release()
       }
 
-      "propagate cancellation" in {
+      "propagate interrupts" in {
         f0().release()
         // now we're waiting.
-        service1Promise.isCancelled must beFalse
-        f1.cancel()
-        service1Promise.isCancelled must beTrue
+        service1Promise.interrupted must beNone
+        val exc = new Exception
+        f1.raise(exc)
+        service1Promise.interrupted must beSome(exc)
       }
     }
   }

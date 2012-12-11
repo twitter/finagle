@@ -1,8 +1,7 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{WriteException, FailedFastException, ServiceFactory, Service}
-import com.twitter.util.{Promise, Future}
-import java.net.ConnectException
+import com.twitter.finagle.{FailedFastException, ServiceFactory, Service}
+import com.twitter.util.Promise
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.MockTimer

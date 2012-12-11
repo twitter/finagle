@@ -42,8 +42,11 @@ class ThriftServerFramedCodec(config: ServerCodecConfig) extends Codec[Array[Byt
       case ia: InetSocketAddress => ia
       case _ => new InetSocketAddress(0)
     }
-    val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress)
-    trace andThen HandleUncaughtApplicationExceptions andThen factory
+
+    factory map { service =>
+      val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress)
+      trace andThen HandleUncaughtApplicationExceptions andThen service
+    }
   }
 }
 

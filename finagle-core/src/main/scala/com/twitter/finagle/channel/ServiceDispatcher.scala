@@ -1,13 +1,13 @@
 package com.twitter.finagle.channel
 
-import com.twitter.finagle.dispatch.{ServerDispatcher, ServerDispatcherFactory}
-import com.twitter.finagle.service.ProxyService
+import com.twitter.finagle.dispatch.{ServerDispatcher}
+import com.twitter.finagle.service.{FailedService, ProxyService}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ChannelTransport, TransportFactory}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.{ClientConnection, WriteTimedOutException}
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.finagle.service.FailedService
+import com.twitter.finagle.transport.{
+  ChannelTransport, Transport, TransportFactory}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.{
+  ClientConnection, Service, ServiceFactory, WriteTimedOutException}
 import com.twitter.util.{Promise, Monitor, Return, Throw}
 import java.util.logging.{Logger, Level}
 import org.jboss.netty.channel._
@@ -20,7 +20,7 @@ import org.jboss.netty.handler.timeout.ReadTimeoutException
  */
 class ServiceDispatcher[Req, Rep](
     serviceFactory: ServiceFactory[Req, Rep],
-    mkDispatcher: ServerDispatcherFactory[Req, Rep],
+    newDispatcher: (Channel, Service[Req, Rep]) => ServerDispatcher,
     statsReceiver: StatsReceiver,
     log: Logger,
     monitor: Monitor,
@@ -75,11 +75,7 @@ class ServiceDispatcher[Req, Rep](
 
     // Note that since ServiceDispatcher is added to the original pipeline,
     // we are guaranteed not to drop any messages here.
-    val mkTrans = new TransportFactory {
-      def apply[In, Out]() = new ChannelTransport[In, Out](channel)
-    }
-
-    dispatcher = mkDispatcher(mkTrans, service)
+    dispatcher = newDispatcher(channel, service)
 
     super.channelOpen(ctx, e)
   }

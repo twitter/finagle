@@ -3,10 +3,6 @@ package com.twitter.finagle.dispatch
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledRequestException, WriteException}
 import com.twitter.util.{Return, Throw, Promise, Future}
-import org.jboss.netty.channel.{
-  ChannelPipeline, ChannelEvent, DownstreamMessageEvent,
-  DefaultExceptionEvent, Channel}
-import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -53,7 +49,7 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
       p1.poll must beSome(Return("ok: two"))
     }
 
-    "cancellation" in {
+    "interruption" in {
       trans.write(any) returns Future.value(())
       val p0 = new Promise[String]
       trans.read() returns p0
@@ -65,15 +61,17 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
       f1.isDefined must beFalse
 
       "close transport and cancel pending requests" in {
-        f0.cancel()
+        val intr = new Exception
+        f0.raise(intr)
         there was one(trans).close()
         f0.poll must beLike {
-          case Some(Throw(cause: CancelledRequestException)) => true
+          case Some(Throw(`intr`)) => true
         }
       }
 
       "ignore pending" in {
-        f1.cancel()
+        val intr = new Exception
+        f1.raise(intr)
         there was no(trans).close()
         f0.isDefined must beFalse
         f1.isDefined must beFalse
@@ -81,7 +79,7 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
         p0.setValue("ok")
         f0.poll must beSome(Return("ok"))
         f1.poll must beLike {
-          case Some(Throw(exc: CancelledRequestException)) => true
+          case Some(Throw(WriteException(`intr`))) => true
         }
         there was one(trans).write(any)
       }
@@ -90,7 +88,14 @@ class ClientDispatcherSpec extends SpecificationWithJUnit with Mockito {
     "rewrite WriteExceptions" in {
       val exc = mock[Exception]
       trans.write(any) returns Future.exception(exc)
-      disp("hello").poll must be_==(Some(Throw(WriteException(exc))))
+      val resultOpt = disp("hello").poll
+
+      resultOpt.isDefined must beTrue
+      resultOpt.get.isThrow must beTrue
+
+      val result: Throwable = resultOpt.get.asInstanceOf[Throw[String]].e
+      result.isInstanceOf[WriteException] must beTrue
+      result.getCause must be_==(exc)
     }
   }
 }

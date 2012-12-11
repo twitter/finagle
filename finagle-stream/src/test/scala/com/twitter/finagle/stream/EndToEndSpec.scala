@@ -99,7 +99,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         }
 
         "the server does not admit concurrent requests" in {
-          import com.twitter.finagle.util.Conversions._
+          import com.twitter.finagle.netty3.Conversions._
           // The finagle client, by nature, doesn't allow for this, so
           // we need to go through the trouble of establishing our own
           // pipeline.

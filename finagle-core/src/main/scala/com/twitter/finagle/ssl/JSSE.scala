@@ -20,12 +20,29 @@ object JSSE {
   }
 
   /**
-   * Get a server
+   * Get an SSL server via JSSE
+   *
+   * @param certificatePath The path to the PEM encoded certificate file
+   * @param keyPath The path to the corresponding PEM encoded key file
+   * @param caCertPath The path to the optional PEM encoded CA cert file.
+   *   If caCertPath is set, use it in setting up the connection instead of
+   *   certificatePath. The cert chain should contain the certificate.
+   * @param useCache Use a cache of SSL contexts, keyed on certificatePath
+   * @throws RuntimeException if no provider could be initialized
+   * @return an SSLEngine
    */
-  def server(certificatePath: String, keyPath: String, useCache: Boolean = true): Option[Engine] = {
+  private[finagle] def server(
+    certificatePath: String,
+    keyPath: String,
+    caCertPath: Option[String],
+    useCache: Boolean = true
+  ): Option[Engine] = {
     def makeContext: SSLContext = {
       val context = SSLContext.getInstance(protocol)
-      val kms = PEMEncodedKeyManager(certificatePath, keyPath)
+      val kms = PEMEncodedKeyManager(
+        certificatePath,
+        keyPath,
+        caCertPath)
       context.init(kms, null, null)
 
       log.finest("JSSE context instantiated for certificate '%s'".format(
@@ -37,7 +54,10 @@ object JSSE {
 
     val context = synchronized {
       if (useCache)
-        contextCache.getOrElseUpdate(certificatePath, makeContext)
+        contextCache.getOrElseUpdate(
+          List(certificatePath, keyPath, caCertPath).mkString(" + "),
+          makeContext
+        )
       else
         makeContext
     }

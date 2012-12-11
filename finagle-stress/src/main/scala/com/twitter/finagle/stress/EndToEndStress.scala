@@ -5,9 +5,9 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.util.ManagedTimer
+import com.twitter.finagle.util.SharedTimer
 import com.twitter.ostrich.stats
-import com.twitter.util.{Future, Return, Promise, Throw, Time}
+import com.twitter.util.{Future, Return, Promise, Throw, Stopwatch}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.concurrent.CountDownLatch
 import org.jboss.netty.buffer.ChannelBuffers
@@ -39,25 +39,25 @@ object EndToEndStress {
     val request = new DefaultHttpRequest(
       HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
 
-    val beginTime = Time.now
+    val elapsed = Stopwatch.start()
 
     service(request) ensure {
       dispatchLoop(service, latch)
     } respond {
       case Return(_) =>
-        stats.Stats.addMetric("request_msec", beginTime.untilNow.inMilliseconds.toInt)
+        stats.Stats.addMetric("request_msec", elapsed().inMilliseconds.toInt)
       case Throw(_) =>
         stats.Stats.incr("failure")
     }
   }
 
-  private[this] def buildServer = ServerBuilder()
+  private[this] def buildServer() = ServerBuilder()
     .name("stressServer")
     .bindTo(new InetSocketAddress(0))
     .codec(Http())
     .reportTo(new OstrichStatsReceiver)
     .maxConcurrentRequests(5)
-    .buildManaged(HttpService)
+    .build(HttpService)
 
   private[this] def buildClient(concurrency: Int, addr: SocketAddress) = ClientBuilder()
     .name("stressClient")
@@ -65,35 +65,33 @@ object EndToEndStress {
     .hosts(Seq(addr))
     .codec(Http())
     .hostConnectionLimit(concurrency)
-    .buildManaged()
+    .build()
 
   def main(args: Array[String]) {
     println("Starting EndToEndStress")
 
     val concurrency = 10
     val latch = new CountDownLatch(concurrency)
-    val beginTime = Time.now
+    val elapsed = Stopwatch.start()
 
-    val testResource = for {
-      timer <- ManagedTimer.toTwitterTimer
-      server <- buildServer
-      client <- buildClient(concurrency, server.boundAddress)
-    } yield {
-      timer.schedule(10.seconds) {
-        println("@@ %ds".format(beginTime.untilNow.inSeconds))
-        Stats.prettyPrintStats()
-      }
-      0 until concurrency foreach { _ => dispatchLoop(client, latch) }
+    val timer = SharedTimer.acquire()
+    val server = buildServer()
+    val client = buildClient(concurrency, server.localAddress)
+
+    timer.twitter.schedule(10.seconds) {
+      println("@@ %ds".format(elapsed().inSeconds))
+      Stats.prettyPrintStats()
     }
-
-    val res = testResource.make()
+    0 until concurrency foreach { _ => dispatchLoop(client, latch) }
 
     Runtime.getRuntime().addShutdownHook(new Thread {
       override def run() {
         val start = System.currentTimeMillis()
         running = false
         latch.await()
-        res.dispose()
+        client.release()
+        server.close()
+        timer.dispose()
         println("Shutdown took %dms".format(System.currentTimeMillis()-start))
       }
     })

@@ -1,8 +1,7 @@
 package com.twitter.finagle
 
-import java.net.SocketAddress
-
 import com.twitter.util.Duration
+import java.net.SocketAddress
 
 trait SourcedException extends Exception {
   var serviceName: String = "unspecified"
@@ -94,10 +93,29 @@ case class UnknownChannelException(underlying: Throwable, override val remoteAdd
   def this() = this(null, null)
 }
 
-case class WriteException(underlying: Throwable) extends ChannelException(underlying) with NoStacktrace {
-  def this() = this(null)
-  override def fillInStackTrace = this
-  override def getStackTrace = underlying.getStackTrace
+
+/**
+ * Marker trait to indicate there was an exception while writing the request.
+ * These exceptions should generally be retryable as the full request should
+ * not have reached the other end.
+ */
+trait WriteException extends Exception with SourcedException
+
+object WriteException {
+
+  def apply(underlying: Throwable): WriteException = new ChannelException(underlying)
+    with WriteException
+    with NoStacktrace
+  {
+    override def fillInStackTrace = this
+    override def getStackTrace = underlying.getStackTrace
+  }
+
+  def unapply(t: Throwable): Option[Throwable] = t match {
+    case we: WriteException => Some(we.getCause)
+    case _ => None
+  }
+
 }
 
 case class SslHandshakeException(underlying: Throwable, override val remoteAddress: SocketAddress)
@@ -137,14 +155,21 @@ class CancelledReadException extends TransportException
 class CancelledWriteException extends TransportException
 
 // Service layer errors.
-class ServiceException                                         extends Exception with SourcedException
+trait ServiceException                                         extends Exception with SourcedException
 class ServiceClosedException                                   extends ServiceException
 class ServiceNotAvailableException                             extends ServiceException
+
+/**
+ * Indicates that the connection was not established within the timeouts.
+ * This type of exception should generally be safe to retry.
+ */
 class ServiceTimeoutException(
-    protected val timeout: Duration)
-    extends ServiceException
-    with TimeoutException {
-  protected val explanation =
+    override protected val timeout: Duration)
+  extends WriteException
+  with ServiceException
+  with TimeoutException
+{
+  override protected val explanation =
     "creating a service/connection or reserving a service/connection from the service/connection pool"
 }
 

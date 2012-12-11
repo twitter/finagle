@@ -2,14 +2,14 @@ package com.twitter.finagle.example.memcache
 
 import com.twitter.common.args.Flags
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.builder.{
-  ReferenceCountedChannelFactory, LazyRevivableChannelFactory, ClientBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.stats.OstrichStatsReceiver
+import com.twitter.finagle.netty3.NewChannelFactory
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -55,14 +55,12 @@ object MemcacheStress {
       .hosts(config.hosts)
 
     if (config.nworkers > 0)
-      builder = builder.channelFactory(
-        new ReferenceCountedChannelFactory(
-          new LazyRevivableChannelFactory(() =>
-            new NioClientSocketChannelFactory(
-              Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheboss")),
-              Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheIO")),
-              config.nworkers
-            )
+      builder = builder.newChannelFactory(
+        new NewChannelFactory(() =>
+          new NioClientSocketChannelFactory(
+            Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheboss")),
+            Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheIO")),
+            config.nworkers
           )
         )
       )
@@ -80,7 +78,7 @@ object MemcacheStress {
 
     println(builder)
     val factory = builder.buildFactory()
-    val begin = Time.now
+    val elapsed = Stopwatch.start()
 
     for (_ <- 0 until config.concurrency) {
       val svc = new PersistentService(factory)
@@ -91,7 +89,7 @@ object MemcacheStress {
     while (true) {
       Thread.sleep(5000)
 
-      val howlong = Time.now - begin
+      val howlong = elapsed()
       val howmuch = count.get()
       assert(howmuch > 0)
 

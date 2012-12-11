@@ -1,13 +1,13 @@
 package com.twitter.finagle.stats
 
-import scala.collection.mutable.{HashMap, SynchronizedMap, WeakHashMap}
+import scala.collection.mutable
 import scala.ref.WeakReference
 
-import com.twitter.util.{Future, Time, JavaSingleton}
+import com.twitter.util.{Future, Stopwatch, JavaSingleton}
 import java.util.concurrent.TimeUnit
 
 /**
- * A writeable Counter. Only sums are kept of Counters.  An example
+ * A writeable Counter. Only sums are kept of Counters. An example
  * Counter is "number of requests served".
  */
 trait Counter extends {
@@ -16,12 +16,17 @@ trait Counter extends {
 }
 
 /**
- * TODO: doc
+ * An append-only collection of time-series data. Example Stats are
+ * "queue depth" or "query width in a stream of requests".
  */
 trait Stat {
   def add(value: Float)
 }
 
+/**
+ * Exposes the value of a function. For example, one could add a gauge for a
+ * computed health metric.
+ */
 trait Gauge {
   def remove()
 }
@@ -42,9 +47,9 @@ trait StatsReceiver {
    * Time a given function using the given TimeUnit
    */
   def time[T](unit: TimeUnit, name: String*)(f: => T): T = {
-    val start = Time.now
+    val elapsed = Stopwatch.start()
     val result = f
-    stat(name: _*).add((Time.now - start).inUnit(unit))
+    stat(name: _*).add(elapsed().inUnit(unit))
     result
   }
 
@@ -59,9 +64,9 @@ trait StatsReceiver {
    * Time a given future using the given TimeUnit
    */
   def timeFuture[T](unit: TimeUnit, name: String*)(f: => Future[T]): Future[T] = {
-    val start = Time.now
+    val elapsed = Stopwatch.start()
     f ensure {
-      stat(name: _*).add((Time.now - start).inUnit(unit))
+      stat(name: _*).add(elapsed().inUnit(unit))
     }
   }
 
@@ -83,12 +88,12 @@ trait StatsReceiver {
   def counter0(name: String): Counter = counter(name)
 
   /**
-   * Get a Gauge with the description
+   * Get a Stat with the description
    */
   def stat(name: String*): Stat
 
   /**
-   * Get a Gauge with the description. This method is a convenience for Java programs.
+   * Get a Stat with the description. This method is a convenience for Java programs.
    */
   def stat0(name: String): Stat = stat(name)
 
@@ -193,16 +198,18 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
 
 object NullStatsReceiver extends NullStatsReceiver
 
+object DefaultStatsReceiver extends NullStatsReceiver
+
 /** In-memory stats receiver for testing. */
 class InMemoryStatsReceiver extends StatsReceiver {
   val repr = this
 
-  val counters = new HashMap[Seq[String], Int]
-                   with SynchronizedMap[Seq[String], Int]
-  val stats    = new HashMap[Seq[String], Seq[Float]]
-                   with SynchronizedMap[Seq[String], Seq[Float]]
-  val gauges   = new WeakHashMap[Seq[String], () => Float]
-                   with SynchronizedMap[Seq[String], () => Float]
+  val counters = new mutable.HashMap[Seq[String], Int]
+                   with mutable.SynchronizedMap[Seq[String], Int]
+  val stats    = new mutable.HashMap[Seq[String], Seq[Float]]
+                   with mutable.SynchronizedMap[Seq[String], Seq[Float]]
+  val gauges   = new mutable.WeakHashMap[Seq[String], () => Float]
+                   with mutable.SynchronizedMap[Seq[String], () => Float]
 
   def counter(name: String*): Counter = {
     new Counter {
@@ -239,8 +246,8 @@ class InMemoryStatsReceiver extends StatsReceiver {
  */
 class GlobalStatsReceiver extends NullStatsReceiver {
   private[this] trait GlobalGauge extends Gauge { def addReceiver(receiver: StatsReceiver) }
-  private[this] val registered = new HashMap[AnyRef, StatsReceiver]
-  private[this] val gauges = new HashMap[Seq[String], WeakReference[GlobalGauge]]
+  private[this] val registered = new mutable.HashMap[AnyRef, StatsReceiver]
+  private[this] val gauges = new mutable.HashMap[Seq[String], WeakReference[GlobalGauge]]
 
   private[this] def mkGauge(name: Seq[String], f: => Float) = new GlobalGauge {
     private[this] var children: List[Gauge] = Nil

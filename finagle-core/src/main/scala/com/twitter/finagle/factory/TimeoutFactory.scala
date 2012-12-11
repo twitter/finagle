@@ -19,8 +19,8 @@ class TimeoutFactory[Req, Rep](
   override def apply(conn: ClientConnection) = {
     val res = super.apply(conn)
     res.within(timer, timeout) rescue {
-      case _: java.util.concurrent.TimeoutException =>
-        res.cancel()
+      case exc: java.util.concurrent.TimeoutException =>
+        res.raise(exc)
         res onSuccess { _.release() }
         Future.exception(exception)
     }

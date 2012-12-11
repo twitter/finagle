@@ -2,8 +2,9 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Trace, Annotation}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{ByteArrays, Ok, Error, Cancelled}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
+import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.{Future, Time}
 import org.apache.thrift.protocol.{
   TBinaryProtocol, TMessage, TMessageType, TProtocol, TProtocolFactory}

@@ -1,4 +1,4 @@
-package com.twitter.finagle.util
+package com.twitter.finagle.netty3
 
 import org.jboss.netty.channel.ChannelFuture
 

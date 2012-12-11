@@ -9,8 +9,8 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util.Throw
-import com.twitter.finagle.builder.{
-  ClientBuilder, ReferenceCountedChannelFactory}
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.netty3.NewChannelFactory
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.ChannelClosedException
 
@@ -32,7 +32,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     val builder =
       ClientBuilder()
-        .channelFactory(new ReferenceCountedChannelFactory(new DefaultLocalClientChannelFactory))
+        .newChannelFactory(new NewChannelFactory(() => new DefaultLocalClientChannelFactory))
         .hosts(Seq(serverAddress))
         .hostConnectionLimit(1)
         .codec(Http())

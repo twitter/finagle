@@ -89,7 +89,7 @@ class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
         new TApplicationException("Invalid method name: 'another_method'"))
     }
 
-    "make sure we mesure protocol negotiation latency" in {
+    "make sure we measure protocol negotiation latency" in {
       Time.withCurrentTimeFrozen { timeControl =>
         val statsReceiver = new InMemoryStatsReceiver
         val name = "thrift_client"

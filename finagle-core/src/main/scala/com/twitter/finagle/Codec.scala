@@ -7,8 +7,9 @@ package com.twitter.finagle
  */
 
 import com.twitter.finagle.dispatch.{
-  ClientDispatcherFactory, SerialClientDispatcher, SerialServerDispatcher,
+  ClientDispatcher, ServerDispatcher, SerialClientDispatcher, SerialServerDispatcher,
   ServerDispatcherFactory}
+import com.twitter.finagle.transport.{Transport, TransportFactory}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
 
@@ -20,6 +21,10 @@ trait Codec[Req, Rep] {
    * The pipeline factory that implements the protocol.
    */
   def pipelineFactory: ChannelPipelineFactory
+
+  /* Note: all of the below interfaces are scheduled for deprecation in favor of
+   * clients/servers
+   */
 
   /**
    * Prepare a factory for usage with the codec. Used to allow codec
@@ -41,11 +46,14 @@ trait Codec[Req, Rep] {
    * Proceed with care.
    */
 
-  val mkClientDispatcher: ClientDispatcherFactory[Req, Rep] = (mkTrans) =>
-    new SerialClientDispatcher(mkTrans())
+  def newClientDispatcher(transport: Transport[Req, Rep]): ClientDispatcher[Req, Rep] =
+    new SerialClientDispatcher(transport)
 
-  val mkServerDispatcher: ServerDispatcherFactory[Req, Rep] = (mkTrans, service) =>
-    new SerialServerDispatcher[Req, Rep](mkTrans(), service)
+  // Due to existing codecs, we need to support polymorphic
+  // transports in servers. Luckily, this goes away entirely with
+  // com.twitter.finagle.Server, and so can be deprecated eventually.
+  def newServerDispatcher(newTransport: TransportFactory, service: Service[Req, Rep]): ServerDispatcher =
+    new SerialServerDispatcher[Req, Rep](newTransport(), service)
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to

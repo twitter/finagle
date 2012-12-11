@@ -131,7 +131,8 @@ case class Http(
         } else
           super.prepareConnFactory(underlying)
 
-      override val mkClientDispatcher = (mkTrans: TransportFactory) => new HttpClientDispatcher(mkTrans())
+      override def newClientDispatcher(transport: Transport[HttpRequest, HttpResponse]) =
+        new HttpClientDispatcher(transport)
     }
   }
 
@@ -147,7 +148,7 @@ case class Http(
 
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
           val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
-          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt 
+          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
           pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
 
           if (_compressionLevel > 0) {

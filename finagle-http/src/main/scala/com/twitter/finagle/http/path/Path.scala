@@ -217,3 +217,21 @@ abstract class LongParamMatcher(name: String) {
       }
     }
 }
+
+/**
+ * Double param extractor:
+ *   object Latitude extends DoubleParamMatcher("lat")
+ *   (Path(request.path) :? request.params) match {
+ *     case Root / "closest" :? Latitude("lat") => ...
+ */
+abstract class DoubleParamMatcher(name: String) {
+  def unapply(params: ParamMap): Option[Double] =
+    params.get(name) flatMap { value =>
+      try {
+        Some(value.toDouble)
+      } catch {
+        case ex: NumberFormatException =>
+          None
+      }
+    }
+}

@@ -47,7 +47,7 @@ trait Keys { self: BaseClient =>
    * @param cursor, count, pattern
    * @return cursor followed by matching keys
    */
-  def scan(cursor: Long, count: Option[Long], pattern: Option[ChannelBuffer]
+  def scan(cursor: JLong, count: Option[JLong], pattern: Option[ChannelBuffer]
   ): Future[Seq[ChannelBuffer]] =
     doRequest(Scan(cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))

@@ -7,8 +7,8 @@ import org.jboss.netty.handler.codec.http._
 
 import com.twitter.concurrent.Offer
 import com.twitter.util.{Try, Return, Throw}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.{Cancelled, Ok, Error}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.{Cancelled, Ok, Error}
 
 import com.twitter.finagle.channel.BrokerChannelHandler
 

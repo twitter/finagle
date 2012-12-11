@@ -23,7 +23,6 @@ class EndToEndSpec extends SpecificationWithJUnit {
         .bindTo(address)
         .name("FinagleServer")
         .build(service)
-
       val cluster = new DynamicCluster[SocketAddress](Seq(server.localAddress))
       val client = ClientBuilder()
         .cluster(cluster)
@@ -31,7 +30,8 @@ class EndToEndSpec extends SpecificationWithJUnit {
         .hostConnectionLimit(1)
         .build()
 
-      // create a pending request; delete the server from cluster; then verify the request can still finish
+      // create a pending request; delete the server from cluster
+      //  then verify the request can still finish
       val response = client("123")
       arrivalLatch.await()
       cluster.del(server.localAddress)

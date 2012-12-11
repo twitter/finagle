@@ -6,7 +6,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.util.{Promise, Time, Future}
+import com.twitter.util.{Promise, Stopwatch, Future}
 import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.handler.codec.http._
@@ -54,12 +54,12 @@ object Stress {
       }
     }
 
-    val start = Time.now
+    val elapsed = Stopwatch.start()
 
     Future.join(requests) ensure {
       client.release()
 
-      val duration = start.untilNow
+      val duration = elapsed()
       println("%20s\t%s".format("Status", "Count"))
       for ((status, count) <- responses.asMap.asScala)
         println("%20s\t%d".format(status, count))

@@ -9,7 +9,10 @@ import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTime
 class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
   "TimeoutFilter" should {
     val timer = new MockTimer
-    val promise = new Promise[String]
+    val promise = new Promise[String] {
+      @volatile var interrupted: Option[Throwable] = None
+      setInterruptHandler { case exc => interrupted = Some(exc) }
+    }
     val service = new Service[String, String] {
       def apply(request: String) = promise
     }
@@ -28,11 +31,13 @@ class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
     "times out a request that is not successful, cancels underlying" in Time.withCurrentTimeFrozen { tc =>
       val res = timeoutService("blah")
       res.isDefined must beFalse
-      promise.isCancelled must beFalse
+      promise.interrupted must beNone
       tc.advance(2.seconds)
       timer.tick()
       res.isDefined must beTrue
-      promise.isCancelled must beTrue
+      promise.interrupted must beLike {
+        case Some(_: java.util.concurrent.TimeoutException) => true
+      }
      res() must throwA(exception)
     }
   }

@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import org.jboss.netty.channel._
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 
 /**
  * Deal with Http connection lifecycle wrt. keepalives, etc.

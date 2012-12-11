@@ -71,6 +71,14 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
         }
       }
 
+      "must not modify the underlying request buffer" in {
+        val reqBuf = mkmsg(new TMessage("proc", TMessageType.CALL, 0))
+        val origBuf = reqBuf.clone()
+        filtered(new ThriftClientRequest(reqBuf, false))
+        there was one(service).apply(any)
+        reqBuf.toSeq must be_==(origBuf.toSeq)
+      }
+
       "handle empty TMessage" in {
         mustExcept(Array(), "short header")
       }

@@ -15,30 +15,14 @@ import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
  * ``.release()'' on the self channel, but this action is
  * customizable.
  */
-class ExpiringService[Req, Rep](
+abstract class ExpiringService[Req, Rep](
   self: Service[Req, Rep],
   maxIdleTime: Option[Duration],
   maxLifeTime: Option[Duration],
   timer: Timer,
-  stats: StatsReceiver,
-  onExpire: () => Unit)
-  extends ServiceProxy[Req, Rep](self)
+  stats: StatsReceiver
+) extends ServiceProxy[Req, Rep](self)
 {
-  def this(
-    self: Service[Req, Rep],
-    maxIdleTime: Option[Duration],
-    maxLifeTime: Option[Duration],
-    timer: Timer
-  ) = this(self, maxIdleTime, maxLifeTime, timer, NullStatsReceiver, self.release _ )
-
-  def this(
-    self: Service[Req, Rep],
-    maxIdleTime: Option[Duration],
-    maxLifeTime: Option[Duration],
-    timer: Timer,
-    stats: StatsReceiver
-  ) = this(self, maxIdleTime, maxLifeTime, timer, stats, self.release _ )
-
   private[this] var active = true
   private[this] val latch = new AsyncLatch
 
@@ -77,6 +61,8 @@ class ExpiringService[Req, Rep](
     if (expireFnCalled.compareAndSet(false, true))
       onExpire()
   }
+
+  protected def onExpire()
 
   override def apply(req: Req): Future[Rep] = {
     val decrLatch = synchronized {

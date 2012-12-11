@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.twitter.util.{Future, Time, Throw}
+import com.twitter.util.{Future, Stopwatch, Throw}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{SourcedException, Service, SimpleFilter}
 
@@ -17,7 +17,7 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
     statsReceiver.addGauge("pending") { outstandingRequestCount.get }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val requestedAt = Time.now
+    val elapsed = Stopwatch.start()
     dispatchCount.incr()
 
     outstandingRequestCount.incrementAndGet()
@@ -25,7 +25,7 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
 
     result respond { response =>
       outstandingRequestCount.decrementAndGet()
-      latencyStat.add(requestedAt.untilNow.inMilliseconds)
+      latencyStat.add(elapsed().inMilliseconds)
       response match {
         case Throw(e) =>
           def flatten(ex: Throwable): Seq[String] =

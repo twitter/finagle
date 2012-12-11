@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle</artifactId>
   <packaging>pom</packaging>
-  <version>5.3.20-SNAPSHOT</version>
+  <version>6.0.2-SNAPSHOT</version>
   <distributionManagement>
     <repository>
       <id>artifactory-release</id>
@@ -29,6 +29,7 @@
     <module>finagle-ostrich4</module>
     <module>finagle-redis</module>
     <module>finagle-serversets</module>
+    <module>finagle-spdy</module>
     <module>finagle-stream</module>
     <module>finagle-stress</module>
     <module>finagle-test</module>

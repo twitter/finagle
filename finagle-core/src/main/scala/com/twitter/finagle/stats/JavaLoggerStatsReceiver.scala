@@ -5,8 +5,8 @@ import collection.mutable.HashMap
 import java.util.logging.Logger
 import com.twitter.conversions.time._
 import com.twitter.util.{Timer, TimerTask}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.ManagedTimer
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.util.SharedTimer
 
 class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
   extends StatsReceiverWithCumulativeGauges
@@ -16,7 +16,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
 
   // Timer here will never be released. This is ok since this class
   // is used for debugging only.
-  def this(logger: Logger) = this(logger, ManagedTimer.make().get.toTwitterTimer)
+  def this(logger: Logger) = this(logger, SharedTimer.acquire().twitter)
 
   def stat(name: String*) = new Stat {
     def add(value: Float) {

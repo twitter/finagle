@@ -9,8 +9,8 @@ import org.jboss.netty.channel.{
   SimpleChannelHandler, LifeCycleAwareChannelHandler,
   ChannelHandlerContext, ChannelStateEvent, Channel}
 
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.LatentChannelFuture
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.LatentChannelFuture
 
 private[finagle] class ChannelClosingHandler
   extends SimpleChannelHandler

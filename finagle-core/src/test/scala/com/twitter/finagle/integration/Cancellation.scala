@@ -1,16 +1,16 @@
 package com.twitter.finagle.integration
 
-import java.util.concurrent.Executors
-
+import com.twitter.finagle.{WriteException, CancelledConnectionException}
+import org.jboss.netty.channel._
+import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.mockito.{Matchers, ArgumentCaptor}
 
 import org.jboss.netty.channel._
 
-import com.twitter.finagle.builder.{ClientBuilder, ReferenceCountedChannelFactory}
-import com.twitter.finagle.util.Conversions._
-import com.twitter.finagle.util.Ok
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.netty3.Ok
 import com.twitter.finagle.{WriteException, CancelledConnectionException}
 
 import com.twitter.conversions.time._
@@ -28,16 +28,19 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
       there was one(m.connectFuture).cancel()
       m.connectFuture.isCancelled must beTrue
       f.isDefined must beTrue
-      f() must throwA(new WriteException(new CancelledConnectionException))
+      f() must throwA(WriteException(new CancelledConnectionException))
     }
 
     "cancel while waiting for a reply" in {
       val m = new MockChannel
-      val client = m.build()
-      val f = client("123")
+      val cli = m.build()
+
+      val f = cli("123")
       f.isDefined must beFalse
       m.connectFuture.setSuccess()
       m.channel.isOpen returns true
+
+      f.isDefined must beFalse
 
       // the request was sent.
       val meCaptor = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
