@@ -1,3 +1,17 @@
+6.0.2			2012/12/11
+
+	* TimerSpec, RefcountedSpec: make deterministic
+	* finagle-core: JSSE SSL support for intermediate certificates
+	* finagle-core: push SSLEngine all the way up to the ServerBuilder
+	* finagle-core: preclude default SourceMonitor in clients
+	* finagle-core: ReusingPool for pipelined, multiplexed clients
+	* finagle-core: remove wasteful RichLong allocations in hot path
+	* finagle-core: move acquire/release of services outside of WatermarkPool's synchronization
+	* finagle-core: remove unintended reflection-by-refinement-type
+	* finagle-thrift: actually support multiple protocols
+	* finagle-ostrich4: configurable delimiter
+	* finagle-redis: parse case-insensitive commands
+
 6.0.1			2012/11/26
 
 	* Use java.util.ArrayDeque in place of mutable.Queue due to 
