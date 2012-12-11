@@ -45,8 +45,8 @@ private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
     // This does not catch all misuses: there's a race between
     // calling `newTimeout` and `stop()`.
     require(active.get, "newTimeout on inactive timer")
+    @volatile var ran = false
     val wrappedTask = new nu.TimerTask {
-      @volatile var ran = false
       def run(timeout: nu.Timeout) {
         ran = true
         pending.remove(timeout)
@@ -59,7 +59,7 @@ private[finagle] class NettyTimerView(underlying: nu.Timer) extends nu.Timer {
     // to the pending set. If ran isn't set here we know that we
     // haven't attempted to remove the task yet. The remaining races
     // are fine since removal is idempotent.
-    if (wrappedTask.ran)
+    if (ran)
       pending.remove(timeout)
     new nu.Timeout {
       def getTimer() = timeout.getTimer()
