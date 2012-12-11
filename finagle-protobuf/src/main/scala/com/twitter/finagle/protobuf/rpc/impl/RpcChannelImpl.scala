@@ -31,7 +31,7 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
   def callMethod(m: MethodDescriptor, controller: RpcController,
     request: Message, responsePrototype: Message,
     done: RpcCallback[Message]): Unit = {
-    // retries is a workaround for ChannelClosedException raised when servers shutdown.
+    // retries is a workaround for ChannelClosedException raised when servers shut down.
     val retries = 3
 
     callMethod(m, controller, request, responsePrototype, done, retries)
