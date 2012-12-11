@@ -5,11 +5,12 @@ import org.mockito.ArgumentCaptor
 import com.twitter.util.Future
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.apache.thrift.protocol.{TMessageType, TMessage}
+import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.Filter._
 
 class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
+  val protocolFactory = new TBinaryProtocol.Factory()
 
   "ThriftClientFramedCodec" should {
 
@@ -19,8 +20,8 @@ class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
 
       Trace.clear()
 
-      val filter = new ThriftClientTracingFilter("service", true, None)
-      val buffer = new OutputBuffer()
+      val filter = new ThriftClientTracingFilter("service", true, None, protocolFactory)
+      val buffer = new OutputBuffer(protocolFactory)
       buffer().writeMessageBegin(
         new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
       val options = new thrift.ConnectionOptions
@@ -36,7 +37,7 @@ class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
       stack(new ThriftClientRequest(buffer.toArray, false), service)
 
       val header = new thrift.RequestHeader
-      InputBuffer.peelMessage(_request.getValue.message, header)
+      InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
 
       header.isSampled mustBe true
     }
@@ -45,8 +46,8 @@ class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
       val traceId = TraceId(Some(SpanId(1L)), None, SpanId(2L), Some(true), Flags().setDebug)
       Trace.setId(traceId)
 
-      val filter = new ThriftClientTracingFilter("service", true, None)
-      val buffer = new OutputBuffer()
+      val filter = new ThriftClientTracingFilter("service", true, None, protocolFactory)
+      val buffer = new OutputBuffer(protocolFactory)
       buffer().writeMessageBegin(new TMessage("method", TMessageType.CALL, 0))
 
       val options = new thrift.ConnectionOptions
@@ -60,7 +61,7 @@ class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
       filter(new ThriftClientRequest(buffer.toArray, false), service)
 
       val header = new thrift.RequestHeader
-      InputBuffer.peelMessage(_request.getValue.message, header)
+      InputBuffer.peelMessage(_request.getValue.message, header, protocolFactory)
 
       header.getTrace_id mustBe 1L
       header.getSpan_id mustBe 2L

@@ -8,6 +8,8 @@ import org.specs.mock.Mockito
 import com.twitter.util.{Future, Promise, Throw, Return}
 
 class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
+  val protocolFactory = new TBinaryProtocol.Factory()
+
   "ValidateThriftService" should {
     val p = new Promise[Array[Byte]]
     val service = mock[Service[ThriftClientRequest, Array[Byte]]]
@@ -27,7 +29,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "handle no-exception messages" in {
-      val buf = new OutputBuffer()
+      val buf = new OutputBuffer(protocolFactory)
       buf().writeMessageBegin(new TMessage("ok123", TMessageType.REPLY, 0))
       buf().writeMessageEnd()
       val res = validate(req)
@@ -47,7 +49,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         TApplicationException.WRONG_METHOD_NAME)
 
       for (typ <- codes) {
-        val buf = new OutputBuffer()
+        val buf = new OutputBuffer(protocolFactory)
         buf().writeMessageBegin(new TMessage("ok123", TMessageType.EXCEPTION, 0))
         val exc = new TApplicationException(typ, "wtf")
         exc.write(buf())
@@ -76,7 +78,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         TApplicationException.UNKNOWN_METHOD)
 
       for (typ <- codes) {
-        val buf = new OutputBuffer()
+        val buf = new OutputBuffer(protocolFactory)
         buf().writeMessageBegin(new TMessage("foobar", TMessageType.EXCEPTION, 0))
         val exc = new TApplicationException(typ, "it's ok, don't worry about it!")
         exc.write(buf())

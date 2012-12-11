@@ -30,22 +30,30 @@ object ThriftClientFramedCodec {
   def get() = apply()
 }
 
-class ThriftClientFramedCodecFactory(clientId: Option[ClientId], _useCallerSeqIds: Boolean)
+class ThriftClientFramedCodecFactory(
+    clientId: Option[ClientId], 
+    _useCallerSeqIds: Boolean, 
+    _protocolFactory: TProtocolFactory)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
-  def this(clientId: Option[ClientId]) = this(clientId, false)
+  def this(clientId: Option[ClientId]) = this(clientId, false, new TBinaryProtocol.Factory())
 
   // Fix this after the API/ABI freeze (use case class builder)
   def useCallerSeqIds(x: Boolean): ThriftClientFramedCodecFactory =
-    new ThriftClientFramedCodecFactory(clientId, x)
+    new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory)
+
+  /**
+   * Use the given protocolFactory in stead of the default `TBinaryProtocol.Factory`
+   */
+  def protocolFactory(pf: TProtocolFactory) =
+    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf)
 
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
    */
   def apply(config: ClientCodecConfig) =
-    new ThriftClientFramedCodec(new TBinaryProtocol.Factory(), config, clientId, _useCallerSeqIds)
-
+    new ThriftClientFramedCodec(_protocolFactory, config, clientId, _useCallerSeqIds)
 }
 
 class ThriftClientFramedCodec(
@@ -70,7 +78,7 @@ class ThriftClientFramedCodec(
     underlying flatMap { service =>
       // Attempt to upgrade the protocol the first time around by
       // sending a magic method invocation.
-      val buffer = new OutputBuffer()
+      val buffer = new OutputBuffer(protocolFactory)
       buffer().writeMessageBegin(new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
 
       val options = new thrift.ConnectionOptions
@@ -85,7 +93,7 @@ class ThriftClientFramedCodec(
         val tracingFilter = new ThriftClientTracingFilter(
           config.serviceName,
           reply.`type` != TMessageType.EXCEPTION,
-          clientId)
+          clientId, protocolFactory)
         val seqIdFilter = if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
           new SeqIdFilter else Filter.identity[ThriftClientRequest, Array[Byte]]
         val filtered = seqIdFilter andThen tracingFilter andThen service
@@ -133,7 +141,7 @@ private[thrift] class ThriftClientChannelBufferEncoder
  */
 
 private[thrift] class ThriftClientTracingFilter(
-  serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId]
+  serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId], protocolFactory: TProtocolFactory
 )
   extends SimpleFilter[ThriftClientRequest, Array[Byte]]
 {
@@ -142,7 +150,7 @@ private[thrift] class ThriftClientTracingFilter(
     service: Service[ThriftClientRequest, Array[Byte]]
   ) = {
     // Create a new span identifier for this request.
-    val msg = new InputBuffer(request.message)().readMessageBegin()
+    val msg = new InputBuffer(request.message, protocolFactory)().readMessageBegin()
     Trace.recordRpcname(serviceName, msg.name)
 
     val thriftRequest = if (isUpgraded) {
@@ -162,7 +170,7 @@ private[thrift] class ThriftClientTracingFilter(
       header.setFlags(Trace.id.flags.toLong)
 
       new ThriftClientRequest(
-        ByteArrays.concat(OutputBuffer.messageToArray(header), request.message),
+        ByteArrays.concat(OutputBuffer.messageToArray(header, protocolFactory), request.message),
         request.oneway)
     } else {
       request
@@ -180,7 +188,7 @@ private[thrift] class ThriftClientTracingFilter(
 
         if (isUpgraded) {
           // Peel off the ResponseHeader.
-          InputBuffer.peelMessage(response, new thrift.ResponseHeader)
+          InputBuffer.peelMessage(response, new thrift.ResponseHeader, protocolFactory)
         } else {
           response
         }

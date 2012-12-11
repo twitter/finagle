@@ -1,26 +1,24 @@
 package com.twitter.finagle.thrift
 
 import org.apache.thrift.TBase
-import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TMemoryInputTransport
 
 private[thrift] object InputBuffer {
-  private[thrift] val protocolFactory = new TBinaryProtocol.Factory()
-
-  def peelMessage(bytes: Array[Byte], message: TBase[_, _]) = {
-    val buffer = new InputBuffer(bytes)
+  def peelMessage(bytes: Array[Byte], message: TBase[_, _], protocolFactory: TProtocolFactory) = {
+    val buffer = new InputBuffer(bytes, protocolFactory)
     message.read(buffer())
     buffer.remainder
   }
 
-  def readMessageBegin(bytes: Array[Byte]) = {
-    val buffer = new InputBuffer(bytes)
+  def readMessageBegin(bytes: Array[Byte], protocolFactory: TProtocolFactory) = {
+    val buffer = new InputBuffer(bytes, protocolFactory)
     val iprot = buffer()
     iprot.readMessageBegin()
   }
 }
 
-private[thrift] class InputBuffer(bytes: Array[Byte]) {
+private[thrift] class InputBuffer(bytes: Array[Byte], protocolFactory: TProtocolFactory) {
   import InputBuffer._
 
   private[this] val memoryTransport = new TMemoryInputTransport(bytes)

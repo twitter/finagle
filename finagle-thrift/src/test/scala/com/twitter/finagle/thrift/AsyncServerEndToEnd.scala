@@ -1,18 +1,18 @@
 package com.twitter.finagle.thrift
 
-import org.specs.SpecificationWithJUnit
-
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.silly.Silly
+import com.twitter.util.TimeConversions._
+import com.twitter.util.{Promise, Return}
+import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
-
-import com.twitter.util.{Promise, Return}
-import com.twitter.util.TimeConversions._
-import com.twitter.silly.Silly
-
-import com.twitter.finagle.netty3.Conversions._
+import org.specs.SpecificationWithJUnit
 
 class AsyncServerEndToEndSpec extends SpecificationWithJUnit {
+  val protocolFactory = new TBinaryProtocol.Factory()
+
   "async Thrift server" should {
     "work" in {
       // ** Set up the server.
@@ -25,8 +25,8 @@ class AsyncServerEndToEndSpec extends SpecificationWithJUnit {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("decode", new ThriftServerDecoder)
-          pipeline.addLast("encode", new ThriftServerEncoder)
+          pipeline.addLast("decode", new ThriftServerDecoder(protocolFactory))
+          pipeline.addLast("encode", new ThriftServerEncoder(protocolFactory))
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               e.getMessage match {
@@ -52,8 +52,8 @@ class AsyncServerEndToEndSpec extends SpecificationWithJUnit {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("decode", new ThriftClientDecoder)
-          pipeline.addLast("encode", new ThriftClientEncoder)
+          pipeline.addLast("decode", new ThriftClientDecoder(protocolFactory))
+          pipeline.addLast("encode", new ThriftClientEncoder(protocolFactory))
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[ThriftReply[Silly.bleep_result]])
