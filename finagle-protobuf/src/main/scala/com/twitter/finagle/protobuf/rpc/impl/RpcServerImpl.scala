@@ -68,7 +68,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
       } catch {
         case e: RuntimeException => {
           log.warn("#apply# Exception: ", e)
-          if (handler.canHandle(e)) {
+          if (handler != null && handler.canHandle(e)) {
             promise.setValue((methodName, handler.handle(e, constructEmptyResponseMessage(m))))
           } else {
             // last-resort

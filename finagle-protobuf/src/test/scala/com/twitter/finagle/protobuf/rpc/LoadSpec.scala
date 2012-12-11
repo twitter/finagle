@@ -46,8 +46,9 @@ object RpcProtobufSpec extends SpecificationWithJUnit {
         val totalRequests = new AtomicInteger()
 
         val service = new SampleWeatherServiceImpl(80, null)
-        val server = factory.createServer(serverBuilder.asInstanceOf[ServerBuilder[(String, com.google.protobuf.Message),(String, com.google.protobuf.Message),Any,Any,Any]], port, service, executorService)
-        val stub = factory.createStub(clientBuilder.asInstanceOf[ClientBuilder[(String, com.google.protobuf.Message),(String, com.google.protobuf.Message),Any,Any,Any]], WeatherService.newStub(null).asInstanceOf[{ def newStub(c: RpcChannel): WeatherService }], executorService)
+
+        val server = factory.createServer(serverBuilder.asInstanceOf[ServerBuilder[(String, com.google.protobuf.Message),(String, com.google.protobuf.Message),Any,Any,Any]], port, service, null, executorService)
+        val stub = factory.createStub(clientBuilder.asInstanceOf[ClientBuilder[(String, com.google.protobuf.Message),(String, com.google.protobuf.Message),Any,Any,Any]], WeatherService.newStub(null).asInstanceOf[{ def newStub(c: RpcChannel): WeatherService }], null, executorService)
 
         val finishBarrier = new CyclicBarrier(THREAD_COUNT + 1)
         val startBarrier = new CyclicBarrier(THREAD_COUNT)

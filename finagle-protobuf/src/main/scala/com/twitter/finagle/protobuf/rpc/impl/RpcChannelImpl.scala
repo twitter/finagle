@@ -62,7 +62,7 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
   }
 
   def handle(done: RpcCallback[Message], controller: RpcController, m: Message) {
-    if (handler.canHandle(m)) {
+    if (handler != null && handler.canHandle(m)) {
       controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(handler.handle(m))
     } else {
       done.run(m)
