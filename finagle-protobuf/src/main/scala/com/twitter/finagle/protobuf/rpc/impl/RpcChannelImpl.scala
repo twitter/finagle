@@ -29,8 +29,8 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
     .unsafeBuild()
 
   def callMethod(m: MethodDescriptor, controller: RpcController,
-    request: Message, responsePrototype: Message,
-    done: RpcCallback[Message]): Unit = {
+                 request: Message, responsePrototype: Message,
+                 done: RpcCallback[Message]): Unit = {
     // retries is a workaround for ChannelClosedException raised when servers shut down.
     val retries = 3
 
@@ -38,36 +38,41 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
   }
 
   def callMethod(m: MethodDescriptor, controller: RpcController,
-    request: Message, responsePrototype: Message,
-    done: RpcCallback[Message], retries: Int): Unit = {
+                 request: Message, responsePrototype: Message,
+                 done: RpcCallback[Message], retries: Int): Unit = {
 
     Util.log("Request", m.getName(), request)
     val req = (m.getName(), request)
 
-    client(req) onSuccess { result =>
-      Util.log("Response", m.getName(), result._2)
-      futurePool({ handle(done, controller, result._2) })
-    } onFailure { e =>
-      log.warn("#callMethod# Failed.", e)
-      e match {
-        case cc: ChannelClosedException => if (retries > 1) {
-          log.warn("#callMethod# Retrying.")
-          callMethod(m, controller, request, responsePrototype, done, retries - 1);
-        } else {
-          controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
+    client(req) onSuccess {
+      result =>
+        Util.log("Response", m.getName(), result._2)
+        futurePool({
+          handle(done, controller, result._2)
+        })
+    } onFailure {
+      e =>
+        log.warn("#callMethod# Failed.", e)
+        e match {
+          case cc: ChannelClosedException => if (retries > 1) {
+            log.warn("#callMethod# Retrying.")
+            callMethod(m, controller, request, responsePrototype, done, retries - 1);
+          } else {
+            controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
+          }
+          case _ => controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
         }
-        case _ => controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
-      }
     }
   }
 
   def handle(done: RpcCallback[Message], controller: RpcController, m: Message) {
-    if (handler != null && handler.canHandle(m)) {
+    if (handler.canHandle(m)) {
       controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(handler.handle(m))
     } else {
       done.run(m)
     }
   }
+
   def release() {
     client.release()
   }

@@ -1,4 +1,5 @@
 package com.twitter.finagle.protobuf.rpc
+
 import com.google.protobuf.Message
 
 /**

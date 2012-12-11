@@ -19,13 +19,15 @@ class RpcFactoryImpl extends RpcFactory {
 
   def createServer(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, handler: ServiceExceptionHandler[Message], executorService: ExecutorService): RpcServer = new RpcServerImpl(sb, port, service, handler, executorService)
 
-  def createStub[T <: Service](cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], service: { def newStub(c: RpcChannel): T }, handler: ExceptionResponseHandler[Message], executorService: ExecutorService): T = {
+  def createStub[T <: Service](cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], service: {def newStub(c: RpcChannel): T}, handler: ExceptionResponseHandler[Message], executorService: ExecutorService): T = {
     service.newStub(new RpcChannelImpl(cb, service.asInstanceOf[T], handler, executorService))
   }
 
-  def createController(): RpcController = { new RpcControllerWithOnFailureCallback() }
+  def createController(): RpcController = {
+    new RpcControllerWithOnFailureCallback()
+  }
 
-  def release(stub: { def getChannel(): RpcChannel }) {
-	stub.getChannel().asInstanceOf[RpcChannelImpl].release()
-  } 
+  def release(stub: {def getChannel(): RpcChannel}) {
+    stub.getChannel().asInstanceOf[RpcChannelImpl].release()
+  }
 }

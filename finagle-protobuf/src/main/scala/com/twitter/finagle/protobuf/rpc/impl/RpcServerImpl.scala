@@ -1,11 +1,11 @@
 package com.twitter.finagle.protobuf.rpc.impl
 
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
-import com.twitter.finagle.protobuf.rpc.{ RpcServer, Util }
-import com.twitter.util.{ Future, Promise }
+import com.twitter.finagle.protobuf.rpc.{RpcServer, Util}
+import com.twitter.util.{Future, Promise}
 import com.twitter.util.Duration
 import com.twitter.util.FuturePool
-import com.twitter.finagle.builder.{ Server, ServerBuilder, ServerConfig }
+import com.twitter.finagle.builder.{Server, ServerBuilder, ServerConfig}
 import java.net.InetSocketAddress
 import org.slf4j.LoggerFactory
 import scala.None
@@ -68,7 +68,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
       } catch {
         case e: RuntimeException => {
           log.warn("#apply# Exception: ", e)
-          if (handler != null && handler.canHandle(e)) {
+          if (handler.canHandle(e)) {
             promise.setValue((methodName, handler.handle(e, constructEmptyResponseMessage(m))))
           } else {
             // last-resort
@@ -82,13 +82,15 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
   }
 
   def constructEmptyResponseMessage(m: MethodDescriptor): Message = {
-        val outputType = m.getOutputType();
-        DynamicMessage.newBuilder(outputType).build()
+    val outputType = m.getOutputType();
+    DynamicMessage.newBuilder(outputType).build()
   }
 }
 
 object ServiceDispatcher {
-  def apply(service: com.google.protobuf.Service, handler: ServiceExceptionHandler[Message], futurePool: FuturePool): ServiceDispatcher = { new ServiceDispatcher(service, handler, futurePool) }
+  def apply(service: com.google.protobuf.Service, handler: ServiceExceptionHandler[Message], futurePool: FuturePool): ServiceDispatcher = {
+    new ServiceDispatcher(service, handler, futurePool)
+  }
 }
 
 
