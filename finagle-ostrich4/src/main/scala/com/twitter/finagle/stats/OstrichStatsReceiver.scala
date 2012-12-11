@@ -3,7 +3,8 @@ package com.twitter.finagle.stats
 import com.twitter.ostrich.stats.{Stats, StatsCollection}
 
 class OstrichStatsReceiver(
-  val repr: StatsCollection = Stats
+  val repr: StatsCollection = Stats,
+  val delimiter: String = "/"
 ) extends StatsReceiverWithCumulativeGauges {
 
   protected[this] def registerGauge(name: Seq[String], f: => Float) {
@@ -28,5 +29,5 @@ class OstrichStatsReceiver(
     }
   }
 
-  private[this] def variableName(name: Seq[String]) = name mkString "/"
+  private[this] def variableName(name: Seq[String]) = name mkString delimiter
 }
