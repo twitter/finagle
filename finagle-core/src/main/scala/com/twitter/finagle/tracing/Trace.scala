@@ -26,7 +26,9 @@ import scala.util.Random
  * When reporting, we report to all tracers in the list of `Tracer`s.
  */
 object Trace {
-  private case class State(id: Option[TraceId], terminal: Boolean, tracers: List[Tracer])
+  sealed trait TraceState
+  private case class State(id: Option[TraceId], terminal: Boolean, tracers: List[Tracer]) extends TraceState
+  private case object NoState extends TraceState
 
   private[this] val rng = new Random
 
@@ -118,6 +120,12 @@ object Trace {
       case None    => local() = State(None, false, tracer :: Nil)
       case Some(s) => local() = s.copy(tracers = tracer :: this.tracers)
     }
+  }
+
+  def state: TraceState = local() getOrElse NoState
+  def state_=(state: TraceState) = state match {
+    case NoState =>
+    case s: State => local.set(Some(s))
   }
 
   /**
