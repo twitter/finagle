@@ -44,6 +44,7 @@ After version 5.0, Finagle is only compiled against Scala 2.9.x, and sbt-style c
 * <a href="#Building a Robust Server">Building a Robust Server</a>
 * <a href="#Building a Robust Client">Building a Robust Client</a>
 * <a href="#Creating Filters to Transform Requests and Responses">Creating Filters to Transform Requests and Responses</a>
+* <a href="#Configuring Finagle Servers and Clients">Configuring Finagle Servers and Clients</a>
 * <a href="#Using ServerSet Objects">Using ServerSet Objects</a>
 * <a href="#Java Design Patterns for Finagle">Java Design Patterns for Finagle</a>
   - <a href="#Using Future Objects With Java">Using Future Objects With Java</a>
@@ -610,7 +611,7 @@ A client is a `Service` and can be wrapped by `Filter` objects. Typically, you c
 </tr>
 <tr>
 <td>retries</td>
-<td>Number of retries per request (only applies to recoverable errors)</td>
+<td>Number of tries (not retries) per request (only applies to recoverable errors)</td>
 <td><I>None</I></td>
 </tr>
 </tbody>
@@ -1071,7 +1072,7 @@ A robust client has little to do with the lines of code (SLOC) that goes into it
       .logger(Logger.getLogger("http"))
       .build()
 
-The `ClientBuilder` object creates and configures a load balanced HTTP client that balances requests among 3 (local) endpoints. The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
+The `ClientBuilder` object creates and configures a load-balanced HTTP client that balances requests among 3 (local) endpoints. The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
 
 The following examples show how to invoke this client from Scala and Java, respectively:
 
@@ -1154,6 +1155,192 @@ A client can access a cluster, as follows:
       .hostConnectionLimit(1)
       .codec(new StringCodec)
       .build()
+
+[Top](#Top)
+
+
+
+
+
+
+
+<a name="Configuring Finagle Servers and Clients"></a>
+
+## Configuring Finagle Servers and Clients
+
+Finagle offers a wealth of options for configuring servers and clients. For many if not most Finagle users, the defaults are both sensible and sufficient, and this section is unnecessary. Both servers and clients require a small number of configuration parameters (below: <a href="#ClientBuilder Required Parameters">clients</a>, <a href="#ServerBuilder Required Parameters">servers</a>).
+
+* <a href="#Using the ClientBuilder and ServerBuilder">Using the ClientBuilder and ServerBuilder</a>
+* <a href="#ClientBuilder Required Parameters">ClientBuilder Required Parameters</a>
+* <a href="#ServerBuilder Required Parameters">ServerBuilder Required Parameters</a>
+* <a href="#Clusters">Clusters</a>
+* <a href="#Idle Times">Idle Times</a>
+* <a href="#Timeouts">Timeouts</a>
+* <a href="#Configuring Connections>Configuring Connections</a>
+* <a href="#maxConcurrentRequests>maxConcurrentRequests</a>
+* <a href="#Retries">Retries</a>
+* <a href="#Debugging">Debugging</a>
+
+
+### Using the ClientBuilder and ServerBuilder
+
+A client is specified as follows:
+
+    val client: Service[Req, Resp] = ClientBuilder()
+      .configParam1(val1)
+      .configParam2(val2)
+      ...
+      .build()
+
+Each `configParam` is initialized with a value (`val`); the params are initialized in order, top to bottom. Conceptually, the builder acts like an immutable map. If `configParamX` and `configParamY` are mutually exclusive, the later one overrides the earlier one. At the end, `build`, called with no arguments, actually constructs the client; this is the only operation with any side-effects.
+
+A server looks similar:
+
+    val server: Server = ServerBuilder()
+      .configParam1(val1)
+      .configParam2(val2)
+      ...
+      .build(myService)
+
+Unlike in the ClientBuilder, the ServerBuilder's `build` call takes a single argument, the service that will be visible to connected clients.
+
+These builders are immutable/persistent; this has correctness advantages and also allows constructing "template" builders that might encapsulate a certain set of parameters. This is a useful and common design pattern.
+
+
+### ClientBuilder Required Parameters
+
+The ClientBuilder has two main abstractions. The first is the trio of **client**, **hosts**, and **connections**. A client can connect to one or more hosts and specify a policy that distributes requests to those hosts. And each host may allow one or more individual connections to it, exposing concurrency among requests from its connected clients and allowing parallel execution.
+
+![_Relationship between clients, hosts, and connections._](https://raw.github.com/twitter/finagle/master/doc/client-abstraction.png)
+
+<!--1) Spend a bit more time explaining layers inside clients and servers and terminology used. E.g. host is kind of ambiguous just by itself. Obviously, a good picture should clear this up. Maybe just start on nailing this picture or pictures (coud be easier to have one pic for server layers and one for client layers to explain in detail each one, and then one bigger one with both but less detail to use when illustrating e.g. timeouts that happen across the wire between these two.) Once we are happy with pictures I think descriptions of various config args will follow easily.-->
+
+The second main abstraction is the **codec**, which is responsible for turning a discrete request or response into a stream of bytes to send across the network, and vice versa.
+
+These concepts are so important that they are required when specifying any client:
+
+> The `ClientBuilder` requires the definition of `cluster` or `hosts`, `codec`, and `hostConnectionLimit`. In Scala, these are statically type checked, and in Java the lack of any of the above causes a runtime error.
+
+Alternatively, a Java ClientBuilder is statically type checked by using `ClientBuilder.safeBuild()`.
+
+* `hosts` must contain a list of hosts or `cluster` an explicitly specified cluster.
+* The `codec` implements the network protocol used by the client, and consequently determines the types of request and reply.
+* `hostConnectionLimit` specifies the maximum number of connections that are established to each host.
+
+If you don't specify those, and you're using Scala, you'll see an error message that indicates the `Builder is not fully configured` with details on the requested (incomplete) configuration.
+
+### ServerBuilder Required Parameters
+
+`ServerBuilder` has three required parameters: a `codec`, a service name (a string) (called as `name`), and an address (typically `InetSocketAddress(serverPort)`) (called as `bindTo`). Just as with the client, in Scala these are statically type checked; Java can be statically type checked by using `ServerBuilder.safeBuild()`; otherwise in Java the lack of any of the above causes a runtime error.
+
+### Clusters
+
+The purpose of a Cluster is to abstract a group of identical servers, where requests to the cluster can be routed to any server in that cluster. Note that clusters have dynamic membership. <a href="#Building a Robust Client">Recall that</a>:
+
+> The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
+
+<!-- Marius: "I would drop the part about custom load balancers. If you're in that territory you already need to be deeply familiar with the code."-->
+<!--If this default strategy does not meet your needs, the simplest way to implement a custom load balancing strategy is to create your own client per endpoint and then write your own load balancer across that. The <a href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala">HeapBalancer</a> code provides a solid starting point; note it uses a heap to identify the endpoint with the least number of requests (`Ordering.by { _.load }`, where `load` is the number of connections).-->
+
+
+### Idle Times
+
+> `hostConnectionIdleTime` vs. `hostConnectionMaxIdleTime`: with respect to the `ClientBuilder`, what's the difference?
+
+`hostConnectionIdleTime` applies to the caching pool: "the amount of time a connection is allowed to linger (when it otherwise would have been closed by the pool) before being closed". More precisely, it is applied to any connection between the low and high watermarks. `hostConnectionMaxIdleTime` applies to the physical connection: "the maximum time a connection is allowed to linger unused".
+
+### Timeouts
+
+Clients have several timeout parameters during the connection process, which consists of the following steps:
+
+<!--1. Request connection
+2. Establish socket with remote host
+3. (Possibly) placed in queue waiting for connection
+4. Acquire connection
+5. Dispatch request to remote host (host will then service the request)
+6. Receive response from remote host
+7. Satisfy the Finagle `Future`-->
+
+1. Make a request.
+2. Ask the load balancer where to connect to (the load balancer chooses the least connected endpoint).
+3. Ask that endpoint's pool for a connection. Most of the time, there is an existing unused connection in the pool and that connection is returned. Otherwise, a connection is acquired or, depending on pool policies, the request may be queued. A queued request may be satisfied by giving a connection back to the pool, or establishing one when possible according to pooling policies.
+4. When a connection is established, we create a socket and connect.
+5. Dispatch the request on the given connection.
+6. Wait until you receive a reply, then satisfy the `Future`.
+7. Give the connection back to the pool.
+
+<!--timeout is applied to [1,6]; connectTimeout is applied to [1,3]; tcpConnectTimeout is applied to 4; requestTimeout to [5,6].-->
+
+The configurable timeout parameters are:
+
+<!--2) Maybe add markers if form of numbers in the picture, so when you describe a timeout, you could just say, e.g. this is timeout between points 2 and 4 in the picture.-->
+
+* `connectTimeout` - total time to acquire a connection regardless of whether it's an actual connect attempt or waiting in the queue for one to free up. (1&ndash;3)
+* `tcpConnectTimeout` - TCP-level connect timeout, equivalent to Netty's `connectTimeoutMillis` and the second parameter to Java's `java.net.Socket.connect(SocketAddress, int)`. It is specifically the maximum time to wait between a socket connection attempt and its success. By default, this is set to 10 milliseconds, which may be insufficient for distant servers. (4)
+* `requestTimeout` - per-request timeout, meaning for each retry, the attempt may take this long. This timer begins counting only when the connection is established. (5&ndash;6)
+* `timeout` - top-level timeout applied from the issuance of a request (through `service(request)`) until the satisfaction of its reply future.  No request will take longer than this. (1&ndash;6)
+
+![_Timeline of a client request, with timeouts._](https://raw.github.com/twitter/finagle/master/doc/request-timeline.png)
+
+### Configuring Connections
+
+Finagle manages a connection pool for clients. Connections to a server are expensive to build, so when Finagle establishes a connection for a particular request, it maintains that connection even after the request is complete. Then another request can reuse the same connection. The management of this pool is handled by Finagle, but you can configure some of the pool parameters.
+
+How do connections work in the presence of the connection pool? The following points explain the relevant behavior in terms of the parameters that you can set.
+
+* When the client is built, no connections are established eagerly.
+* When you send the first request, it will establish a connection and give it to that request.
+* When that request is complete, the request will release the connection to the _watermark_ pool. `hostConnectionCoresize` sets the size of this pool; the watermark pool maintains this number of connections (per host).
+* If there are more than `hostConnectionCoresize` outstanding requests, new connections will be established on demand up to `hostConnectionLimit`. Once those requests complete, they will be released to the _cachingPool_, which will keep them around for `hostConnectionIdleTime`. if a new connection is requested within `hostConnectionIdleTime`, it will reuse that connection.
+* Any connection-level errors (write exceptions or timeouts) will make the connection unavailable and will be discarded immediately.
+
+Setting `hostConnectionLimit` specifies the maximum number of connections that are allowed per host; Finagle guarantees it will never have more active connections than this limit. `hostConnectionCoresize` sets a minimum number of connections; unless they time out from idleness, the pool never has fewer connections than this limit.
+
+If you set these two parameters to be the same, the consequence is that Finagle won't establish more than that number of connections per host, and it won't relinquish healthy connections. However, this doesn't mean that you will always see the same number of connections. To _get_ these connections, you need requests. Finagle does not proactively establish connections (when the client is built, no connections are established eagerly). When a new request is dispatched, the following happens:
+
+    if num(active connections) == max, enqueue it
+    otherwise establish a new connection and dispatch it
+
+When a request is complete, the connection is re-added to the pool only if it is healthy (is alive and hasn't been closed by the server).
+
+However, there are some other parameters at play, too: if the client specifies idle timeouts, the connection is jettisoned if idle (for the parameterized amount of time). Unless the connection count is maximized to every host, requests will never queue.
+
+Another useful parameter is limiting the number of waiters by setting `hostConnectionMaxWaiters`; requests that arrive when the number of waiters exceeds this number immediately return a `Future.exception(TooManyWaitersException)`.
+
+Reducing high lock contention via a fast, lock-free buffer is the goal of the experimental `expHostConnectionBufferSize(n)` parameter in the pool, where `n` should be set to the number of expected outstanding requests at a time (overestimating is better than underestimating, and power-of-two sizes of `n` may be faster). This parameter is currently experimental and will eventually be integrated into the mainline code (as `hostConnectionBufferSize`).
+
+Note that finagle also exports a number of useful stats that allow you to inspect the state of the pool(s), load balancers, and queues. These are usually illustrative in explaining exactly why there are N connections to a given host.
+
+### maxConcurrentRequests
+
+`maxConcurrentRequests` is the maximum number of requests you are telling Finagle that your server implementation can handle concurrently at any time. If exceeded, Finagle will insert new requests in an unbounded queue waiting for their turn. Note that setting maxConcurrentRequests will not result in explicitly rejecting requests, due to the unbounded queue. However, it effectively can, due to timeouts upstream and consequent cancellations.
+
+### Retries
+
+The `ClientBuilder` allows specifying a `retryPolicy` or a number of `retries`. These are mutually exclusive and each can override the other; if you specify both in the `ClientBuilder`, the later one will override the earlier one.
+
+Note that "retries" actually means "tries"; `retry=1` means 1 try with no retries; `retry=2` means 1 try with 1 retry, and so on. We apologize for this historical vestige.
+
+### Debugging
+
+One good trick for debugging is to add a logger:
+
+    ServerBuilder() // or ClientBuilder()
+      ...
+      .logger(java.util.logging.Logger.getLogger("debug"))
+      ...
+
+While logging server behavior, it may be useful to have access to information about the client for any particular request. The ClientId companion object provides a `.current()` method that returns the id of the client from which the current request originated. Its docs (`finagle/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/authentication.scala`) note that
+
+>  [`ClientID`] is set at the beginning of the request and is available throughout the life-cycle of the request. It is [available] iff the client has an upgraded finagle connection and has chosen to specify the client ID in its codec.
+
+Loggers should only be used for debugging; logs are very verbose.
+
+
+
+
+
+
 
 [Top](#Top)
 
