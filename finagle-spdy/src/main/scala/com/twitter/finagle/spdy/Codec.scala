@@ -2,14 +2,15 @@ package com.twitter.finagle.spdy
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
+import org.jboss.netty.channel.{Channel, ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 import org.jboss.netty.handler.codec.spdy._
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.{ClientDispatcherFactory, ServerDispatcher}
-import com.twitter.finagle.transport.{Transport, TransportFactory}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.transport.{ChannelTransport, Transport, TransportFactory}
 import com.twitter.util.StorageUnit
 
 class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
@@ -68,6 +69,9 @@ case class Spdy(
       ): ServiceFactory[HttpRequest, HttpResponse] = {
         new GenerateSpdyStreamId andThen super.prepareConnFactory(underlying)
       }
+
+      override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[HttpRequest, HttpResponse] =
+        new ChannelTransport[HttpRequest, HttpResponse](ch)
 
       override def newClientDispatcher(transport: Transport[HttpRequest, HttpResponse]) =
         new SpdyClientDispatcher(transport)

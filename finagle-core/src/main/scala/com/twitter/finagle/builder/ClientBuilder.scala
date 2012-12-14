@@ -630,6 +630,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         for (s <- config.recvBufferSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
         o.result()
       },
+      newChannelTransport = codec.newClientTransport,
       newChannelDispatcher = codec.newClientDispatcher(_),
       nettyTimer = nettyTimer,
       statsReceiver = statsReceiver

@@ -4,8 +4,8 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.NewChannelFactory
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.transport.{ClientChannelTransport, Transport}
 import java.net.SocketAddress
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
   ChannelPipelineFactory, Channels, DefaultChannelConfig}
@@ -26,6 +26,10 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
      answers { s => s.asInstanceOf[ServiceFactory[String, String]] })
     (codec.prepareServiceFactory(Matchers.any[ServiceFactory[String, String]])
      answers { f => f.asInstanceOf[ServiceFactory[String, String]] })
+    (codec.newClientTransport(Matchers.any[Channel], Matchers.any[StatsReceiver])
+     answers { case args: Array[Any] =>
+      new ClientChannelTransport[String, String](args(0).asInstanceOf[Channel], args(1).asInstanceOf[StatsReceiver])
+     })
     (codec.newClientDispatcher(Matchers.any[Transport[String, String]])
      answers { t => new SerialClientDispatcher[String, String](t.asInstanceOf[Transport[String, String]]) })
 

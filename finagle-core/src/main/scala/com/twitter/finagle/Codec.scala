@@ -9,9 +9,10 @@ package com.twitter.finagle
 import com.twitter.finagle.dispatch.{
   ClientDispatcher, ServerDispatcher, SerialClientDispatcher, SerialServerDispatcher,
   ServerDispatcherFactory}
-import com.twitter.finagle.transport.{Transport, TransportFactory}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.transport.{ClientChannelTransport, Transport, TransportFactory}
 import java.net.{InetSocketAddress, SocketAddress}
-import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
+import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
 
 /**
  * Superclass for all codecs.
@@ -45,6 +46,9 @@ trait Codec[Req, Rep] {
    * good understanding of finagle internals to implement correctly.
    * Proceed with care.
    */
+
+  def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Req, Rep] =
+    new ClientChannelTransport[Req, Rep](ch, statsReceiver)
 
   def newClientDispatcher(transport: Transport[Req, Rep]): ClientDispatcher[Req, Rep] =
     new SerialClientDispatcher(transport)
