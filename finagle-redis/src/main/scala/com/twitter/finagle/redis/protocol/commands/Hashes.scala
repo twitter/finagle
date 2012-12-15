@@ -62,6 +62,32 @@ case class HMGet(key: ChannelBuffer, fields: Seq[ChannelBuffer]) extends StrictK
   def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.HMGET, key) ++ fields)
 }
 
+case class HMSet(key: ChannelBuffer, fv: Map[ChannelBuffer, ChannelBuffer]) extends StrictKeyCommand {
+  def command = Commands.HMSET
+
+  val fvList: Seq[ChannelBuffer] = fv.flatMap { case(f,v) =>
+    f :: v :: Nil
+  }(collection.breakOut)
+
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.HMSET, key) ++ fvList)
+}
+
+object HMSet {
+  def apply(args: Seq[Array[Byte]]) = {
+    RequireClientProtocol(args.length > 3, "HMSET requires a hash key and at least one field and value")
+
+    val key = ChannelBuffers.wrappedBuffer(args(0))
+    val fv = args.drop(1).grouped(2).map {
+      case field :: value :: Nil => (ChannelBuffers.wrappedBuffer(field),
+        ChannelBuffers.wrappedBuffer(value))
+      case _ => throw ClientError("Unexpected uneven pair of elements in HMSET")
+    }.toMap
+
+    new HMSet(key, fv)
+  }
+}
+
+
 case class HScan(
   key: ChannelBuffer,
   cursor: Long,

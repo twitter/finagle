@@ -69,6 +69,17 @@ trait Hashes { self: BaseClient =>
     }
 
   /**
+   * Sets values for given fields in hash
+   * @param key hash key
+   * @param fv map of field to value
+   * @see http://redis.io/commands/hmset
+   */
+  def hMSet(key: ChannelBuffer, fv: Map[ChannelBuffer, ChannelBuffer]): Future[Unit] =
+    doRequest(HMSet(key, fv)) {
+      case StatusReply(msg) => Future.Unit
+    }
+
+  /**
    * Returns keys in given hash, starting at cursor
    * @param hash key, cursor, count, pattern
    * @return cursor followed by matching keys

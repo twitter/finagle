@@ -82,6 +82,7 @@ object Commands {
   val HGETALL           = "HGETALL"
   val HKEYS             = "HKEYS"
   val HMGET             = "HMGET"
+  val HMSET             = "HMSET"
   val HSCAN             = "HSCAN"
   val HSET              = "HSET"
 
@@ -181,6 +182,7 @@ object Commands {
     HGETALL           -> {HGetAll(_)},
     HKEYS             -> {HKeys(_)},
     HMGET             -> {HMGet(_)},
+    HMSET             -> {HMSet(_)},
     HSCAN             -> {HScan(_)},
     HSET              -> {HSet(_)},
 
@@ -296,6 +298,7 @@ object CommandBytes {
   val HGETALL           = StringToChannelBuffer("HGETALL")
   val HKEYS             = StringToChannelBuffer("HKEYS")
   val HMGET             = StringToChannelBuffer("HMGET")
+  val HMSET             = StringToChannelBuffer("HMSET")
   val HSCAN             = StringToChannelBuffer("HSCAN")
   val HSET              = StringToChannelBuffer("HSET")
 
