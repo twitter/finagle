@@ -198,9 +198,13 @@ class Connection(@volatile private[this] var state: State = AuthenticationRequir
 
     if (!busy) {
       val pending = frontendQueue.peek
-      logger.ifDebug("Frontend message is pending " + pending)
-      state = state.accept(pending)._2
-      busy = true
+      if (pending == null) {
+        logger.ifWarning("Backend message respondend and no frontend messages were sent")
+      } else {
+        logger.ifDebug("Frontend message is pending " + pending)
+        state = state.accept(pending)._2
+        busy = true
+      }
     }
 
     val (result, newState) = handleMisc.orElse(state.accept)(msg)
