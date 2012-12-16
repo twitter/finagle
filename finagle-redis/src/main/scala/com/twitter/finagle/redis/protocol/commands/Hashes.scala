@@ -8,7 +8,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object HDel {
   def apply(args: Seq[Array[Byte]]) = {
-    RequireClientProtocol(args.length > 2, "HDEL requires a hash key and at least one field")
+    RequireClientProtocol(args.length >= 2, "HDEL requires a hash key and at least one field")
     new HDel(ChannelBuffers.wrappedBuffer(args(0)),
       args.drop(1).map(ChannelBuffers.wrappedBuffer(_)))
   }
@@ -52,7 +52,7 @@ case class HKeys(key: ChannelBuffer) extends StrictKeyCommand {
 
 object HMGet {
   def apply(args: Seq[Array[Byte]]) = {
-    RequireClientProtocol(args.length > 2, "HMGET requires a hash key and at least one field")
+    RequireClientProtocol(args.length >= 2, "HMGET requires a hash key and at least one field")
     new HMGet(ChannelBuffers.wrappedBuffer(args(0)),
       args.drop(1).map(ChannelBuffers.wrappedBuffer(_)))
   }
@@ -74,7 +74,7 @@ case class HMSet(key: ChannelBuffer, fv: Map[ChannelBuffer, ChannelBuffer]) exte
 
 object HMSet {
   def apply(args: Seq[Array[Byte]]) = {
-    RequireClientProtocol(args.length > 3, "HMSET requires a hash key and at least one field and value")
+    RequireClientProtocol(args.length >= 3, "HMSET requires a hash key and at least one field and value")
 
     val key = ChannelBuffers.wrappedBuffer(args(0))
     val fv = args.drop(1).grouped(2).map {
