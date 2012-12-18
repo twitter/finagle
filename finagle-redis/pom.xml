@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-redis</artifactId>
   <packaging>jar</packaging>
-  <version>6.0.3-SNAPSHOT</version>
+  <version>6.0.4-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -20,12 +20,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.0.3-SNAPSHOT</version>
+      <version>6.0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.0.4-SNAPSHOT</version>
+      <version>6.0.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

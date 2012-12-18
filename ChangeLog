@@ -1,3 +1,11 @@
+6.0.3			2012/12/18
+
+	* finagle-mux: new session protocol
+	* documentation: document connection management and associated
+	configuration options
+	* finagle-core: expose newChannelTransport in Codec to allow multiplexing in clients
+	* finagle-http RequestProxy: proxy response
+
 6.0.2			2012/12/11
 
 	* TimerSpec, RefcountedSpec: make deterministic
