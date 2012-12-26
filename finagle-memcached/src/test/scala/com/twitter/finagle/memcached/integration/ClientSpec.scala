@@ -197,6 +197,18 @@ class ClientSpec extends SpecificationWithJUnit {
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
       }
+
+      "even in future pool" in {
+        lazy val client = KetamaClientBuilder()
+            .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
+            .build()
+
+        val futureResult = Future.value(true) flatMap {
+          _ => client.get("foo")
+        }
+
+        futureResult() mustEqual None
+      }
     }
   }
 

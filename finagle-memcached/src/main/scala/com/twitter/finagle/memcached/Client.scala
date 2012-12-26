@@ -770,29 +770,29 @@ case class KetamaClientBuilder private[memcached] (
     // A dedicated broker for both cache node health event and cache pool change event.
     val nodeChangeBroker = new Broker[NodeEvent]
 
-    def notifyNodeJoin(node: CacheNode) {
+    def prepareNodeJoin(node: CacheNode) = {
       val key = KetamaClientKey(node.host, node.port, node.weight)
       val (fa, health) = failureAccrualWrapper(key)
       val client = builder
           .hosts(new InetSocketAddress(key.host, key.port))
           .failureAccrualFactory(fa)
           .build()
-      nodeChangeBroker ! new NodeJoin(key, client)
       health foreach { healthEvent =>
         nodeChangeBroker ! healthEvent
       }
-    }
 
-    def notifyNodeLeave(node: CacheNode) {
-      nodeChangeBroker ! new NodeLeave(KetamaClientKey(node.host, node.port, node.weight))
+      (key, client)
     }
 
     val (cacheNodes, clusterUpdates) = _cluster.snap
-    cacheNodes foreach { notifyNodeJoin(_) }
+    val initialServices = (cacheNodes.map(prepareNodeJoin)).toMap
     clusterUpdates foreach { spool =>
       spool foreach {
-        case Cluster.Add(node) => notifyNodeJoin(node)
-        case Cluster.Rem(node) => notifyNodeLeave(node)
+        case Cluster.Add(node) =>
+          val (key, client) = prepareNodeJoin(node)
+          nodeChangeBroker ! new NodeJoin(key, client)
+        case Cluster.Rem(node) =>
+          nodeChangeBroker ! new NodeLeave(KetamaClientKey(node.host, node.port, node.weight))
       }
     }
 
@@ -800,7 +800,7 @@ case class KetamaClientBuilder private[memcached] (
     val statsReceiver = builder.statsReceiver.scope("memcached_client")
 
     new KetamaClient(
-      Map(),
+      initialServices,
       nodeChangeBroker.recv,
       keyHasher,
       KetamaClient.NumReps,
