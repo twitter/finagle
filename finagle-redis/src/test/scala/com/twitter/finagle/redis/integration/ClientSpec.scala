@@ -230,6 +230,12 @@ class ClientSpec extends SpecificationWithJUnit {
           client.hMGet(foo, Seq(bar, boo))().toList) mustEqual Seq("baz", "moo")
       }
 
+      "set multiple values" in {
+        client.hMSet(foo, Map(baz -> bar, moo -> boo))()
+        CBToString.fromList(
+          client.hMGet(foo, Seq(baz, moo))().toList) mustEqual Seq("bar", "boo")
+      }
+
       "get multiple values at once" in {
         client.hSet(foo, bar, baz)()
         client.hSet(foo, boo, moo)()
