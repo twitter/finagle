@@ -1,5 +1,6 @@
 package com.twitter.finagle.stress
 
+import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
@@ -9,57 +10,116 @@ import com.twitter.ostrich.stats.{Stats => OstrichStats}
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.{Duration, CountDownLatch, Return, Throw, Stopwatch}
 
+import com.google.caliper.{Param, SimpleBenchmark}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.handler.codec.http._
 
 import scala.collection.mutable.ArrayBuffer
 
-object LoadBalancerTest {
+object LoadBalancerTest extends App {
+  val nreqsFlag = flag("n", 100000, "Number of reqs sent from each client")
+  val latencyFlag = flag("l", 0.seconds, "req latency forced at the server")
+
   val totalRequests = new AtomicInteger(0)
+  val clientBuilder = ClientBuilder()
+    .requestTimeout(100.milliseconds)
+    .retries(10)
 
-  def main(args: Array[String]) {
-    // Make the type enforced by the *codec*
-
-    runSuite(
-      ClientBuilder()
-        .requestTimeout(100.milliseconds)
-        .retries(10)
-    )
+  def main() {
+    runSuite()
   }
 
-  def runSuite(clientBuilder: ClientBuilder[_, _, _, _, _]) {
-    val n = 10000
-    val latency = 0.seconds
+  def doTest(latency: Duration, nreqs: Int,
+             behavior: PartialFunction[(Int, Seq[EmbeddedServer]), Unit]) {
+      new LoadBalancerTest(clientBuilder, latency, nreqs)(behavior).run()
+  }
+
+  def runSuite() {
+    val latency = latencyFlag()
+    val n = nreqsFlag()
+
     println("testing " + clientBuilder)
     println("\n== baseline (warmup) ==\n")
-    new LoadBalancerTest(clientBuilder, latency, 10*n)({ case _ => }).run()
+    doTest(latency, n, { case _ => })
 
     println("\n== baseline ==\n")
-    new LoadBalancerTest(clientBuilder, latency, 10*n)({ case _ => }).run()
+    doTest(latency, n, { case _ => })
 
     println("\n== 1 server goes offline ==\n")
-    new LoadBalancerTest(clientBuilder, latency, 10*n)({
-      case (`n`, servers) =>
-        servers(1).stop()
-    }).run()
+    doTest(latency, n, { case (`n`, servers) => servers(1).stop() })
 
     println("\n== 1 application becomes nonresponsive ==\n")
-    new LoadBalancerTest(clientBuilder, latency, 10*n)({
-      case (`n`, servers) =>
-        servers(1).becomeApplicationNonresponsive()
-    }).run()
+    doTest(latency, n,
+      { case (`n`, servers) => servers(1).becomeApplicationNonresponsive() })
 
     println("\n== 1 connection becomes nonresponsive ==\n")
-    new LoadBalancerTest(clientBuilder, latency, 10*n)({
-      case (`n`, servers) =>
-        servers(1).becomeConnectionNonresponsive()
-    }).run()
+    doTest(latency, n,
+      { case (`n`, servers) => servers(1).becomeConnectionNonresponsive() })
 
     println("\n== 1 server has a protocol error ==\n")
-    new LoadBalancerTest(clientBuilder, latency, 10*n)({
-      case (`n`, servers) =>
-        servers(1).becomeBelligerent()
-    }).run()
+    doTest(latency, n,
+      { case (`n`, servers) => servers(1).becomeBelligerent() })
+  }
+}
+
+
+class LoadBalancerBenchmark extends SimpleBenchmark {
+  @Param(Array("0")) val latencyInMilliSec: Long = 0
+  @Param(Array("10000")) val nreqs: Int = 10000
+
+  def timeBaseline(reps: Int) {
+    var i = 0
+    while (i < reps) {
+      LoadBalancerTest.doTest(
+        Duration.fromMilliseconds(latencyInMilliSec),
+        nreqs,
+        { case _ => })
+      i += 1
+    }
+  }
+
+  def timeOneOffline(reps: Int) {
+    var i = 0
+    while (i < reps) {
+      LoadBalancerTest.doTest(
+        Duration.fromMilliseconds(latencyInMilliSec),
+        nreqs,
+        { case (n, servers) => servers(1).stop() })
+      i += 1
+    }
+  }
+
+  def timeOneAppNonResponsive(reps: Int) {
+    var i = 0
+    while (i < reps) {
+      LoadBalancerTest.doTest(
+        Duration.fromMilliseconds(latencyInMilliSec),
+        nreqs,
+        { case (n, servers) =>  servers(1).becomeApplicationNonresponsive() })
+      i += 1
+    }
+  }
+
+  def timeOneConnNonResponsive(reps: Int) {
+    var i = 0
+    while (i < reps) {
+      LoadBalancerTest.doTest(
+        Duration.fromMilliseconds(latencyInMilliSec),
+        nreqs,
+        { case (n, servers) =>  servers(1).becomeConnectionNonresponsive() })
+      i += 1
+    }
+  }
+
+  def timeOneProtocolError(reps: Int) {
+    var i = 0
+    while (i < reps) {
+      LoadBalancerTest.doTest(
+      Duration.fromMilliseconds(latencyInMilliSec),
+      nreqs,
+      { case (n, servers) =>  servers(1).becomeBelligerent() })
+      i += 1
+    }
   }
 }
 
@@ -130,6 +190,7 @@ class LoadBalancerTest(
     // semantic information here.
 
     println("> STATS")
+    println("> rps: %.2f".format(rps))
     val succ = stats.getCounter("success")().toDouble
     val fail = stats.getCounter("fail")().toDouble
     println("> success rate: %.2f".format(100.0 * succ / (succ + fail)))
