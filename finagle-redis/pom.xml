@@ -35,9 +35,10 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- Both of these use external redis processes -->
+            <!-- These use external redis processes -->
             <exclude>**/ClientServerIntegrationSpec.class</exclude>
             <exclude>**/ClientSpec.class</exclude>
+            <exclude>**/BtreeClientSpec.class</exclude>
           </excludes>
         </configuration>
       </plugin>
