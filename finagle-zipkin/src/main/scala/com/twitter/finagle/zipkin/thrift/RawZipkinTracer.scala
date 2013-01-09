@@ -70,17 +70,17 @@ private[thrift] class RawZipkinTracer(
   private[this] var spanMap: DeadlineSpanMap = _
   private[this] var refcount = 0
   private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = _
-  private[thrift] var client: scribe.ServiceToClient = _
+  private[thrift] var client: scribe.FinagledClient = _
   private[thrift] var timer: FinagleTimer = _
 
-  protected def newClient(): scribe.ServiceToClient = {
+  protected def newClient(): scribe.FinagledClient = {
     transport = ClientBuilder()
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(5)
       .build()
 
-    new scribe.ServiceToClient(
+    new scribe.FinagledClient(
       new TracelessFilter andThen transport,
       new TBinaryProtocol.Factory())
   }
@@ -123,7 +123,7 @@ private[thrift] class RawZipkinTracer(
       val baos = new ByteArrayOutputStream
       s.write(protocolFactory.getProtocol(new TIOStreamTransport(baos)))
       val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray)
-      msgs = msgs :+ new LogEntry().setCategory(TraceCategory).setMessage(serializedBase64Span)
+      msgs = msgs :+ new LogEntry(category = TraceCategory, message = serializedBase64Span)
     } catch {
       case e => statsReceiver.scope("create_log_entries").scope("error").
         counter("%s".format(e.toString)).incr()
@@ -136,9 +136,9 @@ private[thrift] class RawZipkinTracer(
    * Log the span data via Scribe.
    */
   def logSpan(span: Span) {
-    client.Log(createLogEntries(span)) onSuccess {
-      case ResultCode.OK => statsReceiver.scope("log_span").counter("ok").incr()
-      case ResultCode.TRY_LATER => statsReceiver.scope("log_span").counter("try_later").incr()
+    client.log(createLogEntries(span)) onSuccess {
+      case ResultCode.Ok => statsReceiver.scope("log_span").counter("ok").incr()
+      case ResultCode.TryLater => statsReceiver.scope("log_span").counter("try_later").incr()
       case _ => () /* ignore */
     } onFailure {
       case e => statsReceiver.scope("log_span").scope("error").counter("%s".format(e.toString)).incr()

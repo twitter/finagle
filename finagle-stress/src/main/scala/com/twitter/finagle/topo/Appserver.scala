@@ -18,7 +18,7 @@ import org.jboss.netty.handler.codec.http._
 import scala.util.Random
 import com.twitter.finagle.tracing.ConsoleTracer
 
-class AppService(clients: Seq[thrift.Backend.ServiceIface], responseSample: Seq[(Duration, StorageUnit)])
+class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(Duration, StorageUnit)])
   extends Service[HttpRequest, HttpResponse]
 {
   private[this] val rng = new Random
@@ -57,7 +57,7 @@ object Appserver {
       .hostConnectionLimit(1)
       .build()
 
-    new thrift.Backend.ServiceToClient(
+    new thrift.Backend.FinagledClient(
       transport, new TBinaryProtocol.Factory())
   }
 

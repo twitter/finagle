@@ -21,14 +21,14 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
   "RawZipkinTracer" should {
     "send all traces to scribe" in {
       val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-        override def newClient() = mock[scribe.ServiceToClient]
+        override def newClient() = mock[scribe.FinagledClient]
       }
       tracer.acquire()
       doAfter { tracer.release() }
 
-      val expected = new ArrayList[LogEntry]()
-      expected.add(new LogEntry().setCategory("zipkin")
-        .setMessage("CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew" +
+      val expected = new LogEntry(
+        category = "zipkin",
+        message = "CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew" +
         "8ABgwAAAAECgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2Vydmlj" +
         "ZQAACgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAACg" +
         "ABAAAAAAdU1MALAAIAAAAGYm9vaG9vDAADCAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UACAAE" +
@@ -38,8 +38,8 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
         "ADAAAAB3NlcnZpY2UAAAsAAQAAAANpNjQLAAIAAAAIAAAAAAAAAEAIAAMAAAAEDAAECAABAQEB" +
         "AQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZkb3VibGULAAIAAAAIQF7TMzMzMzMIAAMAAA" +
         "AFDAAECAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZzdHJpbmcLAAIAAAAGd29v" +
-        "cGllCAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAACAAkBAA=="))
-      tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
+        "cGllCAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAACAAkBAA==")
+      tracer.client.log(anyObject()) returns Future(ResultCode.Ok)
 
       val inetAddress = InetAddress.getByAddress(Array.fill(4) {
         1
@@ -57,7 +57,7 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 
-      there was one(tracer.client).Log(expected)
+      there was one(tracer.client).log(Seq(expected))
     }
 
     "register onClose handler that calls release" in {
@@ -79,19 +79,19 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
       val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
       val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-        override def newClient() = mock[scribe.ServiceToClient]
+        override def newClient() = mock[scribe.FinagledClient]
       }
       tracer.acquire()
       doAfter { tracer.release() }
 
-      tracer.client.Log(anyObject()) returns Future(ResultCode.OK)
+      tracer.client.log(anyObject()) returns Future(ResultCode.Ok)
 
       tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
       tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
       tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
 
       // scribe Log method is in java
-      there was one(tracer.client).Log(any[java.util.List[LogEntry]])
+      there was one(tracer.client).log(any[Seq[LogEntry]])
     }
   }
 }

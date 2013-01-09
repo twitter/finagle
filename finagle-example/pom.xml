@@ -120,6 +120,11 @@
       <artifactId>util-codec</artifactId>
       <version>6.0.5-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scrooge-runtime</artifactId>
+      <version>2.3.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -128,7 +133,7 @@
         <artifactId>maven-finagle-thrift-plugin</artifactId>
         <configuration>
           <thriftGenerators>
-            <thriftGenerator>finagle</thriftGenerator>
+            <thriftGenerator>scrooge</thriftGenerator>
           </thriftGenerators>
         </configuration>
       </plugin>

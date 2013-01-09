@@ -19,6 +19,6 @@ resolvers <<= (resolvers) { r =>
 
 externalResolvers <<= (resolvers) map identity
 
-addSbtPlugin("com.twitter" % "sbt-package-dist" % "1.0.5")
+resolvers += Resolver.url("sbt-plugin-releases", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.twitter" % "sbt-thrift2" % "0.0.1")
+addSbtPlugin("com.jsuereth" % "xsbt-gpg-plugin" % "0.6")

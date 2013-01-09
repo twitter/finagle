@@ -98,7 +98,7 @@ object Reporter {
       .hostConnectionLimit(5)
       .build()
 
-    new scribe.ServiceToClient(service, new TBinaryProtocol.Factory())
+    new scribe.FinagledClient(service, new TBinaryProtocol.Factory())
   }
 }
 
@@ -114,7 +114,7 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-  client: scribe.ServiceToClient,
+  client: scribe.FinagledClient,
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = None,
@@ -160,9 +160,9 @@ sealed case class Reporter(
    * implications.
    */
   def handle(t: Throwable) = {
-    client.Log(createEntry(t) :: Nil) onSuccess {
-      case ResultCode.OK => statsReceiver.counter("report_exception_ok").incr()
-      case ResultCode.TRY_LATER => statsReceiver.counter("report_exception_try_later").incr()
+    client.log(createEntry(t) :: Nil) onSuccess {
+      case ResultCode.Ok => statsReceiver.counter("report_exception_ok").incr()
+      case ResultCode.TryLater => statsReceiver.counter("report_exception_try_later").incr()
     } onFailure {
       case e => statsReceiver.counter("report_exception_" + e.toString).incr()
     }
