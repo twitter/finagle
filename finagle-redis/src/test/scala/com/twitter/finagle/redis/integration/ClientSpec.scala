@@ -98,6 +98,13 @@ class ClientSpec extends SpecificationWithJUnit {
         client.ttl(foo)() map (_ must beLessThanOrEqualTo(20L))
       }
 
+      "expireAt" in {
+        client.set(foo, bar)()
+        val ttl = System.currentTimeMillis() + 20000L
+        client.expireAt(foo, ttl)() mustEqual true
+        client.ttl(foo)() map (_ must beLessThanOrEqualTo(ttl))
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {

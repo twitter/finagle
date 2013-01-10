@@ -5,7 +5,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
 import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.util.Future
+import com.twitter.util.{Future, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 
@@ -29,6 +29,28 @@ trait Keys { self: BaseClient =>
   def exists(key: ChannelBuffer): Future[JBoolean] =
     doRequest(Exists(key)) {
       case IntegerReply(n) => Future.value((n == 1))
+    }
+
+  /**
+   * Sets how long it will take the key to expire
+   * @params key, ttl
+   * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
+   * false otherwise.
+   */
+  def expire(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
+    doRequest(Expire(key, ttl)) {
+      case IntegerReply(n) => Future.value(n == 1)
+    }
+
+  /**
+   * Same effect and semantic as "expire", but takes an absolute Unix timestamp
+   * @param key, ttl (unix timestamp)
+   * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
+   * false otherwise.
+   */
+  def expireAt(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
+    doRequest(ExpireAt(key, Time.fromMilliseconds(ttl))) {
+      case IntegerReply(n) => Future.value(n == 1)
     }
 
   /**
@@ -72,14 +94,4 @@ trait Keys { self: BaseClient =>
       }
     }
 
-  /**
-   * Sets how long it will take the key to expire
-   * @params key, ttl
-   * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
-   * false otherwise.
-   */
-  def expire(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
-    doRequest(Expire(key, ttl)) {
-      case IntegerReply(n) => Future.value(n == 1)
-    }
 }
