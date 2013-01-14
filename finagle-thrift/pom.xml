@@ -52,7 +52,7 @@
       <version>6.0.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
-<!--	Uncomment the following to regenerate thrift code.
+  <!--	Uncomment the following to regenerate thrift code.
   <build>
     <plugins>
       <plugin>
