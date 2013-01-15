@@ -37,27 +37,28 @@ object LoadBalancerTest extends App {
   def runSuite() {
     val latency = latencyFlag()
     val n = nreqsFlag()
+    val N = 10*n
 
     println("testing " + clientBuilder)
     println("\n== baseline (warmup) ==\n")
-    doTest(latency, n, { case _ => })
+    doTest(latency, N, { case _ => })
 
     println("\n== baseline ==\n")
-    doTest(latency, n, { case _ => })
+    doTest(latency, N, { case _ => })
 
     println("\n== 1 server goes offline ==\n")
-    doTest(latency, n, { case (`n`, servers) => servers(1).stop() })
+    doTest(latency, N, { case (`n`, servers) => servers(1).stop() })
 
     println("\n== 1 application becomes nonresponsive ==\n")
-    doTest(latency, n,
+    doTest(latency, N,
       { case (`n`, servers) => servers(1).becomeApplicationNonresponsive() })
 
     println("\n== 1 connection becomes nonresponsive ==\n")
-    doTest(latency, n,
+    doTest(latency, N,
       { case (`n`, servers) => servers(1).becomeConnectionNonresponsive() })
 
     println("\n== 1 server has a protocol error ==\n")
-    doTest(latency, n,
+    doTest(latency, N,
       { case (`n`, servers) => servers(1).becomeBelligerent() })
   }
 }
@@ -95,7 +96,7 @@ class LoadBalancerBenchmark extends SimpleBenchmark {
       LoadBalancerTest.doTest(
         Duration.fromMilliseconds(latencyInMilliSec),
         nreqs,
-        { case (n, servers) =>  servers(1).becomeApplicationNonresponsive() })
+        { case (n, servers) if n == nreqs/10 =>  servers(1).becomeApplicationNonresponsive() })
       i += 1
     }
   }
@@ -106,7 +107,7 @@ class LoadBalancerBenchmark extends SimpleBenchmark {
       LoadBalancerTest.doTest(
         Duration.fromMilliseconds(latencyInMilliSec),
         nreqs,
-        { case (n, servers) =>  servers(1).becomeConnectionNonresponsive() })
+        { case (n, servers) if n == nreqs/10  =>  servers(1).becomeConnectionNonresponsive() })
       i += 1
     }
   }
@@ -117,7 +118,7 @@ class LoadBalancerBenchmark extends SimpleBenchmark {
       LoadBalancerTest.doTest(
       Duration.fromMilliseconds(latencyInMilliSec),
       nreqs,
-      { case (n, servers) =>  servers(1).becomeBelligerent() })
+      { case (n, servers) if n == nreqs/10  =>  servers(1).becomeBelligerent() })
       i += 1
     }
   }
