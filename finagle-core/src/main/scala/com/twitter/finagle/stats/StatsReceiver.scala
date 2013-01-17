@@ -46,11 +46,18 @@ trait StatsReceiver {
   /**
    * Time a given function using the given TimeUnit
    */
-  def time[T](unit: TimeUnit, name: String*)(f: => T): T = {
+  def time[T](unit: TimeUnit, stat: Stat)(f: => T): T = {
     val elapsed = Stopwatch.start()
     val result = f
-    stat(name: _*).add(elapsed().inUnit(unit))
+    stat.add(elapsed().inUnit(unit))
     result
+  }
+
+  /**
+   * Time a given function using the given TimeUnit
+   */
+  def time[T](unit: TimeUnit, name: String*)(f: => T): T = {
+    time(unit, stat(name: _*))(f)
   }
 
   /**
@@ -63,11 +70,18 @@ trait StatsReceiver {
   /**
    * Time a given future using the given TimeUnit
    */
-  def timeFuture[T](unit: TimeUnit, name: String*)(f: => Future[T]): Future[T] = {
+  def timeFuture[T](unit: TimeUnit, stat: Stat)(f: => Future[T]): Future[T] = {
     val elapsed = Stopwatch.start()
     f ensure {
-      stat(name: _*).add(elapsed().inUnit(unit))
+      stat.add(elapsed().inUnit(unit))
     }
+  }
+
+  /**
+   * Time a given future using the given TimeUnit
+   */
+  def timeFuture[T](unit: TimeUnit, name: String*)(f: => Future[T]): Future[T] = {
+    timeFuture(unit, stat(name: _*))(f)
   }
 
   /**
