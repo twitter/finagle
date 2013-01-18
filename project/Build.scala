@@ -34,6 +34,8 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
+    javacOptions ++= Seq("-source", "1.6"),
+    javacOptions ++= Seq("-target", "1.6"),
 
     // This is bad news for things like com.twitter.util.Time
     parallelExecution in Test := false,
@@ -42,7 +44,7 @@ object Finagle extends Build {
     // on generating docs for generated thrift due to the use
     // of raw java types.
     // packageDoc in Compile := new java.io.File("nosuchjar"),
-    
+
     // Sonatype publishing
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
@@ -88,7 +90,7 @@ object Finagle extends Build {
   lazy val finagle = Project(
     id = "finagle",
     base = file("."),
-    settings = Project.defaultSettings ++ 
+    settings = Project.defaultSettings ++
       sharedSettings
   ) aggregate(
     // Core, support.
