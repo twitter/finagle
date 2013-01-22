@@ -9,6 +9,7 @@ import com.twitter.util.{Promise, Return, Future, Time}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
+import java.util.concurrent.atomic.AtomicInteger
 
 class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "ClientBuilder" should {
@@ -39,13 +40,17 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
 
     "releaseExternalResources once all clients are released" in {
       val m = new MockChannel
+      val nrelease = new AtomicInteger(0)
+      m.channelFactory.releaseExternalResources() answers { _ =>
+        nrelease.incrementAndGet()
+      }
       val client1 = m.build()
       val client2 = m.build()
 
       client1.release()
-      there was no(m.channelFactory).releaseExternalResources()
+      nrelease.get must be_==(0)
       client2.release()
-      there was one(m.channelFactory).releaseExternalResources()
+      nrelease.get must eventually(be_==(1))
     }
 
     "build client that disposes of resources used" in {
