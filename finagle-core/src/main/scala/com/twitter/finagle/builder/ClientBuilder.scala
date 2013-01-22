@@ -129,6 +129,21 @@ private[builder] final case class ClientHostConfig(
   val hostConnectionBufferSize  = _hostConnectionBufferSize
 }
 
+private[builder] final case class ClientTimeoutConfig(
+  private val _tcpConnectTimeout         : Duration                      = 10.milliseconds,
+  private val _connectTimeout            : Duration                      = Duration.MaxValue,
+  private val _requestTimeout            : Duration                      = Duration.MaxValue,
+  private val _timeout                   : Duration                      = Duration.MaxValue,
+  private val _readerIdleTimeout         : Option[Duration]              = None,
+  private val _writerIdleTimeout         : Option[Duration]              = None) {
+  val tcpConnectTimeout         = _tcpConnectTimeout
+  val requestTimeout            = _requestTimeout
+  val connectTimeout            = _connectTimeout
+  val timeout                   = _timeout
+  val readerIdleTimeout         = _readerIdleTimeout
+  val writerIdleTimeout         = _writerIdleTimeout
+}
+
 /**
  * TODO: do we really need to specify HasCodec? -- it's implied in a
  * way by the proper Req, Rep.
@@ -139,13 +154,7 @@ private[builder] final case class ClientHostConfig(
 private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
   private val _cluster                   : Option[Cluster[SocketAddress]]        = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
-  private val _tcpConnectTimeout         : Duration                      = 10.milliseconds,
-  private val _connectTimeout            : Duration                      = Duration.MaxValue,
-  private val _requestTimeout            : Duration                      = Duration.MaxValue,
-  private val _timeout                   : Duration                      = Duration.MaxValue,
   private val _keepAlive                 : Option[Boolean]               = None,
-  private val _readerIdleTimeout         : Option[Duration]              = None,
-  private val _writerIdleTimeout         : Option[Duration]              = None,
   private val _statsReceiver             : Option[StatsReceiver]         = None,
   private val _monitor                   : Option[String => Monitor]     = None,
   private val _name                      : String                        = "client",
@@ -155,9 +164,11 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _logger                    : Option[Logger]                = None,
   private val _newChannelFactory         : Option[() => ChannelFactory]  = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
+  private val _socksProxy                : Option[SocketAddress]          = None,
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _tracerFactory             : Managed[Tracer]               = Managed.const(NullTracer),
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
+  private val _timeoutConfig             : ClientTimeoutConfig           = new ClientTimeoutConfig,
   private val _failFast                  : Boolean                       = true)
 {
   import ClientConfig._
@@ -169,15 +180,16 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
    */
   val cluster                   = _cluster
   val codecFactory              = _codecFactory
-  val tcpConnectTimeout         = _tcpConnectTimeout
-  val requestTimeout            = _requestTimeout
-  val connectTimeout            = _connectTimeout
-  val timeout                   = _timeout
+  val tcpConnectTimeout         = _timeoutConfig.tcpConnectTimeout
+  val requestTimeout            = _timeoutConfig.requestTimeout
+  val connectTimeout            = _timeoutConfig.connectTimeout
+  val timeout                   = _timeoutConfig.timeout
+  val readerIdleTimeout         = _timeoutConfig.readerIdleTimeout
+  val writerIdleTimeout         = _timeoutConfig.writerIdleTimeout
+  val timeoutConfig             = _timeoutConfig
   val statsReceiver             = _statsReceiver
   val monitor                   = _monitor
   val keepAlive                 = _keepAlive
-  val readerIdleTimeout         = _readerIdleTimeout
-  val writerIdleTimeout         = _writerIdleTimeout
   val name                      = _name
   val hostConnectionCoresize    = _hostConfig.hostConnectionCoresize
   val hostConnectionLimit       = _hostConfig.hostConnectionLimit
@@ -185,7 +197,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val hostConnectionMaxWaiters  = _hostConfig.hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConfig.hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConfig.hostConnectionMaxLifeTime
-  val hostConnectionBufferSize   = _hostConfig.hostConnectionBufferSize
+  val hostConnectionBufferSize  = _hostConfig.hostConnectionBufferSize
   val hostConfig                = _hostConfig
   val sendBufferSize            = _sendBufferSize
   val recvBufferSize            = _recvBufferSize
@@ -193,6 +205,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val logger                    = _logger
   val newChannelFactory         = _newChannelFactory
   val tls                       = _tls
+  val socksProxy                = _socksProxy
   val failureAccrual            = _failureAccrual
   val tracerFactory             = _tracerFactory
   val failFast                  = _failFast
@@ -200,13 +213,13 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   def toMap = Map(
     "cluster"                   -> _cluster,
     "codecFactory"              -> _codecFactory,
-    "tcpConnectTimeout"         -> Some(_tcpConnectTimeout),
-    "requestTimeout"            -> Some(_requestTimeout),
-    "connectTimeout"            -> Some(_connectTimeout),
-    "timeout"                   -> Some(_timeout),
+    "tcpConnectTimeout"         -> Some(_timeoutConfig.tcpConnectTimeout),
+    "requestTimeout"            -> Some(_timeoutConfig.requestTimeout),
+    "connectTimeout"            -> Some(_timeoutConfig.connectTimeout),
+    "timeout"                   -> Some(_timeoutConfig.timeout),
     "keepAlive"                 -> Some(_keepAlive),
-    "readerIdleTimeout"         -> Some(_readerIdleTimeout),
-    "writerIdleTimeout"         -> Some(_writerIdleTimeout),
+    "readerIdleTimeout"         -> _timeoutConfig.readerIdleTimeout,
+    "writerIdleTimeout"         -> _timeoutConfig.writerIdleTimeout,
     "statsReceiver"             -> _statsReceiver,
     "monitor"                   -> _monitor,
     "name"                      -> Some(_name),
@@ -223,6 +236,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "logger"                    -> _logger,
     "newChannelFactory"         -> _newChannelFactory,
     "tls"                       -> _tls,
+    "socksProxy"                -> _socksProxy,
     "failureAccrual"            -> _failureAccrual,
     "tracerFactory"             -> Some(_tracerFactory),
     "failFast"                  -> failFast
@@ -356,7 +370,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Specify the TCP connection timeout.
    */
   def tcpConnectTimeout(duration: Duration): This =
-    withConfig(_.copy(_tcpConnectTimeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_tcpConnectTimeout = duration)))
 
   /**
    * The request timeout is the time given to a *single* request (if
@@ -366,7 +380,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * the request and the receipt of the response.
    */
   def requestTimeout(duration: Duration): This =
-    withConfig(_.copy(_requestTimeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_requestTimeout = duration)))
 
   /**
    * The connect timeout is the timeout applied to the acquisition of
@@ -377,7 +391,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * {{factory()}} will always be satisfied within this timeout.
    */
   def connectTimeout(duration: Duration): This =
-    withConfig(_.copy(_connectTimeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_connectTimeout = duration)))
 
   /**
    * Total request timeout.  This timeout is applied from the issuance
@@ -388,7 +402,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Applicable only to service-builds ({{build()}})
    */
   def timeout(duration: Duration): This =
-    withConfig(_.copy(_timeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_timeout = duration)))
 
   /**
    * Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).
@@ -400,13 +414,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The maximum time a connection may have received no data.
    */
   def readerIdleTimeout(duration: Duration): This =
-    withConfig(_.copy(_readerIdleTimeout = Some(duration)))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_readerIdleTimeout = Some(duration))))
 
   /**
    * The maximum time a connection may not have sent any data.
    */
   def writerIdleTimeout(duration: Duration): This =
-    withConfig(_.copy(_writerIdleTimeout = Some(duration)))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_writerIdleTimeout = Some(duration))))
 
   /**
    * Report stats to the given {{StatsReceiver}}.  This will report
@@ -532,6 +546,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_tls = Some({ () => Ssl.clientWithoutCertificateValidation()}, None)))
 
   /**
+   * Make connections via the given SOCKS proxy
+   */
+  def socksProxy(socksProxy: SocketAddress): This =
+    withConfig(_.copy(_socksProxy = Some(socksProxy)))
+
+  /**
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
    */
@@ -617,6 +637,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       newChannelFactory = config.newChannelFactory getOrElse  Netty3Transport.defaultNewChannelFactory,
       tlsNewEngine = config.tls map { case (newEngine, _) => newEngine },
       tlsVerifyHost = config.tls flatMap { case (_, verifyHost) => verifyHost },
+      socksProxy = config.socksProxy,
       channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.MaxValue,
       channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.MaxValue,
       channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.info) },
