@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stress</artifactId>
   <packaging>jar</packaging>
-  <version>6.0.4-SNAPSHOT</version>
+  <version>6.0.6-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-292</artifactId>
@@ -37,32 +37,32 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.0.4-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>6.0.4-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.0.4-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.0.4-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>9.0.5-SNAPSHOT</version>
+      <version>9.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.0.5-SNAPSHOT</version>
+      <version>6.0.7-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>

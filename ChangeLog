@@ -1,3 +1,21 @@
+6.0.5			2012/01/22
+
+	* finagle-core: basic SOCKS support for finagle clients, 
+	intended for use with ssh -D.
+
+6.0.4			2012/01/22
+
+	* finagle-core: CachingPool owns connections and caches them even if upstream cancels
+	* finagle-core: Eliminate varargs overhead in StatsReceiver.time and timeFuture
+	* finagle-core: LoadBalancerTest: allow the tests to be run with Google Caliper
+	* finagle-core: make snap on mapped cluster thread-safe
+	* finagle-memcached: explicitly pass in initial cache nodes when using a
+	a static cluster
+	* finagle-native: fix up grab_and_path_tomcat_native
+	* finagle-redis:  finagle redis btree sorted set commands
+	* finagle-redis: Implemented redis HMSET
+	* finagle-redis: expireAt command
+
 6.0.3			2012/12/18
 
 	* finagle-mux: new session protocol
