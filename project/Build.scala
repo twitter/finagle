@@ -3,9 +3,9 @@ import Keys._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.0.5"
+  val utilVersion = "6.0.6"
   val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
-  val ostrichLib = "com.twitter" %% "ostrich" % "9.0.5"
+  val ostrichLib = "com.twitter" %% "ostrich" % "9.0.6"
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
@@ -14,7 +14,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.0.6-SNAPSHOT",
+    version := "6.0.6",
     organization := "com.twitter",
     scalaVersion := "2.9.2",
     libraryDependencies ++= Seq(
@@ -34,8 +34,8 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
-    javacOptions ++= Seq("-source", "1.6"),
-    javacOptions ++= Seq("-target", "1.6"),
+    javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
+    javacOptions in doc := Seq("-source", "1.6"),
 
     // This is bad news for things like com.twitter.util.Time
     parallelExecution in Test := false,
