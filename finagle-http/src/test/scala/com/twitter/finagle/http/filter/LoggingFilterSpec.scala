@@ -39,7 +39,7 @@ class LoggingFilterSpec extends SpecificationWithJUnit {
         filter(request)()
       }
 
-      stringHandler.get must_== """127.0.0.1 - - [06/Apr/2011:20:32:12 +0000] "GET /search.json HTTP/1.1" 123 5 0 "User Agent"""" + "\n"
+      stringHandler.get mustMatch ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")
     }
   }
 
