@@ -506,7 +506,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
   }
 
   def release() {
-    service.release()
+    service.close()
   }
 }
 

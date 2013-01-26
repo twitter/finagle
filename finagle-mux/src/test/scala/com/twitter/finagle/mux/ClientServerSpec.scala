@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Trace, TraceId, Flags, SpanId, BufferingTracer, Record, Annotation}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.util.{Return, Throw, Promise, Future}
+import com.twitter.util.{Return, Throw, Promise, Future, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
@@ -91,7 +91,7 @@ class ClientServerSpec extends SpecificationWithJUnit with Mockito {
 
       val f1 = client(buf(1))
       there was one(service)(buf(1))
-      server.drain()
+      server.close(Time.now)
       f1.poll must beNone
       client(buf(2)).poll must beSome(Throw(RequestNackedException))
       there was no(service)(buf(2))

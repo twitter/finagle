@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import java.net.SocketAddress
-import com.twitter.util.Future
+import com.twitter.util.{Closable, Future, Time}
 
 object Service {
   /**
@@ -30,10 +30,10 @@ object Service {
  * '''Note:''' this is an abstract class (vs. a trait) to maintain java
  * compatibility, as it has implementation as well as interface.
  */
-abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
+abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
     def apply(req1: Req1) = Service.this.apply(f(req1))
-    override def release() = Service.this.release()
+    override def close(deadline: Time) = Service.this.close(deadline)
   }
 
   /**
@@ -45,7 +45,11 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
    * Relinquishes the use of this service instance. Behavior is
    * undefined if apply() is called after resources are relinquished.
    */
-  def release() = ()
+  // This is asynchronous on purpose, the old API allowed for it.
+  @deprecated("Use close() instead", "7.0.0")
+  final def release() { close() }
+
+  def close(deadline: Time) = Future.Done
 
   /**
    * Determines whether this service is available (can accept requests
@@ -58,7 +62,7 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) {
  * Information about a client, passed to a Service factory for each new
  * connection.
  */
-trait ClientConnection {
+trait ClientConnection extends Closable {
   /**
    * Host/port of the client. This is only available after `Service#connected`
    * has been signalled.
@@ -70,11 +74,6 @@ trait ClientConnection {
    * available after `Service#connected` has been signalled.
    */
   def localAddress: SocketAddress
-
-  /**
-   * Close the underlying client connection.
-   */
-  def close()
 
   /**
    * Expose a Future[Unit] that will be filled when the connection is closed
@@ -89,7 +88,7 @@ object ClientConnection {
       new SocketAddress { override def toString = "unconnected" }
     def remoteAddress = unconnected
     def localAddress = unconnected
-    def close() {}
+    def close(deadline: Time) = Future.Done
     def onClose = new com.twitter.util.Promise[Unit]
   }
 }
@@ -102,20 +101,21 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   extends Service[Req, Rep] with Proxy
 {
   def apply(request: Req) = self(request)
-  override def release() = self.release()
+  override def close(deadline: Time) = self.close(deadline)
   override def isAvailable = self.isAvailable
   override def toString = self.toString
 }
 
 abstract class ServiceFactory[-Req, +Rep]
   extends (ClientConnection => Future[Service[Req, Rep]])
+  with Closable
 { self =>
 
   /**
    * Reserve the use of a given service instance. This pins the
    * underlying channel and the returned service has exclusive use of
    * its underlying connection. To relinquish the use of the reserved
-   * Service, the user must call Service.release().
+   * Service, the user must call Service.close().
    */
   def apply(conn: ClientConnection): Future[Service[Req, Rep]]
   final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
@@ -132,9 +132,9 @@ abstract class ServiceFactory[-Req, +Rep]
     new ServiceFactory[Req1, Rep1] {
       def apply(conn: ClientConnection) =
         self(conn) flatMap { service =>
-          f(service) onFailure { _ => service.release() }
+          f(service) onFailure { _ => service.close() }
         }
-      def close = self.close()
+      def close(deadline: Time) = self.close(deadline)
       override def isAvailable = self.isAvailable
       override def toString() = self.toString()
     }
@@ -152,24 +152,32 @@ abstract class ServiceFactory[-Req, +Rep]
    */
   final def toService: Service[Req, Rep] = new FactoryToService(this)
 
-  /**
-   * Close the factory and its underlying resources.
-   */
-  def close()
-
   def isAvailable: Boolean = true
 }
 
 object ServiceFactory {
   def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] = new ServiceFactory[Req, Rep] {
       private[this] val noRelease = Future.value(new ServiceProxy[Req, Rep](service) {
-       // release() is meaningless on connectionless services.
-       override def release() = ()
+       // close() is meaningless on connectionless services.
+       override def close(deadline: Time) = Future.Done
      })
 
       def apply(conn: ClientConnection) = noRelease
-      def close() = ()
+      def close(deadline: Time) = Future.Done
     }
+
+  def apply[Req, Rep](f: () => Future[Service[Req, Rep]]): ServiceFactory[Req, Rep] =
+    new ServiceFactory[Req, Rep] {
+      def apply(_conn: ClientConnection) = f()
+      def close(deadline: Time) = Future.Done
+    }
+}
+
+trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Proxy {
+  val self: ServiceFactory[Req, Rep]
+  def apply(conn: ClientConnection) = self(conn)
+  def close(deadline: Time) = self.close(deadline)
+  override def isAvailable = self.isAvailable
 }
 
 /**
@@ -178,12 +186,7 @@ object ServiceFactory {
  * existing service factory.
  */
 abstract class ServiceFactoryProxy[-Req, +Rep](val self: ServiceFactory[Req, Rep])
-  extends ServiceFactory[Req, Rep] with Proxy
-{
-  def apply(conn: ClientConnection) = self(conn)
-  def close() = self.close()
-  override def isAvailable = self.isAvailable
-}
+  extends ProxyServiceFactory[Req, Rep]
 
 class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
@@ -191,11 +194,11 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   def apply(request: Req) =
     factory() flatMap { service =>
       service(request) ensure {
-        service.release()
+        service.close()
       }
     }
 
-  override def release() = factory.close()
+  override def close(deadline: Time) = factory.close(deadline)
   override def isAvailable = factory.isAvailable
 }
 

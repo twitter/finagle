@@ -19,6 +19,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
   "MonitorFilter" should {
     val monitor = spy(new MockMonitor)
     val underlying = mock[Service[Int, Int]]
+    underlying.close(any) returns Future.Done
     val reply = new Promise[Int]
     underlying(any) returns reply
     val service = new MonitorFilter(monitor) andThen underlying
@@ -63,6 +64,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
     "when attached to a server, report source for sourced exceptions" in {
       val address = new InetSocketAddress(0)
       val service = mock[Service[String, String]]
+      service.close(any) returns Future.Done
       val server = ServerBuilder()
         .codec(StringCodec)
         .name("MockServer")
@@ -100,6 +102,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
+      preparedFactory.close(any) returns Future.Done
       preparedFactory.map(Matchers.any()) returns
         preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 

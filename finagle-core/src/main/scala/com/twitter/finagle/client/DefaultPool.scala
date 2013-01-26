@@ -30,14 +30,14 @@ import java.net.{InetSocketAddress, SocketAddress}
  * are queued when the connection concurrency exceeds the high
  * watermark.
  */
-case class NewWatermarkPool[Req, Rep](
+case class DefaultPool[Req, Rep](
     low: Int = 0,
     high: Int = Int.MaxValue,
     bufferSize: Int = 0,
     idleTime: Duration = Duration.MaxValue,
     maxWaiters: Int = Int.MaxValue,
     timer: Timer = DefaultTimer.twitter
-) extends (StatsReceiver=> Transformer[Req, Rep]) {
+) extends (StatsReceiver => Transformer[Req, Rep]) {
   def apply(statsReceiver: StatsReceiver) = inputFactory => {
     val factory =
       if (idleTime <= 0.seconds || high <= low) inputFactory else

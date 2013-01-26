@@ -64,7 +64,7 @@ import java.util.concurrent.{Executors, TimeUnit}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
 import javax.net.ssl.SSLContext
-import org.jboss.netty.channel.ChannelFactory
+import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline}
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
 
@@ -130,12 +130,13 @@ private[builder] final case class ClientHostConfig(
 }
 
 private[builder] final case class ClientTimeoutConfig(
-  private val _tcpConnectTimeout         : Duration                      = 10.milliseconds,
-  private val _connectTimeout            : Duration                      = Duration.MaxValue,
-  private val _requestTimeout            : Duration                      = Duration.MaxValue,
-  private val _timeout                   : Duration                      = Duration.MaxValue,
-  private val _readerIdleTimeout         : Option[Duration]              = None,
-  private val _writerIdleTimeout         : Option[Duration]              = None) {
+  private val _tcpConnectTimeout: Duration         = 10.milliseconds,
+  private val _connectTimeout   : Duration         = Duration.MaxValue,
+  private val _requestTimeout   : Duration         = Duration.MaxValue,
+  private val _timeout          : Duration         = Duration.MaxValue,
+  private val _readerIdleTimeout: Option[Duration] = None,
+  private val _writerIdleTimeout: Option[Duration] = None
+) {
   val tcpConnectTimeout         = _tcpConnectTimeout
   val requestTimeout            = _requestTimeout
   val connectTimeout            = _connectTimeout
@@ -143,6 +144,7 @@ private[builder] final case class ClientTimeoutConfig(
   val readerIdleTimeout         = _readerIdleTimeout
   val writerIdleTimeout         = _writerIdleTimeout
 }
+
 
 /**
  * TODO: do we really need to specify HasCodec? -- it's implied in a
@@ -162,14 +164,15 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _recvBufferSize            : Option[Int]                   = None,
   private val _retryPolicy               : Option[RetryPolicy[Try[Nothing]]]  = None,
   private val _logger                    : Option[Logger]                = None,
-  private val _newChannelFactory         : Option[() => ChannelFactory]  = None,
+  private val _channelFactory            : Option[ChannelFactory]        = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _socksProxy                : Option[SocketAddress]          = None,
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _tracerFactory             : Managed[Tracer]               = Managed.const(NullTracer),
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
+  private val _failFast                  : Boolean                       = true,
   private val _timeoutConfig             : ClientTimeoutConfig           = new ClientTimeoutConfig,
-  private val _failFast                  : Boolean                       = true)
+  private val _daemon                    : Boolean                       = false)
 {
   import ClientConfig._
 
@@ -203,12 +206,13 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val recvBufferSize            = _recvBufferSize
   val retryPolicy               = _retryPolicy
   val logger                    = _logger
-  val newChannelFactory         = _newChannelFactory
+  val channelFactory            = _channelFactory
   val tls                       = _tls
   val socksProxy                = _socksProxy
   val failureAccrual            = _failureAccrual
   val tracerFactory             = _tracerFactory
   val failFast                  = _failFast
+  val daemon                    = _daemon
 
   def toMap = Map(
     "cluster"                   -> _cluster,
@@ -218,8 +222,8 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "connectTimeout"            -> Some(_timeoutConfig.connectTimeout),
     "timeout"                   -> Some(_timeoutConfig.timeout),
     "keepAlive"                 -> Some(_keepAlive),
-    "readerIdleTimeout"         -> _timeoutConfig.readerIdleTimeout,
-    "writerIdleTimeout"         -> _timeoutConfig.writerIdleTimeout,
+    "readerIdleTimeout"         -> Some(_timeoutConfig.readerIdleTimeout),
+    "writerIdleTimeout"         -> Some(_timeoutConfig.writerIdleTimeout),
     "statsReceiver"             -> _statsReceiver,
     "monitor"                   -> _monitor,
     "name"                      -> Some(_name),
@@ -234,12 +238,13 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "recvBufferSize"            -> _recvBufferSize,
     "retryPolicy"               -> _retryPolicy,
     "logger"                    -> _logger,
-    "newChannelFactory"         -> _newChannelFactory,
+    "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
     "socksProxy"                -> _socksProxy,
     "failureAccrual"            -> _failureAccrual,
     "tracerFactory"             -> Some(_tracerFactory),
-    "failFast"                  -> failFast
+    "failFast"                  -> failFast,
+    "daemon"                    -> daemon
   )
 
   override def toString = {
@@ -513,8 +518,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * meaningfully reference count factory usage, and so the caller is
    * responsible for calling ``releaseExternalResources()''.
    */
-  def newChannelFactory(newCf: () => ChannelFactory): This =
-    withConfig(_.copy(_newChannelFactory = Some(newCf)))
+  def channelFactory(cf: ChannelFactory): This =
+    withConfig(_.copy(_channelFactory = Some(cf)))
 
   /**
    * Encrypt the connection with SSL.  Hostname verification will be
@@ -599,7 +604,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * availability is turned off during the reconnection period.
    */
   def failFast(onOrOff: Boolean): This =
-   withConfig(_.copy(_failFast = onOrOff))
+    withConfig(_.copy(_failFast = onOrOff))
+    
+  /**
+   * When true, the client is daemonized. As with java threads, a
+   * process can exit only when all remaining clients are daemonized.
+   * False by default.
+   */
+  def daemon(daemonize: Boolean): This =
+    withConfig(_.copy(_daemon = daemonize))
 
   /*** BUILD ***/
 
@@ -622,7 +635,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // builder. TODO: this should be moved to its own toplevel class
     // that we can unittest independently.
     import com.twitter.finagle.client._
-    import com.twitter.finagle.netty3.Netty3Transport
+    import com.twitter.finagle.netty3.{Netty3Transporter, Netty3TransporterTLSConfig}
 
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
@@ -632,12 +645,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val monitor = config.monitor map { newMonitor => newMonitor(config.name) } getOrElse NullMonitor
     val logger = config.logger getOrElse Logger.getLogger(config.name)
 
-    val bindConfig = Netty3Transport.Config[Req, Rep](
+    val newChannel: ChannelPipeline => Channel = {
+      val factory = config.channelFactory getOrElse Netty3Transporter.channelFactory
+      factory.newChannel(_)
+    }
+    
+    // The transporter connects to actual endpoints, providing a typed
+    // session transport.
+    val transporter = Netty3Transporter[Req, Rep](
       pipelineFactory = codec.pipelineFactory,
-      newChannelFactory = config.newChannelFactory getOrElse  Netty3Transport.defaultNewChannelFactory,
-      tlsNewEngine = config.tls map { case (newEngine, _) => newEngine },
-      tlsVerifyHost = config.tls flatMap { case (_, verifyHost) => verifyHost },
+      newChannel = newChannel,
+      newTransport = codec.newClientTransport(_, statsReceiver),
+      tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
       socksProxy = config.socksProxy,
+      statsReceiver = statsReceiver,
       channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.MaxValue,
       channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.MaxValue,
       channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.info) },
@@ -650,14 +671,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         for (s <- config.sendBufferSize) o += "sendBufferSize" -> (s: java.lang.Integer)
         for (s <- config.recvBufferSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
         o.result()
-      },
-      newChannelTransport = codec.newClientTransport,
-      newChannelDispatcher = codec.newClientDispatcher(_),
-      nettyTimer = nettyTimer,
-      statsReceiver = statsReceiver
+      }
     )
-
-    val bind = Netty3Transport(bindConfig)
 
     val measureConn: Transformer[Req, Rep] = underlying =>
       new ServiceFactoryProxy(underlying) {
@@ -674,7 +689,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val prepareConn: Transformer[Req, Rep] =
       measureConn compose (codec.prepareConnFactory _)
 
-    val newPool = NewWatermarkPool[Req, Rep](
+    // Bind a concrete endpoint into a service factory.
+    val bind: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep] = {
+      val bind = DefaultBinder[Req, Rep, Req, Rep](transporter, codec.newClientDispatcher(_))
+      (addr, statsReceiver) => prepareConn(bind(addr, statsReceiver))
+    }
+
+    val pool = DefaultPool[Req, Rep](
       low = config.hostConnectionCoresize getOrElse 1,
       high = Seq(config.hostConnectionCoresize getOrElse 1,
         config.hostConnectionLimit getOrElse Int.MaxValue).max,
@@ -684,8 +705,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       timer = timer
     )
 
-    val transportConfig = DefaultTransport.Config[Req, Rep](
-      bind = prepareConn compose bind,
+    // The client puts it all together: given a binder, a pool and
+    // other paramters, it composes a load-balanced client.
+    val client = DefaultClient[Req, Rep](
+      bind = bind,
+      pool = pool,
       maxIdletime = config.hostConnectionMaxIdleTime getOrElse Duration.MaxValue,
       maxLifetime = config.hostConnectionMaxLifeTime getOrElse Duration.MaxValue,
       requestTimeout = config.requestTimeout,
@@ -695,38 +719,31 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         wrapper.andThen(_)
       },
       failFast = config.failFast && codec.failFastOk,
-      newPool = newPool,
-      timer = timer,
-      monitor = monitor,
-      logger = logger
-    )
-
-    val transport = DefaultTransport(transportConfig)
-
-    val clientConfig = DefaultClient.Config[Req, Rep](
-      transport = transport,
       serviceTimeout = config.connectTimeout,
       timer = timer,
-      statsReceiver = statsReceiver,
       tracer = tracer,
-      name = config.name
+      monitor = monitor,
+      name = config.name,
+      statsReceiver = statsReceiver
     )
-    val client = DefaultClient(clientConfig)
 
     val factory = codec.prepareServiceFactory(client.newClient(config.cluster.get))
 
+    if (!config.daemon) ExitGuard.guard()
     new ServiceFactoryProxy[Req, Rep](factory) {
       private[this] val closed = new AtomicBoolean(false)
-      override def close() {
+      override def close(deadline: Time): Future[Unit] = {
         if (!closed.compareAndSet(false, true)) {
           logger.log(Level.WARNING, "Close on ServiceFactory called multiple times!",
             new Exception/*stack trace please*/)
-          return
+          return Future.exception(new IllegalStateException)
         }
 
-        super.close()
-        finagleTimer.dispose()
-        disposableTracer.dispose()
+        super.close(deadline) ensure {
+          finagleTimer.dispose()
+          disposableTracer.dispose()
+          if (!config.daemon) ExitGuard.unguard()
+        }
       }
     }
   }
@@ -763,15 +780,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     new ServiceProxy[Req, Rep](composed) {
       private[this] val released = new AtomicBoolean(false)
-      override def release() {
+      override def close(deadline: Time): Future[Unit] = {
         if (!released.compareAndSet(false, true)) {
           val logger = config.logger getOrElse Logger.getLogger(config.name)
           logger.log(Level.WARNING, "Release on Service called multiple times!",
             new Exception/*stack trace please*/)
-          return
+          return Future.exception(new IllegalStateException)
         }
-        super.release()
+        super.close(deadline)
         finagleTimer.dispose()
+        Future.Done
       }
     }
   }

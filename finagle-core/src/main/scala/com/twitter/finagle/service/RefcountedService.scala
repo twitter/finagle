@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{Service, ServiceProxy}
 import com.twitter.finagle.util.AsyncLatch
+import com.twitter.util.{Future, Promise, Time}
 
 private[finagle] class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
   extends ServiceProxy[Req, Rep](underlying)
@@ -13,7 +14,11 @@ private[finagle] class RefcountedService[Req, Rep](underlying: Service[Req, Rep]
     underlying(request) ensure { replyLatch.decr() }
   }
 
-  override final def release() = replyLatch.await { doRelease() }
-
-  protected def doRelease() = underlying.release()
+  override final def close(deadline: Time): Future[Unit] = {
+    val p = new Promise[Unit]
+    replyLatch.await {
+      p.become(underlying.close(deadline))
+    }
+    p
+  }
 }

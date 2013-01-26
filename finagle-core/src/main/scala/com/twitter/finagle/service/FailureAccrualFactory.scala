@@ -1,7 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{
-  ClientConnection, Service, ServiceFactory, ServiceFactoryWrapper}
+import com.twitter.finagle.{  ClientConnection, Service, ServiceFactory, ServiceFactoryWrapper}
 import com.twitter.util.{Duration, Return, Throw, Time, Timer, TimerTask, Try}
 
 private[finagle] object FailureAccrualFactory {
@@ -67,7 +66,7 @@ class FailureAccrualFactory[Req, Rep](
           }
         }
 
-        override def release() = service.release()
+        override def close(deadline: Time) = service.close(deadline)
         override def isAvailable =
           service.isAvailable && FailureAccrualFactory.this.isAvailable
       }
@@ -75,7 +74,7 @@ class FailureAccrualFactory[Req, Rep](
 
   override def isAvailable = !markedDead && underlying.isAvailable
 
-  override def close() = underlying.close()
+  def close(deadline: Time) = underlying.close(deadline)
 
   override val toString = "failure_accrual_%s".format(underlying.toString)
 }

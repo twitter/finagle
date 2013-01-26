@@ -14,6 +14,7 @@ class RateLimitingFilterSpec extends SpecificationWithJUnit with Mockito {
     val strategy = new LocalRateLimitingStrategy[Int](categorize, 1.second, 5)
     val filter = new RateLimitingFilter[Int, Int](strategy)
     val service = mock[Service[Int, Int]]
+    service.close(any) returns Future.Done
     service(Matchers.anyInt) returns Future.value(1)
 
     val rateLimitedService = filter andThen service

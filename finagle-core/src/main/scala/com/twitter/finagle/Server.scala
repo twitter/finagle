@@ -1,12 +1,11 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.util.{Future, Duration}
+import com.twitter.util.{Future, Duration, Closable}
 import java.net.SocketAddress
 
 private[finagle]  // for now
-trait ListeningServer {
-  def close(grace: Duration): Future[Unit]
+trait ListeningServer extends Closable {
   def boundAddress: SocketAddress
 }
 

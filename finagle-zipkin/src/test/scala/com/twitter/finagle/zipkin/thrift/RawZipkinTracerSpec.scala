@@ -24,7 +24,7 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
         override def newClient() = mock[scribe.FinagledClient]
       }
       tracer.acquire()
-      doAfter { tracer.release() }
+      doAfter { tracer.close() }
 
       val expected = new LogEntry(
         category = "zipkin",
@@ -69,7 +69,7 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
 
       tracer.client mustNot beNull
       callback()
-      // tracer.release() should set client to null
+      // tracer.close() should set client to null
       tracer.client must beNull
     }
 
@@ -82,7 +82,7 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
         override def newClient() = mock[scribe.FinagledClient]
       }
       tracer.acquire()
-      doAfter { tracer.release() }
+      doAfter { tracer.close() }
 
       tracer.client.log(anyObject()) returns Future(ResultCode.Ok)
 

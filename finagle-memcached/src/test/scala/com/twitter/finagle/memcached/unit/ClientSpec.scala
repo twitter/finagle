@@ -32,15 +32,20 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     expected.size mustEqual 99
 
     // Build Ketama client
+    def newMock() = {
+      val s = mock[Service[Command, Response]]
+      s.close(any) returns Future.Done
+      s
+    }
     val clients = Map(
-      ("10.0.1.1", 11211, 600)  -> mock[Service[Command, Response]],
-      ("10.0.1.2", 11211, 300)  -> mock[Service[Command, Response]],
-      ("10.0.1.3", 11211, 200)  -> mock[Service[Command, Response]],
-      ("10.0.1.4", 11211, 350)  -> mock[Service[Command, Response]],
-      ("10.0.1.5", 11211, 1000) -> mock[Service[Command, Response]],
-      ("10.0.1.6", 11211, 800)  -> mock[Service[Command, Response]],
-      ("10.0.1.7", 11211, 950)  -> mock[Service[Command, Response]],
-      ("10.0.1.8", 11211, 100)  -> mock[Service[Command, Response]]
+      ("10.0.1.1", 11211, 600)  -> newMock(),
+      ("10.0.1.2", 11211, 300)  -> newMock(),
+      ("10.0.1.3", 11211, 200)  -> newMock(),
+      ("10.0.1.4", 11211, 350)  -> newMock(),
+      ("10.0.1.5", 11211, 1000) -> newMock(),
+      ("10.0.1.6", 11211, 800)  -> newMock(),
+      ("10.0.1.7", 11211, 950)  -> newMock(),
+      ("10.0.1.8", 11211, 100)  -> newMock()
     ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
     val broker = new Broker[NodeEvent]
     val ketamaClient = new KetamaClient(clients, broker.recv, KeyHasher.KETAMA, 160)
@@ -62,7 +67,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     "release" in {
       ketamaClient.release()
       clients.values foreach { client =>
-        there was one(client).release()
+        there was one(client).close(any)
       }
     }
 

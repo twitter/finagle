@@ -57,7 +57,7 @@ object Stress {
     val elapsed = Stopwatch.start()
 
     Future.join(requests) ensure {
-      client.release()
+      client.close()
 
       val duration = elapsed()
       println("%20s\t%s".format("Status", "Count"))

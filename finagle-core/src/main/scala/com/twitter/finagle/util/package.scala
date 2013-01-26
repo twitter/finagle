@@ -15,7 +15,7 @@ package com.twitter.finagle
   *   def make() = new Disposable[Tracer] {
   *     val underlying = new Tracer()
   *     def get = underlying
-  *     def dispose(deadline: Time) = underlying.release() // assumes Tracer uses relese() to manage lifetime
+  *     def dispose(deadline: Time) = underlying.close() // assumes Tracer uses relese() to manage lifetime
   *   }
   * }
   *

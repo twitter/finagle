@@ -141,10 +141,10 @@ class HeapBalancer[Req, Rep](
   private[this] class Wrapped(n: Node, underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def release() {
-      super.release()
-      put(n)
-    }
+    override def close(deadline: Time) =
+      super.close(deadline) ensure {
+        put(n)
+      }
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
@@ -159,9 +159,8 @@ class HeapBalancer[Req, Rep](
     n.factory(conn) map { new Wrapped(n, _) } onFailure { _ => put(n) }
   }
 
-  def close() {
-    heap foreach { _.factory.close() }
-  }
+  def close(deadline: Time) =
+    Closable.all(heap.map(_.factory):_*).close(deadline)
 
   override def isAvailable = true
   override val toString = "HeapBalancer(%d)".format(size)

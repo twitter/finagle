@@ -223,7 +223,7 @@ class LoadBalancerTest(
     println("> OSTRICH counters")
     Stats.prettyPrint(OstrichStats)
 
-    client.release()
+    client.close()
     servers foreach { _.stop() }
   }
 }

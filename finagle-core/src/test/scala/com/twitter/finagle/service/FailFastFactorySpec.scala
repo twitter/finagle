@@ -6,7 +6,7 @@ import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.MockTimer
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Time, Return, Throw}
+import com.twitter.util.{Future, Time, Return, Throw}
 import com.twitter.conversions.time._
 
 class FailFastFactorySpec extends SpecificationWithJUnit with Mockito {
@@ -14,8 +14,10 @@ class FailFastFactorySpec extends SpecificationWithJUnit with Mockito {
     val timer = new MockTimer
     val backoffs = 1.second #:: 2.seconds #:: Stream.empty
     val service = mock[Service[Int, Int]]
+    service.close(any) returns Future.Done
     val underlying = mock[ServiceFactory[Int, Int]]
     underlying.isAvailable returns true
+    underlying.close(any) returns Future.Done
     val failfast = new FailFastFactory(underlying, NullStatsReceiver, timer, backoffs)
 
     "pass through whenever everything is fine" in Time.withCurrentTimeFrozen { tc =>

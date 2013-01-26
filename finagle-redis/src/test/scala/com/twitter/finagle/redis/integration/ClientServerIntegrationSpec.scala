@@ -655,7 +655,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   }
 
   doAfterSpec {
-    client.release()
+    client.close()
     server.close()
     RedisCluster.stopAll()
   }

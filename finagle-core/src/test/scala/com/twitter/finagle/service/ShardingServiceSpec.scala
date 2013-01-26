@@ -25,6 +25,7 @@ class ShardingServiceSpec extends SpecificationWithJUnit with Mockito {
 
     val reqA = new ShardingRequest(1L)
     val serviceForA = mock[Service[MockRequest, String]]
+    serviceForA.close(any) returns Future.Done
 
     val unshardableReq = new MockRequest
     val reply = Future.value("hello")
@@ -32,6 +33,7 @@ class ShardingServiceSpec extends SpecificationWithJUnit with Mockito {
     "distribute requests between two shards" in {
       val reqB = new ShardingRequest(2L)
       val serviceForB = mock[Service[MockRequest, String]]
+      serviceForB.close(any) returns Future.Done
 
       distributor.nodeForHash(1L) returns serviceForA
       serviceForA.isAvailable returns true

@@ -2,7 +2,7 @@ package com.twitter.finagle.pool
 
 import com.twitter.finagle._
 import com.twitter.finagle.util.ConcurrentRingBuffer
-import com.twitter.util.Future
+import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.annotation.tailrec
 
@@ -15,16 +15,20 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
     extends ServiceProxy[Req, Rep](self)
   {
     private[this] val wasReleased = new AtomicBoolean(false)
-    def releaseSelf() {
+    def releaseSelf() = {
       if (wasReleased.compareAndSet(false, true))
-        self.release()
+        self.close()
+      else
+        Future.Done
     }
 
-    override def release() {
+    override def close(deadline: Time) = {
       // The ordering here is peculiar but important, avoiding races
       // between draining and giving back to the pool.
       if (!isAvailable || !buffer.tryPut(this) || draining)
         releaseSelf()
+      else
+        Future.Done
     }
   }
 
@@ -55,7 +59,7 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     if (draining) underlying() else get()
 
-  def close() {
+  def close(deadline: Time) = {
     drain()
     underlying.close()
   }

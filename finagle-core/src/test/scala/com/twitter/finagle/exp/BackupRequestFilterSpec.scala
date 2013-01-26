@@ -3,7 +3,7 @@ package com.twitter.finagle.exp
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Service, MockTimer}
-import com.twitter.util.{Promise, Time, Return, TimeControl}
+import com.twitter.util.{Future, Promise, Time, Return, TimeControl}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -20,6 +20,7 @@ class BackupRequestFilterSpec extends SpecificationWithJUnit with Mockito {
     }
     val p = new P
     val underlying = mock[Service[String, String]]
+    underlying.close(any) returns Future.Done
     underlying(any) returns p
     val service = new BackupRequestFilter(10.milliseconds, timer, statsReceiver) andThen underlying
 

@@ -1,18 +1,15 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.atomic.AtomicBoolean
-
-import com.twitter.util
-import com.twitter.util.{Duration, Future, TimerTask, NullTimerTask, Timer}
-
+import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle.{Service, ServiceProxy}
-import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
+import com.twitter.util.{Duration, Promise, Future, TimerTask, NullTimerTask, Timer, Time}
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A service wrapper that expires the self service after a
  * certain amount of idle time. By default, expiring calls
- * ``.release()'' on the self channel, but this action is
+ * ``.close()'' on the self channel, but this action is
  * customizable.
  */
 abstract class ExpiringService[Req, Rep](
@@ -31,6 +28,7 @@ abstract class ExpiringService[Req, Rep](
   private[this] var idleTask = startTimer(maxIdleTime, idleCounter)
   private[this] var lifeTask = startTimer(maxLifeTime, lifeCounter)
   private[this] val expireFnCalled = new AtomicBoolean(false)
+  private[this] val didExpire = new Promise[Unit]
 
   private[this] def startTimer(duration: Option[Duration], counter: Counter) =
     duration map { t: Duration =>
@@ -58,8 +56,10 @@ abstract class ExpiringService[Req, Rep](
   }
 
   private[this] def expired(): Unit = {
-    if (expireFnCalled.compareAndSet(false, true))
+    if (expireFnCalled.compareAndSet(false, true)) {
+      didExpire.setValue(())
       onExpire()
+    }
   }
 
   protected def onExpire()
@@ -86,8 +86,9 @@ abstract class ExpiringService[Req, Rep](
     }
   }
 
-  override def release() {
+  override def close(deadline: Time): Future[Unit] = {
     deactivate()
     expired()
+    didExpire
   }
 }

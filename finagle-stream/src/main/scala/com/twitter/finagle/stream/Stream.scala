@@ -2,12 +2,14 @@ package com.twitter.finagle.stream
 
 import com.twitter.finagle.ServiceNotAvailableException
 import com.twitter.finagle.{
-  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException}
-import com.twitter.util.{Future, Promise}
+  Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException
+}
+import com.twitter.util.{Future, Promise, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{
-  HttpClientCodec, HttpRequest, HttpResponse, HttpServerCodec}
+  HttpClientCodec, HttpRequest, HttpResponse, HttpServerCodec
+}
 
 /**
  * Don't release the underlying service until the response has
@@ -38,9 +40,8 @@ private[stream] class DelayedReleaseService(self: Service[HttpRequest, StreamRes
     }
   }
 
-  override def release() {
-    done ensure self.release()
-  }
+  override def close(deadline: Time) =
+    done ensure { self.close(deadline) }
 }
 
 object Stream {

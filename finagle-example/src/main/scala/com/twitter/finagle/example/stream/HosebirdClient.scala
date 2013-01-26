@@ -44,7 +44,7 @@ object HosebirdClient {
       val httpResponse = streamResponse.httpResponse
       if (httpResponse.getStatus.getCode != 200) {
         println(httpResponse.toString)
-        client.release()
+        client.close()
         clientFactory.close()
       } else {
         var messageCount = 0 // Wait for 1000 messages then shut down.
@@ -53,7 +53,7 @@ object HosebirdClient {
           println(buffer.toString(CharsetUtil.UTF_8))
           println("--")
           if (messageCount == 1000) {
-            client.release()
+            client.close()
             clientFactory.close()
           }
           // We return a Future indicating when we've completed processing the message.

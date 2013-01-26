@@ -3,6 +3,7 @@ package com.twitter.finagle.zipkin.thrift
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
 import com.twitter.finagle.util.SharedTimer
+import com.twitter.util.Time
 import collection.mutable.{SynchronizedMap, HashMap}
 
 object ZipkinTracer {
@@ -31,7 +32,7 @@ object ZipkinTracer {
     h => {
       tracer.acquire()
       h.onClose {
-        tracer.release()
+        tracer.close()
       }
       tracer
     }
@@ -65,5 +66,5 @@ class ZipkinTracer(underlyingTracer: RawZipkinTracer, initialSampleRate: Float) 
     }
   }
 
-  override def release() = underlyingTracer.release()
+  override def close(deadline: Time) = underlyingTracer.close(deadline)
 }

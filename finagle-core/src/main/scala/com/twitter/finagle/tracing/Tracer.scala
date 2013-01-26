@@ -5,10 +5,9 @@ package com.twitter.finagle.tracing
  */
 
 import com.twitter.finagle.util.{CloseNotifier, Disposable, Managed}
-import com.twitter.util.{Duration, Future, Time, TimeFormat}
-
-import java.nio.ByteBuffer
+import com.twitter.util.{Duration, Future, Time, TimeFormat, Closable}
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
 
 private[tracing] object RecordTimeFormat
@@ -69,7 +68,7 @@ object Tracer {
   }
 }
 
-trait Tracer {
+trait Tracer extends Closable {
   def record(record: Record)
 
   /**
@@ -80,8 +79,8 @@ trait Tracer {
    * None: i'm going to defer making a decision on this to the child service
    */
   def sampleTrace(traceId: TraceId): Option[Boolean]
-
-  def release() {}
+  
+  def close(deadline: Time) = Future.Done
 }
 
 class NullTracer extends Tracer {
@@ -115,4 +114,3 @@ object ConsoleTracer extends Tracer {
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
-

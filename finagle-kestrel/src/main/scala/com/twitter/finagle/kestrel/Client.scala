@@ -332,23 +332,23 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
 
             Offer.select(
               ack.recv { _ => recv(service, closeAndOpen) },
-              close.recv { t => service.release(); error ! ReadClosedException }
+              close.recv { t => service.close(); error ! ReadClosedException }
             )
 
           case Return(Values(Seq())) =>
             recv(service, open)
 
           case Return(_) =>
-            service.release()
+            service.close()
             error ! new IllegalArgumentException("invalid reply from kestrel")
 
           case Throw(t) =>
-            service.release()
+            service.close()
             error ! t
         },
 
         close.recv { _ =>
-          service.release()
+          service.close()
           reply.cancel()
           error ! ReadClosedException
         }

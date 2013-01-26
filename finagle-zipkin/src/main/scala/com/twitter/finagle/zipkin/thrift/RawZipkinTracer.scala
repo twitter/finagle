@@ -10,7 +10,7 @@ import com.twitter.finagle.thrift.{
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.{Disposable, SharedTimer, FinagleTimer}
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
-import com.twitter.util.{Base64StringEncoder, Timer}
+import com.twitter.util.{Base64StringEncoder, Timer, Time, Future}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -43,7 +43,7 @@ object RawZipkinTracer {
     h => {
       tracer.acquire()
       h.onClose {
-        tracer.release()
+        tracer.close()
       }
       tracer
     }
@@ -94,17 +94,19 @@ private[thrift] class RawZipkinTracer(
     }
   }
 
-  override def release() = synchronized {
+  override def close(deadline: Time) = synchronized {
     refcount -= 1
     if (refcount == 0) {
       if (transport != null) {
-        transport.release()
+        transport.close()
         transport = null
       }
       client = null
       spanMap = null
       timer.dispose()
     }
+    
+    Future.Done
   }
 
   /**

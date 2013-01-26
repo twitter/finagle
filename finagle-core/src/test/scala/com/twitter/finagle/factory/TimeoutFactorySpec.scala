@@ -1,17 +1,17 @@
 package com.twitter.finagle.factory
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-
-import com.twitter.util.{Time, Promise, Return}
 import com.twitter.conversions.time._
 import com.twitter.finagle.MockTimer
 import com.twitter.finagle.{Service, ServiceFactory, ServiceTimeoutException}
+import com.twitter.util.{Time, Promise, Return, Future}
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
   "TimeoutFactory" should {
     val timer = new MockTimer
     val underlying = mock[ServiceFactory[String, String]]
+    underlying.close(any) returns Future.Done
     val promise = new Promise[Service[String, String]] {
       @volatile var interrupted: Option[Throwable] = None
       setInterruptHandler { case exc => interrupted = Some(exc) }
@@ -46,6 +46,7 @@ class TimeoutFactorySpec extends SpecificationWithJUnit with Mockito {
         val res = factory()
         res.isDefined must beFalse
         val service = mock[Service[String, String]]
+        service.close(any) returns Future.Done
         promise() = Return(service)
         res.isDefined must beTrue
         res() must be_==(service)

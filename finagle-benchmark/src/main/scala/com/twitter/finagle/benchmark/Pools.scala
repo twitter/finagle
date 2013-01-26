@@ -22,7 +22,7 @@ class PoolsBenchmark extends SimpleBenchmark {
     val s = new Array[S](width)
     while (i < n) {
       if (i >= width)
-        s(i%width).release()
+        s(i%width).close()
 
       s(i%width) = pool().get()
 

@@ -6,11 +6,10 @@ package com.twitter.finagle
  * from this codec.
  */
 
-import com.twitter.finagle.dispatch.{
-  ClientDispatcher, ServerDispatcher, SerialClientDispatcher, SerialServerDispatcher,
-  ServerDispatcherFactory}
+import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{ClientChannelTransport, Transport, TransportFactory}
+import com.twitter.util.Closable
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
 
@@ -50,14 +49,11 @@ trait Codec[Req, Rep] {
   def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Req, Rep] =
     new ClientChannelTransport[Req, Rep](ch, statsReceiver)
 
-  def newClientDispatcher(transport: Transport[Req, Rep]): ClientDispatcher[Req, Rep] =
+  def newClientDispatcher(transport: Transport[Req, Rep]): Service[Req, Rep] =
     new SerialClientDispatcher(transport)
 
-  // Due to existing codecs, we need to support polymorphic
-  // transports in servers. Luckily, this goes away entirely with
-  // com.twitter.finagle.Server, and so can be deprecated eventually.
-  def newServerDispatcher(newTransport: TransportFactory, service: Service[Req, Rep]): ServerDispatcher =
-    new SerialServerDispatcher[Req, Rep](newTransport(), service)
+  def newServerDispatcher(transport: Transport[Rep, Req], service: Service[Req, Rep]): Closable =
+    new SerialServerDispatcher[Req, Rep](transport, service)
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to

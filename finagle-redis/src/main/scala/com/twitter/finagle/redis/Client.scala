@@ -80,7 +80,7 @@ class BaseClient(service: Service[Command, Reply]) {
   /**
    * Releases underlying service object
    */
-  def release() = service.release()
+  def release() = service.close()
 
   /**
    * Helper function for passing a command to the service
@@ -174,7 +174,7 @@ private[redis] class ConnectedTransactionalClient(
           Future.exception(ClientError("Transaction failed: " + e.toString))
         }
       } ensure {
-        svc.release()
+        svc.close()
       }
     }
   }

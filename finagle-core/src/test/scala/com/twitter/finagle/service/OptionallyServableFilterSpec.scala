@@ -10,6 +10,7 @@ import com.twitter.finagle.{Service, Filter, NotServableException}
 class OptionallyServableFilterSpec extends SpecificationWithJUnit with Mockito {
   "OptionallyServableFilter" should {
     val underlying = mock[Service[String, String]]
+    underlying.close(any) returns Future.Done
 
     val fn = mock[String => Future[Boolean]]
     val service = new OptionallyServableFilter(fn) andThen underlying

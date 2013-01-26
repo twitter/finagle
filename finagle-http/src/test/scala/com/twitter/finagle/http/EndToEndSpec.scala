@@ -30,7 +30,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
       .build()
 
     doAfter {
-      client.release()
+      client.close()
       server.close()
     }
 

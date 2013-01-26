@@ -1,13 +1,14 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Promise, Return}
+import com.twitter.util.{Future, Promise, Return}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 class MaskCancelFilterSpec extends SpecificationWithJUnit with Mockito {
   "MaskCancelFilter" should {
     val service = mock[Service[Int, Int]]
+    service.close(any) returns Future.Done
     val filter = new MaskCancelFilter[Int, Int]
 
     val filtered = filter andThen service

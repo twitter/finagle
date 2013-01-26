@@ -24,7 +24,7 @@ object ThriftClient {
     client.hi() onSuccess { response =>
       println("Received response: " + response)
     } ensure {
-      service.release()
+      service.close()
     }
   }
 }

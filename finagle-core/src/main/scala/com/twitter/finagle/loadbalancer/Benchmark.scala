@@ -1,9 +1,8 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.util.{Future, Time}
-
-import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.finagle.builder.StaticCluster
+import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
+import com.twitter.util.{Future, Time}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -18,7 +17,7 @@ object Benchmark {
   }
   private[this] class LoadedServiceFactory(i: Int) extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = { loads(i) += 1; Future.value(service) }
-    def close = ()
+    def close(deadline: Time) = Future.Done
   }
   private[this] val factories = 0 until F map { i => new LoadedServiceFactory(i) }
 
@@ -31,7 +30,7 @@ object Benchmark {
     0 until N foreach { i =>
       val j = i % W
       // todo: jitter in release. pick one at random.
-      if (outstanding(j) ne null) outstanding(j).release()
+      if (outstanding(j) ne null) outstanding(j).close()
       outstanding(j) = factory()()
     }
   }

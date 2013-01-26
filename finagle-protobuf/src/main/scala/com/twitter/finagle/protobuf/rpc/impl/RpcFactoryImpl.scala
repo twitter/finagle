@@ -27,6 +27,6 @@ class RpcFactoryImpl extends RpcFactory {
   def createController(): RpcController = { new RpcControllerWithOnFailureCallback() }
 
   def release(stub: { def getChannel(): RpcChannel }) {
-	stub.getChannel().asInstanceOf[RpcChannelImpl].release()
+	stub.getChannel().asInstanceOf[RpcChannelImpl].close()
   } 
 }

@@ -1,41 +1,40 @@
 package com.twitter.finagle
 
-import java.net.SocketAddress
-import com.twitter.finagle.client._
-import com.twitter.finagle.server._
 import com.twitter.finagle.builder.Cluster
+import com.twitter.finagle.client._
+import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
+import com.twitter.finagle.memcached.protocol.text.{
+  MemcachedClientPipelineFactory, MemcachedServerPipelineFactory
+}
 import com.twitter.finagle.memcached.protocol.{Command, Response}
-import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
-import com.twitter.finagle.netty3.{PipeliningTransport, Netty3Server}
+import com.twitter.finagle.netty3._
+import com.twitter.finagle.pool.ReusingPool
+import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
-
-
-class MemcachedTransport 
-  extends PipeliningTransport[Command, Response](MemcachedClientPipelineFactory)
+import java.net.SocketAddress
 
 trait MemcachedRichClient { self: Client[Command, Response] =>
   def newRichClient(cluster: Cluster[SocketAddress]): memcached.Client = memcached.Client(newClient(cluster).toService)
   def newRichClient(cluster: String): memcached.Client = memcached.Client(newClient(cluster).toService)
 }
 
-class MemcachedClient(transport: ((SocketAddress, StatsReceiver)) => ServiceFactory[Command, Response])
-  extends DefaultClient[Command, Response](DefaultClient.Config[Command, Response](transport = transport))
-  with MemcachedRichClient
-{
-  def this() = this(new MemcachedTransport)
-}
+object MemcachedBinder extends DefaultBinder[Command, Response, Command, Response](
+  new Netty3Transporter(MemcachedClientPipelineFactory),
+  new PipeliningDispatcher(_)
+)
 
-class MemcachedNetty3Server extends Netty3Server[Command, Response](
-  Netty3Server.Config(pipelineFactory = MemcachedServerPipelineFactory))
+object MemcachedClient extends DefaultClient[Command, Response](
+  MemcachedBinder, _ => new ReusingPool(_)
+) with MemcachedRichClient
 
-class MemcachedServer extends DefaultServer[Command, Response](
-  DefaultServer.Config[Command, Response](underlying = new MemcachedNetty3Server))
+object MemcachedListener extends Netty3Listener[Response, Command](MemcachedServerPipelineFactory)
+object MemcachedServer 
+  extends DefaultServer[Command, Response, Response, Command](MemcachedListener, new SerialServerDispatcher(_, _))
 
 object Memcached extends Client[Command, Response] with MemcachedRichClient with Server[Command, Response] {
-  val defaultClient = new MemcachedClient
-  val defaultServer = new MemcachedServer
-  def newClient(cluster: Cluster[SocketAddress]): ServiceFactory[Command, Response] = 
-    defaultClient.newClient(cluster)
+  def newClient(cluster: Cluster[SocketAddress]): ServiceFactory[Command, Response] =
+    MemcachedClient.newClient(cluster)
+
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
-    defaultServer.serve(addr, service)
+    MemcachedServer.serve(addr, service)
 }

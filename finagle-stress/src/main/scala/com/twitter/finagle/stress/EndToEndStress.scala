@@ -89,7 +89,7 @@ object EndToEndStress {
         val start = System.currentTimeMillis()
         running = false
         latch.await()
-        client.release()
+        client.close()
         server.close()
         timer.dispose()
         println("Shutdown took %dms".format(System.currentTimeMillis()-start))

@@ -4,7 +4,8 @@ import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.{
-  ClientCodecConfig, ServiceProxy, Service, SimpleFilter, TooManyConcurrentRequestsException}
+  ClientCodecConfig, Service, ServiceProxy, SimpleFilter, TooManyConcurrentRequestsException
+}
 import com.twitter.util._
 import java.net.{SocketAddress, InetSocketAddress}
 import java.nio.charset.Charset
@@ -13,8 +14,9 @@ import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{
-  ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState,
-  ChannelStateEvent, ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent}
+  ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent, 
+  ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent
+}
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
@@ -46,7 +48,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
     def workIt(what: String)(mkClient: => (Service[HttpRequest, StreamResponse], SocketAddress)) {
       what in {
         val (client, address) = mkClient
-        doAfter { client.release() }
+        doAfter { client.close() }
 
         "writes from the server arrive on the client's channel" in {
           val clientRes = client(httpRequest)(1.second)
@@ -243,10 +245,8 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
       val underlying = factory()()
       val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
-        override def release() {
-          server.close()
-          factory.close()
-        }
+        override def close(deadline: Time) = 
+          Closable.all(underlying, server, factory).close(deadline)
       }
 
       (client, address)
@@ -279,12 +279,8 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
       val underlying = factory()()
       val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
-        override def release() {
-          server.close()
-          serverClient.release()
-          proxy.close()
-          factory.close()
-        }
+        override def close(deadline: Time) =
+          Closable.all(server, serverClient, proxy, factory).close(deadline)
       }
 
       (client, proxy.localAddress)
@@ -311,7 +307,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           .build()
 
         doAfter {
-          client.release()
+          client.close()
           server.close()
         }
 

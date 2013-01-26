@@ -9,6 +9,7 @@ import com.twitter.finagle.{CancelledConnectionException, Service}
 class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
   "ProxyService" should {
     val underlying = mock[Service[Int, Int]]
+    underlying.close(any) returns Future.Done
 
     "proxy all methods to the underlying service" in {
       val proxy = new ProxyService(Future.value(underlying))
@@ -23,8 +24,8 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
       proxy.isAvailable must be_==(false)
       there was one(underlying).isAvailable
 
-      proxy.release()
-      there was one(underlying).release()
+      proxy.close()
+      there was one(underlying).close(any)
     }
 
     "buffer requests" in {

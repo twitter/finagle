@@ -1,5 +1,5 @@
 package com.twitter.finagle.memcached;
-
+/*
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.Memcached;
 import com.twitter.finagle.MemcachedClient;
@@ -13,3 +13,4 @@ class Test {
     Client client = Memcached.newRichClient("localhost:11211");
   }
 }
+*/

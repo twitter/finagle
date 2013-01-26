@@ -48,11 +48,11 @@ class ProxySpec extends SpecificationWithJUnit {
     }
 
     doAfter {
-      // externalClient.release() needs to be called explicitly by each test. Otherwise
+      // externalClient.close() needs to be called explicitly by each test. Otherwise
       // 'quit' test would call it twice.
       server.close(0.seconds)
-      proxyService.release()
-      proxyClient.release()
+      proxyService.close()
+      proxyClient.close()
       ExternalMemcached.stop()
     }
 
@@ -111,5 +111,4 @@ class ProxySpec extends SpecificationWithJUnit {
     }
 
   }
-
 }

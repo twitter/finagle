@@ -111,5 +111,4 @@ class Interpreter(queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffe
 
 class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
   def apply(request: Command) = Future(interpreter(request))
-  override def release() = ()
 }

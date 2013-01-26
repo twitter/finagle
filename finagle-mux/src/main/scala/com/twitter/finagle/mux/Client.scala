@@ -3,10 +3,12 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{WriteException, NoStacktrace}
-import com.twitter.util.{Future, Promise, Throw, Return}
+import com.twitter.util.{Future, Promise, Throw, Return, Time}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+
+import com.twitter.finagle.Service
 
 object RequestNackedException
   extends Exception("The request was nackd by the server")
@@ -24,7 +26,7 @@ case class ServerApplicationError(what: String)
  * A ClientDispatcher for the mux protocol.
  */
 private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelBuffer])
-  extends (ChannelBuffer => Future[ChannelBuffer])
+  extends Service[ChannelBuffer, ChannelBuffer]
 {
   import Message._
 
@@ -110,4 +112,7 @@ private[finagle] class ClientDispatcher(trans: Transport[ChannelBuffer, ChannelB
         }
     }
   }
+
+  override def isAvailable = trans.isOpen
+  override def close(deadline: Time) = trans.close(deadline)
 }

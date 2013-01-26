@@ -1,23 +1,22 @@
 package com.twitter.finagle.pool
 
 import collection.mutable.Queue
-
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-import org.mockito.{Matchers, ArgumentCaptor}
-
+import com.twitter.conversions.time._
+import com.twitter.finagle.{Service, ServiceFactory, WriteException, MockTimer}
 import com.twitter.util
 import com.twitter.util.{Time, Duration, Future, Promise}
-import com.twitter.conversions.time._
-
-import com.twitter.finagle.{Service, ServiceFactory, WriteException, MockTimer}
+import org.mockito.{Matchers, ArgumentCaptor}
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
   "CachingPool" should {
     val timer = new MockTimer
     val obj = mock[Object]
     val underlying = mock[ServiceFactory[Any, Any]]
+    underlying.close(any) returns Future.Done
     val underlyingService = mock[Service[Any, Any]]
+    underlyingService.close(any) returns Future.Done
     underlyingService.isAvailable returns true
     underlyingService(Matchers.any) returns Future.value(obj)
     underlying() returns Future.value(underlyingService)
@@ -41,16 +40,16 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
         there was one(underlying)()
         timer.tasks must beEmpty
 
-        f.release()
+        f.close()
         there was one(underlyingService).isAvailable
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
         timer.tasks must haveSize(1)
         timer.tasks.head.when must be_==(Time.now + 5.seconds)
 
         // Reap!
         timeControl.advance(5.seconds)
         timer.tick()
-        there was one(underlyingService).release()
+        there was one(underlyingService).close(any)
 
         timer.tasks must beEmpty
       }
@@ -59,18 +58,18 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
     "reuse cached objects & revive from death row" in {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
-        cachingPool()().release()
+        cachingPool()().close()
         timer.tasks must haveSize(1)
 
         there was one(underlying)()
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
         timer.tasks must haveSize(1)
 
         timeControl.advance(4.seconds)
 
-        cachingPool()().release()
+        cachingPool()().close()
         there was one(underlying)()
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
         timer.tasks must haveSize(1)
 
         // Originally scheduled time.
@@ -78,14 +77,14 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
         timer.tick()
 
         timer.tasks must haveSize(1)  // reschedule
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
 
         timer.tasks.head.when must be_==(Time.now + 4.seconds)
         timeControl.advance(5.seconds)
         timer.tick()
         timer.tasks must beEmpty
 
-        there was one(underlyingService).release()
+        there was one(underlyingService).close(any)
       }
     }
 
@@ -95,10 +94,10 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
         val o1 = mock[Object]
         val o2 = mock[Object]
 
-        val s0 = mock[Service[Any, Any]]; s0(any) returns Future.value(o0)
-        val s1 = mock[Service[Any, Any]]; s1(any) returns Future.value(o1)
-        val s2 = mock[Service[Any, Any]]; s2(any) returns Future.value(o2)
-
+        val s0 = mock[Service[Any, Any]]; s0(any) returns Future.value(o0); s0.close(any) returns Future.Done
+        val s1 = mock[Service[Any, Any]]; s1(any) returns Future.value(o1); s1.close(any) returns Future.Done
+        val s2 = mock[Service[Any, Any]]; s2(any) returns Future.value(o2); s2.close(any) returns Future.Done
+        
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         underlying() returns Future.value(s0)
         val f0 = cachingPool()()
@@ -121,17 +120,17 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
 
         fs foreach { f =>
           timeControl.advance(5.second)
-          f.release()
+          f.close()
         }
 
         timer.tasks must haveSize(1)
-        ss foreach { s => there was no(s).release() }
+        ss foreach { s => there was no(s).close(any) }
 
         timer.tick()
 
-        there was one(s0).release()
-        there was one(s1).release()
-        there was no(s2).release()
+        there was one(s0).close(any)
+        there was one(s1).close(any)
+        there was no(s2).close(any)
 
         timer.tasks must haveSize(1)
         timer.tick()
@@ -153,6 +152,7 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
     "restart timers when a dispose occurs" in {
       Time.withCurrentTimeFrozen { timeControl =>
         val underlyingService = mock[Service[Any, Any]]
+        underlyingService.close(any) returns Future.Done
         underlyingService.isAvailable returns true
         underlyingService(Matchers.any) returns Future.value(obj)
 
@@ -164,9 +164,9 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
         service(123)() must be_==(obj)
         timer.tasks must beEmpty
 
-        service.release()
+        service.close()
         timer.tasks must haveSize(1)
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
 
         timer.tasks.head.when must be_==(Time.now + 5.seconds)
 
@@ -179,11 +179,11 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
 
         timer.tick()
 
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
 
-        service.release()
+        service.close()
 
-        there was no(underlyingService).release()
+        there was no(underlyingService).close(any)
         timer.tasks must haveSize(1)
       }
     }
@@ -192,6 +192,7 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
+        underlyingService.close(any) returns Future.Done
         underlyingService(Matchers.any) returns Future.value(obj)
         underlying() returns Future.value(underlyingService)
         underlyingService.isAvailable returns false
@@ -199,9 +200,9 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
         val service = cachingPool()()
         service(123)() must be_==(obj)
 
-        service.release()
+        service.close()
         there was one(underlyingService).isAvailable
-        there was one(underlyingService).release()
+        there was one(underlyingService).close(any)
 
         // No need to clean up an already disposed object.
         timer.tasks must beEmpty
@@ -212,6 +213,7 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
+        underlyingService.close(any) returns Future.Done
         val slowService = new Promise[Service[Any, Any]]
         underlying() returns slowService
 
@@ -239,16 +241,17 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
+        underlyingService.close(any) returns Future.Done
         underlyingService(Matchers.any) returns Future.value(obj)
         underlying() returns Future.value(underlyingService)
         underlyingService.isAvailable returns true
 
         val service = cachingPool()()
-        service.release()
-        there was no(underlyingService).release()
+        service.close()
+        there was no(underlyingService).close(any)
 
         cachingPool.close()
-        there was one(underlyingService).release()
+        there was one(underlyingService).close(any)
       }
     }
 
@@ -256,22 +259,23 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         val underlyingService = mock[Service[Any, Any]]
+        underlyingService.close(any) returns Future.Done
         underlyingService(Matchers.any) returns Future.value(obj)
         underlying() returns Future.value(underlyingService)
         underlyingService.isAvailable returns true
 
         val service = cachingPool()()
         cachingPool.close()
-        there was no(underlyingService).release()
-        service.release()
-        there was one(underlyingService).release()
+        there was no(underlyingService).close(any)
+        service.close()
+        there was one(underlyingService).close(any)
       }
     }
 
     "close the underlying factory" in {
       val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
       cachingPool.close()
-      there was one(underlying).close()
+      there was one(underlying).close(any)
     }
   }
 }

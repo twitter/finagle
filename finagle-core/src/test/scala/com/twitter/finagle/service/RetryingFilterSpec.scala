@@ -24,6 +24,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
     "with RetryPolicy.tries" in {
       val filter = new RetryingFilter[Int, Int](RetryPolicy.tries(3, shouldRetry), timer, stats)
       val service = mock[Service[Int, Int]]
+      service.close(any) returns Future.Done
       val retryingService = filter andThen service
 
       "always try once" in {
@@ -79,6 +80,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
     def testPolicy(policy: RetryPolicy[Try[Nothing]]) {
       val filter = new RetryingFilter[Int, Int](policy, timer, stats)
       val service = mock[Service[Int, Int]]
+      service.close(any) returns Future.Done
       val retryingService = filter andThen service
 
       "always try once" in {

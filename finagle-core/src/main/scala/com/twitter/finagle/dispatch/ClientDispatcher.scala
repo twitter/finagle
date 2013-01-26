@@ -3,15 +3,15 @@ package com.twitter.finagle.dispatch
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledRequestException, WriteException}
-import com.twitter.util.{Future, Promise, Throw}
+import com.twitter.finagle.{Service, CancelledRequestException, WriteException}
+import com.twitter.util.{Future, Time, Promise, Throw}
 import java.net.InetSocketAddress
 
 /**
  * Dispatch requests one at a time; queueing concurrent requests.
  */
-class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
-  extends ClientDispatcher[Req, Rep]
+class SerialClientDispatcher[Req, Rep](val trans: Transport[Req, Rep])
+  extends Service[Req, Rep]
 {
   import SerialClientDispatcher._
 
@@ -52,6 +52,9 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
 
     p
   }
+
+  override def isAvailable = trans.isOpen
+  override def close(deadline: Time) = trans.close()
 }
 
 object SerialClientDispatcher {

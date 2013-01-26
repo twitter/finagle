@@ -8,7 +8,9 @@ import com.twitter.util.{Time, Future, Promise}
 
 class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
   "IdleConnectionFilter" should {
-    val underlying = ServiceFactory.const(mock[Service[String, String]])
+    val service = mock[Service[String, String]]
+    service.close(any) returns Future.Done
+    val underlying = ServiceFactory.const(service)
 
     val threshold = OpenConnectionsThresholds(2, 4, 1.second)
     val filter = new IdleConnectionFilter(underlying, threshold)
@@ -19,6 +21,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
       c.onClose returns closeFuture
       c.close() answers { _ =>
         closeFuture.setValue(())
+        closeFuture
       }
       filter(c)
       (c, closeFuture)
@@ -81,6 +84,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
         c.onClose returns closeFuture
         c.close() answers { _ =>
           closeFuture.setValue(())
+          closeFuture
         }
         spyFilter(c)
 

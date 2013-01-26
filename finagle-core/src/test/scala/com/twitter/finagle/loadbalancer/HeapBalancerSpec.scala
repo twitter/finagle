@@ -1,15 +1,14 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.finagle.builder.StaticCluster
+import com.twitter.finagle.integration.DynamicCluster
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.{
+  ClientConnection, NoBrokersAvailableException, Service, ServiceFactory
+}
+import com.twitter.util.{Future, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-
-import com.twitter.finagle.{
-  Service, ServiceFactory,
-  NoBrokersAvailableException, ClientConnection}
-import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.builder.StaticCluster
-import com.twitter.util.Future
-import com.twitter.finagle.integration.DynamicCluster
 
 class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
   // test: service creation failure
@@ -21,12 +20,15 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
       load += 1
       new Service[Unit, LoadedFactory] {
         def apply(req: Unit) = Future.value(LoadedFactory.this)
-        override def release() { load -= 1 }
+        override def close(deadline: Time) = { load -= 1; Future.Done }
       }
     }
 
     override def isAvailable = _isAvailable
-    def close() { _closed = true }
+    def close(deadline: Time) =  { 
+      _closed = true
+      Future.Done
+    }
   }
 
   "HeapBalancer (nonempty)" should {
@@ -57,7 +59,7 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
 
       // apologies for the ascii art.
       val f = made(0)(())()
-      made(0).release()
+      made(0).close()
       f.load must be_==(1)
 
       // f is now least-loaded
@@ -104,7 +106,7 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
       (factories :+ newFactory) foreach { _.load must be_==(1) }
 
       cluster.del(newFactory)
-      made2.release()
+      made2.close()
       newFactory.load must be_==(0)
     }
 

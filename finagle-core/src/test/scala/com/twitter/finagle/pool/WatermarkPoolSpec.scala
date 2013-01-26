@@ -11,6 +11,7 @@ import com.twitter.finagle._
 class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
   "WatermarkPool" should {
     val factory = mock[ServiceFactory[Int, Int]]
+    factory.close(any) returns Future.Done
     val pool = new WatermarkPool(factory, 0)
 
     "reflect the underlying availability" in {
@@ -26,7 +27,9 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
 
   "WatermarkPool (lowWatermark = 0)" should {
     val factory = mock[ServiceFactory[Int, Int]]
+    factory.close(any) returns Future.Done
     val service = mock[Service[Int, Int]]
+    service.close(any) returns Future.Done
     val promise = new Promise[Service[Int, Int]]
 
     factory() returns promise
@@ -46,9 +49,9 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
     "dispose of it when returned to the pool" in {
       promise() = Return(service)
       val f = pool()()
-      f.release()
+      f.close()
       there was one(service).isAvailable
-      there was one(service).release()
+      there was one(service).close(any)
     }
   }
 
@@ -56,6 +59,9 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
     val factory = mock[ServiceFactory[Int, Int]]
     val service0 = mock[Service[Int, Int]]
     val promise = new Promise[Service[Int, Int]]
+    
+    factory.close(any) returns Future.Done
+    service0.close(any) returns Future.Done
 
     factory() returns Future.value(service0)
     service0.isAvailable returns true
@@ -70,11 +76,11 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
       val f1 = pool()
       f1.isDefined must beFalse
 
-      f0().release()
+      f0().close()
 
       f1.isDefined must beTrue
       there was one(service0).isAvailable
-      there was no(service0).release()
+      there was no(service0).close(any)
     }
 
     "retry an enqueued request if the underlying factory fails" in {
@@ -117,20 +123,22 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
     "when item becomes unhealthy while pool is idle, it is returned" in {
       val f0 = pool()
       f0.isDefined must beTrue
-      f0().release()  // give it back
-      there was no(service0).release()  // it retained
+      f0().close()  // give it back
+      there was no(service0).close(any)  // it retained
 
       val service1 = mock[Service[Int, Int]]
+      service1.close(any) returns Future.Done
       factory() returns Future.value(service1)
       service0.isAvailable returns false
 
       val f1 = pool()
-      there was one(service0).release()
+      there was one(service0).close(any)
       f1.isDefined must beTrue
     }
 
     "when giving an unhealthy item back" in {
       val service1 = mock[Service[Int, Int]]
+      service1.close(any) returns Future.Done
       val service1Promise = new Promise[Service[Int, Int]] {
         @volatile var interrupted: Option[Throwable] = None
         setInterruptHandler { case exc => interrupted = Some(exc) }
@@ -150,22 +158,22 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
 
       "make a new item" in {
         service1Promise() = Return(service1)
-        f0().release()
-        there was one(service0).release()
+        f0().close()
+        there was one(service0).close(any)
         there was one(service0).isAvailable
         f1.isDefined must beTrue
         there were two(factory)()
         f1()(123)() must be_==(111)
 
         // Healthy again:
-        f1().release()
+        f1().close()
         there was one(service1).isAvailable
         // No additional disposes.
-        there was no(service1).release()
+        there was no(service1).close(any)
       }
 
       "propagate interrupts" in {
-        f0().release()
+        f0().close()
         // now we're waiting.
         service1Promise.interrupted must beNone
         val exc = new Exception
@@ -177,7 +185,9 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
 
   "WatermarkPool (lowWatermark = 1, highWatermark = 1, maxWaiters = 2)" should {
     val factory = mock[ServiceFactory[Int, Int]]
+    factory.close(any) returns Future.Done
     val service0 = mock[Service[Int, Int]]
+    service0.close(any) returns Future.Done
     val promise = new Promise[Service[Int, Int]]
 
     factory() returns Future.value(service0)
@@ -204,20 +214,25 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
       f3() must throwA[TooManyWaitersException]
 
       // give back my original item, and f1 should still get something.
-      f0().release()
+      f0().close()
 
       f1.isDefined must beTrue
       there was one(service0).isAvailable
-      there was no(service0).release()
+      there was no(service0).close(any)
     }
   }
 
   "WatermarkPool (lowWatermark = 100, highWatermark = 1000)" should {
     val factory = mock[ServiceFactory[Int, Int]]
+    factory.close(any) returns Future.Done
     val pool = new WatermarkPool(factory, 100, 1000)
 
     "maintain at all times up to 100 items" in {
-      val mocks = 0 until 100 map { _ => mock[Service[Int, Int]] }
+      val mocks = 0 until 100 map { _ =>
+        val s = mock[Service[Int, Int]]
+        s.close(any) returns Future.Done
+        s
+      }
 
       val services = 0 until 100 map { i =>
         factory() returns Future.value(mocks(i))
@@ -228,14 +243,14 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
       // We now have 100 items, the low watermark of the pool.  We can
       // give them all back, and all should persist.
       mocks foreach { service =>
-        there was no(service).release()
+        there was no(service).close(any)
         service.isAvailable returns true
       }
 
       mocks zip services foreach { case (mock, service) =>
-        service.release()
+        service.close()
         there was one(mock).isAvailable
-        there was no(mock).release()
+        there was no(mock).close(any)
       }
 
       // We can now fetch them again, incurring no additional object
@@ -247,14 +262,16 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
 
       there were 100.times(factory)()
       mocks foreach { service =>
-        there was no(service).release()
+        there was no(service).close(any)
       }
     }
   }
 
   "service lifecycle" should {
     val factory = mock[ServiceFactory[Int, Int]]
+    factory.close(any) returns Future.Done
     val service = mock[Service[Int, Int]]
+    service.close(any) returns Future.Done
     service.isAvailable returns true
     val highWaterMark = 5
     val pool = new WatermarkPool(factory, 1, highWaterMark)
@@ -285,8 +302,8 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
       f().isAvailable must beTrue
 
 
-      f().release()
-      there was no(service).release()
+      f().close()
+      there was no(service).close(any)
 
       factory() returns new Promise[Service[Int, Int]]
       service.isAvailable returns false
@@ -294,15 +311,17 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
       // The service is now unhealty, so it should be discarded, and a
       // new one should be made.
       pool().isDefined must beFalse
-      there was one(service).release()
+      there was one(service).close(any)
       there were two(factory)()
     }
   }
 
   "a closed pool" should {
     val factory = mock[ServiceFactory[Int, Int]]
+    factory.close(any) returns Future.Done
     val pool = new WatermarkPool(factory, 100, 1000)
     val underlyingService = mock[Service[Int, Int]]
+    underlyingService.close(any) returns Future.Done
 
     factory() returns Future.value(underlyingService)
     underlyingService.isAvailable returns true
@@ -313,17 +332,17 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
     val service = serviceFuture()
 
     "drain the queue" in {
-      service.release()
-      there was no(underlyingService).release()
+      service.close()
+      there was no(underlyingService).close(any)
       pool.close()
-      there was one(underlyingService).release()
+      there was one(underlyingService).close(any)
     }
 
     "release services as they become available" in {
       pool.close()
-      there was no(underlyingService).release()
-      service.release()
-      there was one(underlyingService).release()
+      there was no(underlyingService).close(any)
+      service.close()
+      there was one(underlyingService).close(any)
     }
 
     "deny new requests" in {
@@ -333,7 +352,7 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
 
     "close the underlying factory" in {
       pool.close()
-      there was one(factory).close()
+      there was one(factory).close(any)
     }
   }
 }

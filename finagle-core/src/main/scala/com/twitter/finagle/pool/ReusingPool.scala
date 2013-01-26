@@ -2,7 +2,7 @@ package com.twitter.finagle.pool
 
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory,
   ServiceFactoryProxy, ServiceProxy}
-import com.twitter.util.{Future, Promise, Return, Throw, Try}
+import com.twitter.util.{Future, Promise, Return, Throw, Try, Time}
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 
@@ -20,7 +20,7 @@ class ReusingPool[Req, Rep](underlying: ServiceFactory[Req, Rep])
   private[this] def newService(conn: ClientConnection) =
     underlying(conn) map { service =>
       new ServiceProxy(service) {
-        override def release() = () // No-op
+        override def close(deadline: Time) = Future.Done
       }
     }
 
@@ -40,7 +40,7 @@ class ReusingPool[Req, Rep](underlying: ServiceFactory[Req, Rep])
       // Service is dead. Give it back.
       case Some(Return(dead)) =>
         if (!current.compareAndSet(f, Future.never)) apply(conn) else {
-          dead.self.release()
+          dead.self.close()
           current.set(newService(conn))
           current.get
         }

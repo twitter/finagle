@@ -5,7 +5,7 @@ import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
   CancelledWriteException, ChannelClosedException, ChannelException}
-import com.twitter.util.{Future, Return, Promise}
+import com.twitter.util.{Future, Return, Promise, Time}
 import java.net.SocketAddress
 import org.jboss.netty.channel._
 import java.util.concurrent.atomic.AtomicBoolean
@@ -63,10 +63,13 @@ class ChannelTransport[In, Out](ch: Channel)
   }
 
   def read(): Future[Out] = readq.poll()
+  
+  def isOpen = ch.isOpen
 
-  def close() {
+  def close(deadline: Time) = {
     if (ch.isOpen)
       Channels.close(ch)
+    closep map { _ => () }
   }
 
   def localAddress: SocketAddress = ch.getLocalAddress()
@@ -147,9 +150,12 @@ class ClientChannelTransport[In, Out](ch: Channel, statsReceiver: StatsReceiver)
 
   def read(): Future[Out] = readq.poll()
 
-  def close() {
+  def isOpen = ch.isOpen
+
+  def close(deadline: Time) = {
     if (ch.isOpen)
       Channels.close(ch)
+    closep map { _ => () }
   }
 
   def localAddress: SocketAddress = ch.getLocalAddress()

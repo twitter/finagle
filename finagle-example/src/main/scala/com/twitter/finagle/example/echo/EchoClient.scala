@@ -22,7 +22,7 @@ object EchoClient {
       error.printStackTrace()
     } ensure {
       // All done! Close TCP connection(s):
-      client.release()
+      client.close()
     }
   }
 }

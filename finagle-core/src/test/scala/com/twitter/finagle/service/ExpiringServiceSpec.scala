@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.MockTimer
 import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, WriteException}
-import com.twitter.util.{Time, Promise, Return, Duration, Timer}
+import com.twitter.util.{Future, Time, Promise, Return, Duration, Timer}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -19,6 +19,7 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
     Time.withCurrentTimeFrozen { timeControl =>
       val timer = new MockTimer
       val underlying = mock[Service[Any, Any]]
+      underlying.close(any) returns Future.Done
       val promise = new Promise[Int]
       underlying(123) returns promise
       underlying.isAvailable returns true
@@ -33,20 +34,20 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           self, maxIdleTime, maxLifeTime,
           timer, stats)
       {
-        def onExpire() { self.release() }
+        def onExpire() { self.close() }
       }
 
       "releasing" in {
         val service = new ReleasingExpiringService[Any, Any](
           underlying, Some(10.seconds), None, timer, NullStatsReceiver)
-        there was no(underlying).release()
+        there was no(underlying).close(any)
 
         "cancel timers on release" in {
           val count = timer.tasks.size
           val service = new ReleasingExpiringService[Any, Any](
             underlying, Some(10.seconds), Some(5.seconds), timer, NullStatsReceiver)
           timer.tasks.size mustEqual count + 2
-          service.release()
+          service.close()
           timer.tasks.size mustEqual count
         }
 
@@ -54,11 +55,11 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           timeControl.advance(10.seconds)
           timer.tick()
 
-          there was one(underlying).release()
+          there was one(underlying).close(any)
 
           // Now attempt to release it once more:
-          service.release()
-          there was one(underlying).release()
+          service.close()
+          there was one(underlying).close(any)
         }
       }
 
@@ -72,7 +73,7 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           timeControl.advance(10.seconds)
           timer.tick()
 
-          there was one(underlying).release()
+          there was one(underlying).close(any)
 
           timer.tasks must beEmpty
         }
@@ -102,11 +103,11 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           promise() = Return(321)
           timer.tasks must haveSize(1)
 
-          there was no(underlying).release()
+          there was no(underlying).close(any)
           timeControl.advance(10.seconds)
           timer.tick()
 
-          there was one(underlying).release()
+          there was one(underlying).close(any)
         }
       }
 
@@ -121,7 +122,7 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           timeControl.advance(10.seconds)
           timer.tick()
 
-          there was one(underlying).release()
+          there was one(underlying).close(any)
 
           timer.tasks must beEmpty
         }
@@ -145,7 +146,7 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           timeControl.advance(10.seconds)
           timer.tick()
 
-          there was one(underlying).release()
+          there was one(underlying).close(any)
 
           timer.tasks must beEmpty
         }
@@ -172,12 +173,12 @@ class ExpiringServiceSpec extends SpecificationWithJUnit with Mockito {
           timer.tasks must haveSize(2)
           timer.tasks forall(!_.isCancelled) must beTrue
 
-          there was no(underlying).release()
+          there was no(underlying).close(any)
           timeControl.advance(8.seconds)
           timer.tick()
 
           timer.tasks must beEmpty
-          there was one(underlying).release()
+          there was one(underlying).close(any)
         }
       }
 

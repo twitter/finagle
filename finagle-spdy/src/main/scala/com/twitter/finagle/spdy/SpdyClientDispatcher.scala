@@ -1,21 +1,16 @@
 package com.twitter.finagle.spdy
 
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Service, CancelledRequestException, WriteException}
+import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
-
-import scala.collection.JavaConverters._
-
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.spdy.SpdyHttpHeaders
-
-import com.twitter.finagle.{CancelledRequestException, WriteException}
-import com.twitter.finagle.dispatch.ClientDispatcher
-import com.twitter.finagle.transport.Transport
-
-import com.twitter.util.{Future, Promise, Return, Throw}
+import scala.collection.JavaConverters._
 
 class SpdyClientDispatcher(trans: Transport[HttpRequest, HttpResponse])
-  extends ClientDispatcher[HttpRequest, HttpResponse]
+  extends Service[HttpRequest, HttpResponse]
 {
   private[this] val readFailure = new AtomicReference[Throwable]()
 
@@ -67,4 +62,7 @@ class SpdyClientDispatcher(trans: Transport[HttpRequest, HttpResponse])
 
     p
   }
+  
+  override def isAvailable = trans.isOpen
+  override def close(deadline: Time) = trans.close()
 }

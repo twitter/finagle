@@ -136,7 +136,6 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
             }
             promise
           }
-          override def release() = ()
         }
       }
 
@@ -160,7 +159,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
           val factory = new ServiceFactory[Command, Response] {
             // use an executor so readReliably doesn't block waiting on an empty queue
             def apply(conn: ClientConnection) = Future(newKestrelService(Some(executor), queues))
-            def close() { }
+            def close(deadline: Time) = Future.Done
             override def toString = "ServiceFactory for %s".format(host)
           }
           mockHostClientBuilder.buildFactory() returns factory

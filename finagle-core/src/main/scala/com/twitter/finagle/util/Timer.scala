@@ -30,7 +30,7 @@ trait FinagleTimer {
  */
 private[finagle] object SharedTimer extends SharedTimer(
   () => new HashedWheelTimer(TimerThreadFactory, 10, TimeUnit.MILLISECONDS))
-private[finagle] object TimerThreadFactory extends NamedPoolThreadFactory("Finagle Timer")
+private[finagle] object TimerThreadFactory extends NamedPoolThreadFactory("Finagle Timer", true/*daemon*/)
 
 /**
  * Maintain a view on top of `underlying` with its own set of pending

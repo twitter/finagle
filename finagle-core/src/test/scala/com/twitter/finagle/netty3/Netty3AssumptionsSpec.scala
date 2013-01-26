@@ -1,19 +1,15 @@
 package com.twitter.finagle.netty3
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.util.{CountDownLatch, RandomSocket}
 import java.util.concurrent.Executors
-
-import org.specs.SpecificationWithJUnit
-
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
 import org.jboss.netty.channel._
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import org.specs.SpecificationWithJUnit
 
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.{Ok, Error, Cancelled, Netty3Transport}
-
-import com.twitter.util.{CountDownLatch, RandomSocket}
-import com.twitter.conversions.time._
+import Conversions._
 
 /**
  * Here we test a number of assumptions we are making of Netty. This
@@ -51,8 +47,7 @@ class Netty3AssumptionsSpec extends SpecificationWithJUnit {
     // This test, like any involving timing, is of course fraught with
     // races.
     "leave the channel in a closed state [immediately]" in {
-      val newCf = Netty3Transport.defaultNewChannelFactory
-      val bootstrap = new ClientBootstrap(newCf())
+      val bootstrap = new ClientBootstrap(Netty3Transporter.channelFactory)
 
       val pipeline = Channels.pipeline
       pipeline.addLast("stfu", new SimpleChannelUpstreamHandler {

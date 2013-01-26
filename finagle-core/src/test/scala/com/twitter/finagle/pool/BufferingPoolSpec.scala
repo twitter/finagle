@@ -7,7 +7,9 @@ import com.twitter.util.Future
 
 class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
   val underlying = mock[ServiceFactory[Int, Int]]
+  underlying.close(any) returns Future.Done
   val service = mock[Service[Int, Int]]
+  service.close(any) returns Future.Done
   service.isAvailable returns true
   underlying(any) returns Future.value(service)
   val N = 10
@@ -16,56 +18,58 @@ class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
   "BufferingPool" should {
     "buffer exactly N items" in {
       val n2 = for (_ <- 0 until N*2) yield pool()()
-      there was no(service).release()
+      there was no(service).close(any)
       there were (N*2).times(underlying).apply(any)
       for (s <- n2 take N)
-        s.release()
-      there was no(service).release()
+        s.close()
+      there was no(service).close(any)
       val n1 = for (_ <- 0 until N) yield pool()()
       there were (N*2).times(underlying).apply(any)
       for (s <- n1)
-        s.release()
-      there was no(service).release()
+        s.close()
+      there was no(service).close(any)
       for (s <- n2 drop N)
-        s.release()
-      there were N.times(service).release()
+        s.close()
+      there were N.times(service).close(any)
     }
 
     "drain services on close" in {
       val ns = for (_ <- 0 until N) yield pool()()
-      there was no(service).release()
-      for (s <- ns take (N-1)) s.release()
+      there was no(service).close(any)
+      for (s <- ns take (N-1)) s.close()
       pool.close()
-      there were (N-1).times(service).release()
-      ns(N-1).release()
-      there were N.times(service).release()
+      there were (N-1).times(service).close(any)
+      ns(N-1).close()
+      there were N.times(service).close(any)
 
       // Bypass buffer after drained.
       val s = pool()()
       there were (N+1).times(underlying).apply(any)
-      s.release()
-      there were (N+1).times(service).release()
+      s.close()
+      there were (N+1).times(service).close(any)
     }
 
     "give back unhealthy services immediately" in {
       val unhealthy = mock[Service[Int, Int]]
+      unhealthy.close(any) returns Future.Done
       unhealthy.isAvailable returns false
       underlying(any) returns Future.value(unhealthy)
       val s1 = pool()()
       s1.isAvailable must beFalse
-      s1.release()
-      there was one(unhealthy).release()
+      s1.close()
+      there was one(unhealthy).close(any)
     }
 
     "skip unhealthy services" in {
       val failing = mock[Service[Int, Int]]
+      failing.close(any) returns Future.Done
       failing.isAvailable returns true
       underlying(any) returns Future.value(failing)
-      pool()().release()
-      there was no(failing).release()
+      pool()().close()
+      there was no(failing).close(any)
       failing.isAvailable returns false
       pool()()
-      there was one(failing).release()
+      there was one(failing).close(any)
     }
   }
 }

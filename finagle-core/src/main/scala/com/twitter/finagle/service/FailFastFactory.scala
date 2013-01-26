@@ -83,7 +83,7 @@ private[finagle] class FailFastFactory[Req, Rep](
         case Throw(exc) => proc ! Observation.TimeoutFail
         case Return(service) =>
           proc ! Observation.Success
-          service.release()
+          service.close()
       }
 
     case Observation.Close =>
@@ -126,8 +126,8 @@ private[finagle] class FailFastFactory[Req, Rep](
   override def isAvailable = self.isAvailable && state == Ok
   override val toString = "fail_fast_%s".format(self.toString)
 
-  override def close() = {
+  override def close(deadline: Time) = {
     proc ! Observation.Close
-    self.close()
+    self.close(deadline)
   }
 }

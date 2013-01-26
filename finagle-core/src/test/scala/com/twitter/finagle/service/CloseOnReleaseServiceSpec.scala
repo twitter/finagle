@@ -1,31 +1,31 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.{Service, WriteException}
+import com.twitter.util.{Future, Promise}
+import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.mockito.Matchers
-
-import com.twitter.util.Promise
-import com.twitter.finagle.{Service, WriteException}
 
 class CloseOnReleaseServiceSpec extends SpecificationWithJUnit with Mockito {
   "CloseOnReleaseService" should {
     val service = mock[Service[Any, Any]]
+    service.close(any) returns Future.Done
     val promise = new Promise[Any]
     service(Matchers.any) returns promise
     val wrapper = new CloseOnReleaseService(service)
 
     "only call release on the underlying service once" in {
-      wrapper.release()
-      there was one(service).release()
+      wrapper.close()
+      there was one(service).close(any)
 
-      wrapper.release()
-      there was one(service).release()
+      wrapper.close()
+      there was one(service).close(any)
 
       service.isAvailable must beFalse
     }
 
     "throw a write exception if we attempt to use a released service" in {
-      wrapper.release()
+      wrapper.close()
 
       wrapper(132)() must throwA[WriteException]
     }

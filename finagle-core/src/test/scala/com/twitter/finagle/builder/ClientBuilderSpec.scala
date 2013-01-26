@@ -5,11 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.util.{Promise, Return, Future, Time}
-
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import java.util.concurrent.atomic.AtomicInteger
 
 class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "ClientBuilder" should {
@@ -17,6 +15,7 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
+      preparedFactory.close(any) returns Future.Done
       preparedFactory.map(Matchers.any()) returns
         preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 
@@ -33,24 +32,10 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       requestFuture.isDefined must beFalse
       val service = mock[Service[String, String]]
       service("123") returns Future.value("321")
+      service.close(any) returns Future.Done
       preparedServicePromise() = Return(service)
       there was one(service)("123")
       requestFuture.poll must beSome(Return("321"))
-    }
-
-    "releaseExternalResources once all clients are released" in {
-      val m = new MockChannel
-      val nrelease = new AtomicInteger(0)
-      m.channelFactory.releaseExternalResources() answers { _ =>
-        nrelease.incrementAndGet()
-      }
-      val client1 = m.build()
-      val client2 = m.build()
-
-      client1.release()
-      nrelease.get must be_==(0)
-      client2.release()
-      nrelease.get must eventually(be_==(1))
     }
 
     "build client that disposes of resources used" in {
@@ -65,7 +50,7 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
         .build()
 
       called must beFalse
-      client.release()
+      client.close()
       called must beTrue
     }
 
