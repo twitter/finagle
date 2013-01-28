@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stress</artifactId>
   <packaging>jar</packaging>
-  <version>6.0.2-SNAPSHOT</version>
+  <version>6.0.6-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-292</artifactId>
@@ -17,6 +17,11 @@
   </properties>
   <dependencies>
     <!-- library dependencies -->
+    <dependency>
+      <groupId>com.google.caliper</groupId>
+      <artifactId>caliper</artifactId>
+      <version>0.5-rc1</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
@@ -32,32 +37,37 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.0.2-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>6.0.2-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.0.2-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.0.2-SNAPSHOT</version>
+      <version>6.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>9.0.3-SNAPSHOT</version>
+      <version>9.0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.0.2-SNAPSHOT</version>
+      <version>6.0.7-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scrooge-runtime</artifactId>
+      <version>2.3.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -67,7 +77,7 @@
         <artifactId>maven-finagle-thrift-plugin</artifactId>
         <configuration>
           <thriftGenerators>
-            <thriftGenerator>finagle</thriftGenerator>
+            <thriftGenerator>scrooge</thriftGenerator>
           </thriftGenerators>
         </configuration>
       </plugin>

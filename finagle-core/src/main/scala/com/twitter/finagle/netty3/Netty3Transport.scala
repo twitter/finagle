@@ -21,6 +21,7 @@ import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelFuture,
   ChannelFutureListener, ChannelPipelineFactory}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
+import socks.SocksConnectHandler
 
 /**
  * Provide a ServiceFactory based on Netty3.
@@ -189,6 +190,12 @@ class Netty3Transport[Req, Rep] protected(config: Netty3Transport.Config[Req, Re
           pipeline.addFirst("ssl", sslHandler)
         }
 
+        (socksProxy, addr) match {
+          case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
+            pipeline.addFirst("socksConnect", new SocksConnectHandler(proxyAddr, inetAddr))
+          case _ =>
+        }
+
         for (snooper <- channelSnooper)
           pipeline.addFirst("channelSnooper", snooper)
 
@@ -250,6 +257,7 @@ object Netty3Transport {
       (ch: Channel, statsReceiver: StatsReceiver) => new ClientChannelTransport[Req, Rep](ch, statsReceiver),
     tlsNewEngine: Option[() => Engine] = None,
     tlsVerifyHost: Option[String] = None,
+    socksProxy: Option[SocketAddress] = None,
     channelReaderTimeout: Duration = Duration.MaxValue,
     channelWriterTimeout: Duration = Duration.MaxValue,
     channelSnooper: Option[ChannelSnooper] = None,

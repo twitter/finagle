@@ -1,3 +1,5 @@
+/* CHANGING THIS FILE REQUIRES MANUAL REGENERATION */
+
 /**
  * Define thrift structs for thrift request tracing.
  */

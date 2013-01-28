@@ -1,9 +1,8 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.finagle.redis.util._
-import java.nio.charset.Charset
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 
 object RequireClientProtocol extends ErrorConversion {
@@ -70,6 +69,13 @@ object Commands {
   val ZSCORE            = "ZSCORE"
   val ZUNIONSTORE       = "ZUNIONSTORE"
 
+  // Btree Sorted Set
+  val BADD              = "BADD"
+  val BCARD             = "BCARD"
+  val BREM              = "BREM"
+  val BGET              = "BGET"
+  val BRANGE            = "BRANGE"
+
   // Miscellaneous
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
@@ -82,6 +88,7 @@ object Commands {
   val HGETALL           = "HGETALL"
   val HKEYS             = "HKEYS"
   val HMGET             = "HMGET"
+  val HMSET             = "HMSET"
   val HSCAN             = "HSCAN"
   val HSET              = "HSET"
 
@@ -169,6 +176,12 @@ object Commands {
     ZSCORE            -> {ZScore(_)},
     ZUNIONSTORE       -> {ZUnionStore(_)},
 
+    // Btree Sorted Set
+    BADD              -> {BAdd(_)},
+    BCARD             -> {BCard(_)},
+    BREM              -> {BRem(_)},
+    BGET              -> {BGet(_)},
+
     // miscellaneous
     FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
@@ -181,6 +194,7 @@ object Commands {
     HGETALL           -> {HGetAll(_)},
     HKEYS             -> {HKeys(_)},
     HMGET             -> {HMGet(_)},
+    HMSET             -> {HMSet(_)},
     HSCAN             -> {HScan(_)},
     HSET              -> {HSet(_)},
 
@@ -284,6 +298,13 @@ object CommandBytes {
   val ZSCORE            = StringToChannelBuffer("ZSCORE")
   val ZUNIONSTORE       = StringToChannelBuffer("ZUNIONSTORE")
 
+  // Btree Sorted Set
+  val BADD              = StringToChannelBuffer("BADD")
+  val BCARD             = StringToChannelBuffer("BCARD")
+  val BREM              = StringToChannelBuffer("BREM")
+  val BGET              = StringToChannelBuffer("BGET")
+  val BRANGE            = StringToChannelBuffer("BRANGE")
+
   // Miscellaneous
   val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
   val SELECT            = StringToChannelBuffer("SELECT")
@@ -296,6 +317,7 @@ object CommandBytes {
   val HGETALL           = StringToChannelBuffer("HGETALL")
   val HKEYS             = StringToChannelBuffer("HKEYS")
   val HMGET             = StringToChannelBuffer("HMGET")
+  val HMSET             = StringToChannelBuffer("HMSET")
   val HSCAN             = StringToChannelBuffer("HSCAN")
   val HSET              = StringToChannelBuffer("HSET")
 
@@ -330,7 +352,7 @@ object CommandBytes {
 
 
 class CommandCodec extends UnifiedProtocolCodec {
-  import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
+  import com.twitter.finagle.redis.naggati.Encoder
   import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
   import com.twitter.logging.Logger

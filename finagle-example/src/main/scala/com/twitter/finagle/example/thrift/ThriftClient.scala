@@ -19,7 +19,7 @@ object ThriftClient {
     // Wrap the raw Thrift service in a Client decorator. The client
     // provides a convenient procedural interface for accessing the Thrift
     // server.
-    val client = new Hello.ServiceToClient(service, new TBinaryProtocol.Factory())
+    val client = new Hello.FinagledClient(service, new TBinaryProtocol.Factory())
 
     client.hi() onSuccess { response =>
       println("Received response: " + response)

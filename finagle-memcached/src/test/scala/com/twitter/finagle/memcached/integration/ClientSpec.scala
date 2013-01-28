@@ -1,7 +1,5 @@
 package com.twitter.finagle.memcached.integration
 
-/* temporarily disabled due to internal dependency
-
 import _root_.java.io.ByteArrayOutputStream
 import _root_.java.net.InetSocketAddress
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
@@ -198,6 +196,18 @@ class ClientSpec extends SpecificationWithJUnit {
         client.get("foo")() mustEqual None
         client.set("foo", "bar")()
         client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      }
+
+      "even in future pool" in {
+        lazy val client = KetamaClientBuilder()
+            .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
+            .build()
+
+        val futureResult = Future.value(true) flatMap {
+          _ => client.get("foo")
+        }
+
+        futureResult() mustEqual None
       }
     }
   }
@@ -574,5 +584,3 @@ class ClientSpec extends SpecificationWithJUnit {
     }
   }
 }
-
-*/

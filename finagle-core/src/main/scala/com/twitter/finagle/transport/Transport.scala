@@ -1,7 +1,10 @@
 package com.twitter.finagle.transport
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.util.Future
 import java.net.SocketAddress
+
+// Mapped: ideally via a util-codec?
 
 /**
  * A transport is a representation of a stream of objects that may be
@@ -51,4 +54,22 @@ trait Transport[In, Out] {
  */
 trait TransportFactory {
   def apply[In, Out](): Transport[In, Out]
+}
+
+/**
+ * A `Transport` interface to a pair of queues (one for reading, one
+ * for writing); useful for testing.
+ */
+class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
+  extends Transport[In, Out]
+{
+  def write(input: In) = {
+    writeq.offer(input)
+    Future.Done
+  }
+  def read(): Future[Out] = readq.poll()
+  def close() {}
+  val onClose = Future.never
+  val localAddress = new SocketAddress{}
+  val remoteAddress = new SocketAddress{}
 }

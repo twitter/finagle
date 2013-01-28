@@ -7,11 +7,10 @@ import org.specs.mock.Mockito
 import org.mockito.{Matchers, ArgumentCaptor}
 
 import com.twitter.util
-import com.twitter.util.{Time, Duration, Future}
+import com.twitter.util.{Time, Duration, Future, Promise}
 import com.twitter.conversions.time._
 
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.finagle.MockTimer
+import com.twitter.finagle.{Service, ServiceFactory, WriteException, MockTimer}
 
 class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
   "CachingPool" should {
@@ -206,6 +205,33 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
 
         // No need to clean up an already disposed object.
         timer.tasks must beEmpty
+      }
+    }
+
+    "cache objects when client sends interrupt" in {
+      Time.withCurrentTimeFrozen { timeControl =>
+        val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
+        val underlyingService = mock[Service[Any, Any]]
+        val slowService = new Promise[Service[Any, Any]]
+        underlying() returns slowService
+
+        val service1 = cachingPool()
+        val exception = new Exception("give up")
+        service1.raise(exception)
+        service1() must throwA[WriteException]
+        service1 onFailure {
+          case WriteException(e) => e mustEqual exception
+          case _ => assert(false, "exception was not write exception")
+        }
+
+        slowService.setValue(underlyingService)
+
+        val service2 = cachingPool()
+        service2.isDefined must beTrue
+
+        // not sure how else to verify the underlying is the same since CachingPool wraps
+        underlyingService(1) returns Future.value(2)
+        service2()(1)() mustEqual 2
       }
     }
 

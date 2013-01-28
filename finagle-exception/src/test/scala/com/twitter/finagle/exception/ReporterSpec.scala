@@ -13,10 +13,10 @@ class ReporterSpec extends SpecificationWithJUnit with Mockito {
   "A default chickadee reporter" should {
     setSequential()
 
-    val logger = mock[scribe.ServiceToClient]
-    logger.Log(anyObject()) returns Future(ResultCode.OK)
+    val logger = mock[scribe.FinagledClient]
+    logger.log(anyObject()) returns Future(ResultCode.Ok)
 
-    val captor = ArgumentCaptor.forClass(classOf[java.util.List[LogEntry]])
+    val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
 
     val reporter = Reporter(logger, "service16")
 
@@ -24,24 +24,24 @@ class ReporterSpec extends SpecificationWithJUnit with Mockito {
 
     "log entries to a client once upon receive" in {
       reporter.handle(tse.throwable)
-      there was one(logger).Log(captor.capture())
+      there was one(logger).log(captor.capture())
     }
 
     "log a json entry with the proper format" in {
       val es = captor.getValue
       es.size mustEqual 1
 
-      tse.verifyCompressedJSON(es.get(0).getMessage)
+      tse.verifyCompressedJSON(es(0).message)
     }
   }
 
   "A client-logging chickadee reporter" should {
     setSequential()
 
-    val logger = mock[scribe.ServiceToClient]
-    logger.Log(anyObject()) returns Future(ResultCode.OK)
+    val logger = mock[scribe.FinagledClient]
+    logger.log(anyObject()) returns Future(ResultCode.Ok)
 
-    val captor = ArgumentCaptor.forClass(classOf[java.util.List[LogEntry]])
+    val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
 
     val reporter = Reporter(logger, "service16").withClient()
 
@@ -49,24 +49,24 @@ class ReporterSpec extends SpecificationWithJUnit with Mockito {
 
     "log entries to a client once upon receive" in {
       reporter.handle(tse.throwable)
-      there was one(logger).Log(captor.capture())
+      there was one(logger).log(captor.capture())
     }
 
     "log a json entry with the proper format" in {
       val es = captor.getValue
       es.size mustEqual 1
 
-      tse.verifyCompressedJSON(es.get(0).getMessage)
+      tse.verifyCompressedJSON(es(0).message)
     }
   }
 
   "A chickadee reporter that logs source and client" should {
     setSequential()
 
-    val logger = mock[scribe.ServiceToClient]
-    logger.Log(anyObject()) returns Future(ResultCode.OK)
+    val logger = mock[scribe.FinagledClient]
+    logger.log(anyObject()) returns Future(ResultCode.Ok)
 
-    val captor = ArgumentCaptor.forClass(classOf[java.util.List[LogEntry]])
+    val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
 
     val socket = new InetSocketAddress("localhost", 5871)
     val reporter = Reporter(logger, "service16")
@@ -77,14 +77,14 @@ class ReporterSpec extends SpecificationWithJUnit with Mockito {
 
     "log entries to a client once upon receive" in {
       reporter.handle(tse.throwable)
-      there was one(logger).Log(captor.capture())
+      there was one(logger).log(captor.capture())
     }
 
     "log a json entry with the proper format" in {
       val es = captor.getValue
       es.size mustEqual 1
 
-      tse.verifyCompressedJSON(es.get(0).getMessage)
+      tse.verifyCompressedJSON(es(0).message)
     }
   }
 }

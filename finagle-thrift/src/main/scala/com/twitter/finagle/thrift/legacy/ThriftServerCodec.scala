@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TMessageType, TBinaryProtocol}
+import org.apache.thrift.protocol.{TMessageType, TProtocolFactory}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
@@ -12,9 +12,9 @@ import java.util.logging.{Logger, Level}
 /*
  * Translate ThriftReplys to wire representation
  */
-private[thrift] class ThriftServerEncoder extends SimpleChannelDownstreamHandler {
-  protected val protocolFactory = new TBinaryProtocol.Factory(true, true)
-
+private[thrift] class ThriftServerEncoder(protocolFactory: TProtocolFactory)
+    extends SimpleChannelDownstreamHandler
+{
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
     e.getMessage match {
       case reply@ThriftReply(response, call) =>
@@ -31,9 +31,10 @@ private[thrift] class ThriftServerEncoder extends SimpleChannelDownstreamHandler
 /**
  * Translate wire representation to ThriftCalls
  */
-private[thrift] class ThriftServerDecoder extends ReplayingDecoder[VoidEnum] {
+private[thrift] class ThriftServerDecoder(protocolFactory: TProtocolFactory)
+    extends ReplayingDecoder[VoidEnum]
+{
   private[this] val logger = Logger.getLogger(getClass.getName)
-  private[this] val protocolFactory = new TBinaryProtocol.Factory(true, true)
 
   def decodeThriftCall(ctx: ChannelHandlerContext, channel: Channel,
                        buffer: ChannelBuffer):Object = {

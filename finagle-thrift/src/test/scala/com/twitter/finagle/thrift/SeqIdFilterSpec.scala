@@ -9,6 +9,8 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
+  val protocolFactory = new TBinaryProtocol.Factory()
+
   def mkmsg(tmsg: TMessage, strictWrite: Boolean) = {
     val trans = new TMemoryBuffer(24)
     val oprot = (new TBinaryProtocol.Factory(false, strictWrite)).getProtocol(trans)
@@ -18,7 +20,7 @@ class SeqIdFilterSpec extends SpecificationWithJUnit with Mockito {
   }
 
   def getmsg(buf: Array[Byte]) =
-    new InputBuffer(buf)().readMessageBegin
+    new InputBuffer(buf, protocolFactory)().readMessageBegin
 
   for (seqId <- Seq(0, 1, -1, 123, -123, Int.MaxValue, Int.MinValue)) {
     testFilter("strict(%d)".format(seqId), seqId, mkmsg(_, true))

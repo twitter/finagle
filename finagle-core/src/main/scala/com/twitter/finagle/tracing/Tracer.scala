@@ -54,15 +54,15 @@ object Tracer {
   type Factory = (CloseNotifier) => Tracer
 
   def mkManaged(tracerFactory: Factory): Managed[Tracer] = new Managed[Tracer] {
+    @volatile var handler = { () => {} }
     private[this] val notifier = new CloseNotifier {
-      var handler = { () => {} }
       def onClose(h: => Unit) = handler = { () => h }
     }
     def make() = new Disposable[Tracer] {
       val underlying = tracerFactory(notifier)
       def get = underlying
       def dispose(deadline: Time) = {
-        notifier.handler()
+        handler()
         Future.value(())
       }
     }

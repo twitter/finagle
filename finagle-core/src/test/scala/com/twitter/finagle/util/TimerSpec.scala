@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.util.TimerTask
 import java.util.Collections
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.{util => nu}
 import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
@@ -12,20 +13,22 @@ import org.specs.mock.Mockito
 class TimerSpec extends SpecificationWithJUnit with Mockito {
   "ManagedNettyTimer" should {
     val timer = mock[nu.Timer]
+    val nstop = new AtomicInteger(0)
     @volatile var running = true
     timer.stop() answers { args =>
       running = false
+      nstop.incrementAndGet()
       Collections.emptySet()
     }
-    val shared = new SharedTimer(() =>timer)
+    val shared = new SharedTimer(() => timer)
 
     "Stop the underlying timer when the reference count reaches 0" in {
       val t0, t1 = shared.acquire()
 
       t1.dispose()
-      there was no(timer).stop()
+      nstop.get must be_==(0)
       t0.dispose()
-      there was one(timer).stop()
+      nstop.get must eventually(be_==(1))
     }
 
     "Cancel pending timeouts when a timer is disposed" in {

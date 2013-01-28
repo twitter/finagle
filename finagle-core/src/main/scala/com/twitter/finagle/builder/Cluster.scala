@@ -45,13 +45,16 @@ trait Cluster[T] { self =>
     private[this] val mapped = mutable.HashMap.empty[T, mutable.Queue[U]]
 
     override def ready = self.ready
+
     def snap: (Seq[U], Future[Spool[Cluster.Change[U]]]) = {
       val (seqT, changeT) = self.snap
-      val seqU = seqT map { t =>
-        val q = mapped.getOrElseUpdate(t, mutable.Queue[U]())
-        val u = f(t)
-        q.enqueue(u)
-        u
+      val seqU = mapped.synchronized {
+        seqT map { t =>
+          val q = mapped.getOrElseUpdate(t, mutable.Queue[U]())
+          val u = f(t)
+          q.enqueue(u)
+          u
+        }
       }
 
       val changeU = changeT map { spoolT =>

@@ -10,7 +10,7 @@ import com.twitter.util.{Future, JavaTimer}
 import java.net.InetSocketAddress
 import org.apache.thrift.protocol.TBinaryProtocol
 
-object BackendService extends thrift.Backend.ServiceIface {
+object BackendService extends thrift.Backend.FutureIface {
   private[this] val timer = new JavaTimer
 
   private[this] def makeResponse(size: Int) = "."*size
@@ -48,6 +48,6 @@ object Backendserver {
       .codec(ThriftServerFramedCodec())
       .reportTo(new OstrichStatsReceiver)
       .bindTo(new InetSocketAddress(basePort))
-      .build(new thrift.Backend.Service(BackendService, new TBinaryProtocol.Factory()))
+      .build(new thrift.Backend.FinagledService(BackendService, new TBinaryProtocol.Factory()))
   }
 }

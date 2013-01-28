@@ -15,6 +15,8 @@ import com.twitter.finagle.{SunkChannel, TooManyConcurrentRequestsException}
 import com.twitter.silly.Silly
 
 class ThriftCodecSpec extends SpecificationWithJUnit {
+  val protocolFactory = new TBinaryProtocol.Factory()
+
   def thriftToBuffer(method: String, `type`: Byte, seqid: Int,
       message: { def write(p: TProtocol) }): ChannelBuffer = {
     val buffer = ChannelBuffers.dynamicBuffer()
@@ -41,7 +43,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
       val reply = call.newReply
       reply.setSuccess("result")
 
-      val channel = makeChannel(new ThriftServerEncoder)
+      val channel = makeChannel(new ThriftServerEncoder(protocolFactory))
       Channels.write(channel, call.reply(reply))
 
       channel.upstreamEvents must haveSize(0)
@@ -68,7 +70,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
     "decode calls" in {
       // receive call and decode
       val buffer = thriftToBuffer("bleep", TMessageType.CALL, 23, new Silly.bleep_args("args"))
-      val channel = makeChannel(new ThriftServerDecoder)
+      val channel = makeChannel(new ThriftServerDecoder(protocolFactory))
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)
@@ -88,7 +90,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
 
       Range(0, buffer.readableBytes - 1).foreach { numBytes =>
         // receive partial call
-        val channel = makeChannel(new ThriftServerDecoder)
+        val channel = makeChannel(new ThriftServerDecoder(protocolFactory))
         val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
         Channels.fireMessageReceived(channel, truncatedBuffer)
 
@@ -115,7 +117,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
   "thrift client encoder" should {
     "encode calls" in {
       val call = new ThriftCall("testMethod", new Silly.bleep_args("arg"), classOf[Silly.bleep_result])
-      val channel = makeChannel(new ThriftClientEncoder)
+      val channel = makeChannel(new ThriftClientEncoder(protocolFactory))
       Channels.write(channel, call)
 
       channel.upstreamEvents must haveSize(0)
@@ -141,7 +143,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
     "decode replys" in {
       // receive reply and decode
       val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
-      val channel = makeChannel(new ThriftClientDecoder())
+      val channel = makeChannel(new ThriftClientDecoder(protocolFactory))
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)
@@ -158,7 +160,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
 
       Range(0, buffer.readableBytes - 1).foreach { numBytes =>
         // receive partial call
-        val channel = makeChannel(new ThriftClientDecoder())
+        val channel = makeChannel(new ThriftClientDecoder(protocolFactory))
         val truncatedBuffer = buffer.copy(buffer.readerIndex, numBytes)
         Channels.fireMessageReceived(channel, truncatedBuffer)
 
@@ -184,7 +186,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
       // receive exception and decode
       val buffer = thriftToBuffer("bleep", TMessageType.EXCEPTION, 23,
         new TApplicationException(TApplicationException.UNKNOWN_METHOD, "message"))
-      val channel = makeChannel(new ThriftClientDecoder())
+      val channel = makeChannel(new ThriftClientDecoder(protocolFactory))
       Channels.fireMessageReceived(channel, buffer)
       channel.upstreamEvents must haveSize(1)
       channel.downstreamEvents must haveSize(0)

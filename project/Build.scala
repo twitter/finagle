@@ -1,28 +1,26 @@
 import sbt._
 import Keys._
-import com.twitter.sbt._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.0.1"
-  val nettyLib = "io.netty" % "netty" % "3.5.5.Final" withSources()
-  val ostrichLib = "com.twitter" % "ostrich" % "9.0.2" withSources()
+  val utilVersion = "6.0.6"
+  val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
+  val ostrichLib = "com.twitter" %% "ostrich" % "9.0.6"
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
 
-  def util(which: String) = "com.twitter" % ("util-"+which) % utilVersion withSources()
+  def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "5.3.8",
+    version := "6.0.6",
     organization := "com.twitter",
     scalaVersion := "2.9.2",
-    SubversionPublisher.subversionRepository := Some("https://svn.twitter.biz/maven-public"),
     libraryDependencies ++= Seq(
-      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources(),
-      "junit" % "junit" % "4.8.1" % "test" withSources(),
-      "org.mockito" % "mockito-all" % "1.8.5" % "test" withSources()
+      "org.scala-tools.testing" % "specs_2.9.1" % "1.6.9" % "test",
+      "junit" % "junit" % "4.8.1" % "test",
+      "org.mockito" % "mockito-all" % "1.8.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
     resolvers += "Coda Hale's Repository" at "http://repo.codahale.com/",
@@ -36,6 +34,8 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
+    javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
+    javacOptions in doc := Seq("-source", "1.6"),
 
     // This is bad news for things like com.twitter.util.Time
     parallelExecution in Test := false,
@@ -43,7 +43,38 @@ object Finagle extends Build {
     // This effectively disables packageDoc, which craps out
     // on generating docs for generated thrift due to the use
     // of raw java types.
-    packageDoc in Compile := new java.io.File("nosuchjar")
+    // packageDoc in Compile := new java.io.File("nosuchjar"),
+
+    // Sonatype publishing
+    publishArtifact in Test := false,
+    pomIncludeRepository := { _ => false },
+    publishMavenStyle := true,
+    pomExtra := (
+      <url>https://github.com/twitter/util</url>
+      <licenses>
+        <license>
+          <name>Apache License, Version 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:twitter/finagle.git</url>
+        <connection>scm:git:git@github.com:twitter/finagle.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>twitter</id>
+          <name>Twitter Inc.</name>
+          <url>https://www.twitter.com/</url>
+        </developer>
+      </developers>),
+    publishTo <<= version { (v: String) =>
+      val nexus = "https://oss.sonatype.org/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+    }
   )
 
   val jmockSettings = Seq(
@@ -58,7 +89,9 @@ object Finagle extends Build {
 
   lazy val finagle = Project(
     id = "finagle",
-    base = file(".")
+    base = file("."),
+    settings = Project.defaultSettings ++
+      sharedSettings
   ) aggregate(
     // Core, support.
     finagleCore, finagleTest, finagleOstrich4,
@@ -77,7 +110,6 @@ object Finagle extends Build {
     id = "finagle-test",
     base = file("finagle-test"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-test",
@@ -88,7 +120,6 @@ object Finagle extends Build {
     id = "finagle-core",
     base = file("finagle-core"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-core",
@@ -100,7 +131,6 @@ object Finagle extends Build {
     id = "finagle-ostrich4",
     base = file("finagle-ostrich4"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
@@ -111,8 +141,7 @@ object Finagle extends Build {
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
+      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
@@ -124,8 +153,7 @@ object Finagle extends Build {
     id = "finagle-exception",
     base = file("finagle-exception"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
+      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-exception",
@@ -142,7 +170,6 @@ object Finagle extends Build {
     id = "finagle-commons-stats",
     base = file("finagle-commons-stats"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
@@ -154,7 +181,6 @@ object Finagle extends Build {
     id = "finagle-serversets",
     base = file("finagle-serversets"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-serversets",
@@ -170,6 +196,7 @@ object Finagle extends Build {
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
           <exclude org="com.twitter" name="util-core"/>
+          <exclude org="com.twitter" name="util-logging"/>
           <exclude org="com.twitter.common" name="jdk-logging"/>
           <exclude org="com.twitter.common" name="stats"/>
           <exclude org="com.twitter.common" name="util-executor-service-shutdown"/>
@@ -186,13 +213,12 @@ object Finagle extends Build {
     id = "finagle-http",
     base = file("finagle-http"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-http",
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
-      "commons-lang" % "commons-lang" % "2.6" withSources()
+      "commons-lang" % "commons-lang" % "2.6"
     )
   ).dependsOn(finagleCore)
 
@@ -200,7 +226,6 @@ object Finagle extends Build {
     id = "finagle-native",
     base = file("finagle-native"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-native"
@@ -210,7 +235,6 @@ object Finagle extends Build {
     id = "finagle-stream",
     base = file("finagle-stream"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-stream"
@@ -220,8 +244,6 @@ object Finagle extends Build {
     id = "finagle-thrift",
     base = file("finagle-thrift"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-thrift",
@@ -233,7 +255,6 @@ object Finagle extends Build {
     id = "finagle-memcached",
     base = file("finagle-memcached"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-memcached",
@@ -248,7 +269,6 @@ object Finagle extends Build {
     id = "finagle-kestrel",
     base = file("finagle-kestrel"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-kestrel"
@@ -259,7 +279,6 @@ object Finagle extends Build {
     id = "finagle-protobuf",
     base = file("finagle-protobuf"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-protobuf",
@@ -275,7 +294,6 @@ object Finagle extends Build {
     id = "finagle-redis",
     base = file("finagle-redis"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-redis",
@@ -295,20 +313,19 @@ object Finagle extends Build {
     id = "finagle-stress",
     base = file("finagle-stress"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
+      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-stress",
-    libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs
+    libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
+    libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp)
 
   lazy val finagleExample = Project(
     id = "finagle-example",
     base = file("finagle-example"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
+      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-example",
@@ -325,8 +342,7 @@ object Finagle extends Build {
     id = "finagle-benchmark",
     base = file("finagle-benchmark"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
-      CompileThriftFinagle.newSettings ++
+      Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
@@ -340,7 +356,6 @@ object Finagle extends Build {
     id = "finagle-mysql",
     base = file("finagle-mysql"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
     ).settings(
       name := "finagle-mysql",

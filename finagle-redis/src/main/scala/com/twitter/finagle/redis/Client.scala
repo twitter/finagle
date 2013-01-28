@@ -35,6 +35,7 @@ class Client(service: Service[Command, Reply])
   with SortedSets
   with Lists
   with Sets
+  with BtreeSortedSetCommands
 
 /**
  * Connects to a single Redis host

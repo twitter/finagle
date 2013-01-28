@@ -9,17 +9,16 @@ sbtjar=sbt-launch.jar
 
 if [ ! -f $sbtjar ]; then
   echo 'downloading '$sbtjar 1>&2
-  curl -O http://repo.typesafe.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/0.11.2/$sbtjar
+  curl -O http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/$sbtjar
 fi
 
 test -f $sbtjar || exit 1
-
 sbtjar_md5=$(openssl md5 < $sbtjar|cut -f2 -d'='|awk '{print $1}')
-
-if [ "${sbtjar_md5}" != 2886cc391e38fa233b3e6c0ec9adfa1e ]; then
+if [ "${sbtjar_md5}" != 9d832c4cfdb889103bd37a8bda3faa0e ]; then
   echo 'bad sbtjar!' 1>&2
   exit 1
 fi
+
 
 test -f ~/.sbtconfig && . ~/.sbtconfig
 
@@ -37,6 +36,6 @@ java -ea                          \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx3G                          \
+  -Xmx1G                          \
   -server                         \
   -jar $sbtjar "$@"

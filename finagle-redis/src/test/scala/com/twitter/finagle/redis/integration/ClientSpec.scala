@@ -98,6 +98,13 @@ class ClientSpec extends SpecificationWithJUnit {
         client.ttl(foo)() map (_ must beLessThanOrEqualTo(20L))
       }
 
+      "expireAt" in {
+        client.set(foo, bar)()
+        val ttl = System.currentTimeMillis() + 20000L
+        client.expireAt(foo, ttl)() mustEqual true
+        client.ttl(foo)() map (_ must beLessThanOrEqualTo(ttl))
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {
@@ -228,6 +235,12 @@ class ClientSpec extends SpecificationWithJUnit {
         client.hSet(foo, boo, moo)()
         CBToString.fromList(
           client.hMGet(foo, Seq(bar, boo))().toList) mustEqual Seq("baz", "moo")
+      }
+
+      "set multiple values" in {
+        client.hMSet(foo, Map(baz -> bar, moo -> boo))()
+        CBToString.fromList(
+          client.hMGet(foo, Seq(baz, moo))().toList) mustEqual Seq("bar", "boo")
       }
 
       "get multiple values at once" in {

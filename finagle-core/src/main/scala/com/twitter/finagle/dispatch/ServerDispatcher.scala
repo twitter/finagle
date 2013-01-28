@@ -1,7 +1,7 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, NoStacktrace}
+import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
 import com.twitter.util.{Future, Return}
 import java.util.concurrent.atomic.AtomicReference
 
@@ -44,7 +44,7 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
   private[this] val state = new AtomicReference[Future[_]](Idle)
 
   trans.onClose ensure {
-    state.getAndSet(Closed).cancel()
+    state.getAndSet(Closed).raise(new CancelledRequestException)
     service.release()
   }
 
@@ -53,7 +53,7 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
     trans.read() flatMap { req =>
       val f = service(req)
       if (state.compareAndSet(Idle, f)) f else {
-        f.cancel()
+        f.raise(new CancelledRequestException)
         Eof
       }
     } flatMap { rep =>

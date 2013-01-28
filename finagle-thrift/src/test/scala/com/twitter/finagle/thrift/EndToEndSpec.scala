@@ -1,29 +1,29 @@
 package com.twitter.finagle.thrift
 
-import org.specs.SpecificationWithJUnit
-
-import org.apache.thrift.{TProcessorFactory, TApplicationException}
-import org.apache.thrift.protocol.TBinaryProtocol
+import com.twitter.finagle.{ClientCodecConfig, ServerCodecConfig}
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.tracing
+import com.twitter.finagle.tracing.{Trace, BufferingTracer, Annotation, Record}
+import com.twitter.silly.Silly
+import com.twitter.test.{B, SomeStruct, AnException, F}
+import com.twitter.util.TimeConversions._
+import com.twitter.util.{Future, RandomSocket, Return, Promise, Time}
+import java.util.concurrent.Executors
+import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolFactory, TJSONProtocol}
 import org.apache.thrift.server.TSimpleServer
 import org.apache.thrift.transport.{TSocket, TServerSocket, TFramedTransport}
-import java.util.concurrent.Executors
-
+import org.apache.thrift.{TProcessorFactory, TApplicationException}
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
 import org.jboss.netty.channel.socket.nio._
+import org.specs.SpecificationWithJUnit
 
-import com.twitter.test.{B, SomeStruct, AnException, F}
-import com.twitter.finagle.tracing
-import com.twitter.finagle.tracing.{Trace, BufferingTracer, Annotation, Record}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.silly.Silly
-import com.twitter.util.{Future, RandomSocket, Return, Promise, Time}
-import com.twitter.util.TimeConversions._
+trait EndToEndSpec extends SpecificationWithJUnit {
+  val protocolFactory: TProtocolFactory
 
-class EndToEndSpec extends SpecificationWithJUnit {
-  "Thrift server" should {
+  "Thrift server (%s)".format(protocolFactory) should {
     val processor =  new B.ServiceIface {
       def add(a: Int, b: Int) = Future.exception(new AnException)
       def add_one(a: Int, b: Int) = Future.Void
@@ -38,16 +38,16 @@ class EndToEndSpec extends SpecificationWithJUnit {
     val serverAddr = RandomSocket()
     val serverTracer = new BufferingTracer
     val server = ServerBuilder()
-      .codec(ThriftServerFramedCodec())
+      .codec(ThriftServerFramedCodec(protocolFactory))
       .bindTo(serverAddr)
       .name("ThriftServer")
       .tracerFactory((_) => serverTracer)
-      .build(new B.Service(processor, new TBinaryProtocol.Factory()))
+      .build(new B.Service(processor, protocolFactory))
 
     val clientTracer = new BufferingTracer
     val serviceFactory = ClientBuilder()
       .hosts(Seq(serverAddr))
-      .codec(ThriftClientFramedCodec())
+      .codec(ThriftClientFramedCodec().protocolFactory(protocolFactory))
       .hostConnectionLimit(2)
       .tracerFactory((_) => clientTracer)
       .buildFactory()
@@ -63,7 +63,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
       server.close(20.milliseconds)
     }
 
-    val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
+    val client = new B.ServiceToClient(service, protocolFactory)
 
     "have unique trace ids" in Time.withCurrentTimeFrozen { tc =>
       serverTracer must beEmpty
@@ -152,22 +152,22 @@ class EndToEndSpec extends SpecificationWithJUnit {
       }
 
       "handle wrong interface" in {
-        val client = new F.ServiceToClient(service, new TBinaryProtocol.Factory())
+        val client = new F.ServiceToClient(service, protocolFactory)
         client.another_method(123)() must throwA(
           new TApplicationException("Invalid method name: 'another_method'"))
       }
     }
-    
+
     "handle multiple connections" in {
       val s1 = serviceFactory()()
       val s2 = serviceFactory()()
-      
-      val c1 = new B.ServiceToClient(s1, new TBinaryProtocol.Factory())
-      val c2 = new B.ServiceToClient(s2, new TBinaryProtocol.Factory())
-      
+
+      val c1 = new B.ServiceToClient(s1, protocolFactory)
+      val c2 = new B.ServiceToClient(s2, protocolFactory)
+
       val f1 = c1.multiply(10, 10)
       val f2 = c2.multiply(10, 10)
-      
+
       f1() must be_==(f2())
     }
   }
@@ -189,7 +189,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory))
+          pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory, protocolFactory))
           pipeline
         }
       })
@@ -202,8 +202,8 @@ class EndToEndSpec extends SpecificationWithJUnit {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("encoder", new ThriftClientEncoder)
-          pipeline.addLast("decoder", new ThriftClientDecoder)
+          pipeline.addLast("encoder", new ThriftClientEncoder(protocolFactory))
+          pipeline.addLast("decoder", new ThriftClientDecoder(protocolFactory))
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[ThriftReply[Silly.bleep_result]])
@@ -245,7 +245,6 @@ class EndToEndSpec extends SpecificationWithJUnit {
       val serverAddr       = RandomSocket()
       val serverSocket     = new TServerSocket(serverAddr.getPort)
       val transportFactory = new TFramedTransport.Factory
-      val protocolFactory  = new TBinaryProtocol.Factory(true, true)
 
       val processor = new Silly.Processor(new Silly.Iface {
         def bleep(bloop: String): String =
@@ -266,8 +265,8 @@ class EndToEndSpec extends SpecificationWithJUnit {
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("encoder", new ThriftClientEncoder)
-          pipeline.addLast("decoder", new ThriftClientDecoder)
+          pipeline.addLast("encoder", new ThriftClientEncoder(protocolFactory))
+          pipeline.addLast("decoder", new ThriftClientDecoder(protocolFactory))
           pipeline.addLast("handler", new SimpleChannelUpstreamHandler {
             override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
               callResults() = Return(e.getMessage.asInstanceOf[ThriftReply[Silly.bleep_result]])
@@ -320,7 +319,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           val processorFactory = new TProcessorFactory(processor)
           val pipeline = Channels.pipeline()
           pipeline.addLast("framer", new ThriftFrameCodec)
-          pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory))
+          pipeline.addLast("processor", new ThriftProcessorHandler(processorFactory, protocolFactory))
           pipeline
         }
       })
@@ -328,7 +327,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
       val (transport, client) = {
         val socket = new TSocket(serverAddress.getHostName, serverAddress.getPort, 1000/*ms*/)
         val transport = new TFramedTransport(socket)
-        val protocol = new TBinaryProtocol(transport)
+        val protocol = protocolFactory.getProtocol(transport)
         (transport, new Silly.Client(protocol))
       }
 
@@ -342,4 +341,16 @@ class EndToEndSpec extends SpecificationWithJUnit {
       serverBootstrap.getFactory.releaseExternalResources()
     }
   }
+}
+
+class EndToEndBinarySpec extends SpecificationWithJUnit with EndToEndSpec {
+  val protocolFactory = new TBinaryProtocol.Factory()
+}
+
+class EndToEndCompactSpec extends SpecificationWithJUnit with EndToEndSpec {
+  val protocolFactory = new TCompactProtocol.Factory()
+}
+
+class EndToEndJsonSpec extends SpecificationWithJUnit with EndToEndSpec {
+  val protocolFactory = new TJSONProtocol.Factory()
 }
