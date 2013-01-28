@@ -325,7 +325,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // cache pool cluster should be updated
         expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           updateCachePoolConfigData(10)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
 
         /***** remove 2 servers from the zk serverset ******/
         // cache pool should remain the same size at this moment
@@ -338,7 +338,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // cache pool should be updated
         expectPoolStatus(myPool, currentSize = 10, expectedPoolSize = 8, expectedAdd = 0, expectedRem = 2) {
           updateCachePoolConfigData(8)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
 
         /***** remove 2 more then add 3 ******/
         // cache pool should remain the same size at this moment
@@ -352,7 +352,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // cache pool should be updated
         expectPoolStatus(myPool, currentSize = 8, expectedPoolSize = 9, expectedAdd = 3, expectedRem = 2) {
           updateCachePoolConfigData(9)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
       }
 
       "zk failures test" in {
@@ -378,7 +378,7 @@ class ClientSpec extends SpecificationWithJUnit {
         expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           addMoreServers(5)
           updateCachePoolConfigData(10)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
       }
 
       "using backup pools" in {
@@ -395,7 +395,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // give it some time we should see the cache pool cluster pick up underlying pool
         expectPoolStatus(myPool, currentSize = 2, expectedPoolSize = 5, expectedAdd = 5, expectedRem = 2) {
           zookeeperServer.startNetwork
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
 
         /***** start 5 more memcached servers and join the cluster ******/
         // update config data node, which triggers the pool update
@@ -403,7 +403,7 @@ class ClientSpec extends SpecificationWithJUnit {
         expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           addMoreServers(5)
           updateCachePoolConfigData(10)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
       }
     }
 
@@ -477,7 +477,7 @@ class ClientSpec extends SpecificationWithJUnit {
         expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
           additionalServers = addMoreServers(4)
           updateCachePoolConfigData(9)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
         // Unlike CachePoolCluster, our KetamaClient doesn't have api to expose its internal state and
         // it shouldn't, hence here I don't really have a better way to wait for the client's key ring
         // redistribution to finish other than sleep for a while.
@@ -489,7 +489,7 @@ class ClientSpec extends SpecificationWithJUnit {
           additionalServers(0).update(Status.DEAD)
           additionalServers(1).update(Status.DEAD)
           updateCachePoolConfigData(7)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
         trackCacheShards.size mustBe 7
 
@@ -499,7 +499,7 @@ class ClientSpec extends SpecificationWithJUnit {
           additionalServers(3).update(Status.DEAD)
           addMoreServers(4)
           updateCachePoolConfigData(9)
-        }.get(2.seconds)() mustNot throwA[Exception]
+        }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
         trackCacheShards.size mustBe 9
       }
