@@ -10,6 +10,25 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 
 trait SortedSets { self: BaseClient =>
+  private[this] def parseMBulkReply(
+    withScores: JBoolean
+  ): PartialFunction[Reply, Future[Either[ZRangeResults, Seq[ChannelBuffer]]]] = {
+    val parse: PartialFunction[Reply, Either[ZRangeResults, Seq[ChannelBuffer]]] = {
+      case MBulkReply(messages) => withScoresHelper(withScores)(messages)
+      case EmptyMBulkReply() => withScoresHelper(withScores)(Nil)
+    }
+    parse andThen Future.value
+  }
+
+  private[this] def withScoresHelper(
+    withScores: JBoolean
+  )(messages: List[Reply]): Either[ZRangeResults, Seq[ChannelBuffer]] = {
+    val chanBufs = ReplyFormat.toChannelBuffers(messages)
+    if (withScores)
+      Left(ZRangeResults(returnPairs(chanBufs)))
+    else
+      Right(chanBufs)
+  }
 
   /**
    * Adds member, score pair to sorted set
@@ -54,14 +73,10 @@ trait SortedSets { self: BaseClient =>
     max: ZInterval,
     withScores: JBoolean,
     limit: Option[Limit]
-  ): Future[ZRangeResults] =
+  ): Future[Either[ZRangeResults, Seq[ChannelBuffer]]] =
     doRequest(
-      ZRangeByScore(key, min, max, (if (withScores) WithScores.asArg else None), limit)
-    ) {
-      case MBulkReply(messages) => Future.value(
-        ZRangeResults(returnPairs(ReplyFormat.toChannelBuffers(messages))))
-      case EmptyMBulkReply()    => Future.value(ZRangeResults(Seq()))
-    }
+      ZRangeByScore(key, min, max, WithScores.option(withScores), limit)
+    ) (parseMBulkReply(withScores))
 
   /**
    * Removes specified member(s) from sorted set at key
@@ -79,11 +94,15 @@ trait SortedSets { self: BaseClient =>
    * @param key, start, stop
    * @return List of elements in specified range
    */
-  def zRevRange(key: ChannelBuffer, start: JLong, stop: JLong): Future[Seq[ChannelBuffer]] =
-    doRequest(ZRevRange(key, start, stop)) {
-      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
-    }
+  def zRevRange(
+    key: ChannelBuffer,
+    start: JLong,
+    stop: JLong,
+    withScores: JBoolean
+  ): Future[Either[ZRangeResults, Seq[ChannelBuffer]]] =
+    doRequest(ZRevRange(key, start, stop, WithScores.option(withScores)))(
+      parseMBulkReply(withScores)
+    )
 
   /**
    * Returns elements in sorted set at key with a score between max and min
@@ -98,14 +117,10 @@ trait SortedSets { self: BaseClient =>
     min: ZInterval,
     withScores: JBoolean,
     limit: Option[Limit]
-  ): Future[ZRangeResults] =
-    doRequest(
-      ZRevRangeByScore(key, max, min, (if (withScores) WithScores.asArg else None), limit)
-    ) {
-      case MBulkReply(messages) => Future.value(
-        ZRangeResults(returnPairs(ReplyFormat.toChannelBuffers(messages))))
-      case EmptyMBulkReply()    => Future.value(ZRangeResults(Seq()))
-    }
+  ): Future[Either[ZRangeResults, Seq[ChannelBuffer]]] =
+    doRequest(ZRevRangeByScore(key, max, min, WithScores.option(withScores), limit))(
+      parseMBulkReply(withScores)
+    )
 
   /**
    * Gets score of member in sorted set
@@ -181,10 +196,14 @@ trait SortedSets { self: BaseClient =>
    * @param key, start, stop
    * @return ZRangeResults object containing item/score pairs
    */
-  def zRange(key: ChannelBuffer, start: JLong, stop: JLong): Future[Seq[ChannelBuffer]] =
-    doRequest(ZRange(key, start, stop)) {
-      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+  def zRange(
+    key: ChannelBuffer,
+    start: JLong,
+    stop: JLong,
+    withScores: JBoolean
+  ): Future[Either[ZRangeResults, Seq[ChannelBuffer]]] =
+    doRequest(ZRange(key, start, stop, WithScores.option(withScores))) {
+      parseMBulkReply(withScores)
     }
 
 }

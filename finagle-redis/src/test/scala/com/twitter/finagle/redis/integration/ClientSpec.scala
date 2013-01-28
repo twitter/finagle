@@ -14,6 +14,7 @@ import com.twitter.finagle.redis.util.CBToString
 import scala.collection.{Set => CollectionSet}
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.redis.protocol.Limit
 
 
 class ClientSpec extends SpecificationWithJUnit {
@@ -288,11 +289,12 @@ class ClientSpec extends SpecificationWithJUnit {
       "get the zRangeByScore" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        CBToString.fromTuplesWithDoubles(
-          client.zRangeByScore(foo, ZInterval(0), ZInterval(30), true,
-            Some(Limit(0, 5)))().asTuples) mustEqual Seq(("bar", 10), ("baz", 20))
-        client.zRangeByScore(foo, ZInterval(30), ZInterval(0), true,
-          Some(Limit(0, 5)))().asTuples mustEqual Seq()
+        for (left <- client.zRangeByScore(foo, ZInterval(0), ZInterval(30), true,
+          Some(Limit(0, 5)))().left)
+          CBToString.fromTuplesWithDoubles(left.asTuples) mustEqual (Seq(("bar", 10), ("baz", 20)))
+        for (left <- client.zRangeByScore(foo, ZInterval(30), ZInterval(0), true,
+          Some(Limit(0, 5)))().left)
+          left.asTuples mustEqual Seq()
       }
 
       "get cardinality and remove members" in {
@@ -305,20 +307,22 @@ class ClientSpec extends SpecificationWithJUnit {
       "get zRevRange" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        CBToString.fromList(
-          client.zRevRange(foo, 0, -1)().toList) mustEqual Seq("baz", "bar")
+        for (right <- client.zRevRange(foo, 0, -1, false)().right)
+          CBToString.fromList(right.toList) mustEqual Seq("baz", "bar")
       }
 
       "get zRevRangeByScore" in {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
-        CBToString.fromTuplesWithDoubles(
-          client.zRevRangeByScore(foo, ZInterval(10), ZInterval(0), true,
-            Some(Limit(0, 1)))().asTuples) mustEqual Seq(("bar", 10))
-        client.zRevRangeByScore(foo, ZInterval(0), ZInterval(10), true,
-            Some(Limit(0, 1)))().asTuples mustEqual Seq()
-        client.zRevRangeByScore(foo, ZInterval(0), ZInterval(0), true,
-          Some(Limit(0, 1)))().asTuples mustEqual Seq()
+        for (left <- client.zRevRangeByScore(foo, ZInterval(10), ZInterval(0), true,
+            Some(Limit(0, 1)))().left)
+          CBToString.fromTuplesWithDoubles(left.asTuples) mustEqual Seq(("bar", 10))
+        for (left <- client.zRevRangeByScore(foo, ZInterval(0), ZInterval(10), true,
+            Some(Limit(0, 1)))().left)
+          left.asTuples mustEqual Seq()
+        for (left <- client.zRevRangeByScore(foo, ZInterval(0), ZInterval(0), true,
+          Some(Limit(0, 1)))().left)
+          left.asTuples mustEqual Seq()
       }
 
       "add members and zIncr, then zIncr a nonmember" in {
@@ -331,11 +335,12 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zAdd(foo, 10, bar)() mustEqual 1
         client.zAdd(foo, 20, baz)() mustEqual 1
         client.zAdd(foo, 30, boo)() mustEqual 1
-        CBToString.fromList(client.zRange(foo, 0, -1)().toList) mustEqual List("bar", "baz", "boo")
-        CBToString.fromList(
-          client.zRange(foo, 2, 3)().toList) mustEqual List("boo")
-        CBToString.fromList(
-          client.zRange(foo, -2, -1)().toList) mustEqual List("baz", "boo")
+        for (right <- client.zRange(foo, 0, -1, false)().right)
+          CBToString.fromList(right.toList) mustEqual List("bar", "baz", "boo")
+        for (right <- client.zRange(foo, 2, 3, false)().right)
+          CBToString.fromList(right.toList) mustEqual List("boo")
+        for (right <- client.zRange(foo, -2, -1, false)().right)
+          CBToString.fromList(right.toList) mustEqual List("baz", "boo")
       }
 
       "get zRank" in {
@@ -351,8 +356,8 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zAdd(foo, 20, baz)() mustEqual 1
         client.zAdd(foo, 30, boo)() mustEqual 1
         client.zRemRangeByRank(foo, 0, 1)() mustEqual 2
-        CBToString.fromList(
-          client.zRange(foo, 0, -1)().toList) mustEqual List("boo")
+        for (right <- client.zRange(foo, 0, -1, false)().right)
+          CBToString.fromList(right.toList) mustEqual List("boo")
       }
 
       "get zRemRangeByScore" in {
@@ -360,8 +365,8 @@ class ClientSpec extends SpecificationWithJUnit {
         client.zAdd(foo, 20, baz)() mustEqual 1
         client.zAdd(foo, 30, boo)() mustEqual 1
         client.zRemRangeByScore(foo, ZInterval(10), ZInterval(20))() mustEqual 2
-        CBToString.fromList(
-          client.zRange(foo, 0, -1)().toList) mustEqual List("boo")
+        for (right <- client.zRange(foo, 0, -1, false)().right)
+          CBToString.fromList(right.toList) mustEqual List("boo")
       }
 
       "get zRevRank" in {
