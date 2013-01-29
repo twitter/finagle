@@ -15,6 +15,7 @@ Finagle and its dependencies are published to maven central with crosspath versi
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
   - <a href="#Simple HTTP Client">Simple HTTP Client</a>
+  - <a href="#HTTP Client To A Standard Web Server">HTTP Client To A Standard Web Server</a>
   - <a href="#Simple Client and Server for Thrift">Simple Client and Server for Thrift</a>
 * <a href="#Finagle Overview">Finagle Overview</a>
   - <a href="#Client Features">Client Features</a>
@@ -173,6 +174,40 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 **Note:** Although the example shows building the client and execution of the built client on the same thread, you should build your clients only once and execute them separately. There is no requirement to maintain a 1:1 relationship between building a client and executing a client.
 
 [Top](#Top)
+
+<a name="HTTP Client To A Standard Web Server"></a>
+
+### HTTP Client To A Standard Web Server
+
+If you create a request using HttpVersion.HTTP_1_1, a validating server will require a Hosts header. We could fix this by setting the Host header as in
+
+    httpRequest.setHeader("Host", "someHostName")
+
+More concisely, you can use the RequestBuilder object, shown below. In the following example, we use a Jetty server "someJettyServer:80" which happens to come with a small test file "/d.txt":
+
+    import org.jboss.netty.handler.codec.http.HttpRequest
+    import org.jboss.netty.handler.codec.http.HttpResponse
+    
+    import com.twitter.finagle.Service
+    import com.twitter.finagle.builder.ClientBuilder
+    import com.twitter.finagle.http.Http
+    import com.twitter.finagle.http.RequestBuilder
+    import com.twitter.util.Future
+    
+    object ClientToValidatingServer {
+      def main(args: Array[String]) {
+        val hostNamePort = "someJettyServer:80"
+        val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
+          .codec(Http())
+          .hosts(hostNamePort)
+          .hostConnectionLimit(1)
+          .build()
+    
+        val httpRequest = RequestBuilder().url("http://" + hostNamePort + "/d.txt").buildGet
+        val responseFuture: Future[HttpResponse] = client(httpRequest)
+        responseFuture onSuccess { response => println("Received response: " + response) }
+      }
+    }
 
 <a name="Simple Client and Server for Thrift"></a>
 
