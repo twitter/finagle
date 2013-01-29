@@ -287,7 +287,7 @@ class ClientSpec extends SpecificationWithJUnit {
                 .hosts(addr.get)
                 .codec(new Memcached)
                 .hostConnectionLimit(1)
-                .tracerFactory(ConsoleTracer.factory)
+                .tracer(ConsoleTracer)
                 .build())
         }
 

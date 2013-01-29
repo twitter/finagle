@@ -5,15 +5,15 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{
-  ThriftClientFramedCodec, ThriftClientRequest, thrift}
+import com.twitter.finagle.thrift.{  ThriftClientFramedCodec, ThriftClientRequest, thrift}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{Disposable, SharedTimer, FinagleTimer}
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.util.{Base64StringEncoder, Timer, Time, Future}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.util.concurrent.TimeoutException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TIOStreamTransport
 import scala.collection.JavaConversions._
@@ -30,8 +30,8 @@ object RawZipkinTracer {
    */
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
-            statsReceiver: StatsReceiver = NullStatsReceiver): Tracer.Factory = {
-
+            statsReceiver: StatsReceiver = NullStatsReceiver
+  ): Tracer = synchronized {
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
       new RawZipkinTracer(
         scribeHost,
@@ -39,17 +39,24 @@ object RawZipkinTracer {
         statsReceiver.scope("zipkin")
       )
     })
-
-    h => {
-      tracer.acquire()
-      h.onClose {
-        tracer.close()
-      }
-      tracer
-    }
+    tracer
   }
+  
+  // Try to flush the tracers when we shut
+  // down. We give it 100ms.
+  Runtime.getRuntime().addShutdownHook(new Thread {
+    override def run() {
+      val tracers = RawZipkinTracer.synchronized(map.values.toSeq)
+      val joined = Future.join(tracers map(_.flush()))
+      try {
+        joined(100.milliseconds)
+      } catch {
+        case _: TimeoutException =>
+          System.err.println("Failed to flush all traces before quitting")
+      }
+    }
+  })
 }
-
 
 /**
  * Receives the Finagle generated traces and sends them off to Zipkin via scribe.
@@ -67,47 +74,23 @@ private[thrift] class RawZipkinTracer(
   private[this] val TraceCategory = "zipkin" // scribe category
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
-  private[this] var spanMap: DeadlineSpanMap = _
-  private[this] var refcount = 0
-  private[this] var transport: Service[ThriftClientRequest, Array[Byte]] = _
-  private[thrift] var client: scribe.FinagledClient = _
-  private[thrift] var timer: FinagleTimer = _
+  private[this] val spanMap: DeadlineSpanMap =
+    new DeadlineSpanMap(this, 120.seconds, statsReceiver, DefaultTimer.twitter)
 
-  protected def newClient(): scribe.FinagledClient = {
-    transport = ClientBuilder()
+  protected[thrift] val client = {
+    val transport = ClientBuilder()
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(5)
+      .daemon(true)
       .build()
 
     new scribe.FinagledClient(
       new TracelessFilter andThen transport,
       new TBinaryProtocol.Factory())
   }
-
-  def acquire() = synchronized {
-    refcount += 1
-    if (refcount == 1) {
-      timer = SharedTimer.acquire()
-      spanMap = new DeadlineSpanMap(this, 120.seconds, statsReceiver, timer.twitter)
-      client = newClient()
-    }
-  }
-
-  override def close(deadline: Time) = synchronized {
-    refcount -= 1
-    if (refcount == 0) {
-      if (transport != null) {
-        transport.close()
-        transport = null
-      }
-      client = null
-      spanMap = null
-      timer.dispose()
-    }
-    
-    Future.Done
-  }
+  
+  protected[thrift] def flush() = spanMap.flush()
 
   /**
    * Always sample the request.
@@ -137,15 +120,14 @@ private[thrift] class RawZipkinTracer(
   /**
    * Log the span data via Scribe.
    */
-  def logSpan(span: Span) {
+  def logSpan(span: Span): Future[Unit] =
     client.log(createLogEntries(span)) onSuccess {
       case ResultCode.Ok => statsReceiver.scope("log_span").counter("ok").incr()
       case ResultCode.TryLater => statsReceiver.scope("log_span").counter("try_later").incr()
       case _ => () /* ignore */
     } onFailure {
       case e => statsReceiver.scope("log_span").scope("error").counter("%s".format(e.toString)).incr()
-    }
-  }
+    } map(_ => ())
 
   /**
    * Mutate the Span with whatever new info we have.

@@ -50,25 +50,11 @@ object Annotation {
 }
 
 object Tracer {
-  type Factory = (CloseNotifier) => Tracer
-
-  def mkManaged(tracerFactory: Factory): Managed[Tracer] = new Managed[Tracer] {
-    @volatile var handler = { () => {} }
-    private[this] val notifier = new CloseNotifier {
-      def onClose(h: => Unit) = handler = { () => h }
-    }
-    def make() = new Disposable[Tracer] {
-      val underlying = tracerFactory(notifier)
-      def get = underlying
-      def dispose(deadline: Time) = {
-        handler()
-        Future.value(())
-      }
-    }
-  }
+  // Deprecated.
+  type Factory = () => Tracer
 }
 
-trait Tracer extends Closable {
+trait Tracer {
   def record(record: Record)
 
   /**
@@ -79,12 +65,10 @@ trait Tracer extends Closable {
    * None: i'm going to defer making a decision on this to the child service
    */
   def sampleTrace(traceId: TraceId): Option[Boolean]
-  
-  def close(deadline: Time) = Future.Done
 }
 
 class NullTracer extends Tracer {
-  val factory: Tracer.Factory = (_) => this
+  val factory: Tracer.Factory = () => this
   def record(record: Record) {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
@@ -106,7 +90,7 @@ class BufferingTracer extends Tracer
 }
 
 object ConsoleTracer extends Tracer {
-  val factory: Tracer.Factory = (_) => this
+  val factory: Tracer.Factory = () => this
 
   def record(record: Record) {
     println(record)

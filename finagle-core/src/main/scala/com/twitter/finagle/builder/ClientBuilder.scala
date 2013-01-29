@@ -168,7 +168,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _socksProxy                : Option[SocketAddress]          = None,
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
-  private val _tracerFactory             : Managed[Tracer]               = Managed.const(NullTracer),
+  private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
   private val _failFast                  : Boolean                       = true,
   private val _timeoutConfig             : ClientTimeoutConfig           = new ClientTimeoutConfig,
@@ -210,7 +210,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val tls                       = _tls
   val socksProxy                = _socksProxy
   val failureAccrual            = _failureAccrual
-  val tracerFactory             = _tracerFactory
+  val tracer                    = _tracer
   val failFast                  = _failFast
   val daemon                    = _daemon
 
@@ -242,7 +242,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "tls"                       -> _tls,
     "socksProxy"                -> _socksProxy,
     "failureAccrual"            -> _failureAccrual,
-    "tracerFactory"             -> Some(_tracerFactory),
+    "tracer"                    -> Some(_tracer),
     "failFast"                  -> failFast,
     "daemon"                    -> daemon
   )
@@ -560,8 +560,21 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
    */
+  @deprecated("Use tracer() instead", "7.0.0")
   def tracerFactory(factory: Tracer.Factory): This =
-    withConfig(_.copy(_tracerFactory = Tracer.mkManaged(factory)))
+    tracer(factory())
+
+  // API compatibility method
+  @deprecated("Use tracer() instead", "7.0.0")
+  def tracerFactory(t: Tracer): This =
+    tracer(t)
+
+  /**
+   * Specifies a tracer that receives trace events.
+   * See [[com.twitter.finagle.tracing]] for details.
+   */
+  def tracer(t: Tracer): This =
+    withConfig(_.copy(_tracer = t))
 
   def monitor(mFactory: String => Monitor): This =
     withConfig(_.copy(_monitor = Some(mFactory)))
@@ -629,7 +642,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ServiceFactory[Req, Rep] = {
     val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name))
     val finagleTimer = SharedTimer.acquire()
-    val disposableTracer = config.tracerFactory.make()
 
     // We configure a client based on the parameters of the client
     // builder. TODO: this should be moved to its own toplevel class
@@ -639,7 +651,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
-    val tracer = disposableTracer.get
+    val tracer = config.tracer
     val timer = finagleTimer.twitter
     val nettyTimer = finagleTimer.netty
     val monitor = config.monitor map { newMonitor => newMonitor(config.name) } getOrElse NullMonitor
@@ -741,7 +753,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
         super.close(deadline) ensure {
           finagleTimer.dispose()
-          disposableTracer.dispose()
           if (!config.daemon) ExitGuard.unguard()
         }
       }

@@ -40,7 +40,7 @@ To add tracing to your Finagle service, just add one line to the
     .codec(ThriftServerFramedCodec())
     .bindTo(serverAddr)
     .name("servicename")
-    .tracerFactory(ZipkinTracer())
+    .tracer(ZipkinTracer())
     .build()
 ```
 

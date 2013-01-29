@@ -38,22 +38,6 @@ class ClientBuilderSpec extends SpecificationWithJUnit with IntegrationBase with
       requestFuture.poll must beSome(Return("321"))
     }
 
-    "build client that disposes of resources used" in {
-      val tracer = mock[Tracer]
-      var called = false
-
-      val client = new MockChannel().clientBuilder
-        .tracerFactory { h =>
-          h.onClose { called = true }
-          tracer
-        }
-        .build()
-
-      called must beFalse
-      client.close()
-      called must beTrue
-    }
-
 /* TODO: Stopwatches eliminated mocking.
     "measure codec connection preparation latency" in {
       Time.withCurrentTimeFrozen { timeControl =>

@@ -97,7 +97,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
   private val _channelFactory:                  ServerChannelFactory                     = Netty3Listener.channelFactory,
   private val _maxConcurrentRequests:           Option[Int]                              = None,
   private val _timeoutConfig:                   TimeoutConfig                            = TimeoutConfig(),
-  private val _tracerFactory:                   Managed[Tracer]                          = Managed.const(NullTracer),
+  private val _tracer:                          Tracer                                   = NullTracer,
   private val _openConnectionsThresholds:       Option[OpenConnectionsThresholds]        = None,
   private val _cancelOnHangup:                  Boolean                                  = true,
   private val _logChannelActivity:              Boolean                                  = false,
@@ -128,7 +128,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
   val readTimeout                     = _timeoutConfig.readTimeout
   val writeCompletionTimeout          = _timeoutConfig.writeCompletionTimeout
   val timeoutConfig                   = _timeoutConfig
-  val tracerFactory                   = _tracerFactory
+  val tracer                          = _tracer
   val openConnectionsThresholds       = _openConnectionsThresholds
   val cancelOnHangup                  = _cancelOnHangup
   val logChannelActivity              = _logChannelActivity
@@ -152,7 +152,7 @@ private[builder] final case class ServerConfig[Req, Rep, HasCodec, HasBindTo, Ha
     "requestTimeout"                  -> _timeoutConfig.requestTimeout,
     "readTimeout"                     -> _timeoutConfig.readTimeout,
     "writeCompletionTimeout"          -> _timeoutConfig.writeCompletionTimeout,
-    "tracerFactory"                   -> Some(_tracerFactory),
+    "tracer"                          -> Some(_tracer),
     "openConnectionsThresholds"       -> Some(_openConnectionsThresholds),
     "cancelOnHangup"                  -> Some(_cancelOnHangup),
     "logChannelActivity"              -> Some(_logChannelActivity),
@@ -322,8 +322,17 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def monitor(mFactory: (String, SocketAddress) => Monitor): This =
     withConfig(_.copy(_monitor = Some(mFactory)))
 
+  @deprecated("Use tracer() instead", "7.0.0")
   def tracerFactory(factory: Tracer.Factory): This =
-    withConfig(_.copy(_tracerFactory = Tracer.mkManaged(factory)))
+    tracer(factory())
+
+  // API compatibility method
+  @deprecated("Use tracer() instead", "7.0.0")
+  def tracerFactory(t: Tracer): This =
+    tracer(t)
+
+  def tracer(t: Tracer): This =
+    withConfig(_.copy(_tracer = t))
 
   /**
    * Cancel pending futures whenever the the connection is shut down.
@@ -398,12 +407,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       serviceName = config.name, boundAddress = config.bindTo)
     val codec = config.codecFactory(codecConfig)
     val finagleTimer = SharedTimer.acquire()
-    val managedTracer = config.tracerFactory.make()
 
     val statsReceiver = config.statsReceiver map(_.scope(config.name)) getOrElse NullStatsReceiver
     val logger = config.logger getOrElse Logger.getLogger(config.name)
     val monitor = config.monitor map(_(config.name, config.bindTo)) getOrElse NullMonitor
-    val tracer = managedTracer.get
+    val tracer = config.tracer
     val timer = finagleTimer.twitter
     val nettyTimer = finagleTimer.netty
     
@@ -465,7 +473,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
       listeningServer.close(deadline) ensure {
         finagleTimer.dispose()
-        managedTracer.dispose()
         if (!config.daemon) ExitGuard.unguard()
       }
     }

@@ -1,9 +1,10 @@
 package com.twitter.finagle.zipkin.thrift
 
 import collection.mutable.HashMap
-import com.twitter.finagle.tracing.TraceId
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Timer, Duration}
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.util.{Time, Timer, Duration, Future}
 
 /**
  * Takes care of storing the spans in a thread safe fashion. If a span
@@ -49,5 +50,18 @@ class DeadlineSpanMap(tracer: RawZipkinTracer,
   def remove(traceId: TraceId): Option[Span] = synchronized {
     spanMap.remove(traceId)
   }
-
+  
+  /**
+   * Flush all currently tracked spans.
+   *
+   * @return Future indicating completion.
+   */
+  def flush(): Future[Unit] = synchronized {
+    val logged = for (id <- spanMap.keys.toSeq; raw <- remove(id)) yield {
+      val span = raw.copy(annotations = 
+        ZipkinAnnotation(Time.now, "finagle.flush", raw.endpoint, None) +: raw.annotations)
+      tracer.logSpan(span)
+    }
+    Future.join(logged)
+  }
 }

@@ -21,21 +21,15 @@ object ZipkinTracer {
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver,
-            sampleRate: Float = Sampler.DefaultSampleRate): Tracer.Factory = {
-
+            sampleRate: Float = Sampler.DefaultSampleRate
+  ): Tracer.Factory = synchronized {
     val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
       val raw = new RawZipkinTracer(
         scribeHost, scribePort, statsReceiver.scope("zipkin"))
       new ZipkinTracer(raw, sampleRate)
     })
-
-    h => {
-      tracer.acquire()
-      h.onClose {
-        tracer.close()
-      }
-      tracer
-    }
+  
+    () => tracer
   }
 
   /**
@@ -54,8 +48,6 @@ class ZipkinTracer(underlyingTracer: RawZipkinTracer, initialSampleRate: Float) 
   private[this] val sampler = new Sampler
   setSampleRate(initialSampleRate)
 
-  def acquire() = underlyingTracer.acquire()
-
   def sampleTrace(traceId: TraceId) = sampler.sampleTrace(traceId)
 
   def setSampleRate(sampleRate: Float) = sampler.setSampleRate(sampleRate)
@@ -65,6 +57,4 @@ class ZipkinTracer(underlyingTracer: RawZipkinTracer, initialSampleRate: Float) 
       underlyingTracer.record(record)
     }
   }
-
-  override def close(deadline: Time) = underlyingTracer.close(deadline)
 }

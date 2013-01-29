@@ -102,7 +102,7 @@ object Appserver {
       .codec(Http())
       .reportTo(new OstrichStatsReceiver)
       .bindTo(new InetSocketAddress(basePort))
-      .tracerFactory(ConsoleTracer.factory)
+      .tracer(ConsoleTracer)
       .build(service)
   }
 }

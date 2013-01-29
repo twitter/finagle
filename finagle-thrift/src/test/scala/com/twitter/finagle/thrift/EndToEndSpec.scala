@@ -41,7 +41,7 @@ trait EndToEndSpec extends SpecificationWithJUnit {
       .codec(ThriftServerFramedCodec(protocolFactory))
       .bindTo(serverAddr)
       .name("ThriftServer")
-      .tracerFactory((_) => serverTracer)
+      .tracer(serverTracer)
       .build(new B.Service(processor, protocolFactory))
 
     val clientTracer = new BufferingTracer
@@ -49,7 +49,7 @@ trait EndToEndSpec extends SpecificationWithJUnit {
       .hosts(Seq(serverAddr))
       .codec(ThriftClientFramedCodec().protocolFactory(protocolFactory))
       .hostConnectionLimit(2)
-      .tracerFactory((_) => clientTracer)
+      .tracer(clientTracer)
       .buildFactory()
     val service = serviceFactory.toService
 
