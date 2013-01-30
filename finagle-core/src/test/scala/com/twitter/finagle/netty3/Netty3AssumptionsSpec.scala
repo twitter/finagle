@@ -11,6 +11,9 @@ import org.specs.SpecificationWithJUnit
 
 import Conversions._
 
+import com.twitter.util.{CountDownLatch, RandomSocket}
+import com.twitter.conversions.time._
+
 /**
  * Here we test a number of assumptions we are making of Netty. This
  * is all stuff that's verified by examination of the Netty codebase,

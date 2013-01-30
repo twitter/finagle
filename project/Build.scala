@@ -16,14 +16,23 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := "6.0.6",
     organization := "com.twitter",
-    scalaVersion := "2.9.2",
+    crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
-      "org.scala-tools.testing" % "specs_2.9.1" % "1.6.9" % "test",
+      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
+        case "2.9.2" => "2.9.1"
+        case "2.10.0" => "2.10"
+        case x => x
+      },
       "junit" % "junit" % "4.8.1" % "test",
       "org.mockito" % "mockito-all" % "1.8.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
     resolvers += "Coda Hale's Repository" at "http://repo.codahale.com/",
+    
+    testOptions in Test <<= scalaVersion map {
+      case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
+      case _ => Seq()
+    },
 
     ivyXML :=
       <dependencies>
