@@ -131,9 +131,9 @@ private[builder] final case class ClientHostConfig(
 
 private[builder] final case class ClientTimeoutConfig(
   private val _tcpConnectTimeout: Duration         = 10.milliseconds,
-  private val _connectTimeout   : Duration         = Duration.MaxValue,
-  private val _requestTimeout   : Duration         = Duration.MaxValue,
-  private val _timeout          : Duration         = Duration.MaxValue,
+  private val _connectTimeout   : Duration         = Duration.Top,
+  private val _requestTimeout   : Duration         = Duration.Top,
+  private val _timeout          : Duration         = Duration.Top,
   private val _readerIdleTimeout: Option[Duration] = None,
   private val _writerIdleTimeout: Option[Duration] = None
 ) {
@@ -671,8 +671,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
       socksProxy = config.socksProxy,
       statsReceiver = statsReceiver,
-      channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.MaxValue,
-      channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.MaxValue,
+      channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.Top,
+      channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.Top,
       channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.info) },
       channelOptions = {
         val o = new mutable.MapBuilder[String, Object, Map[String, Object]](Map())
@@ -722,8 +722,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val client = DefaultClient[Req, Rep](
       bind = bind,
       pool = pool,
-      maxIdletime = config.hostConnectionMaxIdleTime getOrElse Duration.MaxValue,
-      maxLifetime = config.hostConnectionMaxLifeTime getOrElse Duration.MaxValue,
+      maxIdletime = config.hostConnectionMaxIdleTime getOrElse Duration.Top,
+      maxLifetime = config.hostConnectionMaxLifeTime getOrElse Duration.Top,
       requestTimeout = config.requestTimeout,
       failureAccrual = {
         val wrapper = config.failureAccrual map { newFailureAccrual =>
@@ -834,7 +834,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     } getOrElse(identityFilter)
 
   private def globalTimeoutFilter(timer: Timer) =
-    if (config.timeout < Duration.MaxValue) {
+    if (config.timeout < Duration.Top) {
       val exception = new GlobalRequestTimeoutException(config.timeout)
       new TimeoutFilter[Req, Rep](config.timeout, exception, timer)
     } else {

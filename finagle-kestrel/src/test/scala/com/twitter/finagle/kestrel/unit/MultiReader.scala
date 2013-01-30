@@ -6,17 +6,18 @@ import _root_.java.util.concurrent._
 import com.google.common.cache.{LoadingCache, CacheLoader, CacheBuilder}
 import com.twitter.concurrent.{Spool, Broker}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.builder.StaticCluster
+import com.twitter.finagle.builder.{IncompleteSpecification, ClientConfig, ClientBuilder, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Future, Return, Promise, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import scala.collection.mutable.{ArrayBuffer, Set => MSet}
-import com.twitter.finagle.builder.{IncompleteSpecification, ClientConfig, ClientBuilder, Cluster}
-import com.twitter.finagle.service.Backoff
 
 class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
   noDetailedDiffs()
@@ -33,10 +34,11 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
   "MultiReader" should {
     "old-style, static ReadHandle cluster" in {
       val N = 3
-      val handles = 0 until N map { _ => spy(new MockHandle) }
+      val handles = (0 until N).toSeq map { _ => spy(new MockHandle) }
+      val cluster: Cluster[ReadHandle] = new StaticCluster[ReadHandle](handles)
 
       "always grab the first available message" in {
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
 
         val messages = new ArrayBuffer[ReadMessage]
         handle.messages foreach { messages += _ }
@@ -62,7 +64,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
           m
         }
 
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
         (handle.messages??) must be_==(ms(0))
         (handle.messages??) must be_==(ms(2))
         (handle.messages??) must be_==(ms(1))
@@ -70,13 +72,13 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
 
       "propagate closes" in {
         handles foreach { h => there was no(h).close() }
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
         handle.close()
         handles foreach { h => there was one(h).close() }
       }
 
       "propagate errors when everything's errored out" in {
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
         val e = (handle.error?)
         handles foreach { h =>
           e.isDefined must beFalse

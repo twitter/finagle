@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.builder.StaticCluster
 import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Future, Time, Stopwatch}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -25,7 +25,8 @@ object Benchmark {
     0 until loads.size foreach { i => loads(i) = 0 }
   }
 
-  def bench(factory: ServiceFactory[_, _]) = Time.measure {
+  def bench(factory: ServiceFactory[_, _]) = {
+    val elapsed = Stopwatch.start()
     val outstanding = new Array[Service[_, _]](W)
     0 until N foreach { i =>
       val j = i % W
@@ -33,6 +34,7 @@ object Benchmark {
       if (outstanding(j) ne null) outstanding(j).close()
       outstanding(j) = factory()()
     }
+    elapsed()
   }
 
   def go(factory: ServiceFactory[_, _], name: String) = {

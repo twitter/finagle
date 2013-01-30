@@ -56,14 +56,14 @@ object DefaultClient {
 case class DefaultClient[Req, Rep](
   bind: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep],
   pool: StatsReceiver => Transformer[Req, Rep] = DefaultPool(),
-  maxIdletime: Duration = Duration.MaxValue,
-  maxLifetime: Duration = Duration.MaxValue,
-  requestTimeout: Duration = Duration.MaxValue,
+  maxIdletime: Duration = Duration.Top,
+  maxLifetime: Duration = Duration.Top,
+  requestTimeout: Duration = Duration.Top,
   failFast: Boolean = true,
   failureAccrual: Transformer[Req, Rep] = { factory: ServiceFactory[Req, Rep] =>
     DefaultClient.defaultFailureAccrual andThen factory
   },
-  serviceTimeout: Duration = Duration.MaxValue,
+  serviceTimeout: Duration = Duration.Top,
   timer: Timer = DefaultTimer.twitter,
   statsReceiver: StatsReceiver = DefaultStatsReceiver,
   tracer: Tracer  = DefaultTracer,
@@ -79,8 +79,8 @@ case class DefaultClient[Req, Rep](
       })
 
     val lifetimeLimited: Transformer[Req, Rep] = {
-      val idle = if (maxIdletime < Duration.MaxValue) Some(maxIdletime) else None
-      val life = if (maxLifetime < Duration.MaxValue) Some(maxLifetime) else None
+      val idle = if (maxIdletime < Duration.Top) Some(maxIdletime) else None
+      val life = if (maxLifetime < Duration.Top) Some(maxLifetime) else None
   
       if (!idle.isDefined && !life.isDefined) identity else {
         factory => factory map { service =>
@@ -93,7 +93,7 @@ case class DefaultClient[Req, Rep](
     }
 
     val timeBounded: Transformer[Req, Rep] = {
-      if (requestTimeout == Duration.MaxValue) identity else {
+      if (requestTimeout == Duration.Top) identity else {
         val exception = new IndividualRequestTimeoutException(requestTimeout)
         factory => new TimeoutFilter(requestTimeout, exception, timer) andThen factory
       }
@@ -128,7 +128,7 @@ case class DefaultClient[Req, Rep](
   private val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
 
   val timeLimited: Transformer[Req, Rep] = factory =>
-    if (serviceTimeout == Duration.MaxValue) factory else {
+    if (serviceTimeout == Duration.Top) factory else {
       val exception = new ServiceTimeoutException(serviceTimeout)
       new TimeoutFactory(factory, serviceTimeout, exception, timer)
     }

@@ -12,7 +12,7 @@ trait Disposable[+T] {
    * Dispose of a resource by deadline given.
    */
   def dispose(deadline: Time): Future[Unit]
-  final def dispose(): Future[Unit] = dispose(Time.epoch + Duration.forever)
+  final def dispose(): Future[Unit] = dispose(Time.Top)
 }
 
 object Disposable {

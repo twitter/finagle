@@ -23,7 +23,7 @@ class MaskCancelFilterSpec extends SpecificationWithJUnit with Mockito {
 
     "mask interrupts" in {
       p.interrupted must beNone
-      f.cancel()
+      f.raise(new Exception)
       p.interrupted must beNone
     }
 

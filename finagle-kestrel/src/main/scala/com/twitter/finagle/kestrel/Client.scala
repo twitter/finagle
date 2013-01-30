@@ -318,8 +318,8 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     val messages = new Broker[ReadMessage]  // todo: buffer?
     val close = new Broker[Unit]
 
-    val open = Open(queueName, Some(Duration.MaxValue))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
+    val open = Open(queueName, Some(Duration.Top))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
     val abort = Abort(queueName)
 
     def recv(service: Service[Command, Response], command: GetCommand) {
@@ -349,7 +349,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
 
         close.recv { _ =>
           service.close()
-          reply.cancel()
+          reply.raise(ReadClosedException)
           error ! ReadClosedException
         }
       )

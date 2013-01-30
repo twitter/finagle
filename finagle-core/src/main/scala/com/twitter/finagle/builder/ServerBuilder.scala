@@ -26,7 +26,7 @@ trait Server extends Closable {
    * period. close() will drain the current channels, waiting up to
    * ``timeout'', after which channels are forcibly closed.
    */
-  def close(timeout: Duration = Duration.MaxValue): Future[Unit] =
+  def close(timeout: Duration = Duration.Top): Future[Unit] =
     close(timeout.fromNow)
 
   /**
@@ -434,10 +434,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         o.result()
       },
-      channelMaxIdleTime = config.hostConnectionMaxIdleTime getOrElse Duration.MaxValue,
-      channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.MaxValue,
-      channelReadTimeout = config.readTimeout getOrElse Duration.MaxValue,
-      channelWriteCompletionTimeout = config.writeCompletionTimeout getOrElse Duration.MaxValue,
+      channelMaxIdleTime = config.hostConnectionMaxIdleTime getOrElse Duration.Top,
+      channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.Top,
+      channelReadTimeout = config.readTimeout getOrElse Duration.Top,
+      channelWriteCompletionTimeout = config.writeCompletionTimeout getOrElse Duration.Top,
       tlsConfig = config.newEngine map(Netty3ListenerTLSConfig),
       timer = timer,
       nettyTimer = nettyTimer,
@@ -449,7 +449,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val server = DefaultServer[Req, Rep, Rep, Req](
       listener = listener,
       serviceTransport = codec.newServerDispatcher _,
-      requestTimeout = config.requestTimeout getOrElse Duration.MaxValue,
+      requestTimeout = config.requestTimeout getOrElse Duration.Top,
       maxConcurrentRequests = config.maxConcurrentRequests getOrElse Int.MaxValue,
       cancelOnHangup = config.cancelOnHangup,
       prepare = codec.prepareConnFactory(_),

@@ -52,7 +52,7 @@ object DefaultServer {
 case class DefaultServer[Req, Rep, In, Out](
   listener: Listener[In, Out],
   serviceTransport: (Transport[In, Out], Service[Req, Rep]) => Closable,
-  requestTimeout: Duration = Duration.MaxValue,
+  requestTimeout: Duration = Duration.Top,
   maxConcurrentRequests: Int = Int.MaxValue,
   cancelOnHangup: Boolean = true,
   prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] = (sf: ServiceFactory[Req, Rep]) => sf,
@@ -90,7 +90,7 @@ case class DefaultServer[Req, Rep, In, Out](
       else Filter.identity
 
     val timeoutFilter: SimpleFilter[Req, Rep] =
-      if (requestTimeout < Duration.MaxValue) {
+      if (requestTimeout < Duration.Top) {
         val exc = new IndividualRequestTimeoutException(requestTimeout)
         new TimeoutFilter(requestTimeout, exc, timer)
       } else Filter.identity

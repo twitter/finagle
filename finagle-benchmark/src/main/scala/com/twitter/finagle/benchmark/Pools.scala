@@ -39,7 +39,7 @@ class PoolsBenchmark extends SimpleBenchmark {
   }
 
   def timeCachingPool(nreps: Int) {
-    val p = new CachingPool(underlying, width*2, Duration.MaxValue, timer)
+    val p = new CachingPool(underlying, width*2, Duration.Top, timer)
     go(p, width, nreps)
   }
 

@@ -24,7 +24,7 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
       f.isDefined must beFalse
       there was no(m.connectFuture).cancel()
       m.connectFuture.isCancelled must beFalse
-      f.cancel()
+      f.raise(new Exception)
       there was one(m.connectFuture).cancel()
       m.connectFuture.isCancelled must beTrue
       f.isDefined must beTrue
@@ -53,7 +53,7 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
           }
       }
 
-      f.cancel()
+      f.raise(new Exception)
       val seCaptor = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       there were two(m.channelPipeline).sendDownstream(seCaptor.capture)
       seCaptor.getValue must beLike {
@@ -77,7 +77,7 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
       f1.isDefined must beFalse
       there was one(m.channelPipeline).sendDownstream(any)
 
-      f1.cancel()
+      f1.raise(new Exception)
       f1.isDefined must beTrue
       f1() must throwA[CancelledConnectionException]
     }

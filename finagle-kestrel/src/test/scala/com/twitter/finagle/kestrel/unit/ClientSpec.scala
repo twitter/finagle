@@ -123,8 +123,8 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     val factory = mock[ServiceFactory[Command, Response]]
     val service = mock[Service[Command, Response]]
     val client = new ConnectedClient(factory)
-    val open = Open(queueName, Some(Duration.MaxValue))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
+    val open = Open(queueName, Some(Duration.Top))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
     val abort = Abort(queueName)
 
     "interrupt current request on close" in {

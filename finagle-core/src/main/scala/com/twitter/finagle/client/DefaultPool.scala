@@ -34,7 +34,7 @@ case class DefaultPool[Req, Rep](
     low: Int = 0,
     high: Int = Int.MaxValue,
     bufferSize: Int = 0,
-    idleTime: Duration = Duration.MaxValue,
+    idleTime: Duration = Duration.Top,
     maxWaiters: Int = Int.MaxValue,
     timer: Timer = DefaultTimer.twitter
 ) extends (StatsReceiver => Transformer[Req, Rep]) {

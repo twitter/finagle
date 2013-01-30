@@ -217,7 +217,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
             }
           }
 
-          FuturePool.defaultPool {
+          FuturePool.unboundedPool {
             messages !! ChannelBuffers.wrappedBuffer("12".getBytes)
             messages !! ChannelBuffers.wrappedBuffer("23".getBytes)
             error !! EOF

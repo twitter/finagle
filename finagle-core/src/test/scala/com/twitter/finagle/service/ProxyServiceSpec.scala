@@ -71,7 +71,7 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
       val replyPromise = new Promise[Int]
       underlying(123) returns replyPromise
 
-      f123.cancel()
+      f123.raise(new Exception)
 
       promise() = Return(underlying)
 

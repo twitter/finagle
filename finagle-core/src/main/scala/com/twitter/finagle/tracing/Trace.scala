@@ -13,7 +13,7 @@ package com.twitter.finagle.tracing
  * the transport.
  */
 
-import com.twitter.util.{Future, Duration, Time, Local}
+import com.twitter.util.{Future, Duration, Time, Local, Stopwatch}
 import java.net.InetSocketAddress
 import scala.util.Random
 
@@ -153,8 +153,9 @@ object Trace {
    * @return return value of the operation
    */
   def time[T](message: String)(f: => T): T = {
-    val (rv, duration) = Duration.inMilliseconds(f)
-    record(message, duration)
+    val elapsed = Stopwatch.start()
+    val rv = f
+    record(message, elapsed())
     rv
   }
 

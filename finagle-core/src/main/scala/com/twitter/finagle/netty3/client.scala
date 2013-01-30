@@ -119,8 +119,8 @@ case class Netty3Transporter[In, Out](
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   socksProxy: Option[SocketAddress] = None,
   statsReceiver: StatsReceiver = DefaultStatsReceiver,
-  channelReaderTimeout: Duration = Duration.MaxValue,
-  channelWriterTimeout: Duration = Duration.MaxValue,
+  channelReaderTimeout: Duration = Duration.Top,
+  channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,
   channelOptions: Map[String, Object] = Map(
     "tcpNoDelay" -> java.lang.Boolean.TRUE,
@@ -144,15 +144,15 @@ case class Netty3Transporter[In, Out](
       new ChannelRequestStatsHandler(statsReceiver)
     )
 
-    if (channelReaderTimeout < Duration.MaxValue
-      || channelWriterTimeout < Duration.MaxValue) {
+    if (channelReaderTimeout < Duration.Top
+      || channelWriterTimeout < Duration.Top) {
       val rms =
-        if (channelReaderTimeout < Duration.MaxValue)
+        if (channelReaderTimeout < Duration.Top)
           channelReaderTimeout.inMilliseconds
         else
           0L
       val wms =
-        if (channelWriterTimeout < Duration.MaxValue)
+        if (channelWriterTimeout < Duration.Top)
           channelWriterTimeout.inMilliseconds
         else
           0L

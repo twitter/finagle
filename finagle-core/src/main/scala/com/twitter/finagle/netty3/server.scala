@@ -175,10 +175,10 @@ case class Netty3Listener[In, Out](
     "reuseAddress" -> java.lang.Boolean.TRUE,
     "child.tcpNoDelay" -> java.lang.Boolean.TRUE
   ),
-  channelMaxIdleTime: Duration = Duration.MaxValue,
-  channelMaxLifeTime: Duration = Duration.MaxValue,
-  channelReadTimeout: Duration = Duration.MaxValue,
-  channelWriteCompletionTimeout: Duration = Duration.MaxValue,
+  channelMaxIdleTime: Duration = Duration.Top,
+  channelMaxLifeTime: Duration = Duration.Top,
+  channelReadTimeout: Duration = Duration.Top,
+  channelWriteCompletionTimeout: Duration = Duration.Top,
   tlsConfig: Option[Netty3ListenerTLSConfig] = None,
   timer: Timer = DefaultTimer.twitter,
   nettyTimer: org.jboss.netty.util.Timer = DefaultTimer,
@@ -210,14 +210,14 @@ case class Netty3Listener[In, Out](
       // Apply read timeouts *after* request decoding, preventing
       // death from clients trying to DoS by slowly trickling in
       // bytes to our (accumulating) codec.
-      if (channelReadTimeout < Duration.MaxValue) {
+      if (channelReadTimeout < Duration.Top) {
         val (timeoutValue, timeoutUnit) = channelReadTimeout.inTimeUnit
         pipeline.addLast(
           "readTimeout",
           new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
       }
 
-      if (channelWriteCompletionTimeout < Duration.MaxValue) {
+      if (channelWriteCompletionTimeout < Duration.Top) {
         pipeline.addLast(
           "writeCompletionTimeout",
           new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))

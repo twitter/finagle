@@ -23,7 +23,7 @@ abstract class SimpleRetryPolicy[A](i: Int)
   final def apply(e: A) = {
     if (shouldRetry(e)) {
       backoffAt(i) match {
-        case Duration.forever =>
+        case Duration.Top =>
           None
         case howlong =>
           Some((howlong, new SimpleRetryPolicy[A](i + 1) {
@@ -52,7 +52,7 @@ abstract class SimpleRetryPolicy[A](i: Int)
    * A convenience method to access Duration.forever from Java. This is a sentinel value that
    * signals no-further-retries.
    */
-  final val never = Duration.forever
+  final val never = Duration.Top
 }
 
 object RetryPolicy extends JavaSingleton {
