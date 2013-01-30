@@ -5,7 +5,7 @@ object Finagle extends Build {
   val zkVersion = "3.3.4"
   val utilVersion = "6.1.0"
   val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
-  val ostrichLib = "com.twitter" %% "ostrich" % "9.0.6"
+  val ostrichLib = "com.twitter" %% "ostrich" % "9.1.0"
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
