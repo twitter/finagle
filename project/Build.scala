@@ -3,7 +3,7 @@ import Keys._
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.0.6"
+  val utilVersion = "6.1.0"
   val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % "9.0.6"
   val thriftLibs = Seq(
@@ -14,7 +14,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.0.6",
+    version := "6.1.0",
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
