@@ -45,22 +45,18 @@ package com.twitter.finagle.builder
  * instead of a compiler error.
  */
 
-import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
-import com.twitter.finagle.filter.{ExceptionSourceFilter}
+import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.netty3.ChannelSnooper
 import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
   RetryPolicy, RetryingFilter, TimeoutFilter}
-import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
-import com.twitter.finagle.stats.{GlobalStatsReceiver, NullStatsReceiver,
-  RollupStatsReceiver, StatsReceiver}
+import com.twitter.finagle.ssl.{Engine, Ssl}
+import com.twitter.finagle.stats.{GlobalStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Time,
-  Timer, Try}
-import java.net.{InetSocketAddress, SocketAddress}
-import java.util.concurrent.{Executors, TimeUnit}
+import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Time, Timer, Try}
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
 import javax.net.ssl.SSLContext
@@ -129,6 +125,11 @@ private[builder] final case class ClientHostConfig(
   val hostConnectionBufferSize  = _hostConnectionBufferSize
 }
 
+private[builder] final case class StatsReceiverConfig(
+  statsReceiver     : Option[StatsReceiver] = None,
+  hostStatsReceiver : Option[StatsReceiver] = None
+)
+
 private[builder] final case class ClientTimeoutConfig(
   private val _tcpConnectTimeout: Duration         = 10.milliseconds,
   private val _connectTimeout   : Duration         = Duration.Top,
@@ -157,7 +158,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _cluster                   : Option[Cluster[SocketAddress]]        = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _keepAlive                 : Option[Boolean]               = None,
-  private val _statsReceiver             : Option[StatsReceiver]         = None,
+  private val _statsReceiverConfig       : StatsReceiverConfig           = StatsReceiverConfig(),
   private val _monitor                   : Option[String => Monitor]     = None,
   private val _name                      : String                        = "client",
   private val _sendBufferSize            : Option[Int]                   = None,
@@ -183,6 +184,8 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
    */
   val cluster                   = _cluster
   val codecFactory              = _codecFactory
+  val statsReceiver             = _statsReceiverConfig.statsReceiver
+  val hostStatsReceiver         = _statsReceiverConfig.hostStatsReceiver
   val tcpConnectTimeout         = _timeoutConfig.tcpConnectTimeout
   val requestTimeout            = _timeoutConfig.requestTimeout
   val connectTimeout            = _timeoutConfig.connectTimeout
@@ -190,7 +193,6 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val readerIdleTimeout         = _timeoutConfig.readerIdleTimeout
   val writerIdleTimeout         = _timeoutConfig.writerIdleTimeout
   val timeoutConfig             = _timeoutConfig
-  val statsReceiver             = _statsReceiver
   val monitor                   = _monitor
   val keepAlive                 = _keepAlive
   val name                      = _name
@@ -222,9 +224,10 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "connectTimeout"            -> Some(_timeoutConfig.connectTimeout),
     "timeout"                   -> Some(_timeoutConfig.timeout),
     "keepAlive"                 -> Some(_keepAlive),
-    "readerIdleTimeout"         -> Some(_timeoutConfig.readerIdleTimeout),
-    "writerIdleTimeout"         -> Some(_timeoutConfig.writerIdleTimeout),
-    "statsReceiver"             -> _statsReceiver,
+    "statsReceiver"             -> _statsReceiverConfig.statsReceiver,
+    "hostStatsReceiver"         -> _statsReceiverConfig.hostStatsReceiver,
+    "readerIdleTimeout"         -> _timeoutConfig.readerIdleTimeout,
+    "writerIdleTimeout"         -> _timeoutConfig.writerIdleTimeout,
     "monitor"                   -> _monitor,
     "name"                      -> Some(_name),
     "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
@@ -429,11 +432,21 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Report stats to the given {{StatsReceiver}}.  This will report
-   * verbose client statistics and counters, that in turn may be
+   * verbose global statistics and counters, that in turn may be
    * exported to monitoring applications.
+   * NB: per hosts statistics will *NOT* be exported to this receiver
+   *     @see reportHostStats(receiver: StatsReceiver)
    */
   def reportTo(receiver: StatsReceiver): This =
-    withConfig(_.copy(_statsReceiver = Some(receiver)))
+    withConfig(cfg => cfg.copy(_statsReceiverConfig = StatsReceiverConfig(Some(receiver), cfg.hostStatsReceiver)))
+
+  /**
+   * Report per host stats to the given {{StatsReceiver}}.
+   * The statsReceiver will be scoped per client, like this:
+   * client/connect_latency_ms_max/0.0.0.0:64754
+   */
+  def reportHostStats(receiver: StatsReceiver): This =
+    withConfig(cfg => cfg.copy(_statsReceiverConfig = StatsReceiverConfig(cfg.statsReceiver, Some(receiver))))
 
   /**
    * Give a meaningful name to the client. Required.
@@ -618,7 +631,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def failFast(onOrOff: Boolean): This =
     withConfig(_.copy(_failFast = onOrOff))
-    
+
   /**
    * When true, the client is daemonized. As with java threads, a
    * process can exit only when all remaining clients are daemonized.
@@ -631,6 +644,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   private[finagle] lazy val statsReceiver =
     (config.statsReceiver getOrElse NullStatsReceiver).scope(config.name)
+
+  private[finagle] lazy val hostStatsReceiver =
+    config.hostStatsReceiver map(_.scope(config.name)) getOrElse statsReceiver
 
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
@@ -661,7 +677,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       val factory = config.channelFactory getOrElse Netty3Transporter.channelFactory
       factory.newChannel(_)
     }
-    
+
     // The transporter connects to actual endpoints, providing a typed
     // session transport.
     val transporter = Netty3Transporter[Req, Rep](
@@ -733,13 +749,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       failFast = config.failFast && codec.failFastOk,
       serviceTimeout = config.connectTimeout,
       timer = timer,
+      statsReceiver = statsReceiver,
+      hostStatsReceiver = hostStatsReceiver,
       tracer = tracer,
       monitor = monitor,
-      name = config.name,
-      statsReceiver = statsReceiver
+      name = config.name
     )
 
-    val factory = codec.prepareServiceFactory(client.newClient(config.cluster.get))
+    val factory = codec.prepareServiceFactory(
+      client.newClient(Group.fromCluster(config.cluster.get)))
 
     if (!config.daemon) ExitGuard.guard()
     new ServiceFactoryProxy[Req, Rep](factory) {

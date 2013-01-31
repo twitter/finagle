@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
  * A writeable Counter. Only sums are kept of Counters. An example
  * Counter is "number of requests served".
  */
-trait Counter extends {
+trait Counter {
   def incr(delta: Int)
   def incr() { incr(1) }
 }
@@ -145,12 +145,20 @@ trait StatsReceiver {
   }
 
   /**
-   * Append ``namespace'' to the names of this receiver.
+   * Prepend a suffix value to the next scope
+   * stats.scopeSuffix("toto").scope("client").counter("adds") will generate
+   * /client/toto/adds
    */
-  def withSuffix(namespace: String): StatsReceiver = {
-    val seqSuffix = Seq(namespace)
-    new NameTranslatingStatsReceiver(this) {
-      protected[this] def translate(name: Seq[String]) = name ++ seqSuffix
+  def scopeSuffix(suffix: String): StatsReceiver = {
+    val self = this
+    new StatsReceiver {
+      val repr = self.repr
+
+      def counter(names: String*) = self.counter(names: _*)
+      def stat(names: String*)    = self.stat(names: _*)
+      def addGauge(names: String*)(f: => Float) = self.addGauge(names: _*)(f)
+
+      override def scope(namespace: String) = self.scope(namespace).scope(suffix)
     }
   }
 }
@@ -194,7 +202,6 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
 
   def counter(name: String*) = self.counter(translate(name): _*)
   def stat(name: String*)    = self.stat(translate(name): _*)
-
   def addGauge(name: String*)(f: => Float) = self.addGauge(translate(name): _*)(f)
 }
 
@@ -211,8 +218,7 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
 }
 
 object NullStatsReceiver extends NullStatsReceiver
-
-object DefaultStatsReceiver extends NullStatsReceiver
+object DefaultStatsReceiver extends LoadedStatsReceiver
 
 /** In-memory stats receiver for testing. */
 class InMemoryStatsReceiver extends StatsReceiver {
@@ -306,3 +312,77 @@ class GlobalStatsReceiver extends NullStatsReceiver {
 }
 
 object GlobalStatsReceiver extends GlobalStatsReceiver
+
+/*
+ * BroadcastStatsReceiver is a wrapper around multiple StatsReceivers
+ */
+object BroadcastStatsReceiver {
+  def apply(receivers: Seq[StatsReceiver]) = receivers match {
+    case Seq() => NullStatsReceiver
+    case Seq(fst) => fst
+    case Seq(fst, snd) => new Two(fst, snd)
+    case more => new N(more)
+  }
+
+  private class Two(statsReceiver1: StatsReceiver, statsReceiver2: StatsReceiver)
+    extends StatsReceiver with Proxy
+  {
+    val repr = this
+    val self = statsReceiver1
+
+    def counter(names: String*) = new Counter {
+      val counter1 = statsReceiver1.counter(names:_*)
+      val counter2 = statsReceiver2.counter(names:_*)
+      def incr(delta: Int) {
+        counter1.incr(delta)
+        counter2.incr(delta)
+      }
+    }
+
+    def stat(names: String*) = new Stat {
+      val stat1 = statsReceiver1.stat(names:_*)
+      val stat2 = statsReceiver2.stat(names:_*)
+      def add(value: Float) {
+        stat1.add(value)
+        stat2.add(value)
+      }
+    }
+
+    def addGauge(names: String*)(f: => Float) = new Gauge {
+      val gauge1 = statsReceiver1.addGauge(names:_*)(f)
+      val gauge2 = statsReceiver2.addGauge(names:_*)(f)
+      def remove() {
+        gauge1.remove()
+        gauge2.remove()
+      }
+    }
+
+    override def scope(name: String) =
+      new Two(statsReceiver1.scope(name), statsReceiver2.scope(name))
+  }
+
+  private class N(statsReceivers: Seq[StatsReceiver]) extends StatsReceiver with Proxy {
+    val repr = this
+    val self = statsReceivers.head
+
+    def counter(names: String*) = new Counter {
+      val counters = statsReceivers map { _.counter(names:_*) }
+      def incr(delta: Int) {
+        counters foreach { _.incr(delta) }
+      }
+    }
+    def stat(names: String*) = new Stat {
+      val stats = statsReceivers map { _.stat(names:_*) }
+      def add(value: Float) {
+        stats foreach { _.add(value) }
+      }
+    }
+    def addGauge(names: String*)(f: => Float) = new Gauge {
+      val gauges = statsReceivers map { _.addGauge(names:_*)(f) }
+      def remove() = gauges foreach { _.remove() }
+    }
+
+    override def scope(name: String) =
+      new N(statsReceivers map { _.scope(name) })
+  }
+}

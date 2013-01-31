@@ -31,6 +31,7 @@
     <module>finagle-redis</module>
     <module>finagle-serversets</module>
     <module>finagle-spdy</module>
+    <module>finagle-stats</module>
     <module>finagle-stream</module>
     <module>finagle-stress</module>
     <module>finagle-test</module>

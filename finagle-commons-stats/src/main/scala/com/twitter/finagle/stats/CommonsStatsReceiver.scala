@@ -51,5 +51,4 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
     stats(name)
   }
-
 }

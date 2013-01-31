@@ -1,14 +1,12 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.common.io.FileUtils.createTempDir
-import com.twitter.common.quantity.{Amount, Time}
+
 import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.{NoBrokersAvailableException, Codec, CodecFactory, Service}
 import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
 import com.twitter.util.{Future, RandomSocket}
 import java.net.InetSocketAddress
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{
@@ -38,26 +36,10 @@ object StringCodec extends CodecFactory[String, String] {
 
 class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
   "ZookeeperServerSetCluster" should {
-    val zookeeperAddress = RandomSocket.nextAddress
-    var connectionFactory: NIOServerCnxn.Factory = null
-    var zookeeperServer: ZooKeeperServer = null
-    var zookeeperClient: ZooKeeperClient = null
-
-    doBefore {
-      zookeeperServer = new ZooKeeperServer(
-        new FileTxnSnapLog(createTempDir(), createTempDir()),
-        new ZooKeeperServer.BasicDataTreeBuilder)
-      connectionFactory = new NIOServerCnxn.Factory(zookeeperAddress)
-      connectionFactory.startup(zookeeperServer)
-      zookeeperClient = new ZooKeeperClient(
-        Amount.of(100, Time.MILLISECONDS),
-        zookeeperAddress)
-    }
-
-    doAfter {
-      connectionFactory.shutdown()
-      zookeeperClient.close()
-    }
+    val inst = new ZkInstance
+    import inst._
+    doBefore(start())
+    doAfter(stop())
 
     def withServer(f: Server => Unit) {
       val sillyService = new Service[String, String] {

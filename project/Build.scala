@@ -103,7 +103,7 @@ object Finagle extends Build {
       sharedSettings
   ) aggregate(
     // Core, support.
-    finagleCore, finagleTest, finagleOstrich4,
+    finagleCore, finagleTest, finagleOstrich4, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
 
@@ -145,6 +145,17 @@ object Finagle extends Build {
     name := "finagle-ostrich4",
     libraryDependencies ++= Seq(ostrichLib)
   ).dependsOn(finagleCore)
+
+  lazy val finagleStats = Project(
+    id = "finagle-stats",
+    base = file("finagle-stats"),
+    settings = Project.defaultSettings ++
+      StandardProject.newSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-stats",
+    libraryDependencies ++= Seq("com.twitter.common" % "metrics" % "0.0.6" withSources())
+  ).dependsOn(finagleCore, finagleExample /*% "test"*/)
 
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
@@ -345,7 +356,7 @@ object Finagle extends Build {
     )
   ).dependsOn(
     finagleCore, finagleHttp, finagleStream, finagleThrift,
-    finagleMemcached, finagleKestrel, finagleRedis, finagleOstrich4)
+    finagleMemcached, finagleKestrel, finagleRedis, finagleOstrich4, finagleStats)
 
   lazy val finagleBenchmark = Project(
     id = "finagle-benchmark",
@@ -359,7 +370,7 @@ object Finagle extends Build {
       util("codec"),
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleStats, finagleOstrich4)
 
   lazy val finagleMySQL = Project(
     id = "finagle-mysql",

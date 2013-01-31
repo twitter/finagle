@@ -3,13 +3,13 @@ package com.twitter.finagle.http
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{
-  DefaultHttpResponse, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, 
+  HttpResponse, HttpResponseStatus, HttpVersion}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import scala.util.Random
 
-class HttpMuxServiceSpec extends SpecificationWithJUnit with Mockito {
+class HttpMuxerSpec extends SpecificationWithJUnit with Mockito {
   // todo: add other metrics when they are supported
   "Default Http server" should {
     class DummyService(reply: String) extends Service[HttpRequest, HttpResponse] {
@@ -22,7 +22,7 @@ class HttpMuxServiceSpec extends SpecificationWithJUnit with Mockito {
 
     val (reply1, reply2, reply3) = ("dumb", "dumber", "dumbest")
 
-    val muxService = new HttpMuxService()
+    val muxService = new HttpMuxer()
       .withHandler("foo/bar/", new DummyService(reply1)) // prefix match
       .withHandler("foo/bar", new DummyService(reply2))  // exact match
       .withHandler("foo/boo/baz/", new DummyService(reply3))

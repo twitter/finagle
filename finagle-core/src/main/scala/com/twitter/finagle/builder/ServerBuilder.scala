@@ -5,7 +5,7 @@ import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.netty3.{ChannelSnooper, Netty3Listener}
 import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.tracing.{  NullTracer, Tracer, TracingFilter}
+import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.jvm.Jvm
 import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor, Promise,   Time, Timer}
@@ -343,7 +343,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     withConfig(_.copy(_openConnectionsThresholds = Some(thresholds)))
-  
+
   /**
    * When true, the server is daemonized. As with java threads, a
    * process can only exit only when all remaining servers are daemonized.
@@ -414,7 +414,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val tracer = config.tracer
     val timer = finagleTimer.twitter
     val nettyTimer = finagleTimer.netty
-    
+
     val listener = Netty3Listener[Rep, Req](
       pipelineFactory = codec.pipelineFactory,
       channelSnooper =
@@ -462,7 +462,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     val listeningServer = server.serve(config.bindTo, serviceFactory)
     val closed = new AtomicBoolean(false)
-    
+
     if (!config.daemon) ExitGuard.guard()
     def close(deadline: Time): Future[Unit] = {
       if (!closed.compareAndSet(false, true)) {

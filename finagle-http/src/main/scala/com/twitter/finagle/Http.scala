@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.builder.{Cluster, StaticCluster}
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.netty3._
@@ -17,9 +16,9 @@ trait HttpRichClient { self: Client[HttpRequest, HttpResponse] =>
       val port = if (url.getPort < 0) url.getDefaultPort else url.getPort
       new InetSocketAddress(url.getHost, port)
     }
-    val cluster = StaticCluster[SocketAddress](Seq(addr))
+    val group = Group[SocketAddress](addr)
     val req = http.RequestBuilder().url(url).buildGet()
-    val service = newClient(cluster).toService
+    val service = newClient(group).toService
     service(req) ensure {
       service.close()
     }
@@ -44,11 +43,11 @@ object HttpServer extends DefaultServer[HttpRequest, HttpResponse, HttpResponse,
   HttpListener, new SerialServerDispatcher(_, _)
 )
 
-object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient 
+object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     with Server[HttpRequest, HttpResponse]
 {
-  def newClient(cluster: Cluster[SocketAddress]): ServiceFactory[HttpRequest, HttpResponse] =
-    HttpClient.newClient(cluster)
+  def newClient(group: Group[SocketAddress]): ServiceFactory[HttpRequest, HttpResponse] =
+    HttpClient.newClient(group)
 
   def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer =
     HttpServer.serve(addr, service)

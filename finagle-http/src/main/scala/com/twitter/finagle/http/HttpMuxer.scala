@@ -1,11 +1,12 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.util.LoadService
 import com.twitter.util.Future
 import java.net.URI
-import org.jboss.netty.handler.codec.http.{
-  DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, 
-  HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
+  HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import java.util.logging.Logger
 
 /**
  * A service that dispatches incoming requests to registered handlers.
@@ -18,7 +19,7 @@ import org.jboss.netty.handler.codec.http.{
  *  - Exact matching overrides prefix matching.
  *  - When multiple prefix matches exist, the longest pattern wins.
  */
-class HttpMuxService(protected[this] val patterns: Seq[(String, Service[HttpRequest, HttpResponse])])
+class HttpMuxer(protected[this] val patterns: Seq[(String, Service[HttpRequest, HttpResponse])])
   extends Service[HttpRequest, HttpResponse] {
 
   def this() = this(Seq[(String, Service[HttpRequest, HttpResponse])]())
@@ -30,9 +31,9 @@ class HttpMuxService(protected[this] val patterns: Seq[(String, Service[HttpRequ
    * Create a new Mux service with the specified pattern added. If the pattern already exists, overwrite existing value.
    * Pattern ending with "/" indicates prefix matching; otherwise exact matching.
    */
-  def withHandler(pattern: String, service: Service[HttpRequest, HttpResponse]): HttpMuxService = {
+  def withHandler(pattern: String, service: Service[HttpRequest, HttpResponse]): HttpMuxer = {
     val norm = normalize(pattern)
-    new HttpMuxService(patterns.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
+    new HttpMuxer(patterns.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
   }
 
   /**
@@ -71,8 +72,8 @@ class HttpMuxService(protected[this] val patterns: Seq[(String, Service[HttpRequ
 /**
  * Singleton default multiplex service
  */
-object DefaultHttpMuxService extends Service[HttpRequest, HttpResponse] {
-  @volatile private[this] var underlying = new HttpMuxService()
+object HttpMuxer extends Service[HttpRequest, HttpResponse] {
+  @volatile private[this] var underlying = new HttpMuxer()
   override def apply(request: HttpRequest): Future[HttpResponse] =
     underlying(request)
 
@@ -82,4 +83,19 @@ object DefaultHttpMuxService extends Service[HttpRequest, HttpResponse] {
   def addHandler(pattern: String, service: Service[HttpRequest, HttpResponse]) = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
+
+  private[this] val log = Logger.getLogger(getClass.getName)
+
+  for (handler <- LoadService[HttpMuxHandler]()) {
+    log.info("HttpMuxer[%s] = %s(%s)".format(handler.pattern, handler.getClass.getName, handler))
+    addHandler(handler.pattern, handler)
+  }
+}
+
+/**
+ * Trait HttpMuxHandler is used for service-loading HTTP handlers.
+ */
+trait HttpMuxHandler extends Service[HttpRequest, HttpResponse] {
+  /** The pattern on to bind this handler to */
+  val pattern: String
 }
