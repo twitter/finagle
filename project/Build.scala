@@ -150,12 +150,13 @@ object Finagle extends Build {
     id = "finagle-stats",
     base = file("finagle-stats"),
     settings = Project.defaultSettings ++
-      StandardProject.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-stats",
-    libraryDependencies ++= Seq("com.twitter.common" % "metrics" % "0.0.6" withSources())
-  ).dependsOn(finagleCore, finagleExample /*% "test"*/)
+    libraryDependencies ++= Seq(
+      "com.twitter.common" % "metrics" % "0.0.6" withSources(),
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3")
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
@@ -206,12 +207,11 @@ object Finagle extends Build {
     name := "finagle-serversets",
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "client" % "0.0.6",
-      "com.twitter.common.zookeeper" % "group" % "0.0.5"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.23"
     ),
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.10">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.23">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
