@@ -1,12 +1,7 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.finagle.mysql._
-import com.twitter.finagle.mysql.protocol._
-import com.twitter.conversions.time._
 import java.net.{ServerSocket, BindException}
 import java.sql.Date
-import scala.collection.mutable
-import org.specs.SpecificationWithJUnit
 
 object Connection {
   // Requires mysql running @ localhost:3306
@@ -30,17 +25,17 @@ object Connection {
   }
 
   private[this] val prepared = mutable.Map[String, PreparedStatement]()
-  def prepare(sql: String, params: Any*): Option[PreparedStatement] = 
+  def prepare(sql: String, params: Any*): Option[PreparedStatement] =
     if (prepared.contains(sql))
       prepared.get(sql)
     else
       client map { c =>
-        val ps = c.prepare(sql, params: _*).get 
+        val ps = c.prepare(sql, params: _*).get
         prepared += (sql -> ps)
         ps
       }
 
-  def close() = { 
+  def close() = {
     client map { c =>
       prepared map { kv => c.closeStatement(kv._2) }
       c.close()
@@ -49,8 +44,8 @@ object Connection {
 }
 
 case class SwimmingRecord(
-  event: String, 
-  time: Float, 
+  event: String,
+  time: Float,
   name: String,
   nationality: String,
   date: Date
@@ -83,12 +78,12 @@ class ClientSpec extends SpecificationWithJUnit {
 
       val client = c.get
 
-      "Ping" in { 
+      "Ping" in {
         val pingRes = client.ping.get
-        pingRes.isInstanceOf[OK] mustEqual true 
+        pingRes.isInstanceOf[OK] mustEqual true
       }
 
-      "Run basic queries" in { 
+      "Run basic queries" in {
         "Create Table" in {
           val sql = """CREATE TEMPORARY TABLE IF NOT EXISTS `finagle-mysql-test` (
             `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -99,14 +94,14 @@ class ClientSpec extends SpecificationWithJUnit {
             `date` date DEFAULT NULL,
             PRIMARY KEY (`id`)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
-        
+
           val createRes = client.query(sql).get
           createRes.isInstanceOf[OK] mustEqual true
         }
 
         "Insert" in {
-          val sql = """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`) 
-            VALUES 
+          val sql = """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
+            VALUES
               %s;""".format(currentRecords.mkString(", "))
 
           val insertRes = client.query(sql).get
@@ -145,7 +140,7 @@ class ClientSpec extends SpecificationWithJUnit {
           "execute #1" in {
             ps.parameters = Array(recordHolder)
             val row = extractRow(client.execute(ps).get)
-            val result = row.valueOf("numRecords").get 
+            val result = row.valueOf("numRecords").get
             result mustEqual LongValue(numRecords(recordHolder))
 
             "again" in {
@@ -158,7 +153,7 @@ class ClientSpec extends SpecificationWithJUnit {
             ps.parameters = Array(recordHolder)
             val execRes = client.execute(ps).get.asInstanceOf[ResultSet]
             val row = execRes.rows(0)
-            val result = row.valueOf("numRecords").get 
+            val result = row.valueOf("numRecords").get
             result mustEqual LongValue(numRecords(recordHolder))
 
             "again" in {

@@ -1,13 +1,11 @@
 package com.twitter.finagle.memcached
 
-import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 
-import com.google.common.base.{CharMatcher, Strings}
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._

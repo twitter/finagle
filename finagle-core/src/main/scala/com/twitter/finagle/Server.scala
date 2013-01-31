@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.util.{Future, Duration, Closable}
+import com.twitter.util.Closable
 import java.net.SocketAddress
 
 private[finagle]  // for now

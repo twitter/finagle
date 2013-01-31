@@ -1,19 +1,13 @@
 package com.twitter.finagle.integration
 
-import com.twitter.finagle.{WriteException, CancelledConnectionException}
-import org.jboss.netty.channel._
 import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.channel._
 
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.Ok
 import com.twitter.finagle.{WriteException, CancelledConnectionException}
 
-import com.twitter.conversions.time._
 
 class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "Cancellation" should {

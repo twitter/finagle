@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Version}
-import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
+import com.twitter.logging.{BareFormatter, Logger, StringHandler}
 import com.twitter.util.{Future, Time}
 import org.specs.SpecificationWithJUnit
 

@@ -1,11 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.mysql.util.Query
-import com.twitter.finagle.Service
-import com.twitter.finagle.{ServiceFactory, Codec, CodecFactory}
-import com.twitter.util.Future
 
 object Client {
   /**
@@ -67,11 +62,11 @@ class Client(factory: ServiceFactory[Request, Result]) {
     case rs: ResultSet => rs.rows.map(f)
     case ok: OK => Seq()
   }
-  
+
   /**
    * Sends a query to server to be prepared for execution.
    * @param sql A query to be prepared on the server.
-   * @return PreparedStatement 
+   * @return PreparedStatement
    */
   def prepare(sql: String, params: Any*) = {
     val stmt = Query.expandParams(sql, params)
@@ -82,7 +77,7 @@ class Client(factory: ServiceFactory[Request, Result]) {
           ps.parameters = Query.flatten(params).toArray
 
         Future.value(ps)
-    } 
+    }
   }
 
   /**
@@ -92,9 +87,9 @@ class Client(factory: ServiceFactory[Request, Result]) {
    */
   def execute(ps: PreparedStatement) = send(ExecuteRequest(ps)) {
     case rs: ResultSet =>
-      ps.bindParameters() 
+      ps.bindParameters()
       Future.value(rs)
-    case ok: OK => 
+    case ok: OK =>
       ps.bindParameters()
       Future.value(ok)
   }
@@ -103,8 +98,8 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Combines the prepare and execute operations.
    * @return a Future[(PreparedStatement, Result)] tuple.
    */
-  def prepareAndExecute(sql: String, params: Any*) = 
-    prepare(sql, params: _*) flatMap { ps => 
+  def prepareAndExecute(sql: String, params: Any*) =
+    prepare(sql, params: _*) flatMap { ps =>
       execute(ps) map {
         res => (ps, res)
       }
@@ -127,11 +122,11 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Combines the prepare and select operations.
    * @return a Future[(PreparedStatement, Seq[T])] tuple.
    */
-  def prepareAndSelect[T](sql: String, params: Any*)(f: Row => T) = 
-    prepare(sql, params: _*) flatMap { ps => 
-      select(ps)(f) map { 
+  def prepareAndSelect[T](sql: String, params: Any*)(f: Row => T) =
+    prepare(sql, params: _*) flatMap { ps =>
+      select(ps)(f) map {
           seq => (ps, seq)
-      } 
+      }
     }
 
   /**
@@ -159,7 +154,7 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Helper function to send requests to the ServiceFactory
    * and handle Error responses from the server.
    */
-  private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]])  = 
+  private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]])  =
     fService flatMap { service =>
       service(r) flatMap (handler orElse {
         case Error(c, s, m) => Future.exception(ServerError(c + " - " + m))

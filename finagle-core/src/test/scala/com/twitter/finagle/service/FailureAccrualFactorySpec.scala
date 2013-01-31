@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.mockito.{Matchers, ArgumentCaptor}
+import org.mockito.Matchers
 
 import com.twitter.util.{Duration, Future, Return, Throw, Time, Timer, Try}
 import com.twitter.conversions.time._

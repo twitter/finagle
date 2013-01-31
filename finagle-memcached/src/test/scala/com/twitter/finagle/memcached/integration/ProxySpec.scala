@@ -8,7 +8,7 @@ import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceClosedException
 import com.twitter.util.RandomSocket
-import java.net.{InetSocketAddress, Socket}
+import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit

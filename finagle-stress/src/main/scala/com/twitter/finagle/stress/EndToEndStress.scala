@@ -7,7 +7,7 @@ import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.util.SharedTimer
 import com.twitter.ostrich.stats
-import com.twitter.util.{Future, Return, Promise, Throw, Stopwatch}
+import com.twitter.util.{Future, Return, Throw, Stopwatch}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.concurrent.CountDownLatch
 import org.jboss.netty.buffer.ChannelBuffers

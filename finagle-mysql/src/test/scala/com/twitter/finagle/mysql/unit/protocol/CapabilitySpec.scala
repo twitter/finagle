@@ -1,14 +1,13 @@
 package com.twitter.finagle.mysql.protocol
 
-import org.specs.SpecificationWithJUnit
 
 class CapabilitySpec extends SpecificationWithJUnit {
   "CapabilitySpec" should {
-    val c = Capability(Capability.LongPassword, 
-                       Capability.SSL, 
+    val c = Capability(Capability.LongPassword,
+                       Capability.SSL,
                        Capability.Transactions,
                        Capability.MultiResults)
-    
+
    "contain capability" in {
       c.has(Capability.SSL) must beTrue
       c.has(Capability.Compress) must beFalse
@@ -32,7 +31,7 @@ class CapabilitySpec extends SpecificationWithJUnit {
     "add capability" in {
       val c2 = c + Capability.LocalFiles + Capability.Compress
       c2.hasAll(
-        Capability.LocalFiles, 
+        Capability.LocalFiles,
         Capability.Compress
       ) must beTrue
     }

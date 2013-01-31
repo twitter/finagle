@@ -3,8 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{WriteException, NoStacktrace}
-import com.twitter.util.{Future, Promise, Throw, Return, Time}
-import java.util.concurrent.ConcurrentHashMap
+import com.twitter.util.{Future, Promise, Time}
 import java.util.logging.Logger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 

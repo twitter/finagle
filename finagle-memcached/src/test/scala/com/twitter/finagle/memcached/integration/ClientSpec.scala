@@ -15,14 +15,12 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.finagle.tracing.ConsoleTracer
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.thrift.Status
 import com.twitter.util.Future
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
-import scala.collection.JavaConversions._
 
 class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {

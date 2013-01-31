@@ -1,14 +1,13 @@
 package com.twitter.finagle.stress
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.util.SharedTimer
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.Duration
 import com.twitter.util.RandomSocket
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.{Executors}
+import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.buffer._
 import org.jboss.netty.channel._

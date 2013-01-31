@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.unit.protocol.text.client
 import com.twitter.finagle.memcached.protocol
 import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
 import com.twitter.finagle.memcached.protocol.text.{Tokens, StatLines}
-import com.twitter.finagle.memcached.protocol.{ClientError, Info => MCInfo, InfoLines, Stored, NonexistentCommand, NotFound, Exists, Value}
+import com.twitter.finagle.memcached.protocol.{ClientError, Info => MCInfo, InfoLines, Stored, NonexistentCommand, NotFound, Exists}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil.UTF_8

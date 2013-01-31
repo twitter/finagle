@@ -1,8 +1,4 @@
 package com.twitter.finagle.protobuf.rpc
-import com.google.protobuf.RpcCallback
-import com.google.protobuf.RpcController
-import com.twitter.finagle.TimeoutException
-import com.twitter.finagle.ChannelClosedException
 
 class RpcControllerWithOnFailureCallback extends RpcController {
 

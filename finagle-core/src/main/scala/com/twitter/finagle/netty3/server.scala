@@ -1,25 +1,18 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.ListeningServer
-import com.twitter.finagle.WriteTimedOutException
 import com.twitter.finagle._
 import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler
 }
-import com.twitter.finagle.dispatch.{ExpiringServerDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.ssl.{Engine, Ssl, SslShutdownHandler}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
+import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor, DefaultTimer}
-import com.twitter.util.{Duration, Future, Monitor, Promise, Return, Throw, Timer, Time}
+import com.twitter.util.{Duration, Future, Monitor, Promise, Timer, Time}
 import java.net.SocketAddress
-import java.util.Collections
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.{ConcurrentHashMap, Executors}
 import java.util.logging.{Logger, Level}
-import javax.net.ssl.SSLEngine
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.group.{
@@ -29,7 +22,6 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.{ReadTimeoutException, ReadTimeoutHandler}
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 /**
  * Netty3 TLS configuration.
@@ -237,7 +229,7 @@ case class Netty3Listener[In, Out](
     }
   }
 
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer = 
+  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
     new ListeningServer {
       val closer = new Closer(timer)
 
@@ -257,8 +249,8 @@ case class Netty3Listener[In, Out](
  * installed as the last handler.
  */
 private[netty3] class ServerBridge[In, Out](
-  serveTransport: Transport[In, Out] => Unit, 
-  monitor: Monitor, 
+  serveTransport: Transport[In, Out] => Unit,
+  monitor: Monitor,
   log: Logger,
   statsReceiver: StatsReceiver,
   channels: ChannelGroup

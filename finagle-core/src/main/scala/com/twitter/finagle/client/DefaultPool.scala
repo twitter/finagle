@@ -1,12 +1,10 @@
 package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
-import com.twitter.finagle._
 import com.twitter.finagle.pool.{WatermarkPool, CachingPool, BufferingPool}
-import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Timer, Duration}
-import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * Create a watermark pool backed by a caching pool. This is the

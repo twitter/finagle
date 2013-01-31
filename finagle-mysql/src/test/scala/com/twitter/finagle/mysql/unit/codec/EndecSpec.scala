@@ -2,9 +2,6 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.mysql.protocol.{Error => MySQLError}
-import org.jboss.netty.buffer.ChannelBuffers._
-import org.jboss.netty.channel._
-import org.specs.SpecificationWithJUnit
 
 class EndecSpec extends SpecificationWithJUnit {
   "Decoder" should {
@@ -71,14 +68,14 @@ class EndecSpec extends SpecificationWithJUnit {
 
       def aux(len: Int): List[Field] = len match {
         case 0 => Nil
-        case x => 
+        case x =>
           val maxLen = 12
           val fieldName = "field" + len
           val f = Field(
-            catalog, 
-            db, 
-            table, 
-            table, 
+            catalog,
+            db,
+            table,
+            table,
             fieldName,
             fieldName,
             33.toShort,
@@ -95,8 +92,8 @@ class EndecSpec extends SpecificationWithJUnit {
     def toPacket(f: Field): Packet = {
       def strLen(s: String) = Buffer.sizeOfLen(s.length) + s.length
 
-      val sizeOfField = (strLen(f.catalog) + strLen(f.db) 
-        + strLen(f.table) + strLen(f.origTable) 
+      val sizeOfField = (strLen(f.catalog) + strLen(f.db)
+        + strLen(f.table) + strLen(f.origTable)
         + strLen(f.name) + strLen(f.origName) + 12)
 
       val fieldData = new Array[Byte](sizeOfField)
@@ -115,17 +112,17 @@ class EndecSpec extends SpecificationWithJUnit {
       bw.writeByte(f.decimals)
       Packet(sizeOfField, 0, fieldData)
     }
-    
+
     val numFields = 5
     val numRows = 3
     val headerPacket = Packet(1, 0, Array(numFields.toByte))
     val eof = Packet(1, 0, Array(Packet.EofByte))
-    
+
     // fields + field packets
     val fields = createFields(numFields)
     val fieldPackets = fields map { toPacket(_) }
 
-    def rowPacket: Packet = { 
+    def rowPacket: Packet = {
       val valueSize = 7
       val bufferSize = numFields * valueSize
       val bw = BufferWriter(new Array[Byte](bufferSize))
@@ -148,7 +145,7 @@ class EndecSpec extends SpecificationWithJUnit {
       "Get empty results after field packets" in {
         fieldResults foreach { _.isEmpty mustEqual true }
       }
-      
+
 
       // send eof one
       val eofRes = endec.decode(eof)

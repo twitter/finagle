@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.{Time, RandomSocket}
+import com.twitter.util.Time
 import java.net.InetSocketAddress
 import org.specs.SpecificationWithJUnit
 

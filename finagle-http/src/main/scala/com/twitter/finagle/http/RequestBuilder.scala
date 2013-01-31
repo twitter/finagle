@@ -2,9 +2,8 @@ package com.twitter.finagle.http
 
 import com.twitter.util.Base64StringEncoder
 import java.net.URL
-import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder, HttpDataFactory, HttpPostBodyUtil}
+import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder, HttpDataFactory}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders, HttpVersion, HttpMethod, DefaultHttpRequest}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConversions._

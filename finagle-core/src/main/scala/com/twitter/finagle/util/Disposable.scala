@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.{Future, Return, Throw, Try, Time, Duration}
+import com.twitter.util.{Future, Return, Throw, Time}
 
 /**
  * Disposable is a container for a resource that must be explicitly disposed when

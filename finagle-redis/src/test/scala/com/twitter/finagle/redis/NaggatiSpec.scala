@@ -4,12 +4,10 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.{ClientError, ServerError}
 import com.twitter.finagle.redis.naggati.test._
-import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.util.{Future, Time}
+import com.twitter.util.Time
 import org.specs.SpecificationWithJUnit
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.Channel
+import org.jboss.netty.buffer.ChannelBuffer
 
 class NaggatiSpec extends SpecificationWithJUnit {
   import com.twitter.logging.Logger

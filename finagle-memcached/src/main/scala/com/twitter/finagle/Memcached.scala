@@ -9,7 +9,6 @@ import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.ReusingPool
 import com.twitter.finagle.server._
-import com.twitter.finagle.stats.StatsReceiver
 import java.net.SocketAddress
 
 trait MemcachedRichClient { self: Client[Command, Response] =>

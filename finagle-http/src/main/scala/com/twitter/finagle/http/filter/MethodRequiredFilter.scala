@@ -3,7 +3,6 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.util.Future
-import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 

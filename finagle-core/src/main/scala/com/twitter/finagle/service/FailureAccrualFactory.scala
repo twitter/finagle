@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.{  ClientConnection, Service, ServiceFactory, ServiceFactoryWrapper}
-import com.twitter.util.{Duration, Return, Throw, Time, Timer, TimerTask, Try}
+import com.twitter.util.{Duration, Time, Timer, TimerTask, Try}
 
 private[finagle] object FailureAccrualFactory {
   def wrapper(

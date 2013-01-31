@@ -4,7 +4,7 @@ import java.{util => ju}
 import java.util.{concurrent => juc}
 import scala.collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{RetryFailureException, SimpleFilter, Service, WriteException, TimeoutException}
+import com.twitter.finagle.{SimpleFilter, Service, WriteException, TimeoutException}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.finagle.tracing.Trace

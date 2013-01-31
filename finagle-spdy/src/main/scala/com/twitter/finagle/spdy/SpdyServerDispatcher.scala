@@ -4,7 +4,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Closable, Time}
 
 class SpdyServerDispatcher(
   trans: Transport[HttpResponse, HttpRequest],

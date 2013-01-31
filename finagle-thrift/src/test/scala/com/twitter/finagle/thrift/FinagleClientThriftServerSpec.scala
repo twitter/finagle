@@ -1,7 +1,6 @@
 package com.twitter.finagle.thrift
 
 import java.net.ServerSocket
-import java.util.logging
 import java.util.concurrent.CyclicBarrier
 
 import org.specs.SpecificationWithJUnit
@@ -9,12 +8,11 @@ import org.specs.SpecificationWithJUnit
 import org.apache.thrift.transport.{TServerSocket, TFramedTransport, TTransportFactory}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
-import org.apache.thrift.async.AsyncMethodCallback
 
 import com.twitter.test.{B, AnException, SomeStruct}
-import com.twitter.util.{RandomSocket, Promise, Return, Throw, Future}
+import com.twitter.util.{RandomSocket, Promise, Return, Future}
 
-import com.twitter.finagle.{Codec, ClientCodecConfig, CodecFactory}
+import com.twitter.finagle.CodecFactory
 import com.twitter.finagle.builder.ClientBuilder
 
 class FinagleClientThriftServerSpec extends SpecificationWithJUnit {

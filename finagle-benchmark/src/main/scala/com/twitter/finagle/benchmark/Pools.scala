@@ -1,7 +1,6 @@
 package com.twitter.finagle.benchmark
 
 import com.google.caliper.SimpleBenchmark
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.pool._
 import com.twitter.util.{Duration, JavaTimer}

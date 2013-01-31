@@ -12,7 +12,7 @@ import com.twitter.finagle.tracing.{Tracer, TracingFilter, DefaultTracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger}
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Duration, Monitor, Timer, Closable, Future, Return, Throw, Time}
+import com.twitter.util.{Duration, Monitor, Timer, Closable, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -140,9 +140,9 @@ case class DefaultServer[Req, Rep, In, Out](
     }
   }
 
-  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer = 
+  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer {
-      val underlying = listener.listen(addr) { transport => 
+      val underlying = listener.listen(addr) { transport =>
         serveTransport(newStack(factory), transport)
       }
       def close(deadline: Time) = {

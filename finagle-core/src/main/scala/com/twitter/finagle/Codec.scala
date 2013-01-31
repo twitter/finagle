@@ -8,7 +8,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ClientChannelTransport, Transport, TransportFactory}
+import com.twitter.finagle.transport.{ClientChannelTransport, Transport}
 import com.twitter.util.Closable
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}

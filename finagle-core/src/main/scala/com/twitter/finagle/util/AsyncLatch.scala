@@ -1,6 +1,5 @@
 package com.twitter.finagle.util
 
-import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable.ArrayBuffer
 
 /**

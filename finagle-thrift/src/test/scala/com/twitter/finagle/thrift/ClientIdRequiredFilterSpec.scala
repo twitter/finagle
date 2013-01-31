@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{Service, Filter}
-import com.twitter.util.{Future, Local, Return, Throw}
+import com.twitter.finagle.Service
+import com.twitter.util.Future
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
 

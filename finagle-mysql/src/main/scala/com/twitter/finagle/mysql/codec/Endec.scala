@@ -2,9 +2,6 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.ClientError
 import com.twitter.finagle.mysql.protocol._
-import com.twitter.logging.Logger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel._
 
 sealed trait State
 case object Idle extends State
@@ -17,12 +14,12 @@ case class Defragging(
 /**
  * Encoder: Encodes a Request into a ChannelBuffer.
  * Decoder: Decodes a Packet into a POJO.
- * 
+ *
  * There are specific packets received from MySQL that can
- * be easily decoded based on their first byte. However, more complex 
+ * be easily decoded based on their first byte. However, more complex
  * results need to be defragged as they arrive in the pipeline.
  * To accomplish this, this handler needs to contain some state.
- * 
+ *
  * Some of state is volatile because it is shared between handleDownstream
  * and handleUpstream events which are usually executed
  * on separate threads.
@@ -30,7 +27,7 @@ case class Defragging(
 class Endec extends SimpleChannelHandler {
   private[this] val log = Logger("finagle-mysql")
   private[this] var state: State = WaitingForGreeting
-  private[this] var defragDecoder: (Packet, Seq[Packet], Seq[Packet]) => Result = _ 
+  private[this] var defragDecoder: (Packet, Seq[Packet], Seq[Packet]) => Result = _
   @volatile private[this] var expectPrepareOK: Boolean = false
   @volatile private[this] var expectBinaryResults: Boolean = false
 
@@ -49,7 +46,7 @@ class Endec extends SimpleChannelHandler {
   }
 
   /**
-   * Netty upstream handler. The message should contain a 
+   * Netty upstream handler. The message should contain a
    * Request object.
    */
   override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
@@ -60,11 +57,11 @@ class Endec extends SimpleChannelHandler {
       Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
       Channels.fireMessageReceived(ctx, CloseStatementOK)
 
-    case req: Request => 
+    case req: Request =>
       val buffer = encode(req)
       Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
 
-    case unknown => 
+    case unknown =>
       log.error("Endec: Expected Request and received: " + unknown.getClass.getName)
   }
 
@@ -84,7 +81,7 @@ class Endec extends SimpleChannelHandler {
 
   /**
    * Logical entry point for the Encoder.
-   * Encodes a request into ChannelBuffer. 
+   * Encodes a request into ChannelBuffer.
    * Note, some requests change the state of the decoder.
    */
   def encode(req: Request): ChannelBuffer = req match {
@@ -93,7 +90,7 @@ class Endec extends SimpleChannelHandler {
       expectBinaryResults = (r.cmd == Command.COM_STMT_EXECUTE)
       r.toChannelBuffer
 
-    case r: Request => 
+    case r: Request =>
       r.toChannelBuffer
   }
 
@@ -127,11 +124,11 @@ class Endec extends SimpleChannelHandler {
   }
 
   /**
-   * Defrags a set of packets expected from the server. This handles defragging 
-   * packets for a ResultSet and a PreparedStatement. 
-   * 
-   * For a PreparedStatement the packet sequences are not neccessarily 
-   * defragged in order and the order needs to be determined based on the 
+   * Defrags a set of packets expected from the server. This handles defragging
+   * packets for a ResultSet and a PreparedStatement.
+   *
+   * For a PreparedStatement the packet sequences are not neccessarily
+   * defragged in order and the order needs to be determined based on the
    * PreparedOK meta data. This happens when the PreparedStatement is decoded
    * in order to simplify this method.
    */

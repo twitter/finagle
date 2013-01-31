@@ -4,7 +4,7 @@ import java.io.PrintStream
 import java.nio.charset.Charset
 
 import org.jboss.netty.channel._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 /** Log events on channels */
 trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandler {

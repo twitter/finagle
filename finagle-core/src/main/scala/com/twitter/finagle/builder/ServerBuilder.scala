@@ -2,13 +2,12 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.channel.OpenConnectionsThresholds
-import com.twitter.finagle.netty3.{ChannelSnooper, Netty3Listener}
+import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
-import com.twitter.jvm.Jvm
-import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor, Promise,   Time, Timer}
+import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor,   Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}

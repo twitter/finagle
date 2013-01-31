@@ -4,8 +4,7 @@ package com.twitter.finagle.tracing
  * Tracers record trace events.
  */
 
-import com.twitter.finagle.util.{CloseNotifier, Disposable, Managed}
-import com.twitter.util.{Duration, Future, Time, TimeFormat, Closable}
+import com.twitter.util.{Duration, Time, TimeFormat}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer

@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import org.jboss.netty.handler.codec.http.{Cookie, CookieDecoder, CookieEncoder, HttpHeaders, HttpRequest}
+import org.jboss.netty.handler.codec.http.{Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import scala.collection.mutable
 import scala.collection.JavaConversions._
 

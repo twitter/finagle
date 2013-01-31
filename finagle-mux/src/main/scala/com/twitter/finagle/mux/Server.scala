@@ -1,13 +1,12 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.dispatch
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Return, Throw, Try, Time, Closable}
+import com.twitter.util.{Future, Return, Throw, Time, Closable}
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
 case class ClientHangupException(cause: Throwable) extends Exception(cause)
@@ -97,7 +96,7 @@ private[finagle] class ServerDispatcher(
 
     for (tag <- tags.acquire())
       trans.write(encode(Tdrain(tag)))
-    
+
     // TODO.
     Future.Done
   }

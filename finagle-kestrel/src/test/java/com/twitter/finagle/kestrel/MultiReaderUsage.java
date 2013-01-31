@@ -1,14 +1,16 @@
 package com.twitter.finagle.kestrel;
 
-import com.twitter.util.Duration;
-import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.builder.StaticCluster;
-import com.twitter.finagle.kestrel.protocol.Kestrel;
-import java.util.concurrent.TimeUnit;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import scala.collection.JavaConversions.*;
+import java.util.concurrent.TimeUnit;
+
+import scala.collection.JavaConversions.JListWrapper;
+
+import com.twitter.finagle.builder.ClientBuilder;
+import com.twitter.finagle.builder.StaticCluster;
+import com.twitter.finagle.kestrel.protocol.Kestrel;
+import com.twitter.util.Duration;
 
 /**
  * A compilation test for using MultiReader in Java.

@@ -2,26 +2,24 @@ package com.twitter.finagle.example.java.kestrel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.util.CharsetUtil;
 
-import com.twitter.util.JavaTimer;
-import com.twitter.util.Duration;
-
-import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.ServiceFactory;
-import com.twitter.finagle.service.Backoff;
-
-import com.twitter.finagle.kestrel.java.Client;
+import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrel.MultiReader;
 import com.twitter.finagle.kestrel.ReadHandle;
 import com.twitter.finagle.kestrel.ReadMessage;
+import com.twitter.finagle.kestrel.java.Client;
 import com.twitter.finagle.kestrel.protocol.Command;
-import com.twitter.finagle.kestrel.protocol.Response;
 import com.twitter.finagle.kestrel.protocol.Kestrel;
+import com.twitter.finagle.kestrel.protocol.Response;
+import com.twitter.finagle.service.Backoff;
+import com.twitter.util.Duration;
+import com.twitter.util.JavaTimer;
 
 /**
  * Demonstrates the use of {{com.twitter.finagel.kestrel.MultiReader}}

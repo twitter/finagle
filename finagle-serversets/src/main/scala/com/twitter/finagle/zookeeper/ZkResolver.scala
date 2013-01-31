@@ -3,11 +3,11 @@ package com.twitter.finagle.zookeeper
 import com.twitter.finagle.{Group, GroupResolver, InetGroupResolver}
 import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.common.zookeeper.ServerSet
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.InetSocketAddress
 import scala.collection.JavaConverters._
 import com.twitter.common.net.pool.DynamicHostSet
 import com.google.common.collect.ImmutableSet
-import com.twitter.thrift.{Endpoint, ServiceInstance}
+import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 
 class ZkResolverException(msg: String) extends Exception(msg)

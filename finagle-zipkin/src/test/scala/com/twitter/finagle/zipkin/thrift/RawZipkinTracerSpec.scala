@@ -1,8 +1,7 @@
 package com.twitter.finagle.zipkin.thrift
 
-import org.specs.{SpecificationWithJUnit, Specification}
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import java.util.ArrayList
 
 import com.twitter.conversions.time._
 import com.twitter.util._

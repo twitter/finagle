@@ -1,16 +1,5 @@
 package com.twitter.finagle.protobuf.rpc.impl
 
-import java.net.InetSocketAddress
-import com.google.protobuf.Descriptors.MethodDescriptor
-import com.google.protobuf.RpcCallback
-import com.google.protobuf.Message
-import com.google.protobuf.RpcChannel
-import com.google.protobuf.RpcController
-import com.google.protobuf.Service
-import org.slf4j.LoggerFactory
-import com.twitter.util.Duration
-import com.twitter.util.FuturePool
-import com.twitter.finagle.builder.ClientBuilder
 import java.util.concurrent.ExecutorService
 import com.twitter.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
@@ -40,7 +29,7 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
   }
 
   def release() {
-     client.close()	
-  } 
-  
+     client.close()
+  }
+
 }

@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{CancelledRequestException, Service}
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.Future
 import org.specs.SpecificationWithJUnit
 
 

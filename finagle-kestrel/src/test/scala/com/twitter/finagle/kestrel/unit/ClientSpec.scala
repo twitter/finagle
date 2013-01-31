@@ -5,7 +5,7 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer, Promise}
+import com.twitter.util.{Future, Duration, Time, MockTimer, Promise}
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 

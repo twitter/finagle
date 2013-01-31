@@ -1,6 +1,5 @@
 package com.twitter.finagle.http
 
-import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, HttpMethod, HttpVersion}
 import org.specs.SpecificationWithJUnit
 import org.specs.util.DataTables

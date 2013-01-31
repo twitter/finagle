@@ -7,7 +7,6 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.Filter._
 
 class ThriftClientFramedCodecSpec extends SpecificationWithJUnit with Mockito {
   val protocolFactory = new TBinaryProtocol.Factory()

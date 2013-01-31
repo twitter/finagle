@@ -1,7 +1,6 @@
 package com.twitter.finagle.example.redis
 
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.redis.{Client, Redis}
+import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.util.{RedisCluster, StringToChannelBuffer}
 
 object RedisClient {

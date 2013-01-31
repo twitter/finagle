@@ -1,18 +1,9 @@
 package com.twitter.finagle.protobuf.rpc.impl
 
 import com.twitter.finagle.protobuf.rpc.RpcFactory
-import com.twitter.finagle.protobuf.rpc.RpcServer
 import com.twitter.finagle.protobuf.rpc.RpcControllerWithOnFailureCallback
 import com.twitter.finagle.protobuf.rpc.RpcServer
 
-import com.twitter.finagle.builder.ServerBuilder
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.util.Duration
-
-import com.google.protobuf.RpcController
-import com.google.protobuf.RpcChannel
-import com.google.protobuf.Message
-import com.google.protobuf.Service
 
 import java.util.concurrent.ExecutorService
 
@@ -28,5 +19,5 @@ class RpcFactoryImpl extends RpcFactory {
 
   def release(stub: { def getChannel(): RpcChannel }) {
 	stub.getChannel().asInstanceOf[RpcChannelImpl].close()
-  } 
+  }
 }

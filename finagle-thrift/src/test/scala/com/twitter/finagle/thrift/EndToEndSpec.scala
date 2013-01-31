@@ -1,9 +1,7 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{ClientCodecConfig, ServerCodecConfig}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.tracing
 import com.twitter.finagle.tracing.{Trace, BufferingTracer, Annotation, Record}
 import com.twitter.silly.Silly
 import com.twitter.test.{B, SomeStruct, AnException, F}

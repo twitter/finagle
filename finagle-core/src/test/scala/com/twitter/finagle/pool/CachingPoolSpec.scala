@@ -1,11 +1,9 @@
 package com.twitter.finagle.pool
 
-import collection.mutable.Queue
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, ServiceFactory, WriteException, MockTimer}
-import com.twitter.util
-import com.twitter.util.{Time, Duration, Future, Promise}
-import org.mockito.{Matchers, ArgumentCaptor}
+import com.twitter.util.{Time, Future, Promise}
+import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -97,7 +95,7 @@ class CachingPoolSpec extends SpecificationWithJUnit with Mockito {
         val s0 = mock[Service[Any, Any]]; s0(any) returns Future.value(o0); s0.close(any) returns Future.Done
         val s1 = mock[Service[Any, Any]]; s1(any) returns Future.value(o1); s1.close(any) returns Future.Done
         val s2 = mock[Service[Any, Any]]; s2(any) returns Future.value(o2); s2.close(any) returns Future.Done
-        
+
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         underlying() returns Future.value(s0)
         val f0 = cachingPool()()

@@ -1,13 +1,10 @@
 package com.twitter.finagle.redis.integration
 
-import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.Redis
 import com.twitter.finagle.redis.TransactionalClient
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.util.Future
 import com.twitter.finagle.redis.util.StringToChannelBuffer
 import com.twitter.finagle.redis.util.RedisCluster
 import com.twitter.finagle.redis.util.CBToString

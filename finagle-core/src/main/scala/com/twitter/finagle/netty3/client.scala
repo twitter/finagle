@@ -1,27 +1,21 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
 import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler
 }
-import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.socks.SocksConnectHandler
-import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, RollupStatsReceiver,   StatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport, ClientChannelTransport,   Transport}
+import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
+import com.twitter.finagle.stats.{DefaultStatsReceiver,   StatsReceiver}
+import com.twitter.finagle.transport.{ChannelTransport,   Transport}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Promise, Time, Duration, NonFatal}
+import com.twitter.util.{Future, Promise, Duration, NonFatal}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.{Executors, TimeUnit}
-import org.jboss.netty.channel.group.{
-  ChannelGroupFuture, ChannelGroupFutureListener, DefaultChannelGroup, DefaultChannelGroupFuture
-}
+import java.util.concurrent.TimeUnit
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{
-  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, ChannelPipelineFactory, 
+  Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, ChannelPipelineFactory,
   Channels
 }
 import org.jboss.netty.handler.timeout.IdleStateHandler
@@ -138,7 +132,7 @@ case class Netty3Transporter[In, Out](
 
   private def newPipeline(addr: SocketAddress, statsReceiver: StatsReceiver) = {
     val pipeline = pipelineFactory.getPipeline()
-  
+
     pipeline.addFirst("channelStatsHandler", channelStatsHandler)
     pipeline.addFirst("channelRequestStatsHandler",
       new ChannelRequestStatsHandler(statsReceiver)
@@ -156,7 +150,7 @@ case class Netty3Transporter[In, Out](
           channelWriterTimeout.inMilliseconds
         else
           0L
-  
+
       pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
       pipeline.addFirst("idleDetector",
         new IdleStateHandler(DefaultTimer, rms, wms, 0, TimeUnit.MILLISECONDS))
@@ -172,7 +166,7 @@ case class Netty3Transporter[In, Out](
       val verifier = verifyHost map {
         SslConnectHandler.sessionHostnameVerifier(_) _
       } getOrElse { Function.const(None) _ }
-  
+
       pipeline.addFirst("sslConnect", new SslConnectHandler(sslHandler, verifier))
       pipeline.addFirst("ssl", sslHandler)
     }

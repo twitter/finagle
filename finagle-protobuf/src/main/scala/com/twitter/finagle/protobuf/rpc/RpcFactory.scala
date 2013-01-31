@@ -1,12 +1,5 @@
 package com.twitter.finagle.protobuf.rpc
 
-import com.google.protobuf.Message
-import com.google.protobuf.RpcChannel
-import com.google.protobuf.Service
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.builder.ServerBuilder
-import com.google.protobuf.RpcController
-import com.twitter.util.Duration
 import java.util.concurrent.ExecutorService
 
 trait RpcFactory {

@@ -1,12 +1,10 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.{Future, Time}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 
 trait Keys { self: BaseClient =>
@@ -79,7 +77,7 @@ trait Keys { self: BaseClient =>
   /**
    * Gets the ttl of the given key.
    * @param key
-   * @return Option containing either the ttl in seconds if the key exists 
+   * @return Option containing either the ttl in seconds if the key exists
    * and has a timeout, or else nothing.
    */
   def ttl(key: ChannelBuffer): Future[Option[JLong]] =

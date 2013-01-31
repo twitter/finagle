@@ -1,12 +1,9 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
-import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.Future
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 
 trait Strings { self: BaseClient =>

@@ -1,14 +1,15 @@
 package com.twitter.finagle.memcached.java;
 
+import java.util.Collections;
+import java.util.Set;
+
+import scala.collection.JavaConversions;
+
 import com.twitter.common.zookeeper.ZooKeeperClient;
 import com.twitter.finagle.memcached.CacheNode;
 import com.twitter.finagle.memcached.CachePoolCluster$;
 import com.twitter.finagle.stats.NullStatsReceiver;
 import com.twitter.finagle.stats.StatsReceiver;
-
-import java.util.Collections;
-import java.util.Set;
-import scala.collection.JavaConversions;
 
 /**
  * A Java-friendly CachePoolCluster.

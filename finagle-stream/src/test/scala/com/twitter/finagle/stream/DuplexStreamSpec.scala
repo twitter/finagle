@@ -1,17 +1,13 @@
 package com.twitter.finagle.stream
 
 import com.twitter.concurrent._
-import com.twitter.concurrent._
-import com.twitter.conversions.time._
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.util.{Future, CountDownLatch, Promise, Return}
+import com.twitter.util.{Future, Promise, Return}
 import java.net.InetSocketAddress
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.jboss.netty.handler.codec.http.{
-  DefaultHttpRequest, HttpRequest, HttpMethod, HttpVersion}
 import org.specs.SpecificationWithJUnit
 
 class DuplexStreamSpec extends SpecificationWithJUnit {

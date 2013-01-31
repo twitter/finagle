@@ -1,8 +1,6 @@
 package com.twitter.finagle.tracing
 
 import org.specs.SpecificationWithJUnit
-import java.nio.ByteBuffer
-import scala.collection.Map
 
 class SpanIdSpec extends SpecificationWithJUnit {
   "SpanId" should {

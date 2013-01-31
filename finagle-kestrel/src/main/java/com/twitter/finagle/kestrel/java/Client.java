@@ -1,21 +1,21 @@
 package com.twitter.finagle.kestrel.java;
 
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+
 import com.twitter.concurrent.Offer;
 import com.twitter.finagle.ServiceFactory;
+import com.twitter.finagle.kestrel.ReadHandle;
 import com.twitter.finagle.kestrel.protocol.Command;
 import com.twitter.finagle.kestrel.protocol.Response;
-import com.twitter.finagle.kestrel.ReadHandle;
-import com.twitter.finagle.kestrel.ReadMessage;
 import com.twitter.util.Duration;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
 import com.twitter.util.Timer;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Callable;
-import java.util.Iterator;
 
 /**
  * A Java-friendly Client for interacting with Kestrel.

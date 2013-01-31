@@ -1,8 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.Group
-import com.twitter.finagle.builder.StaticCluster
-import com.twitter.finagle.integration.DynamicCluster
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{
   ClientConnection, NoBrokersAvailableException, Service, ServiceFactory

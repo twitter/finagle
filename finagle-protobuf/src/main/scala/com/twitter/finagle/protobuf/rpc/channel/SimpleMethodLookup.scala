@@ -1,13 +1,9 @@
 package com.twitter.finagle.protobuf.rpc.channel
 
 import com.twitter.finagle.protobuf.rpc.Util
-import com.google.protobuf.Service
-import scala.collection.JavaConversions._
-import scala.collection.mutable._
-import com.google.common.base.Joiner
 
 /**
- * Maps method names to short codes. This particular implementation uses the trivial String.hashCode. 
+ * Maps method names to short codes. This particular implementation uses the trivial String.hashCode.
  */
 class SimpleMethodLookup(val methods: java.util.List[String]) extends MethodLookup {
 

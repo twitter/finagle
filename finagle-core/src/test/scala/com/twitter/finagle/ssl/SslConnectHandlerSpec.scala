@@ -1,9 +1,6 @@
 package com.twitter.finagle.ssl
 
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.Error
-import com.twitter.finagle.{InconsistentStateException, SslHandshakeException,
-  SslHostVerificationException}
+import com.twitter.finagle.SslHandshakeException
 import java.net.SocketAddress
 import javax.net.ssl.SSLEngine
 import javax.net.ssl.SSLSession

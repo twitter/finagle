@@ -1,6 +1,5 @@
 package com.twitter.finagle.factory
 
-import com.twitter.util
 import com.twitter.util.{Future, Duration, Timer}
 
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ServiceTimeoutException, ClientConnection}

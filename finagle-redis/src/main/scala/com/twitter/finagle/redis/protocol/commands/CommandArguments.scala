@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.protocol
 import _root_.java.lang.{Long => JLong}
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffers
 
 trait CommandArgument extends Command
 

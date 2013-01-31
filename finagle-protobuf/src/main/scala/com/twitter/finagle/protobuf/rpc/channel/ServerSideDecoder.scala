@@ -1,12 +1,5 @@
 package com.twitter.finagle.protobuf.rpc.channel
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.handler.codec.frame.FrameDecoder
-
-import com.google.protobuf.Message
-import com.google.protobuf.Service
 
 class ServerSideDecoder(val repo: MethodLookup, val service: Service) extends FrameDecoder with ProtobufDecoder {
 

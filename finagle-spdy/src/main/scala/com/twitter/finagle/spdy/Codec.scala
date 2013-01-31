@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.spdy._
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ChannelTransport, Transport, TransportFactory}
+import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.util.{Closable, StorageUnit}
 
 class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {

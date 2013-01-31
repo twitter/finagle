@@ -1,8 +1,7 @@
 package com.twitter.finagle.kestrel
 
 import scala.collection.JavaConversions._
-import _root_.java.util.concurrent.atomic.AtomicBoolean
-import _root_.java.util.logging.{Logger, Level}
+import _root_.java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.util.{
   Future, Duration, Time,

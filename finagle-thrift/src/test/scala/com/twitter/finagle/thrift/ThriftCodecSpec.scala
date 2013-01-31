@@ -1,17 +1,15 @@
 package com.twitter.finagle.thrift
 
 import org.specs.SpecificationWithJUnit
-import org.specs.matcher.Matcher
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-import org.apache.thrift.{TBase, TApplicationException}
+import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{
   TProtocol, TBinaryProtocol, TMessage, TMessageType}
-import org.apache.thrift.transport.TTransportException
 
-import com.twitter.finagle.{SunkChannel, TooManyConcurrentRequestsException}
+import com.twitter.finagle.SunkChannel
 import com.twitter.silly.Silly
 
 class ThriftCodecSpec extends SpecificationWithJUnit {

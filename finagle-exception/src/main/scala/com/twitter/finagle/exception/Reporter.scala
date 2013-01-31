@@ -1,7 +1,6 @@
 package com.twitter.finagle.exception
 
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
-import scala.collection.JavaConversions._
 
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.scribe.{LogEntry, ResultCode, scribe}

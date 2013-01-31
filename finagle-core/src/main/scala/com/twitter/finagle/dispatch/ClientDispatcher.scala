@@ -3,7 +3,7 @@ package com.twitter.finagle.dispatch
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, CancelledRequestException, WriteException}
+import com.twitter.finagle.{Service, WriteException}
 import com.twitter.util.{Future, Time, Promise, Throw}
 import java.net.InetSocketAddress
 

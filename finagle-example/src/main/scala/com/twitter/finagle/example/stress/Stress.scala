@@ -1,12 +1,11 @@
 package com.twitter.finagle.example.stress
 
 import com.google.common.util.concurrent.AtomicLongMap
-import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.util.{Promise, Stopwatch, Future}
+import com.twitter.util.{Stopwatch, Future}
 import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.handler.codec.http._

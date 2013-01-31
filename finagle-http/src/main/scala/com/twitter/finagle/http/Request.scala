@@ -4,7 +4,7 @@ import com.twitter.finagle.http.netty.HttpRequestProxy
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, DefaultHttpResponse, HttpMessage,
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, HttpMessage,
   HttpMethod, HttpRequest, HttpVersion, QueryStringEncoder}
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty

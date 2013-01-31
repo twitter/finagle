@@ -3,16 +3,8 @@ package com.twitter.finagle.protobuf.rpc.impl
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
 import com.twitter.finagle.protobuf.rpc.RpcServer
 
-import com.twitter.util.Future
-import com.twitter.util.Duration
-import com.twitter.util.FuturePool
-import com.twitter.finagle.builder.{ Server, ServerBuilder, ServerConfig }
 
 import java.net.InetSocketAddress
-import com.google.protobuf._
-import org.slf4j.LoggerFactory
-import scala.None
-import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
 
 class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, executorService: ExecutorService) extends RpcServer {

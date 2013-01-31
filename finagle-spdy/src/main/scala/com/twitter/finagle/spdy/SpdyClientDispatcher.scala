@@ -1,7 +1,7 @@
 package com.twitter.finagle.spdy
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, CancelledRequestException, WriteException}
+import com.twitter.finagle.{Service, WriteException}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
@@ -62,7 +62,7 @@ class SpdyClientDispatcher(trans: Transport[HttpRequest, HttpResponse])
 
     p
   }
-  
+
   override def isAvailable = trans.isOpen
   override def close(deadline: Time) = trans.close()
 }

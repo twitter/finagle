@@ -5,7 +5,6 @@ import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.redis.protocol.Commands.trimList
-import scala.runtime.RichDouble
 
 trait ErrorConversion {
   def getException(msg: String): Throwable

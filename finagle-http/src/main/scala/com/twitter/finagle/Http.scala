@@ -4,7 +4,6 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Future
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.handler.codec.http._

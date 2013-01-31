@@ -1,15 +1,16 @@
 package com.twitter.finagle.memcached.integration;
 
-import com.twitter.finagle.*;
+import java.nio.charset.Charset;
+
+import com.twitter.finagle.Service;
+import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.memcached.java.Client;
 import com.twitter.finagle.memcached.java.ClientBase;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.finagle.memcached.protocol.text.Memcached;
-import com.twitter.finagle.builder.ClientBuilder;
-import junit.framework.TestCase;
 
-import java.nio.charset.Charset;
+import junit.framework.TestCase;
 
 public class TestClient extends TestCase {
   public static void main(String[] args) {

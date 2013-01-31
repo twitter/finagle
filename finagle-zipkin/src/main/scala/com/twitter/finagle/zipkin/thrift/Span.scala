@@ -5,10 +5,7 @@ package com.twitter.finagle.zipkin.thrift
  * issuance and handling of a single RPC request.
  */
 
-import java.nio.ByteBuffer
 
-import scala.collection.Map
-import collection.JavaConversions._
 import com.twitter.finagle.thrift.thrift
 import com.twitter.finagle.tracing.TraceId
 

@@ -1,23 +1,20 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle._
-import com.twitter.finagle.mysql.codec.{PacketFrameDecoder, Endec}  
+import com.twitter.finagle.mysql.codec.{PacketFrameDecoder, Endec}
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.mysql.protocol.Capability._
-import com.twitter.util.Future
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
 
-class MySQL(username: String, password: String, database: Option[String]) 
+class MySQL(username: String, password: String, database: Option[String])
   extends CodecFactory[Request, Result] {
     private[this] val clientCapability = Capability(
-      LongFlag, 
-      Transactions, 
-      Protocol41, 
-      FoundRows, 
-      Interactive, 
-      LongPassword, 
-      ConnectWithDB, 
-      SecureConnection, 
+      LongFlag,
+      Transactions,
+      Protocol41,
+      FoundRows,
+      Interactive,
+      LongPassword,
+      ConnectWithDB,
+      SecureConnection,
       LocalFiles
     )
 
@@ -38,7 +35,7 @@ class MySQL(username: String, password: String, database: Option[String])
         }
 
         // Authenticate each connection before returning it via a ServiceFactoryProxy.
-        override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) = 
+        override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) =
           new AuthenticationProxy(underlying, username, password, database, clientCapability)
 
       }
@@ -46,21 +43,21 @@ class MySQL(username: String, password: String, database: Option[String])
 }
 
 class AuthenticationProxy(
-    underlying: ServiceFactory[Request, Result], 
-    username: String, 
+    underlying: ServiceFactory[Request, Result],
+    username: String,
     password: String,
     database: Option[String],
-    clientCap: Capability) 
+    clientCap: Capability)
   extends ServiceFactoryProxy(underlying) {
 
-    def makeLoginReq(sg: ServersGreeting) = 
+    def makeLoginReq(sg: ServersGreeting) =
       LoginRequest(username, password, database, clientCap, sg.salt, sg.serverCap)
-      
+
     def acceptGreeting(res: Result) = res match {
       case sg: ServersGreeting if !sg.serverCap.has(Capability.Protocol41) =>
         Future.exception(IncompatibleServer("This client is only compatible with MySQL version 4.1 and later."))
 
-      case sg: ServersGreeting if !Charset.isUTF8(sg.charset) => 
+      case sg: ServersGreeting if !Charset.isUTF8(sg.charset) =>
         Future.exception(IncompatibleServer("This client is only compatible with UTF-8 charset encoding."))
 
       case sg: ServersGreeting =>
@@ -71,10 +68,10 @@ class AuthenticationProxy(
     }
 
     def acceptLogin(res: Result) = res match {
-      case r: OK => 
+      case r: OK =>
         Future.value(res)
 
-      case Error(c, _, m) => 
+      case Error(c, _, m) =>
         Future.exception(ServerError("Error when authenticating the client "+ c + " - " + m))
     }
 

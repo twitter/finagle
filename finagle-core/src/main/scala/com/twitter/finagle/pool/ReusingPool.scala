@@ -2,7 +2,7 @@ package com.twitter.finagle.pool
 
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory,
   ServiceFactoryProxy, ServiceProxy}
-import com.twitter.util.{Future, Promise, Return, Throw, Try, Time}
+import com.twitter.util.{Future, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 

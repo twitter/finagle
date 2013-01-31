@@ -3,9 +3,6 @@ package com.twitter.finagle.mysql.protocol
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Date
 import java.util.Calendar
-import org.jboss.netty.buffer.ChannelBuffer
-import org.specs.SpecificationWithJUnit
-import scala.math.BigInt
 
 class RequestSpec extends SpecificationWithJUnit {
   "Request" should {
@@ -90,9 +87,9 @@ class RequestSpec extends SpecificationWithJUnit {
        cmd mustEqual Command.COM_STMT_EXECUTE
        id mustEqual stmtId
        flg mustEqual flags
-       iter mustEqual iteration 
+       iter mustEqual iteration
       }
-          
+
 
       // null bit map
       val len = ((params.size + 7) / 8).toInt
@@ -128,7 +125,7 @@ class RequestSpec extends SpecificationWithJUnit {
           "String" in {
             str mustEqual strVal
           }
-          
+
           val bool = br.readByte()
 
           "Boolean" in {
@@ -136,7 +133,7 @@ class RequestSpec extends SpecificationWithJUnit {
           }
 
           val byte = br.readByte()
-          
+
           "Byte" in {
             byte mustEqual byteVal
           }
@@ -146,8 +143,8 @@ class RequestSpec extends SpecificationWithJUnit {
           "Short" in {
             short mustEqual shortVal
           }
-          
-          val int = br.readInt() 
+
+          val int = br.readInt()
 
           "Int" in {
             int mustEqual intVal
@@ -158,19 +155,19 @@ class RequestSpec extends SpecificationWithJUnit {
           "Long" in {
             long mustEqual longVal
           }
-          
+
           val float = br.readFloat()
 
           "Float" in {
             float mustEqual floatVal
           }
-          
+
           val dbl = br.readDouble()
 
           "Double" in {
             dbl mustEqual doubleVal
           }
-          
+
           val TimestampValue(ts) = TimestampValue(br.readLengthCodedBytes())
 
           "java.sql.Timestamp" in {

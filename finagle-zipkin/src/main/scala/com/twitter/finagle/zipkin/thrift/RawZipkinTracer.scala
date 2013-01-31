@@ -5,18 +5,17 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{  ThriftClientFramedCodec, ThriftClientRequest, thrift}
+import com.twitter.finagle.thrift.{  ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
-import com.twitter.util.{Base64StringEncoder, Timer, Time, Future}
+import com.twitter.util.{Base64StringEncoder, Future}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TIOStreamTransport
-import scala.collection.JavaConversions._
 
 object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port
@@ -41,7 +40,7 @@ object RawZipkinTracer {
     })
     tracer
   }
-  
+
   // Try to flush the tracers when we shut
   // down. We give it 100ms.
   Runtime.getRuntime().addShutdownHook(new Thread {
@@ -89,7 +88,7 @@ private[thrift] class RawZipkinTracer(
       new TracelessFilter andThen transport,
       new TBinaryProtocol.Factory())
   }
-  
+
   protected[thrift] def flush() = spanMap.flush()
 
   /**

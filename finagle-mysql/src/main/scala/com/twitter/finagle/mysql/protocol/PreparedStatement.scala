@@ -1,6 +1,5 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.util.Promise
 
 case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Result {
   val statement: Promise[String] = new Promise[String]()
@@ -9,9 +8,9 @@ case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Resu
 
   def parameters: Array[Any] = params
   def hasNewParameters: Boolean = hasNewParams
-  
+
   def bindParameters() = hasNewParams = false
-  
+
   def parameters_=(arr: Array[Any]) = {
     require(arr.size == numberOfParams, "Invalid number of parameters.")
     hasNewParams = true
@@ -52,12 +51,12 @@ object PreparedStatement {
 
 /**
  * Prepared statement header returned from the server
- * in response to a prepared statement initialization request 
+ * in response to a prepared statement initialization request
  * COM_STMT_PREPARE.
  */
-case class PreparedOK(statementId: Int, 
-                     numOfColumns: Int, 
-                     numOfParams: Int, 
+case class PreparedOK(statementId: Int,
+                     numOfColumns: Int,
+                     numOfParams: Int,
                      warningCount: Int)
 
 object PreparedOK {

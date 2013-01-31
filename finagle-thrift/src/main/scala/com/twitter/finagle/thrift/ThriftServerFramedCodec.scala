@@ -1,6 +1,5 @@
 package com.twitter.finagle.thrift
 
-import collection.JavaConversions._
 import com.twitter.finagle._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
@@ -16,7 +15,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 
 object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodecFactory
-  def apply(protocolFactory: TProtocolFactory) = 
+  def apply(protocolFactory: TProtocolFactory) =
     new ThriftServerFramedCodecFactory(protocolFactory)
 
   def get()   = apply()

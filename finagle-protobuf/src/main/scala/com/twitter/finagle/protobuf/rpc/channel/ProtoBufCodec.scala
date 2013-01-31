@@ -1,12 +1,5 @@
 package com.twitter.finagle.protobuf.rpc.channel
 
-import org.jboss.netty.channel.ChannelPipelineFactory
-import org.jboss.netty.channel.Channels
-import com.google.protobuf.Message
-import com.google.protobuf.Service
-import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import com.twitter.finagle.Codec
-import com.twitter.finagle.CodecFactory
 
 class ProtoBufCodec(val service: Service) extends CodecFactory[(String, Message), (String, Message)] {
 

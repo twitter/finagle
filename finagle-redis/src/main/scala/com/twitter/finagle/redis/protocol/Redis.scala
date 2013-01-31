@@ -5,7 +5,6 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.redis.naggati.{Codec => NaggatiCodec}
-import com.twitter.util.Future
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 
 object Redis {
@@ -18,9 +17,9 @@ object RedisClientPipelineFactory extends ChannelPipelineFactory {
     val pipeline = Channels.pipeline()
     val commandCodec = new CommandCodec
     val replyCodec = new ReplyCodec
-  
+
     pipeline.addLast("codec", new NaggatiCodec(replyCodec.decode, commandCodec.encode))
-  
+
     pipeline
   }
 }

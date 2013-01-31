@@ -3,14 +3,11 @@ package com.twitter.finagle.kestrel.unit
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
-import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer}
-import com.twitter.concurrent.{Offer, Broker}
-import com.twitter.conversions.time._
+import com.twitter.concurrent.Broker
 
 import com.twitter.finagle.kestrel._
-import com.twitter.finagle.kestrel.protocol._
 
 class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
   def msg_(i: Int) = {

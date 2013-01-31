@@ -5,8 +5,6 @@ import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stream.{Stream, StreamResponse}
 import com.twitter.conversions.time._
 import com.twitter.util.{Base64StringEncoder => Base64, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpVersion, HttpMethod, DefaultHttpRequest}
 import org.jboss.netty.util.CharsetUtil
 

@@ -2,8 +2,6 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
-import com.twitter.finagle.util.SharedTimer
-import com.twitter.util.Time
 import collection.mutable.{SynchronizedMap, HashMap}
 
 object ZipkinTracer {
@@ -28,7 +26,7 @@ object ZipkinTracer {
         scribeHost, scribePort, statsReceiver.scope("zipkin"))
       new ZipkinTracer(raw, sampleRate)
     })
-  
+
     () => tracer
   }
 

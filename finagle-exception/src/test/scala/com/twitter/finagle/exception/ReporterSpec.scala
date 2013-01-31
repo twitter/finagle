@@ -3,7 +3,6 @@ package com.twitter.finagle.exception
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.ArgumentCaptor
-import com.twitter.util.Future
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
 import org.mockito.Matchers._
 import com.twitter.util._

@@ -1,6 +1,6 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.{Filter, Service}
+
 
 
 // class CastingFilter[Req, Rep] extends Filter[Req, Rep, Any, Any]

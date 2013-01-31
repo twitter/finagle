@@ -1,8 +1,5 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.conversions.time._
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.util.{CountDownLatch, RandomSocket}
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
 import org.jboss.netty.channel._

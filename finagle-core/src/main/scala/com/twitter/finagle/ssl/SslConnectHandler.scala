@@ -2,7 +2,7 @@ package com.twitter.finagle.ssl
 
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
-import com.twitter.finagle.{CancelledConnectionException, ChannelClosedException,
+import com.twitter.finagle.{ChannelClosedException,
   InconsistentStateException, SslHandshakeException, SslHostVerificationException}
 import com.twitter.util.Try
 import java.net.SocketAddress

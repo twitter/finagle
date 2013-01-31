@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.util.{Time, Duration, Future, TimerTask, Timer}
+import com.twitter.util.{Time, Duration, TimerTask, Timer}
 import java.util.Collections
 import java.util.concurrent.{TimeUnit, ConcurrentHashMap}
 import java.util.concurrent.atomic.AtomicBoolean

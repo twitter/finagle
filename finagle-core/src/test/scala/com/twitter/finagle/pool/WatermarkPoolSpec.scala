@@ -2,7 +2,6 @@ package com.twitter.finagle.pool
 
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.mockito.Matchers
 import com.twitter.conversions.time._
 import com.twitter.util.{Future, Promise, Return, Throw}
 
@@ -59,7 +58,7 @@ class WatermarkPoolSpec extends SpecificationWithJUnit with Mockito {
     val factory = mock[ServiceFactory[Int, Int]]
     val service0 = mock[Service[Int, Int]]
     val promise = new Promise[Service[Int, Int]]
-    
+
     factory.close(any) returns Future.Done
     service0.close(any) returns Future.Done
 

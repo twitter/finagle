@@ -1,14 +1,12 @@
 package com.twitter.finagle.stream
 
-import com.twitter.finagle.ServiceNotAvailableException
 import com.twitter.finagle.{
   Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException
 }
 import com.twitter.util.{Future, Promise, Time}
-import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{
-  HttpClientCodec, HttpRequest, HttpResponse, HttpServerCodec
+  HttpClientCodec, HttpRequest, HttpServerCodec
 }
 
 /**
@@ -76,7 +74,7 @@ class Stream extends CodecFactory[HttpRequest, StreamResponse] {
 
       override def prepareServiceFactory(
         underlying: ServiceFactory[HttpRequest, StreamResponse]
-      ): ServiceFactory[HttpRequest, StreamResponse] = 
+      ): ServiceFactory[HttpRequest, StreamResponse] =
         underlying map(new DelayedReleaseService(_))
     }
   }

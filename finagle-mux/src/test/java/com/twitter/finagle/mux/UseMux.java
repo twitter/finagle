@@ -1,8 +1,9 @@
 package com.twitter.finagle;
 
-import com.twitter.util.Future;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+
+import com.twitter.util.Future;
 
 // A compilation test for the Mux API.
 public class UseMux {

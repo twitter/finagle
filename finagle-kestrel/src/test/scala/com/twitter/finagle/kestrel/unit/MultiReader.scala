@@ -7,11 +7,10 @@ import com.google.common.cache.{LoadingCache, CacheLoader, CacheBuilder}
 import com.twitter.concurrent.{Spool, Broker}
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.StaticCluster
-import com.twitter.finagle.builder.{IncompleteSpecification, ClientConfig, ClientBuilder, Cluster}
+import com.twitter.finagle.builder.{ClientConfig, ClientBuilder, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Future, Return, Promise, Time}
 import org.jboss.netty.buffer.ChannelBuffer

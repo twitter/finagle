@@ -1,9 +1,5 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.logging.Logger
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers._
-import scala.math.BigInt
 
 object Command {
   val COM_SLEEP               = 0x00.toByte // internal thread state
@@ -46,44 +42,44 @@ abstract class Request(seq: Short) {
    * to create the ChannelBuffer.
    */
   val data: ChannelBuffer
-  
-  def toChannelBuffer: ChannelBuffer = 
+
+  def toChannelBuffer: ChannelBuffer =
     Packet.toChannelBuffer(data.capacity, seq, data)
 }
 
 abstract class CommandRequest(val cmd: Byte) extends Request(0)
 
-class SimpleCommandRequest(command: Byte, buffer: Array[Byte]) 
+class SimpleCommandRequest(command: Byte, buffer: Array[Byte])
   extends CommandRequest(command) {
     override val data = Buffer.toChannelBuffer(Array(cmd), buffer)
 }
 
-/** 
- * NOOP Request used internally by this client. 
+/**
+ * NOOP Request used internally by this client.
  */
 case object ClientInternalGreet extends Request(0) {
   override val data = EMPTY_BUFFER
   override def toChannelBuffer = EMPTY_BUFFER
 }
 
-case object PingRequest 
+case object PingRequest
   extends SimpleCommandRequest(Command.COM_PING, Buffer.EMPTY_BYTE_ARRAY)
 
 case class UseRequest(dbName: String)
   extends SimpleCommandRequest(Command.COM_INIT_DB, dbName.getBytes)
 
-case class QueryRequest(sqlStatement: String) 
+case class QueryRequest(sqlStatement: String)
   extends SimpleCommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
 
 case class PrepareRequest(sqlStatement: String)
   extends SimpleCommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
 
 /**
- * An Execute Request. 
+ * An Execute Request.
  * Uses the binary protocol to build an execute request for
  * a prepared statement.
- */ 
-case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1) 
+ */
+case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1)
   extends CommandRequest(Command.COM_STMT_EXECUTE) {
     private[this] val log = Logger("finagle-mysql")
 
@@ -92,10 +88,10 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case _ => false
     }
 
-    private[this] def makeNullBitmap(parameters: List[Any], bit: Int = 0, result: BigInt = BigInt(0)): Array[Byte] = 
+    private[this] def makeNullBitmap(parameters: List[Any], bit: Int = 0, result: BigInt = BigInt(0)): Array[Byte] =
       parameters match {
         case Nil => result.toByteArray.reverse // As little-endian byte array
-        case param :: rest => 
+        case param :: rest =>
           val bits = if (isNull(param)) result.setBit(bit) else result
           makeNullBitmap(rest, bit+1, bits)
       }
@@ -113,7 +109,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       }
     }
 
-    /** 
+    /**
      * Returns sizeof all the parameters in the List.
      */
     private[this] def sizeOfParameters(parameters: List[Any], size: Int = 0): Int = parameters match {
@@ -128,7 +124,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
 
     /**
      * Writes the parameter into its MySQL binary representation.
-     */ 
+     */
     private[this] def writeParam(param: Any, writer: BufferWriter) = param match {
       case s: String      => writer.writeLengthCodedString(s)
       case b: Boolean     => writer.writeBoolean(b)
@@ -152,13 +148,13 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       bw.writeInt(ps.statementId)
       bw.writeByte(flags)
       bw.writeInt(iterationCount)
-      
+
       val paramsList = ps.parameters.toList
       val nullBytes = makeNullBitmap(paramsList)
       val newParamsBound: Byte = if (ps.hasNewParameters) 1 else 0
 
       val initialBuffer = Buffer.toChannelBuffer(bw.array, nullBytes, Array(newParamsBound))
-      
+
       // convert parameters to binary representation.
       val sizeOfParams = sizeOfParameters(paramsList)
       val values = BufferWriter(new Array[Byte](sizeOfParams))

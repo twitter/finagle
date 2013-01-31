@@ -3,7 +3,6 @@ package com.twitter.finagle.memcached.protocol.text
 import com.twitter.finagle.memcached.protocol._
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.channel._
 

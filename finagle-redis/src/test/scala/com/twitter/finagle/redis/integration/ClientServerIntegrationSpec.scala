@@ -3,11 +3,10 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import util._
 import scala.collection.immutable

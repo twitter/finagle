@@ -11,12 +11,12 @@ import com.twitter.finagle.service.{
   TimeoutFilter
 }
 import com.twitter.finagle.stats.{
-  BroadcastStatsReceiver, DefaultStatsReceiver, NullStatsReceiver, RollupStatsReceiver,
+  BroadcastStatsReceiver, DefaultStatsReceiver, RollupStatsReceiver,
   StatsReceiver
 }
 import com.twitter.finagle.tracing.{DefaultTracer, Tracer, TracingFilter}
 import com.twitter.finagle.util.{DefaultTimer, DefaultMonitor}
-import com.twitter.util.{Future, Timer, Duration, Monitor}
+import com.twitter.util.{Timer, Duration, Monitor}
 import java.net.{SocketAddress, InetSocketAddress}
 
 object DefaultClient {

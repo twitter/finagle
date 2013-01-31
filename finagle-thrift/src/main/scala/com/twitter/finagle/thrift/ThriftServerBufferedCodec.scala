@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import org.jboss.netty.channel.ChannelPipelineFactory
-import com.twitter.finagle.{Codec, CodecFactory, ServerCodecConfig}
+import com.twitter.finagle.{CodecFactory, ServerCodecConfig}
 import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
 
 /**

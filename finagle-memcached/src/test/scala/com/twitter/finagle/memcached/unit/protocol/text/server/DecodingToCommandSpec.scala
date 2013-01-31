@@ -7,7 +7,6 @@ import com.twitter.finagle.memcached.protocol.{Set, Stats}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 import org.specs.util.DataTables

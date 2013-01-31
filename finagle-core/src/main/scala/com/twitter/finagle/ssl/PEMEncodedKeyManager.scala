@@ -1,9 +1,7 @@
 package com.twitter.finagle.ssl
 
 import java.io._
-import java.security.cert.X509Certificate
-import java.security.spec._
-import java.security.{KeyFactory, KeyStore, Security, Provider, PrivateKey}
+import java.security.KeyStore
 import java.util.Random
 import javax.net.ssl._
 

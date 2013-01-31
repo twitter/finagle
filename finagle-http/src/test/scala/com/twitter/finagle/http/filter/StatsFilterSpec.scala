@@ -2,7 +2,6 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.service.NullService
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Time}
 import org.specs.SpecificationWithJUnit

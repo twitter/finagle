@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.{Service, ServiceException, ShardNotAvailableException}
+import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher

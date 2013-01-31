@@ -1,10 +1,8 @@
 package com.twitter.finagle.builder
 
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
-import com.twitter.finagle.tracing.Tracer
-import com.twitter.util.{Promise, Return, Future, Time}
+import com.twitter.util.{Promise, Return, Future}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito

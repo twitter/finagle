@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.util.{StringToBytes, BytesToString, GetMonadArg}
+import com.twitter.finagle.redis.util.GetMonadArg
 import com.twitter.finagle.redis.ClientError
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 

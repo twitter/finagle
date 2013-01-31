@@ -4,7 +4,7 @@ import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.{
-  ClientCodecConfig, Service, ServiceProxy, SimpleFilter, TooManyConcurrentRequestsException
+  Service, ServiceProxy, TooManyConcurrentRequestsException
 }
 import com.twitter.util._
 import java.net.{SocketAddress, InetSocketAddress}
@@ -14,11 +14,10 @@ import org.jboss.netty.bootstrap.ClientBootstrap
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{
-  ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent, 
+  ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent,
   ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent
 }
 import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 
 class EndToEndSpec extends SpecificationWithJUnit {
@@ -101,7 +100,6 @@ class EndToEndSpec extends SpecificationWithJUnit {
         }
 
         "the server does not admit concurrent requests" in {
-          import com.twitter.finagle.netty3.Conversions._
           // The finagle client, by nature, doesn't allow for this, so
           // we need to go through the trouble of establishing our own
           // pipeline.
@@ -245,7 +243,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
       val underlying = factory()()
       val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
-        override def close(deadline: Time) = 
+        override def close(deadline: Time) =
           Closable.all(underlying, server, factory).close(deadline)
       }
 

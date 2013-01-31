@@ -1,9 +1,5 @@
 package com.twitter.finagle.mysql.protocol
 
-import com.twitter.finagle.mysql.ClientError
-import com.twitter.logging.Logger
-import scala.math.BigInt
-import java.sql.{Timestamp, Date}
 
 trait ResultSet extends Result {
   val fields: Seq[Field]
@@ -28,11 +24,11 @@ object ResultSet {
     /**
      * Rows can be encoded as Strings or Binary depending
      * on if the ResultSet is created by a normal query or
-     * a prepared statement, respectively. 
+     * a prepared statement, respectively.
      */
-    val rows = rowPackets map { p: Packet => 
+    val rows = rowPackets map { p: Packet =>
       if (!isBinaryEncoded)
-        new StringEncodedRow(p.body, fields, indexMap) 
+        new StringEncodedRow(p.body, fields, indexMap)
       else
         new BinaryEncodedRow(p.body, fields, indexMap)
     }
@@ -49,10 +45,10 @@ trait Row {
   /**
    * Contains a Field object for each
    * Column in the Row.
-   */ 
+   */
   val fields: Seq[Field]
 
-  /** The values for this Row. */ 
+  /** The values for this Row. */
   val values: IndexedSeq[Value]
 
   /**
@@ -65,13 +61,13 @@ trait Row {
   def indexOf(columnName: String): Option[Int]
 
   /**
-   * Retrieves the Value in the column with the 
+   * Retrieves the Value in the column with the
    * given name.
    * @param columnName name of the column.
-   * @return Some(Value) if the column 
+   * @return Some(Value) if the column
    * exists with the given name. Otherwise, None.
-   */ 
-  def valueOf(columnName: String): Option[Value] = 
+   */
+  def valueOf(columnName: String): Option[Value] =
     valueOf(indexOf(columnName))
 
   protected def valueOf(columnIndex: Option[Int]): Option[Value] =
@@ -120,7 +116,7 @@ class BinaryEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[S
   val values: IndexedSeq[Value] = for (idx <- 0 until fields.size) yield {
     if (isNull(idx))
       NullValue
-    else 
+    else
       Value(fields(idx).fieldType, buffer)
   }
 

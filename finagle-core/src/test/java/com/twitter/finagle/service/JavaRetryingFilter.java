@@ -1,10 +1,9 @@
 package com.twitter.finagle.service;
 
-import java.lang.Exception;
-import java.lang.Throwable;
 import java.util.concurrent.TimeUnit;
-import com.twitter.util.Try;
+
 import com.twitter.util.Duration;
+import com.twitter.util.Try;
 
 /**
  * Just a compilation test for Java.
@@ -16,7 +15,7 @@ class JavaRetryingFilter {
     RetryPolicy$.MODULE$.backoffJava(
       Backoff.toJava(Backoff.constant(Duration.fromTimeUnit(0, TimeUnit.SECONDS))),
       RetryPolicy$.MODULE$.TimeoutAndWriteExceptionsOnly());
-    
+
     /* A friendlier way in Java */
     RetryPolicy<Try<Void>> r = new SimpleRetryPolicy<Try<Void>>() {
       public boolean shouldRetry(Try<Void> a) {

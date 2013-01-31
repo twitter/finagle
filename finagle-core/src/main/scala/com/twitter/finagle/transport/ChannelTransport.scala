@@ -1,7 +1,6 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
   CancelledWriteException, ChannelClosedException, ChannelException}
@@ -63,7 +62,7 @@ class ChannelTransport[In, Out](ch: Channel)
   }
 
   def read(): Future[Out] = readq.poll()
-  
+
   def isOpen = ch.isOpen
 
   def close(deadline: Time) = {

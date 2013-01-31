@@ -1,13 +1,12 @@
 package com.twitter.finagle.zookeeper
 
 
-import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
+import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
 import com.twitter.finagle.{NoBrokersAvailableException, Codec, CodecFactory, Service}
 import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
-import com.twitter.util.{Future, RandomSocket}
+import com.twitter.util.Future
 import java.net.InetSocketAddress
-import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{
   Delimiters, DelimiterBasedFrameDecoder}

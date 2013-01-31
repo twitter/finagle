@@ -3,8 +3,7 @@ package com.twitter.finagle.thrift
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-import org.jboss.netty.channel._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 class ChannelBufferTransportSpec extends SpecificationWithJUnit with Mockito {
   "ChannelBufferToTransport" should {

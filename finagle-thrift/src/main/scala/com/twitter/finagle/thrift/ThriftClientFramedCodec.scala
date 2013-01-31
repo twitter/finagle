@@ -5,9 +5,8 @@ import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.util.{Future, Time}
 import org.apache.thrift.protocol.{
-  TBinaryProtocol, TMessage, TMessageType, TProtocol, TProtocolFactory}
+  TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
@@ -31,8 +30,8 @@ object ThriftClientFramedCodec {
 }
 
 class ThriftClientFramedCodecFactory(
-    clientId: Option[ClientId], 
-    _useCallerSeqIds: Boolean, 
+    clientId: Option[ClientId],
+    _useCallerSeqIds: Boolean,
     _protocolFactory: TProtocolFactory)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {

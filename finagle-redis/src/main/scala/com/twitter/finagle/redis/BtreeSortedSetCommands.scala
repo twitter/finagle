@@ -5,7 +5,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
-import util.{StringToChannelBuffer, ReplyFormat}
+import util.ReplyFormat
 
 trait BtreeSortedSetCommands { self: BaseClient =>
 

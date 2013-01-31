@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty3
 
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import com.twitter.util.Promise
 import org.jboss.netty.channel._
 

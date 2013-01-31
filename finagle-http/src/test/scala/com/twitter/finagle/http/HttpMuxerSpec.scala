@@ -3,11 +3,10 @@ package com.twitter.finagle.http
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, 
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest,
   HttpResponse, HttpResponseStatus, HttpVersion}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import scala.util.Random
 
 class HttpMuxerSpec extends SpecificationWithJUnit with Mockito {
   // todo: add other metrics when they are supported

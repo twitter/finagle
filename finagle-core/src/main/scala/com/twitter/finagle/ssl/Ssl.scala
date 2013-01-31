@@ -1,14 +1,9 @@
 package com.twitter.finagle.ssl
 
-import java.security.cert.{Certificate, CertificateFactory}
-import java.util.logging.{Level, Logger}
+import java.util.logging.Logger
 import javax.net.ssl._
 
-import org.jboss.netty.channel.{
-  Channel, ChannelHandlerContext, ChannelLocal, MessageEvent, SimpleChannelHandler
-}
 
-import collection.JavaConversions._
 import collection.mutable.{Map => MutableMap}
 
 /*

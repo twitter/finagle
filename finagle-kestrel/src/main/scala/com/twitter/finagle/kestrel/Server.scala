@@ -8,7 +8,6 @@ import com.twitter.finagle.{ServiceFactory, ClientConnection}
 import com.twitter.util.{Future, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 import protocol.{Kestrel, Command, Response}
-import scala.collection.mutable
 
 class Server(address: SocketAddress) {
   private[this] val serviceFactory = new ServiceFactory[Command, Response] {

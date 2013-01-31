@@ -17,11 +17,9 @@
 package com.twitter.finagle.redis.naggati
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.FrameDecoder
-import com.twitter.util.Future
 
 /*
  * Convenience exception class to allow decoders to indicate a protocol error.

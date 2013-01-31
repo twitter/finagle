@@ -4,7 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
+import com.twitter.logging.{Level, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import org.jboss.netty.handler.codec.http._
 

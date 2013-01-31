@@ -1,14 +1,8 @@
-import com.twitter.conversions.time._
-import com.twitter.util.Try
-import com.twitter.finagle.mysql._
-import com.twitter.finagle.mysql.protocol._
-import com.twitter.util.Future
-import java.net.InetSocketAddress
 import java.sql.Date
 
 case class SwimmingRecord(
-  event: String, 
-  time: Float, 
+  event: String,
+  time: Float,
   name: String,
   nationality: String,
   date: Date
@@ -23,7 +17,7 @@ case class SwimmingRecord(
 }
 
 object SwimmingRecord {
-  val createTableSQL = 
+  val createTableSQL =
   """CREATE TEMPORARY TABLE IF NOT EXISTS `finagle-mysql-example` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `event` varchar(30) DEFAULT NULL,
@@ -33,7 +27,7 @@ object SwimmingRecord {
     `date` date DEFAULT NULL,
     PRIMARY KEY (`id`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8"""
-  
+
   val records = List(
     SwimmingRecord("50 m freestyle", 20.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-12-18")),
     SwimmingRecord("100 m freestyle", 46.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-08-02")),
@@ -129,12 +123,12 @@ object Main {
   def parseArgs(parsed: Map[String, Any], args: List[String]): Map[String, Any] = args match {
     case Nil => parsed
     case "-host" :: value :: tail =>
-      parseArgs(parsed + ("host" -> value), tail) 
-    case "-port" :: value :: tail => 
+      parseArgs(parsed + ("host" -> value), tail)
+    case "-port" :: value :: tail =>
       parseArgs(parsed + ("port" -> value.toInt), tail)
-    case "-u" :: value :: tail => 
+    case "-u" :: value :: tail =>
       parseArgs(parsed + ("username" -> value), tail)
-    case "-p" :: value :: tail => 
+    case "-p" :: value :: tail =>
       parseArgs(parsed + ("password" -> value), tail)
     case unknown :: tail => parsed
   }

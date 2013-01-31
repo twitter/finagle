@@ -1,7 +1,7 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledRequestException, WriteException}
+import com.twitter.finagle.WriteException
 import com.twitter.util.{Return, Throw, Promise, Future}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito

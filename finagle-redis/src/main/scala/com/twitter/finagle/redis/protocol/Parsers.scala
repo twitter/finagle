@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep, ProtocolError}
+import com.twitter.finagle.redis.naggati.{NextStep, ProtocolError}
 import com.twitter.finagle.redis.naggati.Stages._
 import com.twitter.finagle.redis.protocol.RedisCodec._
 import com.twitter.finagle.redis.util._

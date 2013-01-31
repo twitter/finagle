@@ -3,8 +3,8 @@ package com.twitter.finagle.dispatch
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{TransportFactory, Transport}
-import com.twitter.util.{Duration, Promise, Timer, Time, Closable}
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Duration, Timer, Time, Closable}
 
 object ExpiringServerDispatcher {
   def apply[Req, Rep](
