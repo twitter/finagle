@@ -305,6 +305,10 @@ class ClientSpec extends SpecificationWithJUnit {
 
     }
 
+    /**
+     * Temporarily disable this integration tests due its unstableness.
+     * Fix is tracked by CACHE-609
+
     "Cache specific cluster" in {
       "add and remove" in {
         // the cluster initially must have 5 members
@@ -501,6 +505,7 @@ class ClientSpec extends SpecificationWithJUnit {
         trackCacheShards.size mustBe 9
       }
     }
+    */
 
     def updateCachePoolConfigData(size: Int) {
       val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = size)
