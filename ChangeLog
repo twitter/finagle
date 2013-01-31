@@ -1,9 +1,23 @@
-6.0.5			2012/01/22
+6.1.0			2013/01/30
 
-	* finagle-core: basic SOCKS support for finagle clients, 
+	* finagle: update util and ostrich dependencies
+	* finagle: libraries: preliminary 2.10 port/build
+	* finagle: Tracer use new daemon() flag; get rid of factory. Simplify.
+	* finagle: refactor clients and servers to be simpler, more logical.
+	* finagle-core: Provide a reportHostStatsTo API on ClientBuilder that per-host stats
+	will be reported to.
+	* finagle-core: Use Groups in place of Clusters
+	* finagle-core: Create a NonShrinkingCluster
+	* finagle-redis: made zRange... commands work more like the actual redis commands
+	* finagle-stats: new project that provides a StatsReceiver based on Twitter's Metrics library.
+	* finagle-http: add new-style client and server, including a primitive URL fetcher
+
+6.0.5			2013/01/22
+
+	* finagle-core: basic SOCKS support for finagle clients,
 	intended for use with ssh -D.
 
-6.0.4			2012/01/22
+6.0.4			2013/01/22
 
 	* finagle-core: CachingPool owns connections and caches them even if upstream cancels
 	* finagle-core: Eliminate varargs overhead in StatsReceiver.time and timeFuture
@@ -40,7 +54,7 @@
 
 6.0.1			2012/11/26
 
-	* Use java.util.ArrayDeque in place of mutable.Queue due to 
+	* Use java.util.ArrayDeque in place of mutable.Queue due to
 	https://issues.scala-lang.org/browse/SI-6690
 
 6.0.0			2012/11/26
