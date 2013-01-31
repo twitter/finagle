@@ -1,1 +1,1 @@
-com.twitter.finagle.stats.MetricsMuxHandler
+com.twitter.finagle.stats.MetricsExporter

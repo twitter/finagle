@@ -19,13 +19,15 @@ import java.util.logging.Logger
  *  - Exact matching overrides prefix matching.
  *  - When multiple prefix matches exist, the longest pattern wins.
  */
-class HttpMuxer(protected[this] val patterns: Seq[(String, Service[HttpRequest, HttpResponse])])
+class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, HttpResponse])])
   extends Service[HttpRequest, HttpResponse] {
 
   def this() = this(Seq[(String, Service[HttpRequest, HttpResponse])]())
 
   private[this] val sorted: Seq[(String, Service[HttpRequest, HttpResponse])] =
-    patterns.sortBy { case (pattern, _) => pattern.length } reverse
+    handlers.sortBy { case (pattern, _) => pattern.length } reverse
+
+  def patterns = sorted map { case(p, _) => p }
 
   /**
    * Create a new Mux service with the specified pattern added. If the pattern already exists, overwrite existing value.
@@ -33,7 +35,7 @@ class HttpMuxer(protected[this] val patterns: Seq[(String, Service[HttpRequest, 
    */
   def withHandler(pattern: String, service: Service[HttpRequest, HttpResponse]): HttpMuxer = {
     val norm = normalize(pattern)
-    new HttpMuxer(patterns.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
+    new HttpMuxer(handlers.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
   }
 
   /**
@@ -83,6 +85,8 @@ object HttpMuxer extends Service[HttpRequest, HttpResponse] {
   def addHandler(pattern: String, service: Service[HttpRequest, HttpResponse]) = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
+
+  def patterns = underlying.patterns
 
   private[this] val log = Logger.getLogger(getClass.getName)
 
