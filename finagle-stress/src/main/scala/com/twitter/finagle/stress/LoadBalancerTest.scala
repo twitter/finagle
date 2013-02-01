@@ -151,7 +151,8 @@ class LoadBalancerTest(
       result match {
         case Return(_) =>
           val duration = elapsed()
-          stats.addMetric("request_msec", elapsed().inMilliseconds.toInt)
+          stats.addMetric("request_msec", duration.inMilliseconds.toInt)
+          stats.addMetric("request_usec", duration.inMicroseconds.toInt)
           stats.incr("success")
         case Throw(exc) =>
           stats.incr("fail")
@@ -185,7 +186,7 @@ class LoadBalancerTest(
     0 until concurrency foreach { _ => dispatch(client, servers, behavior) }
     latch.await()
     val duration = elapsed()
-    val rps = numRequests.toDouble / duration.inSeconds.toDouble
+    val rps = numRequests.toDouble / duration.inMilliseconds.toDouble * 1000
 
     // Produce a "report" here instead, so we have some sort of
     // semantic information here.
