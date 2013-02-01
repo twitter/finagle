@@ -446,6 +446,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     )
 
     val server = DefaultServer[Req, Rep, Rep, Req](
+      name = config.name,
       listener = listener,
       serviceTransport = codec.newServerDispatcher _,
       requestTimeout = config.requestTimeout getOrElse Duration.Top,
@@ -459,7 +460,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       tracer = tracer
     )
 
-    val listeningServer = server.serve(config.bindTo, serviceFactory)
+    val listeningServer = server.serveRaw(config.bindTo, serviceFactory)
     val closed = new AtomicBoolean(false)
 
     if (!config.daemon) ExitGuard.guard()

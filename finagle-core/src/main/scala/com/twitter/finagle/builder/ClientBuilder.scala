@@ -717,10 +717,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val prepareConn: Transformer[Req, Rep] =
       measureConn compose (codec.prepareConnFactory _)
 
-    // Bind a concrete endpoint into a service factory.
-    val bind: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep] = {
-      val bind = DefaultBinder[Req, Rep, Req, Rep](transporter, codec.newClientDispatcher(_))
-      (addr, statsReceiver) => prepareConn(bind(addr, statsReceiver))
+    val endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep] = {
+      val bridged = Bridge[Req, Rep, Req, Rep](transporter, codec.newClientDispatcher(_))
+      (addr, statsReceiver) => prepareConn(bridged(addr, statsReceiver))
     }
 
     val pool = DefaultPool[Req, Rep](
@@ -736,7 +735,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // The client puts it all together: given a binder, a pool and
     // other paramters, it composes a load-balanced client.
     val client = DefaultClient[Req, Rep](
-      bind = bind,
+      name = config.name,
+      endpointer = endpointer,
       pool = pool,
       maxIdletime = config.hostConnectionMaxIdleTime getOrElse Duration.Top,
       maxLifetime = config.hostConnectionMaxLifeTime getOrElse Duration.Top,
@@ -752,12 +752,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       statsReceiver = statsReceiver,
       hostStatsReceiver = hostStatsReceiver,
       tracer = tracer,
-      monitor = monitor,
-      name = config.name
+      monitor = monitor
     )
 
+    // Note the direct use of newStack here. This is because we want
+    // to control how stats receivers are scoped.
     val factory = codec.prepareServiceFactory(
-      client.newClient(Group.fromCluster(config.cluster.get)))
+      client.newStack(Group.fromCluster(config.cluster.get)))
 
     if (!config.daemon) ExitGuard.guard()
     new ServiceFactoryProxy[Req, Rep](factory) {

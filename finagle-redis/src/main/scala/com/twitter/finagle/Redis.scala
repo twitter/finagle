@@ -12,14 +12,12 @@ trait RedisRichClient { self: Client[Command, Reply] =>
   def newRichClient(group: String): redis.Client = redis.Client(newClient(group).toService)
 }
 
-object RedisBinder extends DefaultBinder[Command, Reply, Command, Reply](
-  new Netty3Transporter(redis.RedisClientPipelineFactory),
-  new PipeliningDispatcher(_)
-)
+object RedisTransporter extends Netty3Transporter[Command, Reply](redis.RedisClientPipelineFactory)
 
 object RedisClient extends DefaultClient[Command, Reply](
-  RedisBinder,
-  _ => new ReusingPool(_)
+  name = "redis",
+  endpointer = Bridge[Command, Reply, Command, Reply](RedisTransporter, new PipeliningDispatcher(_)),
+  pool = _ => new ReusingPool(_)
 ) with RedisRichClient
 
 object Redis extends Client[Command, Reply] with RedisRichClient {

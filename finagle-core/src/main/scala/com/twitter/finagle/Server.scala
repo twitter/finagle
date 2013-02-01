@@ -4,7 +4,6 @@ import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.util.Closable
 import java.net.SocketAddress
 
-private[finagle]  // for now
 trait ListeningServer extends Closable {
   def boundAddress: SocketAddress
 }

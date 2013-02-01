@@ -7,15 +7,19 @@ import com.twitter.finagle.server._
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 
-object MuxBinder extends DefaultBinder[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-  new Netty3Transporter(mux.PipelineFactory),
-  new mux.ClientDispatcher(_)
+object MuxTransporter extends Netty3Transporter[ChannelBuffer, ChannelBuffer](mux.PipelineFactory)
+
+object MuxClient extends DefaultClient[ChannelBuffer, ChannelBuffer](
+  name = "mux",
+  endpointer = Bridge[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
+    MuxTransporter, new mux.ClientDispatcher(_)),
+  pool = _ => new ReusingPool(_)
 )
-object MuxClient extends DefaultClient[ChannelBuffer, ChannelBuffer](MuxBinder, _ => new ReusingPool(_))
 
 object MuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer](mux.PipelineFactory)
 object MuxServer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-  MuxListener, new mux.ServerDispatcher(_, _))
+  "muxsrv", MuxListener, new mux.ServerDispatcher(_, _)
+)
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].

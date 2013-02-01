@@ -16,18 +16,20 @@ trait MemcachedRichClient { self: Client[Command, Response] =>
   def newRichClient(group: String): memcached.Client = memcached.Client(newClient(group).toService)
 }
 
-object MemcachedBinder extends DefaultBinder[Command, Response, Command, Response](
-  new Netty3Transporter(MemcachedClientPipelineFactory),
-  new PipeliningDispatcher(_)
-)
+object MemcachedTransporter 
+  extends Netty3Transporter[Command, Response](MemcachedClientPipelineFactory)
 
 object MemcachedClient extends DefaultClient[Command, Response](
-  MemcachedBinder, _ => new ReusingPool(_)
+  name = "memcached",
+  endpointer = Bridge[Command, Response, Command, Response](
+    MemcachedTransporter, new PipeliningDispatcher(_)),
+  pool = _ => new ReusingPool(_)
 ) with MemcachedRichClient
 
 object MemcachedListener extends Netty3Listener[Response, Command](MemcachedServerPipelineFactory)
-object MemcachedServer
-  extends DefaultServer[Command, Response, Response, Command](MemcachedListener, new SerialServerDispatcher(_, _))
+object MemcachedServer extends DefaultServer[Command, Response, Response, Command](
+  "memcachedsrv", MemcachedListener, new SerialServerDispatcher(_, _)
+)
 
 object Memcached extends Client[Command, Response] with MemcachedRichClient with Server[Command, Response] {
   def newClient(group: Group[SocketAddress]): ServiceFactory[Command, Response] =

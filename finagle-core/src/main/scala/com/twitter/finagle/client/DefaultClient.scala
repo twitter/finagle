@@ -30,8 +30,10 @@ object DefaultClient {
  * responsible for binding concrete endpoints (named by
  * SocketAddresses).
  *
- * @param bind The binder used to bind a concrete endpoint to a
- * ServiceFactory.
+ * @param name A name identifying the client.
+ *
+ * @param endpointer A function used to create a ServiceFactory
+ * to a concrete endpoint.
  *
  * @param pool The pool used to cache idle service (connection).
  *
@@ -54,7 +56,8 @@ object DefaultClient {
  * acquiring a service. Defaults to infinity.
  */
 case class DefaultClient[Req, Rep](
-  bind: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep],
+  name: String,
+  endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep],
   pool: StatsReceiver => Transformer[Req, Rep] = DefaultPool(),
   maxIdletime: Duration = Duration.Top,
   maxLifetime: Duration = Duration.Top,
@@ -68,8 +71,7 @@ case class DefaultClient[Req, Rep](
   statsReceiver: StatsReceiver = DefaultStatsReceiver,
   hostStatsReceiver: StatsReceiver = DefaultStatsReceiver,
   tracer: Tracer  = DefaultTracer,
-  monitor: Monitor = DefaultMonitor,
-  name: String = "unknown"
+  monitor: Monitor = DefaultMonitor
 ) extends Client[Req, Rep] {
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
@@ -124,7 +126,7 @@ case class DefaultClient[Req, Rep](
       pool(hostStats) compose
       fastFailed compose
       lifetimeLimited compose
-      (bind(_, hostStats))
+      (endpointer(_, hostStats))
 
     newStack(sa)
   }
@@ -158,5 +160,8 @@ case class DefaultClient[Req, Rep](
       refcounted compose
       balanced
 
-  def newClient(group: Group[SocketAddress]) = newStack(group)
+  def newClient(group: Group[SocketAddress]) = copy(
+    statsReceiver = statsReceiver.scope(name),
+    hostStatsReceiver = hostStatsReceiver.scope(name)
+  ).newStack(group)
 }

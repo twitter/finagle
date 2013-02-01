@@ -50,6 +50,7 @@ object DefaultServer {
  * @param prepare Prepare the given `ServiceFactory` before use.
  */
 case class DefaultServer[Req, Rep, In, Out](
+  name: String,
   listener: Listener[In, Out],
   serviceTransport: (Transport[In, Out], Service[Req, Rep]) => Closable,
   requestTimeout: Duration = Duration.Top,
@@ -139,10 +140,10 @@ case class DefaultServer[Req, Rep, In, Out](
         transport.close()
     }
   }
-
-  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
+  
+  def serveRaw(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer {
-      val underlying = listener.listen(addr) { transport =>
+      val underlying = listener.listen(addr) { transport => 
         serveTransport(newStack(factory), transport)
       }
       def close(deadline: Time) = {
@@ -160,4 +161,8 @@ case class DefaultServer[Req, Rep, In, Out](
 
       def boundAddress = underlying.boundAddress
     }
+
+  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer = copy(
+    statsReceiver = statsReceiver.scope(name)
+  ).serveRaw(addr, factory)
 }

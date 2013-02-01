@@ -163,6 +163,16 @@ trait StatsReceiver {
   }
 }
 
+trait StatsReceiverProxy extends StatsReceiver with Proxy {
+  val self: StatsReceiver
+
+  val repr = self
+  def counter(names: String*) = self.counter(names:_*)
+  def stat(names: String*) = self.stat(names:_*)
+  def addGauge(names: String*)(f: => Float) = self.addGauge(names:_*)(f)
+  override def scope(name: String) = self.scope(name)
+}
+
 class RollupStatsReceiver(val self: StatsReceiver)
   extends StatsReceiver with Proxy
 {
@@ -218,7 +228,9 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
 }
 
 object NullStatsReceiver extends NullStatsReceiver
-object DefaultStatsReceiver extends LoadedStatsReceiver
+object DefaultStatsReceiver extends  {
+  val self: StatsReceiver = (new LoadedStatsReceiver).scope("finagle")
+} with StatsReceiverProxy
 
 /** In-memory stats receiver for testing. */
 class InMemoryStatsReceiver extends StatsReceiver {

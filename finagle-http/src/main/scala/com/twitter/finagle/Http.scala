@@ -24,22 +24,23 @@ trait HttpRichClient { self: Client[HttpRequest, HttpResponse] =>
   }
 }
 
-object HttpBinder extends DefaultBinder[HttpRequest, HttpResponse, HttpRequest, HttpResponse](
-  new Netty3Transporter(http.Http().client(ClientCodecConfig("httpclient")).pipelineFactory),
-  new SerialClientDispatcher(_)
+object HttpTransporter extends Netty3Transporter[HttpRequest, HttpResponse](
+  http.Http().client(ClientCodecConfig("httpclient")).pipelineFactory
 )
 
 object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
-  HttpBinder, DefaultPool[HttpRequest, HttpResponse]()
+  name = "http",
+  endpointer = Bridge[HttpRequest, HttpResponse, HttpRequest, HttpResponse](
+    HttpTransporter, new SerialClientDispatcher(_)),
+  pool = DefaultPool[HttpRequest, HttpResponse]()
 ) with HttpRichClient
-
 
 object HttpListener extends Netty3Listener[HttpResponse, HttpRequest](
   http.Http().server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
 )
 
 object HttpServer extends DefaultServer[HttpRequest, HttpResponse, HttpResponse, HttpRequest](
-  HttpListener, new SerialServerDispatcher(_, _)
+  "httpsrv", HttpListener, new SerialServerDispatcher(_, _)
 )
 
 object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
