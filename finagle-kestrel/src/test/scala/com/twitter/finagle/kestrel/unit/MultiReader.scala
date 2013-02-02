@@ -89,7 +89,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
       }
     }
 
-    class DynamicCluster[U](initial: Seq[U]) extends Cluster[U] {
+    class DynamicCluster[+U](initial: Seq[U]) extends Cluster[U] {
       def this() = this(Seq[U]())
 
       var set = initial.toSet

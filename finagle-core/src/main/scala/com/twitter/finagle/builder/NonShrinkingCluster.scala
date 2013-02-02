@@ -13,7 +13,7 @@ import java.util.ArrayDeque
  * impact by delaying node removals. We do so by disallowing the cluster to shrink. Add
  * events are always propagated but Rem events require a corresponding Add.
  */
-class NonShrinkingCluster[T](underlying: Cluster[T]) extends Cluster[T] {
+class NonShrinkingCluster[+T](underlying: Cluster[T]) extends Cluster[T] {
   import Cluster._
 
   def snap: (Seq[T], Future[Spool[Change[T]]]) = {

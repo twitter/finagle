@@ -14,7 +14,7 @@ import java.util.logging.Logger
  * Note that a Cluster can be elastic: members can join or leave at
  * any time.
  */
-trait Cluster[T] { self =>
+trait Cluster[+T] { self =>
   /**
    * A Future object that is defined when the cluster is initialized.
    * Cluster users can subscribe to this Future object to check or get notified of the availability of the cluster.
@@ -90,14 +90,14 @@ trait Cluster[T] { self =>
 }
 
 object Cluster {
-  sealed abstract trait Change[T] { def value: T }
-  case class Add[T](value: T) extends Change[T]
-  case class Rem[T](value: T) extends Change[T]
+  sealed abstract trait Change[+T] { def value: T }
+  case class Add[+T](value: T) extends Change[T]
+  case class Rem[+T](value: T) extends Change[T]
 }
 
 /**
  * A simple static cluster implementation.
  */
-case class StaticCluster[T](underlying: Seq[T]) extends Cluster[T] {
+case class StaticCluster[+T](underlying: Seq[T]) extends Cluster[T] {
   def snap: (Seq[T], Future[Spool[Cluster.Change[T]]]) = (underlying, Future.value(Spool.empty))
 }

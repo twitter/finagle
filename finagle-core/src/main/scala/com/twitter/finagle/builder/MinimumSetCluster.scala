@@ -9,7 +9,7 @@ import com.twitter.util.Future
  * to specify a Cluster to supplement the initial static set. All operations
  * that would remove entries in the minimum set are censored and counted.
  */
-class MinimumSetCluster[T](
+class MinimumSetCluster[+T](
   minimum: Set[T],
   supplementary: Cluster[T],
   statsReceiver: StatsReceiver = NullStatsReceiver
