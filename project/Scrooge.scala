@@ -154,14 +154,7 @@ object Scrooge extends Plugin {
       folder / (name + ".jar")
     },
     
-    libraryDependencies <+= scalaVersion {
-      // TODO: until we publish cross builds for real
-      case x if x.startsWith("2.10") =>
-        "com.twitter" %% "scrooge-runtime" % "2.4.0" intransitive()
-      case _ =>
-        "com.twitter" % "scrooge-runtime" % "2.3.2" intransitive()
-    },
-
+    libraryDependencies += "com.twitter" %% "scrooge-runtime" % "2.4.0" intransitive(),
     scroogeFetch <<= (
       streams,
       scroogeCacheFolder,
