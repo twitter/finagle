@@ -14,7 +14,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.1.0",
+    version := "6.1.1",
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
@@ -109,7 +109,7 @@ object Finagle extends Build {
 
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
-    finagleMemcached, finagleKestrel,
+    finagleMemcached, finagleKestrel, finagleRedis,
 
     // Use and integration
     finagleStress, finagleExample, finagleBenchmark
@@ -323,6 +323,8 @@ object Finagle extends Build {
     testOptions in Test := Seq(Tests.Filter {
       case "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec" => false
       case "com.twitter.finagle.redis.integration.ClientSpec" => false
+      case "com.twitter.finagle.redis.integration.BtreeClientSpec" => false
+      case "com.twitter.finagle.redis.integration.ClientServerIntegrationSpec" => false
       case _ => true
     })
   ).dependsOn(finagleCore)
