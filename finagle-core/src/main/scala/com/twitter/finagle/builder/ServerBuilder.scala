@@ -405,15 +405,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val codecConfig = ServerCodecConfig(
       serviceName = config.name, boundAddress = config.bindTo)
     val codec = config.codecFactory(codecConfig)
-    val finagleTimer = SharedTimer.acquire()
 
     val statsReceiver = config.statsReceiver map(_.scope(config.name)) getOrElse NullStatsReceiver
     val logger = config.logger getOrElse Logger.getLogger(config.name)
     val monitor = config.monitor map(_(config.name, config.bindTo)) getOrElse NullMonitor
     val tracer = config.tracer
-    val timer = finagleTimer.twitter
-    val nettyTimer = finagleTimer.netty
-
+    val timer = DefaultTimer.twitter
+    val nettyTimer = DefaultTimer
+    
     val listener = Netty3Listener[Rep, Req](
       pipelineFactory = codec.pipelineFactory,
       channelSnooper =
@@ -472,7 +471,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       }
 
       listeningServer.close(deadline) ensure {
-        finagleTimer.dispose()
         if (!config.daemon) ExitGuard.unguard()
       }
     }

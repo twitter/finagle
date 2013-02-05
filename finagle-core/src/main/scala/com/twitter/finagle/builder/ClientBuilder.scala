@@ -657,7 +657,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): ServiceFactory[Req, Rep] = {
     val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name))
-    val finagleTimer = SharedTimer.acquire()
 
     // We configure a client based on the parameters of the client
     // builder. TODO: this should be moved to its own toplevel class
@@ -668,8 +667,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
     val tracer = config.tracer
-    val timer = finagleTimer.twitter
-    val nettyTimer = finagleTimer.netty
+    val timer = DefaultTimer.twitter
+    val nettyTimer = DefaultTimer
     val monitor = config.monitor map { newMonitor => newMonitor(config.name) } getOrElse NullMonitor
     val logger = config.logger getOrElse Logger.getLogger(config.name)
 
@@ -771,7 +770,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
         }
 
         super.close(deadline) ensure {
-          finagleTimer.dispose()
           if (!config.daemon) ExitGuard.unguard()
         }
       }
@@ -800,8 +798,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       case _ => underlying
     }
 
-    val finagleTimer = SharedTimer.acquire()
-    val timer = finagleTimer.twitter
+    val timer = DefaultTimer.twitter
 
     // We keep the retrying filter after the load balancer so we can
     // retry across different hosts rather than the same one repeatedly.
@@ -818,8 +815,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           return Future.exception(new IllegalStateException)
         }
         super.close(deadline)
-        finagleTimer.dispose()
-        Future.Done
       }
     }
   }

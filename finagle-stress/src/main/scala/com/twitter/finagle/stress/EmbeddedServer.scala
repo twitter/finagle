@@ -1,11 +1,12 @@
 package com.twitter.finagle.stress
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.SharedTimer
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.util.Duration
 import com.twitter.util.RandomSocket
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
@@ -25,7 +26,6 @@ class EmbeddedServer(val addr: SocketAddress) {
 
   // (Publicly accessible) stats covering this server.
   val stats = new StatsCollection
-  val timer = SharedTimer.acquire()
   val stopped = new AtomicBoolean(false)
 
   // Server state:
@@ -93,7 +93,7 @@ class EmbeddedServer(val addr: SocketAddress) {
       pipeline.addLast("latency", new SimpleChannelDownstreamHandler {
         override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
           if (latency != 0.seconds)
-            timer.twitter.schedule(latency) { super.writeRequested(ctx, e) }
+            DefaultTimer.twitter.schedule(latency) { super.writeRequested(ctx, e) }
           else
             super.writeRequested(ctx, e)
         }
@@ -125,7 +125,6 @@ class EmbeddedServer(val addr: SocketAddress) {
     channels.clear()
 
     bootstrap.releaseExternalResources()
-    timer.dispose()
   }
 
   def start() {

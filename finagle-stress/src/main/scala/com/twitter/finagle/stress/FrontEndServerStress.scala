@@ -1,7 +1,7 @@
 package com.twitter.finagle.stress
 
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.util.SharedTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.Service
 import org.jboss.netty.buffer.ChannelBuffers
@@ -74,11 +74,10 @@ object FrontEndServerStress {
     val latch = new CountDownLatch(concurrency)
     val beginTime = Time.now
 
-    val timer = SharedTimer.acquire()
     val server = buildServer()
     val client = buildClient(concurrency, server.localAddress)
 
-    timer.twitter.schedule(10.seconds) {
+    DefaultTimer.twitter.schedule(10.seconds) {
       println("@@ %ds".format(beginTime.untilNow.inSeconds))
       Stats.prettyPrintStats()
     }
@@ -91,7 +90,6 @@ object FrontEndServerStress {
         latch.await()
         client.close()
         server.close()
-        timer.dispose()
         println("Shutdown took %dms".format(System.currentTimeMillis()-start))
       }
     })

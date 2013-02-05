@@ -5,7 +5,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.util.SharedTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.ostrich.stats
 import com.twitter.util.{Future, Return, Throw, Stopwatch}
 import java.net.{SocketAddress, InetSocketAddress}
@@ -74,11 +74,10 @@ object EndToEndStress {
     val latch = new CountDownLatch(concurrency)
     val elapsed = Stopwatch.start()
 
-    val timer = SharedTimer.acquire()
     val server = buildServer()
     val client = buildClient(concurrency, server.localAddress)
 
-    timer.twitter.schedule(10.seconds) {
+    DefaultTimer.twitter.schedule(10.seconds) {
       println("@@ %ds".format(elapsed().inSeconds))
       Stats.prettyPrintStats()
     }
@@ -91,7 +90,6 @@ object EndToEndStress {
         latch.await()
         client.close()
         server.close()
-        timer.dispose()
         println("Shutdown took %dms".format(System.currentTimeMillis()-start))
       }
     })

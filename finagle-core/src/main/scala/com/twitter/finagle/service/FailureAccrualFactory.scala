@@ -74,7 +74,10 @@ class FailureAccrualFactory[Req, Rep](
 
   override def isAvailable = !markedDead && underlying.isAvailable
 
-  def close(deadline: Time) = underlying.close(deadline)
+  def close(deadline: Time) = underlying.close(deadline) ensure {
+    // We revive to make sure we've cancelled timer tasks, etc.
+    revive()
+  }
 
   override val toString = "failure_accrual_%s".format(underlying.toString)
 }
