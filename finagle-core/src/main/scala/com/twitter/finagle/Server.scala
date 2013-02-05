@@ -4,7 +4,8 @@ import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.util.Closable
 import java.net.SocketAddress
 
-trait ListeningServer extends Closable {
+trait ListeningServer extends Closable with Group[SocketAddress] {
+  lazy val members = Set(boundAddress)
   def boundAddress: SocketAddress
 }
 
