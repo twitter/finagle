@@ -12,7 +12,7 @@ import com.twitter.finagle.tracing.{Tracer, TracingFilter, DefaultTracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger}
 import com.twitter.jvm.Jvm
-import com.twitter.util.{Duration, Monitor, Timer, Closable, Return, Throw, Time}
+import com.twitter.util.{CloseAwaitably, Duration, Monitor, Timer, Closable, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -142,11 +142,11 @@ case class DefaultServer[Req, Rep, In, Out](
   }
   
   def serveRaw(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
-    new ListeningServer {
+    new ListeningServer with CloseAwaitably {
       val underlying = listener.listen(addr) { transport => 
         serveTransport(newStack(factory), transport)
       }
-      def close(deadline: Time) = {
+      def close(deadline: Time) = closeAwaitably {
         // The order here is important: by calling underlying.close()
         // first, we guarantee that no further connections are
         // created.

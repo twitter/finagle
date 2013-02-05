@@ -9,7 +9,7 @@ import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor, DefaultTimer}
-import com.twitter.util.{Duration, Future, Monitor, Promise, Timer, Time}
+import com.twitter.util.{CloseAwaitably, Duration, Future, Monitor, Promise, Timer, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.{Logger, Level}
@@ -230,7 +230,7 @@ case class Netty3Listener[In, Out](
   }
 
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
-    new ListeningServer {
+    new ListeningServer with CloseAwaitably {
       val closer = new Closer(timer)
 
       val newBridge = () => new ServerBridge(serveTransport, monitor, logger, statsReceiver, closer.activeChannels)
@@ -239,7 +239,9 @@ case class Netty3Listener[In, Out](
       bootstrap.setPipelineFactory(newServerPipelineFactory(newBridge))
       val ch = bootstrap.bind(addr)
 
-      def close(deadline: Time) = closer.close(bootstrap, ch, deadline)
+      def close(deadline: Time) = closeAwaitably {
+        closer.close(bootstrap, ch, deadline)
+      }
       def boundAddress = ch.getLocalAddress()
     }
 }

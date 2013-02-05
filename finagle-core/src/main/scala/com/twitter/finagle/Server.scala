@@ -1,10 +1,14 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.util.Closable
+import com.twitter.util.{Awaitable, Closable}
 import java.net.SocketAddress
 
-trait ListeningServer extends Closable with Group[SocketAddress] {
+trait ListeningServer 
+  extends Closable 
+  with Awaitable[Unit] 
+  with Group[SocketAddress]
+{
   lazy val members = Set(boundAddress)
   def boundAddress: SocketAddress
 }
