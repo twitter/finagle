@@ -32,7 +32,7 @@ class StatsReceiverBenchmark extends SimpleBenchmark {
   }
 
   def timeMetricsStatsInsertion(nreps: Int) {
-    testStatsInsertions(MetricsStatsReceiver.root, nreps)
+    testStatsInsertions(new MetricsStatsReceiver(), nreps)
   }
 
   def timeOstrichStatsQuery(n: Int) {
@@ -46,7 +46,7 @@ class StatsReceiverBenchmark extends SimpleBenchmark {
   }
 
   def timeMetricsStatsQuery(n: Int) {
-    val receiver = MetricsStatsReceiver.root
+    val receiver = new MetricsStatsReceiver()
     (0 until n) foreach { x => receiver.stat("my_stat").add(rnd.nextInt(x)) }
     var i = 0
     while (i < n) {

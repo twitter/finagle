@@ -7,6 +7,7 @@ class OstrichStatsReceiver(
   val delimiter: String = "/"
 ) extends StatsReceiverWithCumulativeGauges {
 
+  def this() = this(Stats, "/")
   // To avoid breaking the Java API:
   def this(repr: StatsCollection) = this(repr, "/")
 

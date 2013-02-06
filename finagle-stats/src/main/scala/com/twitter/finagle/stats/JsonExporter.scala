@@ -36,9 +36,7 @@ class JsonExporter(registry: Metrics) extends Service[HttpRequest, HttpResponse]
     import scala.collection.JavaConversions._
 
     // Create a TreeMap for sorting the keys
-    val samples = registry.sample().foldLeft(TreeMap.empty[String, Number]) {
-       (map, pair) => map + pair
-    }
+    val samples = TreeMap.empty[String, Number] ++ registry.sample()
     val printer = if (pretty) writer else prettyWriter
     printer.writeValueAsString(samples)
   }

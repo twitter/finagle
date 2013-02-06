@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
 
 object MetricsStatsReceiver {
-  val root = new MetricsStatsReceiver(Metrics.root())
   val defaultRegistry = Metrics.createDetached()
 }
 
@@ -66,9 +65,10 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiver {
   private[this] def format(names: Seq[String]) = names.mkString("/")
 }
 
-class MetricsExporter
-  extends JsonExporter(MetricsStatsReceiver.defaultRegistry)
-  with HttpMuxHandler 
+class MetricsExporter(registry: Metrics)
+  extends JsonExporter(registry)
+  with HttpMuxHandler
 {
+  def this() = this(MetricsStatsReceiver.defaultRegistry)
   val pattern = "/metrics.json"
 }

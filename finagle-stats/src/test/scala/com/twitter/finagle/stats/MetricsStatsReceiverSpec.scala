@@ -7,7 +7,7 @@ import com.twitter.common.metrics.Metrics
 
 class MetricsStatsReceiverSpec extends SpecificationWithJUnit with Mockito {
   "MetricsStatsReceiver stats system" should {
-    val rootReceiver = MetricsStatsReceiver.root
+    val rootReceiver = new MetricsStatsReceiver()
 
     def read(metrics: MetricsStatsReceiver)(name: String): Number =
       metrics.registry.sample().get(name)
