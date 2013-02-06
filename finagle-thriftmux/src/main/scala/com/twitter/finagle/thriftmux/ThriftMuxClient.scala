@@ -61,7 +61,7 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface](target: String, cls: Class[_]): Iface =
-    newIface(Group(target), cls)
+    newIface(Group.resolve(target), cls)
 
   /**
    * $clientUse
@@ -107,7 +107,7 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface: ClassManifest](target: String): Iface =
-    newIface[Iface](Group(target))
+    newIface[Iface](Group.resolve(target))
 
   /**
    * $clientUse

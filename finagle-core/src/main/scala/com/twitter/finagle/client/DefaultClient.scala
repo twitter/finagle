@@ -160,8 +160,15 @@ case class DefaultClient[Req, Rep](
       refcounted compose
       balanced
 
-  def newClient(group: Group[SocketAddress]) = copy(
-    statsReceiver = statsReceiver.scope(name),
-    hostStatsReceiver = hostStatsReceiver.scope(name)
-  ).newStack(group)
+  def newClient(group: Group[SocketAddress]) = {
+    val scoped: StatsReceiver => StatsReceiver = group match {
+      case NamedGroup(name) => _.scope(name)
+      case _ => identity
+    }
+
+    copy(
+      statsReceiver = scoped(statsReceiver.scope(name)),
+      hostStatsReceiver = scoped(hostStatsReceiver.scope(name))
+    ).newStack(group)
+  }
 }

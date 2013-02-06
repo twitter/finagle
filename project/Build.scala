@@ -18,6 +18,7 @@ object Finagle extends Build {
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" %"1.8" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
         case "2.9.2" => "2.9.1"
         case "2.10.0" => "2.10"

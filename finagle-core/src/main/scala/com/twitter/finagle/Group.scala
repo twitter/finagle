@@ -82,6 +82,21 @@ trait MutableGroup[T] extends Group[T] {
   def update(newMembers: Set[T])
 }
 
+/**
+ * A mixin trait to assign a ``name`` to the group. This is used
+ * to assign labels to groups that ascribe meaning to them.
+ */
+trait NamedGroup {
+  def name: String
+}
+
+object NamedGroup {
+  def unapply(g: Group[_]): Option[String] = g match {
+    case n: NamedGroup => Some(n.name)
+    case _ => None
+  }
+}
+
 trait GroupResolver extends (String => Group[SocketAddress]) {
   val scheme: String
 }
@@ -89,8 +104,8 @@ trait GroupResolver extends (String => Group[SocketAddress]) {
 class GroupResolverNotFoundException(scheme: String)
   extends Exception("Group resolver not found for scheme \"%s\"".format(scheme))
 
-class GroupDestinationInvalid(dest: String)
-  extends Exception("Group destination \"%s\" is not valid".format(dest))
+class GroupTargetInvalid(target: String)
+  extends Exception("Group target \"%s\" is not valid".format(target))
 
 object InetGroupResolver extends GroupResolver {
   val scheme = "inet"
@@ -101,18 +116,37 @@ object InetGroupResolver extends GroupResolver {
 }
 
 object Group {
+  /**
+   * Construct a `T`-typed static group from the given elements.
+   *
+   * @param staticMembers the members of the returned static group
+   */
   def apply[T](staticMembers: T*): Group[T] = new Group[T] {
     val members = Set(staticMembers:_*)
   }
 
+  /**
+   * The empty group of type `T`.
+   */
   def empty[T]: Group[T] = Group()
 
+  /**
+   * Creates a mutable group of type `T`.
+   *
+   * @param initial the initial elements of the group
+   */
   def mutable[T](initial: T*): MutableGroup[T] = new MutableGroup[T] {
     @volatile private[this] var current: Set[T] = Set(initial:_*)
     def members = current
     def update(newMembers: Set[T]) { current = newMembers }
   }
 
+  /**
+   * Construct a (dynamic) `Group` from the given
+   * [[com.twitter.finagle.builder.Cluster]]. Note that clusters
+   * are deprecated, so this constructor acts as a temporary
+   * bridge.
+   */
   def fromCluster[T](underlying: Cluster[T]): Group[T] = new Group[T] {
     val (snap, edits) = underlying.snap
     @volatile var current: Set[T] = snap.toSet
@@ -135,19 +169,76 @@ object Group {
     resolvers
   }
 
-  def apply(dest: String): Group[SocketAddress] =
-    dest.split("!", 2) match {
-      case Array(scheme, addr) =>
-        val r = resolvers.find(_.scheme == scheme) getOrElse {
-          throw new GroupResolverNotFoundException(scheme)
-        }
+  private sealed trait Token
+  private case class El(e: String) extends Token
+  private object Eq extends Token
+  private object Bang extends Token
+  
+  private def delex(ts: Seq[Token]) =
+    ts map {
+      case El(e) => e
+      case Bang => "!"
+      case Eq => "="
+    } mkString ""
 
-        r(addr)
+  private def lex(s: String) = {
+    s.foldLeft(List[Token]()) {
+      case (ts, '=') => Eq :: ts
+      case (ts, '!') => Bang :: ts
+      case (El(s) :: ts, c) => El(s+c) :: ts
+      case (ts, c) => El(""+c) :: ts
+    }
+  }.reverse
 
-      case Array(addr) =>
-        InetGroupResolver(addr)
+  /**
+   * Resolve a group from a target name, a string. Resolve uses
+   * `GroupResolver`s to do this. These are loaded via the Java
+   * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
+   * mechanism. The default resolver is "inet", resolving DNS
+   * name/port pairs.
+   *
+   * Target names have a simple grammar: The name of the resolver
+   * precedes the name of the address to be resolved, separated by
+   * an exclamation mark ("bang"). For example: inet!twitter.com:80
+   * resolves the name "twitter.com:80" using the "inet" resolver. If no
+   * resolver name is present, the inet resolver is used.
+   *
+   * Names resolved by this mechanism are also a 
+   * [[com.twitter.finagle.NamedGroup]]. By default, this name is 
+   * simply the `target` string, but it can be overriden by prefixing
+   * a name separated by an equals sign from the rest of the target.
+   * For example, the target "www=inet!google.com:80" resolves
+   * "google.com:80" with the inet resolver, but the returned group's
+   * [[com.twitter.finagle.NamedGroup]] name is "www".
+   */
+  def resolve(target: String): Group[SocketAddress] = 
+    new Group[SocketAddress] 
+      with Proxy 
+      with NamedGroup
+    {
+      val lexed = lex(target)
 
-      case _ =>
-        throw new GroupDestinationInvalid(dest)
+      val (name, stripped) = lexed match {
+        case El(n) :: Eq :: rest => (n, rest)
+        case Eq :: rest => ("", rest)
+        case rest => (target, rest)
+      }
+
+      val self = stripped match {
+        case (Eq :: _) | (Bang :: _) =>
+          throw new GroupTargetInvalid(target)
+
+        case El(scheme) :: Bang :: addr =>
+          val r = resolvers.find(_.scheme == scheme) getOrElse {
+            throw new GroupResolverNotFoundException(scheme)
+          }
+  
+          r(delex(addr))
+
+        case ts =>
+          InetGroupResolver(delex(ts))
+      }
+
+      def members = self.members
   }
 }
