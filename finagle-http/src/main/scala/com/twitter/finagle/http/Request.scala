@@ -1,11 +1,13 @@
 package com.twitter.finagle.http
 
+import com.google.common.base.Charsets
 import com.twitter.finagle.http.netty.HttpRequestProxy
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, HttpMessage,
-  HttpMethod, HttpRequest, HttpVersion, QueryStringEncoder}
+import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
+import org.jboss.netty.handler.codec.http._
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 
@@ -134,12 +136,30 @@ abstract class Request extends Message with HttpRequestProxy {
   /** Get response associated with request. */
   def getResponse(): Response = response
 
+  /** Encode as an HTTP message */
+  def encodeString(): String = {
+    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
+    encoder.offer(this)
+    val buffer = encoder.poll()
+    buffer.toString(Charsets.UTF_8)
+  }
+
   override def toString =
     "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
 }
 
 
 object Request {
+
+  /** Decode a Request from a String */
+  def decodeString(s: String): Request = {
+    val decoder = new DecoderEmbedder(
+      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+    decoder.offer(ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.UTF_8)))
+    val httpRequest = decoder.poll().asInstanceOf[HttpRequest]
+    assert(httpRequest ne null)
+    Request(httpRequest)
+  }
 
   /** Create Request from parameters.  Convenience method for testing. */
   def apply(params: Tuple2[String, String]*): MockRequest =
@@ -203,4 +223,31 @@ object Request {
     // Create an external MockRequest
     def external = withIp("8.8.8.8")
   }
+
+  /** Create a query string from URI and parameters. */
+  def queryString(uri: String, params: Tuple2[String, String]*): String = {
+    val encoder = new QueryStringEncoder(uri)
+    params.foreach { case (key, value) =>
+      encoder.addParam(key, value)
+    }
+    encoder.toString
+  }
+
+  /**
+   * Create a query string from parameters.  The results begins with "?" only if
+   * params is non-empty.
+   */
+  def queryString(params: Tuple2[String, String]*): String =
+    queryString("", params: _*)
+
+  /** Create a query string from URI and parameters. */
+  def queryString(uri: String, params: Map[String, String]): String =
+    queryString(uri, params.toSeq: _*)
+
+  /**
+   * Create a query string from parameters.  The results begins with "?" only if
+   * params is non-empty.
+   */
+  def queryString(params: Map[String, String]): String =
+    queryString("", params.toSeq: _*)
 }

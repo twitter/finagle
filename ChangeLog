@@ -1,3 +1,7 @@
+6.1.1			NOT RELEASED
+	* finagle-http: New Request/Response encode/decode functions
+	* finagle-http: New Request object queryString utility functions
+
 6.1.0			2013/01/30
 
 	* finagle: update util and ostrich dependencies

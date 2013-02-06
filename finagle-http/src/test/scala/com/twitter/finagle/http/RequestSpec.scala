@@ -61,5 +61,37 @@ class RequestSpec extends SpecificationWithJUnit with DataTables {
       response.version must_== Version.Http11
       response.status  must_== Status.Ok
     }
+
+    "toHttpString" in {
+      val request = Request("/search.json", "q" -> "twitter")
+      request.headers("Host") = "search.twitter.com"
+
+      val expected = "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n"
+
+      val actual = request.encodeString()
+      actual must_== expected
+    }
+
+    "decode" in {
+      val request = Request.decodeString(
+        "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n")
+      request.path            must_== "/search.json"
+      request.params("q")     must_== "twitter"
+      request.headers("Host") must_== "search.twitter.com"
+    }
+
+    "queryString" in {
+      Request.queryString()                                          must_== ""
+      Request.queryString(Map.empty[String, String])                 must_== ""
+      Request.queryString("/search.json")                            must_== "/search.json"
+      Request.queryString("/search.json", Map.empty[String, String]) must_== "/search.json"
+
+      Request.queryString("/search.json", "q" -> "twitter")      must_== "/search.json?q=twitter"
+      Request.queryString("/search.json", Map("q" -> "twitter")) must_== "/search.json?q=twitter"
+      Request.queryString("q" -> "twitter")                      must_== "?q=twitter"
+      Request.queryString(Map("q" -> "twitter"))                 must_== "?q=twitter"
+
+      Request.queryString("q!" -> "twitter!") must_== "?q%21=twitter%21"
+    }
   }
 }

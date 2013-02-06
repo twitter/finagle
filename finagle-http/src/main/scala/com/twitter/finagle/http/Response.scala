@@ -1,9 +1,11 @@
 package com.twitter.finagle.http
 
+import com.google.common.base.Charsets
 import com.twitter.finagle.http.netty.HttpResponseProxy
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponse,
-  HttpResponseStatus, HttpVersion}
-
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.channel.Channel
+import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
+import org.jboss.netty.handler.codec.http._
 
 /**
  * Rich HttpResponse
@@ -20,6 +22,14 @@ abstract class Response extends Message with HttpResponseProxy {
   def getStatusCode(): Int      = statusCode
   def setStatusCode(value: Int) { statusCode = value }
 
+  /** Encode as an HTTP message */
+  def encodeString(): String = {
+    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpResponseEncoder)
+    encoder.offer(this)
+    val buffer = encoder.poll()
+    buffer.toString(Charsets.UTF_8)
+  }
+
   override def toString =
     "Response(\"" + version + " " + status + "\")"
 }
@@ -31,6 +41,16 @@ class MockResponse extends Response {
 
 
 object Response {
+
+  /** Decode a Response from a String */
+  def decodeString(s: String): Response = {
+    val decoder = new DecoderEmbedder(
+      new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+    decoder.offer(ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.UTF_8)))
+    val httpResponse = decoder.poll().asInstanceOf[HttpResponse]
+    assert(httpResponse ne null)
+    Response(httpResponse)
+  }
 
   /** Create Response.  Convenience method for testing. */
   def apply(): Response =
