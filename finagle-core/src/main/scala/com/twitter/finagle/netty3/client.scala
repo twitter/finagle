@@ -77,10 +77,10 @@ case class Netty3TransporterTLSConfig(
  * address), provides a typed transport for communicating with this
  * endpoint.
  *
- * @tparam Req the type of requests. The given pipeline must consume
+ * @tparam In the type of requests. The given pipeline must consume
  * `Req`-typed objects
  *
- * @tparam Rep the type of replies. The given pipeline must produce
+ * @tparam Out the type of replies. The given pipeline must produce
  * objects of this type.
  *
  * @param pipelineFactory the pipeline factory that implements the
@@ -116,10 +116,7 @@ case class Netty3Transporter[In, Out](
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,
-  channelOptions: Map[String, Object] = Map(
-    "tcpNoDelay" -> java.lang.Boolean.TRUE,
-    "reuseAddress" -> java.lang.Boolean.TRUE
-  )
+  channelOptions: Map[String, Object] = Netty3Transporter.defaultChannelOptions
 ) extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
   // Note that this may have the undesired effect of creating extra
   // gauges when intermediate copies of a transporter is made. This
@@ -199,4 +196,8 @@ object Netty3Transporter {
   val channelFactory: ChannelFactory = new NioClientSocketChannelFactory(Executor, Executor) {
     override def releaseExternalResources() = ()  // no-op; unreleasable
   }
+  val defaultChannelOptions: Map[String, Object] = Map(
+    "tcpNoDelay" -> java.lang.Boolean.TRUE,
+    "reuseAddress" -> java.lang.Boolean.TRUE
+  )
 }
