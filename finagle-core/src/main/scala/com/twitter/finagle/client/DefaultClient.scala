@@ -76,12 +76,13 @@ case class DefaultClient[Req, Rep](
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
     val hostStats = {
-      val rollupReceiver = new RollupStatsReceiver(hostStatsReceiver.scope(
+      val host = new RollupStatsReceiver(hostStatsReceiver.scope(
         sa match {
          case ia: InetSocketAddress => "%s:%d".format(ia.getHostName, ia.getPort)
          case other => other.toString
         }))
-      BroadcastStatsReceiver(Seq(statsReceiver, rollupReceiver))
+      val global = new RollupStatsReceiver(statsReceiver)
+      BroadcastStatsReceiver(Seq(host, global))
     }
 
     val lifetimeLimited: Transformer[Req, Rep] = {
