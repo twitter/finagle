@@ -1,3 +1,9 @@
+import com.twitter.conversions.time._
+import com.twitter.util.Try
+import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.protocol._
+import com.twitter.util.Future
+import java.net.InetSocketAddress
 import java.sql.Date
 
 case class SwimmingRecord(

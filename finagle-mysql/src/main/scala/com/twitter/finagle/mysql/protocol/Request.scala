@@ -1,5 +1,9 @@
 package com.twitter.finagle.mysql.protocol
 
+import com.twitter.logging.Logger
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers.{wrappedBuffer, EMPTY_BUFFER}
+
 
 object Command {
   val COM_SLEEP               = 0x00.toByte // internal thread state
