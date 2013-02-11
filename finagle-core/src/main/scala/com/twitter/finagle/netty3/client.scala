@@ -9,7 +9,7 @@ import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
 import com.twitter.finagle.stats.{DefaultStatsReceiver,   StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport,   Transport}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Promise, Duration, NonFatal}
+import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
@@ -24,10 +24,16 @@ import scala.collection.JavaConverters._
 /** Bridges a netty3 channel with a transport */
 private[netty3] class ChannelConnector[In, Out](
   newChannel: () => Channel,
-  newTransport: Channel => Transport[In, Out]
+  newTransport: Channel => Transport[In, Out],
+  statsReceiver: StatsReceiver
 ) extends (SocketAddress => Future[Transport[In, Out]]) {
+  private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
+  private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
+  private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
+
   def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
     require(addr != null)
+    val elapsed = Stopwatch.start()
 
     val ch = try newChannel() catch {
       case NonFatal(exc) => return Future.exception(exc)
@@ -46,12 +52,17 @@ private[netty3] class ChannelConnector[In, Out](
 
     connectFuture.addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture) {
-        if (f.isSuccess)
+        val latency = elapsed().inMilliseconds
+        if (f.isSuccess) {
+          connectLatencyStat.add(latency)
           promise.setValue(transport)
-        else if (f.isCancelled)
+        } else if (f.isCancelled) {
+          cancelledConnects.incr()
           promise.setException(WriteException(new CancelledConnectionException))
-        else
+        } else {
+          failedConnectLatencyStat.add(latency)
           promise.setException(WriteException(f.getCause))
+        }
       }
     })
 
@@ -187,7 +198,8 @@ case class Netty3Transporter[In, Out](
   }
 
   def apply(addr: SocketAddress, statsReceiver: StatsReceiver): Future[Transport[In, Out]] = {
-    val conn = new ChannelConnector[In, Out](() => newConfiguredChannel(addr, statsReceiver), newTransport)
+    val conn = new ChannelConnector[In, Out](
+      () => newConfiguredChannel(addr, statsReceiver), newTransport, statsReceiver)
     conn(addr)
   }
 }
