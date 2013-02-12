@@ -3,6 +3,7 @@ package com.twitter.finagle.mysql.protocol
 import com.twitter.finagle.mysql.ClientError
 import java.nio.charset.{Charset => JCharset}
 import java.nio.ByteOrder
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 /**
  * The BufferReader and BufferWriter interfaces provide methods for
@@ -37,7 +38,7 @@ object Buffer {
    * avoids copying the underlying arrays.
    */
   def toChannelBuffer(bytes: Array[Byte]*) =
-    wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes: _*)
+    ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes: _*)
 }
 
 trait BufferReader {

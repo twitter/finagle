@@ -1,5 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
+import org.specs.SpecificationWithJUnit
 
 class ServersGreetingSpec extends SpecificationWithJUnit {
   "ServersGreeting" should {

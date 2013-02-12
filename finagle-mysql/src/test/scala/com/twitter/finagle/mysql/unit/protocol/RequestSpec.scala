@@ -3,6 +3,7 @@ package com.twitter.finagle.mysql.protocol
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Date
 import java.util.Calendar
+import org.specs.SpecificationWithJUnit
 
 class RequestSpec extends SpecificationWithJUnit {
   "Request" should {

@@ -1,6 +1,10 @@
 package com.twitter.finagle.mysql
 
+import com.twitter.finagle.mysql.protocol._
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.mysql.util.Query
+import com.twitter.util.Future
 
 object Client {
   /**

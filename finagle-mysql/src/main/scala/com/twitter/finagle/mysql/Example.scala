@@ -1,3 +1,8 @@
+package com.twitter.finagle.mysql
+
+import com.twitter.finagle.mysql.protocol._
+import com.twitter.util.{Future, Try}
+import com.twitter.conversions.time._
 import java.sql.Date
 
 case class SwimmingRecord(

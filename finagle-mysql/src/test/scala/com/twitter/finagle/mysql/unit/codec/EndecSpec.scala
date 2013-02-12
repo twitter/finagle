@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.mysql.protocol.{Error => MySQLError}
+import org.specs.SpecificationWithJUnit
 
 class EndecSpec extends SpecificationWithJUnit {
   "Decoder" should {

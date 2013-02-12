@@ -1,5 +1,6 @@
 package com.twitter.finagle.mysql.protocol
 
+import org.specs.SpecificationWithJUnit
 
 class LoginRequestSpec extends SpecificationWithJUnit {
   "Login Request" should {

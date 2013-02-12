@@ -1,6 +1,10 @@
 package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.protocol.{Buffer, Packet}
+import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
+import org.jboss.netty.buffer.ChannelBuffers
+import org.specs.mock.Mockito
+import org.specs.SpecificationWithJUnit
 
 class PacketFrameDecoderSpec extends SpecificationWithJUnit with Mockito {
   val ctx = mock[ChannelHandlerContext]
@@ -9,7 +13,7 @@ class PacketFrameDecoderSpec extends SpecificationWithJUnit with Mockito {
   def makeBuffer(packet: Packet) = {
     val header = packet.header.toChannelBuffer
     val body = Buffer.toChannelBuffer(packet.body)
-    wrappedBuffer(header, body)
+    ChannelBuffers.wrappedBuffer(header, body)
   }
 
   "PacketFrameDecoder" should {

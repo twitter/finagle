@@ -1,7 +1,11 @@
 package com.twitter.finagle.mysql.integration
 
+import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.protocol._
 import java.net.{ServerSocket, BindException}
 import java.sql.Date
+import org.specs.SpecificationWithJUnit
+import scala.collection.mutable
 
 object Connection {
   // Requires mysql running @ localhost:3306

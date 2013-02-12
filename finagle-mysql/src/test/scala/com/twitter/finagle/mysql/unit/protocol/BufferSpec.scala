@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql.protocol
 
 import com.twitter.finagle.mysql.ClientError
+import org.specs.SpecificationWithJUnit
 
 class BufferSpec extends SpecificationWithJUnit {
   "Buffer" should {

@@ -1,5 +1,7 @@
 package com.twitter.finagle.mysql.protocol
 
+import com.twitter.logging.Logger
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object Command {
   val COM_SLEEP               = 0x00.toByte // internal thread state
@@ -58,8 +60,8 @@ class SimpleCommandRequest(command: Byte, buffer: Array[Byte])
  * NOOP Request used internally by this client.
  */
 case object ClientInternalGreet extends Request(0) {
-  override val data = EMPTY_BUFFER
-  override def toChannelBuffer = EMPTY_BUFFER
+  override val data = ChannelBuffers.EMPTY_BUFFER
+  override def toChannelBuffer = ChannelBuffers.EMPTY_BUFFER
 }
 
 case object PingRequest
@@ -167,9 +169,9 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
         // only add type data if the prepared statement has new parameters.
         val types = BufferWriter(new Array[Byte](ps.numberOfParams * 2))
         paramsList foreach { writeTypeCode(_, types) }
-        wrappedBuffer(initialBuffer, types.toChannelBuffer, values.toChannelBuffer)
+        ChannelBuffers.wrappedBuffer(initialBuffer, types.toChannelBuffer, values.toChannelBuffer)
       } else
-          wrappedBuffer(initialBuffer, values.toChannelBuffer)
+        ChannelBuffers.wrappedBuffer(initialBuffer, values.toChannelBuffer)
     }
 }
 

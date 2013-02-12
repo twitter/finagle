@@ -2,6 +2,9 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.ClientError
 import com.twitter.finagle.mysql.protocol._
+import com.twitter.logging.Logger
+import org.jboss.netty.channel._
+import org.jboss.netty.buffer.ChannelBuffer
 
 sealed trait State
 case object Idle extends State
