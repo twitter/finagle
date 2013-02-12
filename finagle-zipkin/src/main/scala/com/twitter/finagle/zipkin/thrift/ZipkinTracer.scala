@@ -10,31 +10,53 @@ object ZipkinTracer {
   private[this] val map =
     new HashMap[String, ZipkinTracer] with SynchronizedMap[String, ZipkinTracer]
 
+  val default = mk()
+
   /**
    * @param scribeHost Host to send trace data to
    * @param scribePort Port to send trace data to
    * @param statsReceiver Where to log information about tracing success/failures
    * @param sampleRate How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
    */
+  @deprecated("Use mk() instead", "6.1.0")
   def apply(scribeHost: String = "localhost",
             scribePort: Int = 1463,
             statsReceiver: StatsReceiver = NullStatsReceiver,
             sampleRate: Float = Sampler.DefaultSampleRate
-  ): Tracer.Factory = synchronized {
-    val tracer = map.getOrElseUpdate(scribeHost + ":" + scribePort, {
+  ): Tracer.Factory = () => mk(scribeHost, scribePort, statsReceiver, sampleRate)
+
+  /**
+   * @param host Host to send trace data to
+   * @param port Port to send trace data to
+   * @param statsReceiver Where to log information about tracing success/failures
+   * @param sampleRate How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
+   */
+  def mk(host: String = "localhost",
+         port: Int = 1463,
+         statsReceiver: StatsReceiver = NullStatsReceiver,
+         sampleRate: Float = Sampler.DefaultSampleRate
+  ): Tracer = synchronized {
+    val tracer = map.getOrElseUpdate(host + ":" + port, {
       val raw = new RawZipkinTracer(
-        scribeHost, scribePort, statsReceiver.scope("zipkin"))
+        host, port, statsReceiver.scope("zipkin"))
       new ZipkinTracer(raw, sampleRate)
     })
 
-    () => tracer
+    tracer
   }
 
   /**
    * Util method since named parameters can't be called from Java
    * @param sr stats receiver to send successes/failures to
    */
-  def apply(sr: StatsReceiver): Tracer.Factory = apply(statsReceiver = sr)
+  @deprecated("Use mk() instead", "6.1.0")
+  def apply(sr: StatsReceiver): Tracer.Factory = () => mk(statsReceiver = sr)
+
+  /**
+   * Util method since named parameters can't be called from Java
+   * @param sr stats receiver to send successes/failures to
+   */
+  def mk(statsReceiver: StatsReceiver): Tracer = mk(statsReceiver = statsReceiver)
 }
 
 /**
