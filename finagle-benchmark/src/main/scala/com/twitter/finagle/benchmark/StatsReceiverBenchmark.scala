@@ -37,7 +37,7 @@ class StatsReceiverBenchmark extends SimpleBenchmark {
 
   def timeOstrichStatsQuery(n: Int) {
     val receiver = new OstrichStatsReceiver()
-    (0 until n) foreach { x => receiver.stat("my_stat").add(rnd.nextInt(x)) }
+    (1 to n) foreach { x => receiver.stat("my_stat").add(rnd.nextInt(x)) }
     var i = 0
     while (i < n) {
       receiver.repr.getMetric("my_stat")().toMap
@@ -47,7 +47,7 @@ class StatsReceiverBenchmark extends SimpleBenchmark {
 
   def timeMetricsStatsQuery(n: Int) {
     val receiver = new MetricsStatsReceiver()
-    (0 until n) foreach { x => receiver.stat("my_stat").add(rnd.nextInt(x)) }
+    (1 to n) foreach { x => receiver.stat("my_stat").add(rnd.nextInt(x)) }
     var i = 0
     while (i < n) {
       receiver.registry.sample()
