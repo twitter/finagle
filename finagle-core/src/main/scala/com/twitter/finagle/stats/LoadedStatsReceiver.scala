@@ -12,3 +12,5 @@ private[finagle] class LoadedStatsReceiver extends {
     BroadcastStatsReceiver(receivers)
   }
 } with StatsReceiverProxy
+
+object LoadedStatsReceiver extends LoadedStatsReceiver

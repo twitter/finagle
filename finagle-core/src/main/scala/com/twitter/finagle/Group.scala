@@ -74,6 +74,21 @@ trait Group[T] { outer =>
 
   /** Synonymous to `members` */
   def apply(): Set[T] = members
+  
+  /**
+   * Name the group `n`.
+   *
+   * @return `this` mixed in with `NamedGroup`, named `n`
+   */
+  def named(n: String): Group[T] = 
+    new Group[T]
+      with Proxy
+      with NamedGroup
+    {
+      val self = outer
+      def members = self.members
+      val name = n
+    }
 
   override def toString = "Group(%s)".format(members mkString ", ")
 }

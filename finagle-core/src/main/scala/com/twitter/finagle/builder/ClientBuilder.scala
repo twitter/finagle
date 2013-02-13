@@ -680,12 +680,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // The transporter connects to actual endpoints, providing a typed
     // session transport.
     val transporter = Netty3Transporter[Req, Rep](
+      name = config.name,
       pipelineFactory = codec.pipelineFactory,
       newChannel = newChannel,
       newTransport = codec.newClientTransport(_, statsReceiver),
       tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
       socksProxy = config.socksProxy,
-      statsReceiver = statsReceiver,
       channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.Top,
       channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.Top,
       channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.info) },

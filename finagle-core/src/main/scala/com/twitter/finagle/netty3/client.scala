@@ -6,19 +6,21 @@ import com.twitter.finagle.channel.{
 }
 import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
-import com.twitter.finagle.stats.{DefaultStatsReceiver,   StatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver,   StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport,   Transport}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
+import java.util.IdentityHashMap
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel.{
   Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, ChannelPipelineFactory,
   Channels
 }
 import org.jboss.netty.handler.timeout.IdleStateHandler
+import org.jboss.netty.channel.ChannelHandler
 import scala.collection.JavaConverters._
 
 /** Bridges a netty3 channel with a transport */
@@ -118,30 +120,35 @@ case class Netty3TransporterTLSConfig(
  * the channel prior to establishing a new connection.
  */
 case class Netty3Transporter[In, Out](
+  name: String,
   pipelineFactory: ChannelPipelineFactory,
   newChannel: ChannelPipeline => Channel = Netty3Transporter.channelFactory.newChannel(_),
   newTransport: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   socksProxy: Option[SocketAddress] = None,
-  statsReceiver: StatsReceiver = DefaultStatsReceiver,
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,
   channelOptions: Map[String, Object] = Netty3Transporter.defaultChannelOptions
 ) extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
-  // Note that this may have the undesired effect of creating extra
-  // gauges when intermediate copies of a transporter is made. This
-  // is sadly unavoidable without proper lifecycle management.
-  private val channelStatsHandler = {
-    val nconn = new AtomicLong(0)
-    statsReceiver.provideGauge("connections") { nconn.get }
-    new ChannelStatsHandler(statsReceiver, nconn)
+  private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
+  
+  // TODO: These gauges will stay around forever. It's
+  // fine, but it would be nice to clean them up.
+  def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
+    if (!(statsHandlers containsKey statsReceiver)) {
+      val nconn = new AtomicLong(0)
+      statsReceiver.provideGauge("connections") { nconn.get() }
+      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver, nconn))
+    }
+
+    statsHandlers.get(statsReceiver)
   }
 
   private def newPipeline(addr: SocketAddress, statsReceiver: StatsReceiver) = {
     val pipeline = pipelineFactory.getPipeline()
 
-    pipeline.addFirst("channelStatsHandler", channelStatsHandler)
+    pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
     pipeline.addFirst("channelRequestStatsHandler",
       new ChannelRequestStatsHandler(statsReceiver)
     )
@@ -199,7 +206,8 @@ case class Netty3Transporter[In, Out](
 
   def apply(addr: SocketAddress, statsReceiver: StatsReceiver): Future[Transport[In, Out]] = {
     val conn = new ChannelConnector[In, Out](
-      () => newConfiguredChannel(addr, statsReceiver), newTransport, statsReceiver)
+      () => newConfiguredChannel(addr, statsReceiver),
+      newTransport, statsReceiver)
     conn(addr)
   }
 }

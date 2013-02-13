@@ -69,10 +69,8 @@ trait Server[Req, Rep] {
     serve(addr, ServiceFactory.const(service))
 
   /** $target */
-  def serve(target: String, service: ServiceFactory[Req, Rep]): ListeningServer = {
-    val Seq(addr) = InetSocketAddressUtil.parseHosts(target)
-    serve(addr, service)
-  }
+  def serve(target: String, service: ServiceFactory[Req, Rep]): ListeningServer =
+    serve(Resolver.resolve(target), service)
 
   /** $target */
   def serve(target: String, service: Service[Req, Rep]): ListeningServer = {

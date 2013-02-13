@@ -228,8 +228,17 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
 }
 
 object NullStatsReceiver extends NullStatsReceiver
+
 object DefaultStatsReceiver extends  {
-  val self: StatsReceiver = (new LoadedStatsReceiver).scope("finagle")
+  val self: StatsReceiver = LoadedStatsReceiver.scope("finagle")
+} with StatsReceiverProxy
+
+object ClientStatsReceiver extends {
+  val self: StatsReceiver = LoadedStatsReceiver.scope("clnt")
+} with StatsReceiverProxy
+
+object ServerStatsReceiver extends {
+  val self: StatsReceiver = LoadedStatsReceiver.scope("srv")
 } with StatsReceiverProxy
 
 /** In-memory stats receiver for testing. */

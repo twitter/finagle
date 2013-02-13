@@ -7,6 +7,7 @@ import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor,   Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -414,6 +415,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val nettyTimer = DefaultTimer
     
     val listener = Netty3Listener[Rep, Req](
+      name = config.name,
       pipelineFactory = codec.pipelineFactory,
       channelSnooper =
         if (config.logChannelActivity) Some(ChannelSnooper(config.name)(logger.info))
@@ -459,7 +461,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       tracer = tracer
     )
 
-    val listeningServer = server.serveRaw(config.bindTo, serviceFactory)
+    val listeningServer = server.serve(config.bindTo, serviceFactory)
     val closed = new AtomicBoolean(false)
 
     if (!config.daemon) ExitGuard.guard()

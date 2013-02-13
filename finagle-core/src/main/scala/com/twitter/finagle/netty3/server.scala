@@ -6,11 +6,12 @@ import com.twitter.finagle.channel.{
 }
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{ServerStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor, DefaultTimer}
 import com.twitter.util.{CloseAwaitably, Duration, Future, Monitor, Promise, Timer, Time}
 import java.net.SocketAddress
+import java.util.IdentityHashMap
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.{Logger, Level}
 import org.jboss.netty.bootstrap.ServerBootstrap
@@ -159,6 +160,7 @@ object Netty3Listener {
  * @param tlsConfig When present, SSL is used to provide session security.
  */
 case class Netty3Listener[In, Out](
+  name: String,
   pipelineFactory: ChannelPipelineFactory,
   channelSnooper: Option[ChannelSnooper] = None,
   channelFactory: ServerChannelFactory = Netty3Listener.channelFactory,
@@ -174,69 +176,84 @@ case class Netty3Listener[In, Out](
   tlsConfig: Option[Netty3ListenerTLSConfig] = None,
   timer: Timer = DefaultTimer.twitter,
   nettyTimer: org.jboss.netty.util.Timer = DefaultTimer,
-  statsReceiver: StatsReceiver = DefaultStatsReceiver,
+  statsReceiver: StatsReceiver = ServerStatsReceiver,
   monitor: Monitor = DefaultMonitor,
   logger: java.util.logging.Logger = DefaultLogger
 ) extends Listener[In, Out] {
   import Netty3Listener._
 
-  // Note that this may have the undesired effect of creating extra
-  // gauges when intermediate copies of a transporter is made. This
-  // is sadly unavoidable without proper lifecycle management.
-  private val channelStatsHandler = {
-    val nconn = new AtomicLong(0)
-    statsReceiver.provideGauge("connections") { nconn.get }
-    new ChannelStatsHandler(statsReceiver, nconn)
-  }
+  private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
 
-  def newServerPipelineFactory(newBridge: () => ChannelHandler) = new ChannelPipelineFactory {
-    def getPipeline() = {
-      val pipeline = pipelineFactory.getPipeline()
-
-      for (channelSnooper <- channelSnooper)
-        pipeline.addFirst("channelLogger", channelSnooper)
-
-      if (statsReceiver ne NullStatsReceiver)
-        pipeline.addFirst("channelStatsHandler", channelStatsHandler)
-
-      // Apply read timeouts *after* request decoding, preventing
-      // death from clients trying to DoS by slowly trickling in
-      // bytes to our (accumulating) codec.
-      if (channelReadTimeout < Duration.Top) {
-        val (timeoutValue, timeoutUnit) = channelReadTimeout.inTimeUnit
-        pipeline.addLast(
-          "readTimeout",
-          new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
-      }
-
-      if (channelWriteCompletionTimeout < Duration.Top) {
-        pipeline.addLast(
-          "writeCompletionTimeout",
-          new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
-      }
-
-      for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
-        addTlsToPipeline(pipeline, newEngine)
-
-      if (statsReceiver ne NullStatsReceiver) {
-        pipeline.addLast(
-          "channelRequestStatsHandler",
-          new ChannelRequestStatsHandler(statsReceiver))
-      }
-
-      pipeline.addLast("finagleBridge", newBridge())
-      pipeline
+  // TODO: These gauges will stay around forever. It's
+  // fine, but it would be nice to clean them up.
+  def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
+    if (!(statsHandlers containsKey statsReceiver)) {
+      val nconn = new AtomicLong(0)
+      statsReceiver.provideGauge("connections") { nconn.get() }
+      statsHandlers.put(statsReceiver, new ChannelStatsHandler(statsReceiver, nconn))
     }
+
+    statsHandlers.get(statsReceiver)
   }
+
+  def newServerPipelineFactory(statsReceiver: StatsReceiver, newBridge: () => ChannelHandler) = 
+    new ChannelPipelineFactory {
+      def getPipeline() = {
+        val pipeline = pipelineFactory.getPipeline()
+  
+        for (channelSnooper <- channelSnooper)
+          pipeline.addFirst("channelLogger", channelSnooper)
+  
+        if (statsReceiver ne NullStatsReceiver)
+          pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
+  
+        // Apply read timeouts *after* request decoding, preventing
+        // death from clients trying to DoS by slowly trickling in
+        // bytes to our (accumulating) codec.
+        if (channelReadTimeout < Duration.Top) {
+          val (timeoutValue, timeoutUnit) = channelReadTimeout.inTimeUnit
+          pipeline.addLast(
+            "readTimeout",
+            new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
+        }
+  
+        if (channelWriteCompletionTimeout < Duration.Top) {
+          pipeline.addLast(
+            "writeCompletionTimeout",
+            new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
+        }
+  
+        for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
+          addTlsToPipeline(pipeline, newEngine)
+  
+        if (statsReceiver ne NullStatsReceiver) {
+          pipeline.addLast(
+            "channelRequestStatsHandler",
+            new ChannelRequestStatsHandler(statsReceiver))
+        }
+  
+        pipeline.addLast("finagleBridge", newBridge())
+        pipeline
+      }
+    }
 
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
     new ListeningServer with CloseAwaitably {
+      val scopedStatsReceiver = statsReceiver match {
+        case ServerStatsReceiver =>
+          statsReceiver.scope(Resolver.nameOf(addr) getOrElse name)
+        case sr => sr
+      }
+
       val closer = new Closer(timer)
 
-      val newBridge = () => new ServerBridge(serveTransport, monitor, logger, statsReceiver, closer.activeChannels)
+      val newBridge = () => new ServerBridge(
+        serveTransport, monitor, logger, 
+        scopedStatsReceiver, closer.activeChannels)
       val bootstrap = new ServerBootstrap(channelFactory)
       bootstrap.setOptions(bootstrapOptions.asJava)
-      bootstrap.setPipelineFactory(newServerPipelineFactory(newBridge))
+      bootstrap.setPipelineFactory(
+        newServerPipelineFactory(scopedStatsReceiver, newBridge))
       val ch = bootstrap.bind(addr)
 
       def close(deadline: Time) = closeAwaitably {

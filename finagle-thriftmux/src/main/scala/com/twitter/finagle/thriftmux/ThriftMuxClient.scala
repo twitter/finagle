@@ -1,12 +1,12 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.NamedGroup
 import com.twitter.util.Future
 import java.net.SocketAddress
 import org.apache.thrift.protocol.{TProtocolFactory, TBinaryProtocol}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-
 
 /**
  *
@@ -90,11 +90,16 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
         case cause: NoSuchMethodException =>
           throw new IllegalArgumentException("Iface is not a valid scrooge iface", cause)
       }
-  
+      
+      val statsReceiver = group match {
+        case NamedGroup(name) => ClientStatsReceiver.scope(name)
+        case _ => ClientStatsReceiver.scope("mux")
+      }
+
       val underlying = newClient(group).toService
       constructor.newInstance(
         underlying, protocolFactory, 
-        None, DefaultStatsReceiver)
+        None, statsReceiver)
     } else {
       throw new IllegalArgumentException(
         "Iface %s is not a valid thrift iface".format(clsName))

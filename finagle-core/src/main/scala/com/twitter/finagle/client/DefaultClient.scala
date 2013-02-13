@@ -11,8 +11,8 @@ import com.twitter.finagle.service.{
   TimeoutFilter
 }
 import com.twitter.finagle.stats.{
-  BroadcastStatsReceiver, DefaultStatsReceiver, RollupStatsReceiver,
-  StatsReceiver
+  BroadcastStatsReceiver, ClientStatsReceiver, RollupStatsReceiver,
+  StatsReceiver, NullStatsReceiver
 }
 import com.twitter.finagle.tracing.{DefaultTracer, Tracer, TracingFilter}
 import com.twitter.finagle.util.{DefaultTimer, DefaultMonitor}
@@ -68,8 +68,8 @@ case class DefaultClient[Req, Rep](
   },
   serviceTimeout: Duration = Duration.Top,
   timer: Timer = DefaultTimer.twitter,
-  statsReceiver: StatsReceiver = DefaultStatsReceiver,
-  hostStatsReceiver: StatsReceiver = DefaultStatsReceiver,
+  statsReceiver: StatsReceiver = ClientStatsReceiver,
+  hostStatsReceiver: StatsReceiver = NullStatsReceiver,
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor
 ) extends Client[Req, Rep] {
@@ -132,44 +132,45 @@ case class DefaultClient[Req, Rep](
     newStack(sa)
   }
 
-  private val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
-
-  val timeLimited: Transformer[Req, Rep] = factory =>
-    if (serviceTimeout == Duration.Top) factory else {
-      val exception = new ServiceTimeoutException(serviceTimeout)
-      new TimeoutFactory(factory, serviceTimeout, exception, timer)
+  val newStack: Group[SocketAddress] => ServiceFactory[Req, Rep] = {
+    val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
+  
+    val timeLimited: Transformer[Req, Rep] = factory =>
+      if (serviceTimeout == Duration.Top) factory else {
+        val exception = new ServiceTimeoutException(serviceTimeout)
+        new TimeoutFactory(factory, serviceTimeout, exception, timer)
+      }
+  
+    val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer) andThen _
+    val observed: Transformer[Req, Rep] = new StatsFactoryWrapper(_, statsReceiver)
+  
+    val noBrokersException = new NoBrokersAvailableException(name)
+  
+    val balanced: Group[SocketAddress] => ServiceFactory[Req, Rep] = group => {
+      val endpoints = group map { addr => (addr, bindStack(addr)) }
+      new HeapBalancer(
+        endpoints,
+        statsReceiver.scope("loadbalancer"),
+        hostStatsReceiver.scopeSuffix("loadbalancer"),
+        noBrokersException)
     }
 
-  val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer) andThen _
-  val observed: Transformer[Req, Rep] = new StatsFactoryWrapper(_, statsReceiver)
-
-  val noBrokersException = new NoBrokersAvailableException(name)
-
-  val balanced: Group[SocketAddress] => ServiceFactory[Req, Rep] = group => {
-    val endpoints = group map { addr => (addr, bindStack(addr)) }
-    new HeapBalancer(
-      endpoints,
-      statsReceiver.scope("loadbalancer"),
-      hostStatsReceiver.scopeSuffix("loadbalancer"),
-      noBrokersException)
-  }
-
-  val newStack: Group[SocketAddress] => ServiceFactory[Req, Rep] =
     traced compose
       observed compose
       timeLimited compose
       refcounted compose
       balanced
+  }
 
   def newClient(group: Group[SocketAddress]) = {
     val scoped: StatsReceiver => StatsReceiver = group match {
-      case NamedGroup(name) => _.scope(name)
-      case _ => identity
+      case NamedGroup(groupName) => _.scope(groupName)
+      case _ => _.scope(name)
     }
 
     copy(
-      statsReceiver = scoped(statsReceiver.scope(name)),
-      hostStatsReceiver = scoped(hostStatsReceiver.scope(name))
+      statsReceiver = scoped(statsReceiver),
+      hostStatsReceiver = scoped(hostStatsReceiver)
     ).newStack(group)
   }
 }

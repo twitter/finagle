@@ -2,7 +2,7 @@ package com.twitter.finagle.topo
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.http.Http
+import com.twitter.finagle.Http
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.logging.{Level, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
@@ -33,14 +33,10 @@ object Client {
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(statsPort, 100/*backlog*/, runtime)
     adminService.start()
-
-    val builder = ClientBuilder()
-      .reportTo(new OstrichStatsReceiver)
-      .hosts(hostport)
-      .codec(Http())
-      .hostConnectionLimit(1)
+    
+    val service = Http.newService(hostport)
 
     for (which <- 0 until n)
-      go(builder.name("client%d".format(which)).build())
+      go(service)
   }
 }
