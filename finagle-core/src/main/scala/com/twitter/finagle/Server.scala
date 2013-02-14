@@ -1,17 +1,17 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.util.{Awaitable, Closable}
-import java.net.SocketAddress
+import com.twitter.util.{Awaitable, Closable, CloseAwaitably, Future, Time}
+import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * Trait ListeningServer represents a bound and listening
- * server. Closing a server instance unbinds the port and 
+ * server. Closing a server instance unbinds the port and
  * relinquishes resources that are associated with the server.
  */
-trait ListeningServer 
-  extends Closable 
-  with Awaitable[Unit] 
+trait ListeningServer
+  extends Closable
+  with Awaitable[Unit]
   with Group[SocketAddress]
 {
   /**
@@ -20,6 +20,21 @@ trait ListeningServer
   def boundAddress: SocketAddress
 
   lazy val members = Set(boundAddress)
+}
+
+/**
+ * An empty ListeningServer that can be used as a placeholder. For
+ * example:
+ *
+ * {{{
+ * @volatile var server = NullServer
+ * def main() { server = Http.serve(...) }
+ * def exit() { server.close() }
+ * }}}
+ */
+object NullServer extends ListeningServer with CloseAwaitably {
+  def close(deadline: Time) = closeAwaitably { Future.Done }
+  val boundAddress = new InetSocketAddress(0)
 }
 
 /**
@@ -53,11 +68,11 @@ trait ListeningServer
  * otherwise terminated.
  *
  * @define addr
- * 
+ *
  * Serve `service` on `addr`
  *
  * @define target
- * 
+ *
  * Serve `service` on `target`.
  */
 trait Server[Req, Rep] {
