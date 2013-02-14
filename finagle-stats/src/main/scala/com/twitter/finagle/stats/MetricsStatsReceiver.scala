@@ -70,5 +70,5 @@ class MetricsExporter(registry: Metrics)
   with HttpMuxHandler
 {
   def this() = this(MetricsStatsReceiver.defaultRegistry)
-  val pattern = "/metrics.json"
+  val pattern = "/admin/metrics.json"
 }
