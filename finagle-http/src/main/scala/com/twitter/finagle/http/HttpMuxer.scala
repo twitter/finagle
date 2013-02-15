@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Filter, Service}
 import com.twitter.finagle.util.LoadService
 import com.twitter.util.Future
 import java.net.URI
@@ -85,6 +85,14 @@ object HttpMuxer extends Service[HttpRequest, HttpResponse] {
   def addHandler(pattern: String, service: Service[HttpRequest, HttpResponse]) = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
+
+  private[this] val nettyToFinagle =
+    Filter.mk[HttpRequest, HttpResponse, Request, Response] { (req, service) =>
+      service(Request(req)) map { _.httpResponse }
+    }
+
+  def addRichHandler(pattern: String, service: Service[Request, Response]) =
+    addHandler(pattern, nettyToFinagle andThen service)
 
   def patterns = underlying.patterns
 
