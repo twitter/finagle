@@ -56,7 +56,7 @@ object ZipkinTracer {
    * Util method since named parameters can't be called from Java
    * @param sr stats receiver to send successes/failures to
    */
-  def mk(statsReceiver: StatsReceiver): Tracer = mk(statsReceiver = statsReceiver)
+  def mk(sr: StatsReceiver): Tracer = mk(statsReceiver = sr)
 }
 
 /**
