@@ -26,12 +26,12 @@ trait Client[Req, Rep] {
     val client = newClient(group)
     new FactoryToService[Req, Rep](client)
   }
-  
+
   /**
    * Create a new servie connected to `target`.
    */
   final def newService(target: String): Service[Req, Rep] =
-    newService(Group.resolve(target))
+    newService(Resolver.resolve(target)())
 
   /**
    * Create a new client, a `ServiceFactory` that is connected to `group`.
@@ -43,5 +43,5 @@ trait Client[Req, Rep] {
    * group resolved by `target`.
    */
   final def newClient(target: String): ServiceFactory[Req, Rep] =
-    newClient(Group.resolve(target))
+    newClient(Resolver.resolve(target)())
 }

@@ -1,9 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.builder.Cluster
-import com.twitter.finagle.util.{InetSocketAddressUtil, LoadService}
-import java.net.SocketAddress
-import java.util.logging.Logger
+import com.twitter.util.{Closable, Future, Time}
 
 /**
  * A group is a dynamic set of `T`-typed values. It is used to
@@ -112,24 +110,6 @@ object NamedGroup {
   }
 }
 
-trait GroupResolver extends (String => Group[SocketAddress]) {
-  val scheme: String
-}
-
-class GroupResolverNotFoundException(scheme: String)
-  extends Exception("Group resolver not found for scheme \"%s\"".format(scheme))
-
-class GroupTargetInvalid(target: String)
-  extends Exception("Group target \"%s\" is not valid".format(target))
-
-object InetGroupResolver extends GroupResolver {
-  val scheme = "inet"
-  def apply(addr: String) = {
-    val expanded = InetSocketAddressUtil.parseHosts(addr)
-    Group[SocketAddress](expanded:_*)
-  }
-}
-
 object Group {
   /**
    * Construct a `T`-typed static group from the given elements.
@@ -173,87 +153,5 @@ object Group {
     }
 
     def members = current
-  }
-
-  private lazy val resolvers = {
-    val rs = LoadService[GroupResolver]()
-    val log = Logger.getLogger(getClass.getName)
-    val resolvers = Seq(InetGroupResolver) ++ rs
-    for (r <- resolvers)
-      log.info("GroupResolver[%s] = %s(%s)".format(r.scheme, r.getClass.getName, r))
-    resolvers
-  }
-
-  private sealed trait Token
-  private case class El(e: String) extends Token
-  private object Eq extends Token
-  private object Bang extends Token
-  
-  private def delex(ts: Seq[Token]) =
-    ts map {
-      case El(e) => e
-      case Bang => "!"
-      case Eq => "="
-    } mkString ""
-
-  private def lex(s: String) = {
-    s.foldLeft(List[Token]()) {
-      case (ts, '=') => Eq :: ts
-      case (ts, '!') => Bang :: ts
-      case (El(s) :: ts, c) => El(s+c) :: ts
-      case (ts, c) => El(""+c) :: ts
-    }
-  }.reverse
-
-  /**
-   * Resolve a group from a target name, a string. Resolve uses
-   * `GroupResolver`s to do this. These are loaded via the Java
-   * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
-   * mechanism. The default resolver is "inet", resolving DNS
-   * name/port pairs.
-   *
-   * Target names have a simple grammar: The name of the resolver
-   * precedes the name of the address to be resolved, separated by
-   * an exclamation mark ("bang"). For example: inet!twitter.com:80
-   * resolves the name "twitter.com:80" using the "inet" resolver. If no
-   * resolver name is present, the inet resolver is used.
-   *
-   * Names resolved by this mechanism are also a 
-   * [[com.twitter.finagle.NamedGroup]]. By default, this name is 
-   * simply the `target` string, but it can be overriden by prefixing
-   * a name separated by an equals sign from the rest of the target.
-   * For example, the target "www=inet!google.com:80" resolves
-   * "google.com:80" with the inet resolver, but the returned group's
-   * [[com.twitter.finagle.NamedGroup]] name is "www".
-   */
-  def resolve(target: String): Group[SocketAddress] = 
-    new Group[SocketAddress] 
-      with Proxy 
-      with NamedGroup
-    {
-      val lexed = lex(target)
-
-      val (name, stripped) = lexed match {
-        case El(n) :: Eq :: rest => (n, rest)
-        case Eq :: rest => ("", rest)
-        case rest => (target, rest)
-      }
-
-      val self = stripped match {
-        case (Eq :: _) | (Bang :: _) =>
-          throw new GroupTargetInvalid(target)
-
-        case El(scheme) :: Bang :: addr =>
-          val r = resolvers.find(_.scheme == scheme) getOrElse {
-            throw new GroupResolverNotFoundException(scheme)
-          }
-  
-          r(delex(addr))
-
-        case ts =>
-          InetGroupResolver(delex(ts))
-      }
-
-      def members = self.members
   }
 }

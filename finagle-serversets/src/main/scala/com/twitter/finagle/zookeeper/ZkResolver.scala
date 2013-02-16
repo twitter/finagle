@@ -1,9 +1,10 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.finagle.{Group, GroupResolver, InetGroupResolver}
+import com.twitter.finagle.{Group, Resolver, InetResolver}
 import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.common.zookeeper.ServerSet
-import java.net.InetSocketAddress
+import com.twitter.util.{Future, Return, Throw, Try}
+import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
 import com.twitter.common.net.pool.DynamicHostSet
 import com.google.common.collect.ImmutableSet
@@ -31,12 +32,12 @@ private class ZkGroup(serverSet: ServerSet, path: String)
   }
 }
 
-class ZkResolver extends GroupResolver {
+class ZkResolver extends Resolver {
   val scheme = "zk"
 
   private[this] var zkClients: Map[Set[InetSocketAddress], ZooKeeperClient] = Map()
   private[this] def zkClientFor(hosts: String) = {
-    val zkGroup = InetGroupResolver(hosts) collect { case ia: InetSocketAddress => ia }
+    val zkGroup = InetResolver.resolve(hosts)() collect { case ia: InetSocketAddress => ia }
     val zkHosts = zkGroup()
     if (zkHosts.isEmpty)
       throw new ZkResolverException("ZK client address \"%s\" resolves to nothing".format(zkHosts))
@@ -56,25 +57,26 @@ class ZkResolver extends GroupResolver {
     zkClients(zkHosts)
   }
 
-  def apply(addr: String) = addr.split("!") match {
+  def resolve(addr: String) = addr.split("!") match {
     // zk!host:2181!/path
     case Array(hosts, path) =>
-      (new ZkGroup(new ServerSetImpl(zkClientFor(hosts), path), path)) collect {
+      val group = (new ZkGroup(new ServerSetImpl(zkClientFor(hosts), path), path)) collect {
         case inst if inst.getStatus == ALIVE =>
           val ep = inst.getServiceEndpoint
-          new InetSocketAddress(ep.getHost, ep.getPort)
+          new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
       }
+      Return(group)
 
     // zk!host:2181!/path!endpoint
     case Array(hosts, path, endpoint) =>
-      (new ZkGroup(new ServerSetImpl(zkClientFor(hosts), path), path)) collect {
+      val group = (new ZkGroup(new ServerSetImpl(zkClientFor(hosts), path), path)) collect {
         case inst if inst.getStatus == ALIVE && inst.getAdditionalEndpoints.containsKey(endpoint) =>
           val ep = inst.getAdditionalEndpoints.get(endpoint)
-          new InetSocketAddress(ep.getHost, ep.getPort)
+          new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
       }
+      Return(group)
 
     case _ =>
-      throw new ZkResolverException("Invalid address \"%s\"".format(addr))
+      Throw(new ZkResolverException("Invalid address \"%s\"".format(addr)))
   }
 }
-

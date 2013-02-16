@@ -1,0 +1,48 @@
+package com.twitter.finagle
+
+import com.twitter.util.{Closable, Return, Time}
+import java.net.{InetSocketAddress, SocketAddress}
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+
+case class TestGroup(target: String) extends Group[SocketAddress] {
+  def members = Set()
+}
+
+class TestResolver extends Resolver {
+  val scheme = "test"
+  def resolve(target: String) = Return(TestGroup(target))
+}
+
+@RunWith(classOf[JUnitRunner])
+class ResolverTest extends FunSuite {
+  test("reject bad names") {
+    assert(Resolver.resolve("!foo!bar").isThrow)
+  }
+
+  test("reject unknown resolvers") {
+    assert(Resolver.resolve("unknown!foobar").isThrow)
+  }
+
+  test("resolve ServiceLoaded resolvers") {
+    Resolver.resolve("test!xyz")() match {
+      case p: Proxy => assert(p.self === TestGroup("xyz"))
+      case _ => assert(false)
+    }
+  }
+
+  test("assign names") {
+    Resolver.resolve("test!xyz")() match {
+      case NamedGroup("test!xyz") =>
+      case _ => assert(false)
+    }
+
+    Resolver.resolve("myname=test!xyz")() match {
+      case NamedGroup("myname") =>
+      case _ => assert(false)
+    }
+  }
+
+  // names
+}

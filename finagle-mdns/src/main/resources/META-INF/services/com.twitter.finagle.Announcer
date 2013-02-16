@@ -1,0 +1,2 @@
+com.twitter.finagle.mdns.LocalAnnouncer
+com.twitter.finagle.mdns.MDNSAnnouncer

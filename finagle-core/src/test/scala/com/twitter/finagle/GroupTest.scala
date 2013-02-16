@@ -1,8 +1,6 @@
 package com.twitter.finagle
 
 import collection.mutable
-import com.twitter.util.{Try, Throw}
-import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -35,7 +33,7 @@ class GroupTest extends FunSuite {
     assert(Set(mapped:_*) == Set(1,2,3))
     assert(derived() eq derived())
   }
-  
+
   test("remap elements that re-appear") {
     val ctx = new Ctx
     import ctx._
@@ -73,7 +71,7 @@ class GroupTest extends FunSuite {
   test("convert from dynamic builder group") {
     val bc = new builder.ClusterInt
     val group = Group.fromCluster(bc)
-    
+
     assert(group().isEmpty)
     bc.add(1)
     assert(group() == Set(1))
@@ -86,45 +84,4 @@ class GroupTest extends FunSuite {
     bc.add(2)
     assert(group() == Set(1,2))
   }
-}
-
-case class TestGroup(target: String) extends Group[SocketAddress] {
-  def members = Set()
-}
-
-class TestResolver extends GroupResolver {
-  val scheme = "test"
-  def apply(target: String) = TestGroup(target)
-}
-
-@RunWith(classOf[JUnitRunner])
-class GroupResolverTest extends FunSuite {
-  test("reject bad names") {
-    assert(Try(Group.resolve("!foo!bar")).isThrow)
-  }
-  
-  test("reject unknown resolvers") {
-    assert(Try(Group.resolve("unknown!foobar")).isThrow)
-  }
-  
-  test("resolve ServiceLoaded resolvers") {
-    Group.resolve("test!xyz") match {
-      case p: Proxy => assert(p.self == TestGroup("xyz"))
-      case _ => assert(false)
-    }
-  }
-  
-  test("assign names") {
-    Group.resolve("test!xyz") match {
-      case NamedGroup("test!xyz") => 
-      case _ => assert(false)
-    }
-
-    Group.resolve("myname=test!xyz") match {
-      case NamedGroup("myname") =>
-      case _ => assert(false)
-    }
-  }
-
-  // names
 }

@@ -3,6 +3,7 @@ package com.twitter.finagle.zookeeper
 import org.specs.SpecificationWithJUnit
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.thrift.Status._
+import com.twitter.util.Await
 import scala.collection.JavaConverters._
 import java.net.InetSocketAddress
 
@@ -49,7 +50,7 @@ class ZkGroupSpec extends SpecificationWithJUnit {
     val res = new ZkResolver
 
     "resolve ALIVE endpoints" in {
-      val clust = res("localhost:%d!/foo/bar/baz".format(zookeeperAddress.getPort))
+      val clust = res.resolve("localhost:%d!/foo/bar/baz".format(zookeeperAddress.getPort))()
       clust() must beEmpty
       val inetClust = clust collect { case ia: InetSocketAddress => ia }
       inetClust() must be(inetClust())
@@ -70,7 +71,7 @@ class ZkGroupSpec extends SpecificationWithJUnit {
         Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
       inetClust() must eventually(haveSize(1))
 
-      val blahClust = res("localhost:%d!/foo/bar/baz!blah".format(zookeeperAddress.getPort))
+      val blahClust = res.resolve("localhost:%d!/foo/bar/baz!blah".format(zookeeperAddress.getPort))()
       blahClust() must eventually(haveSize(1))
       blahClust() must be(blahClust())
       blahClust().toSeq must beLike {

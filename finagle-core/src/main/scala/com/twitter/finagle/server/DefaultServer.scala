@@ -73,30 +73,30 @@ case class DefaultServer[Req, Rep, In, Out](
         monitor andThen new SourceTrackingMonitor(logger, "server"))
       val tracingFilter = new TracingFilter[Req, Rep](tracer)
       val jvmFilter= DefaultServer.newJvmFilter[Req, Rep]()
-  
+
       val filter = handletimeFilter andThen // to measure total handle time
         monitorFilter andThen // to maximize surface area for exception handling
         tracingFilter andThen // to prepare tracing prior to codec tracing support
         jvmFilter  // to maximize surface area
-  
+
       filter andThen _
     }
-  
+
     val inner: Transformer[Req, Rep] = {
       val maskCancelFilter: SimpleFilter[Req, Rep] =
         if (cancelOnHangup) Filter.identity
         else new MaskCancelFilter
-  
+
       val statsFilter: SimpleFilter[Req, Rep] =
         if (statsReceiver ne NullStatsReceiver) new StatsFilter(statsReceiver)
         else Filter.identity
-  
+
       val timeoutFilter: SimpleFilter[Req, Rep] =
         if (requestTimeout < Duration.Top) {
           val exc = new IndividualRequestTimeoutException(requestTimeout)
           new TimeoutFilter(requestTimeout, exc, timer)
         } else Filter.identity
-  
+
       val requestSemaphoreFilter: SimpleFilter[Req, Rep] =
         if (maxConcurrentRequests == Int.MaxValue) Filter.identity else {
           val sem = new AsyncSemaphore(maxConcurrentRequests)
@@ -110,12 +110,12 @@ case class DefaultServer[Req, Rep, In, Out](
             val g1 = statsReceiver.addGauge("request_queue_size") { sem.numWaiters }
           }
         }
-  
+
       val filter = maskCancelFilter andThen
         requestSemaphoreFilter andThen
         statsFilter andThen
         timeoutFilter
-  
+
       filter andThen _
     }
 
@@ -145,16 +145,16 @@ case class DefaultServer[Req, Rep, In, Out](
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val scopedStatsReceiver = statsReceiver match {
-        case ServerStatsReceiver => statsReceiver.scope(Resolver.nameOf(addr) getOrElse name)
+        case ServerStatsReceiver => statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
         case sr => sr
       }
       val newStack = makeNewStack(scopedStatsReceiver)
 
-      val underlying = listener.listen(addr) { transport => 
+      val underlying = listener.listen(addr) { transport =>
         serveTransport(newStack(factory), transport)
       }
 
-      def close(deadline: Time) = closeAwaitably {
+      def closeServer(deadline: Time) = closeAwaitably {
         // The order here is important: by calling underlying.close()
         // first, we guarantee that no further connections are
         // created.

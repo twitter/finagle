@@ -196,17 +196,17 @@ case class Netty3Listener[In, Out](
     statsHandlers.get(statsReceiver)
   }
 
-  def newServerPipelineFactory(statsReceiver: StatsReceiver, newBridge: () => ChannelHandler) = 
+  def newServerPipelineFactory(statsReceiver: StatsReceiver, newBridge: () => ChannelHandler) =
     new ChannelPipelineFactory {
       def getPipeline() = {
         val pipeline = pipelineFactory.getPipeline()
-  
+
         for (channelSnooper <- channelSnooper)
           pipeline.addFirst("channelLogger", channelSnooper)
-  
+
         if (statsReceiver ne NullStatsReceiver)
           pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
-  
+
         // Apply read timeouts *after* request decoding, preventing
         // death from clients trying to DoS by slowly trickling in
         // bytes to our (accumulating) codec.
@@ -216,22 +216,22 @@ case class Netty3Listener[In, Out](
             "readTimeout",
             new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
         }
-  
+
         if (channelWriteCompletionTimeout < Duration.Top) {
           pipeline.addLast(
             "writeCompletionTimeout",
             new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
         }
-  
+
         for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
           addTlsToPipeline(pipeline, newEngine)
-  
+
         if (statsReceiver ne NullStatsReceiver) {
           pipeline.addLast(
             "channelRequestStatsHandler",
             new ChannelRequestStatsHandler(statsReceiver))
         }
-  
+
         pipeline.addLast("finagleBridge", newBridge())
         pipeline
       }
@@ -241,14 +241,14 @@ case class Netty3Listener[In, Out](
     new ListeningServer with CloseAwaitably {
       val scopedStatsReceiver = statsReceiver match {
         case ServerStatsReceiver =>
-          statsReceiver.scope(Resolver.nameOf(addr) getOrElse name)
+          statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
         case sr => sr
       }
 
       val closer = new Closer(timer)
 
       val newBridge = () => new ServerBridge(
-        serveTransport, monitor, logger, 
+        serveTransport, monitor, logger,
         scopedStatsReceiver, closer.activeChannels)
       val bootstrap = new ServerBootstrap(channelFactory)
       bootstrap.setOptions(bootstrapOptions.asJava)
@@ -256,7 +256,7 @@ case class Netty3Listener[In, Out](
         newServerPipelineFactory(scopedStatsReceiver, newBridge))
       val ch = bootstrap.bind(addr)
 
-      def close(deadline: Time) = closeAwaitably {
+      def closeServer(deadline: Time) = closeAwaitably {
         closer.close(bootstrap, ch, deadline)
       }
       def boundAddress = ch.getLocalAddress()

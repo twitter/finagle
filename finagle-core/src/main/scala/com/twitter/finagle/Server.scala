@@ -20,6 +20,21 @@ trait ListeningServer
   def boundAddress: SocketAddress
 
   lazy val members = Set(boundAddress)
+
+  protected def closeServer(deadline: Time): Future[Unit]
+
+  private[this] var announcements = List[Announcement]()
+
+  def announce(target: String) {
+    val addr = boundAddress.asInstanceOf[InetSocketAddress]
+    Announcer.announce(addr, target) foreach { announcement =>
+      synchronized { announcements ::= announcement }
+    }
+  }
+
+  final def close(deadline: Time): Future[Unit] = synchronized {
+    Closable.all(announcements: _*).close(deadline) flatMap { _ => closeServer(deadline) }
+  }
 }
 
 /**
@@ -33,7 +48,7 @@ trait ListeningServer
  * }}}
  */
 object NullServer extends ListeningServer with CloseAwaitably {
-  def close(deadline: Time) = closeAwaitably { Future.Done }
+  def closeServer(deadline: Time) = closeAwaitably { Future.Done }
   val boundAddress = new InetSocketAddress(0)
 }
 
@@ -74,6 +89,11 @@ object NullServer extends ListeningServer with CloseAwaitably {
  * @define target
  *
  * Serve `service` on `target`.
+ *
+ * @define serveAndAnnounce
+ *
+ * Serve `service` on `target` and announce with `name`. Announcements will be removed
+ * when the service is closed. Omitting the `target` will bind to an ephemeral port.
  */
 trait Server[Req, Rep] {
   /** $addr */
@@ -85,10 +105,28 @@ trait Server[Req, Rep] {
 
   /** $target */
   def serve(target: String, service: ServiceFactory[Req, Rep]): ListeningServer =
-    serve(Resolver.resolve(target), service)
+    serve(ServerRegistry.register(target), service)
 
   /** $target */
-  def serve(target: String, service: Service[Req, Rep]): ListeningServer = {
+  def serve(target: String, service: Service[Req, Rep]): ListeningServer =
     serve(target, ServiceFactory.const(service))
+
+  /** $serveAndAnnounce */
+  def serveAndAnnounce(forum: String, target: String, service: ServiceFactory[Req, Rep]): ListeningServer = {
+    val server = serve(target, service)
+    server.announce(forum)
+    server
   }
+
+  /** $serveAndAnnounce */
+  def serveAndAnnounce(name: String, target: String, service: Service[Req, Rep]): ListeningServer =
+    serveAndAnnounce(target, name, ServiceFactory.const(service))
+
+  /** $serveAndAnnounce */
+  def serveAndAnnounce(name: String, service: ServiceFactory[Req, Rep]): ListeningServer =
+    serveAndAnnounce(name, ":*", service)
+
+  /** $serveAndAnnounce */
+  def serveAndAnnounce(name: String, service: Service[Req, Rep]): ListeningServer =
+    serveAndAnnounce(name, ServiceFactory.const(service))
 }

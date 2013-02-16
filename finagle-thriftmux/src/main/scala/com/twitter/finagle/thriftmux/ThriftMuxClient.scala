@@ -2,7 +2,6 @@ package com.twitter.finagle
 
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.finagle.NamedGroup
 import com.twitter.util.Future
 import java.net.SocketAddress
 import org.apache.thrift.protocol.{TProtocolFactory, TBinaryProtocol}
@@ -40,12 +39,12 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
  * In Java, we need to provide the class object:
  *
  * {{{
- * TestService.FutureIface client = 
+ * TestService.FutureIface client =
  *   ThriftMux.newIface(target, TestService.FutureIface.class);
  * }}}
  *
  * @define clientUse
- *   
+ *
  * Create a new client of type `Iface`, which must be generated
  * by either [[https://github.com/twitter/scrooge Scrooge]] or
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
@@ -61,7 +60,7 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface](target: String, cls: Class[_]): Iface =
-    newIface(Group.resolve(target), cls)
+    newIface(Resolver.resolve(target)(), cls)
 
   /**
    * $clientUse
@@ -70,27 +69,27 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     val clsName = cls.getName
     val inst = if (clsName.endsWith("$ServiceIface")) {  // thrift-finagle
       val clientClass = classForName(clsName.dropRight(13)+"$ServiceToClient")
-      
+
       val constructor = try { clientClass.getConstructor(
         classOf[Service[_, _]], classOf[TProtocolFactory])
       } catch {
         case cause: NoSuchMethodException =>
           throw new IllegalArgumentException("Iface is not a valid thrift-finagle iface", cause)
       }
-      
+
       val underlying = newClient(group).toService
       constructor.newInstance(underlying, protocolFactory)
     } else if (clsName.endsWith("$FutureIface")) {  // scrooge
       val clientClass = classForName(clsName.dropRight(12)+"$FinagledClient")
 
       val constructor = try { clientClass.getConstructor(
-        classOf[Service[_, _]], classOf[TProtocolFactory], 
+        classOf[Service[_, _]], classOf[TProtocolFactory],
         classOf[Option[_]], classOf[StatsReceiver])
       } catch {
         case cause: NoSuchMethodException =>
           throw new IllegalArgumentException("Iface is not a valid scrooge iface", cause)
       }
-      
+
       val statsReceiver = group match {
         case NamedGroup(name) => ClientStatsReceiver.scope(name)
         case _ => ClientStatsReceiver.scope("mux")
@@ -98,7 +97,7 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 
       val underlying = newClient(group).toService
       constructor.newInstance(
-        underlying, protocolFactory, 
+        underlying, protocolFactory,
         None, statsReceiver)
     } else {
       throw new IllegalArgumentException(
@@ -112,13 +111,13 @@ trait ThriftMuxRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface: ClassManifest](target: String): Iface =
-    newIface[Iface](Group.resolve(target))
+    newIface[Iface](Resolver.resolve(target)())
 
   /**
    * $clientUse
    */
   def newIface[Iface: ClassManifest](group: Group[SocketAddress]): Iface = {
-    val cls = implicitly[ClassManifest[Iface]].erasure  
+    val cls = implicitly[ClassManifest[Iface]].erasure
     newIface[Iface](group, cls)
   }
 }
@@ -133,7 +132,7 @@ case class ThriftMuxClientImpl(
         def apply(req: ThriftClientRequest): Future[Array[Byte]] = {
           if (req.oneway) return Future.exception(
             new Exception("ThriftMux does not support one-way messages"))
-          
+
           service(ChannelBuffers.wrappedBuffer(req.message)) map(ThriftMuxUtil.bufferToArray)
         }
         override def isAvailable = service.isAvailable
