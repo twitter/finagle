@@ -1167,7 +1167,7 @@ In this example, the `flatMap` object enables pipelining of the requests.
 
 ## Using ServerSet Objects
 
-`finagle-serversets` is an implementation of the Finagle Cluster interface using `com.twitter.com.zookeeper` [ServerSets](http://twitter.github.com/commons/apidocs/#com.twitter.common.zookeeper.ServerSet).
+`finagle-serversets` is an implementation of the Finagle Cluster interface using `com.twitter.common.zookeeper` [ServerSets](http://twitter.github.com/commons/apidocs/#com.twitter.common.zookeeper.ServerSet).
 
 You can instantiate a `ServerSet` object as follows:
 
