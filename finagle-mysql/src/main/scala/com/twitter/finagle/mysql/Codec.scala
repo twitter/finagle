@@ -1,8 +1,11 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.mysql.codec.{PacketFrameDecoder, Endec}
+import com.twitter.finagle._
+import com.twitter.finagle.mysql.codec.{PacketFrameDecoder, Endec}  
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.mysql.protocol.Capability._
+import com.twitter.util.Future
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
 
 class MySQL(username: String, password: String, database: Option[String])
   extends CodecFactory[Request, Result] {

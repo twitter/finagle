@@ -3,6 +3,8 @@ package com.twitter.finagle.mysql.protocol
 import com.twitter.finagle.mysql.ClientError
 import java.nio.charset.{Charset => JCharset}
 import java.nio.ByteOrder
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 
 /**
  * The BufferReader and BufferWriter interfaces provide methods for

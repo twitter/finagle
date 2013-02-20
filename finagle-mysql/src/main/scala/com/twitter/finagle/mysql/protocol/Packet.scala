@@ -1,5 +1,7 @@
 package com.twitter.finagle.mysql.protocol
 
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 
 /**
  * Represents a logical packet received from MySQL.
