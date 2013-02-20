@@ -1,5 +1,8 @@
 import sbt._
 import Keys._
+import Tests._
+import com.typesafe.sbt.SbtSite.site
+import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
@@ -101,7 +104,10 @@ object Finagle extends Build {
     id = "finagle",
     base = file("."),
     settings = Project.defaultSettings ++
-      sharedSettings
+      sharedSettings ++ 
+      Unidoc.settings ++ Seq(
+        Unidoc.unidocExclude := Seq(finagleExample.id)
+      )
   ) aggregate(
     // Core, support.
     finagleCore, finagleTest, finagleOstrich4, finagleStats,
@@ -384,4 +390,32 @@ object Finagle extends Build {
       name := "finagle-mysql",
       libraryDependencies ++= Seq(util("logging"))
     ).dependsOn(finagleCore)
+
+  lazy val finagleDoc = Project(
+    id = "finagle-doc",
+    base = file("doc"),
+    settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() /*++ site.includeScaladoc() */ ++ Seq(
+      scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Finagle", "-doc-version", v)),
+      includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt"),
+
+      // Workaround for sbt bug: Without a testGrouping for all test configs,
+      // the wrong tests are run
+      testGrouping <<= definedTests in Test map partitionTests,
+      testGrouping in DocTest <<= definedTests in DocTest map partitionTests
+
+    )).configs(DocTest).settings(inConfig(DocTest)(Defaults.testSettings): _*).settings(
+    unmanagedSourceDirectories in DocTest <+= baseDirectory { _ / "src/sphinx/code" },
+    //resourceDirectory in DocTest <<= baseDirectory { _ / "src/test/resources" }
+
+    // Make the "test" command run both, test and doctest:test
+    test <<= Seq(test in Test, test in DocTest).dependOn
+    ).dependsOn(finagleCore, finagleHttp)
+    
+  /* Test Configuration for running tests on doc sources */
+  lazy val DocTest = config("doctest") extend(Test)
+
+  // A dummy partitioning scheme for tests
+  def partitionTests(tests: Seq[TestDefinition]) = {
+    Seq(new Group("inProcess", tests, InProcess))
+  }
 }

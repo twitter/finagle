@@ -1,0 +1,12 @@
+@import url("flasky.css");
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+    font-weight: bold;
+    font-style: italic;
+    color: #7f7f7f;
+}
