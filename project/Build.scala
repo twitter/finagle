@@ -6,7 +6,7 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.1.0"
+  val utilVersion = "6.2.0"
   val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % "9.1.0"
   val thriftLibs = Seq(
@@ -17,11 +17,11 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.1.1",
+    version := "6.2.0",
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" %"1.8" % "test",
+      "org.scalatest" %% "scalatest" %"1.9.1" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
         case "2.9.2" => "2.9.1"
         case "2.10.0" => "2.10"
@@ -117,6 +117,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
+    finagleMux, finagleThriftMux,
 
     // Use and integration
     finagleStress, finagleExample, finagleBenchmark
@@ -151,7 +152,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-ostrich4",
     libraryDependencies ++= Seq(ostrichLib)
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleStats = Project(
     id = "finagle-stats",
@@ -173,7 +174,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq(util("codec")) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
@@ -201,7 +201,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.35")
   ).dependsOn(finagleCore)
 
@@ -274,7 +273,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ thriftLibs
   ).dependsOn(finagleCore, finagleTest % "test")
 
@@ -336,6 +334,29 @@ object Finagle extends Build {
     })
   ).dependsOn(finagleCore)
 
+  lazy val finagleMux = Project(
+    id = "finagle-mux",
+    base = file("finagle-mux"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-mux"
+  ).dependsOn(finagleCore)
+
+  lazy val finagleThriftMux = Project(
+    id = "finagle-thriftmux",
+    base = file("finagle-thriftmux"),
+    settings = Project.defaultSettings ++
+      Scrooge.newSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-thriftmux",
+    Scrooge.scroogeThriftNamespaceMap in Test := Map(
+      "com.twitter.finagle.thriftmux.thrift" -> 
+        "com.twitter.finagle.thriftmux.thriftscala"
+    )
+  ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
+
   // Uses
 
   lazy val finagleStress = Project(
@@ -348,7 +369,7 @@ object Finagle extends Build {
     name := "finagle-stress",
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
-  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp)
+  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
 
   lazy val finagleExample = Project(
     id = "finagle-example",

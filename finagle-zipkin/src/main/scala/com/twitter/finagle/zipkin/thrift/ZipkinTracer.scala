@@ -50,13 +50,15 @@ object ZipkinTracer {
    * @param sr stats receiver to send successes/failures to
    */
   @deprecated("Use mk() instead", "6.1.0")
-  def apply(sr: StatsReceiver): Tracer.Factory = () => mk(statsReceiver = sr)
+  def apply(sr: StatsReceiver): Tracer.Factory = () => 
+    mk("localhost", 1463, sr, Sampler.DefaultSampleRate)
 
   /**
    * Util method since named parameters can't be called from Java
    * @param sr stats receiver to send successes/failures to
    */
-  def mk(sr: StatsReceiver): Tracer = mk(statsReceiver = sr)
+  def mk(statsReceiver: StatsReceiver): Tracer =
+    mk("localhost", 1463, statsReceiver, Sampler.DefaultSampleRate)
 }
 
 /**

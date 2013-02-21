@@ -5,8 +5,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import scala.collection.JavaConversions.JListWrapper;
-
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.builder.StaticCluster;
 import com.twitter.finagle.kestrel.protocol.Kestrel;
@@ -21,7 +19,7 @@ public class MultiReaderUsage {
     ArrayList<SocketAddress> clusterMembers = new ArrayList<SocketAddress>();
     clusterMembers.add(localhost);
     StaticCluster<SocketAddress> cluster =
-      new StaticCluster<SocketAddress>(new JListWrapper(clusterMembers));
+      new StaticCluster<SocketAddress>(null);
 
     return
       MultiReader.newBuilder(cluster, "the-queue")

@@ -18,7 +18,7 @@ class EndToEndTest extends FunSuite {
     val client = ThriftMux.newIface[TestService.FutureIface](server)
     assert(client.query("ok").get() == "okok")
   }
-  
+/* TODO: add back when sbt supports old-school thrift gen
   test("end-to-end finagle-thrift") {
     import com.twitter.finagle.thriftmux.thrift.TestService
 
@@ -29,4 +29,5 @@ class EndToEndTest extends FunSuite {
     val client = ThriftMux.newIface[TestService.ServiceIface](server)
     assert(client.query("ok").get() == "okok")
   }
+*/
 }
