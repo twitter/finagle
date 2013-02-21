@@ -1,0 +1,298 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Concurrent Programming with Futures &mdash; Finagle 0.1-SNAPSHOT documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
+    <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+    <link rel="prev" title="Quickstart" href="Quickstart.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Quickstart.html" title="Quickstart"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="concurrent-programming-with-futures">
+<h1>Concurrent Programming with Futures<a class="headerlink" href="#concurrent-programming-with-futures" title="Permalink to this headline">¶</a></h1>
+<p>Finagle uses <em>futures</em> <a class="footnote-reference" href="#futures" id="id1">[1]</a> to encapsulate and compose
+concurrent operations such as a network RPCs. Futures are directly
+analogous to threads —&nbsp;they provide independent and overlapping
+threads of control — and can be thought of as <em>featherweight
+threads</em>. They are cheap in construction, so the economies of
+traditional threads do not apply. It is no problem to maintain
+millions of outstanding concurrent operations when they are
+represented by futures.</p>
+<p>Futures also decouple Finagle from the operating system and runtime
+thread schedulers. This is used in important ways; for example,
+Finagle uses thread biasing to reduce context switching costs.</p>
+<table class="docutils footnote" frame="void" id="futures" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>As of version 2.10, Scala has its own implementation
+of Futures, <cite>scala.concurrent.Future</cite>, in part inspired by the one
+from <cite>com.twitter.util</cite>. While <cite>com.twitter.util.Future</cite> will eventually
+implement the same interface as <cite>scala.concurrent.Future</cite>, it does
+not yet — the Future type described presently is <cite>com.twitter.util.Future</cite>.</td></tr>
+</tbody>
+</table>
+<div class="section" id="futures-as-containers">
+<h2>Futures as containers<a class="headerlink" href="#futures-as-containers" title="Permalink to this headline">¶</a></h2>
+<p>Common examples of operations that are represented
+by Futures are:</p>
+<ul class="simple">
+<li>an RPC to a remote host</li>
+<li>a long computation in another thread</li>
+<li>reading from disk</li>
+</ul>
+<p>Note that these operations are all fallible: remote hosts could
+crash, computations might throw an exception, disks could fail, etc.
+etc. A <cite>Future[T]</cite>, then, occupies exactly one of three states:</p>
+<ul class="simple">
+<li>Empty (pending)</li>
+<li>Succeeded (with a result of type <cite>T</cite>)</li>
+<li>Failed (with a <cite>Throwable</cite>)</li>
+</ul>
+<p>While it is possible to directly query this state, this is rarely useful.
+Instead, a callback may be registered to receive the results once
+they are made available:</p>
+<div class="highlight-text"><div class="highlight"><pre>val f: Future[Int]
+f onSuccess { res =&gt;
+  println(&quot;The result is &quot; + res)
+}
+</pre></div>
+</div>
+<p>which will be invoked only on success. Callbacks may also be registered
+to account for failures:</p>
+<div class="highlight-text"><div class="highlight"><pre>f onFailure { cause: Throwable =&gt;
+  println(&quot;f failed with &quot; + cause)
+}
+</pre></div>
+</div>
+</div>
+<div class="section" id="sequential-composition">
+<h2>Sequential composition<a class="headerlink" href="#sequential-composition" title="Permalink to this headline">¶</a></h2>
+<p>Registering callbacks is useful but presents a cumbersome API. The
+power of Futures lie in how they <em>compose</em>. Most operations can be
+broken up into smaller operations which in turn constitute the
+<em>composite operation</em>. Futures makes it easy to create such composite
+operations.</p>
+<p>Consider the simple example of fetching a representative thumbnail
+from a website (ala Pinterest). This typically involves:</p>
+<ol class="arabic simple">
+<li>Fetching the homepage</li>
+<li>Parsing that page to find the first image link</li>
+<li>Fetching the image link</li>
+</ol>
+<p>This is an example of <em>sequential</em> composition: in order to do the
+next step, we must have succesfully completed the previous one. With
+Futures, this is called <cite>flatMap</cite> <a class="footnote-reference" href="#flatmap" id="id2">[2]</a>. The result of <cite>flatMap</cite> is a Future
+representing the result of this composite operation. Given some helper
+methods —&nbsp;<cite>fetchUrl</cite> fetches the given URL, <cite>findImageUrls</cite> parses an HTML
+page to find image links —&nbsp;we can implement our Pinterest-style thumbnail
+extract like this:</p>
+<div class="highlight-text"><div class="highlight"><pre>def fetchUrl(url: String): Future[Array[Byte]]
+def findImageUrls(bytes: Array[Byte]): Seq[String]
+
+val url = &quot;http://www.google.com&quot;
+
+val f: Future[Array[Byte]] = fetchUrl(url) flatMap { bytes =&gt;
+  val images = findImageUrls(bytes)
+  if (images.isEmpty)
+    Future.exception(new Exception(&quot;no image&quot;))
+  else
+    fetchUrl(images(0))
+}
+
+f onSuccess { image =&gt;
+  println(&quot;Found image of size &quot;+image.size)
+}
+</pre></div>
+</div>
+<p><cite>f</cite> represents the <em>composite</em> operation. It is the result of first
+retrieving the web page, and then the first image link. If either of
+the smaller operations fail (the first or second <cite>fetchUrl</cite> or if
+<cite>findImageUrls</cite> doesn&#8217;t succesfully find an images), the composite
+operation also fails.</p>
+<p>The astute reader may have noticed something peculiar: this is
+typically the job of the semicolon! That is not far from the truth:
+semicolons sequence two statements, and with traditional I/O
+operations, have the same effect as <cite>flatMap</cite> does above (the
+exception mechanism takes the role of a failed future). Futures
+are much more versatile, however, as we&#8217;ll see.</p>
+</div>
+<div class="section" id="concurrent-composition">
+<h2>Concurrent composition<a class="headerlink" href="#concurrent-composition" title="Permalink to this headline">¶</a></h2>
+<p>It is also possible to compose Futures <em>concurrently</em>. We can extend
+our above example to demonstrate: let&#8217;s fetch <em>all</em> the images.
+Concurrent composition is provided by <cite>Future.collect</cite>:</p>
+<div class="highlight-text"><div class="highlight"><pre>val collected: Future[Seq[Array[Byte]]] =
+  fetchUrl(url) flatMap { bytes =&gt;
+    val fetches = findImageUrls(bytes) map { url =&gt; fetchUrl(url) }
+    Future.collect(fetches)
+  }
+</pre></div>
+</div>
+<p>Here we have combined both concurrent and sequential composition:
+first we fetch the webpage, then we collect the results of fetching
+all of the underlying images.</p>
+<p>As with sequential composition, concurrent composition propagates
+failures: the future <cite>collected</cite> will fail if any of the underlying
+futures do.</p>
+<p>It is also simple to write your own combinators that operate over
+Futures. This is quite useful, and gives rise to a great amount of
+modularity in distributed systems as common patterns can be cleanly
+abstracted.</p>
+</div>
+<div class="section" id="recovering-from-failure">
+<h2>Recovering from failure<a class="headerlink" href="#recovering-from-failure" title="Permalink to this headline">¶</a></h2>
+<p>Composed futures fail whenever any of their constitutent futures
+fail. However it is often useful to recover from such failures. The
+<cite>rescue</cite> combinator on <cite>Future</cite> is the dual to <cite>flatMap</cite>: whereas <cite>flatMap</cite>
+operates over <em>values</em>, <cite>rescue</cite> operates over <em>exceptions</em>. They
+are otherwise identical. It is often desirable to handle only a subset
+of possible exceptions. To accomodate for this <cite>rescue</cite> accepts
+a <cite>PartialFunction</cite>, mapping a <cite>Throwable</cite> to a <cite>Future</cite>:</p>
+<div class="highlight-text"><div class="highlight"><pre>trait Future[A] {
+  ..
+  def rescue[B &gt;: A](f: PartialFunction[Throwable, Future[B]]): Future[B]
+  ..
+</pre></div>
+</div>
+<p>The following retries a request infinitely should it fail with a
+<cite>TimeoutException</cite>:</p>
+<div class="highlight-text"><div class="highlight"><pre>def fetchUrl(url: String): Future[HttpResponse]
+
+def fetchUrlWithRetry(url: String) =
+  fetchUrl(url) rescue {
+    case exc: TimeoutException =&gt; fetchUrlWithRetry(url)
+  }
+</pre></div>
+</div>
+</div>
+<div class="section" id="other-resources">
+<h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://twitter.github.com/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="http://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></li>
+<li>As of Scala 2.10, the Scala standard library has its own futures
+implementation and API, described <a class="reference external" href="http://docs.scala-lang.org/overviews/core/futures.html">here</a>. Note that
+this is largely similar to the API used in Finagle
+(<em>com.twitter.util.Future</em>), but there are still some naming
+differences.</li>
+<li><a class="reference external" href="http://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="http://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</li>
+</ul>
+<table class="docutils footnote" frame="void" id="flatmap" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>The name <cite>flatMap</cite> may seem strange and unrelated to our present
+discussion, but its etymology is impeccable: it derives from a deeper relationship
+between the sort of sequential composition we do with futures, to a similar sort
+of composition we can perform over collections. See the <a class="reference external" href="http://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Concurrent Programming with Futures</a><ul>
+<li><a class="reference internal" href="#futures-as-containers">Futures as containers</a></li>
+<li><a class="reference internal" href="#sequential-composition">Sequential composition</a></li>
+<li><a class="reference internal" href="#concurrent-composition">Concurrent composition</a></li>
+<li><a class="reference internal" href="#recovering-from-failure">Recovering from failure</a></li>
+<li><a class="reference internal" href="#other-resources">Other resources</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Quickstart.html" title="previous chapter">Quickstart</a></li>
+      <li>Next: <a href="ServicesAndFilters.html" title="next chapter">Services &amp; Filters</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

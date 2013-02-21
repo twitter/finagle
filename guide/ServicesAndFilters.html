@@ -1,0 +1,217 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Services &amp; Filters &mdash; Finagle 0.1-SNAPSHOT documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
+    <link rel="next" title="Finagle changelog" href="changelog.html" />
+    <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="changelog.html" title="Finagle changelog"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Futures.html" title="Concurrent Programming with Futures"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="services-filters">
+<h1>Services &amp; Filters<a class="headerlink" href="#services-filters" title="Permalink to this headline">¶</a></h1>
+<p>Services and filters consitute the core abstractions with which
+clients and servers are constructed with the Finagle network library.
+They are very simple, but also quite versatile. Most of Finagle&#8217;s
+internals are structured around Services and Filters.</p>
+<div class="section" id="services">
+<h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
+<p>A service, at its heart, is a simple function:</p>
+<div class="highlight-text"><div class="highlight"><pre>trait Service[Req, Rep] extends (Req =&gt; Future[Rep])
+</pre></div>
+</div>
+<p>Put another way, a service takes some request of type <cite>Req</cite> and returns
+to you a <a class="reference internal" href="Futures.html"><em>Future</em></a> representing the eventual result (or failure)
+of type <cite>Rep</cite>.</p>
+<p>Services are used to represent both clients and servers. An <em>instance</em>
+of a service is used a client; a server <em>implements</em> a <cite>Service</cite>.</p>
+<p>To use an HTTP client:</p>
+<div class="highlight-text"><div class="highlight"><pre>val httpService: Service[HttpRequest, HttpResponse] = ...
+
+httpService(new DefaultHttpRequest(...)) onSuccess { res =&gt;
+  println(&quot;received response &quot;+res)
+}
+</pre></div>
+</div>
+<p>or to provide an HTTP server:</p>
+<div class="highlight-text"><div class="highlight"><pre>val httpService = new Service[HttpRequest, HttpResponse] {
+  def apply(req: HttpRequest) = ...
+}
+</pre></div>
+</div>
+<p>Services implement <em>application logic</em>. You might, for instance,
+define a <cite>Service[HttpRequest, HttpResponse]</cite> to implement your
+application&#8217;s external API.</p>
+</div>
+<div class="section" id="filters">
+<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
+<p>It is often useful to define <em>application-agnostic</em> behavior as well.
+A common example of this is to implement timeouts: if a request
+fails to complete within a certain time, the timeout mechanism fails
+it with a timeout exception.</p>
+<p>Like services, filters are also simple functions:</p>
+<div class="highlight-text"><div class="highlight"><pre>abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
+  extends ((ReqIn, Service[ReqOut, RepIn]) =&gt; Future[RepOut])
+</pre></div>
+</div>
+<p>or: given a request of type <cite>ReqIn</cite>, a service of type
+<cite>Service[ReqOut, RepIn]</cite>, return a Future of type <cite>RepIn</cite> (the reply
+type). All types are parameterized so that filters may also transform
+request or reply types; visualized:</p>
+<img alt="_images/filter2.png" src="_images/filter2.png" />
+<p>In most common cases, <cite>ReqIn</cite> is equal to <cite>ReqOut</cite>, and <cite>RepIn</cite> is
+equal to <cite>RepOut</cite> —&nbsp;this is in fact sufficiently common to warrant its
+own alias:</p>
+<div class="highlight-text"><div class="highlight"><pre>trait SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
+</pre></div>
+</div>
+<p>This, then, is a complete definition of a timeout filter:</p>
+<div class="highlight-text"><div class="highlight"><pre>class TimeoutFilter[Req, Rep](timeout: Duration, timer: Timer)
+    extends SimpleFilter[Req, Rep]
+{
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    val res = service(request)
+    res.within(timer, timeout)
+  }
+}
+</pre></div>
+</div>
+<p>The filter is given a request and the next service in the filter chain.
+It then dispatches this request, applying a timeout on the returned
+<cite>Future</cite> — <cite>within</cite> is a method on <cite>Future</cite> which applies the given
+timeout, failing the future with a timeout exception should it fail
+to complete within the given deadline.</p>
+</div>
+<div class="section" id="composing-filters-and-services">
+<h2>Composing filters and services<a class="headerlink" href="#composing-filters-and-services" title="Permalink to this headline">¶</a></h2>
+<p>Filters and services compose with the <cite>andThen</cite> method. For example
+to furnish a service with timeout behavior:</p>
+<div class="highlight-text"><div class="highlight"><pre>val service: Service[HttpRequest, HttpResponse] = ...
+val timeoutFilter = new TimeoutFilter[HttpRequest, HttpResponse](...)
+
+val serviceWithTimeout: Service[HttRequest, HttpResponse] =
+  timeoutFilter andThen service
+</pre></div>
+</div>
+<p>Applying a filter to a <cite>Service</cite> produces a new <cite>Service</cite> whose requests
+are first filtered through <cite>timeoutFilter</cite>.</p>
+<p>We can also compose filters with <cite>andThen</cite>, creating composite filters,
+so that</p>
+<div class="highlight-text"><div class="highlight"><pre>val timeoutFilter = new TimeoutFilter[..](..)
+val retryFilter = new RetryFilter[..](..)
+
+val retryWithTimeoutFilter: Filter[..] =
+  retryFilter andThen timeoutFilter
+</pre></div>
+</div>
+<p>creates a filter that dispatches requests first through <cite>retryFilter</cite> and
+then <cite>timeoutFilter</cite>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Services &amp; Filters</a><ul>
+<li><a class="reference internal" href="#services">Services</a></li>
+<li><a class="reference internal" href="#filters">Filters</a></li>
+<li><a class="reference internal" href="#composing-filters-and-services">Composing filters and services</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Futures.html" title="previous chapter">Concurrent Programming with Futures</a></li>
+      <li>Next: <a href="changelog.html" title="next chapter">Finagle changelog</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

@@ -1,0 +1,179 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Finagle! &mdash; Finagle 0.1-SNAPSHOT documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="#" />
+    <link rel="next" title="Quickstart" href="Quickstart.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+  <div class=indexwrapper>
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Quickstart.html" title="Quickstart"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="finagle">
+<h1>Finagle!<a class="headerlink" href="#finagle" title="Permalink to this headline">¶</a></h1>
+<img alt="_images/governor.png" class="floatingflask" src="_images/governor.png" />
+<p>Finagle is an extensible network stack for the JVM, used to construct
+highly concurrent servers. Finagle implements uniform client and
+server APIs for several protocols, and is designed for high
+performance and concurrency. Most of Finagle&#8217;s code is protocol
+agnostic, simplifying the implementation of new protocols.</p>
+<p>Finagle uses a <em>clean</em>, <em>simple</em>, and <em>safe</em> concurrent programming
+model, based on <a class="reference internal" href="Futures.html"><em>Futures</em></a>. This leads to safe and
+modular programs that are also simple to reason about.</p>
+<p>Finagle clients and servers expose statistics for monitoring and
+diagnostics. They are also traceable through a mechanism similar to
+<a class="reference external" href="http://research.google.com/pubs/pub36356.html">Dapper</a>&#8216;s (another Twitter open source project, <a class="reference external" href="http://twitter.github.com/zipkin/">Zipkin</a>, provides
+trace aggregation and visualization).</p>
+<p>The <a class="reference internal" href="Quickstart.html"><em>quickstart</em></a> has an overview of the most
+important concepts, walking you through the setup of a simple HTTP
+server and client.</p>
+<p>A section on <a class="reference internal" href="Futures.html"><em>Futures</em></a> follows, motivating and
+explaining the important ideas behind the concurrent programming
+model used in Finagle. The next section documents
+<a class="reference internal" href="ServicesAndFilters.html"><em>Services &amp; Filters</em></a> which are the core
+abstractions used to represent clients and servers and modify
+their behavior.</p>
+<p>Other useful resources include:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://engineering.twitter.com/2011/08/finagle-protocol-agnostic-rpc-system.html">Twitter engineering blog entry introducing Finagle</a></li>
+<li><a class="reference external" href="http://days2011.scala-lang.org/node/138/286">ScalaDays 2011 presentation on Finagle</a></li>
+<li>Twitter&#8217;s <a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a> has a section <a class="reference external" href="http://twitter.github.com/scala_school/finagle.html">introducing Finagle</a> and another <a class="reference external" href="http://twitter.github.com/scala_school/searchbird.html">constructing a distributed search engine using Finagle</a></li>
+</ul>
+<div class="section" id="user-s-guide">
+<h2>User&#8217;s guide<a class="headerlink" href="#user-s-guide" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Quickstart.html">Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#setting-up-sbt">Setting up SBT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#a-minimal-http-server">A minimal HTTP server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#using-clients">Using clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Quickstart.html#putting-it-together">Putting it together</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Futures.html">Concurrent Programming with Futures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Futures.html#futures-as-containers">Futures as containers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Futures.html#sequential-composition">Sequential composition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Futures.html#concurrent-composition">Concurrent composition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Futures.html#recovering-from-failure">Recovering from failure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Futures.html#other-resources">Other resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ServicesAndFilters.html">Services &amp; Filters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#composing-filters-and-services">Composing filters and services</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Finagle changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#x">6.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id9">5.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id28">4.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id30">3.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id32">2.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id35">1.x</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#authors">Authors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#the-apache-license">The Apache license</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </div>
+  
+  </body>
+</html>
