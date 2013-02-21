@@ -1,0 +1,925 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.builder.ServerBuilder</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+      <div id="definition">
+        <a title="Go to companion" href="ServerBuilder$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.builder" class="extype" href="package.html">builder</a></p>
+        <h1><a title="Go to companion" href="ServerBuilder$.html">ServerBuilder</a></h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ServerBuilder</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A handy Builder for constructing Servers (i.e., binding Services to
+a port).  This class is subclassable. Override copy() and build()
+to do your own dirty work.</p><p>The main class to use is <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>, as so</p><pre>
+ServerBuilder()
+  .codec(Http)
+  .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
+  .readTimeout(<span class="num">2.</span>minutes)
+  .name(<span class="lit">"servicename"</span>)
+  .bindTo(<span class="kw">new</span> InetSocketAddress(serverPort))
+  .build(plusOneService)
+</pre><p>The <code>ServerBuilder</code> requires the definition of <code>codec</code>, <code>bindTo</code>
+and <code>name</code>. In Scala, these are statically type
+checked, and in Java the lack of any of the above causes a runtime
+error.</p><p>The <code>build</code> method uses an implicit argument to statically
+typecheck the builder (to ensure completeness, see above). The Java
+compiler cannot provide such implicit, so we provide a separate
+function in Java to accomplish this. Thus, the Java code for the
+above is</p><pre>
+ServerBuilder.safeBuild(
+ plusOneService,
+ ServerBuilder.get()
+  .codec(Http)
+  .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
+  .readTimeout(<span class="num">2.</span>minutes)
+  .name(<span class="lit">"servicename"</span>)
+  .bindTo(<span class="kw">new</span> InetSocketAddress(serverPort)));
+</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ServerBuilder</code>
+verifies the builder dynamically, resulting in a runtime error
+instead of a compiler error.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+            </div>
+        <div id="ancestors">
+              <span class="filtertype">Inherited</span>
+              <ol><li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.builder.ServerBuilder" class="in"><span>ServerBuilder</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+            </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#FullySpecifiedConfig" data-isabs="false">
+      <a id="FullySpecifiedConfig:FullySpecifiedConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FullySpecifiedConfig</span><span class="result"> = <span name="com.twitter.finagle.builder.ServerConfig" class="extype">ServerConfig</span>[Req, Rep, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#This" data-isabs="false">
+      <a id="This:This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">This</span><span class="result"> = <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req, Rep, HasCodec, HasBindTo, HasName]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#ThisConfig" data-isabs="false">
+      <a id="ThisConfig:ThisConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ThisConfig</span><span class="result"> = <span name="com.twitter.finagle.builder.ServerConfig" class="extype">ServerConfig</span>[Req, Rep, HasCodec, HasBindTo, HasName]</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#backlog" data-isabs="false">
+      <a id="backlog(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">backlog</span><span class="params">(<span name="value">value: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#bindTo" data-isabs="false">
+      <a id="bindTo(SocketAddress):ServerBuilder[Req, Rep, HasCodec, Yes, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bindTo</span><span class="params">(<span name="address">address: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req, Rep, HasCodec, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasName]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#build" data-isabs="false">
+      <a id="build(ServiceFactory[Req, Rep])(ServerConfigEvidence[HasCodec, HasBindTo, HasName]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">build</span><span class="params">(<span name="serviceFactory">serviceFactory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <a name="com.twitter.finagle.builder.ServerConfigEvidence" class="extype" href="ServerConfigEvidence.html">ServerConfigEvidence</a>[HasCodec, HasBindTo, HasName]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct the Server, given the provided ServiceFactory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct the Server, given the provided ServiceFactory. This
+is useful if the protocol is stateful (e.g., requires authentication
+or supports transactions).
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#build" data-isabs="false">
+      <a id="build(Service[Req, Rep])(ServerConfigEvidence[HasCodec, HasBindTo, HasName]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">build</span><span class="params">(<span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <a name="com.twitter.finagle.builder.ServerConfigEvidence" class="extype" href="ServerConfigEvidence.html">ServerConfigEvidence</a>[HasCodec, HasBindTo, HasName]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct the Server, given the provided Service.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#cancelOnHangup" data-isabs="false">
+      <a id="cancelOnHangup(Boolean):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancelOnHangup</span><span class="params">(<span name="yesOrNo">yesOrNo: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Cancel pending futures whenever the the connection is shut down.</p><div class="fullcomment"><div class="comment cmt"><p>Cancel pending futures whenever the the connection is shut down.
+This defaults to true.
+</p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#channelFactory" data-isabs="false">
+      <a id="channelFactory(ServerChannelFactory):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelFactory</span><span class="params">(<span name="cf">cf: <span name="org.jboss.netty.channel.ServerChannelFactory" class="extype">ServerChannelFactory</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#codec" data-isabs="false">
+      <a id="codec[Req1, Rep1](CodecFactory[Req1, Rep1]):ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codecFactory">codecFactory: <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#codec" data-isabs="false">
+      <a id="codec[Req1, Rep1]((ServerCodecConfig) ⇒ Codec[Req1, Rep1]):ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codecFactory">codecFactory: (<a name="com.twitter.finagle.ServerCodecConfig" class="extype" href="../ServerCodecConfig.html">ServerCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#codec" data-isabs="false">
+      <a id="codec[Req1, Rep1](Codec[Req1, Rep1]):ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codec">codec: <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[Req1, Rep1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>, HasBindTo, HasName]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#config" data-isabs="false">
+      <a id="config:ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">config</span><span class="result">: <span name="com.twitter.finagle.builder.ServerConfig" class="extype">ServerConfig</span>[Req, Rep, HasCodec, HasBindTo, HasName]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="prt" name="com.twitter.finagle.builder.ServerBuilder#copy" data-isabs="false">
+      <a id="copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](ServerConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]):ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="config">config: <span name="com.twitter.finagle.builder.ServerConfig" class="extype">ServerConfig</span>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#daemon" data-isabs="false">
+      <a id="daemon(Boolean):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">daemon</span><span class="params">(<span name="daemonize">daemonize: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">When true, the server is daemonized.</p><div class="fullcomment"><div class="comment cmt"><p>When true, the server is daemonized. As with java threads, a
+process can only exit only when all remaining servers are daemonized.
+False by default.
+</p></div></div>
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#hostConnectionMaxIdleTime" data-isabs="false">
+      <a id="hostConnectionMaxIdleTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="howlong">howlong: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#hostConnectionMaxLifeTime" data-isabs="false">
+      <a id="hostConnectionMaxLifeTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="howlong">howlong: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#keepAlive" data-isabs="false">
+      <a id="keepAlive(Boolean):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">keepAlive</span><span class="params">(<span name="value">value: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#logChannelActivity" data-isabs="false">
+      <a id="logChannelActivity(Boolean):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logChannelActivity</span><span class="params">(<span name="v">v: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#logger" data-isabs="false">
+      <a id="logger(Logger):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logger</span><span class="params">(<span name="logger">logger: <span name="java.util.logging.Logger" class="extype">Logger</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#maxConcurrentRequests" data-isabs="false">
+      <a id="maxConcurrentRequests(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxConcurrentRequests</span><span class="params">(<span name="max">max: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#monitor" data-isabs="false">
+      <a id="monitor((String, SocketAddress) ⇒ Monitor):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monitor</span><span class="params">(<span name="mFactory">mFactory: (String, <span name="java.net.SocketAddress" class="extype">SocketAddress</span>) ⇒ <span name="com.twitter.util.Monitor" class="extype">Monitor</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#name" data-isabs="false">
+      <a id="name(String):ServerBuilder[Req, Rep, HasCodec, HasBindTo, Yes]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="params">(<span name="value">value: String</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req, Rep, HasCodec, HasBindTo, <a name="com.twitter.finagle.builder.ServerConfig.Yes" class="extype" href="ServerConfig$$Yes.html">Yes</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#newFinagleSslEngine" data-isabs="false">
+      <a id="newFinagleSslEngine(() ⇒ Engine):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newFinagleSslEngine</span><span class="params">(<span name="v">v: () ⇒ <a name="com.twitter.finagle.ssl.Engine" class="extype" href="../ssl/Engine.html">Engine</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#newSslEngine" data-isabs="false">
+      <a id="newSslEngine(() ⇒ SSLEngine):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newSslEngine</span><span class="params">(<span name="newSsl">newSsl: () ⇒ <span name="javax.net.ssl.SSLEngine" class="extype">SSLEngine</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Provide a raw SSL engine that is used to establish SSL sessions.</p>
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#openConnectionsThresholds" data-isabs="false">
+      <a id="openConnectionsThresholds(OpenConnectionsThresholds):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">openConnectionsThresholds</span><span class="params">(<span name="thresholds">thresholds: <a name="com.twitter.finagle.channel.OpenConnectionsThresholds" class="extype" href="../channel/OpenConnectionsThresholds.html">OpenConnectionsThresholds</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#readTimeout" data-isabs="false">
+      <a id="readTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readTimeout</span><span class="params">(<span name="howlong">howlong: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#recvBufferSize" data-isabs="false">
+      <a id="recvBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recvBufferSize</span><span class="params">(<span name="value">value: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#reportTo" data-isabs="false">
+      <a id="reportTo(StatsReceiver):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#requestTimeout" data-isabs="false">
+      <a id="requestTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestTimeout</span><span class="params">(<span name="howlong">howlong: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#sendBufferSize" data-isabs="false">
+      <a id="sendBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sendBufferSize</span><span class="params">(<span name="value">value: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#tls" data-isabs="false">
+      <a id="tls(String,String,String,String,String):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="certificatePath">certificatePath: String</span>, <span name="keyPath">keyPath: String</span>, <span name="caCertificatePath">caCertificatePath: String = <span class="symbol">null</span></span>, <span name="ciphers">ciphers: String = <span class="symbol">null</span></span>, <span name="nextProtos">nextProtos: String = <span class="symbol">null</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#toString" data-isabs="false">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#tracer" data-isabs="false">
+      <a id="tracer(Tracer):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tracer</span><span class="params">(<span name="t">t: <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../tracing/Tracer.html">Tracer</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#unsafeBuild" data-isabs="false">
+      <a id="unsafeBuild(Service[Req, Rep]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsafeBuild</span><span class="params">(<span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct a Service, with runtime checks for builder
+completeness.</p>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.builder.ServerBuilder#withConfig" data-isabs="false">
+      <a id="withConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]((ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]) ⇒ ServerConfig[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]):ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withConfig</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="f">f: (<span name="com.twitter.finagle.builder.ServerConfig" class="extype">ServerConfig</span>[Req, Rep, HasCodec, HasBindTo, HasName]) ⇒ <span name="com.twitter.finagle.builder.ServerConfig" class="extype">ServerConfig</span>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="">ServerBuilder</a>[Req1, Rep1, HasCodec1, HasBindTo1, HasName1]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#writeCompletionTimeout" data-isabs="false">
+      <a id="writeCompletionTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeCompletionTimeout</span><span class="params">(<span name="howlong">howlong: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#build" data-isabs="false">
+      <a id="build(ServiceFactory[Req, Rep],=:=[ThisConfig, FullySpecifiedConfig]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="serviceFactory">serviceFactory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>, <span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span name="scala.Predef.=:=" class="extype">=:=</span>[ThisConfig, FullySpecifiedConfig]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#build" data-isabs="false">
+      <a id="build((ClientConnection) ⇒ Service[Req, Rep])(=:=[ThisConfig, FullySpecifiedConfig]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use the ServiceFactory variant instead">build</span><span class="params">(<span name="serviceFactory">serviceFactory: (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span name="scala.Predef.=:=" class="extype">=:=</span>[ThisConfig, FullySpecifiedConfig]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct the Server, given the provided ServiceFactory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct the Server, given the provided ServiceFactory. This
+is useful if the protocol is stateful (e.g., requires authentication
+or supports transactions).
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Use the ServiceFactory variant instead</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#build" data-isabs="false">
+      <a id="build(() ⇒ Service[Req, Rep])(=:=[ThisConfig, FullySpecifiedConfig]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use the ServiceFactory variant instead">build</span><span class="params">(<span name="serviceFactory">serviceFactory: () ⇒ <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span name="scala.Predef.=:=" class="extype">=:=</span>[ThisConfig, FullySpecifiedConfig]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct the Server, given the provided Service factory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct the Server, given the provided Service factory.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Use the ServiceFactory variant instead</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#build" data-isabs="false">
+      <a id="build(Service[Req, Rep],=:=[ThisConfig, FullySpecifiedConfig]):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]</span>, <span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span name="scala.Predef.=:=" class="extype">=:=</span>[ThisConfig, FullySpecifiedConfig]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Server" class="extype" href="Server.html">Server</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#tracerFactory" data-isabs="false">
+      <a id="tracerFactory(Tracer):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="t">t: <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../tracing/Tracer.html">Tracer</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder#tracerFactory" data-isabs="false">
+      <a id="tracerFactory(() ⇒ Tracer):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="factory">factory: () ⇒ <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../tracing/Tracer.html">Tracer</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
+    </li></ol>
+            </div>
+        </div>
+
+        <div id="inheritedMembers">
+        <div name="scala.AnyRef" class="parent">
+              <h3>Inherited from AnyRef</h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

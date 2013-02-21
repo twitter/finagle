@@ -1,0 +1,331 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.tracing</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <h1>tracing</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tracing</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.tracing.Annotation" data-isabs="true">
+      <a id="Annotation:Annotation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.BufferingTracer" data-isabs="false">
+      <a id="BufferingTracer:BufferingTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferingTracer.html"><span class="name">BufferingTracer</span></a><span class="result"> extends Tracer with Iterable[Record]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.ClientRequestTracingFilter" data-isabs="true">
+      <a id="ClientRequestTracingFilter:ClientRequestTracingFilter[Req, Res]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientRequestTracingFilter.html"><span class="name">ClientRequestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Res">Res</span>]</span><span class="result"> extends SimpleFilter[Req, Res]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Adds the basic tracing information to a request.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Flags" data-isabs="false">
+      <a id="Flags:Flags"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Flags.html"><span class="name">Flags</span></a><span class="params">(<span name="flags">flags: Long</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents flags that can be passed along in request headers.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.NullTracer" data-isabs="false">
+      <a id="NullTracer:NullTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NullTracer.html"><span class="name">NullTracer</span></a><span class="result"> extends Tracer</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Record" data-isabs="false">
+      <a id="Record:Record"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: TraceId</span>, <span name="timestamp">timestamp: Time</span>, <span name="annotation">annotation: Annotation</span>, <span name="duration">duration: Option[Duration]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Records information of interest to the tracing system.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.SpanId" data-isabs="false">
+      <a id="SpanId:SpanId"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SpanId.html"><span class="name">SpanId</span></a><span class="result"> extends Proxy</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Defines trace identifiers.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.TraceId" data-isabs="false">
+      <a id="TraceId:TraceId"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: Option[SpanId]</span>, <span name="_parentId">_parentId: Option[SpanId]</span>, <span name="spanId">spanId: SpanId</span>, <span name="_sampled">_sampled: Option[Boolean]</span>, <span name="flags">flags: Flags</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A trace id represents one particular trace for one request.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Tracer" data-isabs="true">
+      <a id="Tracer:Tracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.TracingFilter" data-isabs="false">
+      <a id="TracingFilter:TracingFilter[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TracingFilter.html"><span class="name">TracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.TracingLogHandler" data-isabs="false">
+      <a id="TracingLogHandler:TracingLogHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TracingLogHandler.html"><span class="name">TracingLogHandler</span></a><span class="result"> extends Handler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A logging Handler that sends log information via tracing
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.tracing.Annotation" data-isabs="false">
+      <a id="Annotation:Annotation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Annotation$.html"><span class="name">Annotation</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.ConsoleTracer" data-isabs="false">
+      <a id="ConsoleTracer:ConsoleTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ConsoleTracer$.html"><span class="name">ConsoleTracer</span></a><span class="result"> extends Tracer</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.DefaultTracer" data-isabs="false">
+      <a id="DefaultTracer:DefaultTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultTracer$.html"><span class="name">DefaultTracer</span></a><span class="result"> extends NullTracer</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Flags" data-isabs="false">
+      <a id="Flags:Flags"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Flags$.html"><span class="name">Flags</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.NullTracer" data-isabs="false">
+      <a id="NullTracer:NullTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullTracer$.html"><span class="name">NullTracer</span></a><span class="result"> extends NullTracer</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Record" data-isabs="false">
+      <a id="Record:Record"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Record$.html"><span class="name">Record</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.SpanId" data-isabs="false">
+      <a id="SpanId:SpanId"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SpanId$.html"><span class="name">SpanId</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace" data-isabs="false">
+      <a id="Trace:Trace"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Trace$.html"><span class="name">Trace</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt"><code>Trace</code> maintains the state of the tracing stack
+The current <code>TraceId</code> has a terminal flag, indicating whether it
+can be overridden with a different <code>TraceId</code>.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.TraceId" data-isabs="false">
+      <a id="TraceId:TraceId"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TraceId$.html"><span class="name">TraceId</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Tracer" data-isabs="false">
+      <a id="Tracer:Tracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

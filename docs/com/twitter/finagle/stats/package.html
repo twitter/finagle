@@ -1,0 +1,425 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.stats</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <h1>stats</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stats</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.stats.CommonsStatsReceiver" data-isabs="false">
+      <a id="CommonsStatsReceiver:CommonsStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="CommonsStatsReceiver.html"><span class="name">CommonsStatsReceiver</span></a><span class="result"> extends StatsReceiverWithCumulativeGauges</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.Counter" data-isabs="true">
+      <a id="Counter:Counter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Counter.html"><span class="name">Counter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A writeable Counter.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.Gauge" data-isabs="true">
+      <a id="Gauge:Gauge"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Gauge.html"><span class="name">Gauge</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Exposes the value of a function.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.GlobalStatsReceiver" data-isabs="false">
+      <a id="GlobalStatsReceiver:GlobalStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="GlobalStatsReceiver.html"><span class="name">GlobalStatsReceiver</span></a><span class="result"> extends NullStatsReceiver</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Note: currently supports only gauges, will throw
+away other types.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.InMemoryStatsReceiver" data-isabs="false">
+      <a id="InMemoryStatsReceiver:InMemoryStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="InMemoryStatsReceiver.html"><span class="name">InMemoryStatsReceiver</span></a><span class="result"> extends StatsReceiver</span>
+      </span>
+      </h4>
+      <p class="comment cmt">In-memory stats receiver for testing.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver" data-isabs="false">
+      <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="JavaLoggerStatsReceiver.html"><span class="name">JavaLoggerStatsReceiver</span></a><span class="result"> extends StatsReceiverWithCumulativeGauges</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.JsonExporter" data-isabs="false">
+      <a id="JsonExporter:JsonExporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="JsonExporter.html"><span class="name">JsonExporter</span></a><span class="result"> extends Service[HttpRequest, HttpResponse]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.MetricsExporter" data-isabs="false">
+      <a id="MetricsExporter:MetricsExporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MetricsExporter.html"><span class="name">MetricsExporter</span></a><span class="result"> extends JsonExporter with HttpMuxHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.MetricsStatsReceiver" data-isabs="false">
+      <a id="MetricsStatsReceiver:MetricsStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MetricsStatsReceiver.html"><span class="name">MetricsStatsReceiver</span></a><span class="result"> extends StatsReceiver</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.NameTranslatingStatsReceiver" data-isabs="true">
+      <a id="NameTranslatingStatsReceiver:NameTranslatingStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NameTranslatingStatsReceiver.html"><span class="name">NameTranslatingStatsReceiver</span></a><span class="result"> extends StatsReceiver with Proxy</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.NullStatsReceiver" data-isabs="false">
+      <a id="NullStatsReceiver:NullStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NullStatsReceiver.html"><span class="name">NullStatsReceiver</span></a><span class="result"> extends StatsReceiver with JavaSingleton</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichExporter" data-isabs="false">
+      <a id="OstrichExporter:OstrichExporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="OstrichExporter.html"><span class="name">OstrichExporter</span></a><span class="result"> extends Service[HttpRequest, HttpResponse] with HttpMuxHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.OstrichStatsReceiver" data-isabs="false">
+      <a id="OstrichStatsReceiver:OstrichStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="OstrichStatsReceiver.html"><span class="name">OstrichStatsReceiver</span></a><span class="result"> extends StatsReceiverWithCumulativeGauges</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.RollupStatsReceiver" data-isabs="false">
+      <a id="RollupStatsReceiver:RollupStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RollupStatsReceiver.html"><span class="name">RollupStatsReceiver</span></a><span class="result"> extends StatsReceiver with Proxy</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.Stat" data-isabs="true">
+      <a id="Stat:Stat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Stat.html"><span class="name">Stat</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An append-only collection of time-series data.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiver" data-isabs="true">
+      <a id="StatsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsReceiver.html"><span class="name">StatsReceiver</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiverProxy" data-isabs="true">
+      <a id="StatsReceiverProxy:StatsReceiverProxy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsReceiverProxy.html"><span class="name">StatsReceiverProxy</span></a><span class="result"> extends StatsReceiver with Proxy</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" data-isabs="true">
+      <a id="StatsReceiverWithCumulativeGauges:StatsReceiverWithCumulativeGauges"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsReceiverWithCumulativeGauges.html"><span class="name">StatsReceiverWithCumulativeGauges</span></a><span class="result"> extends StatsReceiver</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.SummarizingStatsReceiver" data-isabs="false">
+      <a id="SummarizingStatsReceiver:SummarizingStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SummarizingStatsReceiver.html"><span class="name">SummarizingStatsReceiver</span></a><span class="result"> extends StatsReceiverWithCumulativeGauges</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.stats.BroadcastStatsReceiver" data-isabs="false">
+      <a id="BroadcastStatsReceiver:BroadcastStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BroadcastStatsReceiver$.html"><span class="name">BroadcastStatsReceiver</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.ClientStatsReceiver" data-isabs="false">
+      <a id="ClientStatsReceiver:ClientStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientStatsReceiver$.html"><span class="name">ClientStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.DefaultStatsReceiver" data-isabs="false">
+      <a id="DefaultStatsReceiver:DefaultStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultStatsReceiver$.html"><span class="name">DefaultStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.GlobalStatsReceiver" data-isabs="false">
+      <a id="GlobalStatsReceiver:GlobalStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="GlobalStatsReceiver$.html"><span class="name">GlobalStatsReceiver</span></a><span class="result"> extends GlobalStatsReceiver</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.JavaLoggerStatsReceiver" data-isabs="false">
+      <a id="JavaLoggerStatsReceiver:JavaLoggerStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="JavaLoggerStatsReceiver$.html"><span class="name">JavaLoggerStatsReceiver</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.LoadedStatsReceiver" data-isabs="false">
+      <a id="LoadedStatsReceiver:LoadedStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="LoadedStatsReceiver$.html"><span class="name">LoadedStatsReceiver</span></a><span class="result"> extends LoadedStatsReceiver</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.MetricsStatsReceiver" data-isabs="false">
+      <a id="MetricsStatsReceiver:MetricsStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MetricsStatsReceiver$.html"><span class="name">MetricsStatsReceiver</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.NullStatsReceiver" data-isabs="false">
+      <a id="NullStatsReceiver:NullStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullStatsReceiver$.html"><span class="name">NullStatsReceiver</span></a><span class="result"> extends NullStatsReceiver</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.ServerStatsReceiver" data-isabs="false">
+      <a id="ServerStatsReceiver:ServerStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerStatsReceiver$.html"><span class="name">ServerStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.stats.StatsReceiver" data-isabs="false">
+      <a id="StatsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsReceiver$.html"><span class="name">StatsReceiver</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

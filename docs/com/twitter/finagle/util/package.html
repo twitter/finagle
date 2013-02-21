@@ -1,0 +1,357 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.util</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <h1>util</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">util</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><h4>Resource Management</h4><p><a name="com.twitter.finagle.util.Disposable" class="extype" href="Disposable.html">Disposable</a> represents a live resource that must be disposed after use.
+<a name="com.twitter.finagle.util.Managed" class="extype" href="Managed.html">Managed</a> is a factory for creating and composing such resources.
+Managed resources are composed together so their lifetimes are synchronized.</p><p>The following example shows how to build and use composite managed resources:</p><pre>
+<span class="cmt">// Create managed Tracer</span>
+<span class="kw">def</span> mkManagedTracer() = <span class="kw">new</span> Managed[Tracer] {
+  <span class="kw">def</span> make() = <span class="kw">new</span> Disposable[Tracer] {
+    <span class="kw">val</span> underlying = <span class="kw">new</span> Tracer()
+    <span class="kw">def</span> get = underlying
+    <span class="kw">def</span> dispose(deadline: Time) = underlying.close() <span class="cmt">// assumes Tracer uses relese() to manage lifetime</span>
+  }
+}
+
+<span class="cmt">// Create managed Server using Tracer as dependency</span>
+<span class="kw">def</span> mkManagedServer(t: Tracer) = <span class="kw">new</span> Managed[Server] {
+  <span class="kw">def</span> make() = <span class="kw">new</span> Disposable[Server] {
+    <span class="kw">val</span> underlying = <span class="kw">new</span> Server(t) <span class="cmt">// Server requires tracer to be created</span>
+    <span class="kw">def</span> get = underlying
+    <span class="kw">def</span> dispose(deadline: Time) = underlying.close() <span class="cmt">// assumes Server uses close() to manage lifetime</span>
+  }
+}
+
+<span class="cmt">// Create composite resource</span>
+<span class="kw">val</span> compRes: Managed[Server] = <span class="kw">for</span> {
+  a <span class="kw">&lt;-</span> mkManagedTracer()
+  b <span class="kw">&lt;-</span> mkManagedServer(a)
+} <span class="kw">yield</span> b
+
+<span class="cmt">// Use composite resource in safe fashion. It's guaranteed that both resources</span>
+<span class="cmt">// will be properly closed/released when done using them.</span>
+compRes foreach { b <span class="kw">=&gt;</span>
+  <span class="cmt">// use b (which is type Server in this case)</span>
+} <span class="cmt">// dispose called on both resources</span>
+</pre><h3>Disposable/Managed Semantics</h3><p><a name="com.twitter.finagle.util.Disposable" class="extype" href="Disposable.html">Disposable</a>: get can be called multiple times and should return same instance;
+dispose can be called only once and should release resource that get is returning;
+calling get after dispose is undefined.</p><p><a name="com.twitter.finagle.util.Managed" class="extype" href="Managed.html">Managed</a>: multiple calls to make could return
+ a) new instance or
+ b) ref counted instance of the underlying resource or
+ c) same instance when resource doesn't need to be actually disposed, etc.
+</p></div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.util.AsyncLatch" data-isabs="false">
+      <a id="AsyncLatch:AsyncLatch"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncLatch.html"><span class="name">AsyncLatch</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The AsyncLatch is an asynchronous latch.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Chan" data-isabs="true">
+      <a id="Chan:Chan[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Chan.html"><span class="name">Chan</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.CloseNotifier" data-isabs="true">
+      <a id="CloseNotifier:CloseNotifier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="CloseNotifier.html"><span class="name">CloseNotifier</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Allows resources to register their handlers to be invoked when service is closing.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.ConcurrentRingBuffer" data-isabs="false">
+      <a id="ConcurrentRingBuffer:ConcurrentRingBuffer[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConcurrentRingBuffer.html"><span class="name">ConcurrentRingBuffer</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A simple, lock-free, non-blocking ring buffer.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Disposable" data-isabs="true">
+      <a id="Disposable:Disposable[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Disposable.html"><span class="name">Disposable</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Disposable is a container for a resource that must be explicitly disposed when
+no longer needed.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.DoubleTrouble" data-isabs="false">
+      <a id="DoubleTrouble:DoubleTrouble"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DoubleTrouble.html"><span class="name">DoubleTrouble</span></a><span class="result"> extends Exception</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.Managed" data-isabs="true">
+      <a id="Managed:Managed[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Managed.html"><span class="name">Managed</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt"><code>Managed[T]</code> is a resource of type <code>T</code> which lifetime is explicitly managed.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Proc" data-isabs="true">
+      <a id="Proc:Proc[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Proc.html"><span class="name">Proc</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends Chan[T]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Proc is a process that can receive messages.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.TimerFromNettyTimer" data-isabs="false">
+      <a id="TimerFromNettyTimer:TimerFromNettyTimer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TimerFromNettyTimer.html"><span class="name">TimerFromNettyTimer</span></a><span class="result"> extends Timer</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Implements a com.twitter.util.Timer in terms of a
+org.jboss.netty.util.Timer.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.util.ByteArrays" data-isabs="false">
+      <a id="ByteArrays:ByteArrays"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ByteArrays$.html"><span class="name">ByteArrays</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.CloseNotifier" data-isabs="false">
+      <a id="CloseNotifier:CloseNotifier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CloseNotifier$.html"><span class="name">CloseNotifier</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.package#DefaultLogger" data-isabs="false">
+      <a id="DefaultLogger:Logger"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultLogger</span><span class="result">: <span name="java.util.logging.Logger" class="extype">Logger</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.util.package" class="extype" href="package$.html">package</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.util.DefaultMonitor" data-isabs="false">
+      <a id="DefaultMonitor:DefaultMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends Monitor</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.DefaultTimer" data-isabs="false">
+      <a id="DefaultTimer:DefaultTimer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a><span class="result"> extends HashedWheelTimer</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.Disposable" data-isabs="false">
+      <a id="Disposable:Disposable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Disposable$.html"><span class="name">Disposable</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.ExitGuard" data-isabs="false">
+      <a id="ExitGuard:ExitGuard"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExitGuard$.html"><span class="name">ExitGuard</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">ExitGuard prevents the process from exiting normally by use of a
+nondaemon thread whenever there is at least one guarder.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.InetSocketAddressUtil" data-isabs="false">
+      <a id="InetSocketAddressUtil:InetSocketAddressUtil"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="InetSocketAddressUtil$.html"><span class="name">InetSocketAddressUtil</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.LoadService" data-isabs="false">
+      <a id="LoadService:LoadService"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="LoadService$.html"><span class="name">LoadService</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Load a singleton class using java.util.ServiceLoader.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.util.Managed" data-isabs="false">
+      <a id="Managed:Managed"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Managed$.html"><span class="name">Managed</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.util.Proc" data-isabs="false">
+      <a id="Proc:Proc"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Proc$.html"><span class="name">Proc</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

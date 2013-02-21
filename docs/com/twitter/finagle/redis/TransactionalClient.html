@@ -1,0 +1,1510 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.redis.TransactionalClient</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+      <div id="definition">
+        <a title="Go to companion" href="TransactionalClient$.html"><img src="../../../../lib/trait_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.redis" class="extype" href="package.html">redis</a></p>
+        <h1><a title="Go to companion" href="TransactionalClient$.html">TransactionalClient</a></h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TransactionalClient</span><span class="result"> extends <a name="com.twitter.finagle.redis.Client" class="extype" href="Client.html">Client</a></span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Client connected over a single connection to a
+single redis instance, supporting transactions
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.redis.Client" class="extype" href="Client.html">Client</a>, <a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a>, <a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a>, <a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a>, <a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a>, <a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a>, <a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a>, <a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a>, <a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+            </div>
+        <div id="ancestors">
+              <span class="filtertype">Inherited</span>
+              <ol><li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.redis.TransactionalClient" class="in"><span>TransactionalClient</span></li><li name="com.twitter.finagle.redis.Client" class="in"><span>Client</span></li><li name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="in"><span>BtreeSortedSetCommands</span></li><li name="com.twitter.finagle.redis.Sets" class="in"><span>Sets</span></li><li name="com.twitter.finagle.redis.Lists" class="in"><span>Lists</span></li><li name="com.twitter.finagle.redis.SortedSets" class="in"><span>SortedSets</span></li><li name="com.twitter.finagle.redis.Hashes" class="in"><span>Hashes</span></li><li name="com.twitter.finagle.redis.Strings" class="in"><span>Strings</span></li><li name="com.twitter.finagle.redis.Keys" class="in"><span>Keys</span></li><li name="com.twitter.finagle.redis.BaseClient" class="in"><span>BaseClient</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+            </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        
+
+        <div class="values members" id="values">
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.redis.TransactionalClient#transaction" data-isabs="true">
+      <a id="transaction(Seq[Command]):Future[Seq[Reply]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transaction</span><span class="params">(<span name="cmds">cmds: Seq[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="protocol/Command.html">Command</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="protocol/Reply.html">Reply</a>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Executes given vector of commands as a Redis transaction
+The order of the commands queued on the Redis server is not guaranteed</p><div class="fullcomment"><div class="comment cmt"><p>Executes given vector of commands as a Redis transaction
+The order of the commands queued on the Redis server is not guaranteed</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Results of each command in order
+</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Concrete Value Members</h3>
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#append" data-isabs="false">
+      <a id="append(ChannelBuffer,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">append</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Appends value at the given key.</p><div class="fullcomment"><div class="comment cmt"><p>Appends value at the given key. If key doesn't exist,
+behavior is similar to SET command</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>length of string after append operation
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BaseClient#auth" data-isabs="false">
+      <a id="auth(ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">auth</span><span class="params">(<span name="password">password: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Authorizes to db</p><div class="fullcomment"><div class="comment cmt"><p>Authorizes to db</p></div><dl class="paramcmts block"><dt class="param">password</dt><dd class="cmt"><p>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BtreeSortedSetCommands#bAdd" data-isabs="false">
+      <a id="bAdd(ChannelBuffer,ChannelBuffer,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bAdd</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets field value pair in the given btree sorted set key</p><div class="fullcomment"><div class="comment cmt"><p>Sets field value pair in the given btree sorted set key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if field is new, 0 if field was updated
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BtreeSortedSetCommands#bCard" data-isabs="false">
+      <a id="bCard(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bCard</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the btree sorted set cardinality for the given key</p><div class="fullcomment"><div class="comment cmt"><p>Returns the btree sorted set cardinality for the given key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Integer representing cardinality of btree sorted set,
+or 0 if key does not exist
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BtreeSortedSetCommands#bGet" data-isabs="false">
+      <a id="bGet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bGet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the value for the field from the given btree sorted set key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value for the field from the given btree sorted set key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Value if field exists
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BtreeSortedSetCommands#bRange" data-isabs="false">
+      <a id="bRange(ChannelBuffer,Option[ChannelBuffer],Option[ChannelBuffer]):Future[Seq[(ChannelBuffer, ChannelBuffer)]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="startField">startField: <span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>, <span name="endField">endField: <span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[(<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>)]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets all field value pairs for the given btree sorted order key from startField to endField</p><div class="fullcomment"><div class="comment cmt"><p>Gets all field value pairs for the given btree sorted order key from startField to endField</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Sequence of field/value pairs
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BtreeSortedSetCommands#bRem" data-isabs="false">
+      <a id="bRem(ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bRem</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="fields">fields: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Deletes fields from the given btree sorted set key</p><div class="fullcomment"><div class="comment cmt"><p>Deletes fields from the given btree sorted set key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of fields deleted
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#bitCount" data-isabs="false">
+      <a id="bitCount(ChannelBuffer,Option[Int],Option[Int]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bitCount</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Int" class="extype">Int</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/package.html">None</a></span></span></span>, <span name="end">end: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Int" class="extype">Int</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/package.html">None</a></span></span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Count the number of set bits (population counting) in a string.</p><div class="fullcomment"><div class="comment cmt"><p>Count the number of set bits (population counting) in a string.
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt class="param">start</dt><dd class="cmt"><p>optional index bytes starting from.</p></dd><dt class="param">end</dt><dd class="cmt"><p>optional index bytes of the end.</p></dd><dt>returns</dt><dd class="cmt"><p>The number of bits set to 1.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/bitcount
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#bitOp" data-isabs="false">
+      <a id="bitOp(ChannelBuffer,ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bitOp</span><span class="params">(<span name="op">op: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="dstKey">dstKey: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="srcKeys">srcKeys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Perform a bitwise operation between multiple keys (containing string
+values) and store the result in the destination key.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a bitwise operation between multiple keys (containing string
+values) and store the result in the destination key.
+</p></div><dl class="paramcmts block"><dt class="param">op</dt><dd class="cmt"><p>operation type, one of AND/OR/XOR/NOT.</p></dd><dt class="param">dstKey</dt><dd class="cmt"><p>destination key.</p></dd><dt class="param">srcKeys</dt><dd class="cmt"><p>source keys perform the operation between.</p></dd><dt>returns</dt><dd class="cmt"><p>The size of the string stored in the destination key,
+         that is equal to the size of the longest input string.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/bitop
+</p></span></dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#decr" data-isabs="false">
+      <a id="decr(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decr</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Decremts number stored at key by 1.</p><div class="fullcomment"><div class="comment cmt"><p>Decremts number stored at key by 1.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>value after decrement.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#decrBy" data-isabs="false">
+      <a id="decrBy(ChannelBuffer,Long):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decrBy</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="amount">amount: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Decrements number stored at key by given amount.</p><div class="fullcomment"><div class="comment cmt"><p>Decrements number stored at key by given amount. If key doesn't
+exist, value is set to 0 before the operation</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
+of the wrong type
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#del" data-isabs="false">
+      <a id="del(Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">del</span><span class="params">(<span name="keys">keys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of keys removed
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#exists" data-isabs="false">
+      <a id="exists(ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exists</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Checks if given key exists</p><div class="fullcomment"><div class="comment cmt"><p>Checks if given key exists</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>true if key exists, false otherwise
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#expire" data-isabs="false">
+      <a id="expire(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expire</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+false otherwise.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#expireAt" data-isabs="false">
+      <a id="expireAt(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expireAt</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p><div class="fullcomment"><div class="comment cmt"><p>Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+false otherwise.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BaseClient#flushDB" data-isabs="false">
+      <a id="flushDB():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flushDB</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Deletes all keys in current DB
+</p><div class="fullcomment"><div class="comment cmt"><p>Deletes all keys in current DB
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#get" data-isabs="false">
+      <a id="get(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the value associated with the given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value associated with the given key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>value, or none if key doesn't exist
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#getBit" data-isabs="false">
+      <a id="getBit(ChannelBuffer,Int):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getBit</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="offset">offset: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the bit value at offset in the string value stored at key.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the bit value at offset in the string value stored at key.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the bit value stored at offset.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/getbit
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#getRange" data-isabs="false">
+      <a id="getRange(ChannelBuffer,Long,Long):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="scala.Long" class="extype">Long</span></span>, <span name="end">end: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the substring of the value associated with given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#getSet" data-isabs="false">
+      <a id="getSet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Atomically sets key to value and returns the old value stored at key.</p><div class="fullcomment"><div class="comment cmt"><p>Atomically sets key to value and returns the old value stored at key.
+Returns an error when key exists but does not hold a string value.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the old value stored at key wrapped in Some,
+         or None when key did not exist.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/getset
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hDel" data-isabs="false">
+      <a id="hDel(ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hDel</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="fields">fields: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Deletes fields from given hash</p><div class="fullcomment"><div class="comment cmt"><p>Deletes fields from given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of fields deleted
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hGet" data-isabs="false">
+      <a id="hGet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hGet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets field from hash</p><div class="fullcomment"><div class="comment cmt"><p>Gets field from hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Value if field exists
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hGetAll" data-isabs="false">
+      <a id="hGetAll(ChannelBuffer):Future[Seq[(ChannelBuffer, ChannelBuffer)]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hGetAll</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[(<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>)]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets all field value pairs for given hash</p><div class="fullcomment"><div class="comment cmt"><p>Gets all field value pairs for given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Sequence of field/value pairs
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hKeys" data-isabs="false">
+      <a id="hKeys(ChannelBuffer):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hKeys</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Return all field names stored at key</p><div class="fullcomment"><div class="comment cmt"><p>Return all field names stored at key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>List of fields in hash
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hMGet" data-isabs="false">
+      <a id="hMGet(ChannelBuffer,Seq[ChannelBuffer]):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hMGet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="fields">fields: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets values for given fields in hash</p><div class="fullcomment"><div class="comment cmt"><p>Gets values for given fields in hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>List of values
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hMSet" data-isabs="false">
+      <a id="hMSet(ChannelBuffer,Map[ChannelBuffer, ChannelBuffer]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hMSet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="fv">fv: Map[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets values for given fields in hash</p><div class="fullcomment"><div class="comment cmt"><p>Sets values for given fields in hash</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>hash key</p></dd><dt class="param">fv</dt><dd class="cmt"><p>map of field to value</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/hmset
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hScan" data-isabs="false">
+      <a id="hScan(ChannelBuffer,Long,Option[Long],Option[ChannelBuffer]):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hScan</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="cursor">cursor: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="count">count: <span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>, <span name="pattern">pattern: <span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns keys in given hash, starting at cursor</p><div class="fullcomment"><div class="comment cmt"><p>Returns keys in given hash, starting at cursor</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>cursor followed by matching keys
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hSet" data-isabs="false">
+      <a id="hSet(ChannelBuffer,ChannelBuffer,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hSet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets field value pair in given hash</p><div class="fullcomment"><div class="comment cmt"><p>Sets field value pair in given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if field is new, 0 if field was updated
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#incr" data-isabs="false">
+      <a id="incr(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incr</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Increments the number stored at key by one.</p><div class="fullcomment"><div class="comment cmt"><p>Increments the number stored at key by one.
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the value of key after the increment.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/incr
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#incrBy" data-isabs="false">
+      <a id="incrBy(ChannelBuffer,Long):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incrBy</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="increment">increment: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Increments the number stored at key by increment.</p><div class="fullcomment"><div class="comment cmt"><p>Increments the number stored at key by increment.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the value of key after the increment.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/incrby
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#keys" data-isabs="false">
+      <a id="keys(ChannelBuffer):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">keys</span><span class="params">(<span name="pattern">pattern: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns all keys matching pattern</p><div class="fullcomment"><div class="comment cmt"><p>Returns all keys matching pattern</p></div><dl class="paramcmts block"><dt class="param">pattern</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>list of keys matching pattern
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lIndex" data-isabs="false">
+      <a id="lIndex(ChannelBuffer,Long):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lIndex</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="index">index: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the value of the element at the indexth position in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value of the element at the indexth position in the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the value of the element at the indexth position in the list.
+Nothing if the index is out of range.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lInsertAfter" data-isabs="false">
+      <a id="lInsertAfter(ChannelBuffer,ChannelBuffer,ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lInsertAfter</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="pivot">pivot: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Inserts a value after another pivot value in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Inserts a value after another pivot value in the list.
+If the key is a non-list element,
+an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or
+the list is empty.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lInsertBefore" data-isabs="false">
+      <a id="lInsertBefore(ChannelBuffer,ChannelBuffer,ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lInsertBefore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="pivot">pivot: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Inserts a value before another pivot value in the list.</p><div class="fullcomment"><div class="comment cmt"><p>Inserts a value before another pivot value in the list.
+If the key is a non-list element,
+an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an option of the new length of the list, or nothing if the pivot is not found, or the
+list is empty.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lLen" data-isabs="false">
+      <a id="lLen(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lLen</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the length of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the length of the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the length of the list.  Unassigned keys are considered empty
+lists, and return 0.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lPop" data-isabs="false">
+      <a id="lPop(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lPop</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Pops a value off the front of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pops a value off the front of the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the value of the popped element, or nothing if the list is empty.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lPush" data-isabs="false">
+      <a id="lPush(ChannelBuffer,List[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lPush</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: List[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Pushes a value onto the front of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pushes a value onto the front of the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the list
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lRange" data-isabs="false">
+      <a id="lRange(ChannelBuffer,Long,Long):Future[List[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="end">end: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[List[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the values in the range supplied.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the values in the range supplied.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a list of the value
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lRem" data-isabs="false">
+      <a id="lRem(ChannelBuffer,Long,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lRem</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="count">count: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes count elements matching value from the list.</p><div class="fullcomment"><div class="comment cmt"><p>Removes count elements matching value from the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the number of removed elements.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lSet" data-isabs="false">
+      <a id="lSet(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lSet</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="index">index: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the indexth element to be value.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the indexth element to be value.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#lTrim" data-isabs="false">
+      <a id="lTrim(ChannelBuffer,Long,Long):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lTrim</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="end">end: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes all of the elements from the list except for those in the range.</p><div class="fullcomment"><div class="comment cmt"><p>Removes all of the elements from the list except for those in the range.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#mGet" data-isabs="false">
+      <a id="mGet(Seq[ChannelBuffer]):Future[Seq[Option[ChannelBuffer]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mGet</span><span class="params">(<span name="keys">keys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns the values of all specified keys.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the values of all specified keys.
+</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>list of values at the specified keys.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/mget
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#mSet" data-isabs="false">
+      <a id="mSet(Map[ChannelBuffer, ChannelBuffer]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mSet</span><span class="params">(<span name="kv">kv: Map[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the given keys to their respective values.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given keys to their respective values. MSET replaces existing
+values with new values, just as regular SET.
+</p></div><dl class="paramcmts block"><dt class="param">kv</dt><dd class="cmt"></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/mset
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#mSetNx" data-isabs="false">
+      <a id="mSetNx(Map[ChannelBuffer, ChannelBuffer]):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mSetNx</span><span class="params">(<span name="kv">kv: Map[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the given keys to their respective values.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given keys to their respective values. MSETNX will not perform
+any operation at all even if just a single key already exists.
+</p></div><dl class="paramcmts block"><dt class="param">kv</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>1 if all keys were set, 0 if no keys were set.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/msetnx
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#pSetEx" data-isabs="false">
+      <a id="pSetEx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pSetEx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="millis">millis: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Works exactly like SETEX with the sole difference that the expire
+time is specified in milliseconds instead of seconds.</p><div class="fullcomment"><div class="comment cmt"><p>Works exactly like SETEX with the sole difference that the expire
+time is specified in milliseconds instead of seconds.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/psetex
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BaseClient#quit" data-isabs="false">
+      <a id="quit():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quit</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Closes connection to Redis instance
+</p><div class="fullcomment"><div class="comment cmt"><p>Closes connection to Redis instance
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#rPop" data-isabs="false">
+      <a id="rPop(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rPop</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Pops a value off the end of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pops a value off the end of the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>an option of the value of the popped element, or nothing if the list is empty.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Lists#rPush" data-isabs="false">
+      <a id="rPush(ChannelBuffer,List[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rPush</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: List[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Pushes a value onto the end of the list.</p><div class="fullcomment"><div class="comment cmt"><p>Pushes a value onto the end of the list.
+If the key is a non-list element, an exception will be thrown.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the list
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BaseClient#release" data-isabs="false">
+      <a id="release():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">release</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Releases underlying service object
+</p><div class="fullcomment"><div class="comment cmt"><p>Releases underlying service object
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sAdd" data-isabs="false">
+      <a id="sAdd(ChannelBuffer,List[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sAdd</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: List[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Adds elements to the set, according to the set property.</p><div class="fullcomment"><div class="comment cmt"><p>Adds elements to the set, according to the set property.
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the number of new members added to the set.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sCard" data-isabs="false">
+      <a id="sCard(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sCard</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">How many elements are in the set?
+Throws an exception if the key does not refer to a set.</p><div class="fullcomment"><div class="comment cmt"><p>How many elements are in the set?
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the number of elements in the set.  Unassigned keys are considered
+empty sets.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sIsMember" data-isabs="false">
+      <a id="sIsMember(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sIsMember</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Is the member in the set?
+Throws an exception if the key does not refer to a set.</p><div class="fullcomment"><div class="comment cmt"><p>Is the member in the set?
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a boolean, true if it is in the set, false otherwise.  Unassigned
+keys are considered empty sets.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sMembers" data-isabs="false">
+      <a id="sMembers(ChannelBuffer):Future[Set[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sMembers</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the members of the set.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the members of the set.
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>a list of the members
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sPop" data-isabs="false">
+      <a id="sPop(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sPop</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes an element randomly from the set, and returns it.</p><div class="fullcomment"><div class="comment cmt"><p>Removes an element randomly from the set, and returns it.
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the member, or nothing if the set is empty.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sRem" data-isabs="false">
+      <a id="sRem(ChannelBuffer,List[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sRem</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: List[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes the element from the set if it is in the set.</p><div class="fullcomment"><div class="comment cmt"><p>Removes the element from the set if it is in the set.
+Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>an integer, the number of elements removed from the set, can be
+0 if the key is unassigned.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#scan" data-isabs="false">
+      <a id="scan(Long,Option[Long],Option[ChannelBuffer]):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scan</span><span class="params">(<span name="cursor">cursor: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="count">count: <span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>, <span name="pattern">pattern: <span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns keys starting at cursor</p><div class="fullcomment"><div class="comment cmt"><p>Returns keys starting at cursor</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>cursor followed by matching keys
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.BaseClient#select" data-isabs="false">
+      <a id="select(Int):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">select</span><span class="params">(<span name="index">index: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Select DB with specified zero-based index</p><div class="fullcomment"><div class="comment cmt"><p>Select DB with specified zero-based index</p></div><dl class="paramcmts block"><dt class="param">index</dt><dd class="cmt"><p>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#set" data-isabs="false">
+      <a id="set(ChannelBuffer,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets the given value to key.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given value to key. If a value already exists for the key,
+the value is overwritten with the new value</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setBit" data-isabs="false">
+      <a id="setBit(ChannelBuffer,Int,Int):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setBit</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="offset">offset: <span name="scala.Int" class="extype">Int</span></span>, <span name="value">value: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets or clears the bit at offset in the string value stored at key.</p><div class="fullcomment"><div class="comment cmt"><p>Sets or clears the bit at offset in the string value stored at key.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the original bit value stored at offset.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setbit
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setEx" data-isabs="false">
+      <a id="setEx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setEx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="seconds">seconds: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value and set key to timeout after a given
+number of seconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value and set key to timeout after a given
+number of seconds.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setex
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setNx" data-isabs="false">
+      <a id="setNx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setNx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold string value if key does not exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold string value if key does not exist. In that case, it is
+equal to SET. When key already holds a value, no operation is performed.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if the key was set, 0 if the key was not set.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setnx
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setRange" data-isabs="false">
+      <a id="setRange(ChannelBuffer,Int,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="offset">offset: <span name="scala.Int" class="extype">Int</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Overwrites part of the string stored at key, starting at the specified
+offset, for the entire length of value.</p><div class="fullcomment"><div class="comment cmt"><p>Overwrites part of the string stored at key, starting at the specified
+offset, for the entire length of value.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the string after it was modified.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setrange
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#strlen" data-isabs="false">
+      <a id="strlen(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">strlen</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">returns the length of the string value stored at key.</p><div class="fullcomment"><div class="comment cmt"><p>returns the length of the string value stored at key.
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the length of the string at key, or 0 when key does not exist.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/strlen
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#ttl" data-isabs="false">
+      <a id="ttl(ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ttl</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the ttl of the given key.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the ttl of the given key.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Option containing either the ttl in seconds if the key exists
+and has a timeout, or else nothing.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.TransactionalClient#unwatch" data-isabs="false">
+      <a id="unwatch():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unwatch</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Flushes all previously watched keys for a transaction
+</p>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.TransactionalClient#watch" data-isabs="false">
+      <a id="watch(Seq[ChannelBuffer]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">watch</span><span class="params">(<span name="keys">keys: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Marks given keys to be watched for conditional execution of a transaction</p><div class="fullcomment"><div class="comment cmt"><p>Marks given keys to be watched for conditional execution of a transaction</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>to watch
+</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zAdd" data-isabs="false">
+      <a id="zAdd(ChannelBuffer,Double,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zAdd</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="score">score: <span name="java.lang.Double" class="extype">Double</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Adds member, score pair to sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Adds member, score pair to sorted set</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements added to sorted set
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zCard" data-isabs="false">
+      <a id="zCard(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zCard</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns sorted set cardinality of the sorted set at key</p><div class="fullcomment"><div class="comment cmt"><p>Returns sorted set cardinality of the sorted set at key</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Integer representing cardinality of sorted set,
+or 0 if key does not exist
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zCount" data-isabs="false">
+      <a id="zCount(ChannelBuffer,ZInterval,ZInterval):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zCount</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets number of elements in sorted set with score between min and max</p><div class="fullcomment"><div class="comment cmt"><p>Gets number of elements in sorted set with score between min and max</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of elements between min and max in sorted set
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zIncrBy" data-isabs="false">
+      <a id="zIncrBy(ChannelBuffer,Double,ChannelBuffer):Future[Option[Double]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zIncrBy</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="amount">amount: <span name="java.lang.Double" class="extype">Double</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Double" class="extype">Double</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Increment the member in sorted set key by amount.</p><div class="fullcomment"><div class="comment cmt"><p>Increment the member in sorted set key by amount.
+Returns an option, None if the member is not found, or the set is empty, or the new value.
+Throws an exception if the key refers to a structure that is not a sorted set.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the new value of the incremented member
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRange" data-isabs="false">
+      <a id="zRange(ChannelBuffer,Long,Long,Boolean):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="stop">stop: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="withScores">withScores: <span name="java.lang.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Either" class="extype">Either</span>[<a name="com.twitter.finagle.redis.protocol.ZRangeResults" class="extype" href="protocol/ZRangeResults.html">ZRangeResults</a>, Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns specified range of elements in sorted set at key.</p><div class="fullcomment"><div class="comment cmt"><p>Returns specified range of elements in sorted set at key.
+Elements are ordered from lowest to highest score.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>ZRangeResults object containing item/score pairs
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRangeByScore" data-isabs="false">
+      <a id="zRangeByScore(ChannelBuffer,ZInterval,ZInterval,Boolean,Option[Limit]):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRangeByScore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="withScores">withScores: <span name="java.lang.Boolean" class="extype">Boolean</span></span>, <span name="limit">limit: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.redis.protocol.Limit" class="extype" href="protocol/Limit.html">Limit</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Either" class="extype">Either</span>[<a name="com.twitter.finagle.redis.protocol.ZRangeResults" class="extype" href="protocol/ZRangeResults.html">ZRangeResults</a>, Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets member, score pairs from sorted set between min and max
+Results are limited by offset and count</p><div class="fullcomment"><div class="comment cmt"><p>Gets member, score pairs from sorted set between min and max
+Results are limited by offset and count</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>ZRangeResults object containing item/score pairs
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRank" data-isabs="false">
+      <a id="zRank(ChannelBuffer,ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of the member in the sorted set, or None if it doesn't exist, from low to high.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the rank of the member
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRem" data-isabs="false">
+      <a id="zRem(ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRem</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="members">members: Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes specified member(s) from sorted set at key</p><div class="fullcomment"><div class="comment cmt"><p>Removes specified member(s) from sorted set at key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRemRangeByRank" data-isabs="false">
+      <a id="zRemRangeByRank(ChannelBuffer,Long,Long):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRemRangeByRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="stop">stop: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes members from sorted set by sort order, from start to stop, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by sort order, from start to stop, inclusive.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRemRangeByScore" data-isabs="false">
+      <a id="zRemRangeByScore(ChannelBuffer,ZInterval,ZInterval):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRemRangeByScore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Removes members from sorted set by score, from min to max, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>Removes members from sorted set by score, from min to max, inclusive.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of members removed from sorted set.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRevRange" data-isabs="false">
+      <a id="zRevRange(ChannelBuffer,Long,Long,Boolean):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRevRange</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="start">start: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="stop">stop: <span name="java.lang.Long" class="extype">Long</span></span>, <span name="withScores">withScores: <span name="java.lang.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Either" class="extype">Either</span>[<a name="com.twitter.finagle.redis.protocol.ZRangeResults" class="extype" href="protocol/ZRangeResults.html">ZRangeResults</a>, Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns specified range of elements in sorted set at key
+Elements are ordered from highest to lowest score</p><div class="fullcomment"><div class="comment cmt"><p>Returns specified range of elements in sorted set at key
+Elements are ordered from highest to lowest score</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>List of elements in specified range
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRevRangeByScore" data-isabs="false">
+      <a id="zRevRangeByScore(ChannelBuffer,ZInterval,ZInterval,Boolean,Option[Limit]):Future[Either[ZRangeResults, Seq[ChannelBuffer]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRevRangeByScore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="max">max: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="min">min: <a name="com.twitter.finagle.redis.protocol.ZInterval" class="extype" href="protocol/ZInterval.html">ZInterval</a></span>, <span name="withScores">withScores: <span name="java.lang.Boolean" class="extype">Boolean</span></span>, <span name="limit">limit: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.redis.protocol.Limit" class="extype" href="protocol/Limit.html">Limit</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Either" class="extype">Either</span>[<a name="com.twitter.finagle.redis.protocol.ZRangeResults" class="extype" href="protocol/ZRangeResults.html">ZRangeResults</a>, Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns elements in sorted set at key with a score between max and min
+Elements are ordered from highest to lowest score
+Results are limited by offset and count</p><div class="fullcomment"><div class="comment cmt"><p>Returns elements in sorted set at key with a score between max and min
+Elements are ordered from highest to lowest score
+Results are limited by offset and count</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>ZRangeResults object containing item/score pairs
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zRevRank" data-isabs="false">
+      <a id="zRevRank(ChannelBuffer,ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zRevRank</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the rank of member in the sorted set, or None if it doesn't exist, from high to low.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the rank of the member
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.SortedSets#zScore" data-isabs="false">
+      <a id="zScore(ChannelBuffer,ChannelBuffer):Future[Option[Double]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zScore</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="member">member: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Double" class="extype">Double</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets score of member in sorted set</p><div class="fullcomment"><div class="comment cmt"><p>Gets score of member in sorted set</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Score of member
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div name="com.twitter.finagle.redis.Client" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.Client" class="extype" href="Client.html">Client</a></h3>
+            </div><div name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.BtreeSortedSetCommands" class="extype" href="BtreeSortedSetCommands.html">BtreeSortedSetCommands</a></h3>
+            </div><div name="com.twitter.finagle.redis.Sets" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></h3>
+            </div><div name="com.twitter.finagle.redis.Lists" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.Lists" class="extype" href="Lists.html">Lists</a></h3>
+            </div><div name="com.twitter.finagle.redis.SortedSets" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.SortedSets" class="extype" href="SortedSets.html">SortedSets</a></h3>
+            </div><div name="com.twitter.finagle.redis.Hashes" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></h3>
+            </div><div name="com.twitter.finagle.redis.Strings" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.Strings" class="extype" href="Strings.html">Strings</a></h3>
+            </div><div name="com.twitter.finagle.redis.Keys" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.Keys" class="extype" href="Keys.html">Keys</a></h3>
+            </div><div name="com.twitter.finagle.redis.BaseClient" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.redis.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></h3>
+            </div><div name="scala.AnyRef" class="parent">
+              <h3>Inherited from AnyRef</h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

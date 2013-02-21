@@ -1,0 +1,454 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.thrift</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <h1>thrift</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">thrift</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><h3>Thrift codecs</h3><p>We provide both framed and buffered client protocol support, and
+server support for the framed protocol. The public implementations
+are:</p><p>- <a name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" class="extype" href="ThriftClientBufferedCodec.html">ThriftClientBufferedCodec</a>
+- <a name="com.twitter.finagle.thrift.ThriftClientFramedCodec" class="extype" href="ThriftClientFramedCodec.html">ThriftClientFramedCodec</a>
+- <a name="com.twitter.finagle.thrift.ThriftServerFramedCodec" class="extype" href="ThriftServerFramedCodec.html">ThriftServerFramedCodec</a></p><p>The type of the server codec is <code>Service[Array[Byte], Array[Byte]]</code>
+and the client codecs are <code>Service[ThriftClientRequest,
+Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
+thrift messages (requests and replies) according to the protocol
+chosen. This is why the client codecs need to have access to a
+thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">finagle thrift codegenerator</a>.</p><pre>
+<span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+  .hosts(<span class="lit">"foobar.com:123"</span>)
+  .codec(ThriftClientFramedCodec())
+  .build()
+
+<span class="cmt">// Wrap the raw Thrift transport in a Client decorator. The client</span>
+<span class="cmt">// provides a convenient procedural interface for accessing the Thrift</span>
+<span class="cmt">// server.</span>
+<span class="kw">val</span> client = <span class="kw">new</span> Hello.ServiceToClient(service, protocolFactory)
+</pre><p>In this example, <code>Hello</code> is the thrift interface, and the inner
+class <code>ServiceToClient</code> is provided by the finagle thrift code
+generator.
+</p></div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.thrift.ClientId" data-isabs="false">
+      <a id="ClientId:ClientId"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientId.html"><span class="name">ClientId</span></a><span class="params">(<span name="name">name: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ClientIdRequiredFilter" data-isabs="false">
+      <a id="ClientIdRequiredFilter:ClientIdRequiredFilter[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientIdRequiredFilter.html"><span class="name">ClientIdRequiredFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends SimpleFilter[Req, Rep]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">This filter can only be used with finagle thrift codec.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.InvalidThriftConnectionException" data-isabs="false">
+      <a id="InvalidThriftConnectionException:InvalidThriftConnectionException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="InvalidThriftConnectionException.html"><span class="name">InvalidThriftConnectionException</span></a><span class="params">()</span><span class="result"> extends Exception with ServiceException with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.NoClientIdSpecifiedException" data-isabs="false">
+      <a id="NoClientIdSpecifiedException:NoClientIdSpecifiedException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NoClientIdSpecifiedException.html"><span class="name">NoClientIdSpecifiedException</span></a><span class="result"> extends RequestException</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.SeqIdFilter" data-isabs="false">
+      <a id="SeqIdFilter:SeqIdFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SeqIdFilter.html"><span class="name">SeqIdFilter</span></a><span class="result"> extends SimpleFilter[ThriftClientRequest, Array[Byte]]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A filter to override the input sequence ids, replacing them with
+ones of our own provenance.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.SeqMismatchException" data-isabs="false">
+      <a id="SeqMismatchException:SeqMismatchException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SeqMismatchException.html"><span class="name">SeqMismatchException</span></a><span class="params">(<span name="id">id: Int</span>, <span name="expected">expected: Int</span>)</span><span class="result"> extends TransportException with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftCall" data-isabs="false">
+      <a id="ThriftCall:ThriftCall[A, R]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftCall.html"><span class="name">ThriftCall</span></a><span class="tparams">[<span name="A">A &lt;: org.apache.thrift.TBase[_, _]</span>, <span name="R">R &lt;: org.apache.thrift.TBase[_, _]</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The ThriftCall object represents a thrift dispatch on the
+channel.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftCallFactory" data-isabs="false">
+      <a id="ThriftCallFactory:ThriftCallFactory[A, R]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftCallFactory.html"><span class="name">ThriftCallFactory</span></a><span class="tparams">[<span name="A">A &lt;: org.apache.thrift.TBase[_, _]</span>, <span name="R">R &lt;: org.apache.thrift.TBase[_, _]</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" data-isabs="false">
+      <a id="ThriftClientBufferedCodec:ThriftClientBufferedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientBufferedCodec.html"><span class="name">ThriftClientBufferedCodec</span></a><span class="result"> extends ThriftClientFramedCodec</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientBufferedCodecFactory" data-isabs="false">
+      <a id="ThriftClientBufferedCodecFactory:ThriftClientBufferedCodecFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientBufferedCodecFactory.html"><span class="name">ThriftClientBufferedCodecFactory</span></a><span class="result"> extends (ClientCodecConfig) ⇒ Codec[ThriftClientRequest, Array[Byte]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientFramedCodec" data-isabs="false">
+      <a id="ThriftClientFramedCodec:ThriftClientFramedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientFramedCodec.html"><span class="name">ThriftClientFramedCodec</span></a><span class="result"> extends Codec[ThriftClientRequest, Array[Byte]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory" data-isabs="false">
+      <a id="ThriftClientFramedCodecFactory:ThriftClientFramedCodecFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientFramedCodecFactory.html"><span class="name">ThriftClientFramedCodecFactory</span></a><span class="result"> extends (ClientCodecConfig) ⇒ Codec[ThriftClientRequest, Array[Byte]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientRequest" data-isabs="false">
+      <a id="ThriftClientRequest:ThriftClientRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientRequest.html"><span class="name">ThriftClientRequest</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftFrameCodec" data-isabs="false">
+      <a id="ThriftFrameCodec:ThriftFrameCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftFrameCodec.html"><span class="name">ThriftFrameCodec</span></a><span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftReply" data-isabs="false">
+      <a id="ThriftReply:ThriftReply[R]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftReply.html"><span class="name">ThriftReply</span></a><span class="tparams">[<span name="R">R &lt;: org.apache.thrift.TBase[_, _]</span>]</span><span class="params">(<span name="response">response: R</span>, <span name="call">call: com.twitter.finagle.thrift.ThriftCall[_ &lt;: org.apache.thrift.TBase[_, _], _ &lt;: org.apache.thrift.TBase[_, _]]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Encapsulates the result of a call to a Thrift service.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" data-isabs="false">
+      <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftServerBufferedCodec.html"><span class="name">ThriftServerBufferedCodec</span></a><span class="result"> extends ThriftServerFramedCodec</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory" data-isabs="false">
+      <a id="ThriftServerBufferedCodecFactory:ThriftServerBufferedCodecFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftServerBufferedCodecFactory.html"><span class="name">ThriftServerBufferedCodecFactory</span></a><span class="result"> extends (ServerCodecConfig) ⇒ Codec[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerFramedCodec" data-isabs="false">
+      <a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftServerFramedCodec.html"><span class="name">ThriftServerFramedCodec</span></a><span class="result"> extends Codec[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerFramedCodecFactory" data-isabs="false">
+      <a id="ThriftServerFramedCodecFactory:ThriftServerFramedCodecFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftServerFramedCodecFactory.html"><span class="name">ThriftServerFramedCodecFactory</span></a><span class="result"> extends (ServerCodecConfig) ⇒ Codec[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ValidateThriftService" data-isabs="false">
+      <a id="ValidateThriftService:ValidateThriftService"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ValidateThriftService.html"><span class="name">ValidateThriftService</span></a><span class="result"> extends ServiceProxy[ThriftClientRequest, Array[Byte]]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A filter that invalidates the a connection if it suffers an
+irrecoverable application exception.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.thrift.ClientId" data-isabs="false">
+      <a id="ClientId:ClientId"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientId$.html"><span class="name">ClientId</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt"><code>ClientId</code> provides the client identification of the incoming request if available.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.InputBuffers" data-isabs="false">
+      <a id="InputBuffers:InputBuffers"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="InputBuffers$.html"><span class="name">InputBuffers</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.SeqIdFilter" data-isabs="false">
+      <a id="SeqIdFilter:SeqIdFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SeqIdFilter$.html"><span class="name">SeqIdFilter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" data-isabs="false">
+      <a id="ThriftClientBufferedCodec:ThriftClientBufferedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientBufferedCodec$.html"><span class="name">ThriftClientBufferedCodec</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">ThriftClientBufferedCodec implements a buffered thrift transport
+that supports upgrading in order to provide TraceContexts across
+requests.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientFramedCodec" data-isabs="false">
+      <a id="ThriftClientFramedCodec:ThriftClientFramedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClientFramedCodec$.html"><span class="name">ThriftClientFramedCodec</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">ThriftClientFramedCodec implements a framed thrift transport that
+supports upgrading in order to provide TraceContexts across
+requests.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" data-isabs="false">
+      <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftServerBufferedCodec$.html"><span class="name">ThriftServerBufferedCodec</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">ThriftServerBufferedCodec implements a buffered thrift transport.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerFramedCodec" data-isabs="false">
+      <a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftServerFramedCodec$.html"><span class="name">ThriftServerFramedCodec</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftTypes" data-isabs="false">
+      <a id="ThriftTypes:ThriftTypes"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftTypes$.html"><span class="name">ThriftTypes</span></a><span class="result"> extends HashMap[String, com.twitter.finagle.thrift.ThriftCallFactory[_, _]]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A registry for Thrift types.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift" data-isabs="false">
+      <a id="thrift:thrift"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="thrift/package.html"><span class="name">thrift</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

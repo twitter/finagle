@@ -1,0 +1,400 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.kestrel.protocol</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.kestrel" class="extype" href="../package.html">kestrel</a></p>
+        <h1>protocol</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">protocol</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Abort" data-isabs="false">
+      <a id="Abort:Abort"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Abort.html"><span class="name">Abort</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Close" data-isabs="false">
+      <a id="Close:Close"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Close.html"><span class="name">Close</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.CloseAndOpen" data-isabs="false">
+      <a id="CloseAndOpen:CloseAndOpen"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CloseAndOpen.html"><span class="name">CloseAndOpen</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Command" data-isabs="true">
+      <a id="Command:Command"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Delete" data-isabs="false">
+      <a id="Delete:Delete"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Deleted" data-isabs="false">
+      <a id="Deleted:Deleted"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.DumpConfig" data-isabs="false">
+      <a id="DumpConfig:DumpConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DumpConfig.html"><span class="name">DumpConfig</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.DumpStats" data-isabs="false">
+      <a id="DumpStats:DumpStats"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DumpStats.html"><span class="name">DumpStats</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Error" data-isabs="false">
+      <a id="Error:Error"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Flush" data-isabs="false">
+      <a id="Flush:Flush"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Flush.html"><span class="name">Flush</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.FlushAll" data-isabs="false">
+      <a id="FlushAll:FlushAll"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="FlushAll.html"><span class="name">FlushAll</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Get" data-isabs="false">
+      <a id="Get:Get"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.GetCommand" data-isabs="true">
+      <a id="GetCommand:GetCommand"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="GetCommand.html"><span class="name">GetCommand</span></a><span class="result"> extends Command</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel" data-isabs="false">
+      <a id="Kestrel:Kestrel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Kestrel.html"><span class="name">Kestrel</span></a><span class="result"> extends CodecFactory[Command, Response]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.NotFound" data-isabs="false">
+      <a id="NotFound:NotFound"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Open" data-isabs="false">
+      <a id="Open:Open"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Open.html"><span class="name">Open</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Peek" data-isabs="false">
+      <a id="Peek:Peek"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Peek.html"><span class="name">Peek</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="timeout">timeout: Option[Duration]</span>)</span><span class="result"> extends GetCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Reload" data-isabs="false">
+      <a id="Reload:Reload"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Reload.html"><span class="name">Reload</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Response" data-isabs="true">
+      <a id="Response:Response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Set" data-isabs="false">
+      <a id="Set:Set"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="queueName">queueName: ChannelBuffer</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.ShutDown" data-isabs="false">
+      <a id="ShutDown:ShutDown"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ShutDown.html"><span class="name">ShutDown</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Stats" data-isabs="false">
+      <a id="Stats:Stats"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Stored" data-isabs="false">
+      <a id="Stored:Stored"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Value" data-isabs="false">
+      <a id="Value:Value"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Values" data-isabs="false">
+      <a id="Values:Values"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: Seq[Value]</span>)</span><span class="result"> extends Response with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Version" data-isabs="false">
+      <a id="Version:Version"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Version.html"><span class="name">Version</span></a><span class="params">()</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.kestrel.protocol.Kestrel" data-isabs="false">
+      <a id="Kestrel:Kestrel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Kestrel$.html"><span class="name">Kestrel</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

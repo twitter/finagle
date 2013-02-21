@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.redis.protocol.commands</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.redis" class="extype" href="../../package.html">redis</a>.<a name="com.twitter.finagle.redis.protocol" class="extype" href="../package.html">protocol</a></p>
+        <h1>commands</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">commands</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BAdd" data-isabs="false">
+      <a id="BAdd:BAdd"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BAdd.html"><span class="name">BAdd</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="field">field: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BCard" data-isabs="false">
+      <a id="BCard:BCard"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BCard.html"><span class="name">BCard</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BGet" data-isabs="false">
+      <a id="BGet:BGet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BGet.html"><span class="name">BGet</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="field">field: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BRange" data-isabs="false">
+      <a id="BRange:BRange"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BRange.html"><span class="name">BRange</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="startField">startField: Option[ChannelBuffer]</span>, <span name="endField">endField: Option[ChannelBuffer]</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BRem" data-isabs="false">
+      <a id="BRem:BRem"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BRem.html"><span class="name">BRem</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="fields">fields: Seq[ChannelBuffer]</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BAdd" data-isabs="false">
+      <a id="BAdd:BAdd"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BAdd$.html"><span class="name">BAdd</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BCard" data-isabs="false">
+      <a id="BCard:BCard"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BCard$.html"><span class="name">BCard</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BGet" data-isabs="false">
+      <a id="BGet:BGet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BGet$.html"><span class="name">BGet</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.commands.BRem" data-isabs="false">
+      <a id="BRem:BRem"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BRem$.html"><span class="name">BRem</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

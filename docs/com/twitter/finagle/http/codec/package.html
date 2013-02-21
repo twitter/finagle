@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.http.codec</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.http" class="extype" href="../package.html">http</a></p>
+        <h1>codec</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">codec</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.http.codec.AggregateHttpChunks" data-isabs="false">
+      <a id="AggregateHttpChunks:AggregateHttpChunks"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AggregateHttpChunks.html"><span class="name">AggregateHttpChunks</span></a><span class="params">(<span name="whenDone">whenDone: LeftFoldUpstreamHandler</span>, <span name="request">request: HttpRequest</span>, <span name="bufferBudget">bufferBudget: Int</span>, <span name="buffer">buffer: ChannelBuffer</span>)</span><span class="result"> extends LeftFoldUpstreamHandler with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.AggregateHttpRequest" data-isabs="false">
+      <a id="AggregateHttpRequest:AggregateHttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AggregateHttpRequest.html"><span class="name">AggregateHttpRequest</span></a><span class="result"> extends LeftFoldUpstreamHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.AnnotateCipher" data-isabs="false">
+      <a id="AnnotateCipher:AnnotateCipher"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AnnotateCipher.html"><span class="name">AnnotateCipher</span></a><span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Extract the cipher from the SslHandler and set it as a header on the HTTP
+request befor sending it upstream.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ChannelBufferManager" data-isabs="false">
+      <a id="ChannelBufferManager:ChannelBufferManager"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelBufferManager.html"><span class="name">ChannelBufferManager</span></a><span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker" data-isabs="false">
+      <a id="ChannelBufferUsageTracker:ChannelBufferUsageTracker"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ConnectionManager" data-isabs="false">
+      <a id="ConnectionManager:ConnectionManager"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConnectionManager.html"><span class="name">ConnectionManager</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.RequestDecoder" data-isabs="false">
+      <a id="RequestDecoder:RequestDecoder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestDecoder.html"><span class="name">RequestDecoder</span></a><span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Convert Netty Requests to Finagle-HTTP Requests
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.RequestEncoder" data-isabs="false">
+      <a id="RequestEncoder:RequestEncoder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestEncoder.html"><span class="name">RequestEncoder</span></a><span class="result"> extends SimpleChannelDownstreamHandler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Convert Finagle-HTTP requests to Netty Requests
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.RespondToExpectContinue" data-isabs="false">
+      <a id="RespondToExpectContinue:RespondToExpectContinue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RespondToExpectContinue.html"><span class="name">RespondToExpectContinue</span></a><span class="result"> extends SimpleChannelUpstreamHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ResponseDecoder" data-isabs="false">
+      <a id="ResponseDecoder:ResponseDecoder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseDecoder.html"><span class="name">ResponseDecoder</span></a><span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Convert Netty responses to a Finagle-HTTP responses
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ResponseEncoder" data-isabs="false">
+      <a id="ResponseEncoder:ResponseEncoder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseEncoder.html"><span class="name">ResponseEncoder</span></a><span class="result"> extends SimpleChannelDownstreamHandler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Convert Finagle-HTTP Responses to Netty responses
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.codec.ServerConnectionManager" data-isabs="false">
+      <a id="ServerConnectionManager:ServerConnectionManager"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerConnectionManager.html"><span class="name">ServerConnectionManager</span></a><span class="result"> extends SimpleChannelHandler</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Deal with Http connection lifecycle wrt.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

@@ -1,0 +1,301 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.builder</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a></p>
+        <h1>builder</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">builder</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder" data-isabs="false">
+      <a id="ClientBuilder:ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientBuilder.html"><span class="name">ClientBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.Cluster" data-isabs="true">
+      <a id="Cluster:Cluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Cluster.html"><span class="name">Cluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Cluster is a collection of servers.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.IncompleteSpecification" data-isabs="false">
+      <a id="IncompleteSpecification:IncompleteSpecification"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="IncompleteSpecification.html"><span class="name">IncompleteSpecification</span></a><span class="result"> extends Exception</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used by builder to throw exceptions if the specification is incomplete.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.MinimumSetCluster" data-isabs="false">
+      <a id="MinimumSetCluster:MinimumSetCluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MinimumSetCluster.html"><span class="name">MinimumSetCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends Cluster[T]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Cluster implementation that guarantees a minimum set while allowing you
+to specify a Cluster to supplement the initial static set.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.NonShrinkingCluster" data-isabs="false">
+      <a id="NonShrinkingCluster:NonShrinkingCluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NonShrinkingCluster.html"><span class="name">NonShrinkingCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends Cluster[T]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Dynamic clusters, such as serversets, can be volatile and untrustworthy.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.Server" data-isabs="true">
+      <a id="Server:Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Server.html"><span class="name">Server</span></a><span class="result"> extends Closable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A listening server.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder" data-isabs="false">
+      <a id="ServerBuilder:ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerBuilder.html"><span class="name">ServerBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A handy Builder for constructing Servers (i.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuildertoTwitterService" data-isabs="false">
+      <a id="ServerBuildertoTwitterService:ServerBuildertoTwitterService[Req, Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerBuildertoTwitterService.html"><span class="name">ServerBuildertoTwitterService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends Service</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerConfigEvidence" data-isabs="true">
+      <a id="ServerConfigEvidence:ServerConfigEvidence[HasCodec, HasBindTo, HasName]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerConfigEvidence.html"><span class="name">ServerConfigEvidence</span></a><span class="tparams">[<span name="HasCodec">HasCodec</span>, <span name="HasBindTo">HasBindTo</span>, <span name="HasName">HasName</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span name="&quot;Builder is not fully configured: Codec: ${HasCodec}, BindTo: ${HasBindTo}, Name: ${HasName}&quot;" class="defval">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.SourceTrackingMonitor" data-isabs="false">
+      <a id="SourceTrackingMonitor:SourceTrackingMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SourceTrackingMonitor.html"><span class="name">SourceTrackingMonitor</span></a><span class="result"> extends Monitor</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A monitor that unrolls the exception causes to report source information if any</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.StaticCluster" data-isabs="false">
+      <a id="StaticCluster:StaticCluster[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticCluster.html"><span class="name">StaticCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: Seq[T]</span>)</span><span class="result"> extends Cluster[T] with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A simple static cluster implementation.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.Stats4J" data-isabs="false">
+      <a id="Stats4J:Stats4J"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Stats4J.html"><span class="name">Stats4J</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder" data-isabs="false">
+      <a id="ClientBuilder:ClientBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientBuilder$.html"><span class="name">ClientBuilder</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory for <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="ClientBuilder.html">ClientBuilder</a> instances
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientConfig" data-isabs="false">
+      <a id="ClientConfig:ClientConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfig$.html"><span class="name">ClientConfig</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.Cluster" data-isabs="false">
+      <a id="Cluster:Cluster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Cluster$.html"><span class="name">Cluster</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerBuilder" data-isabs="false">
+      <a id="ServerBuilder:ServerBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerBuilder$.html"><span class="name">ServerBuilder</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Factory for <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="ServerBuilder.html">ServerBuilder</a> instances
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ServerConfig" data-isabs="false">
+      <a id="ServerConfig:ServerConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerConfig$.html"><span class="name">ServerConfig</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.builder.Stats4J" data-isabs="false">
+      <a id="Stats4J:Stats4J"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Stats4J$.html"><span class="name">Stats4J</span></a><span class="result"> extends </span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

@@ -1,0 +1,468 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.stream.DuplexStreamClientCodec</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+      <div id="definition">
+        <a title="Go to companion" href="DuplexStreamClientCodec$.html"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.stream" class="extype" href="package.html">stream</a></p>
+        <h1><a title="Go to companion" href="DuplexStreamClientCodec$.html">DuplexStreamClientCodec</a></h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DuplexStreamClientCodec</span><span class="result"> extends <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+            </div>
+        <div id="ancestors">
+              <span class="filtertype">Inherited</span>
+              <ol><li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.stream.DuplexStreamClientCodec" class="in"><span>DuplexStreamClientCodec</span></li><li name="com.twitter.finagle.Codec" class="in"><span>Codec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+            </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodec#this" data-isabs="false">
+      <a id="this:DuplexStreamClientCodec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DuplexStreamClientCodec</span><span class="params">()</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Codec#failFastOk" data-isabs="false">
+      <a id="failFastOk:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">failFastOk</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Is this Codec OK for failfast? This is a temporary hack to
+disable failFast for codecs for which it isn't well-behaved.</p><div class="fullcomment"><div class="comment cmt"><p>Is this Codec OK for failfast? This is a temporary hack to
+disable failFast for codecs for which it isn't well-behaved.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientDispatcher" data-isabs="false">
+      <a id="newClientDispatcher(Transport[Offer[ChannelBuffer], DuplexStreamHandle]):Service[Offer[ChannelBuffer], DuplexStreamHandle]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newClientDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Codec#newClientTransport" data-isabs="false">
+      <a id="newClientTransport(Channel,StatsReceiver):Transport[Offer[ChannelBuffer], DuplexStreamHandle]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newClientTransport</span><span class="params">(<span name="ch">ch: <span name="org.jboss.netty.channel.Channel" class="extype">Channel</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span><span class="result">: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Note: the below (&quot;raw&quot;) interfaces are low level, and require a
+good understanding of finagle internals to implement correctly.</p><div class="fullcomment"><div class="comment cmt"><p>Note: the below (&quot;raw&quot;) interfaces are low level, and require a
+good understanding of finagle internals to implement correctly.
+Proceed with care.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Codec#newServerDispatcher" data-isabs="false">
+      <a id="newServerDispatcher(Transport[DuplexStreamHandle, Offer[ChannelBuffer]],Service[Offer[ChannelBuffer], DuplexStreamHandle]):Closable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newServerDispatcher</span><span class="params">(<span name="transport">transport: <a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>, <span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.stream.DuplexStreamClientCodec#pipelineFactory" data-isabs="false">
+      <a id="pipelineFactory:ChannelPipelineFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pipelineFactory</span><span class="result">: <span name="org.jboss.netty.channel.ChannelPipelineFactory" class="extype">ChannelPipelineFactory</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The pipeline factory that implements the protocol.</p><div class="fullcomment"><div class="comment cmt"><p>The pipeline factory that implements the protocol.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.stream.DuplexStreamClientCodec" class="extype" href="">DuplexStreamClientCodec</a> → <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Codec#prepareConnFactory" data-isabs="false">
+      <a id="prepareConnFactory(ServiceFactory[Offer[ChannelBuffer], DuplexStreamHandle]):ServiceFactory[Offer[ChannelBuffer], DuplexStreamHandle]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">prepareConnFactory</span><span class="params">(<span name="underlying">underlying: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Prepare a connection factory.</p><div class="fullcomment"><div class="comment cmt"><p>Prepare a connection factory. Used to allow codec modifications
+to the service at the bottom of the stack (connection level).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Codec#prepareServiceFactory" data-isabs="false">
+      <a id="prepareServiceFactory(ServiceFactory[Offer[ChannelBuffer], DuplexStreamHandle]):ServiceFactory[Offer[ChannelBuffer], DuplexStreamHandle]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">prepareServiceFactory</span><span class="params">(<span name="underlying">underlying: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Prepare a factory for usage with the codec.</p><div class="fullcomment"><div class="comment cmt"><p>Prepare a factory for usage with the codec. Used to allow codec
+modifications to the service at the top of the network stack.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div name="com.twitter.finagle.Codec" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="com.twitter.concurrent.Offer" class="extype">Offer</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], <a name="com.twitter.finagle.stream.DuplexStreamHandle" class="extype" href="DuplexStreamHandle.html">DuplexStreamHandle</a>]</h3>
+            </div><div name="scala.AnyRef" class="parent">
+              <h3>Inherited from AnyRef</h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
