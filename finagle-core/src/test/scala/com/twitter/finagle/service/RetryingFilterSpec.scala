@@ -1,13 +1,42 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{MockTimer, Service, WriteException}
+import com.twitter.finagle.{MockTimer, Service, WriteException, CancelledRequestException, TimeoutException}
 import com.twitter.finagle.stats.{StatsReceiver, Stat}
 import com.twitter.util._
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
+  "RetryPolicy" should {
+    import RetryPolicy._
+    val NoExceptions: PartialFunction[Try[Nothing], Boolean] = {
+      case _ => false
+    }
+    val timeoutExc = new TimeoutException {
+      protected val timeout = 0.seconds
+      protected val explanation = "!"
+    }
+
+    "WriteExceptionsOnly" in {
+      val weo = WriteExceptionsOnly orElse NoExceptions
+
+      weo(Throw(new Exception)) must beFalse
+      weo(Throw(WriteException(new Exception))) must beTrue
+      weo(Throw(WriteException(new CancelledRequestException))) must beFalse
+      weo(Throw(timeoutExc)) must beFalse
+    }
+
+    "TimeoutAndWriteExceptionsOnly" in {
+      val weo = TimeoutAndWriteExceptionsOnly orElse NoExceptions
+
+      weo(Throw(new Exception)) must beFalse
+      weo(Throw(WriteException(new Exception))) must beTrue
+      weo(Throw(WriteException(new CancelledRequestException))) must beFalse
+      weo(Throw(timeoutExc)) must beTrue
+    }
+  }
+
   "RetryingFilter" should {
     val backoffs = Stream(1.second, 2.seconds, 3.seconds)
     val stats = mock[StatsReceiver]

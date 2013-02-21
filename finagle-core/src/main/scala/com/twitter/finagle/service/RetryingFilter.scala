@@ -1,13 +1,15 @@
 package com.twitter.finagle.service
 
-import java.{util => ju}
-import java.util.{concurrent => juc}
-import scala.collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{SimpleFilter, Service, WriteException, TimeoutException}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.util._
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.{
+  CancelledRequestException, Service, SimpleFilter, TimeoutException, WriteException
+}
+import com.twitter.util._
+import java.util.{concurrent => juc}
+import java.{util => ju}
+import scala.collection.JavaConversions._
 
 trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
@@ -56,13 +58,21 @@ abstract class SimpleRetryPolicy[A](i: Int)
 }
 
 object RetryPolicy extends JavaSingleton {
+  object RetryableWriteException {
+    def unapply(thr: Throwable): Option[Throwable] = thr match {
+      case WriteException(_: CancelledRequestException) => None
+      case WriteException(exc) => Some(exc)
+      case _ => None
+    }
+  }
+
   val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
-    case Throw(_: WriteException) => true
+    case Throw(RetryableWriteException(_)) => true
   }
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(RetryableWriteException(_)) => true
     case Throw(_: TimeoutException) => true
-    case Throw(_: WriteException) => true
   }
 
   def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
