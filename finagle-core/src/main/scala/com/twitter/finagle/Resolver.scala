@@ -5,6 +5,14 @@ import com.twitter.util.{Closable, Return, Throw, Time, Try}
 import java.net.SocketAddress
 import java.util.WeakHashMap
 import java.util.logging.Logger
+import scala.collection.mutable
+
+trait ResolvedGroup extends Group[SocketAddress]
+  with Proxy
+  with NamedGroup
+{
+  val targets: List[String]
+}
 
 trait Resolver {
   val scheme: String
@@ -72,6 +80,9 @@ object Resolver {
     }
   }.reverse
 
+  private[this] val _resolutions = mutable.Set.empty[List[String]]
+  def resolutions = synchronized { _resolutions.toSet }
+
   /**
    * Resolve a group from a target name, a string. Resolve uses
    * `Resolver`s to do this. These are loaded via the Java
@@ -117,14 +128,24 @@ object Resolver {
     }
 
     resolved map { group =>
-      new Group[SocketAddress]
-        with Proxy
-        with NamedGroup
-      {
+      val lastTargets = group match {
+        case g: ResolvedGroup => g.targets
+        case g => Nil
+      }
+
+      val resolvedGroup = new ResolvedGroup {
+        val targets = delex(stripped) :: lastTargets
         val name = groupName
         val self = group
         def members = self.members
       }
+
+      synchronized {
+        _resolutions -= lastTargets
+        _resolutions += resolvedGroup.targets
+      }
+
+      resolvedGroup
     }
   }
 }

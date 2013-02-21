@@ -4,10 +4,15 @@ import com.twitter.finagle.util.LoadService
 import com.twitter.util.{Closable, Future, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger
+import scala.collection.mutable
 
 trait Announcement extends Closable {
   def close(deadline: Time) = unannounce()
   def unannounce(): Future[Unit]
+}
+
+trait ProxyAnnouncement extends Announcement with Proxy {
+  val forums: List[String]
 }
 
 trait Announcer {
@@ -45,8 +50,11 @@ object Announcer {
     announcers
   }
 
+  private[this] val _announcements = mutable.Set[(InetSocketAddress, List[String])]()
+  def announcements = synchronized { _announcements.toSet }
+
   def announce(addr: InetSocketAddress, forum: String): Future[Announcement] = {
-    forum.split("!", 2) match {
+    val announcement = forum.split("!", 2) match {
       case Array(scheme, name) =>
         announcers.find(_.scheme == scheme) match {
           case Some(announcer) => announcer.announce(addr, name)
@@ -55,6 +63,26 @@ object Announcer {
 
       case _ =>
         Future.exception(new AnnouncerForumInvalid(forum))
+    }
+
+    announcement map { ann =>
+      val lastForums = ann match {
+        case a: ProxyAnnouncement => a.forums
+        case _ => Nil
+      }
+
+      val proxyAnnouncement = new ProxyAnnouncement {
+        val self = ann
+        def unannounce() = ann.unannounce()
+        val forums = forum :: lastForums
+      }
+
+      synchronized {
+        _announcements -= ((addr, lastForums))
+        _announcements += ((addr, proxyAnnouncement.forums))
+      }
+
+      proxyAnnouncement
     }
   }
 }

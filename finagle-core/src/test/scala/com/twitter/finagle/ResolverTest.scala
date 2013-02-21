@@ -44,5 +44,10 @@ class ResolverTest extends FunSuite {
     }
   }
 
+  test("provides a resolutions set") {
+    Resolver.resolve("test!xyz")()
+    assert(Resolver.resolutions == Set(List("test!xyz")))
+  }
+
   // names
 }

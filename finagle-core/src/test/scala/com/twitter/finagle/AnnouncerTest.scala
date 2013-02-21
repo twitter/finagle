@@ -30,8 +30,13 @@ class AnnouncerTest extends FunSuite {
 
   test("resolve ServiceLoaded announcers") {
     Announcer.announce(addr, "test!xyz").get() match {
-      case p: TestAnnouncement => assert(p === TestAnnouncement(addr, "xyz"))
+      case p: Proxy => assert(p.self === TestAnnouncement(addr, "xyz"))
       case _ => assert(false)
     }
+  }
+
+  test("provide a set of announcements") {
+    Announcer.announce(addr, "test!xyz")
+    assert(Announcer.announcements == Set((addr, List("test!xyz"))))
   }
 }
