@@ -32,7 +32,7 @@ object Finagle extends Build {
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
     resolvers += "Coda Hale's Repository" at "http://repo.codahale.com/",
-    
+
     testOptions in Test <<= scalaVersion map {
       case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
       case _ => Seq()
@@ -63,7 +63,7 @@ object Finagle extends Build {
     pomIncludeRepository := { _ => false },
     publishMavenStyle := true,
     pomExtra := (
-      <url>https://github.com/twitter/util</url>
+      <url>https://github.com/twitter/finagle</url>
       <licenses>
         <license>
           <name>Apache License, Version 2.0</name>
@@ -104,7 +104,7 @@ object Finagle extends Build {
     id = "finagle",
     base = file("."),
     settings = Project.defaultSettings ++
-      sharedSettings ++ 
+      sharedSettings ++
       Unidoc.settings ++ Seq(
         Unidoc.unidocExclude := Seq(finagleExample.id)
       )
@@ -352,7 +352,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-thriftmux",
     Scrooge.scroogeThriftNamespaceMap in Test := Map(
-      "com.twitter.finagle.thriftmux.thrift" -> 
+      "com.twitter.finagle.thriftmux.thrift" ->
         "com.twitter.finagle.thriftmux.thriftscala"
     )
   ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
@@ -431,7 +431,7 @@ object Finagle extends Build {
     // Make the "test" command run both, test and doctest:test
     test <<= Seq(test in Test, test in DocTest).dependOn
     ).dependsOn(finagleCore, finagleHttp)
-    
+
   /* Test Configuration for running tests on doc sources */
   lazy val DocTest = config("doctest") extend(Test)
 
