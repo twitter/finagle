@@ -33,6 +33,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     doBefore {
       var address: Option[InetSocketAddress] = ExternalMemcached.start()
+      if (address == None) skip("Cannot start memcached. Skipping...")
       val service = ClientBuilder()
         .hosts(Seq(address.get))
         .codec(new Memcached(stats))
@@ -238,6 +239,7 @@ class ClientSpec extends SpecificationWithJUnit {
       // start five memcached server and join the cluster
       (0 to 4) foreach { _ =>
         val address: Option[InetSocketAddress] = ExternalMemcached.start()
+        if (address == None) skip("Cannot start memcached. Skipping...")
         memcachedAddress ::= address
         zkServerSetCluster.join(address.get)
       }

@@ -36,18 +36,25 @@ object ExternalMemcached { self =>
     address
   }
 
-  def start(addr:Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
-    val address:InetSocketAddress = addr getOrElse { findAddress().get }
+  def start(addr: Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
+    def _start(address: InetSocketAddress) {
+      val cmd: Seq[String] = Seq("memcached",
+                                 "-l", address.getHostName(),
+                                 "-p", address.getPort().toString)
 
-    val cmd: Seq[String] = Seq("memcached",
-                    "-l", address.getHostName(),
-                    "-p", address.getPort().toString)
+      val builder = new ProcessBuilder(cmd.toList)
+      processes ::= builder.start()
+    }
 
-    val builder = new ProcessBuilder(cmd.toList)
-    processes ::= builder.start()
-    Thread.sleep(100)
-
-    Some(address)
+    addr.orElse(findAddress()) flatMap { _addr =>
+      try {
+        _start(_addr)
+        Thread.sleep(100)
+        Some(_addr)
+      } catch {
+        case _ => None
+      }
+    }
   }
 
   def stop() {
@@ -69,5 +76,5 @@ object ExternalMemcached { self =>
     }
   });
 
-  assertMemcachedBinaryPresent()
+  //assertMemcachedBinaryPresent()
 }
