@@ -157,7 +157,7 @@ class ZookeeperCachePoolCluster private[memcached](
   extends CachePoolCluster {
   import ZookeeperCachePoolCluster._
 
-  private[this] val futurePool = FuturePool.defaultPool
+  private[this] val futurePool = FuturePool.unboundedPool
 
   private[this] val zkServerSetCluster =
     new ZookeeperServerSetCluster(
