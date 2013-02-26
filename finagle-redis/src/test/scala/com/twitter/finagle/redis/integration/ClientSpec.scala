@@ -86,6 +86,20 @@ class ClientSpec extends SpecificationWithJUnit {
         client.select(1)() mustEqual ()
       }
 
+      "info" in {
+        val infoCB = client.info()()
+        val info = new String(infoCB.get.array, "UTF8")
+        info mustMatch "# Server"
+        info mustMatch "redis_version:"
+        info mustMatch "# Clients"
+
+        val cpuCB = client.info(StringToChannelBuffer("cpu"))()
+        val cpu = new String(cpuCB.get.array, "UTF8")
+        cpu mustMatch "# CPU"
+        cpu mustMatch "used_cpu_sys:"
+        cpu mustNotMatch "redis_version:"
+      }
+
       "quit" in {
         client.quit()() mustEqual ()
       }

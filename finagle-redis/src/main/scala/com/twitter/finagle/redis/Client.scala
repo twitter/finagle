@@ -4,7 +4,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.Future
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 object Client {
 
@@ -50,6 +50,17 @@ class BaseClient(service: Service[Command, Reply]) {
   def auth(password: ChannelBuffer): Future[Unit] =
     doRequest(Auth(password)) {
       case StatusReply(message) => Future.Unit
+    }
+
+  /**
+   * Returns information and statistics about the server
+   * @param section Optional parameter can be used to select a specific section of information
+   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
+   */
+  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
+    doRequest(Info(section)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply() => Future.value(None)
     }
 
   /**

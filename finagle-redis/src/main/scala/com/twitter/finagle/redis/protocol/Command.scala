@@ -80,6 +80,7 @@ object Commands {
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
   val AUTH              = "AUTH"
+  val INFO              = "INFO"
   val QUIT              = "QUIT"
 
   // Hash Sets
@@ -186,6 +187,7 @@ object Commands {
     FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
     AUTH              -> {Auth(_)},
+    INFO              -> {Info(_)},
     QUIT              -> {_ => Quit},
 
     // hash sets
@@ -309,6 +311,7 @@ object CommandBytes {
   val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
   val SELECT            = StringToChannelBuffer("SELECT")
   val AUTH              = StringToChannelBuffer("AUTH")
+  val INFO              = StringToChannelBuffer("INFO")
   val QUIT              = StringToChannelBuffer("QUIT")
 
   // Hash Sets
