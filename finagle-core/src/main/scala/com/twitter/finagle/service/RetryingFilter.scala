@@ -70,8 +70,7 @@ object RetryPolicy extends JavaSingleton {
     case Throw(RetryableWriteException(_)) => true
   }
 
-  val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
-    case Throw(RetryableWriteException(_)) => true
+  val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
     case Throw(_: TimeoutException) => true
   }
 
