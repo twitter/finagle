@@ -9,6 +9,7 @@ object Finagle extends Build {
   val utilVersion = "6.2.0"
   val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % "9.1.0"
+  val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
@@ -31,7 +32,6 @@ object Finagle extends Build {
       "org.mockito" % "mockito-all" % "1.8.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
-    resolvers += "Coda Hale's Repository" at "http://repo.codahale.com/",
 
     testOptions in Test <<= scalaVersion map {
       case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
@@ -163,7 +163,7 @@ object Finagle extends Build {
     name := "finagle-stats",
     libraryDependencies ++= Seq(
       "com.twitter.common" % "metrics" % "0.0.6" withSources(),
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3")
+      jacksonLib)
   ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
@@ -187,9 +187,7 @@ object Finagle extends Build {
     name := "finagle-exception",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.codahale" % "jerkson_2.8.1" % "0.1.4",
-      "org.codehaus.jackson" % "jackson-core-asl"  % "1.8.1",
-      "org.codehaus.jackson" % "jackson-mapper-asl" % "1.8.1",
+      jacksonLib,
       "com.twitter" % "streamyj_2.8.1" % "0.3.0" % "test"
     ) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift)

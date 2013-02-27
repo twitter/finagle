@@ -24,9 +24,9 @@
   <dependencies>
     <!-- library dependencies -->
     <dependency>
-      <groupId>com.codahale</groupId>
-      <artifactId>jerkson_2.9.1</artifactId>
-      <version>0.5.0</version>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-scala_2.9.2</artifactId>
+      <version>2.1.3</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>

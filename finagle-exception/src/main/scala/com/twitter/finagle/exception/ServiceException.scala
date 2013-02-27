@@ -1,7 +1,18 @@
 package com.twitter.finagle.exception
 
-import com.codahale.jerkson.Json.generate
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.Time
+
+private object JsonGenerator {
+  private[this] val writer = {
+    val mapper = new ObjectMapper
+    mapper.registerModule(DefaultScalaModule)
+    mapper.writer
+  }
+
+  def generate(in: Any): String = writer.writeValueAsString(in)
+}
 
 /**
  * Model classes for exception serialization to JSON
@@ -54,7 +65,7 @@ sealed private[exception] case class ServiceException private[ServiceException] 
   /**
    * Generate a json representation of this using jerkson
    */
-  def toJson: String = generate(jsonValue)
+  def toJson: String = JsonGenerator.generate(jsonValue)
 }
 
 /**
