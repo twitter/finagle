@@ -63,6 +63,8 @@ case class DefaultServer[Req, Rep, In, Out](
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   tracer: Tracer = DefaultTracer
 ) extends Server[Req, Rep] {
+  com.twitter.finagle.Init()
+
   private[this] val connections = Collections.newSetFromMap(
     new ConcurrentHashMap[Closable, java.lang.Boolean])
 

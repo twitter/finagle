@@ -73,6 +73,8 @@ case class DefaultClient[Req, Rep](
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor
 ) extends Client[Req, Rep] {
+  com.twitter.finagle.Init()
+
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
     val hostStats = {
