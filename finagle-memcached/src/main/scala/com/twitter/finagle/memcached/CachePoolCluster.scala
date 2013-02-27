@@ -250,24 +250,19 @@ class ZookeeperCachePoolCluster private[memcached](
       if (event.getType == Watcher.Event.EventType.None)
         statsReceiver.counter("zkConnectionEvent." + event.getState).incr()
         event.getState match {
+          // actively trying to re-establish the zk connection (hence re-register the cache pool
+          // data watcher) whenever an zookeeper connection expired or disconnected. We could also
+          // only do this when SyncConnected happens, but that would be assuming other components
+          // sharing the zk client (e.g. ZookeeperServerSetCluster) will always actively attempts
+          // to re-establish the zk connection. For now, I'm making it actively re-establishing
+          // the connection itself here.
           case KeeperState.Disconnected =>
             underlyingPoolHealth = UnderlyingZookeeperStatus.Disconnected
+            zookeeperWorkQueue ! ReEstablishZKConn
           case KeeperState.Expired =>
-            // we only need to re-establish the zk connection and re-register the config data
-            // watcher when Expired event happens because this is the event that will close
-            // the zk client (which will lose all attached watchers). We could also do this
-            // only when SyncConnected happens instead of keep retrying, but that would be
-            // assuming other components sharing the zk client (e.g. ZookeeperServerSetCluster)
-            // will always actively attempts to re-establish the zk connection. For now, I'm
-            // making it actively re-establishing the connection itself here.
             underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
             zookeeperWorkQueue ! ReEstablishZKConn
-          case KeeperState.SyncConnected =>
-            // only set the underlyingPoolHealth if it is currently disconnected, otherwise if expired
-            // leave it to the readConfigWork to set it back to healthy
-            if (underlyingPoolHealth == UnderlyingZookeeperStatus.Disconnected) {
-              underlyingPoolHealth = UnderlyingZookeeperStatus.Healthy
-            }
+          case _ =>
         }
     }
   }
