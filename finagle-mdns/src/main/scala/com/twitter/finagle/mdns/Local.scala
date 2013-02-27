@@ -4,18 +4,20 @@ import com.twitter.finagle.{Announcement, Announcer, Group, Resolver}
 import com.twitter.util.{Future, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 
+private object Local {
+  def mkTarget(name: String) = "mdns!" + name + "._finagle._tcp.local."
+}
+
 class LocalAnnouncer extends Announcer {
   val scheme = "local"
 
-  def announce(addr: InetSocketAddress, name: String): Future[Announcement] = {
-    val forum = "mdns!" + addr.getPort + "._" + name + "._tcp.local."
-    Announcer.announce(addr, forum)
-  }
+  def announce(addr: InetSocketAddress, name: String): Future[Announcement] =
+    Announcer.announce(addr, Local.mkTarget(name))
 }
 
 class LocalResolver extends Resolver {
   val scheme = "local"
 
   def resolve(name: String): Try[Group[SocketAddress]] =
-    Resolver.resolve("mdns!_" + name + "._tcp.local.")
+    Resolver.resolve(Local.mkTarget(name))
 }

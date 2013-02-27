@@ -117,11 +117,11 @@ private class DNSSD {
   }
 }
 
-private[mdns] class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
-  extends Group[SocketAddress]
+private class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
+  extends Group[MdnsRecord]
 {
-  private[this] val services = new mutable.HashMap[String, SocketAddress]()
-  @volatile private[this] var current = Set[SocketAddress]()
+  private[this] val services = new mutable.HashMap[String, MdnsRecord]()
+  @volatile private[this] var current = Set[MdnsRecord]()
 
   def members = current
 
@@ -136,9 +136,15 @@ private[mdns] class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
   private[this] val proxy = dnssd.newProxy(dnssd.BrowseListenerClass) {
     case ("serviceFound", args)  =>
       val record = mkRecord(args)
-      dnssd.resolve(record) foreach { resolved=>
+      dnssd.resolve(record) foreach { resolved =>
+        val mdnsRecord = MdnsRecord(
+          record.serviceName,
+          record.regType,
+          record.domain,
+          new InetSocketAddress(resolved.hostName, resolved.port))
+
         synchronized {
-          services.put(record.serviceName, new InetSocketAddress(resolved.hostName, resolved.port))
+          services.put(record.serviceName, mdnsRecord)
           current = services.values.toSet
         }
       }
@@ -156,24 +162,20 @@ private[mdns] class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
     regType.asInstanceOf[String], domain.asInstanceOf[String], proxy)
 }
 
-private[mdns] class DNSSDAnnouncer extends Announcer {
-  val scheme = "dnssd"
-
-  private[this] val dnssd = new DNSSD
-
-  def announce(addr: InetSocketAddress, target: String): Future[Announcement] = {
-    val Array(name, app, prot, domain) = target.split("\\.")
-    dnssd.register(name, app + "." + prot, domain, addr.getHostName, addr.getPort)
-  }
+private object DNSSD {
+  lazy val instance = new DNSSD
 }
 
-private[mdns] class DNSSDResolver extends Resolver {
-  val scheme = "dnssd"
+private class DNSSDAnnouncer extends MDNSAnnouncerIface {
+  private[this] val dnssd = DNSSD.instance
 
-  private[this] val dnssd = new DNSSD
+  def announce(addr: InetSocketAddress, name: String, regType: String, domain: String) =
+    dnssd.register(name, regType, domain, addr.getHostName, addr.getPort)
+}
 
-  def resolve(target: String): Try[Group[SocketAddress]] = {
-    val Array(app, prot, domain) = target.split("\\.")
-    Return(new DNSSDGroup(dnssd, app + "." + prot, domain))
-  }
+private class DNSSDResolver extends MDNSResolverIface {
+  private[this] val dnssd = DNSSD.instance
+
+  def resolve(regType: String, domain: String) =
+    Return(new DNSSDGroup(dnssd, regType, domain))
 }

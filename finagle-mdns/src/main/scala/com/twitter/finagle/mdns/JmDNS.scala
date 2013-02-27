@@ -24,14 +24,16 @@ private object DNS {
     pool { dns.getServiceInfo(regType, name) }
 }
 
-private[mdns] class JmDNSAnnouncer extends Announcer {
+private class JmDNSAnnouncer extends MDNSAnnouncerIface {
   val scheme = "jmdns"
 
-  def announce(addr: InetSocketAddress, target: String): Future[Announcement] = {
-    val Array(name, app, prot, domain) = target.split("\\.")
-    val regType = app + "." + prot + "." + domain + "."
-    val info = ServiceInfo.create(regType, name, addr.getPort, "")
-
+  def announce(
+    addr: InetSocketAddress,
+    name: String,
+    regType: String,
+    domain: String
+  ): Future[Announcement] = {
+    val info = ServiceInfo.create(regType + "." + domain, name, addr.getPort, "")
     DNS.registerService(info) map { _ =>
       new Announcement {
         def unannounce() = DNS.unregisterService(info) map { _ => () }
@@ -40,19 +42,16 @@ private[mdns] class JmDNSAnnouncer extends Announcer {
   }
 }
 
-private[mdns] class JmDNSResolver extends Resolver {
+private class JmDNSResolver extends MDNSResolverIface {
   val scheme = "jmdns"
 
-  def resolve(target: String): Try[Group[SocketAddress]] = {
-    val Array(app, prot, domain) = target.split("\\.")
-    val group = new JmDNSGroup(app + "." + prot + "." + domain + ".")
-    Return(group)
-  }
+  def resolve(regType: String, domain: String): Try[Group[MdnsRecord]] =
+    Return(new JmDNSGroup(regType + "." + domain + "."))
 }
 
-private[mdns] class JmDNSGroup(regType: String) extends Group[SocketAddress] {
-  private[this] val services = new mutable.HashMap[String, SocketAddress]()
-  @volatile private[this] var current = Set[SocketAddress]()
+private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
+  private[this] val services = new mutable.HashMap[String, MdnsRecord]()
+  @volatile private[this] var current = Set[MdnsRecord]()
   def members = current
 
   DNS.addServiceListener(regType, new ServiceListener {
@@ -61,9 +60,14 @@ private[mdns] class JmDNSGroup(regType: String) extends Group[SocketAddress] {
     def serviceAdded(event: ServiceEvent) {
       DNS.getServiceInfo(event.getType, event.getName) foreach { info =>
         val addresses = info.getInetAddresses
-        val socket: SocketAddress = new InetSocketAddress(addresses(0), info.getPort)
+        val mdnsRecord = MdnsRecord(
+          info.getName,
+          info.getApplication + "." + info.getProtocol,
+          info.getDomain,
+          new InetSocketAddress(addresses(0), info.getPort))
+
         synchronized {
-          services.put(info.getName, socket)
+          services.put(info.getName, mdnsRecord)
           current = services.values.toSet
         }
       }
