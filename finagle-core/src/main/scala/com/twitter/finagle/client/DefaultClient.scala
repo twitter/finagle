@@ -58,7 +58,7 @@ object DefaultClient {
 case class DefaultClient[Req, Rep](
   name: String,
   endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep],
-  pool: StatsReceiver => Transformer[Req, Rep] = DefaultPool(),
+  pool: StatsReceiver => Transformer[Req, Rep] = DefaultPool[Req, Rep](),
   maxIdletime: Duration = Duration.Top,
   maxLifetime: Duration = Duration.Top,
   requestTimeout: Duration = Duration.Top,

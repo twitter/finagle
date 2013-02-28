@@ -31,8 +31,7 @@ object HttpTransporter extends Netty3Transporter[HttpRequest, HttpResponse](
 object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
   name = "http",
   endpointer = Bridge[HttpRequest, HttpResponse, HttpRequest, HttpResponse](
-    HttpTransporter, new SerialClientDispatcher(_)),
-  pool = DefaultPool[HttpRequest, HttpResponse]()
+    HttpTransporter, new SerialClientDispatcher(_))
 ) with HttpRichClient
 
 object HttpListener extends Netty3Listener[HttpResponse, HttpRequest](
