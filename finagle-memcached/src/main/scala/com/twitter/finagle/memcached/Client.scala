@@ -655,16 +655,12 @@ class KetamaClient private[memcached](
   nodeChange foreach {
     case NodeMarkedDead(key) =>
       ejectNode(key)
-      ejectionCount.incr()
     case NodeRevived(key) =>
       reviveNode(key)
-      revivalCount.incr()
     case NodeLeave(key) =>
       removeNode(key)
-      nodeLeaveCount.incr()
     case NodeJoin(key, client) =>
       joinNode(key, client)
-      nodeJoinCount.incr()
   }
 
   override def clientOf(key: String): Client = {
@@ -679,18 +675,22 @@ class KetamaClient private[memcached](
   }
 
   private[this] def ejectNode(key: KetamaClientKey) = synchronized {
-    val node = nodes(key)
-    if (node.state == NodeState.Live) {
-      node.state = NodeState.Ejected
-      rebuildDistributor()
+    nodes.get(key) match {
+      case Some(node) if (node.state == NodeState.Live) =>
+        node.state = NodeState.Ejected
+        rebuildDistributor()
+        ejectionCount.incr()
+      case _ =>
     }
   }
 
   private[this] def reviveNode(key: KetamaClientKey) = synchronized {
-    val node = nodes(key)
-    if (node.state == NodeState.Ejected) {
-      node.state = NodeState.Live
-      rebuildDistributor()
+    nodes.get(key) match {
+      case Some(node) if node.state == NodeState.Ejected =>
+        node.state = NodeState.Live
+        rebuildDistributor()
+        revivalCount.incr()
+      case _ =>
     }
   }
 
@@ -699,6 +699,7 @@ class KetamaClient private[memcached](
       case Some(Node(node, _)) =>
         rebuildDistributor()
         node.handle.release()
+        nodeLeaveCount.incr()
       case _ =>
     }
   }
@@ -709,6 +710,7 @@ class KetamaClient private[memcached](
 
     nodes(key) = Node(KetamaNode(key.identifier, key.weight, Client(service)), NodeState.Live)
     rebuildDistributor()
+    nodeJoinCount.incr()
   }
 
   def release() = synchronized {

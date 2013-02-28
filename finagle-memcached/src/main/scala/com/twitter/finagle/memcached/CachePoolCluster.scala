@@ -276,6 +276,7 @@ class ZookeeperCachePoolCluster private[memcached](
           case Watcher.Event.EventType.NodeDataChanged =>
             // handle node data change event
             zookeeperWorkQueue ! LoadCachePoolConfig
+          case _ =>
         }
       }
     }

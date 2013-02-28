@@ -17,7 +17,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.thrift.Status
-import com.twitter.util.Future
+import com.twitter.util.{Duration, Future}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
@@ -373,6 +373,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // cache pool cluster should remain the same
         expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
           zookeeperServer.startNetwork
+          Thread.sleep(2000)
         }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
 
         /***** start 5 more memcached servers and join the cluster ******/
@@ -417,6 +418,8 @@ class ClientSpec extends SpecificationWithJUnit {
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
+                .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+                .failureAccrualParams(Int.MaxValue, Duration.Top)
                 .cachePoolCluster(mycluster)
                 .build()
 
@@ -432,6 +435,8 @@ class ClientSpec extends SpecificationWithJUnit {
         mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
 
         val client = KetamaClientBuilder()
+                .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+                .failureAccrualParams(Int.MaxValue, Duration.Top)
                 .cachePoolCluster(mycluster)
                 .build()
                 .asInstanceOf[PartitionedClient]
@@ -456,6 +461,8 @@ class ClientSpec extends SpecificationWithJUnit {
         val mycluster = initializePool(5)
 
         val client = KetamaClientBuilder()
+            .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+            .failureAccrualParams(Int.MaxValue, Duration.Top)
             .cachePoolCluster(mycluster)
             .build()
             .asInstanceOf[PartitionedClient]
@@ -475,7 +482,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // initially there should be 5 cache shards being used
         trackCacheShards.size mustBe 5
 
-        // add 2 more cache servers and update cache pool config data, now there should be 7 shards
+        // add 4 more cache servers and update cache pool config data, now there should be 7 shards
         var additionalServers = List[EndpointStatus]()
         expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
           additionalServers = addMoreServers(4)
@@ -496,11 +503,36 @@ class ClientSpec extends SpecificationWithJUnit {
         Thread.sleep(1000)
         trackCacheShards.size mustBe 7
 
-        // remove 2 and add 4 more cache servers and update cache pool config data, now there should be 9 shards
-        expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 2) {
+        // remove another 2 cache servers and update cache pool config data, now there should be 5 shards
+        expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 5, expectedAdd = 0, expectedRem = 2) {
           additionalServers(2).update(Status.DEAD)
           additionalServers(3).update(Status.DEAD)
-          addMoreServers(4)
+          updateCachePoolConfigData(5)
+        }.get(10.seconds)() mustNot throwA[Exception]
+        Thread.sleep(1000)
+        trackCacheShards.size mustBe 5
+
+        // add 2 more cache servers and update cache pool config data, now there should be 7 shards
+        expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 7, expectedAdd = 2, expectedRem = 0) {
+          additionalServers = addMoreServers(2)
+          updateCachePoolConfigData(7)
+        }.get(10.seconds)() mustNot throwA[Exception]
+        Thread.sleep(1000)
+        trackCacheShards.size mustBe 7
+
+        // add another 2 more cache servers and update cache pool config data, now there should be 9 shards
+        expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 0) {
+          additionalServers = addMoreServers(2)
+          updateCachePoolConfigData(9)
+        }.get(10.seconds)() mustNot throwA[Exception]
+        Thread.sleep(1000)
+        trackCacheShards.size mustBe 9
+
+        // remove 2 and add 2, now there should be still 9 shards
+        expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 2) {
+          additionalServers(0).update(Status.DEAD)
+          additionalServers(1).update(Status.DEAD)
+          addMoreServers(2)
           updateCachePoolConfigData(9)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
