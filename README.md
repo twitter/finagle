@@ -221,7 +221,7 @@ Apache Thrift is a binary communication protocol that defines available methods 
 
 To create a Finagle Thrift service, you must implement the `FutureIface` Interface that <a href="https://github.com/twitter/scrooge">Scrooge</a> (a custom Thrift compiler) generates for your service. Scrooge wraps your service method return values with asynchronous `Future` objects to be compatible with Finagle.
 
-* If you are using <a href="https://github.com/harrah/xsbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
+* If you are using <a href="https://github.com/sbt/sbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
 * If you are using <a href="http://maven.apache.org/">maven</a> to manage your project, <a href="http://maven.twttr.com/com/twitter/maven-finagle-thrift-plugin/">maven-finagle-thrift-plugin</a> can also compile Thrift IDL for Finagle.
 
 #### Simple Thrift Server
