@@ -2,9 +2,9 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.ClientError
 import com.twitter.finagle.mysql.protocol._
-import com.twitter.logging.Logger
-import org.jboss.netty.channel._
+import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel._
 
 sealed trait State
 case object Idle extends State
@@ -28,14 +28,16 @@ case class Defragging(
  * on separate threads.
  */
 class Endec extends SimpleChannelHandler {
-  private[this] val log = Logger("finagle-mysql")
+  private[this] val logger = Logger.getLogger("finagle-mysql")
   private[this] var state: State = WaitingForGreeting
   private[this] var defragDecoder: (Packet, Seq[Packet], Seq[Packet]) => Result = _
+  @volatile private[this] var sg: ServersGreeting = null
+  @volatile private[this] var wroteInternalGreet: Boolean = false
   @volatile private[this] var expectPrepareOK: Boolean = false
   @volatile private[this] var expectBinaryResults: Boolean = false
 
   /**
-   * Netty downstream handler. The message should contain a packet from
+   * Netty downstream handler. The message event should contain a packet from
    * the MySQL server.
    */
   override def messageReceived(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
@@ -45,12 +47,12 @@ class Endec extends SimpleChannelHandler {
 
     case unknown =>
       Channels.disconnect(ctx.getChannel)
-      log.error("Endec: Expected Packet and received: " + unknown.getClass.getName)
+      logger.severe("Endec: Expected Packet and received: " + unknown.getClass.getName)
   }
 
   /**
-   * Netty upstream handler. The message should contain a
-   * Request object.
+   * Netty upstream handler. The message event should contain an
+   * object of type Request.
    */
   override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
     // Synthesize a response for a CloseRequest because we don't
@@ -60,12 +62,23 @@ class Endec extends SimpleChannelHandler {
       Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
       Channels.fireMessageReceived(ctx, CloseStatementOK)
 
+    // The ClientInternalGreet contains an empty buffer and is used to
+    // pair the MySQL server greeting packet with a write request. This satisfies
+    // the request-response model assumed in finagle.
+    case ClientInternalGreet =>
+      val buffer = encode(ClientInternalGreet)
+      Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
+      wroteInternalGreet = true
+      if (sg != null) {
+        Channels.fireMessageReceived(ctx, sg)
+      }
+
     case req: Request =>
       val buffer = encode(req)
       Channels.write(ctx, evt.getFuture, buffer, evt.getRemoteAddress)
 
     case unknown =>
-      log.error("Endec: Expected Request and received: " + unknown.getClass.getName)
+      logger.severe("Endec: Expected Request and received: " + unknown.getClass.getName)
   }
 
   /**
@@ -74,9 +87,18 @@ class Endec extends SimpleChannelHandler {
    * of this decoder.
    */
   def decode(packet: Packet): Option[Result] = state match {
+    // To avoid finagle treating the server greeting as an orphaned response, ensure
+    // the server greeting response is paired with a request. If it isn't hang on to
+    // it until we get the appropriate ClientInternalGreet request.
     case WaitingForGreeting =>
       transition(Idle)
-      Some(ServersGreeting.decode(packet))
+      val greet = ServersGreeting.decode(packet)
+      if (wroteInternalGreet) {
+        Some(greet)
+      } else {
+        sg = greet
+        None
+      }
 
     case Idle            => decodePacket(packet)
     case Defragging(_,_) => defrag(packet)

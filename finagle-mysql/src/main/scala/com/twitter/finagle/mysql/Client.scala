@@ -1,12 +1,14 @@
 package com.twitter.finagle.mysql
 
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.mysql.util.Query
 import com.twitter.util.Future
+import java.util.logging.{Logger, Level}
 
 object Client {
+  private[this] val logger = Logger.getLogger("finagle-mysql")
+
   /**
    * Constructs a Client given a ServiceFactory.
    */
@@ -15,15 +17,19 @@ object Client {
   }
 
   /**
-   * Constructs a ServiceFactory using a single host.
+   * Constructs a Client using a single host.
    * @param host a String of host:port combination.
    * @param username the username used to authenticate to the mysql instance
    * @param password the password used to authenticate to the mysql instance
    * @param dbname database to initially use
+   * @param logLevel java.util.logging.Logger logging level.
    */
-  def apply(host: String, username: String, password: String, dbname: Option[String]): Client = {
+  def apply(host: String, username: String, password: String, dbname: Option[String], logLevel: Level): Client = {
+    logger.setLevel(logLevel)
+
     val factory = ClientBuilder()
       .codec(new MySQL(username, password, dbname))
+      .logger(logger)
       .hosts(host)
       .hostConnectionLimit(1)
       .buildFactory()
@@ -32,11 +38,15 @@ object Client {
   }
 
   def apply(host: String, username: String, password: String): Client = {
-    apply(host, username, password, None)
+    apply(host, username, password, None, Level.OFF)
   }
 
   def apply(host: String, username: String, password: String, dbname: String): Client = {
-    apply(host, username, password, Some(dbname))
+    apply(host, username, password, Some(dbname), Level.OFF)
+  }
+
+  def apply(host: String, username: String, password: String, dbname: String, logLevel: Level): Client = {
+    apply(host, username, password, Some(dbname), logLevel)
   }
 }
 
@@ -46,21 +56,21 @@ class Client(factory: ServiceFactory[Request, Result]) {
   /**
    * Sends a query to the server without using
    * prepared statements.
-   * @param sql An sql statement to be executed.
-   * @return an OK Result or a ResultSet for queries that return
-   * rows.
+   * @param sql A sql statement to be sent to the server.
+   * @return a Future containing an OK Result or a ResultSet
+   * for queries that return rows.
    */
-  def query(sql: String) = send(QueryRequest(sql)) {
-      case rs: ResultSet => Future.value(rs)
-      case ok: OK => Future.value(ok)
+  def query(sql: String): Future[Result] = send(QueryRequest(sql)) {
+    case rs: ResultSet => Future.value(rs)
+    case ok: OK => Future.value(ok)
   }
 
   /**
-   * Runs a query that returns a result set. For each row
-   * in the ResultSet, call f on the row and return the results.
+   * Runs a query that returns a ResultSet. For each row
+   * in the ResultSet, call f on the row and return the Seq of results.
    * @param sql A sql statement that returns a result set.
-   * @param f A function from ResultSet to any type T.
-   * @return a Future of Seq[T]
+   * @param f A function from Row to any type T.
+   * @return a Future of Seq[T] that contains rows.map(f)
    */
   def select[T](sql: String)(f: Row => T): Future[Seq[T]] = query(sql) map {
     case rs: ResultSet => rs.rows.map(f)
@@ -70,26 +80,22 @@ class Client(factory: ServiceFactory[Request, Result]) {
   /**
    * Sends a query to server to be prepared for execution.
    * @param sql A query to be prepared on the server.
-   * @return PreparedStatement
+   * @return a Future[PreparedStatement]
    */
-  def prepare(sql: String, params: Any*) = {
-    val stmt = Query.expandParams(sql, params)
-    send(PrepareRequest(stmt)) {
-      case ps: PreparedStatement =>
-        ps.statement.setValue(stmt)
-        if(params.size > 0)
-          ps.parameters = Query.flatten(params).toArray
-
-        Future.value(ps)
-    }
+  def prepare(sql: String): Future[PreparedStatement] = send(PrepareRequest(sql)) {
+    case ps: PreparedStatement =>
+      ps.statement.setValue(sql)
+      Future.value(ps)
   }
 
   /**
-   * Execute a prepared statement.
-   * @return an OK Result or a ResultSet for queries that return
-   * rows.
+   * Execute a prepared statement on the server. Set the parameters
+   * field or use the update(index, param) method on the
+   * prepared statement object to change parameters.
+   * @return a Future containing an OK Result or a ResultSet
+   * for queries that return rows.
    */
-  def execute(ps: PreparedStatement) = send(ExecuteRequest(ps)) {
+  def execute(ps: PreparedStatement): Future[Result] = send(ExecuteRequest(ps)) {
     case rs: ResultSet =>
       ps.bindParameters()
       Future.value(rs)
@@ -102,20 +108,19 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Combines the prepare and execute operations.
    * @return a Future[(PreparedStatement, Result)] tuple.
    */
-  def prepareAndExecute(sql: String, params: Any*) =
-    prepare(sql, params: _*) flatMap { ps =>
+  def prepareAndExecute(sql: String): Future[(PreparedStatement, Result)] =
+    prepare(sql) flatMap { ps =>
       execute(ps) map {
         res => (ps, res)
       }
     }
 
-
   /**
-   * Runs a query that returns a result set. For each row
+   * Runs a query that returns a ResultSet. For each row
    * in the ResultSet, call f on the row and return the results.
    * @param ps A prepared statement.
-   * @param f A function from ResultSet to any type T.
-   * @return a Future of Seq[T]
+   * @param f A function from Row to any type T.
+   * @return a Future of Seq[T] that contains rows.map(f)
    */
   def select[T](ps: PreparedStatement)(f: Row => T): Future[Seq[T]] = execute(ps) map {
     case rs: ResultSet => rs.rows.map(f)
@@ -126,8 +131,8 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Combines the prepare and select operations.
    * @return a Future[(PreparedStatement, Seq[T])] tuple.
    */
-  def prepareAndSelect[T](sql: String, params: Any*)(f: Row => T) =
-    prepare(sql, params: _*) flatMap { ps =>
+  def prepareAndSelect[T](sql: String)(f: Row => T): Future[(PreparedStatement, Seq[T])] =
+    prepare(sql) flatMap { ps =>
       select(ps)(f) map {
           seq => (ps, seq)
       }
@@ -137,15 +142,15 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Close a prepared statement on the server.
    * @return OK result.
    */
-  def closeStatement(ps: PreparedStatement) = send(CloseRequest(ps)) {
+  def closeStatement(ps: PreparedStatement): Future[Result] = send(CloseRequest(ps)) {
     case ok: OK => Future.value(ok)
   }
 
-  def selectDB(schema: String) = send(UseRequest(schema)) {
+  def selectDB(schema: String): Future[Result] = send(UseRequest(schema)) {
     case ok: OK => Future.value(ok)
   }
 
-  def ping = send(PingRequest) {
+  def ping: Future[Result] = send(PingRequest) {
     case ok: OK => Future.value(ok)
   }
 
@@ -158,7 +163,7 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Helper function to send requests to the ServiceFactory
    * and handle Error responses from the server.
    */
-  private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]])  =
+  private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]]): Future[T] =
     fService flatMap { service =>
       service(r) flatMap (handler orElse {
         case Error(c, s, m) => Future.exception(ServerError(c + " - " + m))

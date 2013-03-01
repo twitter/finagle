@@ -11,8 +11,8 @@ trait Result
  * - COM_REFRESH
  * - COM_REGISTER_SLAVE
  */
-case class OK(affectedRows: Long, 
-              insertId: Long, 
+case class OK(affectedRows: Long,
+              insertId: Long,
               serverStatus: Int,
               warningCount: Int,
               message: String) extends Result
@@ -33,7 +33,7 @@ object OK {
 
 /**
  * Used internally to synthesize a response from
- * the server when sending a prepared statement 
+ * the server when sending a prepared statement
  * CloseRequest
  */
 object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
@@ -55,7 +55,7 @@ object Error {
   }
 }
 
-/** 
+/**
  * Represents and EOF result received from the server which
  * contains any warnings and the server status.
  */

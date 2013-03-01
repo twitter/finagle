@@ -1,9 +1,9 @@
-package com.twitter.finagle.mysql
-
+import com.twitter.conversions.time._
+import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.util.{Future, Try}
-import com.twitter.conversions.time._
 import java.sql.Date
+import java.util.logging.{Logger, Level}
 
 case class SwimmingRecord(
   event: String,
@@ -11,7 +11,7 @@ case class SwimmingRecord(
   name: String,
   nationality: String,
   date: Date
-) extends {
+) {
 
   def toArray = Array(event, time, name, nationality, date)
 
@@ -50,24 +50,24 @@ object Main {
     val port = options.getOrElse("port", 3306).asInstanceOf[Int]
     val username = options.getOrElse("username", "<user>").asInstanceOf[String]
     val password = options.getOrElse("password", "<password>").asInstanceOf[String]
-    val dbname = "test"
+    val dbname = options.getOrElse("database", "test").asInstanceOf[String]
 
-    val client = Client(host+":"+port, username, password, dbname)
+    val client = Client(host+":"+port, username, password, dbname, Level.OFF)
     if (createTable(client) && insertValues(client)) {
       val query = "SELECT * FROM `finagle-mysql-example` WHERE `date` BETWEEN '2009-06-01' AND '2009-8-31'"
       val qres: Future[Seq[_]] = client.select(query) { row =>
-        // row.valueOf returns an Option[Value]
-        val event = row.valueOf("event") map {
+        // row(...) returns an Option[Value]
+        val event = row("event") map {
           case StringValue(s) => s
           case _ => "Default"
         }
 
-        val nationality = row.valueOf("nationality") map {
+        val nationality = row("nationality") map {
           case StringValue(s) => s
           case _ => "Default"
         }
 
-        val date = row.valueOf("date") map {
+        val date = row("date") map {
           case DateValue(d) => d
           case _ => new Date(0)
         }
@@ -75,9 +75,9 @@ object Main {
         // Of course this could cause a runtime error if there isn't a field name
         // "time" or if the Value at the field named time is not of type
         // FloatValue(_)
-        val FloatValue(time) = row.valueOf("time").get
+        val FloatValue(time) = row("time").get
 
-        val StringValue(name) = row.valueOf("name").get
+        val StringValue(name) = row("name").get
 
         (name, time)
       }
@@ -135,6 +135,8 @@ object Main {
       parseArgs(parsed + ("username" -> value), tail)
     case "-p" :: value :: tail =>
       parseArgs(parsed + ("password" -> value), tail)
+    case "-database" :: value :: tail =>
+      parseArgs(parsed + ("database" -> value), tail)
     case unknown :: tail => parsed
   }
 }

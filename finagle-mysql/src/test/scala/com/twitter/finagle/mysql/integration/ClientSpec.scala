@@ -29,12 +29,12 @@ object Connection {
   }
 
   private[this] val prepared = mutable.Map[String, PreparedStatement]()
-  def prepare(sql: String, params: Any*): Option[PreparedStatement] =
+  def prepare(sql: String): Option[PreparedStatement] =
     if (prepared.contains(sql))
       prepared.get(sql)
     else
       client map { c =>
-        val ps = c.prepare(sql, params: _*).get
+        val ps = c.prepare(sql).get
         prepared += (sql -> ps)
         ps
       }
@@ -114,11 +114,11 @@ class ClientSpec extends SpecificationWithJUnit {
 
         "Select" in {
           val selectRes = client.select("SELECT * FROM `finagle-mysql-test`") { row =>
-            val StringValue(event) = row.valueOf("event").get
-            val FloatValue(time) = row.valueOf("time").get
-            val StringValue(name) = row.valueOf("name").get
-            val StringValue(nation) = row.valueOf("nationality").get
-            val DateValue(date) = row.valueOf("date").get
+            val StringValue(event) = row("event").get
+            val FloatValue(time) = row("time").get
+            val StringValue(name) = row("name").get
+            val StringValue(nation) = row("nationality").get
+            val DateValue(date) = row("date").get
             SwimmingRecord(event, time, name, nation, date)
           }.get
 
@@ -144,12 +144,12 @@ class ClientSpec extends SpecificationWithJUnit {
           "execute #1" in {
             ps.parameters = Array(recordHolder)
             val row = extractRow(client.execute(ps).get)
-            val result = row.valueOf("numRecords").get
+            val result = row("numRecords").get
             result mustEqual LongValue(numRecords(recordHolder))
 
             "again" in {
               val row = extractRow(client.execute(ps).get)
-              row.valueOf("numRecords").get mustEqual result
+              row("numRecords").get mustEqual result
             }
           }
 
@@ -157,12 +157,12 @@ class ClientSpec extends SpecificationWithJUnit {
             ps.parameters = Array(recordHolder)
             val execRes = client.execute(ps).get.asInstanceOf[ResultSet]
             val row = execRes.rows(0)
-            val result = row.valueOf("numRecords").get
+            val result = row("numRecords").get
             result mustEqual LongValue(numRecords(recordHolder))
 
             "again" in {
               val row = extractRow(client.execute(ps).get)
-              row.valueOf("numRecords").get mustEqual result
+              row("numRecords").get mustEqual result
             }
           }
         }

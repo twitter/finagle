@@ -1,19 +1,22 @@
 package com.twitter.finagle.mysql.protocol
 
 import com.twitter.finagle.mysql.ClientError
-import java.nio.charset.{Charset => JCharset}
 import java.nio.ByteOrder
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import java.nio.charset.{Charset => JCharset}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers._
 
 /**
  * The BufferReader and BufferWriter interfaces provide methods for
  * reading/writing primitive data types exchanged between the client/server.
- * This includes all primitive numeric types and strings (null-terminated and length coded).
+ * This includes all primitive numeric types and strings.
  * All Buffer methods are side-effecting. That is, each call to a read* or write*
  * method will increase the current offset.
  *
- * Both BufferReader and BufferWriter assume bytes are written
- * in little endian. This conforms with the MySQL protocol.
+ * These interfaces are useful for reading from and writing to a MySQL
+ * packet. They provide protocol specific methods and assure that
+ * buffers are read/written in little endian byte order, which conforms to
+ * the MySQL protocol.
  */
 
 object Buffer {
@@ -38,7 +41,7 @@ object Buffer {
    * avoids copying the underlying arrays.
    */
   def toChannelBuffer(bytes: Array[Byte]*) =
-    ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes: _*)
+    wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes: _*)
 }
 
 trait BufferReader {

@@ -18,7 +18,7 @@ object Capability {
   val SecureConnection = 0x8000 // New 4.1 authentication
   val MultiStatements  = 0x10000 // Enable/disable multi-stmt support
   val MultiResults     = 0x20000 // Enable/disable multi-results */
-  
+
   val CapabilityMap = Map(
     "CLIENT_LONG_PASSWORD"     -> LongPassword,
     "CLIENT_FOUND_ROWS"        -> FoundRows,

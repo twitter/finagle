@@ -10,7 +10,7 @@ case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Resu
   def parameters: Array[Any] = params
   def hasNewParameters: Boolean = hasNewParams
 
-  def bindParameters() = hasNewParams = false
+  def bindParameters() { hasNewParams = false }
 
   def parameters_=(arr: Array[Any]) = {
     require(arr.size == numberOfParams, "Invalid number of parameters.")
@@ -71,4 +71,3 @@ object PreparedOK {
     PreparedOK(stmtId, col, params, warningCount)
   }
 }
-

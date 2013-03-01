@@ -29,7 +29,7 @@ object ServersGreeting {
     val status = br.readShort()
     br.skip(13)
     val salt2 = br.take(12)
-    
+
     ServersGreeting(
       protocol,
       version,
@@ -66,7 +66,7 @@ case class LoginRequest(
     bw.writeInt(capability.mask)
     bw.writeInt(maxPacket)
     bw.writeByte(charset)
-    bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out 
+    bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
     bw.writeNullTerminatedString(username)
     bw.writeLengthCodedBytes(hashPassword)
     if (clientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))

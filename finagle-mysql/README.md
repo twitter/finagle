@@ -1,9 +1,9 @@
 A MySQL client built for finagle.
 
 ---
-## Overview  
+## Overview
 
-*This is meant to give a very brief overview of the MySQL Client/Server protocol and reference relevant source code within finagle-mysql. For an exposition of the MySQL Client/Server protocol, refer to [MySQL Forge](http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol)
+*This is meant to give a very brief overview of the MySQL Client/Server protocol and reference relevant source code within finagle-mysql. For an exposition of the MySQL Client/Server protocol, refer to [MySQL Documentation](http://dev.mysql.com/doc/internals/en/client-server-protocol.html)
 and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/databases/mysql/0596009577/client-server-communication/orm9780596009571-chp-4).*
 
 **Packets** - The basic unit of communication for the MySQL Client/Server protocol is an application-layer packet. A MySQL packet consists of a header (size and sequence number) followed by a body. Packets can be fragmented across frames during transmission. To simplify the decoding of results received from the server, the codec includes a packet frame decoder on the pipeline.
@@ -18,18 +18,18 @@ and [Understanding MySQL Internal](http://my.safaribooksonline.com/book/database
 
     // This clients capabilities
     val clientCapability = Capability(
-      LongFlag, 
-      Transactions, 
-      Protocol41, 
-      FoundRows, 
-      Interactive, 
-      LongPassword, 
-      ConnectWithDB, 
-      SecureConnection, 
+      LongFlag,
+      Transactions,
+      Protocol41,
+      FoundRows,
+      Interactive,
+      LongPassword,
+      ConnectWithDB,
+      SecureConnection,
       LocalFiles
     )
 `* protocol/Capability.scala, Codec.scala`
- 
+
  Note: This client only supports protocol version 4.1 (available in MySQL version 4.1 and above). This is strictly enforced during authentication with a MySQL server.
 
 **Requests** - Most requests sent to the server are Command Requests. They contain a command byte and any arguments that are specific to the command. Command Requests are sent to the server as a MySQL Packet. The first byte of the packet body must contain a valid command byte followed by the arguments. Within finagle-mysql, each Request object has a data field which defines the body of the Packet. Requests are translated into a logical MySQL Packet by the toChannelBuffer method when they reach the Encoder.
@@ -62,6 +62,6 @@ Pattern matching all possible values of the Value ADT gives great flexibility an
 
 **Charset** - Currently, finagle-mysql only supports UTF-8 character encodings. This is strictly enforced when authenticating with a MySQL server. For more information about how to configure a MySQL instance to use UTF-8 refer to the [MySQL Documentation](http://dev.mysql.com/doc/refman/5.0/en/charset-applications.html).
 
-Note: MySQL also supports variable charsets at the table and field level. This charset data is part of the [Field Packet](http://dev.mysql.com/doc/internals/en/field-packet.html).
+Note: MySQL also supports variable charsets at the table and field level. This charset data is part of the field packet.
 
 `* protocol/Charset.scala`

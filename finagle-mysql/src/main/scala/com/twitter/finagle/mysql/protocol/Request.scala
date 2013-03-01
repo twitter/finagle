@@ -1,7 +1,8 @@
 package com.twitter.finagle.mysql.protocol
 
 import com.twitter.logging.Logger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers._
 
 object Command {
   val COM_SLEEP               = 0x00.toByte // internal thread state
@@ -60,8 +61,8 @@ class SimpleCommandRequest(command: Byte, buffer: Array[Byte])
  * NOOP Request used internally by this client.
  */
 case object ClientInternalGreet extends Request(0) {
-  override val data = ChannelBuffers.EMPTY_BUFFER
-  override def toChannelBuffer = ChannelBuffers.EMPTY_BUFFER
+  override val data = EMPTY_BUFFER
+  override def toChannelBuffer = EMPTY_BUFFER
 }
 
 case object PingRequest
@@ -136,7 +137,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case l: Long        => writer.writeLong(l)
       case f: Float       => writer.writeFloat(f)
       case d: Double      => writer.writeDouble(d)
-      case b: Array[Byte] => writer.writeBytes(b)
+      case b: Array[Byte] => writer.writeLengthCodedBytes(b)
       // Dates
       case t: java.sql.Timestamp    => TimestampValue.write(t, writer)
       case d: java.sql.Date         => DateValue.write(d, writer)
@@ -169,9 +170,9 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
         // only add type data if the prepared statement has new parameters.
         val types = BufferWriter(new Array[Byte](ps.numberOfParams * 2))
         paramsList foreach { writeTypeCode(_, types) }
-        ChannelBuffers.wrappedBuffer(initialBuffer, types.toChannelBuffer, values.toChannelBuffer)
+        wrappedBuffer(initialBuffer, types.toChannelBuffer, values.toChannelBuffer)
       } else
-        ChannelBuffers.wrappedBuffer(initialBuffer, values.toChannelBuffer)
+          wrappedBuffer(initialBuffer, values.toChannelBuffer)
     }
 }
 

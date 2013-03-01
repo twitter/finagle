@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql.protocol
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers._
 
 /**
  * Represents a logical packet received from MySQL.
@@ -33,9 +34,9 @@ object Packet {
    */
   def toChannelBuffer(size: Int, seq: Short, body: ChannelBuffer) = {
     val headerBuffer = PacketHeader(size, seq).toChannelBuffer
-    ChannelBuffers.wrappedBuffer(headerBuffer, body)
+    wrappedBuffer(headerBuffer, body)
   }
 
   def toChannelBuffer(size: Int, seq: Short, body: Array[Byte]): ChannelBuffer =
-    toChannelBuffer(size, seq, ChannelBuffers.wrappedBuffer(body))
+    toChannelBuffer(size, seq, wrappedBuffer(body))
 }

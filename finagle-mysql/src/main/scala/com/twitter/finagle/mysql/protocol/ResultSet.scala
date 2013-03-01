@@ -1,6 +1,5 @@
 package com.twitter.finagle.mysql.protocol
 
-
 trait ResultSet extends Result {
   val fields: Seq[Field]
   val rows: Seq[Row]
@@ -67,10 +66,10 @@ trait Row {
    * @return Some(Value) if the column
    * exists with the given name. Otherwise, None.
    */
-  def valueOf(columnName: String): Option[Value] =
-    valueOf(indexOf(columnName))
+  def apply(columnName: String): Option[Value] =
+    apply(indexOf(columnName))
 
-  protected def valueOf(columnIndex: Option[Int]): Option[Value] =
+  protected def apply(columnIndex: Option[Int]): Option[Value] =
     for (idx <- columnIndex) yield values(idx)
 }
 
@@ -172,4 +171,3 @@ object Field {
     )
   }
 }
-

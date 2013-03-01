@@ -26,8 +26,8 @@ case class DateValue(d: SQLDate) extends Value
 case class RawStringValue(s: String) extends Value
 case class RawBinaryValue(bytes: Array[Byte]) extends Value
 
-/** 
- * "" -> EmptyValue 
+/**
+ * "" -> EmptyValue
  * SQL NULL -> NullValue
  */
 case object EmptyValue extends Value
@@ -39,7 +39,7 @@ object Value {
    * and a value string. If the mapping is unknown
    * a RawStringValue is returned.
    */
-  def apply(typeCode: Int, value: String) = 
+  def apply(typeCode: Int, value: String) =
     if (value == null)
       NullValue
     else if (value.isEmpty)
@@ -56,7 +56,7 @@ object Value {
         case Type.LONGLONG   => LongValue(value.toLong)
         case Type.FLOAT      => FloatValue(value.toFloat)
         case Type.DOUBLE     => DoubleValue(value.toDouble)
-        case Type.TIMESTAMP  => TimestampValue(value) 
+        case Type.TIMESTAMP  => TimestampValue(value)
         case Type.DATETIME   => TimestampValue(value)
         case Type.DATE       => DateValue(value)
         case _               => RawStringValue(value)
@@ -100,8 +100,8 @@ object TimestampValue {
   def apply(s: String): Value = {
     if (s == null)
       NullValue
-    else if (s.isEmpty) 
-      EmptyValue 
+    else if (s.isEmpty)
+      EmptyValue
     else if (s == SQLZeroTimestamp.toString)
       TimestampValue(SQLZeroTimestamp)
     else
@@ -118,7 +118,7 @@ object TimestampValue {
     if (bytes.size == 0) {
       return TimestampValue(SQLZeroTimestamp)
     }
-      
+
     var year, month, day, hour, min, sec, nano = 0
     val br = BufferReader(bytes)
 
@@ -133,14 +133,14 @@ object TimestampValue {
       // a RawBinaryValue and allow the user to handle this.
       return RawBinaryValue(bytes)
     }
-        
+
 
     // if the time-part is 00:00:00, it isn't included.
     if (br.readable(3)) {
       hour = br.readUnsignedByte()
       min = br.readUnsignedByte()
       sec = br.readUnsignedByte()
-    } 
+    }
 
     // if the sub-seconds are 0, they aren't included.
     if (br.readable(4)) {
@@ -186,7 +186,7 @@ object DateValue {
    * @param A MySQL formatted TIMESTAMP string YYYY-MM-DD.
    */
   def apply(s: String): Value = {
-    if (s == null) 
+    if (s == null)
       NullValue
     else if (s.isEmpty)
       EmptyValue

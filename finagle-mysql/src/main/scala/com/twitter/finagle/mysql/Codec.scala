@@ -76,7 +76,7 @@ class AuthenticationProxy(
         Future.value(res)
 
       case Error(c, _, m) =>
-        Future.exception(ServerError("Error when authenticating the client "+ c + " - " + m))
+        Future.exception(ServerError("Error when authenticating the client " + c + " - " + m))
     }
 
     override def apply(conn: ClientConnection) = for {

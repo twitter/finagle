@@ -2,6 +2,8 @@ package com.twitter.finagle.mysql.codec
 
 import com.twitter.finagle.mysql.protocol._
 import com.twitter.finagle.mysql.protocol.{Error => MySQLError}
+import org.jboss.netty.buffer.ChannelBuffers._
+import org.jboss.netty.channel._
 import org.specs.SpecificationWithJUnit
 
 class EndecSpec extends SpecificationWithJUnit {
@@ -17,8 +19,7 @@ class EndecSpec extends SpecificationWithJUnit {
     val greetingRes = endec.decode(greetingPacket)
 
     "decode greeting packet" in {
-      greetingRes.isEmpty mustEqual false
-      greetingRes.get.isInstanceOf[ServersGreeting] mustEqual true
+      greetingRes.isEmpty mustEqual true
     }
 
     "decode OK packet" in {
