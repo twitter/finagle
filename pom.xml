@@ -18,6 +18,7 @@
     </snapshotRepository>
   </distributionManagement>
   <modules>
+    <module>finagle-benchmark</module>
     <module>finagle-commons-stats</module>
     <module>finagle-core</module>
     <module>finagle-example</module>
@@ -27,6 +28,7 @@
     <module>finagle-mdns</module>
     <module>finagle-memcached</module>
     <module>finagle-mux</module>
+    <module>finagle-mysql</module>
     <module>finagle-native</module>
     <module>finagle-ostrich4</module>
     <module>finagle-redis</module>
@@ -39,6 +41,5 @@
     <module>finagle-thrift</module>
     <module>finagle-thriftmux</module>
     <module>finagle-zipkin</module>
-    <module>finagle-benchmark</module>
   </modules>
 </project>

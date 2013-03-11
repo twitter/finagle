@@ -1,4 +1,4 @@
-package com.twitter.finagle.mysql.util
+package com.twitter.finagle.exp.mysql.util
 
 object BufferUtil {
   /**

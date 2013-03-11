@@ -1,4 +1,4 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.exp.mysql.protocol
 
 object Type {
   /** MySQL type codes */

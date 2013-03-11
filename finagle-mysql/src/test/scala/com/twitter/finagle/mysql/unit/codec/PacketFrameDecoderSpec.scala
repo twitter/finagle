@@ -1,6 +1,6 @@
-package com.twitter.finagle.mysql.codec
+package com.twitter.finagle.exp.mysql.codec
 
-import com.twitter.finagle.mysql.protocol.{Buffer, Packet}
+import com.twitter.finagle.exp.mysql.protocol.{Buffer, Packet}
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito

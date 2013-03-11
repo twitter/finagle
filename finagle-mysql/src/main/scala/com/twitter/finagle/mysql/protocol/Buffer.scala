@@ -1,6 +1,6 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.exp.mysql.protocol
 
-import com.twitter.finagle.mysql.ClientError
+import com.twitter.finagle.exp.mysql.ClientError
 import java.nio.ByteOrder
 import java.nio.charset.{Charset => JCharset}
 import org.jboss.netty.buffer.ChannelBuffer

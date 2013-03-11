@@ -1,6 +1,8 @@
+package com.twitter.finagle.exp.mysql
+
 import com.twitter.conversions.time._
-import com.twitter.finagle.mysql._
-import com.twitter.finagle.mysql.protocol._
+import com.twitter.finagle.exp.mysql._
+import com.twitter.finagle.exp.mysql.protocol._
 import com.twitter.util.{Future, Try}
 import java.sql.Date
 import java.util.logging.{Logger, Level}

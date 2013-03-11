@@ -1,7 +1,7 @@
-package com.twitter.finagle.mysql
+package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.mysql.protocol._
+import com.twitter.finagle.exp.mysql.protocol._
 import com.twitter.finagle.ServiceFactory
 import com.twitter.util.Future
 import java.util.logging.{Logger, Level}

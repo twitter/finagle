@@ -1,7 +1,7 @@
-package com.twitter.finagle.mysql.codec
+package com.twitter.finagle.exp.mysql.codec
 
-import com.twitter.finagle.mysql.protocol._
-import com.twitter.finagle.mysql.protocol.{Error => MySQLError}
+import com.twitter.finagle.exp.mysql.protocol._
+import com.twitter.finagle.exp.mysql.protocol.{Error => MySQLError}
 import org.jboss.netty.buffer.ChannelBuffers._
 import org.jboss.netty.channel._
 import org.specs.SpecificationWithJUnit

@@ -1,7 +1,7 @@
-package com.twitter.finagle.mysql.codec
+package com.twitter.finagle.exp.mysql.codec
 
-import com.twitter.finagle.mysql.protocol.{Packet, BufferReader}
-import com.twitter.finagle.mysql.util.BufferUtil
+import com.twitter.finagle.exp.mysql.protocol.{Packet, BufferReader}
+import com.twitter.finagle.exp.mysql.util.BufferUtil
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}

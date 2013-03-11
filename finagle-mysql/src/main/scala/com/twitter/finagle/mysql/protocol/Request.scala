@@ -1,4 +1,4 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.exp.mysql.protocol
 
 import com.twitter.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer

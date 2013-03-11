@@ -1,9 +1,9 @@
-package com.twitter.finagle.mysql
+package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle._
-import com.twitter.finagle.mysql.codec.{PacketFrameDecoder, Endec}
-import com.twitter.finagle.mysql.protocol._
-import com.twitter.finagle.mysql.protocol.Capability._
+import com.twitter.finagle.exp.mysql.codec.{PacketFrameDecoder, Endec}
+import com.twitter.finagle.exp.mysql.protocol._
+import com.twitter.finagle.exp.mysql.protocol.Capability._
 import com.twitter.util.Future
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.FrameDecoder
