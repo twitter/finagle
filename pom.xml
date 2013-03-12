@@ -23,6 +23,7 @@
     <module>finagle-core</module>
     <module>finagle-example</module>
     <module>finagle-exception</module>
+    <module>finagle-exp</module>
     <module>finagle-http</module>
     <module>finagle-kestrel</module>
     <module>finagle-mdns</module>
