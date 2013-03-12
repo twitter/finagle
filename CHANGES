@@ -5,13 +5,38 @@
 6.x
 ----
 
-6.1.1
+6.1.2
 ~~~~
 
 Not yet released
 
-- `finagle-http`: New Request/Response encode/decode functions
-- `finagle-http`: New Request object queryString utility functions
+6.1.1
+~~~~
+
+Released 2013/03/12
+
+- `doc`: Finagle user guide!
+- `finagle`: Remove finagle's dependence on jerkson.
+- `finagle`: Upgrade Netty to 3.5.12
+- `finagle`: Upgrade scrooge-runtime to 2.4.0
+- `finagle`: Upgrade util to 6.2.2
+- `finagle-core`: com.twitter.finagle.Group: introduce names, use them.
+- `finagle-core`: deprivatize, document Client, Server.
+- `finagle-core`: fix multiple stats bugs.
+- `finagle-core`: Log Finagle's version number on startup.
+- `finagle-core`: RetryingFilter, don't retry on CancelledRequestException.
+- `finagle-http`: New Request object queryString utility functions.
+- `finagle-http`: New Request/Response encode/decode functions.
+- `finagle-memcached`: Actively reestablish zk connection whenever disconnected or expired.
+- `finagle-memcached`: Cache pool cluster not updated since 2nd serverset change.
+- `finagle-memcached`: Don't use deprecated FuturePool.defaultPool.
+- `finagle-mysql`: Add project in the list of deployed jar.
+- `finagle-mysql`: Fix race condition in the authentication process.
+- `finagle-mysql`: Move it to experimental package.
+- `finagle-ostrich4`: Add OstrichExporter to enable Ostrich stats in the new App stack.
+- `finagle-redis`: Add support for INFO command.
+- `finagle-resolver`: additional visibility for Announcers and Resolvers.
+- `finagle-zipkin`: new factory methods.
 
 6.1.0
 ~~~~
@@ -22,15 +47,15 @@ Released 2013/01/30
 - `finagle`: libraries: preliminary 2.10 port/build
 - `finagle`: Tracer use new daemon() flag; get rid of factory. Simplify.
 - `finagle`: refactor clients and servers to be simpler, more logical.
-- `finagle-core`: Provide a reportHostStatsTo API on ClientBuilder 
+- `finagle-core`: Provide a reportHostStatsTo API on ClientBuilder
   that per-host stats will be reported to.
 - `finagle-core`: Use Groups in place of Clusters
 - `finagle-core`: Create a NonShrinkingCluster
-- `finagle-redis`: made zRange... commands work more like the actual 
+- `finagle-redis`: made zRange... commands work more like the actual
   redis commands
-- `finagle-stats`: new project that provides a StatsReceiver based 
+- `finagle-stats`: new project that provides a StatsReceiver based
   on Twitter's Metrics library.
-- `finagle-http`: add new-style client and server, including a primitive 
+- `finagle-http`: add new-style client and server, including a primitive
   URL fetcher
 
 6.0.5
