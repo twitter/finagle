@@ -153,7 +153,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
       result.response.success must be_==("result")
     }
 
-    "decode replys broken in two" in {
+    "decode replies broken in two" in {
       val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
 
       Range(0, buffer.readableBytes - 1).foreach { numBytes =>

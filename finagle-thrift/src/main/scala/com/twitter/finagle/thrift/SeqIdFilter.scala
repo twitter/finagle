@@ -18,7 +18,7 @@ object SeqIdFilter {
  * ones of our own provenance. We perform checking on these and fail
  * accordingly.
  *
- * Note: This only works when using BinaryProtocol, but will become
+ * @note This only works when using BinaryProtocol, but will become
  * generic with mux support.
  */
 class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {

@@ -74,7 +74,33 @@ class NullTracer extends Tracer {
 
 object NullTracer extends NullTracer
 // TODO
-object DefaultTracer extends NullTracer
+object DefaultTracer extends Tracer {
+  @volatile private[this] var tracers: List[Tracer] = Nil
+  
+  def addTracer(tracer: Tracer) {
+    tracers ::= tracer
+  }
+  def remTracer(tracer: Tracer) {
+    tracers = tracers.filter(_ ne tracer)
+  }
+
+  def record(r: Record) {
+    for (t <- tracers) t.record(r)
+  }
+
+  def sampleTrace(traceId: TraceId): Option[Boolean] = {
+    // This is a bit tricky to answer, but I think also 
+    // the only reasonable way to answer.
+    val answers = 
+      tracers map(_.sampleTrace(traceId)) collect {
+        case Some(x) => x
+      }
+    
+    if (answers.isEmpty) None
+    else if (answers exists (_ == true)) Some(true)
+    else Some(false)
+  }
+}
 
 class BufferingTracer extends Tracer
   with Iterable[Record]

@@ -60,25 +60,34 @@ class ThriftClientFramedCodec(
   config: ClientCodecConfig,
   clientId: Option[ClientId] = None,
   useCallerSeqIds: Boolean = false
-) extends Codec[ThriftClientRequest, Array[Byte]]
-{
-  def pipelineFactory =
-    new ChannelPipelineFactory {
-      def getPipeline() = {
-        val pipeline = Channels.pipeline()
-        pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
-        pipeline.addLast("byteEncoder",      new ThriftClientChannelBufferEncoder)
-        pipeline.addLast("byteDecoder",      new ThriftChannelBufferDecoder)
-        pipeline
-      }
-    }
+) extends Codec[ThriftClientRequest, Array[Byte]] {
 
-  override def prepareConnFactory(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) =
-    underlying flatMap { service =>
+  private[this] val preparer = ThriftClientPreparer(
+    protocolFactory, config.serviceName, 
+    clientId, useCallerSeqIds)
+
+  def pipelineFactory: ChannelPipelineFactory =
+    ThriftFramedTransportPipelineFactory
+
+  override def prepareConnFactory(
+    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
+  ) = preparer.prepare(underlying)
+}
+
+private case class ThriftClientPreparer(
+  protocolFactory: TProtocolFactory,
+  serviceName: String = "unknown",
+  clientId: Option[ClientId] = None,
+  useCallerSeqIds: Boolean = false) {
+
+  def prepare(
+    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
+  ) = underlying flatMap { service =>
       // Attempt to upgrade the protocol the first time around by
       // sending a magic method invocation.
       val buffer = new OutputBuffer(protocolFactory)
-      buffer().writeMessageBegin(new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
+      buffer().writeMessageBegin(
+        new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
 
       val options = new thrift.ConnectionOptions
       options.write(buffer())
@@ -90,7 +99,7 @@ class ThriftClientFramedCodec(
         val iprot = protocolFactory.getProtocol(memoryTransport)
         val reply = iprot.readMessageBegin()
         val tracingFilter = new ThriftClientTracingFilter(
-          config.serviceName,
+          serviceName,
           reply.`type` != TMessageType.EXCEPTION,
           clientId, protocolFactory)
         val seqIdFilter = if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
@@ -138,12 +147,11 @@ private[thrift] class ThriftClientChannelBufferEncoder
  *
  * @param isUpgraded Whether this connection is with a server that has tracing enabled
  */
-
 private[thrift] class ThriftClientTracingFilter(
-  serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId], protocolFactory: TProtocolFactory
-)
-  extends SimpleFilter[ThriftClientRequest, Array[Byte]]
-{
+    serviceName: String, isUpgraded: Boolean, clientId: Option[ClientId], 
+    protocolFactory: TProtocolFactory) 
+  extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
+
   def apply(
     request: ThriftClientRequest,
     service: Service[ThriftClientRequest, Array[Byte]]

@@ -44,18 +44,32 @@ class ThriftServerFramedCodec(
       }
     }
 
-  private[this] val uncaughtExceptionsFilter = new HandleUncaughtApplicationExceptions(protocolFactory)
+  private[this] val boundAddress = config.boundAddress match {
+    case ia: InetSocketAddress => ia
+    case _ => new InetSocketAddress(0)
+  }
 
-  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
-    val boundAddress = config.boundAddress match {
-      case ia: InetSocketAddress => ia
-      case _ => new InetSocketAddress(0)
-    }
+  private[this] val preparer = ThriftServerPreparer(
+    protocolFactory, config.serviceName, boundAddress)
 
-    factory map { service =>
-      val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress, protocolFactory)
-      trace andThen uncaughtExceptionsFilter andThen service
-    }
+  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) =
+    preparer.prepare(factory)
+}
+
+private case class ThriftServerPreparer(
+  protocolFactory: TProtocolFactory, 
+  serviceName: String, 
+  boundAddress: InetSocketAddress) {
+
+  private[this] val uncaughtExceptionsFilter = 
+    new HandleUncaughtApplicationExceptions(protocolFactory)
+
+  def prepare(
+    factory: ServiceFactory[Array[Byte], Array[Byte]]
+  ): ServiceFactory[Array[Byte], Array[Byte]] = factory map { service =>
+    val trace = new ThriftServerTracingFilter(
+      serviceName, boundAddress, protocolFactory)
+    trace andThen uncaughtExceptionsFilter andThen service
   }
 }
 

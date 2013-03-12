@@ -23,12 +23,15 @@ import org.apache.thrift.protocol.TBinaryProtocol
  *
  * By default, the thrift binary protocol is used; different protocol
  * factories may be supplied by instantiating new clients or servers.
+ *
+ * @define clientExampleObject ThriftMux
  */
 object ThriftMux 
-  extends Client[ThriftClientRequest, Array[Byte]] with ThriftMuxRichClient
-  with Server[Array[Byte], Array[Byte]] with ThriftMuxRichServer
+  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
+  with Server[Array[Byte], Array[Byte]] with ThriftRichServer
 {
   protected val protocolFactory = new TBinaryProtocol.Factory()
+  protected val defaultClientName = "mux"
 
   def newClient(group: Group[SocketAddress]): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     ThriftMuxClient.newClient(group)

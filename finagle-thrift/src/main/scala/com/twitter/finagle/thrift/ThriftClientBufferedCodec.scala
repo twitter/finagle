@@ -14,17 +14,22 @@ object ThriftClientBufferedCodec {
    * Create a [[com.twitter.finagle.thrift.ThriftClientBufferedCodecFactory]]
    */
   def apply() = new ThriftClientBufferedCodecFactory
+  
+  def apply(protocolFactory: TProtocolFactory) =
+    new ThriftClientBufferedCodecFactory(protocolFactory)
+
 }
 
-class ThriftClientBufferedCodecFactory extends
+class ThriftClientBufferedCodecFactory(protocolFactory: TProtocolFactory) extends
   CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
+  def this() = this(new TBinaryProtocol.Factory())
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientBufferedCodec]]
    * with a default TBinaryProtocol.
    */
   def apply(config: ClientCodecConfig) = {
-    new ThriftClientBufferedCodec(new TBinaryProtocol.Factory(), config)
+    new ThriftClientBufferedCodec(protocolFactory, config)
   }
 }
 

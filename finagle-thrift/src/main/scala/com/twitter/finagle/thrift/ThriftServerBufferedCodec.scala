@@ -9,20 +9,30 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
  */
 object ThriftServerBufferedCodec {
   /**
-   * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory]]
+   * Create a
+   * [[com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory]],
+   * using the binary protocol factory.
    */
   def apply() = new ThriftServerBufferedCodecFactory
+
+  /**
+   * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory]]
+   * using the protocol factory.
+   */
+  def apply(protocolFactory: TProtocolFactory) =
+    new ThriftServerBufferedCodecFactory(protocolFactory)
 }
 
-class ThriftServerBufferedCodecFactory
+class ThriftServerBufferedCodecFactory(protocolFactory: TProtocolFactory)
   extends CodecFactory[Array[Byte], Array[Byte]]#Server
 {
+  def this() = this(new TBinaryProtocol.Factory())
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodec]]
    * with a default TBinaryProtocol.
    */
   def apply(config: ServerCodecConfig) = {
-    new ThriftServerBufferedCodec(new TBinaryProtocol.Factory(), config)
+    new ThriftServerBufferedCodec(protocolFactory, config)
   }
 }
 
