@@ -107,6 +107,7 @@ object Trace {
         case None    => local() = State(Some(traceId), terminal, tracers)
         case Some(s) => local() = s.copy(id = Some(traceId), terminal = terminal)
       }
+
     traceId
   }
 
@@ -120,6 +121,36 @@ object Trace {
       case None    => local() = State(None, false, tracer :: Nil)
       case Some(s) => local() = s.copy(tracers = tracer :: this.tracers)
     }
+  }
+
+  /**
+   * Push the given tracer, create a derivative TraceId and set it to be
+   * the current trace id.
+   * The implementation of this function is more efficient than calling
+   * pushTracer, nextId and setId sequentially as it minimizes the number
+   * of reads and writes to `local`.
+   *
+   * @param tracer the tracer to be pushed
+   * @param terminal true if the next traceId is a terminal id. Future
+   *                 attempts to set nextId will be ignored.
+   */
+  def pushTracerAndSetNextId(tracer: Tracer, terminal: Boolean = false) {
+    val currentState = local()
+    val _nextId = nextId
+    val newState = currentState match {
+      case None => State(None, false, tracer :: Nil)
+      case Some(s) => s.copy(tracers = tracer :: s.tracers)
+    }
+    /* Only set traceId of the current State if terminal is not set */
+    if (!newState.terminal) {
+      _nextId.sampled match {
+        case None =>
+          local() = newState.copy(terminal = terminal,
+            id = Some(_nextId.copy(_sampled = tracer.sampleTrace(_nextId))))
+        case Some(_) => local() = newState.copy(terminal = terminal, id = Some(_nextId))
+      }
+    } else
+      local() = newState
   }
 
   def state: TraceState = local() getOrElse NoState
