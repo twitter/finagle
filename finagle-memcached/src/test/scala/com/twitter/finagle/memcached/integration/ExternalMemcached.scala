@@ -4,10 +4,11 @@ import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
 import com.twitter.util.RandomSocket
 import collection.JavaConversions._
+import scala.collection._
 
 object ExternalMemcached { self =>
   class MemcachedBinaryNotFound extends Exception
-  private[this] var processes: List[Process] = List()
+  private[this] var processes: Map[InetSocketAddress, Process] = mutable.Map()
   private[this] val forbiddenPorts = 11000.until(11900)
   private[this] var takenPorts: Set[Int] = Set[Int]()
   // prevent us from taking a port that is anything close to a real memcached port.
@@ -43,7 +44,7 @@ object ExternalMemcached { self =>
                                  "-p", address.getPort().toString)
 
       val builder = new ProcessBuilder(cmd.toList)
-      processes ::= builder.start()
+      processes += (address -> builder.start())
     }
 
     addr.orElse(findAddress()) flatMap { _addr =>
@@ -57,10 +58,16 @@ object ExternalMemcached { self =>
     }
   }
 
-  def stop() {
-    processes foreach { p =>
-      p.destroy()
-      p.waitFor()
+  def stop(addr: Option[InetSocketAddress] = None) {
+    if (!addr.isDefined) {
+      processes.values foreach {
+        p =>
+          p.destroy()
+          p.waitFor()
+      }
+    } else {
+      processes(addr.get).destroy()
+      processes(addr.get).waitFor()
     }
   }
 
