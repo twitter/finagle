@@ -1,4 +1,6 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
+
+import com.twitter.finagle.exp.mysql.protocol.{BufferReader, Packet}
 
 trait Result
 

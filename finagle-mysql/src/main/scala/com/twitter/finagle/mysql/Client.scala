@@ -1,10 +1,13 @@
 package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.exp.mysql.protocol._
 import com.twitter.finagle.ServiceFactory
 import com.twitter.util.Future
 import java.util.logging.{Logger, Level}
+
+case class ClientError(msg: String) extends Exception(msg)
+case class ServerError(msg: String) extends Exception(msg)
+case class IncompatibleServer(msg: String) extends Exception(msg)
 
 object Client {
   private[this] val logger = Logger.getLogger("finagle-mysql")

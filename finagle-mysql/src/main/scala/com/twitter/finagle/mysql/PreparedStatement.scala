@@ -1,6 +1,7 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
 
 import com.twitter.util.Promise
+import com.twitter.finagle.exp.mysql.protocol.{BufferReader, Packet}
 
 case class PreparedStatement(statementId: Int, numberOfParams: Int) extends Result {
   val statement: Promise[String] = new Promise[String]()

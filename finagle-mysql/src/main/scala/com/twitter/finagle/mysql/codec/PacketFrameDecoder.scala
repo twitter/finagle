@@ -35,7 +35,7 @@ class PacketFrameDecoder extends FrameDecoder {
     val body = new Array[Byte](length)
     buffer.readBytes(body)
 
-    logger.info("RECEIVED: MySQL packet (length=%d, seq=%d)\n%s".format(length, seq, BufferUtil.hex(body)))
+    logger.finest("RECEIVED: MySQL packet (length=%d, seq=%d)\n%s".format(length, seq, BufferUtil.hex(body)))
 
     Packet(length, seq, body)
   }

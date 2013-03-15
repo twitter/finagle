@@ -1,5 +1,6 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
 
+import com.twitter.finagle.exp.mysql.protocol.{BufferReader, BufferWriter, SQLZeroDate, SQLZeroTimestamp, Type}
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Calendar
 

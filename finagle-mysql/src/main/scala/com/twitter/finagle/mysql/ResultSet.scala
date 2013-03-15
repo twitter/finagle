@@ -1,4 +1,7 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
+
+import com.twitter.finagle.exp.mysql.protocol.{BufferReader, Packet}
+import java.sql.{Timestamp, Date => SQLDate}
 
 trait ResultSet extends Result {
   val fields: Seq[Field]
@@ -71,7 +74,8 @@ trait Row {
 
   protected def apply(columnIndex: Option[Int]): Option[Value] =
     for (idx <- columnIndex) yield values(idx)
-}
+
+  }
 
 class StringEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
   val br = BufferReader(row)

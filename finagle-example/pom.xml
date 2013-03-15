@@ -97,6 +97,11 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
+      <artifactId>finagle-mysql</artifactId>
+      <version>6.1.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
       <version>6.1.2-SNAPSHOT</version>
     </dependency>

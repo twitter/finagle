@@ -2,24 +2,23 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle._
 import com.twitter.finagle.exp.mysql.codec.{PacketFrameDecoder, Endec}
-import com.twitter.finagle.exp.mysql.protocol._
-import com.twitter.finagle.exp.mysql.protocol.Capability._
+import com.twitter.finagle.exp.mysql.protocol.{Capability, Charset, ServersGreeting, LoginRequest}
 import com.twitter.util.Future
-import org.jboss.netty.channel._
+import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 class MySQL(username: String, password: String, database: Option[String])
   extends CodecFactory[Request, Result] {
     private[this] val clientCapability = Capability(
-      LongFlag,
-      Transactions,
-      Protocol41,
-      FoundRows,
-      Interactive,
-      LongPassword,
-      ConnectWithDB,
-      SecureConnection,
-      LocalFiles
+      Capability.LongFlag,
+      Capability.Transactions,
+      Capability.Protocol41,
+      Capability.FoundRows,
+      Capability.Interactive,
+      Capability.LongPassword,
+      Capability.ConnectWithDB,
+      Capability.SecureConnection,
+      Capability.LocalFiles
     )
 
     def server = throw new Exception("Not yet implemented...")

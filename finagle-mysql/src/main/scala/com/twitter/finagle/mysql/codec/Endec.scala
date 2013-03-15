@@ -2,6 +2,7 @@ package com.twitter.finagle.exp.mysql.codec
 
 import com.twitter.finagle.exp.mysql.ClientError
 import com.twitter.finagle.exp.mysql.protocol._
+import com.twitter.finagle.exp.mysql._
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
@@ -130,7 +131,6 @@ class Endec extends SimpleChannelHandler {
   private[this] def decodePacket(packet: Packet): Option[Result] = packet.body(0) match {
     case Packet.OkByte if expectPrepareOK =>
       def expected(n: Int) = if (n > 0) 1 else 0
-
       val ok = PreparedOK.decode(packet)
       val numSetsExpected = expected(ok.numOfParams) + expected(ok.numOfColumns)
 

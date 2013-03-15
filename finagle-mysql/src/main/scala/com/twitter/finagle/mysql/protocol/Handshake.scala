@@ -1,6 +1,7 @@
 package com.twitter.finagle.exp.mysql.protocol
 
 import com.twitter.finagle.exp.mysql.protocol.Capability._
+import com.twitter.finagle.exp.mysql.{Result, Request}
 import java.security.MessageDigest
 
 /**
