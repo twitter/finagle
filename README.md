@@ -1,4 +1,4 @@
-Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/RunningSbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
+Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
 	
