@@ -60,7 +60,7 @@ Like services, filters are also simple functions:
 	  extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
 
 or: given a request of type `ReqIn`, a service of type
-`Service[ReqOut, RepIn]`, return a Future of type `RepIn` (the reply
+`Service[ReqOut, RepIn]`, return a Future of type `RepOut` (the reply
 type). All types are parameterized so that filters may also transform
 request or reply types; visualized:
 

@@ -1,0 +1,225 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.memcached.replication</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.memcached" class="extype" href="../package.html">memcached</a></p>
+        <h1>replication</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">replication</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Package replication implements a base cache client that can manage multiple cache replicas.</p><p>The base replication client will forward cache command to all replicas, as well as collect and
+aggregate each replica's response into a ReplicationStatus object representing the replication
+consistency. The BaseReplicationClient will not handle the consistency between replicas in anyway,
+but only to report its view of the replication state. For instance, BaseReplicationClient provides
+interfaces similar to generic memcache client but always returns ReplicationStatus object which
+can be one of these three forms:</p><ul><li>ConsistentReplication, indicating a consistent state across all replicas</li><li>InconsistentReplication, indicating an inconsistent state across all replicas</li><li>FailedReplication, indicating a failure state</li></ul><p>By checking the returned ReplicationStatus object, one can tell the cache replication status and
+then handle it with application specific logic.</p><p>In addition to a base replication client, a simple replication client wrapper that's compatible
+with generic cache client interface is also provided. The SimpleReplicationClient only supports
+a subset of all memcached commands for now, and will succeed only if the command succeed on all
+cache replicas. In a more complicate caching scenario, this simple/naive replication client may
+not be applicable.
+</p></div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.replication.BaseReplicationClient" data-isabs="false">
+      <a id="BaseReplicationClient:BaseReplicationClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BaseReplicationClient.html"><span class="name">BaseReplicationClient</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Base replication client.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.ConsistentReplication" data-isabs="false">
+      <a id="ConsistentReplication:ConsistentReplication[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConsistentReplication.html"><span class="name">ConsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="result">result: T</span>)</span><span class="result"> extends ReplicationStatus[T] with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Indicating a consistent state across all replicas, which comes with the agreed consistent result;
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.FailedReplication" data-isabs="false">
+      <a id="FailedReplication:FailedReplication[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="FailedReplication.html"><span class="name">FailedReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="failureSeq">failureSeq: Seq[Throw[T]]</span>)</span><span class="result"> extends ReplicationStatus[T] with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">indicating a failed state from all replicas, which comes with a sequence of failures from
+all replicas;
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.InconsistentReplication" data-isabs="false">
+      <a id="InconsistentReplication:InconsistentReplication[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="InconsistentReplication.html"><span class="name">InconsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="resultSeq">resultSeq: Seq[Try[T]]</span>)</span><span class="result"> extends ReplicationStatus[T] with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Indicating an inconsistent state across all replicas, which comes with a sequence of result
+from all replicas; each replica's result can be either Return[T] or Throw[T]
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.RCasUnique" data-isabs="false">
+      <a id="RCasUnique:RCasUnique"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RCasUnique.html"><span class="name">RCasUnique</span></a><span class="params">(<span name="uniques">uniques: Seq[ChannelBuffer]</span>)</span><span class="result"> extends ReplicaCasUnique with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique" data-isabs="true">
+      <a id="ReplicaCasUnique:ReplicaCasUnique"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ReplicaCasUnique.html"><span class="name">ReplicaCasUnique</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Wrapping underlying replicas cas unique values for replication purpose.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.ReplicationStatus" data-isabs="true">
+      <a id="ReplicationStatus:ReplicationStatus[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ReplicationStatus.html"><span class="name">ReplicationStatus</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.SCasUnique" data-isabs="false">
+      <a id="SCasUnique:SCasUnique"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SCasUnique.html"><span class="name">SCasUnique</span></a><span class="params">(<span name="casUnique">casUnique: ChannelBuffer</span>)</span><span class="result"> extends ReplicaCasUnique with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.SimpleReplicationClient" data-isabs="false">
+      <a id="SimpleReplicationClient:SimpleReplicationClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleReplicationClient.html"><span class="name">SimpleReplicationClient</span></a><span class="result"> extends Client</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.replication.SimpleReplicationFailure" data-isabs="false">
+      <a id="SimpleReplicationFailure:SimpleReplicationFailure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleReplicationFailure.html"><span class="name">SimpleReplicationFailure</span></a><span class="params">(<span name="msg">msg: String</span>)</span><span class="result"> extends Throwable with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Simple replication client wrapper that's compatible with base memcached client.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.replication.ReplicationClient" data-isabs="false">
+      <a id="ReplicationClient:ReplicationClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ReplicationClient$.html"><span class="name">ReplicationClient</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Replication client helper
+</p>
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

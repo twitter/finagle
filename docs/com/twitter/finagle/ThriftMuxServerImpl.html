@@ -25,13 +25,18 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftMuxServerImpl</span><span class="params">(<span name="muxer">muxer: <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>, <span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.ThriftMuxRichServer" class="extype" href="ThriftMuxRichServer.html">ThriftMuxRichServer</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">ThriftMuxServerImpl</span><span class="params">(<span name="muxer">muxer: <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>, <span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p><code>TestService.FutureIface</code> must be implemented and passed
+into <code>serveIface</code>:</p><pre>
+ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
+})
+</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.ThriftMuxRichServer" class="extype" href="ThriftMuxRichServer.html">ThriftMuxRichServer</a>, <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a>, <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
           <div class="subClasses hiddenContent"><a name="com.twitter.finagle.ThriftMuxServer" class="extype" href="ThriftMuxServer$.html">ThriftMuxServer</a></div>
@@ -48,7 +53,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.ThriftMuxServerImpl" class="in"><span>ThriftMuxServerImpl</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.ThriftMuxRichServer" class="in"><span>ThriftMuxRichServer</span></li><li name="com.twitter.finagle.Server" class="in"><span>Server</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.ThriftMuxServerImpl" class="in"><span>ThriftMuxServerImpl</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.ThriftRichServer" class="in"><span>ThriftRichServer</span></li><li name="com.twitter.finagle.Server" class="in"><span>Server</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -362,7 +367,7 @@
         <span class="name">protocolFactory</span><span class="result">: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxServerImpl" class="extype" href="">ThriftMuxServerImpl</a> → <a name="com.twitter.finagle.ThriftMuxRichServer" class="extype" href="ThriftMuxRichServer.html">ThriftMuxRichServer</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxServerImpl" class="extype" href="">ThriftMuxServerImpl</a> → <a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServerImpl#serve" data-isabs="false">
       <a id="serve(SocketAddress,ServiceFactory[Array[Byte], Array[Byte]]):ListeningServer"></a>
       <h4 class="signature">
@@ -469,7 +474,7 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
       </h4>
       <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxRichServer#serveIface" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichServer#serveIface" data-isabs="false">
       <a id="serveIface(String,AnyRef):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -491,12 +496,12 @@ service TestService {
 </pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
 implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
-ThriftMux.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })
 </pre><p>Note that this interface is discovered by reflection. Passing an
 invalid interface implementation will result in a runtime error.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxRichServer" class="extype" href="ThriftMuxRichServer.html">ThriftMuxRichServer</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -599,8 +604,8 @@ invalid interface implementation will result in a runtime error.
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
-            </div><div name="com.twitter.finagle.ThriftMuxRichServer" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.ThriftMuxRichServer" class="extype" href="ThriftMuxRichServer.html">ThriftMuxRichServer</a></h3>
+            </div><div name="com.twitter.finagle.ThriftRichServer" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></h3>
             </div><div name="com.twitter.finagle.Server" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</h3>
             </div><div name="scala.AnyRef" class="parent">

@@ -29,11 +29,10 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><h3>Thrift codecs</h3><p>We provide both framed and buffered client protocol support, and
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><h3>Deprecation</h3><p>Please use the new interface, com.twitter.finagle.Thrift,
+for constructing thrift clients and servers.</p><h4>Thrift codecs</h4><p>We provide both framed and buffered client protocol support, and
 server support for the framed protocol. The public implementations
-are:</p><p>- <a name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" class="extype" href="ThriftClientBufferedCodec.html">ThriftClientBufferedCodec</a>
-- <a name="com.twitter.finagle.thrift.ThriftClientFramedCodec" class="extype" href="ThriftClientFramedCodec.html">ThriftClientFramedCodec</a>
-- <a name="com.twitter.finagle.thrift.ThriftServerFramedCodec" class="extype" href="ThriftServerFramedCodec.html">ThriftServerFramedCodec</a></p><p>The type of the server codec is <code>Service[Array[Byte], Array[Byte]]</code>
+are:</p><ul><li><a name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" class="extype" href="ThriftClientBufferedCodec.html">ThriftClientBufferedCodec</a></li><li><a name="com.twitter.finagle.thrift.ThriftClientFramedCodec" class="extype" href="ThriftClientFramedCodec.html">ThriftClientFramedCodec</a></li><li><a name="com.twitter.finagle.thrift.ThriftServerFramedCodec" class="extype" href="ThriftServerFramedCodec.html">ThriftServerFramedCodec</a></li></ul><p>The type of the server codec is <code>Service[Array[Byte], Array[Byte]]</code>
 and the client codecs are <code>Service[ThriftClientRequest,
 Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
@@ -144,6 +143,30 @@ ones of our own provenance.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftBufferedListener" data-isabs="false">
+      <a id="ThriftBufferedListener:ThriftBufferedListener"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftBufferedListener.html"><span class="name">ThriftBufferedListener</span></a><span class="params">(<span name="protocolFactory">protocolFactory: TProtocolFactory</span>)</span><span class="result"> extends Netty3Listener[Array[Byte], Array[Byte]] with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Listener for the Apache Thrift buffered transport.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftBufferedTransporter" data-isabs="false">
+      <a id="ThriftBufferedTransporter:ThriftBufferedTransporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftBufferedTransporter.html"><span class="name">ThriftBufferedTransporter</span></a><span class="params">(<span name="protocolFactory">protocolFactory: TProtocolFactory</span>)</span><span class="result"> extends Netty3Transporter[ThriftClientRequest, Array[Byte]] with Product with Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftCall" data-isabs="false">
       <a id="ThriftCall:ThriftCall[A, R]"></a>
       <h4 class="signature">
@@ -169,6 +192,18 @@ channel.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClient" data-isabs="false">
+      <a id="ThriftClient:ThriftClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftClient.html"><span class="name">ThriftClient</span></a><span class="result"> extends DefaultClient[ThriftClientRequest, Array[Byte]]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Finagle Client for <a href="http://thrift.apache.org">Apache Thrift</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftClientBufferedCodec" data-isabs="false">
       <a id="ThriftClientBufferedCodec:ThriftClientBufferedCodec"></a>
       <h4 class="signature">
@@ -226,18 +261,6 @@ channel.</p>
       </span>
       <span class="symbol">
         <a href="ThriftClientRequest.html"><span class="name">ThriftClientRequest</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftFrameCodec" data-isabs="false">
-      <a id="ThriftFrameCodec:ThriftFrameCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftFrameCodec.html"><span class="name">ThriftFrameCodec</span></a><span class="result"> extends SimpleChannelHandler</span>
       </span>
       </h4>
       
@@ -385,6 +408,18 @@ requests.</p>
       <p class="comment cmt">ThriftClientFramedCodec implements a framed thrift transport that
 supports upgrading in order to provide TraceContexts across
 requests.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftFramedListener" data-isabs="false">
+      <a id="ThriftFramedListener:ThriftFramedListener"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftFramedListener$.html"><span class="name">ThriftFramedListener</span></a><span class="result"> extends Netty3Listener[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Listener for the Apache Thrift <a href="http://people.apache.org/~jfarrell/thrift/0.6.1/javadoc/org/apache/thrift/transport/TFramedTransport.html">framed transport</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" data-isabs="false">
       <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
       <h4 class="signature">
