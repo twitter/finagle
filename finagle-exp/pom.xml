@@ -22,11 +22,6 @@
       <version>1.9.1</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>jsr166e</groupId>
-      <artifactId>jsr166e</artifactId>
-      <version>jsr166e</version>
-    </dependency>
     <!--
     <dependency>
       <groupId>com.twitter.common</groupId>

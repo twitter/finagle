@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.util.Duration
-import jsr166e.LongAdder
+import com.twitter.jsr166e.LongAdder
 
 /**
  * A concurrent histogram implementation
