@@ -4,8 +4,8 @@ Finagle!
 .. image:: _static/governor.png
    :class: floatingflask
 
-Finagle is an extensible network stack for the JVM, used to construct
-highly concurrent servers. Finagle implements uniform client and
+Finagle is an extensible RPC system for the JVM, used to construct
+high-concurrency servers. Finagle implements uniform client and
 server APIs for several protocols, and is designed for high
 performance and concurrency. Most of Finagle's code is protocol
 agnostic, simplifying the implementation of new protocols.
