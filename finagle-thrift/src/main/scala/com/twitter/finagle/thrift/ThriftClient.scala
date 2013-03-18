@@ -39,11 +39,16 @@ private[finagle] case class ThriftBufferedTransportPipelineFactory(
   }
 }
 
-case class ThriftBufferedTransporter(protocolFactory: TProtocolFactory)
+class ThriftBufferedTransporter(protocolFactory: TProtocolFactory)
   extends Netty3Transporter[ThriftClientRequest, Array[Byte]](
     name = "thrift",
     pipelineFactory = ThriftBufferedTransportPipelineFactory(protocolFactory)
 )
+
+object ThriftBufferedTransporter {
+  def apply(protocolFactory: TProtocolFactory): ThriftBufferedTransporter =
+    new ThriftBufferedTransporter(protocolFactory)
+}
 
 /**
  * A Finagle Client for [[http://thrift.apache.org Apache Thrift]].

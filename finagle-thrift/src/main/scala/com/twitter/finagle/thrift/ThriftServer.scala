@@ -52,9 +52,14 @@ private case class ThriftBufferedListenerPipelineFactory(protocolFactory: TProto
  * version of Apache Thrift. This is for the better, as it severely
  * compromises modularity in the Thrift stack.
  */
-case class ThriftBufferedListener(protocolFactory: TProtocolFactory)
+class ThriftBufferedListener(protocolFactory: TProtocolFactory)
   extends Netty3Listener[Array[Byte], Array[Byte]](
     "thrift", ThriftBufferedListenerPipelineFactory(protocolFactory))
+
+object ThriftBufferedListener {
+  def apply(protocolFactory: TProtocolFactory): ThriftBufferedListener =
+    new ThriftBufferedListener(protocolFactory)
+}
 
 /**
  * A Finagle Server for [[http://thrift.apache.org Apache Thrift]]. This
