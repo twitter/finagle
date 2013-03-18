@@ -70,11 +70,13 @@ object MySQLClient extends App {
   def insertValues(client: Client): Future[Seq[Result]] = {
     val insertSQL = "INSERT INTO `finagle-mysql-example` (`event`, `time`, `name`, `nationality`, `date`) VALUES (?,?,?,?,?)"
     client.prepare(insertSQL) flatMap { ps =>
-      val futureResults = SwimmingRecord.records map { r =>
+      val insertResults = SwimmingRecord.records map { r =>
         ps.parameters = Array(r.event, r.time, r.name, r.nationality, r.date)
         client.execute(ps)
       }
-      Future.collect(futureResults)
+      Future.collect(insertResults) ensure {
+        client.closeStatement(ps)
+      }
     }
   }
 
@@ -87,7 +89,7 @@ object MySQLClient extends App {
       val time = row("time") map {
         case FloatValue(f) => f
         case _ => 0.0F
-      } getOrElse 0.0F
+      } get
 
       (name, time)
     }
