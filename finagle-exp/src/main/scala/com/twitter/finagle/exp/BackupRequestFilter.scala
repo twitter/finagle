@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace}
+import com.twitter.finagle.{Service, SimpleFilter, NoStacktrace, BackupRequestLost}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Future, Return, Throw, Duration, Timer, Stopwatch}
 
@@ -47,6 +47,7 @@ class BackupRequestFilter[Req, Rep](
     range: Duration, 
     timer: Timer, 
     statsReceiver: StatsReceiver,
+    history: Duration,
     stopwatch: Stopwatch = Stopwatch
 ) extends SimpleFilter[Req, Rep] {
   require(quantile > 0 && quantile < 100)
@@ -54,7 +55,7 @@ class BackupRequestFilter[Req, Rep](
 
   // Given that we read into the LongAdders as much as we write to
   // them, it's unclear how much their use is helping.
-  private[this] val histo = new LatencyHistogram(range)
+  private[this] val histo = new LatencyHistogram(range, history)
   private[this] def cutoff() = histo.quantile(quantile)
 
   private[this] val timeouts = statsReceiver.counter("timeouts")
@@ -90,5 +91,3 @@ class BackupRequestFilter[Req, Rep](
     }
   }
 }
-
-object BackupRequestLost extends Exception with NoStacktrace

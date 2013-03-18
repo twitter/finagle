@@ -3,7 +3,7 @@ package com.twitter.finagle.exp
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Service, MockTimer}
+import com.twitter.finagle.{Service, MockTimer, BackupRequestLost}
 import com.twitter.util.{Future, Promise, Time, Return, TimeControl, Duration, Stopwatch}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
@@ -34,7 +34,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     val underlying = mock[Service[String, String]]
     when(underlying.close(anyObject())) thenReturn Future.Done
     val filter = new BackupRequestFilter[String, String](
-      95, range, timer, statsReceiver, TimeStopwatch)
+      95, range, timer, statsReceiver, 10.seconds, TimeStopwatch)
     val service = filter andThen underlying
     val cutoffGauge = statsReceiver.gauges(Seq("cutoff_ms"))
     def cutoff() = Duration.fromMilliseconds(cutoffGauge().toInt)

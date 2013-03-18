@@ -186,3 +186,5 @@ class CodecException(description: String) extends Exception(description)
 
 // Channel buffer usage errors.
 class ChannelBufferUsageException(description: String) extends Exception(description)
+
+object BackupRequestLost extends Exception with NoStacktrace

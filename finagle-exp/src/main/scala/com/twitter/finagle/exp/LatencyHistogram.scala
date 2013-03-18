@@ -1,7 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.util.Duration
-import com.twitter.jsr166e.LongAdder
+import com.twitter.util.{Duration, Stopwatch}
 
 /**
  * A concurrent histogram implementation
@@ -12,13 +11,15 @@ import com.twitter.jsr166e.LongAdder
  * appropriate for its application to response
  * latency histograms.
  */
-private class LatencyHistogram(range: Duration) {
+private[finagle] class LatencyHistogram(
+    range: Duration, history: Duration, 
+    stopwatch: Stopwatch = Stopwatch) {
   require(range > Duration.Zero)
 
   private[this] val N = range.inMilliseconds.toInt
-  private[this] val n = new LongAdder
-  private[this] val tab = Array.fill(N) { new LongAdder }
-
+  private[this] val n = new WindowedAdder(history, 5, stopwatch)
+  private[this] val tab = Array.fill(N) { new WindowedAdder(history, 5, stopwatch) }
+  
   /**
    * Compute the quantile `which` from the underlying
    * dataset using the normal algorithm without
@@ -42,10 +43,10 @@ private class LatencyHistogram(range: Duration) {
   }
 
   def add(d: Duration) {
-    require(d > Duration.Zero)
+    require(d >= Duration.Zero)
 
     val ms = (d min range).inMilliseconds
-    tab(ms.toInt).increment()
-    n.increment()
+    tab(ms.toInt).incr()
+    n.incr()
   }
 }
