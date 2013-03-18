@@ -117,7 +117,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
-    finagleMux, finagleThriftMux,
+    finagleMux, finagleThriftMux, finagleMySQL,
 
     // Use and integration
     finagleStress, finagleExample, finagleBenchmark
@@ -384,7 +384,8 @@ object Finagle extends Build {
     )
   ).dependsOn(
     finagleCore, finagleHttp, finagleStream, finagleThrift,
-    finagleMemcached, finagleKestrel, finagleRedis, finagleOstrich4, finagleStats)
+    finagleMemcached, finagleKestrel, finagleRedis, finagleMySQL,
+    finagleOstrich4, finagleStats)
 
   lazy val finagleBenchmark = Project(
     id = "finagle-benchmark",
