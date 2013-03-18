@@ -111,8 +111,9 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Combines the prepare and execute operations.
    * @return a Future[(PreparedStatement, Result)] tuple.
    */
-  def prepareAndExecute(sql: String): Future[(PreparedStatement, Result)] =
+  def prepareAndExecute(sql: String, queryParams: Any*): Future[(PreparedStatement, Result)] =
     prepare(sql) flatMap { ps =>
+      ps.parameters = queryParams.toArray
       execute(ps) map {
         res => (ps, res)
       }
@@ -134,8 +135,9 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * Combines the prepare and select operations.
    * @return a Future[(PreparedStatement, Seq[T])] tuple.
    */
-  def prepareAndSelect[T](sql: String)(f: Row => T): Future[(PreparedStatement, Seq[T])] =
+  def prepareAndSelect[T](sql: String, queryParams: Any*)(f: Row => T): Future[(PreparedStatement, Seq[T])] =
     prepare(sql) flatMap { ps =>
+      ps.parameters = queryParams.toArray
       select(ps)(f) map {
           seq => (ps, seq)
       }
