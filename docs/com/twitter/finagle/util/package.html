@@ -29,45 +29,7 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><h4>Resource Management</h4><p><a name="com.twitter.finagle.util.Disposable" class="extype" href="Disposable.html">Disposable</a> represents a live resource that must be disposed after use.
-<a name="com.twitter.finagle.util.Managed" class="extype" href="Managed.html">Managed</a> is a factory for creating and composing such resources.
-Managed resources are composed together so their lifetimes are synchronized.</p><p>The following example shows how to build and use composite managed resources:</p><pre>
-<span class="cmt">// Create managed Tracer</span>
-<span class="kw">def</span> mkManagedTracer() = <span class="kw">new</span> Managed[Tracer] {
-  <span class="kw">def</span> make() = <span class="kw">new</span> Disposable[Tracer] {
-    <span class="kw">val</span> underlying = <span class="kw">new</span> Tracer()
-    <span class="kw">def</span> get = underlying
-    <span class="kw">def</span> dispose(deadline: Time) = underlying.close() <span class="cmt">// assumes Tracer uses relese() to manage lifetime</span>
-  }
-}
-
-<span class="cmt">// Create managed Server using Tracer as dependency</span>
-<span class="kw">def</span> mkManagedServer(t: Tracer) = <span class="kw">new</span> Managed[Server] {
-  <span class="kw">def</span> make() = <span class="kw">new</span> Disposable[Server] {
-    <span class="kw">val</span> underlying = <span class="kw">new</span> Server(t) <span class="cmt">// Server requires tracer to be created</span>
-    <span class="kw">def</span> get = underlying
-    <span class="kw">def</span> dispose(deadline: Time) = underlying.close() <span class="cmt">// assumes Server uses close() to manage lifetime</span>
-  }
-}
-
-<span class="cmt">// Create composite resource</span>
-<span class="kw">val</span> compRes: Managed[Server] = <span class="kw">for</span> {
-  a <span class="kw">&lt;-</span> mkManagedTracer()
-  b <span class="kw">&lt;-</span> mkManagedServer(a)
-} <span class="kw">yield</span> b
-
-<span class="cmt">// Use composite resource in safe fashion. It's guaranteed that both resources</span>
-<span class="cmt">// will be properly closed/released when done using them.</span>
-compRes foreach { b <span class="kw">=&gt;</span>
-  <span class="cmt">// use b (which is type Server in this case)</span>
-} <span class="cmt">// dispose called on both resources</span>
-</pre><h3>Disposable/Managed Semantics</h3><p><a name="com.twitter.finagle.util.Disposable" class="extype" href="Disposable.html">Disposable</a>: get can be called multiple times and should return same instance;
-dispose can be called only once and should release resource that get is returning;
-calling get after dispose is undefined.</p><p><a name="com.twitter.finagle.util.Managed" class="extype" href="Managed.html">Managed</a>: multiple calls to make could return
- a) new instance or
- b) ref counted instance of the underlying resource or
- c) same instance when resource doesn't need to be actually disposed, etc.
-</p></div></div>
+      <div class="fullcommenttop" id="comment"></div>
     
 
       <div id="mbrsel">
@@ -134,43 +96,6 @@ calling get after dispose is undefined.</p><p><a name="com.twitter.finagle.util.
       </span>
       </h4>
       <p class="comment cmt">A simple, lock-free, non-blocking ring buffer.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.Disposable" data-isabs="true">
-      <a id="Disposable:Disposable[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Disposable.html"><span class="name">Disposable</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Disposable is a container for a resource that must be explicitly disposed when
-no longer needed.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.DoubleTrouble" data-isabs="false">
-      <a id="DoubleTrouble:DoubleTrouble"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="DoubleTrouble.html"><span class="name">DoubleTrouble</span></a><span class="result"> extends Exception</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.util.Managed" data-isabs="true">
-      <a id="Managed:Managed[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Managed.html"><span class="name">Managed</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt"><code>Managed[T]</code> is a resource of type <code>T</code> which lifetime is explicitly managed.</p>
     </li><li visbl="pub" name="com.twitter.finagle.util.Proc" data-isabs="true">
       <a id="Proc:Proc[T]"></a>
       <h4 class="signature">
@@ -263,18 +188,6 @@ org.jboss.netty.util.Timer.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.util.Disposable" data-isabs="false">
-      <a id="Disposable:Disposable"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Disposable$.html"><span class="name">Disposable</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.util.ExitGuard" data-isabs="false">
       <a id="ExitGuard:ExitGuard"></a>
       <h4 class="signature">
@@ -312,18 +225,6 @@ nondaemon thread whenever there is at least one guarder.</p>
       </span>
       </h4>
       <p class="comment cmt">Load a singleton class using java.util.ServiceLoader.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.util.Managed" data-isabs="false">
-      <a id="Managed:Managed"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Managed$.html"><span class="name">Managed</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.util.Proc" data-isabs="false">
       <a id="Proc:Proc"></a>
       <h4 class="signature">
