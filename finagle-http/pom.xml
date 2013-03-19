@@ -37,5 +37,11 @@
       <artifactId>util-logging</artifactId>
       <version>6.2.4-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

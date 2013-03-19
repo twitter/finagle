@@ -43,7 +43,12 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
    * HttpRequest to the registered service; otherwise create a NOT_FOUND response
    */
   def apply(request: HttpRequest): Future[HttpResponse] = {
-    val path = normalize(new URI(request.getUri()).getPath())
+    val u = request.getUri
+    val uri = u.indexOf('?') match {
+      case -1 => u
+      case n  => u.substring(0, n)
+    }
+    val path = normalize(new URI(uri).getPath)
 
     // find the longest prefix of path; patterns are already sorted by length in descending order.
     val matching = sorted.find { case (pattern, _) =>
