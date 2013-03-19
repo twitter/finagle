@@ -19,34 +19,32 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
     val elapsed = Stopwatch.start()
 
     outstandingRequestCount.incrementAndGet()
-    val result = service(request)
-
-    result respond {
-      case Throw(BackupRequestLost) =>
-        // We blackhole this request. It doesn't count for anything.
-        // After the Failure() patch, this should no longer need to
-        // be a special case.
-        outstandingRequestCount.decrementAndGet()
-      case Throw(e) =>
-        dispatchCount.incr()
-        latencyStat.add(elapsed().inMilliseconds)
-        def flatten(ex: Throwable): Seq[String] =
-          if (ex eq null) Seq[String]() else ex.getClass.getName +: flatten(ex.getCause)
-        statsReceiver.scope("failures").counter(flatten(e): _*).incr()
-        e match {
-          case sourced: SourcedException if sourced.serviceName != "unspecified" =>
-            statsReceiver
-              .scope("sourcedfailures")
-              .counter(sourced.serviceName +: flatten(sourced): _*)
-              .incr()
-          case _ =>
-        }
-      case Return(_) =>
-        dispatchCount.incr()
-        successCount.incr()
-        latencyStat.add(elapsed().inMilliseconds)
+    service(request) respond { response =>
+      outstandingRequestCount.decrementAndGet()
+      response match {
+        case Throw(BackupRequestLost) =>
+          // We blackhole this request. It doesn't count for anything.
+          // After the Failure() patch, this should no longer need to
+          // be a special case.
+        case Throw(e) =>
+          dispatchCount.incr()
+          latencyStat.add(elapsed().inMilliseconds)
+          def flatten(ex: Throwable): Seq[String] =
+            if (ex eq null) Seq[String]() else ex.getClass.getName +: flatten(ex.getCause)
+          statsReceiver.scope("failures").counter(flatten(e): _*).incr()
+          e match {
+            case sourced: SourcedException if sourced.serviceName != "unspecified" =>
+              statsReceiver
+                .scope("sourcedfailures")
+                .counter(sourced.serviceName +: flatten(sourced): _*)
+                .incr()
+            case _ =>
+          }
+        case Return(_) =>
+          dispatchCount.incr()
+          successCount.incr()
+          latencyStat.add(elapsed().inMilliseconds)
+      }
     }
-
-    result
   }
 }
