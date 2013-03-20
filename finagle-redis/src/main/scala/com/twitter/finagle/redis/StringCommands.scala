@@ -162,7 +162,7 @@ trait Strings { self: BaseClient =>
           case _ => throw new IllegalStateException()
         } toSeq
       }
-      case EmptyMBulkReply()    => Future.value(Seq.empty)
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**

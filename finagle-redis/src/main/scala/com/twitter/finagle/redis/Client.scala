@@ -200,7 +200,7 @@ private[redis] class ConnectedTransactionalClient(
   private def exec(svc: Service[Command, Reply]): Future[Seq[Reply]] =
     svc(Exec) flatMap {
       case MBulkReply(messages)  => Future.value(messages)
-      case EmptyMBulkReply()     => Future.value(Seq())
+      case EmptyMBulkReply()     => Future.Nil
       case NilMBulkReply()       => Future.exception(
         new ServerError("One or more keys were modified before transaction"))
       case ErrorReply(message)   => Future.exception(new ServerError(message))

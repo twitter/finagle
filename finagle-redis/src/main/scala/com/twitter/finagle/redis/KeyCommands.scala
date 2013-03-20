@@ -59,7 +59,7 @@ trait Keys { self: BaseClient =>
   def keys(pattern: ChannelBuffer): Future[Seq[ChannelBuffer]] =
     doRequest(Keys(pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -71,7 +71,7 @@ trait Keys { self: BaseClient =>
   ): Future[Seq[ChannelBuffer]] =
     doRequest(Scan(cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**

@@ -60,7 +60,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
     doRequest(BRange(key, startField, endField)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toChannelBuffers(messages)))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
   }
 }

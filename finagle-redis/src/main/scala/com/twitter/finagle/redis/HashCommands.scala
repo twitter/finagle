@@ -39,7 +39,7 @@ trait Hashes { self: BaseClient =>
     doRequest(HGetAll(key)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toChannelBuffers(messages)))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
   }
 
   /**
@@ -51,7 +51,7 @@ trait Hashes { self: BaseClient =>
     doRequest(HKeys(key)) {
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -63,7 +63,7 @@ trait Hashes { self: BaseClient =>
     doRequest(HMGet(key, fields)) {
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -86,7 +86,7 @@ trait Hashes { self: BaseClient =>
   ): Future[Seq[ChannelBuffer]] =
     doRequest(HScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
