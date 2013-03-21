@@ -1,8 +1,9 @@
 package com.twitter.finagle.memcached.integration
 
 import java.lang.ProcessBuilder
-import java.net.InetSocketAddress
-import com.twitter.util.RandomSocket
+import java.net.{BindException, ServerSocket, InetSocketAddress}
+import com.twitter.util.{Try, Stopwatch, Duration, RandomSocket}
+import com.twitter.conversions.time._
 import collection.JavaConversions._
 import scala.collection._
 
@@ -37,25 +38,57 @@ object ExternalMemcached { self =>
     address
   }
 
-  def start(addr: Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
-    def _start(address: InetSocketAddress) {
-      val cmd: Seq[String] = Seq("memcached",
-                                 "-l", address.getHostName(),
-                                 "-p", address.getPort().toString)
-
+  def start(address: Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
+    def exec(address: InetSocketAddress) {
+      val cmd = Seq("memcached", "-l", address.getHostName,
+        "-p", address.getPort.toString)
       val builder = new ProcessBuilder(cmd.toList)
       processes += (address -> builder.start())
     }
 
-    addr.orElse(findAddress()) flatMap { _addr =>
+    (address orElse findAddress()) flatMap { addr =>
       try {
-        _start(_addr)
-        Thread.sleep(100)
-        Some(_addr)
+        exec(addr)
+        if (waitForPort(addr.getPort))
+          Some(addr)
+        else
+          None
       } catch {
-        case _ => None
+        case _: Throwable => None
       }
     }
+  }
+
+  def waitForPort(port: Int, timeout: Duration = 5.seconds): Boolean = {
+    val elapsed = Stopwatch.start()
+    def loop(): Boolean = {
+      if (! isPortAvailable(port))
+        true
+      else if (timeout < elapsed())
+        false
+      else {
+        Thread.sleep(100)
+        loop()
+      }
+    }
+    loop()
+  }
+
+  def isPortAvailable(port: Int): Boolean = {
+    var ss: ServerSocket = null
+    var result = false
+    try {
+      ss = new ServerSocket(port)
+      ss.setReuseAddress(true)
+      result = true
+    } catch { case ex: BindException =>
+      result = (ex.getMessage != "Address already in use")
+    } finally {
+      if (ss != null)
+        ss.close()
+    }
+
+    result
   }
 
   def stop(addr: Option[InetSocketAddress] = None) {

@@ -35,14 +35,18 @@ class ClientSpec extends SpecificationWithJUnit {
     val stats = new SummarizingStatsReceiver
 
     doBefore {
-      var address: Option[InetSocketAddress] = ExternalMemcached.start()
-      if (address == None) skip("Cannot start memcached. Skipping...")
-      val service = ClientBuilder()
-        .hosts(Seq(address.get))
-        .codec(new Memcached(stats))
-        .hostConnectionLimit(1)
-        .build()
-      client = Client(service)
+      ExternalMemcached.start() match {
+        case Some(address) =>
+          val service = ClientBuilder()
+            .hosts(Seq(address))
+            .codec(new Memcached(stats))
+            .hostConnectionLimit(1)
+            .build()
+          client = Client(service)
+
+        case _ =>
+          skip("Cannot start memcached. Skipping...")
+      }
     }
 
     doAfter {
