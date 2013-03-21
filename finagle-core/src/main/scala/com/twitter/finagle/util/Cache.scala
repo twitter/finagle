@@ -104,7 +104,7 @@ private[finagle] class Cache[A](
    */
   def put(item: A) {
     val evicted = synchronized {
-      if (deque.isEmpty) scheduleTimer()
+      if (deque.isEmpty && ttl != Duration.Top) scheduleTimer()
       deque.push((Time.now, item))
       if (deque.size > cacheSize) { // it will ever only be over by 1
         // should ditch *oldest* items, so take from last of deque
