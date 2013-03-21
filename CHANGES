@@ -1,14 +1,30 @@
 .. Author notes: this file is formatted with restructured text
-  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-  as it is included in Finagle's user's guide.
+(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+as it is included in Finagle's user's guide.
 
 6.x
-----
+-----
 
 6.1.2
-~~~~
+~~~~~
 
-Not yet released
+Released 2013/03/21
+
+- `finagle`: Fix flakey tests
+- `finagle`: fix sbt build
+- `finagle`: Upgrade util to 6.2.4
+- `finagle-core`: Fix reporting bug for pending reqs
+- `finagle-core`: Move Disposable/Managed to util
+- `finagle-core`: Use Future.Nil
+- `finagle-doc`: Improve, add Matt Ho's talk.
+- `finagle-exp`: Add BackupRequestFilter, new backup request filter using response latency quantiles
+- `finagle-http`: Avoid URISyntaxException
+- `finagle-memcached`: Add Replication Cache Client
+- `finagle-mysql`: Make prepareAndExecute and prepareAndSelect useful again.
+- `finagle-mysql`: Make sure we are properly managing prepared statement
+- `finagle-mysql`: Move interfaces outside of protocol package
+- `finagle-redis`: Moved redis server classes from private to public
+- `finagle-thrift`: fix 2.10 build
 
 6.1.1
 ~~~~
@@ -48,15 +64,15 @@ Released 2013/01/30
 - `finagle`: Tracer use new daemon() flag; get rid of factory. Simplify.
 - `finagle`: refactor clients and servers to be simpler, more logical.
 - `finagle-core`: Provide a reportHostStatsTo API on ClientBuilder
-  that per-host stats will be reported to.
+that per-host stats will be reported to.
 - `finagle-core`: Use Groups in place of Clusters
 - `finagle-core`: Create a NonShrinkingCluster
 - `finagle-redis`: made zRange... commands work more like the actual
-  redis commands
+redis commands
 - `finagle-stats`: new project that provides a StatsReceiver based
-  on Twitter's Metrics library.
+on Twitter's Metrics library.
 - `finagle-http`: add new-style client and server, including a primitive
-  URL fetcher
+URL fetcher
 
 6.0.5
 ~~~~
@@ -64,7 +80,7 @@ Released 2013/01/30
 Released 2013/01/22
 
 - `finagle-core`: basic SOCKS support for finagle clients,
-  intended for use with ssh -D.
+intended for use with ssh -D.
 
 6.0.4
 ~~~~
@@ -76,9 +92,9 @@ Released 2013/01/22
 - `finagle-core`: LoadBalancerTest: allow the tests to be run with Google Caliper
 - `finagle-core`: make snap on mapped cluster thread-safe
 - `finagle-memcached`: explicitly pass in initial cache nodes when using a
-  a static cluster
+a static cluster
 - `finagle-native`: fix up grab_and_path_tomcat_native
-- `finagle-redis`:  finagle redis btree sorted set commands
+- `finagle-redis`: finagle redis btree sorted set commands
 - `finagle-redis`: Implemented redis HMSET
 - `finagle-redis`: expireAt command
 
@@ -89,7 +105,7 @@ Released 2012/12/18
 
 - `finagle-mux`: new session protocol
 - `documentation`: document connection management and associated
-  configuration options
+configuration options
 - `finagle-core`: expose newChannelTransport in Codec to allow multiplexing in clients
 - `finagle-http RequestProxy`: proxy response
 
@@ -116,7 +132,7 @@ Released 2012/12/11
 Released 2012/11/26
 
 - Use java.util.ArrayDeque in place of mutable.Queue due to
-  https://issues.scala-lang.org/browse/SI-6690
+https://issues.scala-lang.org/browse/SI-6690
 
 6.0.0
 ~~~~
@@ -136,11 +152,11 @@ Released 2012/11/21
 
 - `finagle-spdy`: new codec
 - `finagle-core`: ServiceTimeoutException is now a
-  WriteException (so they can be retried)
+WriteException (so they can be retried)
 - `finagle-core`: close channels owned by ChannelTransport
-  before failing queues
+before failing queues
 - `finagle-core`: share ChannelStatsHandler in clients and
-  servers to avoid excessive stats-related weakrefs
+servers to avoid excessive stats-related weakrefs
 - `finagle-core`: don't leak Spooled updates in the HeapBalancer
 
 5.3.22
@@ -193,8 +209,8 @@ Released 2012/09/27
 - `finagle-core`: add optional `shouldRetry` argument to RetryPolicy.tries
 - `finagle-core`: pools propagate underlying availability correctly
 - `finagle-core`: move fail-fast before the pool. This prevents it from
-  masking errors from the failure accrual mechanism, and is arguably
-  the "correct" placement
+masking errors from the failure accrual mechanism, and is arguably
+the "correct" placement
 - `finagle-core`: fix argument type in RetryingFilter.apply
 - `finagle-core`: failFast by default; disable for Kestrel
 - `finagle-memcached`: cache-pool specific Cluster implementation
@@ -378,13 +394,13 @@ Released 2012/03/14
 
 
 - `ServiceToChannelHandler`: keep track of shutdowns with
-  pending replies, don't monitor errors that occur after
-  cancellation.
+pending replies, don't monitor errors that occur after
+cancellation.
 - Add two received_bytesm sent_bytes to per-channel stats.
 - `http`: Add wwwAuthenticate(=) and isXmlHttpRequest
 - `http`: CancelledRequestExceptions become 499s
 - `clients`: experimental Fail-Fast mode
-  (ClientBuilder.expFailFast(true))
+(ClientBuilder.expFailFast(true))
 - `b3`: Only log that a span was unfinished if we actually found one
 - `thrift`: better support for one-way calls
 - `server`: option for cancellation on hangup (default=true)
@@ -393,10 +409,10 @@ Released 2012/03/14
 - `serversets`: allow for additional endpoints
 - `tests`: use true ephemeral ports instead of RandomSocket
 - `memcache stress`: use new command line flag library from
-  commons
+commons
 - `thrift`: concatenate arrays with System.arraycopy
 - `memached`: fix bug wherein we made requests with empty keys
-  on retries
+on retries
 
 2.x
 ----
@@ -432,7 +448,7 @@ Released 2012/02/15
 
 
 - `HeapBalancer`: safely remove services from cluster when
-  they have requests in flight
+they have requests in flight
 - `http`: speed up logging
 - `core`: keep track of handler walltimes
 
@@ -447,9 +463,9 @@ Released 2012/02/13
 - `http`: Message.setContentType: defaults charset to utf-8
 - `http`: added Message.charset, Message.charset=
 - Refactor resource management inside of the builders, making lifetimes
-  explicit
+explicit
 - Generic cluster API, support in the HeapBalancer for dynamic hosts list;
-  remove other load balancers
+remove other load balancers
 - `redis`: memcache.Client-style interface
 - `netty`: update to 3.3.1.Final, and add NPN TLS extension support
 - `b3`: flush span if timeout occurs
@@ -458,7 +474,7 @@ Released 2012/02/13
 - `memcache`: tunable example for benchmarking, testing
 - `ServerBuilder`: major refactor & simplification
 - `SummarizingStatsReceiver`: fix bug where sort didn't operate over a
-  stable collection
+stable collection
 
 1.10.0
 ~~~~
@@ -521,15 +537,15 @@ Released 2011/11/30
 Released 2011/11/29
 
 - `http`: Propagate CancelledRequestException rather than
-  continuing
+continuing
 - `thrift`: deprecated LookupContext, using
-  finagle.thrift.ClientId
+finagle.thrift.ClientId
 - use monitors where applicable (composable widgets for
-  handling exceptions)
+handling exceptions)
 - `memcache`: PHPMemCacheClient
 - make RetryingFilter usable from Java
 - `thrift`: convert uncaught application exceptions into
-  TApplicationExceptions on the wire
+TApplicationExceptions on the wire
 - NoStacktrace.getStackTrace() returns non-empty stacktrace array
 - kill off openConnectionsHealthThresholds (unused)
 
@@ -539,10 +555,10 @@ Released 2011/11/29
 Released 2011/11/08
 
 - `SSL`: make native provider bootstrapping code work; refactor
-  'Ssl' singleton
+'Ssl' singleton
 - `tracing`: Update configurations and libraries to use tracer
-  factory introduced to make it possible to release resources
-  properly in tracers
+factory introduced to make it possible to release resources
+properly in tracers
 - `finagle-thrift`: connection options + client id
 - a more flexible retry filter
 
@@ -552,22 +568,22 @@ Released 2011/11/08
 Released 2011/11/04
 
 - `ExpiringService`: add stats for idle and lifetime expiration.
-  Deactivate() regardless of latch counter
+Deactivate() regardless of latch counter
 - `Filters`: don't apply refcounts on composition, do it only
-  (and always) in the builder
+(and always) in the builder
 - Count pending timeouts, and export them
 - `ChannelService`: release services when `prepareChannel`
-  fails.  This fixes a connection leak
-- `WatermarkPool`: flush waiters on creation failure.  This
-  fixes a condition wherein we'd keep waiters unnecessarily.
+fails. This fixes a connection leak
+- `WatermarkPool`: flush waiters on creation failure. This
+fixes a condition wherein we'd keep waiters unnecessarily.
 - `Timeout exceptions`: include service name
 - Suppress excessive logging of the exceptions that mostly
-  caused by unreliable client connections.
+caused by unreliable client connections.
 - `memcached`: Add generic type support (via Client.adapt), and
-  Array[Byte] and String instances
+Array[Byte] and String instances
 - `finagle-stream`: do not admit concurrent requests
 - `Tracing`: Add release method to Tracer trait, add
-  tracerFactory to builders, deprecate tracer on builders
+tracerFactory to builders, deprecate tracer on builders
 
 1.9.4
 ~~~~
@@ -575,19 +591,19 @@ Released 2011/11/04
 Released 2011/10/24
 
 - `Service`: response Future will now be cancelled if the client
-  disconnects
+disconnects
 - use static exceptions for TimedOutRequestException
 - `kestrel`: Cancel request Future on close in kestrel ReadHandle
 - `exception cleanup`: wrap all Channel exceptions with their
-  underlying exception.  This makes UnknownChannelExceptions in
-  particular easier to debug
+underlying exception. This makes UnknownChannelExceptions in
+particular easier to debug
 - `Friendlier exceptions`: In order to give very specific error
-  messages to timeouts in finagle (so beginners know which
-  settings in the client and server builder caused them), I'm
-  adding lots of human-readable messages to the various
-  TimeoutExceptions.
+messages to timeouts in finagle (so beginners know which
+settings in the client and server builder caused them), I'm
+adding lots of human-readable messages to the various
+TimeoutExceptions.
 - `some timer bug fixes, particularly`: TimerToNettyTimer:
-  actually cancel underlying task.
+actually cancel underlying task.
 
 1.9.2
 ~~~~
@@ -605,14 +621,14 @@ Released 2011/10/14
 Released 2011/09/28
 
 - `memcached`: new interface for partial results (ie. retrieval
-  failures + successes)
+failures + successes)
 - `tracing`: set service name in the endpoint instead of the
-  span
+span
 - more idiomatic KetamaClientBuilder constructor
 - `tracing`: convenience methods to add binary annotations
 - `finagle-http`: misc. fixes
 - HeapBalancer - a new lg n load balancer (asymptotically
-  more efficient!)
+more efficient!)
 - upgrade to ostrich 4.9.0
 
 1.9.0
@@ -640,13 +656,13 @@ Released 2011/08/23
 Released 2011/08/12
 
 - `thrift`: add a server-side buffered codec; fix tracing issue
-  in buffered codec
+in buffered codec
 - `http`: workaround hole in netty logic to guarantee
-  maxRequestSize
+maxRequestSize
 - `serversets`: don't block on ClientBuilder construction
 - `ostrich4`: update to ostrich 4.8.2
 - `streaming`: reimplement HTTP chunked streaming in terms of
-  offer/broker
+offer/broker
 - `kestrel`: buffered & merging of ReadHandles
 
 1.8.1
@@ -657,8 +673,8 @@ Released 2011/08/05
 - upgrade to netty 3.2.5.Final
 - `kestrel`: fix visibility of ResultWithCAS
 - `kestrel`: Client.{read,write}, Client.readReliably,
-  MultiReader: suite of kestrel streaming readers (including
-  grabby-hands replacements) using Offer/Broker
+MultiReader: suite of kestrel streaming readers (including
+grabby-hands replacements) using Offer/Broker
 - `kestrel`: don't render timeouts > 2^31-1
 - `tracing`: fix sampling bug
 - `tracing`: trace the kestrel client
@@ -669,11 +685,11 @@ Released 2011/08/05
 
 Released 2011/08/02
 
-- `SSL`: perform hostname validation in the client.  this is the
-  reason for the minor bump: we change the .tls() ClientBuilder
-  signature
+- `SSL`: perform hostname validation in the client. this is the
+reason for the minor bump: we change the .tls() ClientBuilder
+signature
 - introduce util-codec dependency for use of the apache
-  commons base 64 codec
+commons base 64 codec
 
 1.7.5
 ~~~~
@@ -699,7 +715,7 @@ Released 2011/07/22
 
 
 - `http`: convert codec exceptions into 4xx errors; report them
-  as such upstream
+as such upstream
 - `memcache`: `gets` and `cas` support.
 
 1.7.3
@@ -709,13 +725,13 @@ Released 2011/07/19
 
 
 - `fix`: 1.7.2 introduced a regression in the pool that may,
-  under certain circumstances, admit connections beyond the high
-  watermark.
+under certain circumstances, admit connections beyond the high
+watermark.
 - quench exception for setting multiple Promise values when
-  racing with write errors.
-- Adds tracing support for the Memcached client.  This only
-  creates the client side annotations, no support for passing
-  along ids and such to the memcached server.
+racing with write errors.
+- Adds tracing support for the Memcached client. This only
+creates the client side annotations, no support for passing
+along ids and such to the memcached server.
 
 
 1.7.2
@@ -725,11 +741,11 @@ Released 2011/07/18
 
 
 - support end-to-end cancellation in finagle clients; fixes
-  possible pool starvation conditions, and allows clients to
-  cancel requests and reclaim resources
+possible pool starvation conditions, and allows clients to
+cancel requests and reclaim resources
 - `end-to-end timeouts`: introduce, .connectTimeout and
-  .timeout.  .connectTimeout is the end-to-end connection
-  timeout (includes acquisition & TCP time), .timeout is an
-  end-to-end request time: no requests will take longer
+.timeout. .connectTimeout is the end-to-end connection
+timeout (includes acquisition & TCP time), .timeout is an
+end-to-end request time: no requests will take longer
 - some doc fixes
 - misc. bug fixes
