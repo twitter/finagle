@@ -17,6 +17,7 @@ git clone -b gh-pages --single-branch git@github.com:twitter/finagle.git $dir >/
 savedir=$(pwd)
 cd $dir
 git rm -fr .
+touch .nojekyll
 cp $savedir/site/index.html .
 cp -r $savedir/target/scala-2.9.2/unidoc/ docs
 cp -r $savedir/doc/target/site guide

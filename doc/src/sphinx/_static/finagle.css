@@ -10,3 +10,16 @@ div.body h6 {
     font-style: italic;
     color: #7f7f7f;
 }
+
+ul {
+  margin: 15px 0 15 px 0;
+  list-style: none;
+  line-height: 1.4;
+}
+
+ul li:before {
+  content: '\2014\a0';
+  color: #888;
+  position: absolute;
+  margin-left: -16px;
+}
