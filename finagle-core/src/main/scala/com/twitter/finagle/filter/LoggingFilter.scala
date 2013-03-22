@@ -5,9 +5,9 @@ import com.twitter.finagle.{SimpleFilter, Service}
 import com.twitter.logging.Logger
 
 trait LogFormatter[Req, Rep] {
-  def format(request: Req, response: Rep, responseTime: Duration): String
+  def format(request: Req, reply: Rep, replyTime: Duration): String
 
-  def formatException(request: Req, throwable: Throwable, responseTime: Duration): String
+  def formatException(request: Req, throwable: Throwable, replyTime: Duration): String
 }
 
 /**
@@ -23,21 +23,21 @@ trait LoggingFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
     val elapsed = Stopwatch.start()
     val future = service(request)
     future respond {
-      case Return(response) =>
-        log(elapsed(), request, response)
+      case Return(reply) =>
+        log(elapsed(), request, reply)
       case Throw(throwable) =>
         logException(elapsed(), request, throwable)
     }
     future
   }
 
-  protected def log(responseTime: Duration, request: Req, response: Rep) {
-    val line = formatter.format(request, response, responseTime)
+  protected def log(replyTime: Duration, request: Req, reply: Rep) {
+    val line = formatter.format(request, reply, replyTime)
     log.info(line)
   }
 
-  protected def logException(responseTime: Duration, request: Req, throwable: Throwable) {
-    val line = formatter.formatException(request, throwable, responseTime)
+  protected def logException(replyTime: Duration, request: Req, throwable: Throwable) {
+    val line = formatter.formatException(request, throwable, replyTime)
     log.info(throwable, line)
   }
 
