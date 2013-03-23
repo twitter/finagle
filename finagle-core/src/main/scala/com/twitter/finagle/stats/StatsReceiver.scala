@@ -1,8 +1,5 @@
 package com.twitter.finagle.stats
 
-import scala.collection.mutable
-import scala.ref.WeakReference
-
 import com.twitter.util.{Future, Stopwatch, JavaSingleton}
 import java.util.concurrent.TimeUnit
 
@@ -164,45 +161,26 @@ trait StatsReceiver {
 }
 
 trait StatsReceiverProxy extends StatsReceiver with Proxy {
-  val self: StatsReceiver
+  def self: StatsReceiver
+
+  // Handle the case: Proxy of Proxy of ...
+  override def equals(that: Any): Boolean = self match {
+    case x: Proxy => self equals that
+    case x        => super.equals(that)
+  }
 
   val repr = self
   def counter(names: String*) = self.counter(names:_*)
   def stat(names: String*) = self.stat(names:_*)
   def addGauge(names: String*)(f: => Float) = self.addGauge(names:_*)(f)
-  override def scope(name: String) = self.scope(name)
-}
-
-class RollupStatsReceiver(val self: StatsReceiver)
-  extends StatsReceiver with Proxy
-{
-  val repr = self.repr
-
-  private[this] def tails[A](s: Seq[A]): Seq[Seq[A]] = {
-    s match {
-      case s@Seq(_) =>
-        Seq(s)
-
-      case Seq(hd, tl@_*) =>
-        Seq(Seq(hd)) ++ (tails(tl) map { t => Seq(hd) ++ t })
+  override def scope(name: String) = {
+    val prefix = Seq(name)
+    new NameTranslatingStatsReceiver(self) {
+      protected[this] def translate(name: Seq[String]) = prefix ++ name
     }
   }
-
-  def counter(name: String*) = new Counter {
-    private[this] val allCounters = tails(name) map (self.counter(_: _*))
-    def incr(delta: Int) = allCounters foreach (_.incr(delta))
-  }
-
-  def stat(name: String*) = new Stat {
-    private[this] val allStats = tails(name) map (self.stat(_: _*))
-    def add(value: Float) = allStats foreach (_.add(value))
-  }
-
-  def addGauge(name: String*)(f: => Float) = new Gauge {
-    private[this] val underlying = tails(name) map { self.addGauge(_: _*)(f) }
-    def remove() = underlying foreach { _.remove() }
-  }
 }
+
 
 abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
   extends StatsReceiver with Proxy
@@ -229,8 +207,8 @@ class NullStatsReceiver extends StatsReceiver with JavaSingleton {
 
 object NullStatsReceiver extends NullStatsReceiver
 
-object DefaultStatsReceiver extends  {
-  val self: StatsReceiver = LoadedStatsReceiver.scope("finagle")
+object DefaultStatsReceiver extends {
+  val self: StatsReceiver = LoadedStatsReceiver
 } with StatsReceiverProxy
 
 object ClientStatsReceiver extends {
@@ -240,170 +218,3 @@ object ClientStatsReceiver extends {
 object ServerStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver.scope("srv")
 } with StatsReceiverProxy
-
-/** In-memory stats receiver for testing. */
-class InMemoryStatsReceiver extends StatsReceiver {
-  val repr = this
-
-  val counters = new mutable.HashMap[Seq[String], Int]
-                   with mutable.SynchronizedMap[Seq[String], Int]
-  val stats    = new mutable.HashMap[Seq[String], Seq[Float]]
-                   with mutable.SynchronizedMap[Seq[String], Seq[Float]]
-  val gauges   = new mutable.WeakHashMap[Seq[String], () => Float]
-                   with mutable.SynchronizedMap[Seq[String], () => Float]
-
-  def counter(name: String*): Counter = {
-    new Counter {
-      def incr(delta: Int) {
-        val oldValue = counters.get(name).getOrElse(0)
-        counters(name) = oldValue + delta
-      }
-    }
-  }
-
-  def stat(name: String*): Stat = {
-    new Stat {
-      def add(value: Float) {
-        val oldValue = stats.get(name).getOrElse(Seq.empty)
-        stats(name) = oldValue :+ value
-      }
-    }
-  }
-
-  def addGauge(name: String*)(f: => Float): Gauge = {
-    val gauge = new Gauge {
-      def remove() {
-        gauges -= name
-      }
-    }
-    gauges += name -> (() => f)
-    gauge
-  }
-}
-
-/**
- * Note: currently supports only gauges, will throw
- * away other types.
- */
-class GlobalStatsReceiver extends NullStatsReceiver {
-  private[this] trait GlobalGauge extends Gauge { def addReceiver(receiver: StatsReceiver) }
-  private[this] val registered = new mutable.HashMap[AnyRef, StatsReceiver]
-  private[this] val gauges = new mutable.HashMap[Seq[String], WeakReference[GlobalGauge]]
-
-  private[this] def mkGauge(name: Seq[String], f: => Float) = new GlobalGauge {
-    private[this] var children: List[Gauge] = Nil
-
-    gauges(name) = new WeakReference(this)
-    // Add onto current receivers.
-    registered.values foreach { addReceiver(_) }
-
-    def addReceiver(receiver: StatsReceiver) = {
-      children ::= receiver.addGauge(name: _*) { f }
-    }
-
-    def remove() = GlobalStatsReceiver.this.synchronized {
-      gauges.remove(name)
-      children foreach { _.remove() }
-      children = Nil
-    }
-  }
-
-  def register(receiver: StatsReceiver): Unit = synchronized {
-    if (receiver eq this) return
-
-    val refs = if (registered contains receiver.repr) Seq() else {
-      registered += receiver.repr -> receiver
-      gauges.values.toBuffer
-    }
-
-    for (ref <- refs; gauge <- ref.get)
-      gauge.addReceiver(receiver)
-  }
-
-  override val repr = this
-
-  override def addGauge(name: String*)(f: => Float): Gauge = synchronized {
-    val gauge0 = for {
-      ref <- gauges.get(name)
-      gauge <- ref.get
-    } yield gauge
-
-    gauge0 getOrElse mkGauge(name, f)
-  }
-}
-
-object GlobalStatsReceiver extends GlobalStatsReceiver
-
-/*
- * BroadcastStatsReceiver is a wrapper around multiple StatsReceivers
- */
-object BroadcastStatsReceiver {
-  def apply(receivers: Seq[StatsReceiver]) = receivers match {
-    case Seq() => NullStatsReceiver
-    case Seq(fst) => fst
-    case Seq(fst, snd) => new Two(fst, snd)
-    case more => new N(more)
-  }
-
-  private class Two(statsReceiver1: StatsReceiver, statsReceiver2: StatsReceiver)
-    extends StatsReceiver with Proxy
-  {
-    val repr = this
-    val self = statsReceiver1
-
-    def counter(names: String*) = new Counter {
-      val counter1 = statsReceiver1.counter(names:_*)
-      val counter2 = statsReceiver2.counter(names:_*)
-      def incr(delta: Int) {
-        counter1.incr(delta)
-        counter2.incr(delta)
-      }
-    }
-
-    def stat(names: String*) = new Stat {
-      val stat1 = statsReceiver1.stat(names:_*)
-      val stat2 = statsReceiver2.stat(names:_*)
-      def add(value: Float) {
-        stat1.add(value)
-        stat2.add(value)
-      }
-    }
-
-    def addGauge(names: String*)(f: => Float) = new Gauge {
-      val gauge1 = statsReceiver1.addGauge(names:_*)(f)
-      val gauge2 = statsReceiver2.addGauge(names:_*)(f)
-      def remove() {
-        gauge1.remove()
-        gauge2.remove()
-      }
-    }
-
-    override def scope(name: String) =
-      new Two(statsReceiver1.scope(name), statsReceiver2.scope(name))
-  }
-
-  private class N(statsReceivers: Seq[StatsReceiver]) extends StatsReceiver with Proxy {
-    val repr = this
-    val self = statsReceivers.head
-
-    def counter(names: String*) = new Counter {
-      val counters = statsReceivers map { _.counter(names:_*) }
-      def incr(delta: Int) {
-        counters foreach { _.incr(delta) }
-      }
-    }
-    def stat(names: String*) = new Stat {
-      val stats = statsReceivers map { _.stat(names:_*) }
-      def add(value: Float) {
-        stats foreach { _.add(value) }
-      }
-    }
-    def addGauge(names: String*)(f: => Float) = new Gauge {
-      val gauges = statsReceivers map { _.addGauge(names:_*)(f) }
-      def remove() = gauges foreach { _.remove() }
-    }
-
-    override def scope(name: String) =
-      new N(statsReceivers map { _.scope(name) })
-  }
-}

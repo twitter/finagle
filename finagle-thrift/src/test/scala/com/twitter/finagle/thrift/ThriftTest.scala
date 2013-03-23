@@ -22,7 +22,7 @@ trait ThriftTest { self: FunSuite =>
   private val thriftTests =
     mutable.Map[String, (Iface, BufferingTracer) => Unit]()
 
-  /** 
+  /**
    * Define a new thrift test, which is run over the cross product
    * of known thrift configurations. Run when `runThriftTests` is
    * invoked.
@@ -46,7 +46,7 @@ trait ThriftTest { self: FunSuite =>
     }
   }
 
-  private val newBuilderClient = (protocolFactory: TProtocolFactory, addr: SocketAddress) => 
+  private val newBuilderClient = (protocolFactory: TProtocolFactory, addr: SocketAddress) =>
     new {
       val serviceFactory = ClientBuilder()
         .hosts(Seq(addr))
@@ -57,9 +57,9 @@ trait ThriftTest { self: FunSuite =>
         .buildFactory()
       val service = serviceFactory.toService
       val client = serviceToIface(service, protocolFactory)
-  
+
       def close() {
-        service.release()
+        service.close()
       }
     }
 
@@ -89,7 +89,7 @@ trait ThriftTest { self: FunSuite =>
     "compact" -> new TCompactProtocol.Factory(),
     "json" -> new TJSONProtocol.Factory()
   )
-  
+
   // For some reason, the compiler needs some help here.
   private type NewClient = (TProtocolFactory, SocketAddress) => {
     def close()
@@ -105,7 +105,7 @@ trait ThriftTest { self: FunSuite =>
     "builder" -> newBuilderClient,
     "api" -> newAPIClient
   )
-  
+
   private val servers = Map[String, NewServer](
     "builder" -> newBuilderServer,
     "api" -> newAPIServer
@@ -120,11 +120,12 @@ trait ThriftTest { self: FunSuite =>
   } test("server:%s client:%s proto:%s %s".format(
     clientName, serverName, protoName, label)) {
     val tracer = new BufferingTracer
-    DefaultTracer.addTracer(tracer)
+    val previous = DefaultTracer.self
+    DefaultTracer.self = tracer
     val server = newServer(proto)
     val client = newClient(proto, server.boundAddr)
     try thriftTest(client.client, tracer) finally {
-      DefaultTracer.remTracer(tracer)
+      DefaultTracer.self = previous
       server.close()
       client.close()
     }
@@ -132,7 +133,7 @@ trait ThriftTest { self: FunSuite =>
 }
 
 /*
-	p.s. The very complexity of the above code should be enough to
-	convince anyone of Thrift's hazardous attitude towards software
-	modularity and proper layering.
+  p.s. The very complexity of the above code should be enough to
+  convince anyone of Thrift's hazardous attitude towards software
+  modularity and proper layering.
 */

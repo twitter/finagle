@@ -8,6 +8,7 @@ import com.twitter.util.{Duration, Time, TimeFormat}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
+import com.twitter.finagle.util.LoadService
 
 private[tracing] object RecordTimeFormat
   extends TimeFormat("MMdd HH:mm:ss.SSS")
@@ -73,33 +74,54 @@ class NullTracer extends Tracer {
 }
 
 object NullTracer extends NullTracer
-// TODO
-object DefaultTracer extends Tracer {
-  @volatile private[this] var tracers: List[Tracer] = Nil
-  
-  def addTracer(tracer: Tracer) {
-    tracers ::= tracer
-  }
-  def remTracer(tracer: Tracer) {
-    tracers = tracers.filter(_ ne tracer)
+
+object BroadcastTracer {
+  def apply(tracers: Seq[Tracer]): Tracer = tracers.filterNot(_ == NullTracer) match {
+    case Seq() => NullTracer
+    case Seq(tracer) => tracer
+    case Seq(first, second) => new Two(first, second)
+    case _ => new N(tracers)
   }
 
-  def record(r: Record) {
-    for (t <- tracers) t.record(r)
+  private class Two(first: Tracer, second: Tracer) extends Tracer {
+    def record(record: Record) {
+      first.record(record)
+      second.record(record)
+    }
+
+    def sampleTrace(traceId: TraceId) = {
+      val sampledByFirst = first.sampleTrace(traceId)
+      val sampledBySecond = second.sampleTrace(traceId)
+      if (sampledByFirst == Some(true) || sampledBySecond == Some(true))
+        Some(true)
+      else if (sampledByFirst == Some(false) && sampledBySecond == Some(false))
+        Some(false)
+      else
+        None
+    }
   }
 
-  def sampleTrace(traceId: TraceId): Option[Boolean] = {
-    // This is a bit tricky to answer, but I think also 
-    // the only reasonable way to answer.
-    val answers = 
-      tracers map(_.sampleTrace(traceId)) collect {
-        case Some(x) => x
-      }
-    
-    if (answers.isEmpty) None
-    else if (answers exists (_ == true)) Some(true)
-    else Some(false)
+  private class N(tracers: Seq[Tracer]) extends Tracer {
+    def record(record: Record) {
+      tracers foreach { _.record(record) }
+    }
+
+    def sampleTrace(traceId: TraceId) = {
+      if (tracers exists { _.sampleTrace(traceId) == Some(true) })
+        Some(true)
+      else if (tracers forall { _.sampleTrace(traceId) == Some(false) })
+        Some(false)
+      else
+        None
+    }
   }
+}
+
+object DefaultTracer extends Tracer with Proxy {
+  @volatile var self: Tracer = BroadcastTracer(LoadService[Tracer]())
+
+  def record(record: Record) = self.record(record)
+  def sampleTrace(traceId: TraceId) = self.sampleTrace(traceId)
 }
 
 class BufferingTracer extends Tracer
