@@ -63,14 +63,14 @@ case class LoginRequest(
 
   override val data = {
     val bw = BufferWriter(new Array[Byte](dataSize))
-    val capability = if (dbNameSize == 0) clientCap - ConnectWithDB else clientCap
-    bw.writeInt(capability.mask)
+    val newClientCap = if (dbNameSize == 0) clientCap - ConnectWithDB else clientCap
+    bw.writeInt(newClientCap.mask)
     bw.writeInt(maxPacket)
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
     bw.writeNullTerminatedString(username)
     bw.writeLengthCodedBytes(hashPassword)
-    if (clientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))
+    if (newClientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))
       bw.writeNullTerminatedString(database.get)
 
     bw.toChannelBuffer

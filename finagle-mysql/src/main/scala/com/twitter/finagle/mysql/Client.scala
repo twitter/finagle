@@ -69,8 +69,10 @@ class Client(factory: ServiceFactory[Request, Result]) {
   }
 
   /**
-   * Runs a query that returns a ResultSet. For each row
+   * Send a query that presumably returns a ResultSet. For each row
    * in the ResultSet, call f on the row and return the Seq of results.
+   * If the query result does not contain a ResultSet, the query is executed
+   * and an empty Seq is returned.
    * @param sql A sql statement that returns a result set.
    * @param f A function from Row to any type T.
    * @return a Future of Seq[T] that contains rows.map(f)
@@ -120,8 +122,10 @@ class Client(factory: ServiceFactory[Request, Result]) {
     }
 
   /**
-   * Runs a query that returns a ResultSet. For each row
+   * Send a SELECT query that returns a ResultSet. For each row
    * in the ResultSet, call f on the row and return the results.
+   * If a prepared statement that does not represent a SELECT
+   * query is passed in, an empty Seq is returned.
    * @param ps A prepared statement.
    * @param f A function from Row to any type T.
    * @return a Future of Seq[T] that contains rows.map(f)
@@ -162,7 +166,7 @@ class Client(factory: ServiceFactory[Request, Result]) {
   /**
    * Close the ServiceFactory and its underlying resources.
    */
-  def close() = factory.close()
+  def close(): Future[Unit] = factory.close()
 
   /**
    * Helper function to send requests to the ServiceFactory

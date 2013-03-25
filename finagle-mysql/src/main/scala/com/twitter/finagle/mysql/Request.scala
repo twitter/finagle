@@ -4,6 +4,7 @@ import com.twitter.logging.Logger
 import com.twitter.finagle.exp.mysql.protocol.{Command, Packet, Buffer, BufferWriter, Type}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers._
+import scala.annotation.tailrec
 
 abstract class Request(seq: Short) {
   /**
@@ -60,13 +61,23 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case _ => false
     }
 
-    private[this] def makeNullBitmap(parameters: List[Any], bit: Int = 0, result: BigInt = BigInt(0)): Array[Byte] =
-      parameters match {
-        case Nil => result.toByteArray.reverse // As little-endian byte array
+    private[this] def makeNullBitmap(parameters: List[Any]): Array[Byte] = {
+      val bitmap = new Array[Byte]((parameters.size + 7) / 8)
+      @tailrec
+      def fill(params: List[Any], pos: Int): Array[Byte] = params match {
+        case Nil => bitmap
         case param :: rest =>
-          val bits = if (isNull(param)) result.setBit(bit) else result
-          makeNullBitmap(rest, bit+1, bits)
+          if (isNull(param)) {
+            val bytePos = pos / 8
+            val bitPos = pos % 8
+            val byte = bitmap(bytePos)
+            bitmap(bytePos) = (byte | (1 << bitPos)).toByte
+          }
+          fill(rest, pos+1)
       }
+
+      fill(parameters, 0)
+    }
 
     private[this] def writeTypeCode(param: Any, writer: BufferWriter): Unit = {
       val typeCode = Type.getCode(param)
@@ -84,6 +95,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     /**
      * Returns sizeof all the parameters in the List.
      */
+    @tailrec
     private[this] def sizeOfParameters(parameters: List[Any], size: Int = 0): Int = parameters match {
       case Nil => size
       case p :: rest =>
@@ -140,8 +152,9 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
         val types = BufferWriter(new Array[Byte](ps.numberOfParams * 2))
         paramsList foreach { writeTypeCode(_, types) }
         wrappedBuffer(initialBuffer, types.toChannelBuffer, values.toChannelBuffer)
-      } else
-          wrappedBuffer(initialBuffer, values.toChannelBuffer)
+      } else {
+        wrappedBuffer(initialBuffer, values.toChannelBuffer)
+      }
     }
 }
 

@@ -16,6 +16,12 @@
   </properties>
   <dependencies>
     <!-- library dependencies -->
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
+    </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
