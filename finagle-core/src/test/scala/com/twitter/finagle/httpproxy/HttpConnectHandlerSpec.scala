@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.httpproxy
 
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.Arrays

@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler
 }
-import com.twitter.finagle.http.HttpConnectHandler
+import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
 import com.twitter.finagle.stats.{ClientStatsReceiver,   StatsReceiver}

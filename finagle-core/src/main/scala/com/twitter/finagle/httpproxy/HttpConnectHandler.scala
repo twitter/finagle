@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.httpproxy
 
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicReference

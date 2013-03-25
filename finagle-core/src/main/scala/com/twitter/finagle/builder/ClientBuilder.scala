@@ -567,13 +567,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_tls = Some({ () => Ssl.clientWithoutCertificateValidation()}, None)))
 
   /**
-   * Make connections via the given HTTP proxy
+   * Make connections via the given HTTP proxy.
+   * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
    */
   def httpProxy(httpProxy: SocketAddress): This =
     withConfig(_.copy(_httpProxy = Some(httpProxy)))
 
   /**
-   * Make connections via the given SOCKS proxy
+   * Make connections via the given SOCKS proxy.
+   * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
    */
   def socksProxy(socksProxy: SocketAddress): This =
     withConfig(_.copy(_socksProxy = Some(socksProxy)))
