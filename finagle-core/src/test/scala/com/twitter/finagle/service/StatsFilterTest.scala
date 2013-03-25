@@ -1,13 +1,14 @@
 package com.twitter.finagle.service
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-import com.twitter.util.Promise
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{RequestException, WriteException, Service}
+import com.twitter.finagle.{BackupRequestLost, RequestException, 
+  WriteException, Service}
+import com.twitter.util.Promise
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 @RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
@@ -40,6 +41,26 @@ class StatsFilterTest extends FunSuite {
     assert(unsourced.size == 1)
     assert(unsourced.toSeq(0).exists { s => s.indexOf("RequestException") >= 0 })
     assert(unsourced.toSeq(0).exists { s => s.indexOf("WriteException") >= 0 })
+  }
+  
+  test("don't report BackupRequestLost exceptions") {
+    for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
+      val (promise, receiver, statsService) = getService
+      
+      // It may seem strange to test for the absence
+      // of these keys, but StatsReceiver semantics are
+      // lazy: they are accessed only when incremented.
+
+      assert(!receiver.counters.contains(Seq("requests")))
+      assert(!receiver.counters.keys.exists(_ contains "failure"))
+      statsService("foo")
+      assert(receiver.gauges(Seq("pending"))() === 1.0)
+      promise.setException(BackupRequestLost)
+      assert(!receiver.counters.keys.exists(_ contains "failure"))
+      assert(!(receiver.counters.contains(Seq("requests"))))
+      assert(!(receiver.counters.contains(Seq("success"))))
+      assert(receiver.gauges(Seq("pending"))() === 0.0)
+    }
   }
 
   test("report pending requests on success") {
