@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler
 }
+import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
 import com.twitter.finagle.stats.{ClientStatsReceiver,   StatsReceiver}
@@ -125,6 +126,7 @@ case class Netty3Transporter[In, Out](
   newChannel: ChannelPipeline => Channel = Netty3Transporter.channelFactory.newChannel(_),
   newTransport: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
+  httpProxy: Option[SocketAddress] = None,
   socksProxy: Option[SocketAddress] = None,
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
@@ -132,7 +134,7 @@ case class Netty3Transporter[In, Out](
   channelOptions: Map[String, Object] = Netty3Transporter.defaultChannelOptions
 ) extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
-  
+
   // TODO: These gauges will stay around forever. It's
   // fine, but it would be nice to clean them up.
   def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
@@ -189,6 +191,12 @@ case class Netty3Transporter[In, Out](
     (socksProxy, addr) match {
       case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
         pipeline.addFirst("socksConnect", new SocksConnectHandler(proxyAddr, inetAddr))
+      case _ =>
+    }
+
+    (httpProxy, addr) match {
+      case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
+        pipeline.addFirst("httpConnect", new HttpConnectHandler(proxyAddr, inetAddr, pipeline))
       case _ =>
     }
 
