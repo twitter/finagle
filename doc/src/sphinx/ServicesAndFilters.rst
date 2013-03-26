@@ -20,7 +20,7 @@ to you a :doc:`Future <Futures>` representing the eventual result (or failure)
 of type `Rep`.
 
 Services are used to represent both clients and servers. An *instance*
-of a service is used a client; a server *implements* a `Service`.
+of a service is used through a client; a server *implements* a `Service`.
 
 To use an HTTP client:
 
@@ -59,7 +59,7 @@ Like services, filters are also simple functions:
 	abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 	  extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
 
-or: given a request of type `ReqIn`, a service of type
+or: given a request of type `ReqIn` and a service of type
 `Service[ReqOut, RepIn]`, return a Future of type `RepOut` (the reply
 type). All types are parameterized so that filters may also transform
 request or reply types; visualized:
