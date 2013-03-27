@@ -42,7 +42,8 @@ htmlhelp_basename = "finagle"
 # e.g. :issue:`36` :ticket:`8`
 extlinks = {
   'issue': ('https://github.com/twitter/finagle/issues/%s', 'issue #'),
-  'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example ')
+  'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
+  'api': ('http://twitter.github.com/finagle/docs/#%s', 'Finagle API doc')
 }
 
 rst_epilog = '''
