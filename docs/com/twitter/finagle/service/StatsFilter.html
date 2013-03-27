@@ -29,7 +29,15 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>StatsFilter reports request statistics to the given receiver.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The innocent bystander may find the semantics with respect
+to backup requests a bit puzzling; they are entangled in legacy.
+&quot;requests&quot; counts the total number of requests: subtracting
+&quot;success&quot; from this produces the failure count. However, this
+doesn't allow for &quot;shadow&quot; requests to be accounted for in
+&quot;requests&quot;. This is why we don't increment &quot;requests&quot; on backup
+request failures.
+</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.SimpleFilter" class="extype" href="../SimpleFilter.html">SimpleFilter</a>[Req, Rep], <a name="com.twitter.finagle.Filter" class="extype" href="../Filter.html">Filter</a>[Req, Rep, Req, Rep], (Req, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[Rep], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>

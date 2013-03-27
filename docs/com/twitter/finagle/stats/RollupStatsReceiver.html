@@ -29,7 +29,15 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A RollupStatsReceiver reports stats on multiple Counter/Stat/Gauge based on the sequence of
+names you pass.
+e.g.
+counter(&quot;errors&quot;, &quot;clientErrors&quot;, &quot;java_net_ConnectException&quot;).incr()
+will actually increment those three counters:
+- &quot;/errors&quot;
+- &quot;/errors/clientErrors&quot;
+- &quot;/errors/clientErrors/java_net_ConnectException&quot;
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Proxy" class="extype">Proxy</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -146,7 +154,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addGauge</span><span class="params">(<span name="name">name: String*</span>)</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Gauge" class="extype" href="Gauge.html">Gauge</a></span>
+        <span class="name">addGauge</span><span class="params">(<span name="names">names: String*</span>)</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Gauge" class="extype" href="Gauge.html">Gauge</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Add the function <code><code>f<i> as a gauge with the given name. The
@@ -199,7 +207,7 @@ together.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">counter</span><span class="params">(<span name="name">name: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Counter" class="extype" href="Counter.html">Counter</a></span>
+        <span class="name">counter</span><span class="params">(<span name="names">names: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Counter" class="extype" href="Counter.html">Counter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get a Counter with the description
@@ -409,7 +417,7 @@ stats.scopeSuffix(&quot;toto&quot;).scope(&quot;client&quot;).counter(&quot;adds
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stat</span><span class="params">(<span name="name">name: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Stat" class="extype" href="Stat.html">Stat</a></span>
+        <span class="name">stat</span><span class="params">(<span name="names">names: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.stats.Stat" class="extype" href="Stat.html">Stat</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get a Stat with the description

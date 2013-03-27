@@ -1,0 +1,142 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FAQ &mdash; Finagle 0.1-SNAPSHOT documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
+    <link rel="next" title="Finagle changelog" href="changelog.html" />
+    <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="changelog.html" title="Finagle changelog"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="faq">
+<h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-s-a-cancelledrequestexception">
+<h2>What&#8217;s a <cite>CancelledRequestException</cite>?<a class="headerlink" href="#what-s-a-cancelledrequestexception" title="Permalink to this headline">¶</a></h2>
+<p>When a client to a Finagle server disconnects, the server raises
+a <em>cancellation</em> interrupt on the pending Future. This is done to
+conserve resources and avoid unnecessary work: the upstream
+client may have timed the request out, for example. Interrupts on
+futures propagate, and so if that server is in turn waiting for a response
+from a downstream server it will cancel this pending request, and so on.</p>
+<p>This is the source of the <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.CancelledRequestException">CancelledRequestException</a> &#8211;
+when a Finagle client receives the cancellation interrupt while a request is pending, it
+fails that request with this exception.</p>
+<p>You can turn this behavior off with the <cite>cancelOnHangup</cite> <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> option:</p>
+<div class="highlight-text"><div class="highlight"><pre>ServerBuilder()
+  ...
+  .cancelOnHangup(false)
+  ...
+</pre></div>
+</div>
+<p>Note that most protocols do not natively support request cancellations
+(though modern RPC protocols like <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.Mux$">Mux</a>
+do). In practice, this means that for these protocols, we need to disconnect
+the client to signal cancellation, which in turn can cause undue connection
+churn.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FAQ</a><ul>
+<li><a class="reference internal" href="#what-s-a-cancelledrequestexception">What&#8217;s a <cite>CancelledRequestException</cite>?</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ServicesAndFilters.html" title="previous chapter">Services &amp; Filters</a></li>
+      <li>Next: <a href="changelog.html" title="next chapter">Finagle changelog</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
-    <link rel="next" title="Finagle changelog" href="changelog.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
    
   
@@ -43,7 +43,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="changelog.html" title="Finagle changelog"
+          <a href="FAQ.html" title="FAQ"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Futures.html" title="Concurrent Programming with Futures"
@@ -73,7 +73,7 @@ internals are structured around Services and Filters.</p>
 to you a <a class="reference internal" href="Futures.html"><em>Future</em></a> representing the eventual result (or failure)
 of type <cite>Rep</cite>.</p>
 <p>Services are used to represent both clients and servers. An <em>instance</em>
-of a service is used a client; a server <em>implements</em> a <cite>Service</cite>.</p>
+of a service is used through a client; a server <em>implements</em> a <cite>Service</cite>.</p>
 <p>To use an HTTP client:</p>
 <div class="highlight-text"><div class="highlight"><pre>val httpService: Service[HttpRequest, HttpResponse] = ...
 
@@ -103,7 +103,7 @@ it with a timeout exception.</p>
   extends ((ReqIn, Service[ReqOut, RepIn]) =&gt; Future[RepOut])
 </pre></div>
 </div>
-<p>or: given a request of type <cite>ReqIn</cite>, a service of type
+<p>or: given a request of type <cite>ReqIn</cite> and a service of type
 <cite>Service[ReqOut, RepIn]</cite>, return a Future of type <cite>RepOut</cite> (the reply
 type). All types are parameterized so that filters may also transform
 request or reply types; visualized:</p>
@@ -188,7 +188,7 @@ then <cite>timeoutFilter</cite>.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Futures.html" title="previous chapter">Concurrent Programming with Futures</a></li>
-      <li>Next: <a href="changelog.html" title="next chapter">Finagle changelog</a></li>
+      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

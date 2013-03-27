@@ -591,6 +591,20 @@ will be load balanced across these.  This is a shorthand form for
 specifying a cluster.</p><p>One of the {{hosts}} variations or direct specification of the
 cluster (via {{cluster}}) is required.
 </p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#httpProxy" data-isabs="false">
+      <a id="httpProxy(SocketAddress):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpProxy</span><span class="params">(<span name="httpProxy">httpProxy: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Make connections via the given HTTP proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy.
+If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+</p></div></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -809,8 +823,9 @@ the request and the receipt of the response.
         <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>)</span><span class="result">: This</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Make connections via the given SOCKS proxy
-</p>
+      <p class="shortcomment cmt">Make connections via the given SOCKS proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given SOCKS proxy.
+If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

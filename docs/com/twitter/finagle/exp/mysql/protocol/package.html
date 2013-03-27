@@ -1,0 +1,295 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.exp.mysql.protocol</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../../package.html">exp</a>.<a name="com.twitter.finagle.exp.mysql" class="extype" href="../package.html">mysql</a></p>
+        <h1>protocol</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">protocol</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferReader" data-isabs="true">
+      <a id="BufferReader:BufferReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferReader.html"><span class="name">BufferReader</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferWriter" data-isabs="true">
+      <a id="BufferWriter:BufferWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferWriter.html"><span class="name">BufferWriter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Capability" data-isabs="false">
+      <a id="Capability:Capability"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.LoginRequest" data-isabs="false">
+      <a id="LoginRequest:LoginRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="LoginRequest.html"><span class="name">LoginRequest</span></a><span class="params">(<span name="username">username: String</span>, <span name="password">password: String</span>, <span name="database">database: Option[String]</span>, <span name="clientCap">clientCap: Capability</span>, <span name="salt">salt: Array[Byte]</span>, <span name="serverCap">serverCap: Capability</span>, <span name="charset">charset: Short</span>, <span name="maxPacket">maxPacket: Int</span>)</span><span class="result"> extends Request with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Reply to ServerGreeting sent during handshaking phase.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Packet" data-isabs="false">
+      <a id="Packet:Packet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Packet.html"><span class="name">Packet</span></a><span class="params">(<span name="header">header: PacketHeader</span>, <span name="body">body: Array[Byte]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents a logical packet received from MySQL.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.PacketHeader" data-isabs="false">
+      <a id="PacketHeader:PacketHeader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PacketHeader.html"><span class="name">PacketHeader</span></a><span class="params">(<span name="size">size: Int</span>, <span name="seq">seq: Short</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.ServersGreeting" data-isabs="false">
+      <a id="ServersGreeting:ServersGreeting"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServersGreeting.html"><span class="name">ServersGreeting</span></a><span class="params">(<span name="protocol">protocol: Byte</span>, <span name="version">version: String</span>, <span name="threadId">threadId: Int</span>, <span name="salt">salt: Array[Byte]</span>, <span name="serverCap">serverCap: Capability</span>, <span name="charset">charset: Short</span>, <span name="status">status: Short</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Initial Result received from server during handshaking.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Buffer" data-isabs="false">
+      <a id="Buffer:Buffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Buffer$.html"><span class="name">Buffer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The BufferReader and BufferWriter interfaces provide methods for
+reading/writing primitive data types exchanged between the client/server.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferReader" data-isabs="false">
+      <a id="BufferReader:BufferReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferReader$.html"><span class="name">BufferReader</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferWriter" data-isabs="false">
+      <a id="BufferWriter:BufferWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferWriter$.html"><span class="name">BufferWriter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Capability" data-isabs="false">
+      <a id="Capability:Capability"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Charset" data-isabs="false">
+      <a id="Charset:Charset"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Charset$.html"><span class="name">Charset</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Command" data-isabs="false">
+      <a id="Command:Command"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Command$.html"><span class="name">Command</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Packet" data-isabs="false">
+      <a id="Packet:Packet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Packet$.html"><span class="name">Packet</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.SQLZeroDate" data-isabs="false">
+      <a id="SQLZeroDate:SQLZeroDate"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SQLZeroDate$.html"><span class="name">SQLZeroDate</span></a><span class="result"> extends Date with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Date object that can appropriately
+represent MySQL zero Date.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.SQLZeroTimestamp" data-isabs="false">
+      <a id="SQLZeroTimestamp:SQLZeroTimestamp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SQLZeroTimestamp$.html"><span class="name">SQLZeroTimestamp</span></a><span class="result"> extends Timestamp with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Timestamp object that can appropriately
+represent MySQL zero Timestamp.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.ServersGreeting" data-isabs="false">
+      <a id="ServersGreeting:ServersGreeting"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ServersGreeting$.html"><span class="name">ServersGreeting</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.Type" data-isabs="false">
+      <a id="Type:Type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Type$.html"><span class="name">Type</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

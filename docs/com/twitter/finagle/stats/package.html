@@ -216,7 +216,8 @@ away other types.</p>
         <a href="RollupStatsReceiver.html"><span class="name">RollupStatsReceiver</span></a><span class="result"> extends StatsReceiver with Proxy</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A RollupStatsReceiver reports stats on multiple Counter/Stat/Gauge based on the sequence of
+names you pass.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.Stat" data-isabs="true">
       <a id="Stat:Stat"></a>
       <h4 class="signature">
@@ -295,7 +296,8 @@ away other types.</p>
         <a href="BroadcastStatsReceiver$.html"><span class="name">BroadcastStatsReceiver</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">BroadcastStatsReceiver is a helper object that create a StatsReceiver wrapper around multiple
+StatsReceivers (n).</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.ClientStatsReceiver" data-isabs="false">
       <a id="ClientStatsReceiver:ClientStatsReceiver"></a>
       <h4 class="signature">
@@ -352,10 +354,11 @@ away other types.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="LoadedStatsReceiver$.html"><span class="name">LoadedStatsReceiver</span></a><span class="result"> extends LoadedStatsReceiver</span>
+        <a href="LoadedStatsReceiver$.html"><span class="name">LoadedStatsReceiver</span></a><span class="result"> extends StatsReceiverProxy</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="StatsReceiver.html">StatsReceiver</a> that loads
+all service-loadable receivers and broadcasts stats to them.</p>
     </li><li visbl="pub" name="com.twitter.finagle.stats.MetricsStatsReceiver" data-isabs="false">
       <a id="MetricsStatsReceiver:MetricsStatsReceiver"></a>
       <h4 class="signature">

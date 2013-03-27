@@ -2,7 +2,7 @@ Concurrent Programming with Futures
 ===================================
 
 Finagle uses *futures* [#futures]_ to encapsulate and compose
-concurrent operations such as a network RPCs. Futures are directly
+concurrent operations such as network RPCs. Futures are directly
 analogous to threads — they provide independent and overlapping
 threads of control — and can be thought of as *featherweight
 threads*. They are cheap in construction, so the economies of
@@ -75,7 +75,7 @@ from a website (ala Pinterest). This typically involves:
 3. Fetching the image link
 
 This is an example of *sequential* composition: in order to do the
-next step, we must have succesfully completed the previous one. With
+next step, we must have successfully completed the previous one. With
 Futures, this is called `flatMap` [#flatMap]_. The result of `flatMap` is a Future
 representing the result of this composite operation. Given some helper
 methods — `fetchUrl` fetches the given URL, `findImageUrls` parses an HTML
@@ -104,7 +104,7 @@ extract like this:
 `f` represents the *composite* operation. It is the result of first
 retrieving the web page, and then the first image link. If either of
 the smaller operations fail (the first or second `fetchUrl` or if
-`findImageUrls` doesn't succesfully find an images), the composite
+`findImageUrls` doesn't successfully find any images), the composite
 operation also fails.
 
 The astute reader may have noticed something peculiar: this is
@@ -145,7 +145,7 @@ abstracted.
 Recovering from failure
 -----------------------
 
-Composed futures fail whenever any of their constitutent futures
+Composed futures fail whenever any of their constituent futures
 fail. However it is often useful to recover from such failures. The
 `rescue` combinator on `Future` is the dual to `flatMap`: whereas `flatMap`
 operates over *values*, `rescue` operates over *exceptions*. They 

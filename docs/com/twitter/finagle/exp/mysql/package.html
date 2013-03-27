@@ -1,0 +1,784 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.exp.mysql</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../package.html">exp</a></p>
+        <h1>mysql</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mysql</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.AuthenticationProxy" data-isabs="false">
+      <a id="AuthenticationProxy:AuthenticationProxy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AuthenticationProxy.html"><span class="name">AuthenticationProxy</span></a><span class="result"> extends ServiceFactoryProxy[Request, Result]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.BinaryEncodedRow" data-isabs="false">
+      <a id="BinaryEncodedRow:BinaryEncodedRow"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BinaryEncodedRow.html"><span class="name">BinaryEncodedRow</span></a><span class="result"> extends Row</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.BooleanValue" data-isabs="false">
+      <a id="BooleanValue:BooleanValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BooleanValue.html"><span class="name">BooleanValue</span></a><span class="params">(<span name="b">b: Boolean</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ByteValue" data-isabs="false">
+      <a id="ByteValue:ByteValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: Byte</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client" data-isabs="false">
+      <a id="Client:Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientError" data-isabs="false">
+      <a id="ClientError:ClientError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientError.html"><span class="name">ClientError</span></a><span class="params">(<span name="msg">msg: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest" data-isabs="false">
+      <a id="CloseRequest:CloseRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="ps">ps: PreparedStatement</span>)</span><span class="result"> extends CommandRequest with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CommandRequest" data-isabs="true">
+      <a id="CommandRequest:CommandRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="CommandRequest.html"><span class="name">CommandRequest</span></a><span class="result"> extends Request</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.DateValue" data-isabs="false">
+      <a id="DateValue:DateValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DateValue.html"><span class="name">DateValue</span></a><span class="params">(<span name="d">d: Date</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.DoubleValue" data-isabs="false">
+      <a id="DoubleValue:DoubleValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: Double</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.EOF" data-isabs="false">
+      <a id="EOF:EOF"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: Short</span>, <span name="serverStatus">serverStatus: Short</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents and EOF result received from the server which
+contains any warnings and the server status.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Error" data-isabs="false">
+      <a id="Error:Error"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: Short</span>, <span name="sqlState">sqlState: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the Error Packet received from the server
+and the data sent along with it.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ExecuteRequest" data-isabs="false">
+      <a id="ExecuteRequest:ExecuteRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="ps">ps: PreparedStatement</span>, <span name="flags">flags: Byte</span>, <span name="iterationCount">iterationCount: Int</span>)</span><span class="result"> extends CommandRequest with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An Execute Request.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Field" data-isabs="false">
+      <a id="Field:Field"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: String</span>, <span name="db">db: String</span>, <span name="table">table: String</span>, <span name="origTable">origTable: String</span>, <span name="name">name: String</span>, <span name="origName">origName: String</span>, <span name="charset">charset: Short</span>, <span name="displayLength">displayLength: Int</span>, <span name="fieldType">fieldType: Int</span>, <span name="flags">flags: Short</span>, <span name="decimals">decimals: Byte</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A ResultSet contains a Field packet for each column.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.FloatValue" data-isabs="false">
+      <a id="FloatValue:FloatValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: Float</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.IncompatibleServer" data-isabs="false">
+      <a id="IncompatibleServer:IncompatibleServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="IncompatibleServer.html"><span class="name">IncompatibleServer</span></a><span class="params">(<span name="msg">msg: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.IntValue" data-isabs="false">
+      <a id="IntValue:IntValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: Int</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.LongValue" data-isabs="false">
+      <a id="LongValue:LongValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: Long</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.MySQL" data-isabs="false">
+      <a id="MySQL:MySQL"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MySQL.html"><span class="name">MySQL</span></a><span class="result"> extends CodecFactory[Request, Result]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.OK" data-isabs="false">
+      <a id="OK:OK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: Long</span>, <span name="insertId">insertId: Long</span>, <span name="serverStatus">serverStatus: Int</span>, <span name="warningCount">warningCount: Int</span>, <span name="message">message: String</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the OK Packet received from the server.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PrepareRequest" data-isabs="false">
+      <a id="PrepareRequest:PrepareRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: String</span>)</span><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedOK" data-isabs="false">
+      <a id="PreparedOK:PreparedOK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PreparedOK.html"><span class="name">PreparedOK</span></a><span class="params">(<span name="statementId">statementId: Int</span>, <span name="numOfColumns">numOfColumns: Int</span>, <span name="numOfParams">numOfParams: Int</span>, <span name="warningCount">warningCount: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Prepared statement header returned from the server
+in response to a prepared statement initialization request
+COM_STMT_PREPARE.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement" data-isabs="false">
+      <a id="PreparedStatement:PreparedStatement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="params">(<span name="statementId">statementId: Int</span>, <span name="numberOfParams">numberOfParams: Int</span>)</span><span class="result"> extends Result with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.QueryRequest" data-isabs="false">
+      <a id="QueryRequest:QueryRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: String</span>)</span><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.RawBinaryValue" data-isabs="false">
+      <a id="RawBinaryValue:RawBinaryValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RawBinaryValue.html"><span class="name">RawBinaryValue</span></a><span class="params">(<span name="bytes">bytes: Array[Byte]</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.RawStringValue" data-isabs="false">
+      <a id="RawStringValue:RawStringValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RawStringValue.html"><span class="name">RawStringValue</span></a><span class="params">(<span name="s">s: String</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Raw values are returned when the value is not supported, that is,
+the decode method for the type is not implemented.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Request" data-isabs="true">
+      <a id="Request:Request"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Result" data-isabs="true">
+      <a id="Result:Result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ResultSet" data-isabs="true">
+      <a id="ResultSet:ResultSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="result"> extends Result</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Row" data-isabs="true">
+      <a id="Row:Row"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Defines an interface that allows for easily
+decoding a row into its appropriate values.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ServerError" data-isabs="false">
+      <a id="ServerError:ServerError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="msg">msg: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ShortValue" data-isabs="false">
+      <a id="ShortValue:ShortValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: Short</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" data-isabs="false">
+      <a id="SimpleCommandRequest:SimpleCommandRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleCommandRequest.html"><span class="name">SimpleCommandRequest</span></a><span class="result"> extends CommandRequest</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SimpleResultSet" data-isabs="false">
+      <a id="SimpleResultSet:SimpleResultSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleResultSet.html"><span class="name">SimpleResultSet</span></a><span class="result"> extends ResultSet</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringEncodedRow" data-isabs="false">
+      <a id="StringEncodedRow:StringEncodedRow"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StringEncodedRow.html"><span class="name">StringEncodedRow</span></a><span class="result"> extends Row</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.StringValue" data-isabs="false">
+      <a id="StringValue:StringValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: String</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.TimestampValue" data-isabs="false">
+      <a id="TimestampValue:TimestampValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TimestampValue.html"><span class="name">TimestampValue</span></a><span class="params">(<span name="t">t: Timestamp</span>)</span><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.UseRequest" data-isabs="false">
+      <a id="UseRequest:UseRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: String</span>)</span><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Value" data-isabs="true">
+      <a id="Value:Value"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Defines a Value ADT that represents values
+returned from MySQL.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client" data-isabs="false">
+      <a id="Client:Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Client$.html"><span class="name">Client</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ClientInternalGreet" data-isabs="false">
+      <a id="ClientInternalGreet:ClientInternalGreet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientInternalGreet$.html"><span class="name">ClientInternalGreet</span></a><span class="result"> extends Request with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">NOOP Request used internally by this client.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseStatementOK" data-isabs="false">
+      <a id="CloseStatementOK:CloseStatementOK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CloseStatementOK$.html"><span class="name">CloseStatementOK</span></a><span class="result"> extends OK</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Used internally to synthesize a response from
+the server when sending a prepared statement
+CloseRequest
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.DateValue" data-isabs="false">
+      <a id="DateValue:DateValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DateValue$.html"><span class="name">DateValue</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.EOF" data-isabs="false">
+      <a id="EOF:EOF"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.EmptyValue" data-isabs="false">
+      <a id="EmptyValue:EmptyValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">&quot;&quot; -&gt; EmptyValue
+SQL NULL -&gt; NullValue
+</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Error" data-isabs="false">
+      <a id="Error:Error"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Field" data-isabs="false">
+      <a id="Field:Field"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.NullValue" data-isabs="false">
+      <a id="NullValue:NullValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends Value with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.OK" data-isabs="false">
+      <a id="OK:OK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PingRequest" data-isabs="false">
+      <a id="PingRequest:PingRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends SimpleCommandRequest with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedOK" data-isabs="false">
+      <a id="PreparedOK:PreparedOK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PreparedOK$.html"><span class="name">PreparedOK</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement" data-isabs="false">
+      <a id="PreparedStatement:PreparedStatement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PreparedStatement$.html"><span class="name">PreparedStatement</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ResultSet" data-isabs="false">
+      <a id="ResultSet:ResultSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.TimestampValue" data-isabs="false">
+      <a id="TimestampValue:TimestampValue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TimestampValue$.html"><span class="name">TimestampValue</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Value" data-isabs="false">
+      <a id="Value:Value"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Value$.html"><span class="name">Value</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec" data-isabs="false">
+      <a id="codec:codec"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="codec/package.html"><span class="name">codec</span></a>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol" data-isabs="false">
+      <a id="protocol:protocol"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="protocol/package.html"><span class="name">protocol</span></a>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.util" data-isabs="false">
+      <a id="util:util"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="util/package.html"><span class="name">util</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

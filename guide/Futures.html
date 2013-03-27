@@ -60,7 +60,7 @@
   <div class="section" id="concurrent-programming-with-futures">
 <h1>Concurrent Programming with Futures<a class="headerlink" href="#concurrent-programming-with-futures" title="Permalink to this headline">¶</a></h1>
 <p>Finagle uses <em>futures</em> <a class="footnote-reference" href="#futures" id="id1">[1]</a> to encapsulate and compose
-concurrent operations such as a network RPCs. Futures are directly
+concurrent operations such as network RPCs. Futures are directly
 analogous to threads —&nbsp;they provide independent and overlapping
 threads of control — and can be thought of as <em>featherweight
 threads</em>. They are cheap in construction, so the economies of
@@ -129,7 +129,7 @@ from a website (ala Pinterest). This typically involves:</p>
 <li>Fetching the image link</li>
 </ol>
 <p>This is an example of <em>sequential</em> composition: in order to do the
-next step, we must have succesfully completed the previous one. With
+next step, we must have successfully completed the previous one. With
 Futures, this is called <cite>flatMap</cite> <a class="footnote-reference" href="#flatmap" id="id2">[2]</a>. The result of <cite>flatMap</cite> is a Future
 representing the result of this composite operation. Given some helper
 methods —&nbsp;<cite>fetchUrl</cite> fetches the given URL, <cite>findImageUrls</cite> parses an HTML
@@ -156,7 +156,7 @@ f onSuccess { image =&gt;
 <p><cite>f</cite> represents the <em>composite</em> operation. It is the result of first
 retrieving the web page, and then the first image link. If either of
 the smaller operations fail (the first or second <cite>fetchUrl</cite> or if
-<cite>findImageUrls</cite> doesn&#8217;t succesfully find an images), the composite
+<cite>findImageUrls</cite> doesn&#8217;t successfully find any images), the composite
 operation also fails.</p>
 <p>The astute reader may have noticed something peculiar: this is
 typically the job of the semicolon! That is not far from the truth:
@@ -190,7 +190,7 @@ abstracted.</p>
 </div>
 <div class="section" id="recovering-from-failure">
 <h2>Recovering from failure<a class="headerlink" href="#recovering-from-failure" title="Permalink to this headline">¶</a></h2>
-<p>Composed futures fail whenever any of their constitutent futures
+<p>Composed futures fail whenever any of their constituent futures
 fail. However it is often useful to recover from such failures. The
 <cite>rescue</cite> combinator on <cite>Future</cite> is the dual to <cite>flatMap</cite>: whereas <cite>flatMap</cite>
 operates over <em>values</em>, <cite>rescue</cite> operates over <em>exceptions</em>. They

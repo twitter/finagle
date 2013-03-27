@@ -48,13 +48,14 @@ User's guide
    Quickstart
    Futures
    ServicesAndFilters
+   FAQ
 
 Notes
 -----
 
 .. toctree::
    :maxdepth: 2
-   
+
    changelog
    license
 
