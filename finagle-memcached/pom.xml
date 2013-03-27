@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>6.2.5-SNAPSHOT</version>
+      <version>6.2.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter.common</groupId>
