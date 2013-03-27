@@ -113,6 +113,7 @@ object Finagle extends Build {
     finagleCore, finagleTest, finagleOstrich4, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
+    finagleExp,
 
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
@@ -355,6 +356,26 @@ object Finagle extends Build {
     )
   ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
 
+  lazy val finagleMySQL = Project(
+    id = "finagle-mysql",
+    base = file("finagle-mysql"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+    ).settings(
+      name := "finagle-mysql",
+      libraryDependencies ++= Seq(util("logging"))
+    ).dependsOn(finagleCore)
+  
+  lazy val finagleExp = Project(
+    id = "finagle-exp",
+    base = file("finagle-exp"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+    ).settings(
+      name := "finagle-exp",
+      libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
+    ).dependsOn(finagleCore, finagleTest % "test")
+
   // Uses
 
   lazy val finagleStress = Project(
@@ -400,16 +421,6 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
   ).dependsOn(finagleCore, finagleStats, finagleOstrich4)
-
-  lazy val finagleMySQL = Project(
-    id = "finagle-mysql",
-    base = file("finagle-mysql"),
-    settings = Project.defaultSettings ++
-      sharedSettings
-    ).settings(
-      name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging"))
-    ).dependsOn(finagleCore)
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",
