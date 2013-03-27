@@ -26,13 +26,17 @@ class RollupStatsReceiver(val self: StatsReceiver)
   }
 
   def counter(names: String*) = new Counter {
-    private[this] val allCounters = tails(names) map (self.counter(_: _*))
-    def incr(delta: Int) = allCounters foreach (_.incr(delta))
+    private[this] val allCounters = BroadcastCounter(
+      tails(names) map (self.counter(_: _*))
+    )
+    def incr(delta: Int) = allCounters.incr(delta)
   }
 
   def stat(names: String*) = new Stat {
-    private[this] val allStats = tails(names) map (self.stat(_: _*))
-    def add(value: Float) = allStats foreach (_.add(value))
+    private[this] val allStats = BroadcastStat(
+      tails(names) map (self.stat(_: _*))
+    )
+    def add(value: Float) = allStats.add(value)
   }
 
   def addGauge(names: String*)(f: => Float) = new Gauge {

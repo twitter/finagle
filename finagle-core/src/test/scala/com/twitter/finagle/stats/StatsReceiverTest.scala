@@ -7,9 +7,56 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])
 class StatsReceiverTest extends FunSuite {
+  test("RollupStatsReceiver counter/stats") {
+    val mem = new InMemoryStatsReceiver
+    val receiver = new RollupStatsReceiver(mem)
+
+    receiver.counter("toto", "titi", "tata").incr()
+    assert(mem.counters(Seq("toto")) == 1)
+    assert(mem.counters(Seq("toto", "titi")) == 1)
+    assert(mem.counters(Seq("toto", "titi", "tata")) == 1)
+
+    receiver.counter("toto", "titi", "tutu").incr()
+    assert(mem.counters(Seq("toto")) == 2)
+    assert(mem.counters(Seq("toto", "titi")) == 2)
+    assert(mem.counters(Seq("toto", "titi", "tata")) == 1)
+    assert(mem.counters(Seq("toto", "titi", "tutu")) == 1)
+  }
+
+  test("Broadcast Counter/Stat") {
+    class MemCounter extends Counter {
+      var c = 0
+      def incr(delta: Int) { c += delta }
+    }
+    val c1 = new MemCounter
+    val c2 = new MemCounter
+    val broadcastCounter = BroadcastCounter(Seq(c1, c2))
+    assert(c1.c == 0)
+    assert(c2.c == 0)
+
+    broadcastCounter.incr()
+    assert(c1.c == 1)
+    assert(c2.c == 1)
+
+    class MemStat extends Stat {
+      var values: Seq[Float] = ArrayBuffer.empty[Float]
+      def add(f: Float) { values = values :+ f }
+    }
+    val s1 = new MemStat
+    val s2 = new MemStat
+    val broadcastStat = BroadcastStat(Seq(s1, s2))
+    assert(s1.values === Seq.empty)
+    assert(s2.values === Seq.empty)
+
+    broadcastStat.add(1F)
+    assert(s1.values === Seq(1F))
+    assert(s2.values === Seq(1F))
+  }
+
   test("StatsReceiver time") {
     val receiver = spy(new InMemoryStatsReceiver)
 
