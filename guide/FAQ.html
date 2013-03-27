@@ -70,11 +70,11 @@ from a downstream server it will cancel this pending request, and so on.</p>
 <p>This is the source of the <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.CancelledRequestException">CancelledRequestException</a> &#8211;
 when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception.</p>
-<p>You can turn this behavior off with the <cite>cancelOnHangup</cite> <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> option:</p>
-<div class="highlight-text"><div class="highlight"><pre>ServerBuilder()
-  ...
-  .cancelOnHangup(false)
-  ...
+<p>You can disable this behavior by using the <a class="reference external" href="http://twitter.github.com/finagle/docs/#com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>:</p>
+<div class="highlight-text"><div class="highlight"><pre>val service: Service[Req, Rep] = ...
+val masked = new MaskCancelFilter[Req, Rep]
+
+val maskedService = masked andThen service
 </pre></div>
 </div>
 <p>Note that most protocols do not natively support request cancellations

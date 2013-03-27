@@ -15,14 +15,14 @@ This is the source of the :api:`CancelledRequestException <com.twitter.finagle.C
 when a Finagle client receives the cancellation interrupt while a request is pending, it 
 fails that request with this exception.
 
-You can turn this behavior off with the `cancelOnHangup` :api:`ServerBuilder <com.twitter.finagle.builder.ServerBuilder>` option:
+You can disable this behavior by using the :api:`MaskCancelFilter <com.twitter.finagle.filter.MaskCancelFilter>`:
 
 ::
 
-	ServerBuilder()
-	  ...
-	  .cancelOnHangup(false)
-	  ...
+	val service: Service[Req, Rep] = ...
+	val masked = new MaskCancelFilter[Req, Rep]
+
+	val maskedService = masked andThen service
 
 Note that most protocols do not natively support request cancellations
 (though modern RPC protocols like :api:`Mux <com.twitter.finagle.Mux$>`
