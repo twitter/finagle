@@ -14,7 +14,7 @@ import com.twitter.finagle.stats.{
   BroadcastStatsReceiver, ClientStatsReceiver, RollupStatsReceiver,
   StatsReceiver, NullStatsReceiver
 }
-import com.twitter.finagle.tracing.{DefaultTracer, Tracer, TracingFilter}
+import com.twitter.finagle.tracing.{NullTracer, DefaultTracer, Tracer, TracingFilter}
 import com.twitter.finagle.util.{DefaultTimer, DefaultMonitor}
 import com.twitter.util.{Timer, Duration, Monitor}
 import java.net.{SocketAddress, InetSocketAddress}
@@ -143,7 +143,10 @@ case class DefaultClient[Req, Rep](
         new TimeoutFactory(factory, serviceTimeout, exception, timer)
       }
   
-    val traced: Transformer[Req, Rep] = new TracingFilter[Req, Rep](tracer) andThen _
+    val traced: Transformer[Req, Rep] =
+      if (tracer == NullTracer) identity
+      else factory => new TracingFilter[Req, Rep](tracer) andThen factory
+
     val observed: Transformer[Req, Rep] = new StatsFactoryWrapper(_, statsReceiver)
   
     val noBrokersException = new NoBrokersAvailableException(name)

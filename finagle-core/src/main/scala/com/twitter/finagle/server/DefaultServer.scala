@@ -8,7 +8,7 @@ import com.twitter.finagle.filter.{
 }
 import com.twitter.finagle.service.{TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, ServerStatsReceiver}
-import com.twitter.finagle.tracing.{Tracer, TracingFilter, DefaultTracer}
+import com.twitter.finagle.tracing.{NullTracer, Tracer, TracingFilter, DefaultTracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger}
 import com.twitter.jvm.Jvm
@@ -73,7 +73,9 @@ case class DefaultServer[Req, Rep, In, Out](
       val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
       val monitorFilter = new MonitorFilter[Req, Rep](
         monitor andThen new SourceTrackingMonitor(logger, "server"))
-      val tracingFilter = new TracingFilter[Req, Rep](tracer)
+      val tracingFilter =
+        if (tracer == NullTracer) Filter.identity[Req, Rep]
+        else new TracingFilter[Req, Rep](tracer)
       val jvmFilter= DefaultServer.newJvmFilter[Req, Rep]()
 
       val filter = handletimeFilter andThen // to measure total handle time
