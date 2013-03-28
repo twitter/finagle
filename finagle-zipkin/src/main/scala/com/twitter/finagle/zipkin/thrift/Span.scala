@@ -32,7 +32,7 @@ case class Span(
 {
   val serviceName = _serviceName getOrElse "Unknown"
   val name = _name getOrElse "Unknown"
-  val endpoint = _endpoint getOrElse Endpoint.Unknown
+  val endpoint = (_endpoint getOrElse Endpoint.Unknown).boundEndpoint
 
   /**
    * @return a pretty string for this span ID.
@@ -56,13 +56,22 @@ case class Span(
     span.setName(name)
     span.setDebug(traceId.flags.isDebug)
 
+    // fill in the host/service data for all the annotations
     annotations map ( _.toThrift ) foreach { a =>
-      if (a.isSetHost) a.getHost().setService_name(serviceName)
+      val eopt = if (a.isSetHost) Some(a.getHost()) else endpoint.toThrift
+      eopt foreach { e =>
+        e.setService_name(serviceName)
+        a.setHost(e)
+      }
       span.addToAnnotations(a)
     }
 
     bAnnotations map ( _.toThrift ) foreach { a =>
-      if (a.isSetHost) a.getHost().setService_name(serviceName)
+      val eopt = if (a.isSetHost) Some(a.getHost()) else endpoint.toThrift
+      eopt foreach { e =>
+        e.setService_name(serviceName)
+        a.setHost(e)
+      }
       span.addToBinary_annotations(a)
     }
     span

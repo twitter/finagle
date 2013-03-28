@@ -160,6 +160,22 @@ object Trace {
   }
 
   /**
+   * Convenience method for event loops in services.  Put your service handling
+   * code inside this to get proper tracing with all the correct fields filled in.
+   */
+  def traceService[T](service: String, rpc: String, hostOpt: Option[InetSocketAddress]=None)(f: => T): T = {
+    unwind {
+      Trace.setId(Trace.nextId)
+      Trace.recordRpcname(service, rpc)
+      hostOpt map { Trace.recordServerAddr(_) }
+      Trace.record(Annotation.ServerRecv())
+      try f finally {
+        Trace.record(Annotation.ServerSend())
+      }
+    }
+  }
+
+  /**
    * Invoke `f` and then unwind the stack to the starting point.
    */
   def unwind[T](f: => T): T = {

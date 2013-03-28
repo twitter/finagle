@@ -5,7 +5,7 @@ import com.twitter.util.Time
 import org.junit.runner.RunWith
 import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
-import org.mockito.Mockito.{never, times, verify, when}
+import org.mockito.Mockito.{never, times, verify, when, atLeast}
 import org.mockito.Matchers.any
 import org.scalatest.mock.MockitoSugar
 
@@ -62,6 +62,24 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     assert(Trace.id === topId)
   }
 
+  val tracer1 = mock[Tracer]
+  val tracer2 = mock[Tracer]
+
+  test("Trace.traceService") {
+    var didRun = false
+
+    Trace.pushTracer(tracer1)
+    val priorId = Trace.id
+
+    Trace.traceService("service", "rpcname") {
+      assert(Trace.id != priorId)
+      didRun = true
+    }
+
+    verify(tracer1, atLeast(3)).record(any[Record])
+    assert(didRun)
+    assert(Trace.id === priorId)
+  }
 
   test("Trace.unwind") {
     var didRun = false
@@ -74,10 +92,6 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     assert(didRun)
     assert(Trace.id === priorId)
   }
-
-
-  val tracer1 = mock[Tracer]
-  val tracer2 = mock[Tracer]
 
   test("Trace.record: report topmost id to all tracers") { Time.withCurrentTimeFrozen { tc =>
     Trace.setId(id0)
