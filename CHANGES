@@ -5,6 +5,12 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.1.4
+~~~~~
+
+- `finagle-zipkin`: tracing improvements
+- `finagle`: Upgrade util to 6.2.5
+
 6.1.3
 ~~~~~
 
