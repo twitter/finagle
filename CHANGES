@@ -5,6 +5,20 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.1.3
+~~~~~
+
+- `finagle-core`: Add BroadcastCounter and BroadcastStat, refactor Broadcast and Rollup Receiver.
+- `finagle`: update sbt, add finagle-exp
+- `finagle-doc`: Add a FAQ, add an entry about CancelledRequestExceptions
+- `finagle-core`: Add client support for proxies that support HTTP CONNECT, such as squid.
+- `finagle-doc`: A few wording fixes in Sphinx doc templates.
+- `finagle-core`: StatsFilter: Check for WriteException-wrapped backup-request losers
+- `finagle-mysql`: bug fixes
+- `finagle`: Update sbt project definition
+- `finagle-core`: Introduce DefaultTracer that load available Tracers via LoadService + Fix equality with NullStatsReceiver
+- `finagle-core`: CachingPool: Do not schedule timer tasks if ttl is Duration.Top
+
 6.1.2
 ~~~~~
 
