@@ -167,6 +167,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _logger                    : Option[Logger]                = None,
   private val _channelFactory            : Option[ChannelFactory]        = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
+  private val _httpProxy                 : Option[SocketAddress]          = None,
   private val _socksProxy                : Option[SocketAddress]          = None,
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _tracer                    : Tracer                        = NullTracer,
@@ -210,6 +211,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val logger                    = _logger
   val channelFactory            = _channelFactory
   val tls                       = _tls
+  val httpProxy                 = _httpProxy
   val socksProxy                = _socksProxy
   val failureAccrual            = _failureAccrual
   val tracer                    = _tracer
@@ -243,6 +245,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
+    "httpProxy"                 -> _httpProxy,
     "socksProxy"                -> _socksProxy,
     "failureAccrual"            -> _failureAccrual,
     "tracer"                    -> Some(_tracer),
@@ -564,7 +567,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_tls = Some({ () => Ssl.clientWithoutCertificateValidation()}, None)))
 
   /**
-   * Make connections via the given SOCKS proxy
+   * Make connections via the given HTTP proxy.
+   * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+   */
+  def httpProxy(httpProxy: SocketAddress): This =
+    withConfig(_.copy(_httpProxy = Some(httpProxy)))
+
+  /**
+   * Make connections via the given SOCKS proxy.
+   * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
    */
   def socksProxy(socksProxy: SocketAddress): This =
     withConfig(_.copy(_socksProxy = Some(socksProxy)))
@@ -685,6 +696,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       newChannel = newChannel,
       newTransport = codec.newClientTransport(_, statsReceiver),
       tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
+      httpProxy = config.httpProxy,
       socksProxy = config.socksProxy,
       channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.Top,
       channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.Top,
