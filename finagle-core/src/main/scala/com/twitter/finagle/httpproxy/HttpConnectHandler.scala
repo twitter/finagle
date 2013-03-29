@@ -17,11 +17,12 @@ import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, I
  *
  */
 object HttpConnectHandler {
-  def addHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, pipeline: ChannelPipeline) {
+  def addHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, pipeline: ChannelPipeline): HttpConnectHandler = {
     val clientCodec = new HttpClientCodec()
-    pipeline.addFirst("httpProxyCodec",
-      new HttpConnectHandler(proxyAddr, addr, clientCodec))
+    val handler = new HttpConnectHandler(proxyAddr, addr, clientCodec)
+    pipeline.addFirst("httpProxyCodec", handler)
     pipeline.addFirst("clientCodec", clientCodec)
+    handler
   }
 }
 
