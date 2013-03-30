@@ -15,7 +15,7 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
 import java.util.IdentityHashMap
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import org.jboss.netty.channel.socket.nio.{NioWorkerPool, NioClientSocketChannelFactory}
 import org.jboss.netty.channel.{
   Channel, ChannelFactory, ChannelFuture, ChannelFutureListener, ChannelPipeline, ChannelPipelineFactory,
   Channels
@@ -221,7 +221,11 @@ case class Netty3Transporter[In, Out](
 }
 
 object Netty3Transporter {
-  val channelFactory: ChannelFactory = new NioClientSocketChannelFactory(Executor, Executor) {
+  private[this] val bossThreads = 1
+  private[this] val workerThreads = Runtime.getRuntime.availableProcessors * 2
+
+  val channelFactory: ChannelFactory = new NioClientSocketChannelFactory(
+    Executor, bossThreads, new NioWorkerPool(Executor, workerThreads), DefaultTimer) {
     override def releaseExternalResources() = ()  // no-op; unreleasable
   }
   val defaultChannelOptions: Map[String, Object] = Map(
