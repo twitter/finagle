@@ -3,6 +3,13 @@ package com.twitter.finagle.exp.mysql.protocol
 import java.nio.charset.{Charset => JCharset}
 
 object Charset {
+
+  /**
+    * Converts from mysql charset to java charset.
+    */
+  // TODO: because we only support ascii + utf8, there is no work here.
+  def apply(charset: Short): JCharset = JCharset.forName("UTF-8")
+
   /**
    * Default Charset to use when decoding strings.
    */
@@ -11,6 +18,7 @@ object Charset {
   /**
    * MySQL UTF-8 Collations.
    */
+  val Latin1_bin               = 47.toShort
   val Utf8_bin                 = 83.toShort
   val Utf8_czech_ci            = 202.toShort
   val Utf8_danish_ci           = 203.toShort
@@ -34,7 +42,8 @@ object Charset {
   val Utf8_turkish_ci          = 201.toShort
   val Utf8_unicode_ci          = 192.toShort
 
-  private[this] val Utf8Set = Set(
+  private[this] val CompatibleSet = Set(
+    Latin1_bin,
     Utf8_bin,
     Utf8_czech_ci,
     Utf8_danish_ci,
@@ -59,5 +68,5 @@ object Charset {
     Utf8_unicode_ci
   )
 
-  def isUTF8(code: Short) = Utf8Set.contains(code)
+  def isCompatible(code: Short): Boolean = CompatibleSet(code)
 }

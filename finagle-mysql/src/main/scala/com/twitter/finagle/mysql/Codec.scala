@@ -54,14 +54,14 @@ class AuthenticationProxy(
   extends ServiceFactoryProxy(underlying) {
 
     def makeLoginReq(sg: ServersGreeting) =
-      LoginRequest(username, password, database, clientCap, sg.salt, sg.serverCap)
+      LoginRequest(username, password, database, clientCap, sg.salt, sg.serverCap, sg.charset)
 
     def acceptGreeting(res: Result) = res match {
       case sg: ServersGreeting if !sg.serverCap.has(Capability.Protocol41) =>
         Future.exception(IncompatibleServer("This client is only compatible with MySQL version 4.1 and later."))
 
-      case sg: ServersGreeting if !Charset.isUTF8(sg.charset) =>
-        Future.exception(IncompatibleServer("This client is only compatible with UTF-8 charset encoding."))
+      case sg: ServersGreeting if !Charset.isCompatible(sg.charset) =>
+        Future.exception(IncompatibleServer("This client is only compatible with UTF-8 and Latin-1 charset encoding."))
 
       case sg: ServersGreeting =>
         Future.value(sg)

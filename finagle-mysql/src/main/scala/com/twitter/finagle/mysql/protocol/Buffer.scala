@@ -5,6 +5,7 @@ import java.nio.ByteOrder
 import java.nio.charset.{Charset => JCharset}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers._
+import scala.collection.mutable.{Buffer => SBuffer}
 
 /**
  * The BufferReader and BufferWriter interfaces provide methods for
@@ -133,29 +134,40 @@ trait BufferReader {
 
   /**
    * Reads a null-terminated string where
-   * null is denoted by '\0'. Uses Charset.defaultCharset
+   * null is denoted by '\0'. Uses Charset.defaultCharset by default
    * to decode strings.
    * @return a null-terminated String starting at offset.
    */
-  def readNullTerminatedString(): String = {
+  def readNullTerminatedString(charset: JCharset = Charset.defaultCharset): String = {
     val start = offset
     var length = 0
 
     while (readByte() != 0x00)
       length += 1
 
-    this.toString(start, length, Charset.defaultCharset)
+    this.toString(start, length, charset)
+  }
+
+  /**
+   * Reads a null-terminated array where
+   * null is denoted by '\0'.
+   * @return a null-terminated String starting at offset.
+   */
+  def readNullTerminatedBytes(): Array[Byte] = {
+    val cur: SBuffer[Byte] = SBuffer()
+    do cur += readByte() while (cur.last != 0x00)
+    cur.init.toArray
   }
 
   /**
    * Reads a length encoded string according to the MySQL
-   * Client/Server protocol. Uses Charset.defaultCharset to
-   * decode strings. For more details refer to MySQL
+   * Client/Server protocol. Uses Charset.defaultCharset by default
+   * to decode strings. For more details refer to MySQL
    * documentation.
    * @return a MySQL length coded String starting at
    * offset.
    */
-  def readLengthCodedString(): String = {
+  def readLengthCodedString(charset: JCharset = Charset.defaultCharset): String = {
     val length = readLengthCodedBinary()
     if (length == Buffer.NULL_LENGTH)
        null
@@ -164,7 +176,7 @@ trait BufferReader {
     else {
       val start = offset
       skip(length)
-      this.toString(start, length, Charset.defaultCharset)
+      this.toString(start, length, charset)
     }
   }
 
@@ -346,25 +358,31 @@ trait BufferWriter {
 
    /**
     * Writes a null terminated string onto the buffer where
-    * '\0' denotes null. Uses Charset.defaultCharset to decode the given
-    * String.
+    * '\0' denotes null. Uses Charset.defaultCharset by default
+    * to decode the given String.
     * @param s String to write.
     */
-   def writeNullTerminatedString(s: String): BufferWriter = {
-    writeBytes(s.getBytes(Charset.defaultCharset))
+   def writeNullTerminatedString(
+     s: String,
+     charset: JCharset = Charset.defaultCharset
+   ): BufferWriter = {
+    writeBytes(s.getBytes(charset))
     writeByte('\0')
     this
    }
 
    /**
     * Writes a length coded string using the MySQL Client/Server
-    * protocol. Uses Charset.defaultCharset to decode the given
-    * String.
+    * protocol. Uses Charset.defaultCharset by default to decode
+    * the given String.
     * @param s String to write to buffer.
     */
-   def writeLengthCodedString(s: String): BufferWriter = {
+   def writeLengthCodedString(
+     s: String,
+     charset: JCharset = Charset.defaultCharset
+   ): BufferWriter = {
     writeLengthCodedBinary(s.length)
-    writeBytes(s.getBytes(Charset.defaultCharset))
+    writeBytes(s.getBytes(charset))
     this
    }
 
