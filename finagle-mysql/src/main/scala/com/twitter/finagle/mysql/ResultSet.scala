@@ -84,9 +84,9 @@ class StringEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[S
    * Convert the string representation of each value
    * into an appropriate Value object.
    */
-  val values: IndexedSeq[Value] = (for ((field, idx) <- fields.zipWithIndex) yield {
+  val values: IndexedSeq[Value] = (for (field: Field <- fields.toIndexedSeq) yield {
     Value(field.fieldType, br.readLengthCodedString(Charset(field.charset)))
-  }).toIndexedSeq
+  })
 
   def indexOf(name: String) = indexMap.get(name)
 }
@@ -116,12 +116,12 @@ class BinaryEncodedRow(row: Array[Byte], val fields: Seq[Field], indexMap: Map[S
    * Convert the binary representation of each value
    * into an appropriate Value object.
    */
-  val values: IndexedSeq[Value] = (for ((field, idx) <- fields.zipWithIndex) yield {
+  val values: IndexedSeq[Value] = (for ((field, idx) <- fields.toIndexedSeq.zipWithIndex) yield {
     if (isNull(idx))
       NullValue
     else
       Value(field.fieldType, buffer, Charset(field.charset))
-  }).toIndexedSeq
+  })
 
   def indexOf(name: String) = indexMap.get(name)
 }
