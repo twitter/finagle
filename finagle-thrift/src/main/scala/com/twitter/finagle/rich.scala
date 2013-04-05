@@ -75,7 +75,7 @@ private object ThriftUtil {
  * and the standard protocol is used. If the remote server is also a
  * finagle server (or any other supporting this extension), we reply
  * to the request, and every subsequent request is dispatched with an
- * envelope carrying trace metadata. The envelope itself is also a 
+ * envelope carrying trace metadata. The envelope itself is also a
  * Thrift struct described [[https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift here]].
  */
 trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
@@ -170,15 +170,55 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   import ThriftUtil._
 
-  protected val protocolFactory: TProtocolFactory 
+  protected val protocolFactory: TProtocolFactory
+
+  private[this] def serverFromIface(iface: AnyRef): Service[Array[Byte], Array[Byte]] = {
+    iface.getClass.getInterfaces.filter(n =>
+      n.getName.endsWith("$FutureIface") ||
+      n.getName.endsWith("$ServiceIface")
+    ).toSeq match {
+      case Seq(futureIface) if futureIface.getName.endsWith("$FutureIface") =>
+        val objectName = futureIface.getName.dropRight(12)
+        val serviceClass = classForName(objectName + "$FinagledService")
+
+        val constructor = try {
+          serviceClass.getConstructor(futureIface, classOf[TProtocolFactory])
+        } catch {
+          case cause: NoSuchMethodException =>
+            throw new IllegalArgumentException("iface is not a valid FinagledService", cause)
+        }
+
+        constructor.newInstance(iface, protocolFactory)
+          .asInstanceOf[Service[Array[Byte], Array[Byte]]]
+
+      case Seq(serviceIface) if serviceIface.getName.endsWith("$ServiceIface") =>
+        val outerClass = serviceIface.getName.dropRight(13)
+        val serviceClass = classForName(outerClass + "$Service")
+
+        val constructor = try {
+          serviceClass.getConstructor(serviceIface, classOf[TProtocolFactory])
+        } catch {
+          case cause: NoSuchMethodException =>
+            throw new IllegalArgumentException("iface is not a valid ServiceIface", cause)
+        }
+
+        constructor.newInstance(iface, protocolFactory)
+          .asInstanceOf[Service[Array[Byte], Array[Byte]]]
+
+      case Seq() => throw new IllegalArgumentException("iface is not a FutureIface or ServiceIface")
+      case _ => throw new IllegalArgumentException("iface implements no candidate ifaces")
+    }
+  }
 
   /**
+   * @define serveIface
+   *
    * Serve the interface implementation `iface`, which must be generated
    * by either [[https://github.com/twitter/scrooge Scrooge]] or
    * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
    *
    * Given the IDL:
-   * 
+   *
    * {{{
    * service TestService {
    *   string query(1: string x)
@@ -193,43 +233,10 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
    * Note that this interface is discovered by reflection. Passing an
    * invalid interface implementation will result in a runtime error.
    */
-  def serveIface(target: String, iface: AnyRef): ListeningServer = {
-    val service = iface.getClass.getInterfaces.filter(n => 
-      n.getName.endsWith("$FutureIface") || 
-      n.getName.endsWith("$ServiceIface")
-    ).toSeq match {
-      case Seq(futureIface) if futureIface.getName.endsWith("$FutureIface") =>
-        val objectName = futureIface.getName.dropRight(12)
-        val serviceClass = classForName(objectName + "$FinagledService")
+  def serveIface(target: String, iface: AnyRef): ListeningServer =
+    serve(target, serverFromIface(iface))
 
-        val constructor = try {
-          serviceClass.getConstructor(futureIface, classOf[TProtocolFactory])
-        } catch {
-          case cause: NoSuchMethodException =>
-            throw new IllegalArgumentException("iface is not a valid FinagledService", cause)
-        }
-    
-        constructor.newInstance(iface, protocolFactory)
-          .asInstanceOf[Service[Array[Byte], Array[Byte]]]
-
-      case Seq(serviceIface) if serviceIface.getName.endsWith("$ServiceIface") =>
-        val outerClass = serviceIface.getName.dropRight(13)
-        val serviceClass = classForName(outerClass + "$Service")
-        
-        val constructor = try {
-          serviceClass.getConstructor(serviceIface, classOf[TProtocolFactory])
-        } catch {
-          case cause: NoSuchMethodException =>
-            throw new IllegalArgumentException("iface is not a valid ServiceIface", cause)
-        }
-        
-        constructor.newInstance(iface, protocolFactory)
-          .asInstanceOf[Service[Array[Byte], Array[Byte]]]
-
-      case Seq() => throw new IllegalArgumentException("iface is not a FutureIface or ServiceIface")
-      case _ => throw new IllegalArgumentException("iface implements no candidate ifaces")
-    }
-
-    serve(target, service)
-  }
+  /** $serveIface */
+  def serveIface(target: SocketAddress, iface: AnyRef): ListeningServer =
+    serve(target, serverFromIface(iface))
 }
