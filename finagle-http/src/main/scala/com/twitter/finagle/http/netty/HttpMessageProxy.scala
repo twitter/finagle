@@ -28,14 +28,14 @@ trait HttpMessageProxy extends HttpMessage {
   def getContent(): ChannelBuffer        = httpMessage.getContent()
   def setContent(content: ChannelBuffer) { httpMessage.setContent(content) }
 
-  @deprecated("deprecated in netty")
+  @deprecated("deprecated in netty", "6.1.5")
   def getContentLength(): Long                   = httpMessage.getContentLength()
-  @deprecated("deprecated in netty")
+  @deprecated("deprecated in netty", "6.1.5")
   def getContentLength(defaultValue: Long): Long = httpMessage.getContentLength(defaultValue)
 
   def isChunked: Boolean           = httpMessage.isChunked()
   def setChunked(chunked: Boolean) { httpMessage.setChunked(chunked) }
 
-  @deprecated("deprecated in netty")
+  @deprecated("deprecated in netty", "6.1.5")
   def isKeepAlive: Boolean = httpMessage.isKeepAlive()
 }

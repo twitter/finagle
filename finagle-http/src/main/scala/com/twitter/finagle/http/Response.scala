@@ -52,13 +52,17 @@ object Response {
     Response(httpResponse)
   }
 
-  /** Create Response.  Convenience method for testing. */
+  /** Create Response. */
   def apply(): Response =
     apply(Version.Http11, Status.Ok)
 
-  /** Create Response from version and status.  Convenience method for testing. */
+  /** Create Response from version and status. */
   def apply(version: HttpVersion, status: HttpResponseStatus): Response =
     apply(new DefaultHttpResponse(version, status))
+
+  /** Create Response from status. */
+  def apply(status: HttpResponseStatus): Response =
+    apply(new DefaultHttpResponse(Version.Http11, status))
 
   /** Create Response from HttpResponse. */
   def apply(httpResponseArg: HttpResponse): Response =

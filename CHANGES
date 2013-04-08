@@ -4,6 +4,7 @@ as it is included in Finagle's user's guide.
 
 6.x
 -----
+- `finagle-http`: Add Response.apply(status)
 
 6.3.0
 ~~~~~

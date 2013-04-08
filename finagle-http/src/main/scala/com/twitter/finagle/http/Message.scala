@@ -382,11 +382,11 @@ abstract class Message extends HttpMessage {
 
 object Message {
   private[http] val Utf8          = Charset.forName("UTF-8")
-  @deprecated("Use MediaType.Json")
+  @deprecated("Use MediaType.Json", "6.1.5")
   val MediaTypeJson         = "application/json"
-  @deprecated("Use MediaType.Javascript")
+  @deprecated("Use MediaType.Javascript", "6.1.5")
   val MediaTypeJavascript   = "application/javascript"
-  @deprecated("Use MediaType.WwwForm")
+  @deprecated("Use MediaType.WwwForm", "6.1.5")
   val MediaTypeWwwForm      = "application/x-www-form-urlencoded"
   val CharsetUtf8           = "charset=utf-8"
   val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8
