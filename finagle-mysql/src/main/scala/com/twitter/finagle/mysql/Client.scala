@@ -53,8 +53,8 @@ object Client {
   }
 }
 
-class Client(factory: ServiceFactory[Request, Result]) {
-  private[this] lazy val fService = factory.apply()
+class Client(val factory: ServiceFactory[Request, Result]) {
+  private[this] val service = factory.toService
 
   /**
    * Sends a query to the server without using
@@ -173,10 +173,8 @@ class Client(factory: ServiceFactory[Request, Result]) {
    * and handle Error responses from the server.
    */
   private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]]): Future[T] =
-    fService flatMap { service =>
-      service(r) flatMap (handler orElse {
-        case Error(c, s, m) => Future.exception(ServerError(c + " - " + m))
-        case result         => Future.exception(ClientError("Unhandled result from server: " + result))
-      })
-    }
+    service(r) flatMap (handler orElse {
+      case Error(c, s, m) => Future.exception(ServerError(c + " - " + m))
+      case result         => Future.exception(ClientError("Unhandled result from server: " + result))
+    })
 }
