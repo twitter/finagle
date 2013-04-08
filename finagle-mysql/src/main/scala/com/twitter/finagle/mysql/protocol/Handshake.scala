@@ -3,6 +3,7 @@ package com.twitter.finagle.exp.mysql.protocol
 import com.twitter.finagle.exp.mysql.protocol.Capability._
 import com.twitter.finagle.exp.mysql.{Result, Request}
 import java.security.MessageDigest
+import java.nio.charset.{Charset => JCharset}
 
 /**
  * Initial Result received from server during handshaking.
@@ -21,12 +22,13 @@ object ServersGreeting {
   def decode(packet: Packet): ServersGreeting = {
     val br = BufferReader(packet.body)
     val protocol = br.readByte()
-    val version = br.readNullTerminatedString()
+    val bytesVersion = br.readNullTerminatedBytes()
     val threadId = br.readInt()
     val salt1 = br.take(8)
     br.skip(1) // 1 filler byte always 0x00
     val serverCap = Capability(br.readUnsignedShort())
     val charset = br.readUnsignedByte()
+    val version = new String(bytesVersion, Charset(charset))
     val status = br.readShort()
     br.skip(13)
     val salt2 = br.take(12)
@@ -68,17 +70,17 @@ case class LoginRequest(
     bw.writeInt(maxPacket)
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
-    bw.writeNullTerminatedString(username)
+    bw.writeNullTerminatedString(username, Charset(charset))
     bw.writeLengthCodedBytes(hashPassword)
     if (newClientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))
-      bw.writeNullTerminatedString(database.get)
+      bw.writeNullTerminatedString(database.get, Charset(charset))
 
     bw.toChannelBuffer
   }
 
   private[this] def encryptPassword(password: String, salt: Array[Byte]) = {
     val md = MessageDigest.getInstance("SHA-1")
-    val hash1 = md.digest(password.getBytes(Charset.defaultCharset.displayName))
+    val hash1 = md.digest(password.getBytes(Charset(charset).displayName))
     md.reset()
     val hash2 = md.digest(hash1)
     md.reset()
