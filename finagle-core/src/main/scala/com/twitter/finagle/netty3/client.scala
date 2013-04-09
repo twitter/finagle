@@ -196,7 +196,7 @@ case class Netty3Transporter[In, Out](
 
     (httpProxy, addr) match {
       case (Some(proxyAddr), (inetAddr : InetSocketAddress)) =>
-        pipeline.addFirst("httpConnect", new HttpConnectHandler(proxyAddr, inetAddr, pipeline))
+        HttpConnectHandler.addHandler(proxyAddr, inetAddr, pipeline)
       case _ =>
     }
 

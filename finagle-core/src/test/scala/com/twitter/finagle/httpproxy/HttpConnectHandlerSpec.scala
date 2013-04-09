@@ -27,7 +27,7 @@ class HttpConnectHandlerSpec extends SpecificationWithJUnit with Mockito {
     val connectFuture = Channels.future(channel, true)
     val connectRequested = new DownstreamChannelStateEvent(
         channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
-    val ch = new HttpConnectHandler(proxyAddress, remoteAddress, pipeline)
+    val ch = HttpConnectHandler.addHandler(proxyAddress, remoteAddress, pipeline)
     ch.handleDownstream(ctx, connectRequested)
 
     def checkDidClose() {

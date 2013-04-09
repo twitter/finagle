@@ -16,11 +16,19 @@ import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, I
  * See http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#9.9
  *
  */
-class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, pipeline: ChannelPipeline)
+object HttpConnectHandler {
+  def addHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, pipeline: ChannelPipeline): HttpConnectHandler = {
+    val clientCodec = new HttpClientCodec()
+    val handler = new HttpConnectHandler(proxyAddr, addr, clientCodec)
+    pipeline.addFirst("httpProxyCodec", handler)
+    pipeline.addFirst("clientCodec", clientCodec)
+    handler
+  }
+}
+
+class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clientCodec: HttpClientCodec)
   extends SimpleChannelHandler
 {
-  private[this] val clientCodec = new HttpClientCodec()
-  pipeline.addFirst("httpProxyCodec", clientCodec)
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 
   private[this] def fail(c: Channel, t: Throwable) {
