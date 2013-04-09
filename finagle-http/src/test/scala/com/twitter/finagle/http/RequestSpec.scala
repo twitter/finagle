@@ -80,6 +80,15 @@ class RequestSpec extends SpecificationWithJUnit with DataTables {
       request.headers("Host") must_== "search.twitter.com"
     }
 
+    "decodeBytes" in {
+      val originalRequest = Request("/", "foo" -> "bar")
+      val bytes = originalRequest.encodeBytes()
+      val decodedRequest = Request.decodeBytes(bytes)
+
+      decodedRequest.path          must_== "/"
+      decodedRequest.params("foo") must_== "bar"
+    }
+
     "queryString" in {
       Request.queryString()                                          must_== ""
       Request.queryString(Map.empty[String, String])                 must_== ""

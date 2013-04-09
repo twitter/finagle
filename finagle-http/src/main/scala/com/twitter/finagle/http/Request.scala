@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import com.google.common.base.Charsets
 import com.twitter.finagle.http.netty.HttpRequestProxy
 import java.net.{InetAddress, InetSocketAddress}
+import java.io.ByteArrayOutputStream
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
@@ -136,12 +137,19 @@ abstract class Request extends Message with HttpRequestProxy {
   /** Get response associated with request. */
   def getResponse(): Response = response
 
-  /** Encode as an HTTP message */
+  /** Encode an HTTP message to String */
   def encodeString(): String = {
+    new String(encodeBytes(), "UTF-8")
+  }
+
+  /** Encode an HTTP message to Array[Byte] */
+  def encodeBytes(): Array[Byte] = {
     val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
     encoder.offer(this)
     val buffer = encoder.poll()
-    buffer.toString(Charsets.UTF_8)
+    val bytes = new Array[Byte](buffer.readableBytes())
+    buffer.readBytes(bytes)
+    bytes
   }
 
   override def toString =
@@ -153,9 +161,14 @@ object Request {
 
   /** Decode a Request from a String */
   def decodeString(s: String): Request = {
+    decodeBytes(s.getBytes("UTF-8"))
+  }
+
+  /** Decode a Request from Array[Byte] */
+  def decodeBytes(b: Array[Byte]): Request = {
     val decoder = new DecoderEmbedder(
       new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
-    decoder.offer(ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.UTF_8)))
+    decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val httpRequest = decoder.poll().asInstanceOf[HttpRequest]
     assert(httpRequest ne null)
     Request(httpRequest)
