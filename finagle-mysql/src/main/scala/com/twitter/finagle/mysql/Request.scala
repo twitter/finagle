@@ -110,6 +110,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
      * Writes the parameter into its MySQL binary representation.
      */
     private[this] def writeParam(param: Any, writer: BufferWriter) = param match {
+      // TODO: defaults to UTF-8.  this is ok for ascii, not for every encoding.
       case s: String      => writer.writeLengthCodedString(s)
       case b: Boolean     => writer.writeBoolean(b)
       case b: Byte        => writer.writeByte(b)
