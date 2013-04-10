@@ -74,6 +74,7 @@ case class DefaultClient[Req, Rep](
   monitor: Monitor = DefaultMonitor
 ) extends Client[Req, Rep] {
   com.twitter.finagle.Init()
+  val globalStatsReceiver = new RollupStatsReceiver(statsReceiver)
 
   /** Bind a socket address to a well-formed stack */
   val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
@@ -83,8 +84,7 @@ case class DefaultClient[Req, Rep](
          case ia: InetSocketAddress => "%s:%d".format(ia.getHostName, ia.getPort)
          case other => other.toString
         }))
-      val global = new RollupStatsReceiver(statsReceiver)
-      BroadcastStatsReceiver(Seq(host, global))
+      BroadcastStatsReceiver(Seq(host, globalStatsReceiver))
     }
 
     val lifetimeLimited: Transformer[Req, Rep] = {
@@ -136,21 +136,21 @@ case class DefaultClient[Req, Rep](
 
   val newStack: Group[SocketAddress] => ServiceFactory[Req, Rep] = {
     val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
-  
+
     val timeLimited: Transformer[Req, Rep] = factory =>
       if (serviceTimeout == Duration.Top) factory else {
         val exception = new ServiceTimeoutException(serviceTimeout)
         new TimeoutFactory(factory, serviceTimeout, exception, timer)
       }
-  
+
     val traced: Transformer[Req, Rep] =
       if (tracer == NullTracer) identity
       else factory => new TracingFilter[Req, Rep](tracer) andThen factory
 
-    val observed: Transformer[Req, Rep] = new StatsFactoryWrapper(_, statsReceiver)
-  
+    val observed: Transformer[Req, Rep] = new StatsFactoryWrapper(_, globalStatsReceiver)
+
     val noBrokersException = new NoBrokersAvailableException(name)
-  
+
     val balanced: Group[SocketAddress] => ServiceFactory[Req, Rep] = group => {
       val endpoints = group map { addr => (addr, bindStack(addr)) }
       new HeapBalancer(

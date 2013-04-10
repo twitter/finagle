@@ -1,13 +1,20 @@
 package com.twitter.finagle.stats
 
 import com.twitter.conversions.time._
-import com.twitter.util.Future
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.integration.StringCodec
+import com.twitter.finagle.Service
+import com.twitter.util.{Await, Future, Promise}
+
+import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
+
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
-import collection.mutable.ArrayBuffer
+
+import scala.collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])
 class StatsReceiverTest extends FunSuite {
@@ -108,5 +115,44 @@ class StatsReceiverTest extends FunSuite {
       // Restore initial state
       LoadedStatsReceiver.self = previous
     }
+  }
+
+  test("rollup statsReceiver work in action") {
+    val never = new Service[String, String] {
+      def apply(request: String) = new Promise[String]
+    }
+    val address = new InetSocketAddress(0)
+    val server = ServerBuilder()
+      .codec(StringCodec)
+      .bindTo(address)
+      .name("FinagleServer")
+      .build(never)
+
+    val mem = new InMemoryStatsReceiver
+    val client = ClientBuilder()
+      .name("client")
+      .hosts(server.localAddress)
+      .codec(StringCodec)
+      .requestTimeout(10.millisecond)
+      .hostConnectionLimit(1)
+      .hostConnectionMaxWaiters(1)
+      .reportTo(mem)
+      .build()
+
+    // generate com.twitter.finagle.IndividualRequestTimeoutException
+    Await.ready(client("hi"))
+    Await.ready(server.close())
+    // generate com.twitter.finagle.WriteException$$anon$1
+    Await.ready(client("hi"))
+
+    val aggregatedFailures = mem.counters(Seq("client", "failures"))
+    val otherFailuresSum = {
+      val failures = mem.counters filter { case (names, _) =>
+        names.startsWith(Seq("client", "failures"))
+      }
+      failures.values.sum - aggregatedFailures
+    }
+    assert(aggregatedFailures == otherFailuresSum)
+    assert(aggregatedFailures == 2)
   }
 }
