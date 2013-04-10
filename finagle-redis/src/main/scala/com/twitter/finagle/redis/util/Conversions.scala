@@ -116,12 +116,12 @@ object ReplyFormat {
   def toChannelBuffers(items: List[Reply]): List[ChannelBuffer] = {
     items flatMap {
       case BulkReply(message)   => List(message)
-      case EmptyBulkReply()     => List(RedisCodec.NIL_VALUE_BA)
+      case EmptyBulkReply()     => List(RedisCodec.NIL_BULK_REPLY_BA)
       case IntegerReply(id)     => List(ChannelBuffers.wrappedBuffer(Array(id.toByte)))
       case StatusReply(message) => List(StringToChannelBuffer(message))
       case ErrorReply(message)  => List(StringToChannelBuffer(message))
       case MBulkReply(messages) => ReplyFormat.toChannelBuffers(messages)
-      case EmptyMBulkReply()    => List(RedisCodec.NIL_VALUE_BA)
+      case EmptyMBulkReply()    => List(RedisCodec.NIL_MBULK_REPLY_BA)
       case _                    => Nil
     }
   }

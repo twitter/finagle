@@ -370,6 +370,7 @@ class ClientServerIntegrationSpec extends SpecificationWithJUnit {
           BytesToString(RedisCodec.NIL_VALUE_BA.array),
           BytesToString(VALUE.array)
         )
+        println(expects)
         val req = client(MGet(List(StringToChannelBuffer("thing"), KEY)))
         assertMBulkReply(req, expects)
         client(MGet(List[ChannelBuffer]()))() must throwA[ClientError]
