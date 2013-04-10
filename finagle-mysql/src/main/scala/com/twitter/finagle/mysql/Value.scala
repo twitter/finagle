@@ -3,6 +3,7 @@ package com.twitter.finagle.exp.mysql
 import com.twitter.finagle.exp.mysql.protocol.{BufferReader, BufferWriter, SQLZeroDate, SQLZeroTimestamp, Type}
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Calendar
+import java.nio.charset.{Charset => JCharset}
 
 /**
  * Defines a Value ADT that represents values
@@ -68,10 +69,10 @@ object Value {
    * and a byte buffer. If the mapping is unknwon
    * a RawBinaryValue is returned.
    */
-  def apply(typeCode: Int, buffer: BufferReader) = typeCode match {
-    case Type.STRING      => StringValue(buffer.readLengthCodedString())
-    case Type.VAR_STRING  => StringValue(buffer.readLengthCodedString())
-    case Type.VARCHAR     => StringValue(buffer.readLengthCodedString())
+  def apply(typeCode: Int, buffer: BufferReader, charset: JCharset) = typeCode match {
+    case Type.STRING      => StringValue(buffer.readLengthCodedString(charset))
+    case Type.VAR_STRING  => StringValue(buffer.readLengthCodedString(charset))
+    case Type.VARCHAR     => StringValue(buffer.readLengthCodedString(charset))
     case Type.TINY        => ByteValue(buffer.readByte())
     case Type.SHORT       => ShortValue(buffer.readShort())
     case Type.INT24       => IntValue(buffer.readInt24())
