@@ -80,7 +80,14 @@ object Finagle extends Build {
           <name>Twitter Inc.</name>
           <url>https://www.twitter.com/</url>
         </developer>
-      </developers>),
+      </developers>
+      <repositories>
+        <repository>
+          <id>twitter</id>
+          <name>Twitter Public Repo</name>
+          <url>http://maven.twttr.com</url>
+        </repository>
+      </repositories>),
     publishTo <<= version { (v: String) =>
       val nexus = "https://oss.sonatype.org/"
       if (v.trim.endsWith("SNAPSHOT"))
