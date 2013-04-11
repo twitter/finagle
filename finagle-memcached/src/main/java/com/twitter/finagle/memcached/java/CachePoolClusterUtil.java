@@ -55,6 +55,21 @@ public class CachePoolClusterUtil {
   }
 
   /**
+   * Zookeeper based cache pool cluster.
+   * The cluster will monitor the underlying serverset changes and report the detected underlying
+   * pool size. The cluster snapshot is unmanaged in a way that any serverset change will be immediately
+   * reflected.
+   *
+   * @param zkPath the zookeeper path representing the cache pool
+   * @param zkClient zookeeper client to read zookeeper
+   * @return a Cluster<CacheNode>
+   */
+  public static com.twitter.finagle.builder.Cluster<CacheNode> newUnmanagedZkCluster(
+      String zkPath, ZooKeeperClient zkClient) {
+    return CachePoolCluster$.MODULE$.newUnmanagedZkCluster(zkPath, zkClient);
+  }
+
+  /**
    * Equivalent to calling {@link #newZkCluster(String, ZooKeeperClient, Set, StatsReceiver)}
    * with a {@link NullStatsReceiver}.
    *

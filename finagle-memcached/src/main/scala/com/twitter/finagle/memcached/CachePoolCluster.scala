@@ -51,6 +51,24 @@ object CachePoolCluster {
    */
   def newZkCluster(zkPath: String, zkClient: ZooKeeperClient, backupPool: Option[Set[CacheNode]] = None, statsReceiver: StatsReceiver = NullStatsReceiver) =
     new ZookeeperCachePoolCluster(zkPath, zkClient, backupPool, statsReceiver)
+
+  /**
+   * Zookeeper based cache pool cluster.
+   * The cluster will monitor the underlying serverset changes and report the detected underlying
+   * pool size. The cluster snapshot is unmanaged in a way that any serverset change will be immediately
+   * reflected.
+   *
+   * @param zkPath the zookeeper path representing the cache pool
+   * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
+   */
+  def newUnmanagedZkCluster(
+    zkPath: String,
+    zkClient: ZooKeeperClient
+  ) = new ZookeeperServerSetCluster(
+    ServerSets.create(zkClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)
+  ) map { case addr: InetSocketAddress =>
+    CacheNode(addr.getHostName, addr.getPort, 1)
+  }
 }
 
 trait CachePoolCluster extends Cluster[CacheNode] {

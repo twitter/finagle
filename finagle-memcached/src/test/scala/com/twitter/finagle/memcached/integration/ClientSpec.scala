@@ -474,17 +474,9 @@ class ClientSpec extends SpecificationWithJUnit {
             .build()
             .asInstanceOf[PartitionedClient]
 
-        def trackCacheShards = {
-          var trackedCacheShards = mutable.Set[Client]()
-          val count = 100
-          (0 until count).foreach {
-            n => {
-              val c = client.clientOf("foo"+n)
-              trackedCacheShards += c
-            }
-          }
-          trackedCacheShards
-        }
+        def trackCacheShards = mutable.Set.empty[Client] ++ ((0 until 100).map {
+          n => client.clientOf("foo"+n)
+        })
 
         // initially there should be 5 cache shards being used
         trackCacheShards.size mustBe 5
@@ -545,6 +537,44 @@ class ClientSpec extends SpecificationWithJUnit {
         Thread.sleep(1000)
         trackCacheShards.size mustBe 9
       }
+
+      "unmanaged cache pool is changing" in {
+        // create my cluster client solely based on a zk client and a path
+        val mycluster = initializePool(5, ignoreConfigData = true)
+
+        val client = KetamaClientBuilder()
+            .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+            .failureAccrualParams(Int.MaxValue, Duration.Top)
+            .cachePoolCluster(mycluster)
+            .build()
+            .asInstanceOf[PartitionedClient]
+
+        def trackCacheShards = mutable.Set.empty[Client] ++ ((0 until 100).map {
+          n => client.clientOf("foo"+n)
+        })
+
+        // initially there should be 5 cache shards being used
+        trackCacheShards.size mustBe 5
+
+        // add 4 more cache servers and update cache pool config data, now there should be 7 shards
+        var additionalServers = List[EndpointStatus]()
+        expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
+          additionalServers = addMoreServers(4)
+        }.get(10.seconds)() mustNot throwA[Exception]
+        // Unlike CachePoolCluster, our KetamaClient doesn't have api to expose its internal state and
+        // it shouldn't, hence here I don't really have a better way to wait for the client's key ring
+        // redistribution to finish other than sleep for a while.
+        Thread.sleep(1000)
+        trackCacheShards.size mustBe 9
+
+        // remove 2 cache servers and update cache pool config data, now there should be 7 shards
+        expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
+          additionalServers(0).update(Status.DEAD)
+          additionalServers(1).update(Status.DEAD)
+        }.get(10.seconds)() mustNot throwA[Exception]
+        Thread.sleep(1000)
+        trackCacheShards.size mustBe 7
+      }
     }
     */
 
@@ -566,9 +596,12 @@ class ClientSpec extends SpecificationWithJUnit {
 
     def initializePool(
       expectedSize: Int,
-      backupPool: Option[scala.collection.immutable.Set[CacheNode]]=None
-    ): CachePoolCluster = {
-      val myCachePool = new ZookeeperCachePoolCluster(zkPath, zookeeperClient, backupPool)
+      backupPool: Option[scala.collection.immutable.Set[CacheNode]]=None,
+      ignoreConfigData: Boolean = false
+    ): Cluster[CacheNode] = {
+      val myCachePool =
+        if (! ignoreConfigData) CachePoolCluster.newZkCluster(zkPath, zookeeperClient, backupPool = backupPool)
+        else CachePoolCluster.newUnmanagedZkCluster(zkPath, zookeeperClient)
 
       myCachePool.ready() // wait until the pool is ready
       myCachePool.snap match {
@@ -588,7 +621,7 @@ class ClientSpec extends SpecificationWithJUnit {
      * @param ops operation to execute
      */
     def expectPoolStatus(
-      myCachePool: CachePoolCluster,
+      myCachePool: Cluster[CacheNode],
       currentSize: Int,
       expectedPoolSize: Int,
       expectedAdd: Int,
