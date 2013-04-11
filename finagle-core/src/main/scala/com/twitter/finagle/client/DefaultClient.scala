@@ -5,11 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.factory.{RefcountedFactory, StatsFactoryWrapper,   TimeoutFactory}
 import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.loadbalancer.HeapBalancer
-import com.twitter.finagle.service.FailureAccrualFactory
-import com.twitter.finagle.service.{
-  CloseOnReleaseService, ExpiringService, FailFastFactory, StatsFilter,
-  TimeoutFilter
-}
+import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   BroadcastStatsReceiver, ClientStatsReceiver, RollupStatsReceiver,
   StatsReceiver, NullStatsReceiver
@@ -114,7 +110,7 @@ case class DefaultClient[Req, Rep](
 
     val observed: Transformer[Req, Rep] = {
       val filter = new StatsFilter[Req, Rep](hostStats)
-      factory => filter andThen factory
+      factory => filter andThen new StatsServiceFactory[Req, Rep](factory, hostStats)
     }
 
     val monitored: Transformer[Req, Rep] = {
@@ -152,11 +148,10 @@ case class DefaultClient[Req, Rep](
     val noBrokersException = new NoBrokersAvailableException(name)
 
     val balanced: Group[SocketAddress] => ServiceFactory[Req, Rep] = group => {
-      val endpoints = group map { addr => (addr, bindStack(addr)) }
+      val endpoints = group map { bindStack(_) }
       new HeapBalancer(
         endpoints,
         statsReceiver.scope("loadbalancer"),
-        hostStatsReceiver.scopeSuffix("loadbalancer"),
         noBrokersException)
     }
 

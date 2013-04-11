@@ -3,7 +3,6 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.Group
 import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.util.{Future, Time, Stopwatch}
-import java.net.{InetSocketAddress, SocketAddress}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -57,8 +56,7 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val addr: SocketAddress = new InetSocketAddress(0)
-    val group = Group[ServiceFactory[Int, Int]](factories:_*) map(addr -> _)
+    val group = Group[ServiceFactory[Int, Int]](factories:_*)
     val heap = new HeapBalancer(group)
 
     go(heap, "Heap")

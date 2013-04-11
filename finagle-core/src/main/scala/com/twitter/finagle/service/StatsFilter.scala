@@ -1,8 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{
-  BackupRequestLost, Service, SimpleFilter, SourcedException, WriteException}
+import com.twitter.finagle._
 import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -24,7 +23,8 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
   private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
-  private[this] val outstandingRequestCountgauge =
+  private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.get }
+  private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.get }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
@@ -62,5 +62,15 @@ class StatsFilter[Req, Rep](statsReceiver: StatsReceiver)
           latencyStat.add(elapsed().inMilliseconds)
       }
     }
+  }
+}
+
+class StatsServiceFactory[Req, Rep](
+  factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver
+) extends ServiceFactoryProxy[Req, Rep](factory)
+{
+  private[this] val availableGauge = statsReceiver.addGauge("available"){
+    if (isAvailable) 1F
+    else 0F
   }
 }

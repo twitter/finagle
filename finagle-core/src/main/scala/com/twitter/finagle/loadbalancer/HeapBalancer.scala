@@ -2,19 +2,17 @@ package com.twitter.finagle.loadbalancer
 
 import collection.mutable.HashMap
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{Gauge, StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{ClientConnection, Group, NoBrokersAvailableException,
   Service, ServiceFactory, ServiceProxy}
 import com.twitter.util._
-import java.net.{InetSocketAddress, SocketAddress}
 import util.Random
 
 /**
  * An efficient load balancer that operates on Groups.
  */
 class HeapBalancer[Req, Rep](
-  group: Group[(SocketAddress, ServiceFactory[Req, Rep])],
-  globalStatsReceiver: StatsReceiver = NullStatsReceiver,
+  group: Group[ServiceFactory[Req, Rep]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   emptyException: NoBrokersAvailableException = new NoBrokersAvailableException
 )
@@ -22,9 +20,9 @@ class HeapBalancer[Req, Rep](
 {
   case class Node(
     factory: ServiceFactory[Req, Rep],
-    stats: StatsReceiver,
     var load: Int,
-    var index: Int)
+    var index: Int
+  )
 
   private[this] val rng = new Random
 
@@ -38,29 +36,6 @@ class HeapBalancer[Req, Rep](
   )
   import HeapOps._
 
-  private[this] def createStatsReceiver(addr: SocketAddress) = {
-    val address = addr match {
-      case inet: InetSocketAddress => inet.getHostName + ":" + inet.getPort
-      case socket => socket.toString
-    }
-    statsReceiver.scope(address)
-  }
-
-  // TODO: Remove this as soon as the trait CumulativeGauge has been deleted
-  // Hashmap to hold references to the gauges, which are otherwise only weakly referenced
-  private[this] val gauges = HashMap.empty[Node, (Gauge, Gauge)]
-  private[this] def addGauges(node: Node) = {
-    val availableGauge = node.stats.addGauge("available") {
-      if (node.factory.isAvailable) 1F else 0F
-    }
-    val loadGauge = node.stats.addGauge("load") { node.load.toFloat }
-    gauges(node) = (availableGauge, loadGauge)
-  }
-  private[this] def removeGauges(node: Node) = gauges.remove(node)
-  private[this] val sizeGauge = globalStatsReceiver.addGauge("size") { size }
-  private[this] val adds = globalStatsReceiver.counter("adds")
-  private[this] val removes = globalStatsReceiver.counter("removes")
-
   private[this] var snap = group()
   private[this] var size = snap.size
   // Build initial heap
@@ -71,21 +46,33 @@ class HeapBalancer[Req, Rep](
   private[this] var heap = {
     val heap = new Array[Node](size + 1)
     val failExc = new Exception("Invalid heap operation on index 0")
-    heap(0) = Node(new FailingFactory(failExc), NullStatsReceiver, 0, 0)
+    heap(0) = Node(new FailingFactory(failExc), 0, 0)
     val nodes = (snap.toSeq zipWithIndex) map {
-      case ((a, f), i) => Node(f, createStatsReceiver(a), 0, i + 1)
+      case (f, i) => Node(f, 0, i + 1)
     }
-    nodes foreach { addGauges(_) }
     nodes.copyToArray(heap, 1, nodes.size)
     heap
   }
 
-  private[this] def addNode(addr: SocketAddress, serviceFactory: ServiceFactory[Req, Rep]) {
+  private[this] val availableGauge = statsReceiver.addGauge("available") {
+    val nodes = synchronized { heap.drop(1) }
+    nodes.count(_.factory.isAvailable)
+  }
+
+  private[this] val loadGauge = statsReceiver.addGauge("load") {
+    val nodes = synchronized { heap.drop(1) }
+    nodes.map(_.load).sum
+  }
+
+  private[this] val sizeGauge = statsReceiver.addGauge("size") { size }
+  private[this] val adds = statsReceiver.counter("adds")
+  private[this] val removes = statsReceiver.counter("removes")
+
+  private[this] def addNode(serviceFactory: ServiceFactory[Req, Rep]) {
     size += 1
-    val newNode = Node(serviceFactory, createStatsReceiver(addr), 0, size)
+    val newNode = Node(serviceFactory, 0, size)
     heap = heap :+ newNode
     fixUp(heap, size)
-    addGauges(newNode)
     adds.incr()
   }
 
@@ -96,7 +83,6 @@ class HeapBalancer[Req, Rep](
     fixDown(heap, i, size - 1)
     heap = heap.dropRight(1)
     size -= 1
-    removeGauges(node)
     node.index = -1 // sentinel value indicating node is no longer in the heap.
     serviceFactory.close()
     removes.incr()
@@ -151,9 +137,9 @@ class HeapBalancer[Req, Rep](
       }
   }
 
-  private[this] def updateGroup(newSnap: Set[(SocketAddress, ServiceFactory[Req, Rep])]): Unit = synchronized {
-    for ((_, n) <- snap &~ newSnap) remNode(n)
-    for ((a, n) <- newSnap &~ snap) addNode(a, n)
+  private[this] def updateGroup(newSnap: Set[ServiceFactory[Req, Rep]]): Unit = synchronized {
+    for (n <- snap &~ newSnap) remNode(n)
+    for (n <- newSnap &~ snap) addNode(n)
     snap = newSnap
   }
 
