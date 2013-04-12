@@ -2,7 +2,7 @@ package com.twitter.finagle.exp.mysql.codec
 
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.protocol._
-import com.twitter.finagle.exp.mysql.{Error => MySQLError}
+import com.twitter.finagle.exp.mysql.{Error => ServerError}
 import org.jboss.netty.buffer.ChannelBuffers._
 import org.jboss.netty.channel._
 import org.specs.SpecificationWithJUnit
@@ -55,12 +55,12 @@ class EndecSpec extends SpecificationWithJUnit {
       bw.writeBytes("#42S02".getBytes) // sqlstate
       bw.writeBytes(message.getBytes(Charset.defaultCharset.displayName))
 
-      val expectedError = MySQLError.decode(errpacket)
+      val expectedError = ServerError.decode(errpacket)
 
       val resOpt = endec.decode(errpacket)
       resOpt.isEmpty mustEqual false
-      resOpt.get.isInstanceOf[MySQLError] mustEqual true
-      val res = resOpt.get.asInstanceOf[MySQLError]
+      resOpt.get.isInstanceOf[ServerError] mustEqual true
+      val res = resOpt.get.asInstanceOf[ServerError]
       expectedError mustEqual res
     }
 

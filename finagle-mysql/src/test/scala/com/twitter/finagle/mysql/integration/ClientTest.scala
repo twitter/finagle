@@ -7,6 +7,7 @@ import java.net.{ServerSocket, BindException}
 import java.sql.Date
 import java.util.logging.{Level, Logger}
 import java.util.Properties
+import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -106,6 +107,7 @@ object SwimmingRecord {
   def countRecordsWith(name: String): Int = allRecords filter { _.name == name } size
 }
 
+@RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite with BeforeAndAfterAll {
 
   for (c <- Connection.client) {

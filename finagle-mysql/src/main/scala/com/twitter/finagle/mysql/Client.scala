@@ -2,11 +2,11 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.ServiceFactory
-import com.twitter.util.Future
+import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.{Logger, Level}
 
 case class ClientError(msg: String) extends Exception(msg)
-case class ServerError(msg: String) extends Exception(msg)
+case class ServerError(code: Short, sqlState: String, message: String) extends Exception(message)
 case class IncompatibleServer(msg: String) extends Exception(msg)
 
 object Client {
@@ -53,7 +53,7 @@ object Client {
   }
 }
 
-class Client(val factory: ServiceFactory[Request, Result]) {
+class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
   private[this] val service = factory.toService
 
   /**
@@ -166,7 +166,7 @@ class Client(val factory: ServiceFactory[Request, Result]) {
   /**
    * Close the ServiceFactory and its underlying resources.
    */
-  def close(): Future[Unit] = factory.close()
+  def close(deadline: Time): Future[Unit] = factory.close(deadline)
 
   /**
    * Helper function to send requests to the ServiceFactory
@@ -174,7 +174,7 @@ class Client(val factory: ServiceFactory[Request, Result]) {
    */
   private[this] def send[T](r: Request)(handler: PartialFunction[Result, Future[T]]): Future[T] =
     service(r) flatMap (handler orElse {
-      case Error(c, s, m) => Future.exception(ServerError(c + " - " + m))
-      case result         => Future.exception(ClientError("Unhandled result from server: " + result))
+      case Error(c, s, m)       => Future.exception(ServerError(c, s, m))
+      case result               => Future.exception(ClientError("Unhandled result from server: " + result))
     })
 }
