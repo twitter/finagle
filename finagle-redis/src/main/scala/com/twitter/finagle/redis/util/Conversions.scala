@@ -56,7 +56,7 @@ object StringToChannelBuffer {
 }
 object CBToString {
   def apply(arg: ChannelBuffer, charset: Charset = CharsetUtil.UTF_8) = {
-    new String(arg.array, charset)
+    arg.toString(charset)
   }
   def fromList(args: Seq[ChannelBuffer], charset: Charset = CharsetUtil.UTF_8) =
     args.map { arg => CBToString(arg, charset) }
