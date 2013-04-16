@@ -609,7 +609,7 @@ class KetamaFailureAccrualFactory[Req, Rep](
 }
 
 object KetamaClient {
-  val NumReps = 160
+  val DefaultNumReps = 160
   private val shardNotAvailableDistributor = {
     val failedService = new FailedService(new ShardNotAvailableException)
     new SingletonDistributor(Client(failedService))
@@ -725,7 +725,8 @@ case class KetamaClientBuilder private[memcached] (
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _numFailures: Int = 5,
   _markDeadFor: Duration = 30.seconds,
-  oldLibMemcachedVersionComplianceMode: Boolean = false
+  oldLibMemcachedVersionComplianceMode: Boolean = false,
+  numReps: Int = KetamaClient.DefaultNumReps
 ) {
 
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
@@ -753,6 +754,9 @@ case class KetamaClientBuilder private[memcached] (
 
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
+
+  def numReps(numReps: Int): KetamaClientBuilder =
+    copy(numReps = numReps)
 
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): KetamaClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
@@ -803,7 +807,7 @@ case class KetamaClientBuilder private[memcached] (
       initialServices,
       nodeChangeBroker.recv,
       keyHasher,
-      KetamaClient.NumReps,
+      numReps,
       statsReceiver,
       oldLibMemcachedVersionComplianceMode
     )
