@@ -96,24 +96,45 @@ class StatsReceiverTest extends FunSuite {
     verify(receiver, times(3)).stat("2", "chainz")
   }
 
-  test("StatsReceiver equality with NullStatsReceiver") {
-    val previous = LoadedStatsReceiver.self
+  test("Scoped equality") {
+    val sr = new InMemoryStatsReceiver
+    assert(sr == sr)
+    assert(sr.scope("foo") != sr.scope("bar"))
+  }
+
+  test("Scoped forwarding to NullStatsReceiver") {
+    assert(NullStatsReceiver.scope("foo").scope("bar").isNull)
+  }
+
+  test("Forwarding to LoadedStatsReceiver") {
+    val prev = LoadedStatsReceiver.self
     LoadedStatsReceiver.self = NullStatsReceiver
 
-    try{
-      val statsReceiver = DefaultStatsReceiver
-      assert(statsReceiver == NullStatsReceiver,
-        "Can't detect that statsReceiver is NullStatsReceiver")
+    val dsr = DefaultStatsReceiver // StatsReceiverProxy
+    val csr = ClientStatsReceiver // NameTranslatingStatsReceiver
+    val ssr = ServerStatsReceiver // NameTranslatingStatsReceiver
+
+    try {
+      assert(dsr.isNull, "DefaultStatsReceiver should be null")
+      assert(csr.isNull, "ClientStatsReceiver should be null")
+      assert(ssr.isNull, "ServerStatsReceiver should be null")
 
       val mem = new InMemoryStatsReceiver
       LoadedStatsReceiver.self = mem
-      assert(statsReceiver != NullStatsReceiver,
-        "Can't detect that statsReceiver isn't NullStatsReceiver anymore")
-      assert(statsReceiver == mem,
-        "Can't detect that statsReceiver is InMemoryStatsReceiver")
+
+      assert(!dsr.isNull, "DefaultStatsReceiver should not be null")
+      assert(!csr.isNull, "ClientStatsReceiver should not be null")
+      assert(!ssr.isNull, "ServerStatsReceiver should not be null")
+
+      dsr.counter("req").incr()
+      csr.counter("req").incr()
+      ssr.counter("req").incr()
+
+      assert(mem.counters(Seq("req")) == 1)
+      assert(mem.counters(Seq("clnt", "req")) == 1)
+      assert(mem.counters(Seq("srv", "req")) == 1)
     } finally {
-      // Restore initial state
-      LoadedStatsReceiver.self = previous
+      LoadedStatsReceiver.self = prev
     }
   }
 

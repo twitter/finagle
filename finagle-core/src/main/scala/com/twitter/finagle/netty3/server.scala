@@ -204,7 +204,7 @@ case class Netty3Listener[In, Out](
         for (channelSnooper <- channelSnooper)
           pipeline.addFirst("channelLogger", channelSnooper)
 
-        if (statsReceiver ne NullStatsReceiver)
+        if (!statsReceiver.isNull)
           pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
 
         // Apply read timeouts *after* request decoding, preventing
@@ -226,7 +226,7 @@ case class Netty3Listener[In, Out](
         for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
           addTlsToPipeline(pipeline, newEngine)
 
-        if (statsReceiver ne NullStatsReceiver) {
+        if (!statsReceiver.isNull) {
           pipeline.addLast(
             "channelRequestStatsHandler",
             new ChannelRequestStatsHandler(statsReceiver))

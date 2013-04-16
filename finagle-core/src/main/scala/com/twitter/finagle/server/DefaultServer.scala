@@ -92,7 +92,7 @@ case class DefaultServer[Req, Rep, In, Out](
         else new MaskCancelFilter
 
       val statsFilter: SimpleFilter[Req, Rep] =
-        if (statsReceiver ne NullStatsReceiver) new StatsFilter(statsReceiver)
+        if (!statsReceiver.isNull) new StatsFilter(statsReceiver)
         else Filter.identity
 
       val timeoutFilter: SimpleFilter[Req, Rep] =

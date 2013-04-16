@@ -41,6 +41,13 @@ trait StatsReceiver {
   val repr: AnyRef
 
   /**
+   * Accurately indicates if this is a NullStatsReceiver.
+   * Because equality is not forwarded via scala.Proxy, this
+   * is helpful to check for a NullStatsReceiver.
+   */
+  def isNull: Boolean = false
+
+  /**
    * Time a given function using the given TimeUnit
    */
   def time[T](unit: TimeUnit, stat: Stat)(f: => T): T = {
@@ -160,33 +167,22 @@ trait StatsReceiver {
   }
 }
 
-trait StatsReceiverProxy extends StatsReceiver with Proxy {
+trait StatsReceiverProxy extends StatsReceiver {
   def self: StatsReceiver
 
-  // Handle the case: Proxy of Proxy of ...
-  override def equals(that: Any): Boolean = self match {
-    case x: Proxy => self equals that
-    case x        => super.equals(that)
-  }
-
   val repr = self
+  override def isNull = self.isNull
   def counter(names: String*) = self.counter(names:_*)
   def stat(names: String*) = self.stat(names:_*)
   def addGauge(names: String*)(f: => Float) = self.addGauge(names:_*)(f)
-  override def scope(name: String) = {
-    val prefix = Seq(name)
-    new NameTranslatingStatsReceiver(self) {
-      protected[this] def translate(name: Seq[String]) = prefix ++ name
-    }
-  }
 }
 
-
 abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
-  extends StatsReceiver with Proxy
+  extends StatsReceiver
 {
   protected[this] def translate(name: Seq[String]): Seq[String]
   val repr = self.repr
+  override def isNull = self.isNull
 
   def counter(name: String*) = self.counter(translate(name): _*)
   def stat(name: String*)    = self.stat(translate(name): _*)
@@ -195,6 +191,7 @@ abstract class NameTranslatingStatsReceiver(val self: StatsReceiver)
 
 class NullStatsReceiver extends StatsReceiver with JavaSingleton {
   val repr = this
+  override def isNull = true
 
   private[this] val NullCounter = new Counter { def incr(delta: Int) {} }
   private[this] val NullStat = new Stat { def add(value: Float) {}}

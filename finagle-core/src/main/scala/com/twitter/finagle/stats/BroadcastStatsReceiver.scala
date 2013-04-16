@@ -5,7 +5,7 @@ package com.twitter.finagle.stats
  * StatsReceivers (n).
  */
 object BroadcastStatsReceiver {
-  def apply(receivers: Seq[StatsReceiver]) = receivers.filterNot(_ == NullStatsReceiver) match {
+  def apply(receivers: Seq[StatsReceiver]) = receivers.filterNot(_.isNull) match {
     case Seq() => NullStatsReceiver
     case Seq(fst) => fst
     case more => new N(more)
