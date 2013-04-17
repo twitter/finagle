@@ -9,7 +9,7 @@ import com.twitter.finagle.thrift.{  ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
-import com.twitter.util.{Base64StringEncoder, Future}
+import com.twitter.util.{Await, Base64StringEncoder, Future}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -48,7 +48,7 @@ object RawZipkinTracer {
       val tracers = RawZipkinTracer.synchronized(map.values.toSeq)
       val joined = Future.join(tracers map(_.flush()))
       try {
-        joined(100.milliseconds)
+        Await.result(joined, 100.milliseconds)
       } catch {
         case _: TimeoutException =>
           System.err.println("Failed to flush all traces before quitting")
