@@ -26,6 +26,7 @@ class ClientSpec extends SpecificationWithJUnit {
     val baz = StringToChannelBuffer("baz")
     val boo = StringToChannelBuffer("boo")
     val moo = StringToChannelBuffer("moo")
+    val num = StringToChannelBuffer("num")
 
     doBefore {
       RedisCluster.start()
@@ -261,6 +262,27 @@ class ClientSpec extends SpecificationWithJUnit {
         CBToString.fromTuples(
           client.hGetAll(foo)()) mustEqual Seq(("bar", "baz"), ("boo", "moo"))
       }
+
+      "increment a value" in {
+        client.hIncrBy(foo, num, 4L)()
+        client.hGet(foo, num)() mustEqual Some(StringToChannelBuffer(4L.toString))
+        client.hIncrBy(foo, num, 4L)()
+        client.hGet(foo, num)() mustEqual Some(StringToChannelBuffer(8L.toString))
+      }
+
+      "do a setnx" in {
+        client.hDel(foo, Seq(bar))()
+        client.hSetNx(foo,bar, baz)() must_== 1
+        client.hSetNx(foo,bar, moo)() must_== 0
+        CBToString(client.hGet(foo, bar)().get) mustEqual "baz"
+      }
+
+      "get all the values" in {
+        client.del(Seq(foo))()
+        client.hMSet(foo, Map(baz -> bar, moo -> boo))()
+        client.hVals(foo)().map(CBToString(_)) mustEqual Seq("bar", "boo")
+      }
+
 
       // "hscan" in {
       //   client.hSet(foo, bar, baz)()

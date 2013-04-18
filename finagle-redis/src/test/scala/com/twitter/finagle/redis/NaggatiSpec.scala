@@ -730,7 +730,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
             case MBulkReply(msgs) =>
               ReplyFormat.toString(msgs) mustEqual List(
                 "foo",
-                BytesToString(RedisCodec.NIL_VALUE_BA.array),
+                "nil",
                 "bar")
             case _ => fail("Expected MBulkReply")
           }
