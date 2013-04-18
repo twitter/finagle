@@ -43,6 +43,16 @@ trait Hashes { self: BaseClient =>
   }
 
   /**
+   * Increment a field by a value
+   * @param hash key, fields, amount
+   * @return new value of field
+   */
+  def hIncrBy(key: ChannelBuffer, field: ChannelBuffer, amount: Long): Future[JLong] = 
+    doRequest(HIncrBy(key, field, amount)) {      
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
    * Return all field names stored at key
    * @param hash key
    * @return List of fields in hash
@@ -97,5 +107,26 @@ trait Hashes { self: BaseClient =>
   def hSet(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
     doRequest(HSet(key, field, value)) {
       case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Sets field value pair in given hash only if the field does not yet exist
+   * @param hash key, field, value
+   * @return 1 if field is new, 0 if no operation was performed
+   */
+  def hSetNx(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
+    doRequest(HSetNx(key, field, value)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Gets the values of all fields in given hash
+   * @param hash key
+   * @return list of values, or empty list when key does not exist
+   */
+  def hVals(key: ChannelBuffer): Future[Seq[ChannelBuffer]] = 
+    doRequest(HVals(key)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
+      case EmptyMBulkReply()    => Future.Nil
     }
 }
