@@ -160,8 +160,8 @@ case class ZRank(key: ChannelBuffer, member: ChannelBuffer) extends ZRankCmd {
   def commandBytes = CommandBytes.ZRANK
 }
 object ZRank extends ZRankCmdCompanion {
-  def get(key: String, member: String) =
-    new ZRank(StringToChannelBuffer(key), StringToChannelBuffer(member))
+  def get(key: ChannelBuffer, member: ChannelBuffer) =
+    new ZRank(key, member)
 }
 
 case class ZRem(key: ChannelBuffer, members: Seq[ChannelBuffer]) extends StrictKeyCommand {
@@ -274,8 +274,8 @@ case class ZRevRank(key: ChannelBuffer, member: ChannelBuffer) extends ZRankCmd 
   def commandBytes = CommandBytes.ZREVRANK
 }
 object ZRevRank extends ZRankCmdCompanion {
-  def get(key: String, member: String) =
-    new ZRevRank(StringToChannelBuffer(key), StringToChannelBuffer(member))
+  def get(key: ChannelBuffer, member: ChannelBuffer) =
+    new ZRevRank(key, member)
 }
 
 case class ZScore(key: ChannelBuffer, member: ChannelBuffer)
@@ -739,10 +739,10 @@ abstract class ZRankCmd extends StrictKeyCommand with StrictMemberCommand {
       member))
 }
 trait ZRankCmdCompanion {
-  def get(key: String, member: String): ZRankCmd
+  def get(key: ChannelBuffer, member: ChannelBuffer): ZRankCmd
 
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "ZRANKcmd")
-    get(BytesToString(args(0)), BytesToString(args(1)))
+    get(ChannelBuffers.wrappedBuffer(args(0)), ChannelBuffers.wrappedBuffer(args(1)))
   }
 }
