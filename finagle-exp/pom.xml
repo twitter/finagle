@@ -46,5 +46,10 @@
       <artifactId>finagle-core</artifactId>
       <version>6.3.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>jsr166e</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
 </project>
