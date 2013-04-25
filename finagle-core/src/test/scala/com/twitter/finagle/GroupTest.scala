@@ -84,4 +84,10 @@ class GroupTest extends FunSuite {
     bc.add(2)
     assert(group() == Set(1,2))
   }
+
+  test("combined groups") {
+    val combined = Group[Int](1, 2) + Group[Int](3, 4) + Group[Int](5, 6)
+    assert(combined.members == Set(1, 2, 3, 4, 5, 6))
+    assert(combined.members == combined.members)
+  }
 }

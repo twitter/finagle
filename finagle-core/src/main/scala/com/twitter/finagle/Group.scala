@@ -88,6 +88,31 @@ trait Group[T] { outer =>
       val name = n
     }
 
+  def +(other: Group[T]): Group[T] = new Group[T] {
+    @volatile private[this] var current = Set.empty[T]
+    @volatile private[this] var outerMembers = Set.empty[T]
+    @volatile private[this] var otherMembers = Set.empty[T]
+
+    private[this] def update() = synchronized {
+      outerMembers = outer.members
+      otherMembers = other.members
+      current = outerMembers ++ otherMembers
+    }
+    update()
+
+    private[this] def hasChanged =
+      ((outerMembers ne outer.members) || (otherMembers ne other.members))
+
+    def members = {
+      if (hasChanged) synchronized {
+        if (hasChanged)
+          update()
+      }
+
+      current
+    }
+  }
+
   override def toString = "Group(%s)".format(members mkString ", ")
 }
 
@@ -154,4 +179,5 @@ object Group {
 
     def members = current
   }
+
 }
