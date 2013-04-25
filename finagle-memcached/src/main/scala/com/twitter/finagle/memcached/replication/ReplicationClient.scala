@@ -46,12 +46,11 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    numFailures: Int = 5,
-    markDeadFor: Duration = 30.seconds
+    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
   ) = {
     val underlyingClients = pools map { pool =>
       pool.ready()
-      KetamaClientBuilder(pool, hashName, clientBuilder, numFailures, markDeadFor).build()
+      KetamaClientBuilder(pool, hashName, clientBuilder, failureAccrualParams).build()
     }
     val repStatsReceiver =
       clientBuilder map { _.statsReceiver.scope("cache_replication") } getOrElse(NullStatsReceiver)
@@ -62,10 +61,9 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    numFailures: Int = 5,
-    markDeadFor: Duration = 30.seconds
+    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
   ) = {
-    new SimpleReplicationClient(newBaseReplicationClient(pools, clientBuilder, hashName, numFailures, markDeadFor))
+    new SimpleReplicationClient(newBaseReplicationClient(pools, clientBuilder, hashName, failureAccrualParams))
   }
 }
 

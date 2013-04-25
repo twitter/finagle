@@ -723,8 +723,7 @@ case class KetamaClientBuilder private[memcached] (
   _cluster: Cluster[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
-  _numFailures: Int = 5,
-  _markDeadFor: Duration = 30.seconds,
+  _failureAccrualParams: (Int, Duration) = (5, 30.seconds),
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
@@ -762,7 +761,10 @@ case class KetamaClientBuilder private[memcached] (
     copy(_clientBuilder = Some(clientBuilder))
 
   def failureAccrualParams(numFailures: Int, markDeadFor: Duration): KetamaClientBuilder =
-    copy(_numFailures = numFailures, _markDeadFor = markDeadFor)
+    copy(_failureAccrualParams = (numFailures, markDeadFor))
+
+  def noFailureAccrual: KetamaClientBuilder =
+    copy(_failureAccrualParams = (Int.MaxValue, Duration.Zero))
 
   def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
     copy(oldLibMemcachedVersionComplianceMode = true)
@@ -813,12 +815,15 @@ case class KetamaClientBuilder private[memcached] (
     )
   }
 
-  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = new ServiceFactoryWrapper {
-    def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
-        new KetamaFailureAccrualFactory(
-          factory, _numFailures, _markDeadFor, timer, key, broker
-        )
-      }
+  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = {
+    val (_numFailures, _markDeadFor) = _failureAccrualParams
+    new ServiceFactoryWrapper {
+      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
+          new KetamaFailureAccrualFactory(
+            factory, _numFailures, _markDeadFor, timer, key, broker
+          )
+        }
+    }
   }
 
   private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
