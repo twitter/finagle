@@ -147,12 +147,12 @@ case class ZRangeByScore(
 }
 object ZRangeByScore extends ZScoredRangeCompanion {
   def get(
-    key: String,
+    key: ChannelBuffer,
     min: ZInterval,
     max: ZInterval,
     withScores: Option[CommandArgument],
     limit: Option[Limit]): ZScoredRange =
-      new ZRangeByScore(StringToChannelBuffer(key), min, max, withScores, limit)
+      new ZRangeByScore(key, min, max, withScores, limit)
 }
 
 case class ZRank(key: ChannelBuffer, member: ChannelBuffer) extends ZRankCmd {
@@ -261,12 +261,12 @@ case class ZRevRangeByScore(
 }
 object ZRevRangeByScore extends ZScoredRangeCompanion {
   def get(
-    key: String,
+    key: ChannelBuffer,
     max: ZInterval,
     min: ZInterval,
     withScores: Option[CommandArgument],
     limit: Option[Limit]): ZScoredRange =
-      new ZRevRangeByScore(StringToChannelBuffer(key), max, min, withScores, limit)
+      new ZRevRangeByScore(key, max, min, withScores, limit)
 }
 
 case class ZRevRank(key: ChannelBuffer, member: ChannelBuffer) extends ZRankCmd {
@@ -579,7 +579,7 @@ trait ZScoredRange extends KeyCommand { self =>
 }
 trait ZScoredRangeCompanion { self =>
   def get(
-    key: String,
+    key: ChannelBuffer,
     min: ZInterval,
     max: ZInterval,
     withScores: Option[CommandArgument],
@@ -587,14 +587,14 @@ trait ZScoredRangeCompanion { self =>
 
   def apply(args: Seq[Array[Byte]]) = args match {
     case key :: min :: max :: Nil =>
-      get(BytesToString(key), ZInterval(min), ZInterval(max), None, None)
+      get(ChannelBuffers.wrappedBuffer(key), ZInterval(min), ZInterval(max), None, None)
     case key :: min :: max :: tail =>
-      parseArgs(BytesToString(key), ZInterval(min), ZInterval(max), tail)
+      parseArgs(ChannelBuffers.wrappedBuffer(key), ZInterval(min), ZInterval(max), tail)
     case _ =>
       throw ClientError("Expected either 3, 4 or 5 args for ZRANGEBYSCORE/ZREVRANGEBYSCORE")
   }
 
-  def apply(key: String, min: ZInterval, max: ZInterval, withScores: CommandArgument) = {
+  def apply(key: ChannelBuffer, min: ZInterval, max: ZInterval, withScores: CommandArgument) = {
     withScores match {
       case WithScores =>
         get(key, min, max, Some(withScores), None)
@@ -603,10 +603,10 @@ trait ZScoredRangeCompanion { self =>
     }
   }
 
-  def apply(key: String, min: ZInterval, max: ZInterval, limit: Limit) =
+  def apply(key: ChannelBuffer, min: ZInterval, max: ZInterval, limit: Limit) =
     get(key, min, max, None, Some(limit))
 
-  def apply(key: String, min: ZInterval, max: ZInterval, withScores: CommandArgument,
+  def apply(key: ChannelBuffer, min: ZInterval, max: ZInterval, withScores: CommandArgument,
             limit: Limit) =
   {
     withScores match {
@@ -617,7 +617,7 @@ trait ZScoredRangeCompanion { self =>
     }
   }
 
-  protected def parseArgs(key: String, min: ZInterval, max: ZInterval, args: Seq[Array[Byte]]) = {
+  protected def parseArgs(key: ChannelBuffer, min: ZInterval, max: ZInterval, args: Seq[Array[Byte]]) = {
     RequireClientProtocol(args != null && !args.isEmpty, "Expected arguments for command")
     val sArgs = BytesToString.fromList(args)
     val (arg0, remaining) = doParse(sArgs)
