@@ -2,7 +2,7 @@ package com.twitter.finagle.exp.mysql.integration
 
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.protocol._
-import com.twitter.util.NonFatal
+import com.twitter.util.{Await, NonFatal}
 import java.net.{ServerSocket, BindException}
 import java.sql.Date
 import java.util.logging.{Level, Logger}
@@ -58,7 +58,7 @@ object Connection {
       prepared.get(sql)
     else
       client map { c =>
-        val ps = c.prepare(sql).get
+        val ps = Await.result(c.prepare(sql))
         prepared += (sql -> ps)
         ps
       }
@@ -112,12 +112,12 @@ class ClientTest extends FunSuite with BeforeAndAfterAll {
 
   for (c <- Connection.client) {
     test("Ping Server") {
-      val pingResult = c.ping.get
+      val pingResult = Await.result(c.ping)
       expectResult(true) { pingResult.isInstanceOf[OK] }
     }
 
     test("Create Table") {
-      val createResult = c.query(SwimmingRecord.schema).get
+      val createResult = Await.result(c.query(SwimmingRecord.schema))
       expectResult(true) { createResult.isInstanceOf[OK] }
     }
 
@@ -126,20 +126,20 @@ class ClientTest extends FunSuite with BeforeAndAfterAll {
       """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
          VALUES %s;""".format(SwimmingRecord.allRecords.mkString(", "))
 
-      val insertResult = c.query(sql).get
+      val insertResult = Await.result(c.query(sql))
       val OK(_, insertid, _, _, _) = insertResult.asInstanceOf[OK]
       expectResult(true) { insertResult.isInstanceOf[OK] }
     }
 
     test("Select") {
-      val selectResult = c.select("SELECT * FROM `finagle-mysql-test`") { row =>
+      val selectResult = Await.result(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
         val StringValue(event) = row("event").get
         val FloatValue(time) = row("time").get
         val StringValue(name) = row("name").get
         val StringValue(nation) = row("nationality").get
         val DateValue(date) = row("date").get
         SwimmingRecord(event, time, name, nation, date)
-      }.get
+      })
 
       var i = 0
       for (res <- selectResult) {
@@ -158,10 +158,10 @@ class ClientTest extends FunSuite with BeforeAndAfterAll {
       val recordName = SwimmingRecord.allRecords(randomIdx).name
 
       // query using the prepared statement
-      val ps = c.prepare(prepareQuery).get
+      val ps = Await.result(c.prepare(prepareQuery))
       ps.parameters = Array(recordName)
-      val result1 = c.execute(ps).get
-      val result2 = c.execute(ps).get
+      val result1 = Await.result(c.execute(ps))
+      val result2 = Await.result(c.execute(ps))
 
       val expectedRes = LongValue(SwimmingRecord.countRecordsWith(recordName))
       expectResult(expectedRes) {

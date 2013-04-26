@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.Service
-import com.twitter.util.Future
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
 import org.specs.SpecificationWithJUnit
 
@@ -36,7 +36,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
     "return same content in response as in request" in {
       val response = client(Request("123"))
-      response().contentString must_==("123")
+      Await.result(response).contentString must_==("123")
     }
   }
 }

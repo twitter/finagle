@@ -1,11 +1,8 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.Group
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{
-  ClientConnection, NoBrokersAvailableException, Service, ServiceFactory
-}
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.{ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
+import com.twitter.util.{Await, Future, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -44,18 +41,18 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
     factories.size must be_==(N)
 
     "balance according to load" in {
-      val made = 0 until N map { _ => b()() }
+      val made = 0 until N map { _ => Await.result(b()) }
       factories foreach { _.load must be_==(1) }
-      val made2 = 0 until N map { _ => b()() }
+      val made2 = 0 until N map { _ => Await.result(b()) }
       factories foreach { _.load must be_==(2) }
 
       // apologies for the ascii art.
-      val f = made(0)(())()
+      val f = Await.result(made(0)(()))
       made(0).close()
       f.load must be_==(1)
 
       // f is now least-loaded
-      val f1 = b()()(())()
+      val f1 = Await.result(Await.result(b())(()))
       f1 must be(f)
     }
 
@@ -71,28 +68,28 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
 
     "be able to handle dynamically added factory" in {
       // initially N factories, load them twice
-      val made = 0 until N*2 map { _ => b()() }
+      val made = 0 until N*2 map { _ => Await.result(b()) }
       factories foreach { _.load must be_==(2) }
 
       // add newFactory to the heap balancer. Initially it has load 0, so the next two make()() should both pick
       // newFactory
       group() += newFactory
-      b()()
+      Await.result(b())
       newFactory.load must be_==(1)
-      b()()
+      Await.result(b())
       newFactory.load must be_==(2)
 
       // remove newFactory from the heap balancer. Further calls to make()() should not affect the load on newFactory
       group() -= newFactory
-      val made2 = 0 until N foreach { _ => b()() }
+      val made2 = 0 until N foreach { _ => Await.result(b()) }
       factories foreach { _.load must be_==(3) }
       newFactory.load must be_==(2)
     }
 
     "be safe to remove a host from group before releasing it" in {
-      val made = 0 until N map { _ => b()() }
+      val made = 0 until N map { _ => Await.result(b()) }
       group() += newFactory
-      val made2 = b.apply().apply()
+      val made2 = Await.result(b())
       (factories :+ newFactory) foreach { _.load must be_==(1) }
 
       group() -= newFactory
@@ -101,9 +98,9 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "close a factory as it is removed from group" in {
-      val made = 0 until N map { _ => b()() }
+      val made = 0 until N map { _ => Await.result(b()) }
       group() --= half1
-      b()().close()
+      Await.result(b()).close()
       half1 foreach { _._closed must beTrue }
     }
 
@@ -117,24 +114,24 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
       checkGauge("available", 10)
       checkGauge("size", 10)
 
-      0 until N map { _ => b()() }
+      0 until N map { _ => Await.result(b()) }
       checkGauge("load", 10)
       checkGauge("available", 10)
       checkGauge("size", 10)
 
-      0 until N map { _ => b()() }
+      0 until N map { _ => Await.result(b()) }
       checkGauge("load", 20)
       checkGauge("available", 10)
       checkGauge("size", 10)
 
       group() += newFactory
-      b()()
+      Await.result(b())
       checkGauge("available", 11)
       checkGauge("size", 11)
       checkCounter("adds", 1)
 
       group() -= newFactory
-      b()()
+      Await.result(b())
       checkGauge("available", 10)
       checkGauge("size", 10)
       checkCounter("adds", 1)
@@ -145,14 +142,14 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
   "HeapBalancer (empty)" should {
     "always return NoBrokersAvailableException" in {
       val b = new HeapBalancer(Group.empty[ServiceFactory[Unit, LoadedFactory]])
-      b()() must throwA[NoBrokersAvailableException]
+      Await.result(b()) must throwA[NoBrokersAvailableException]
       val heapBalancerEmptyGroup = "HeapBalancerEmptyGroup"
       val c = new HeapBalancer(
         Group.empty[ServiceFactory[Unit, LoadedFactory]],
         NullStatsReceiver,
         new NoBrokersAvailableException(heapBalancerEmptyGroup)
       )
-      c()() must throwA[NoBrokersAvailableException].like {
+      Await.result(c()) must throwA[NoBrokersAvailableException].like {
         case m => m.getMessage must beMatching(heapBalancerEmptyGroup)
       }
     }

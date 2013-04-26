@@ -347,8 +347,8 @@ class ZookeeperCachePoolCluster private[memcached](
       // should be always exactly matching existing memberships, controlled by cache-team operator.
       // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
       // another try
-      val newSet = waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges)
-          .get(CachePoolWaitCompleteTimeout)()
+      val newSet = Await.result(waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges),
+        CachePoolWaitCompleteTimeout)
 
       updatePool(newSet)
     }

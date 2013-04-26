@@ -4,6 +4,7 @@ import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.http.{Request, Status}
 import com.twitter.finagle.http.path._
 import com.twitter.finagle.http.path.{Path => FPath}
+import com.twitter.util.Await
 
 
 class RoutingServiceSpec extends SpecificationWithJUnit {
@@ -14,8 +15,8 @@ class RoutingServiceSpec extends SpecificationWithJUnit {
         case "/test.json" => NullService
       }
 
-      service(Request("/test.json"))().status must_== Status.Ok
-      service(Request("/unknown"))().status   must_== Status.NotFound
+      Await.result(service(Request("/test.json"))).status must_== Status.Ok
+      Await.result(service(Request("/unknown"))).status   must_== Status.NotFound
     }
 
     "RoutingService.byPathObject" in {
@@ -23,8 +24,8 @@ class RoutingServiceSpec extends SpecificationWithJUnit {
         case Root / "test" ~ "json" => NullService
       }
 
-      service(Request("/test.json"))().status must_== Status.Ok
-      service(Request("/unknown"))().status   must_== Status.NotFound
+      Await.result(service(Request("/test.json"))).status must_== Status.Ok
+      Await.result(service(Request("/unknown"))).status   must_== Status.NotFound
     }
   }
 }

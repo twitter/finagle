@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{CancelledRequestException, Service}
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.Future
+import com.twitter.finagle.{CancelledRequestException, Service}
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
 
 
@@ -27,7 +27,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val request = Request()
       val filter = (new ExceptionFilter) andThen service
 
-      val response = filter(request)()
+      val response = Await.result(filter(request))
       response.status        must_== Status.Ok
       response.contentString must_== "hello"
     }
@@ -36,7 +36,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val request = Request("exception" -> "true")
       val filter = (new ExceptionFilter) andThen service
 
-      val response = filter(request)()
+      val response = Await.result(filter(request))
       response.status        must_== Status.InternalServerError
       response.contentString must_== ""
     }
@@ -45,7 +45,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val request = Request("throw" -> "true")
       val filter = (new ExceptionFilter) andThen service
 
-      val response = filter(request)()
+      val response = Await.result(filter(request))
       response.status        must_== Status.InternalServerError
       response.contentString must_== ""
     }
@@ -54,7 +54,7 @@ class ExceptionFilterSpec extends SpecificationWithJUnit {
       val request = Request("cancel" -> "true")
       val filter = (new ExceptionFilter) andThen service
 
-      val response = filter(request)()
+      val response = Await.result(filter(request))
       response.statusCode    must_== 499
       response.contentString must_== ""
     }

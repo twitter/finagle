@@ -1,11 +1,11 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.{NotShardableException, Service, ShardNotAvailableException}
 import com.twitter.hashing._
-import com.twitter.finagle.{Service, ShardNotAvailableException, NotShardableException}
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
+import org.mockito.Matchers._
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.mockito.Matchers._
 
 
 class ShardingServiceSpec extends SpecificationWithJUnit with Mockito {
@@ -51,12 +51,12 @@ class ShardingServiceSpec extends SpecificationWithJUnit with Mockito {
     "returns an exception if the shard picked is unavailable" in {
       distributor.nodeForHash(1L) returns serviceForA
       serviceForA.isAvailable returns false
-      service(reqA)() must throwA[ShardNotAvailableException]
+      Await.result(service(reqA)) must throwA[ShardNotAvailableException]
       there was no(serviceForA).apply(reqA)
     }
 
     "returns an unshardable if the request is not shardable" in {
-      service(unshardableReq)() must throwA[NotShardableException]
+      Await.result(service(unshardableReq)) must throwA[NotShardableException]
       there was no(distributor).nodeForHash(anyLong)
     }
   }

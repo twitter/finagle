@@ -1,11 +1,10 @@
 package com.twitter.finagle.zipkin.thrift
 
-import collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{  ThriftClientFramedCodec, thrift}
+import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
@@ -16,6 +15,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.TIOStreamTransport
+import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 
 object RawZipkinTracer {
   // to make sure we only create one instance of the tracer per host and port

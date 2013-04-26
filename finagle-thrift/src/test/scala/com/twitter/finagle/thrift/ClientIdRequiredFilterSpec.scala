@@ -1,9 +1,9 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
-import com.twitter.util.Future
-import org.specs.mock.Mockito
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class ClientIdRequiredFilterSpec extends SpecificationWithJUnit with Mockito {
   "ClientIdRequiredFilter" should {
@@ -17,13 +17,13 @@ class ClientIdRequiredFilterSpec extends SpecificationWithJUnit with Mockito {
       underlying(request) returns response
       clientId.asCurrent {
         val result = service(request)
-        result() mustEqual response()
+        Await.result(result) mustEqual Await.result(response)
         result
       }
     }
 
     "throws NoClientIdSpecifiedException when ClientId does not exist" in {
-      service(request)() must throwA[NoClientIdSpecifiedException]
+      Await.result(service(request)) must throwA[NoClientIdSpecifiedException]
       there was no(underlying).apply(any[String])
     }
   }

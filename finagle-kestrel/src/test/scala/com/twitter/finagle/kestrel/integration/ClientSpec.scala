@@ -1,11 +1,12 @@
 package com.twitter.finagle.kestrel.integration
 
-import org.specs.SpecificationWithJUnit
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.kestrel.Client
-import org.jboss.netty.util.CharsetUtil
+import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.util.Await
+import org.jboss.netty.util.CharsetUtil
+import org.specs.SpecificationWithJUnit
 
 class ClientSpec extends SpecificationWithJUnit {
   "ConnectedClient" should {
@@ -19,12 +20,12 @@ class ClientSpec extends SpecificationWithJUnit {
         .buildFactory()
       val client = Client(serviceFactory)
 
-      client.delete("foo")()
+      Await.result(client.delete("foo"))
 
       "set & get" in {
-        client.get("foo")() mustEqual None
-        client.set("foo", "bar")()
-        client.get("foo")() map { _.toString(CharsetUtil.UTF_8) } mustEqual Some("bar")
+        Await.result(client.get("foo")) mustEqual None
+        Await.result(client.set("foo", "bar"))
+        Await.result(client.get("foo")) map { _.toString(CharsetUtil.UTF_8) } mustEqual Some("bar")
       }
     }
   }

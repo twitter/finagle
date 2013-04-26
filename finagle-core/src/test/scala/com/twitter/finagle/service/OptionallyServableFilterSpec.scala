@@ -1,11 +1,9 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.{NotServableException, Service}
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-
-import com.twitter.util.Future
-
-import com.twitter.finagle.{Service, NotServableException}
 
 class OptionallyServableFilterSpec extends SpecificationWithJUnit with Mockito {
   "OptionallyServableFilter" should {
@@ -20,7 +18,7 @@ class OptionallyServableFilterSpec extends SpecificationWithJUnit with Mockito {
       fn.apply(request) returns Future.value(true)
 
       underlying(request) returns response
-      service(request)() mustEqual response()
+      Await.result(service(request)) mustEqual Await.result(response)
 
       there was one(fn).apply(request)
     }
@@ -28,7 +26,7 @@ class OptionallyServableFilterSpec extends SpecificationWithJUnit with Mockito {
     "throws NotServableException when fn returns false" in {
       fn.apply(request) returns Future.value(false)
 
-      service(request)() must throwA[NotServableException]
+      Await.result(service(request)) must throwA[NotServableException]
 
       there was no(underlying).apply(any[String])
       there was one(fn).apply(request)

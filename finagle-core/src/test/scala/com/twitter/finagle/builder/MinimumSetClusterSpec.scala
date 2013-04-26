@@ -1,5 +1,6 @@
 package com.twitter.finagle.builder
 
+import com.twitter.util.Await
 import org.specs.SpecificationWithJUnit
 
 class MinimumSetClusterSpec extends SpecificationWithJUnit {
@@ -18,7 +19,7 @@ class MinimumSetClusterSpec extends SpecificationWithJUnit {
       val (_, updates) = cluster.snap
       dynamicCluster.add(4)
       updates.isDefined must beTrue
-      updates().head mustEqual Cluster.Add(4)
+      Await.result(updates).head mustEqual Cluster.Add(4)
     }
 
     "don't propagate censored updates" in {

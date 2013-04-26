@@ -1,11 +1,11 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle._
-import com.twitter.finagle.integration.{IntegrationBase, StringCodec}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.util.{Monitor, Promise, Future, Return, Throw}
+import com.twitter.finagle.integration.{IntegrationBase, StringCodec}
+import com.twitter.util.{Await, Future, Monitor, Promise, Return, Throw}
 import java.net.InetSocketAddress
-import java.util.logging.{StreamHandler, Level, Logger}
+import java.util.logging.{Level, Logger, StreamHandler}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -84,7 +84,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
       service(any) throws outer // make server service throw the mock exception
 
       try {
-        val f = client("123")()
+        val f = Await.result(client("123"))
       } catch {
         case e: ChannelException => // deliberately empty. Server exception comes back as ChannelClosedException
       }

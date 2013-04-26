@@ -5,7 +5,7 @@ import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
 import com.twitter.concurrent.Broker
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
@@ -60,7 +60,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
 
         expectedService.apply(any[Incr]) returns Future.value(randomResponse)
 
-        mockClient.incr("foo")().get mustEqual randomResponse.value
+        Await.result(mockClient.incr("foo")).get mustEqual randomResponse.value
       }
     }
 
@@ -91,26 +91,26 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       val broker = new Broker[NodeEvent]
       val ketamaClient = new KetamaClient(services, broker.recv, KeyHasher.KETAMA, 160)
 
-      ketamaClient.get("foo")()
+      Await.result(ketamaClient.get("foo"))
       there was one(serviceA).apply(any)
 
       broker !! NodeMarkedDead(nodeKeyA)
 
       "goes to secondary if primary is down" in {
         serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
-        ketamaClient.get("foo")()
+        Await.result(ketamaClient.get("foo"))
         there was one(serviceB).apply(any)
       }
 
       "throws ShardNotAvailableException when no nodes available" in {
         broker !! NodeMarkedDead(nodeKeyB)
-        ketamaClient.get("foo")() must throwA[ShardNotAvailableException]
+        Await.result(ketamaClient.get("foo")) must throwA[ShardNotAvailableException]
       }
 
       "brings back the dead node" in {
         serviceA(any) returns Future.value(Values(Seq(value)))
         broker !! NodeRevived(nodeKeyA)
-        ketamaClient.get("foo")()
+        Await.result(ketamaClient.get("foo"))
         there was two(serviceA).apply(any)
       }
     }

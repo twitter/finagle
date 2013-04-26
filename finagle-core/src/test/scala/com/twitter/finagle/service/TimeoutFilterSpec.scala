@@ -1,10 +1,10 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.{IndividualRequestTimeoutException, MockTimer, Service}
+import com.twitter.util.{Await, Promise, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import com.twitter.conversions.time._
-import com.twitter.util.{Promise, Time}
-import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
 
 class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
   "TimeoutFilter" should {
@@ -25,7 +25,7 @@ class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
       promise.setValue("1")
       val res = timeoutService("blah")
       res.isDefined must beTrue
-      res() mustBe "1"
+      Await.result(res) mustBe "1"
     }
 
     "times out a request that is not successful, cancels underlying" in Time.withCurrentTimeFrozen { tc =>
@@ -38,7 +38,7 @@ class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
       promise.interrupted must beLike {
         case Some(_: java.util.concurrent.TimeoutException) => true
       }
-     res() must throwA(exception)
+     Await.result(res) must throwA(exception)
     }
   }
 }

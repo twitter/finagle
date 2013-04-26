@@ -49,7 +49,7 @@ object ReplicationClient {
     failureAccrualParams: (Int, Duration) = (5, 30.seconds)
   ) = {
     val underlyingClients = pools map { pool =>
-      pool.ready()
+      Await.result(pool.ready)
       KetamaClientBuilder(pool, hashName, clientBuilder, failureAccrualParams).build()
     }
     val repStatsReceiver =

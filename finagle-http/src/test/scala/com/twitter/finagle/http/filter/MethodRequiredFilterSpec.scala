@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status}
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
 
 class MethodRequiredFilterSpec extends SpecificationWithJUnit {
@@ -28,7 +28,7 @@ class MethodRequiredFilterSpec extends SpecificationWithJUnit {
     "return 407 when disallowed method is used" in {
       val request = Request()
       request.method = Method.Get
-      val response = filter(request, dummyService)()
+      val response = Await.result(filter(request, dummyService))
       response.status must_== Status.MethodNotAllowed
       response.headers.get("Allow").get must be_==("POST")
     }
@@ -36,7 +36,7 @@ class MethodRequiredFilterSpec extends SpecificationWithJUnit {
     "return 200 when allowed method is used" in {
       val request = Request()
       request.method = Method.Post
-      val response = filter(request, dummyService)()
+      val response = Await.result(filter(request, dummyService))
       response.status must_== Status.Ok
     }
   }

@@ -1,12 +1,11 @@
 package com.twitter.finagle.integration
 
+import com.twitter.finagle.{CancelledConnectionException, WriteException}
+import com.twitter.util.Await
+import org.jboss.netty.channel._
 import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-
-import org.jboss.netty.channel._
-
-import com.twitter.finagle.{WriteException, CancelledConnectionException}
 
 
 class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
@@ -22,7 +21,7 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
       there was one(m.connectFuture).cancel()
       m.connectFuture.isCancelled must beTrue
       f.isDefined must beTrue
-      f() must throwA(WriteException(new CancelledConnectionException))
+      Await.result(f) must throwA(WriteException(new CancelledConnectionException))
     }
 
     "cancel while waiting for a reply" in {
@@ -73,7 +72,7 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
 
       f1.raise(new Exception)
       f1.isDefined must beTrue
-      f1() must throwA[CancelledConnectionException]
+      Await.result(f1) must throwA[CancelledConnectionException]
     }
   }
 }

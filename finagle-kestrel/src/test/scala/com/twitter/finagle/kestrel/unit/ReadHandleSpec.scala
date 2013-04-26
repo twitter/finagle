@@ -1,13 +1,12 @@
 package com.twitter.finagle.kestrel.unit
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
-
+import com.twitter.concurrent.Broker
+import com.twitter.finagle.kestrel._
+import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
-import com.twitter.concurrent.Broker
-
-import com.twitter.finagle.kestrel._
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
   def msg_(i: Int) = {
@@ -50,7 +49,7 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
       sent.isDefined must beFalse
       val recvd = (buffered.messages?)
       recvd.isDefined must beTrue
-      recvd().ack.sync()
+      Await.result(recvd).ack.sync()
       sent.isDefined must beTrue
     }
 
@@ -62,7 +61,7 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
       0 until N foreach { i =>
         val recvd = (buffered.messages?)
         recvd.isDefined must beTrue
-        recvd().bytes.toString(CharsetUtil.UTF_8) must be_==(i.toString)
+        Await.result(recvd).bytes.toString(CharsetUtil.UTF_8) must be_==(i.toString)
       }
     }
 
@@ -72,7 +71,7 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
       val e = new Exception("sad panda")
       error ! e
       errd.isDefined must beTrue
-      errd() must be(e)
+      Await.result(errd) must be(e)
     }
 
     "when closed" in {
@@ -92,11 +91,11 @@ class ReadHandleSpec extends SpecificationWithJUnit with Mockito {
         closed.isDefined must beFalse
         val m0 = (buffered.messages?)
         m0.isDefined must beTrue
-        m0().ack.sync()
+        Await.result(m0).ack.sync()
         closed.isDefined must beFalse
         val m1 = (buffered.messages?)
         m1.isDefined must beTrue
-        m1().ack.sync()
+        Await.result(m1).ack.sync()
         closed.isDefined must beTrue
       }
     }

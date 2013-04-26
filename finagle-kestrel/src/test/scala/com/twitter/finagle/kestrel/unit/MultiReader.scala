@@ -12,7 +12,7 @@ import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
-import com.twitter.util.{Future, Return, Promise, Time}
+import com.twitter.util.{Await, Future, Promise, Return, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -85,7 +85,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         }
 
         e.isDefined must beTrue
-        e() must be(AllHandlesDiedException)
+        Await.result(e) must be(AllHandlesDiedException)
       }
     }
 
@@ -194,7 +194,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         messages must eventually(be_==(sentMessages.toSet))
@@ -209,7 +209,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         // 0, 3, 6 ...
@@ -232,7 +232,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         messages must eventually(be_==(sentMessages.toSet))
@@ -243,7 +243,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
 
           // write to all 3
           sentMessages.zipWithIndex foreach { case (m, i) =>
-            services(i % services.size).apply(Set("the_queue", Time.now, m))()
+            Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
           }
 
           // expect fewer to be read on each pass
@@ -261,7 +261,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         messages must beEmpty // cluster not ready
@@ -279,7 +279,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         hosts.foreach { host => cluster.del(host) }
 
         e.isDefined must beTrue
-        e() must be(AllHandlesDiedException)
+        Await.result(e) must be(AllHandlesDiedException)
       }
 
       "silently handle the removal of a host that was never added" in {
@@ -290,7 +290,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         val sentMessages = 0 until N*10 map { i => "message %d".format(i) }
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
         messages must eventually(be_==(sentMessages.toSet))
         messages.clear()
@@ -298,7 +298,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         cluster.del(InetSocketAddress.createUnresolved("10.0.0.100", 22133))
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
         messages must eventually(be_==(sentMessages.toSet))
       }

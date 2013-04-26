@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.logging.{BareFormatter, Logger, StringHandler}
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Await, Future, Time}
 import org.specs.SpecificationWithJUnit
 
 
@@ -36,7 +36,7 @@ class LoggingFilterSpec extends SpecificationWithJUnit {
       val filter = (new LoggingFilter(logger, formatter)) andThen service
 
       Time.withTimeAt(Time.fromSeconds(1302121932)) { _ =>
-        filter(request)()
+        Await.result(filter(request))
       }
 
       stringHandler.get mustMatch ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")

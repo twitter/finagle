@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Await, Closable, Future, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -21,15 +21,15 @@ class AnnouncerTest extends FunSuite {
   val addr = new InetSocketAddress(0)
 
   test("reject bad names") {
-    assert(Announcer.announce(addr, "!foo!bar").isThrow)
+    assert(Await.ready(Announcer.announce(addr, "!foo!bar")).poll.get.isThrow)
   }
 
   test("reject unknown announcers") {
-    assert(Announcer.announce(addr, "unkown!foobar").isThrow)
+    assert(Await.ready(Announcer.announce(addr, "unkown!foobar")).poll.get.isThrow)
   }
 
   test("resolve ServiceLoaded announcers") {
-    Announcer.announce(addr, "test!xyz").get() match {
+    Await.result(Announcer.announce(addr, "test!xyz")) match {
       case p: Proxy => assert(p.self === TestAnnouncement(addr, "xyz"))
       case _ => assert(false)
     }

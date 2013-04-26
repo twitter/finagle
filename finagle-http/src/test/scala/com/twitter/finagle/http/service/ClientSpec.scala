@@ -8,7 +8,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.TimeConversions._
-import com.twitter.util.Throw
+import com.twitter.util.{Await, Throw, Try}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.ChannelClosedException
@@ -58,7 +58,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // No failures have happened yet.
         client.isAvailable must beTrue
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future get(1.second)
+        val resolved = Try(Await.result(future, 1.second))
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]
@@ -71,7 +71,7 @@ class ClientSpec extends SpecificationWithJUnit {
           .retries(10)
           .build()
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future get(1.second)
+        val resolved = Try(Await.result(future, 1.second))
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]

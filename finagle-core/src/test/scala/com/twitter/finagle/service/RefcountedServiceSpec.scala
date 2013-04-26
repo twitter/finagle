@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Await, Future, Promise, Return}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -31,7 +31,7 @@ class RefcountedServiceSpec extends SpecificationWithJUnit with Mockito {
       promise() = Return(123)
       there was one(service).close(any)
       f.isDefined must beTrue
-      f() must be_==(123)
+      Await.result(f) must be_==(123)
     }
   }
 }

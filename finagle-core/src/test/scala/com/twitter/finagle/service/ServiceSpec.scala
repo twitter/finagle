@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import org.specs.SpecificationWithJUnit
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Future, Throw}
+import com.twitter.util.{Await, Future, Throw, Try}
 import com.twitter.conversions.time._
 
 class ServiceSpec extends SpecificationWithJUnit {
@@ -17,7 +17,7 @@ class ServiceSpec extends SpecificationWithJUnit {
         }
       }
 
-      Service.rescue(exceptionThrowingService)(1).get(1.second) must be_==(Throw(e))
+      Try(Await.result(Service.rescue(exceptionThrowingService)(1), 1.second)) must be_==(Throw(e))
     }
   }
 }

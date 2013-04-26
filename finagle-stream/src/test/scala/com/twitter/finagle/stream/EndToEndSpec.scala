@@ -3,20 +3,15 @@ package com.twitter.finagle.stream
 import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{
-  Service, ServiceProxy, TooManyConcurrentRequestsException
-}
+import com.twitter.finagle.{Service, ServiceProxy, TooManyConcurrentRequestsException}
 import com.twitter.util._
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetSocketAddress, SocketAddress}
 import java.nio.charset.Charset
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import org.jboss.netty.channel.{
-  ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent,
-  ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent
-}
+import org.jboss.netty.channel.{ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, ChannelState, ChannelStateEvent, ChannelUpstreamHandler, Channels, MessageEvent, WriteCompletionEvent}
 import org.jboss.netty.handler.codec.http._
 import org.specs.SpecificationWithJUnit
 
@@ -50,7 +45,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         doAfter { client.close() }
 
         "writes from the server arrive on the client's channel" in {
-          val clientRes = client(httpRequest)(1.second)
+          val clientRes = Await.result(client(httpRequest), 1.second)
           var result = ""
           val latch = new CountDownLatch(1)
           (clientRes.error?) ensure {
@@ -73,7 +68,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         }
 
         "writes from the server are queued before the client responds" in {
-          val clientRes = client(httpRequest)(1.second)
+          val clientRes = Await.result(client(httpRequest), 1.second)
           messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
           messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
           messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
@@ -93,7 +88,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         }
 
         "the client does not admit concurrent requests" in {
-          val clientRes = client(httpRequest)(1.second)
+          val clientRes = Await.result(client(httpRequest), 1.second)
           client(httpRequest).poll must beLike {
             case Some(Throw(_: TooManyConcurrentRequestsException)) => true
           }
@@ -150,19 +145,19 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
           messages !! ChannelBuffers.wrappedBuffer("chunk1".getBytes)
 
-          (recvd?)(1.second) must beLike {
+          Await.result(recvd?, 1.second) must beLike {
             case e: ChannelStateEvent =>
               e.getState == ChannelState.OPEN && (java.lang.Boolean.TRUE equals e.getValue)
           }
 
-          (recvd?)(1.second) must beLike {
+          Await.result(recvd?, 1.second) must beLike {
             case m: MessageEvent =>
               m.getMessage must beLike {
                 case res: HttpResponse => res.isChunked
               }
           }
 
-          (recvd?)(1.second) must beLike {
+          Await.result(recvd?, 1.second) must beLike {
             case m: MessageEvent =>
               m.getMessage must beLike {
                 case res: HttpChunk => !res.isLast  // get "chunk1"
@@ -178,7 +173,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           // the streaming should continue
           messages !! ChannelBuffers.wrappedBuffer("chunk2".getBytes)
 
-          (recvd?)(1.second) must beLike {
+          Await.result(recvd?, 1.second) must beLike {
             case m: MessageEvent =>
               m.getMessage must beLike {
                 case res: HttpChunk => !res.isLast  // get "chunk2"
@@ -186,7 +181,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           }
 
           error !! EOF
-          (recvd?)(1.second) must beLike {
+          Await.result(recvd?, 1.second) must beLike {
             case m: MessageEvent =>
               m.getMessage must beLike {
                 case res: HttpChunkTrailer => res.isLast
@@ -194,14 +189,14 @@ class EndToEndSpec extends SpecificationWithJUnit {
           }
 
           // And finally it's closed.
-          (recvd?)(1.second) must beLike {
+          Await.result(recvd?, 1.second) must beLike {
             case e: ChannelStateEvent =>
               e.getState == ChannelState.OPEN && (java.lang.Boolean.FALSE equals e.getValue)
           }
         }
 
         "server ignores channel buffer messages after channel close" in {
-          val clientRes = client(httpRequest)(1.second)
+          val clientRes = Await.result(client(httpRequest), 1.second)
           var result = ""
           val latch = new CountDownLatch(1)
 
@@ -241,7 +236,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         .hostConnectionLimit(1)
         .buildFactory()
 
-      val underlying = factory()()
+      val underlying = Await.result(factory())
       val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
         override def close(deadline: Time) =
           Closable.all(underlying, server, factory).close(deadline)
@@ -275,7 +270,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         .hostConnectionLimit(1)
         .buildFactory()
 
-      val underlying = factory()()
+      val underlying = Await.result(factory())
       val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
         override def close(deadline: Time) =
           Closable.all(server, serverClient, proxy, factory).close(deadline)
@@ -309,7 +304,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           server.close()
         }
 
-        val res = client(httpRequest)(1.second)
+        val res = Await.result(client(httpRequest), 1.second)
         count must be_==(1)
         val f2 = client(httpRequest)
         f2.poll must beNone  // because of the host connection limit
@@ -319,7 +314,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
         count must be_==(1)
         error !! EOF
         res.release()
-        val res2 = f2(1.second)
+        val res2 = Await.result(f2, 1.second)
         count must be_==(2)
         res2.release()
       }

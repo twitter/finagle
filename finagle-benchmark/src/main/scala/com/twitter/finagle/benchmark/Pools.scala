@@ -3,7 +3,7 @@ package com.twitter.finagle.benchmark
 import com.google.caliper.SimpleBenchmark
 import com.twitter.finagle._
 import com.twitter.finagle.pool._
-import com.twitter.util.{Duration, JavaTimer}
+import com.twitter.util.{Await, Duration, JavaTimer}
 
 // A simple benchmark for pools that measures only get/put times for
 // when the pool is full (common case).
@@ -23,7 +23,7 @@ class PoolsBenchmark extends SimpleBenchmark {
       if (i >= width)
         s(i%width).close()
 
-      s(i%width) = pool().get()
+      s(i%width) = Await.result(pool())
 
       i += 1
     }

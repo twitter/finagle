@@ -4,10 +4,10 @@ import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Await, Future, Promise, Return, Try}
 import java.net.InetSocketAddress
 import java.nio.charset.Charset
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.specs.SpecificationWithJUnit
 
 class DuplexStreamSpec extends SpecificationWithJUnit {
@@ -48,28 +48,28 @@ class DuplexStreamSpec extends SpecificationWithJUnit {
         .hostConnectionLimit(1)
         .buildFactory()
 
-      val client = factory()()
+      val client = Await.result(factory())
 
       val outbound = new Broker[ChannelBuffer]
-      val handle = client(outbound.recv)()
+      val handle = Await.result(client(outbound.recv))
       val inbound = handle.messages
 
       "receive and reverse" in {
         service.input.isDefined mustEqual true
-        val input = service.input()
+        val input = Await.result(service.input)
         input.sync() foreach { str =>
           service.output.send(bufferToString(str).reverse).sync()
         }
 
         outbound.send("hello").sync()
-        bufferToString(inbound.sync()()) mustEqual "olleh"
+        bufferToString(Await.result(inbound.sync())) mustEqual "olleh"
       }
 
       "send two consequitive messages and receive them" in {
         var count = 0
 
         service.input.isDefined mustEqual true
-        val input = service.input()
+        val input = Await.result(service.input)
 
         input foreach { _ =>
           count += 1
@@ -79,20 +79,20 @@ class DuplexStreamSpec extends SpecificationWithJUnit {
         }
         outbound.send("hello").sync()
         outbound.send("world").sync()
-        bufferToString(inbound.sync()()) mustEqual "done"
+        bufferToString(Await.result(inbound.sync())) mustEqual "done"
         count mustEqual 2
       }
 
       "server closes when client initiates close" in {
-        service.handle().onClose.isDefined mustEqual false
+        Await.result(service.handle).onClose.isDefined mustEqual false
         handle.close()
-        service.handle().onClose.get(1.seconds) mustEqual Return(())
+        Try(Await.result(Await.result(service.handle).onClose, 1.seconds)) mustEqual Return(())
       }
 
       "client closes when server initiates close" in {
         handle.onClose.isDefined mustEqual false
-        service.handle().close()
-        handle.onClose.get(1.seconds) mustEqual Return(())
+        Await.result(service.handle).close()
+        Try(Await.result(handle.onClose, 1.seconds)) mustEqual Return(())
       }
     }
   }

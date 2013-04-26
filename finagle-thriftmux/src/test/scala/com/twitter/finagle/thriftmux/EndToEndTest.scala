@@ -1,11 +1,11 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.Group
-import com.twitter.finagle.ThriftMux
-import com.twitter.util.Future
+import com.twitter.finagle.thriftmux.thriftscala.TestService
+import com.twitter.finagle.{Group, ThriftMux}
+import com.twitter.util.{Await, Future}
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
@@ -16,7 +16,7 @@ class EndToEndTest extends FunSuite {
     })
 
     val client = ThriftMux.newIface[TestService.FutureIface](server)
-    assert(client.query("ok").get() == "okok")
+    assert(Await.result(client.query("ok")) == "okok")
   }
 /* TODO: add back when sbt supports old-school thrift gen
   test("end-to-end finagle-thrift") {

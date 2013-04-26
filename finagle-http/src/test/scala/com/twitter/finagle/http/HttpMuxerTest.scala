@@ -1,13 +1,12 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest,
-  HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class HttpMuxerTest extends FunSuite {
@@ -28,26 +27,26 @@ class HttpMuxerTest extends FunSuite {
     .withHandler("foo/boo/baz/", new DummyService(reply3))
 
   test("handles params properly") {
-    assert(Response(muxService(Request("/foo/bar/blah?j={}"))()).contentString == reply1)
+    assert(Response(Await.result(muxService(Request("/foo/bar/blah?j={}")))).contentString == reply1)
   }
 
   test("prefix matching request path correctly") {
-    assert(Response(muxService(Request("/fooblah"))()).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(muxService(Request("/fooblah")))).status == HttpResponseStatus.NOT_FOUND)
 
-    assert(Response(muxService(Request("/foo/bar/blah"))()).contentString == reply1)
+    assert(Response(Await.result(muxService(Request("/foo/bar/blah")))).contentString == reply1)
 
     // after normalization, it should match "/foo/bar/"
-    assert(Response(muxService(Request("/foo//bar/blah"))()).contentString == reply1)
+    assert(Response(Await.result(muxService(Request("/foo//bar/blah")))).contentString == reply1)
 
-    assert(Response(muxService(Request("/foo/bar"))()).contentString == reply2)
+    assert(Response(Await.result(muxService(Request("/foo/bar")))).contentString == reply2)
 
-    assert(Response(muxService(Request("/foo/bar/"))()).contentString == reply1)
+    assert(Response(Await.result(muxService(Request("/foo/bar/")))).contentString == reply1)
 
-    assert(Response(muxService(Request("/foo/boo/baz"))()).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(muxService(Request("/foo/boo/baz")))).status == HttpResponseStatus.NOT_FOUND)
 
-    assert(Response(muxService(Request("/foo/boo/baz/blah"))()).contentString == reply3)
+    assert(Response(Await.result(muxService(Request("/foo/boo/baz/blah")))).contentString == reply3)
 
-    assert(Response(muxService(Request("/foo/barblah"))()).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(muxService(Request("/foo/barblah")))).status == HttpResponseStatus.NOT_FOUND)
   }
 
   test("Registering a service with an existing name will overwrite the old") {
@@ -57,18 +56,18 @@ class HttpMuxerTest extends FunSuite {
       .withHandler("foo/bar", new DummyService(r2))  // exact match
       .withHandler("foo/boo/baz/", new DummyService(r3))
 
-    assert(Response(mux2(Request("/fooblah"))()).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(mux2(Request("/fooblah")))).status == HttpResponseStatus.NOT_FOUND)
 
-    assert(Response(mux2(Request("/foo/bar/blah"))()).contentString == r1)
+    assert(Response(Await.result(mux2(Request("/foo/bar/blah")))).contentString == r1)
 
-    assert(Response(mux2(Request("/foo/bar"))()).contentString == r2)
+    assert(Response(Await.result(mux2(Request("/foo/bar")))).contentString == r2)
 
-    assert(Response(mux2(Request("/foo/bar/"))()).contentString == r1)
+    assert(Response(Await.result(mux2(Request("/foo/bar/")))).contentString == r1)
 
-    assert(Response(mux2(Request("/foo/boo/baz"))()).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(mux2(Request("/foo/boo/baz")))).status == HttpResponseStatus.NOT_FOUND)
 
-    assert(Response(mux2(Request("/foo/boo/baz/blah"))()).contentString == r3)
+    assert(Response(Await.result(mux2(Request("/foo/boo/baz/blah")))).contentString == r3)
 
-    assert(Response(mux2(Request("/foo/barblah"))()).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(mux2(Request("/foo/barblah")))).status == HttpResponseStatus.NOT_FOUND)
   }
 }

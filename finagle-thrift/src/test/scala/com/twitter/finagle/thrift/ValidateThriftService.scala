@@ -1,11 +1,11 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.{Service, WriteException}
+import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessageType, TMessage}
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import com.twitter.util.{Future, Promise, Throw, Return}
 
 class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
   val protocolFactory = new TBinaryProtocol.Factory()
@@ -60,7 +60,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         validate.isAvailable must beTrue
         val f = validate(req)
         f.isDefined must beTrue
-        f() must be_==(arr)
+        Await.result(f) must be_==(arr)
         validate.isAvailable must beFalse
         val resp = validate(req).poll
 
@@ -89,7 +89,7 @@ class ValidateThriftServiceSpec extends SpecificationWithJUnit with Mockito {
         validate.isAvailable must beTrue
         val f = validate(req)
         f.isDefined must beTrue
-        f() must be_==(arr)
+        Await.result(f) must be_==(arr)
         validate.isAvailable must beTrue
         validate(req).poll must beLike {
           case Some(Return(_)) => true

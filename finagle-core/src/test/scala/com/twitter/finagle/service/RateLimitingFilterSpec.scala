@@ -1,11 +1,11 @@
 package com.twitter.finagle.service
 
-import org.specs.SpecificationWithJUnit
-import org.specs.mock.Mockito
 import com.twitter.finagle.Service
 import com.twitter.util.TimeConversions._
+import com.twitter.util.{Await, Future, Time}
 import org.mockito.Matchers
-import com.twitter.util.{Time, Future}
+import org.specs.SpecificationWithJUnit
+import org.specs.mock.Mockito
 
 class RateLimitingFilterSpec extends SpecificationWithJUnit with Mockito {
 
@@ -23,7 +23,7 @@ class RateLimitingFilterSpec extends SpecificationWithJUnit with Mockito {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
         (1 to 5) foreach { _ =>
-          rateLimitedService(1)() mustBe 1
+          Await.result(rateLimitedService(1)) mustBe 1
           t += 100.milliseconds
         }
       }
@@ -33,11 +33,11 @@ class RateLimitingFilterSpec extends SpecificationWithJUnit with Mockito {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
         (1 to 5) foreach { _ =>
-          rateLimitedService(1)() mustBe 1
+          Await.result(rateLimitedService(1)) mustBe 1
           t += 100.milliseconds
         }
 
-        rateLimitedService(1)() must throwA[Exception]
+        Await.result(rateLimitedService(1)) must throwA[Exception]
       }
     }
 
@@ -45,7 +45,7 @@ class RateLimitingFilterSpec extends SpecificationWithJUnit with Mockito {
       var t = Time.now
       Time.withTimeFunction(t) { _ =>
         (1 to 5) foreach { _ =>
-          (1 to 5) foreach { i => rateLimitedService(i)() mustBe 1 }
+          (1 to 5) foreach { i => Await.result(rateLimitedService(i)) mustBe 1 }
           t += 100.milliseconds
         }
       }

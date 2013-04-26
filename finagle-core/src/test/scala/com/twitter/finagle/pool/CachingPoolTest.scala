@@ -1,14 +1,14 @@
 package com.twitter.finagle.pool
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, ServiceFactory, WriteException, MockTimer}
-import com.twitter.util.{Duration, Time, Future, Promise}
+import com.twitter.finagle.{MockTimer, Service, ServiceFactory, WriteException}
+import com.twitter.util.{Await, Duration, Future, Promise, Time}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 
 @RunWith(classOf[JUnitRunner])
 class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest {
@@ -37,8 +37,8 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
 
-        val f = cachingPool()()
-        assert(f(123)() === obj)
+        val f = Await.result(cachingPool())
+        assert(Await.result(f(123)) === obj)
         verify(underlying)()
         assert(timer.tasks.isEmpty)
 
@@ -60,18 +60,18 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
     test("do not schedule timer tasks if items never expire") {
       val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, Duration.Top, timer)
 
-      val service = cachingPool()()
+      val service = Await.result(cachingPool())
       assert(service === underlyingService)
       service.close()
       verify(underlyingService, never()).close(any[Time])
       assert(timer.tasks.isEmpty)
-      assert(cachingPool()() === underlyingService)
+      assert(Await.result(cachingPool()) === underlyingService)
     }
 
     test("reuse cached objects & revive from death row") {
       Time.withCurrentTimeFrozen { timeControl =>
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
-        cachingPool()().close()
+        Await.result(cachingPool()).close()
         assert(timer.tasks.size === 1)
 
         verify(underlying)()
@@ -80,7 +80,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
         timeControl.advance(4.seconds)
 
-        cachingPool()().close()
+        Await.result(cachingPool()).close()
         verify(underlying)()
         verify(underlyingService, never()).close(any[Time])
         assert(timer.tasks.size === 1)
@@ -119,16 +119,16 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
         val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
         when(underlying()).thenReturn(Future.value(s0))
-        val f0 = cachingPool()()
-        assert(f0(123)() === o0)
+        val f0 = Await.result(cachingPool())
+        assert(Await.result(f0(123)) === o0)
 
         when(underlying()).thenReturn(Future.value(s1))
-        val f1 = cachingPool()()
-        assert(f1(123)() === o1)
+        val f1 = Await.result(cachingPool())
+        assert(Await.result(f1(123)) === o1)
 
         when(underlying()).thenReturn(Future.value(s2))
-        val f2 = cachingPool()()
-        assert(f2(123)()  === o2)
+        val f2 = Await.result(cachingPool())
+        assert(Await.result(f2(123))  === o2)
 
         val ss = Seq(s0, s1, s2)
         val fs = Seq(f0, f1, f2)
@@ -157,7 +157,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
         assert(timer.tasks.head.when === Time.now + 5.seconds)
 
         // Take it!
-        assert(cachingPool()()(123)() === o2)
+        assert(Await.result(Await.result(cachingPool())(123)) === o2)
 
         timeControl.advance(5.seconds)
 
@@ -179,8 +179,8 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
         when(underlying()).thenReturn(Future.value(underlyingService))
 
         assert(timer.tasks.isEmpty)
-        val service = cachingPool()()
-        assert(service(123)() === obj)
+        val service = Await.result(cachingPool())
+        assert(Await.result(service(123)) === obj)
         assert(timer.tasks.isEmpty)
 
         service.close()
@@ -191,7 +191,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
         timeControl.advance(1.second)
 
-        assert(cachingPool()()(123)() === obj)
+        assert(Await.result(Await.result(cachingPool())(123)) === obj)
 
         timeControl.advance(4.seconds)
         assert(timer.tasks.isEmpty)
@@ -216,8 +216,8 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
         when(underlying()).thenReturn(Future.value(underlyingService))
         when(underlyingService.isAvailable).thenReturn(false)
 
-        val service = cachingPool()()
-        assert(service(123)() === obj)
+        val service = Await.result(cachingPool())
+        assert(Await.result(service(123)) === obj)
 
         service.close()
         verify(underlyingService).isAvailable
@@ -239,7 +239,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
         val service1 = cachingPool()
         val exception = new Exception("give up")
         service1.raise(exception)
-        intercept[WriteException] { service1() }
+        intercept[WriteException] { Await.result(service1) }
         service1 onFailure {
           case WriteException(e) => assert(e === exception)
           case _ => assert(false, "exception was not write exception")
@@ -252,7 +252,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
         // not sure how else to verify the underlying is the same since CachingPool wraps
         when(underlyingService(1)).thenReturn(Future.value(2))
-        assert(service2()(1)() === 2)
+        assert(Await.result(Await.result(service2)(1)) === 2)
       }
     }
 
@@ -265,7 +265,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
         when(underlying()).thenReturn(Future.value(underlyingService))
         when(underlyingService.isAvailable).thenReturn(true)
 
-        val service = cachingPool()()
+        val service = Await.result(cachingPool())
         service.close()
         verify(underlyingService, never()).close(any[Time])
 
@@ -283,7 +283,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
         when(underlying()).thenReturn(Future.value(underlyingService))
         when(underlyingService.isAvailable).thenReturn(true)
 
-        val service = cachingPool()()
+        val service = Await.result(cachingPool())
         cachingPool.close()
         verify(underlyingService, never()).close(any[Time])
         service.close()

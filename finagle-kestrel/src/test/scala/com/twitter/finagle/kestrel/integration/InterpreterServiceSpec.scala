@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.Time
+import com.twitter.util.{Await, Time}
 import java.net.InetSocketAddress
 import org.specs.SpecificationWithJUnit
 
@@ -39,7 +39,7 @@ class InterpreterServiceSpec extends SpecificationWithJUnit {
         _ <- client(Set(queueName, Time.now, value))
         r <- client(Get(queueName))
       } yield r
-      result(1.second) mustEqual Values(Seq(Value(queueName, value)))
+      Await.result(result, 1.second) mustEqual Values(Seq(Value(queueName, value)))
     }
 
     "transactions" in {
@@ -50,7 +50,7 @@ class InterpreterServiceSpec extends SpecificationWithJUnit {
           _ <- client(Abort(queueName))
           r <- client(Open(queueName))
         } yield r
-        result(1.second) mustEqual Values(Seq(Value(queueName, value)))
+        Await.result(result, 1.second) mustEqual Values(Seq(Value(queueName, value)))
       }
     }
   }

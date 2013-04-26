@@ -1,9 +1,8 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{BackupRequestLost, RequestException, 
-  WriteException, Service}
-import com.twitter.util.Promise
+import com.twitter.finagle.{BackupRequestLost, RequestException, Service, WriteException}
+import com.twitter.util.{Await, Promise}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -33,7 +32,7 @@ class StatsFilterTest extends FunSuite {
     promise.setException(e3)
     val res = statsService("foo")
     assert(res.isDefined)
-    assert(res.isThrow)
+    assert(Await.ready(res).poll.get.isThrow)
     val sourced = receiver.counters.keys.filter { _.exists(_ == "sourcedfailures") }
     assert(sourced.size == 1)
     assert(sourced.toSeq(0).exists(_.indexOf("bogus") >=0))

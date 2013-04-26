@@ -5,7 +5,7 @@ import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
 import com.twitter.finagle.{NoBrokersAvailableException, Codec, CodecFactory, Service}
 import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{
@@ -73,7 +73,7 @@ class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
 
         withClient(cluster) { client =>
           cluster.thread.join()
-          client("hello\n")(1.seconds) mustEqual "olleh"
+          Await.result(client("hello\n"), 1.seconds) mustEqual "olleh"
         }
       }
     }
@@ -102,7 +102,7 @@ class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
           cluster.ready.isDefined must beFalse
           cluster.join(server.localAddress)
           cluster.thread.join()
-          response() mustEqual "olleh"
+          Await.result(response) mustEqual "olleh"
           cluster.ready.isDefined must beTrue
         }
       }
@@ -118,7 +118,7 @@ class ZookeeperServerSetClusterSpec extends SpecificationWithJUnit {
 
         withClient(cluster) { client =>
           cluster.thread.join()
-          client("hello\n")(1.seconds) mustEqual "olleh"
+          Await.result(client("hello\n"), 1.seconds) mustEqual "olleh"
         }
       }
     }

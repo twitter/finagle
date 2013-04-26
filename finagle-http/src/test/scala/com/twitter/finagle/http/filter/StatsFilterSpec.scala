@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Await, Future, Time}
 import org.specs.SpecificationWithJUnit
 
 
@@ -22,7 +22,7 @@ class StatsFilterSpec extends SpecificationWithJUnit {
       }
 
       Time.withCurrentTimeFrozen { _ =>
-        filter(Request())()
+        Await.result(filter(Request()))
       }
 
       receiver.counters(Seq("status", "404")) must_== 1

@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.{Service, WriteException}
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Await, Future, Promise}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -27,7 +27,7 @@ class CloseOnReleaseServiceSpec extends SpecificationWithJUnit with Mockito {
     "throw a write exception if we attempt to use a released service" in {
       wrapper.close()
 
-      wrapper(132)() must throwA[WriteException]
+      Await.result(wrapper(132)) must throwA[WriteException]
     }
   }
 }

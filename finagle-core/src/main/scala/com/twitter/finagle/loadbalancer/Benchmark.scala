@@ -1,8 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.Group
-import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
-import com.twitter.util.{Future, Time, Stopwatch}
+import com.twitter.finagle.{ClientConnection, Group, Service, ServiceFactory}
+import com.twitter.util.{Await, Future, Stopwatch, Time}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -32,7 +31,7 @@ object Benchmark {
       val j = i % W
       // todo: jitter in release. pick one at random.
       if (outstanding(j) ne null) outstanding(j).close()
-      outstanding(j) = factory()()
+      outstanding(j) = Await.result(factory())
     }
     elapsed()
   }

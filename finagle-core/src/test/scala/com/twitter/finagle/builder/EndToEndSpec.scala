@@ -1,8 +1,8 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
-import com.twitter.util.{Future, CountDownLatch, Promise}
+import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
+import com.twitter.util.{Await, CountDownLatch, Future, Promise}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.specs.SpecificationWithJUnit
 
@@ -37,7 +37,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
       cluster.del(server.localAddress)
       response.isDefined must beFalse
       constRes.setValue("foo")
-      response() must be_==("foo")
+      Await.result(response) must be_==("foo")
     }
 
 
@@ -70,8 +70,8 @@ class EndToEndSpec extends SpecificationWithJUnit {
       // more than 5 requests will result in MaxQueuedRequestsExceededException
       val r = client("123")
       r.isDefined must beTrue
-      r.isThrow must beTrue
-      r() must throwA(new TooManyConcurrentRequestsException)
+      Await.ready(r).poll.get.isThrow must beTrue
+      Await.result(r) must throwA(new TooManyConcurrentRequestsException)
 
       // make cluster available, now queued requests should be processed
       val thread = new Thread {
@@ -80,7 +80,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
 
       cluster.ready.map { _ =>
         0 until 5 foreach { i =>
-          responses(i)() must be_==(i.toString)
+          Await.result(responses(i)) must be_==(i.toString)
         }
       }
       thread.start()

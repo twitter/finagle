@@ -1,13 +1,11 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.{MockTimer, Service, ServiceFactory}
+import com.twitter.util.{Await, Duration, Future, Return, Throw, Time, Timer, Try}
+import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import org.mockito.Matchers
-
-import com.twitter.util.{Duration, Future, Return, Throw, Time, Timer, Try}
-import com.twitter.conversions.time._
-
-import com.twitter.finagle.{Service, ServiceFactory, MockTimer}
 
 class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
   "a failing service" should {
@@ -24,19 +22,19 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     val timer = new MockTimer
     val factory = new FailureAccrualFactory[Int, Int](
       underlying, 3, 10.seconds, timer)
-    val service = factory()()
+    val service = Await.result(factory())
     there was one(underlying)()
 
     "become unavailable" in {
       Time.withCurrentTimeFrozen { timeControl =>
 
-        service(123)() must throwA[Exception]
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
 
         // Now fail:
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beFalse
         service.isAvailable must beFalse
 
@@ -46,9 +44,9 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
 
     "be revived (for one request) after the markDeadFor duration" in {
       Time.withCurrentTimeFrozen { timeControl =>
-        service(123)() must throwA[Exception]
-        service(123)() must throwA[Exception]
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beFalse
         service.isAvailable must beFalse
 
@@ -60,7 +58,7 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
         service.isAvailable must beTrue
 
         // But after one bad dispatch, mark it again unhealthy.
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
 
         factory.isAvailable must beFalse
         service.isAvailable must beFalse
@@ -69,9 +67,9 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
 
     "reset failure counters after an individual success" in {
       Time.withCurrentTimeFrozen { timeControl =>
-        service(123)() must throwA[Exception]
-        service(123)() must throwA[Exception]
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beFalse
         service.isAvailable must beFalse
 
@@ -85,20 +83,20 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
         underlyingService(123) returns Future.value(321)
 
         // A good dispatch!
-        service(123)() must be_==(321)
+        Await.result(service(123)) must be_==(321)
 
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
 
         // Counts are now reset.
         underlyingService(123) returns Future.exception(new Exception)
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
-        service(123)() must throwA[Exception]
+        Await.result(service(123)) must throwA[Exception]
         factory.isAvailable must beFalse
         service.isAvailable must beFalse
       }
@@ -118,7 +116,7 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
 
     val factory = new FailureAccrualFactory[Int, Int](
       underlying, 3, 10.seconds, new MockTimer)
-    val service = factory()()
+    val service = Await.result(factory())
     there was one(underlying)()
 
     "[service] pass through underlying availability" in {
@@ -150,11 +148,11 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     "fail after the given number of tries" in {
       Time.withCurrentTimeFrozen { timeControl =>
         factory.isAvailable must beTrue
-        factory()() must throwA(exc)
+        Await.result(factory()) must throwA(exc)
         factory.isAvailable must beTrue
-        factory()() must throwA(exc)
+        Await.result(factory()) must throwA(exc)
         factory.isAvailable must beTrue
-        factory()() must throwA(exc)
+        Await.result(factory()) must throwA(exc)
         factory.isAvailable must beFalse
       }
     }
@@ -188,19 +186,19 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     val timer = new MockTimer
     val factory = new CustomizedFailureAccrualFactory(
       underlying, 3, 10.seconds, timer)
-    val service = factory()()
+    val service = Await.result(factory())
     there was one(underlying)()
 
     "become unavailable" in {
       Time.withCurrentTimeFrozen { timeControl =>
 
-        service(123)() must be_==(321)
-        service(123)() must be_==(321)
+        Await.result(service(123)) must be_==(321)
+        Await.result(service(123)) must be_==(321)
         factory.isAvailable must beTrue
         service.isAvailable must beTrue
 
         // Now fail:
-        service(123)() must be_==(321)
+        Await.result(service(123)) must be_==(321)
         service.isAvailable must beFalse
 
         there were three(underlyingService)(123)

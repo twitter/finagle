@@ -1,19 +1,15 @@
 package com.twitter.finagle.thrift
 
-import java.net.ServerSocket
-import java.util.concurrent.CyclicBarrier
-
-import org.specs.SpecificationWithJUnit
-
-import org.apache.thrift.transport.{TServerSocket, TFramedTransport, TTransportFactory}
-import org.apache.thrift.protocol.TBinaryProtocol
-import org.apache.thrift.server.TSimpleServer
-
-import com.twitter.test.{B, AnException, SomeStruct}
-import com.twitter.util.{RandomSocket, Promise, Return, Future}
-
 import com.twitter.finagle.CodecFactory
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.test.{AnException, B, SomeStruct}
+import com.twitter.util.{Await, Future, Promise, RandomSocket, Return}
+import java.net.ServerSocket
+import java.util.concurrent.CyclicBarrier
+import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.thrift.server.TSimpleServer
+import org.apache.thrift.transport.{TFramedTransport, TServerSocket, TTransportFactory}
+import org.specs.SpecificationWithJUnit
 
 class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
   "finagle client vs. synchronous thrift server" should {
@@ -79,7 +75,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
         val future = client.multiply(1, 2)
-        future() must be_==(3)
+        Await.result(future) must be_==(3)
       }
 
       "handle exceptions" in {
@@ -94,7 +90,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
 
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-        client.add(1, 2)() must throwA[AnException]
+        Await.result(client.add(1, 2)) must throwA[AnException]
       }
 
       "handle void returns" in {
@@ -109,7 +105,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
 
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-        client.add_one(1, 2)()
+        Await.result(client.add_one(1, 2))
         true must beTrue
       }
 
@@ -127,8 +123,8 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
         somewayPromise.isDefined must beFalse
-        client.someway()() must beNull  // returns
-        somewayPromise() must be_==(())
+        Await.result(client.someway()) must beNull  // returns
+        Await.result(somewayPromise) must be_==(())
       }
 
       "talk to multiple servers" in {
@@ -150,7 +146,7 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
 
         {
           val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
-          val resolved = futures map(_())
+          val resolved = futures map(Await.result(_))
           resolved foreach { r => r must be_==(3) }
         }
       }

@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Return, Throw, Time}
+import com.twitter.util.{Await, Future, Return, Throw, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -36,7 +36,7 @@ class ServiceSpec extends SpecificationWithJUnit with Mockito {
     "resolve immediately to the given service" in {
       val f: Future[Service[String, String]] = factory()
       f.isDefined must beTrue
-      val proxied = f()
+      val proxied = Await.result(f)
       proxied("ok").poll must be_==(Some(Return("ko")))
       there was one(service)("ok")
     }

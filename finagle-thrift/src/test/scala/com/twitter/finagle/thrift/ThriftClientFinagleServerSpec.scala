@@ -4,15 +4,12 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.test._
-import com.twitter.util.{Future, Return, Promise, Time}
 import com.twitter.util.TimeConversions._
-
+import com.twitter.util.{Await, Future, Promise, Return, Time}
 import java.net.InetSocketAddress
-
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
-
 import org.specs.SpecificationWithJUnit
 
 class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
@@ -73,7 +70,7 @@ class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
     "handle one-way calls" in {
       somewayPromise.isDefined must beFalse
       client.someway()                  // just returns(!)
-      somewayPromise() must be_==(())
+      Await.result(somewayPromise) must be_==(())
     }
 
     "handle wrong interface" in {
@@ -102,7 +99,7 @@ class ThriftClientFinagleServerSpec extends SpecificationWithJUnit {
           .build()
 
         val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-        client.multiply(4,2).get must be_==(2)
+        Await.result(client.multiply(4,2)) must be_==(2)
 
         val key = Seq(name, "codec_connection_preparation_latency_ms")
         statsReceiver.repr.stats.contains(key) must beTrue

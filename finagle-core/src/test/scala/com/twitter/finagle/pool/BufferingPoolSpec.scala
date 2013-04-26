@@ -1,9 +1,9 @@
 package com.twitter.finagle.pool
 
+import com.twitter.finagle._
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import com.twitter.finagle._
-import com.twitter.util.Future
 
 class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
   val underlying = mock[ServiceFactory[Int, Int]]
@@ -17,13 +17,13 @@ class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
 
   "BufferingPool" should {
     "buffer exactly N items" in {
-      val n2 = for (_ <- 0 until N*2) yield pool()()
+      val n2 = for (_ <- 0 until N*2) yield Await.result(pool())
       there was no(service).close(any)
       there were (N*2).times(underlying).apply(any)
       for (s <- n2 take N)
         s.close()
       there was no(service).close(any)
-      val n1 = for (_ <- 0 until N) yield pool()()
+      val n1 = for (_ <- 0 until N) yield Await.result(pool())
       there were (N*2).times(underlying).apply(any)
       for (s <- n1)
         s.close()
@@ -34,7 +34,7 @@ class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "drain services on close" in {
-      val ns = for (_ <- 0 until N) yield pool()()
+      val ns = for (_ <- 0 until N) yield Await.result(pool())
       there was no(service).close(any)
       for (s <- ns take (N-1)) s.close()
       pool.close()
@@ -43,7 +43,7 @@ class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
       there were N.times(service).close(any)
 
       // Bypass buffer after drained.
-      val s = pool()()
+      val s = Await.result(pool())
       there were (N+1).times(underlying).apply(any)
       s.close()
       there were (N+1).times(service).close(any)
@@ -54,7 +54,7 @@ class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
       unhealthy.close(any) returns Future.Done
       unhealthy.isAvailable returns false
       underlying(any) returns Future.value(unhealthy)
-      val s1 = pool()()
+      val s1 = Await.result(pool())
       s1.isAvailable must beFalse
       s1.close()
       there was one(unhealthy).close(any)
@@ -65,10 +65,10 @@ class BufferingPoolSpec extends SpecificationWithJUnit with Mockito {
       failing.close(any) returns Future.Done
       failing.isAvailable returns true
       underlying(any) returns Future.value(failing)
-      pool()().close()
+      Await.result(pool()).close()
       there was no(failing).close(any)
       failing.isAvailable returns false
-      pool()()
+      Await.result(pool())
       there was one(failing).close(any)
     }
   }

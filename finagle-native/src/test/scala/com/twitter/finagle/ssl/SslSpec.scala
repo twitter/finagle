@@ -4,7 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.io.TempFile
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import java.io.File
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer._
@@ -182,7 +182,7 @@ class SslSpec extends SpecificationWithJUnit {
            else
              request.setHeader("Requested-Bytes", 0)
 
-           val response = client(request)()
+           val response = Await.result(client(request))
            response.getStatus mustEqual HttpResponseStatus.OK
            HttpHeaders.getContentLength(response) mustEqual responseSize
            val content = response.getContent()

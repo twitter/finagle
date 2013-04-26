@@ -2,14 +2,14 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Service
-import com.twitter.finagle.tracing.{Trace, TraceId, Flags, SpanId, BufferingTracer, Record, Annotation}
+import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.util.{Return, Throw, Promise, Future, Time}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
+import java.net.InetSocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import java.net.InetSocketAddress
 
 class ClientServerSpec extends SpecificationWithJUnit with Mockito {
   "Client+Server" should {
@@ -135,7 +135,7 @@ class ClientServerSpec extends SpecificationWithJUnit with Mockito {
         client(buf(1))
       }
       resp.poll must beSomething
-      val respBuf = resp()
+      val respBuf = Await.result(resp)
       val respArr = new Array[Byte](respBuf.readableBytes)
       respBuf.readBytes(respArr)
       val respStr = new String(respArr, CharsetUtil.UTF_8)
@@ -157,8 +157,8 @@ class ClientServerSpec extends SpecificationWithJUnit with Mockito {
         p
       }
       resp.poll must beSomething
-      resp().readableBytes must be_==(8)
-      val respFlags = Flags(resp().readLong)
+      Await.result(resp).readableBytes must be_==(8)
+      val respFlags = Flags(Await.result(resp).readLong)
       respFlags must be_==(flags)
     }
   }
