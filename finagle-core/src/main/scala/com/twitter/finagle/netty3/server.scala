@@ -148,10 +148,6 @@ object Netty3Listener {
  * @param bootstrapOptions Additional options for Netty's
  * `ServerBootstrap`
  *
- * @param channelMaxIdleTime The maximum idle time of any channel.
- *
- * @param channelMaxLifeTime The maximum life time of any channel.
- *
  * @param channelReadTimeout Channels are given this much time to
  * read a request.
  *
@@ -170,8 +166,6 @@ case class Netty3Listener[In, Out](
     "reuseAddress" -> java.lang.Boolean.TRUE,
     "child.tcpNoDelay" -> java.lang.Boolean.TRUE
   ),
-  channelMaxIdleTime: Duration = Duration.Top,
-  channelMaxLifeTime: Duration = Duration.Top,
   channelReadTimeout: Duration = Duration.Top,
   channelWriteCompletionTimeout: Duration = Duration.Top,
   tlsConfig: Option[Netty3ListenerTLSConfig] = None,
