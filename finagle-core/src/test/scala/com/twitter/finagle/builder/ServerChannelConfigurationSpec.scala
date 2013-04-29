@@ -1,19 +1,16 @@
 package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
+import com.twitter.finagle.Service
 import com.twitter.util.Future
-import org.specs.SpecificationWithJUnit
-import java.net.InetSocketAddress
 import com.twitter.finagle.ChannelClosedException
-import com.twitter.finagle.channel.OpenConnectionsThresholds
-import com.twitter.util.{Future, CountDownLatch, Promise}
-
 import com.twitter.finagle.{Codec, CodecFactory}
+import org.specs.SpecificationWithJUnit
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.util.CharsetUtil
+import java.net.InetSocketAddress
 
 /**
  * This Codec is a newline (\n) delimited line-based protocol. Here we re-use existing 
@@ -53,13 +50,14 @@ class StringCodec extends CodecFactory[String, String] {
 }
 
 class ServerChannelConfigurationSpec extends SpecificationWithJUnit {
+  val service = new Service[String, String] {
+    def apply(request: String) = {
+      Future.value(request)
+    }
+  }
+
   "Server"  should {
     "close connection after max life time duration" in {
-
-      val service = new Service[String, String] {
-        def apply(request: String) = Future.value(request)
-      }
-
       // create a server builder which will close connections in 2 seconds
       val address = new InetSocketAddress(0)
       val server = ServerBuilder()
@@ -86,12 +84,7 @@ class ServerChannelConfigurationSpec extends SpecificationWithJUnit {
 
   "Server" should {
     "close connection after max idle time duration" in {
-
-      val service = new Service[String, String] {
-        def apply(request: String) = Future.value(request)
-      }
-
-      // create a server builder which will close connections in 2 seconds idle
+      // create a server builder which will close idle connections in 2 seconds
       val address = new InetSocketAddress(0)
       val server = ServerBuilder()
         .codec(StringCodec)
