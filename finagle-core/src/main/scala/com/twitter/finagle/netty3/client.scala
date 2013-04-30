@@ -221,11 +221,8 @@ case class Netty3Transporter[In, Out](
 }
 
 object Netty3Transporter {
-  private[this] val bossThreads = 1
-  private[this] val workerThreads = Runtime.getRuntime.availableProcessors * 2
-
   val channelFactory: ChannelFactory = new NioClientSocketChannelFactory(
-    Executor, bossThreads, new NioWorkerPool(Executor, workerThreads), DefaultTimer) {
+    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer) {
     override def releaseExternalResources() = ()  // no-op; unreleasable
   }
   val defaultChannelOptions: Map[String, Object] = Map(

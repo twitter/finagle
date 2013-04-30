@@ -32,9 +32,10 @@ import scala.collection.JavaConverters._
 case class Netty3ListenerTLSConfig(newEngine: () => Engine)
 
 object Netty3Listener {
-  val channelFactory: ServerChannelFactory = new NioServerSocketChannelFactory(Executor, Executor) {
-    override def releaseExternalResources() = ()  // no-op
-  }
+  val channelFactory: ServerChannelFactory = 
+    new NioServerSocketChannelFactory(Executor, WorkerPool) {
+      override def releaseExternalResources() = ()  // no-op
+    }
 
   /**
    * Class Closer implements channel tracking and semi-graceful closing
