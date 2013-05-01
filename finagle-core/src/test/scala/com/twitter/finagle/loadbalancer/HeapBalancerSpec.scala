@@ -82,19 +82,20 @@ class HeapBalancerSpec extends SpecificationWithJUnit with Mockito {
       val made = 0 until N*2 map { _ => b()() }
       factories foreach { case (_, f) => f.load must be_==(2) }
 
-      // add newFactory to the heap balancer. Initially it has load 0, so the next two make()() should both pick
+      // add newFactory to the heap balancer. Initially it has load 0, so the next make()() should pick
       // newFactory
       group() += (socket -> newFactory)
       b()()
       newFactory.load must be_==(1)
+      // Since newly added factory has a maxLoad of 1, the next make()() should not pick the newFactory
       b()()
-      newFactory.load must be_==(2)
+      newFactory.load must be_==(1)
 
       // remove newFactory from the heap balancer. Further calls to make()() should not affect the load on newFactory
       group() -= (socket -> newFactory)
-      val made2 = 0 until N foreach { _ => b()() }
+      val made2 = 0 until N-1 foreach { _ => b()() }  // use N-1 here, since one of the factories has load 3 now
       factories foreach { case (_, f) => f.load must be_==(3) }
-      newFactory.load must be_==(2)
+      newFactory.load must be_==(1)
     }
 
     "be safe to remove a host from group before releasing it" in {

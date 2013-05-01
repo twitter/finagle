@@ -24,6 +24,7 @@ class HeapBalancer[Req, Rep](
     factory: ServiceFactory[Req, Rep],
     stats: StatsReceiver,
     var load: Int,
+    var maxLoad: Int, // (maxLoad <= 0) means unlimited
     var index: Int)
 
   private[this] val rng = new Random
@@ -63,6 +64,7 @@ class HeapBalancer[Req, Rep](
 
   private[this] var snap = group()
   private[this] var size = snap.size
+  private[this] var limited = 0 // Number of nodes with maxLoad set
   // Build initial heap
   // Our heap is 1-indexed. We make heap[0] a dummy node
   // Invariants:
@@ -71,18 +73,21 @@ class HeapBalancer[Req, Rep](
   private[this] var heap = {
     val heap = new Array[Node](size + 1)
     val failExc = new Exception("Invalid heap operation on index 0")
-    heap(0) = Node(new FailingFactory(failExc), NullStatsReceiver, 0, 0)
+    heap(0) = Node(new FailingFactory(failExc), NullStatsReceiver, 0, -1, 0)
     val nodes = (snap.toSeq zipWithIndex) map {
-      case ((a, f), i) => Node(f, createStatsReceiver(a), 0, i + 1)
+      case ((a, f), i) => Node(f, createStatsReceiver(a), 0, -1, i + 1)
     }
     nodes foreach { addGauges(_) }
     nodes.copyToArray(heap, 1, nodes.size)
     heap
   }
 
-  private[this] def addNode(addr: SocketAddress, serviceFactory: ServiceFactory[Req, Rep]) {
+  private[this] def addNode(addr: SocketAddress, serviceFactory: ServiceFactory[Req, Rep], maxLoad: Int) {
     size += 1
-    val newNode = Node(serviceFactory, createStatsReceiver(addr), 0, size)
+    if (maxLoad > 0) {
+      limited += 1
+    }
+    val newNode = Node(serviceFactory, createStatsReceiver(addr), 0, maxLoad, size)
     heap = heap :+ newNode
     fixUp(heap, size)
     addGauges(newNode)
@@ -98,12 +103,22 @@ class HeapBalancer[Req, Rep](
     size -= 1
     removeGauges(node)
     node.index = -1 // sentinel value indicating node is no longer in the heap.
+    if (node.maxLoad > 0) {
+      limited -= 1
+    }
     serviceFactory.close()
     removes.incr()
   }
 
-  private[this] def put(n: Node) = synchronized {
+  private[this] def put(n: Node, success: Boolean) = synchronized {
     n.load -= 1
+    if (n.maxLoad > 0) {
+      if (success) {
+        n.maxLoad += 1
+      } else {
+        n.maxLoad = if (n.maxLoad > 1) n.maxLoad/2 else 1
+      }
+    }
     if (n.index < 0) {
       // n has already been removed from the group, therefore do nothing
     } else if (n.load == 0 && size > 1) {
@@ -130,7 +145,7 @@ class HeapBalancer[Req, Rep](
 
   private[this] def get(i: Int): Node = {
     val n = heap(i)
-    if (n.factory.isAvailable || size < i*2) n else {
+    if ((n.factory.isAvailable && (n.maxLoad <= 0 || n.load < n.maxLoad)) || size < i*2) n else {
       if (size == i*2) get(i*2) else {
         val left = get(i*2)
         val right = get(i*2 + 1)
@@ -147,13 +162,20 @@ class HeapBalancer[Req, Rep](
   {
     override def close(deadline: Time) =
       super.close(deadline) ensure {
-        put(n)
+        put(n, true)
       }
   }
 
   private[this] def updateGroup(newSnap: Set[(SocketAddress, ServiceFactory[Req, Rep])]): Unit = synchronized {
     for ((_, n) <- snap &~ newSnap) remNode(n)
-    for ((a, n) <- newSnap &~ snap) addNode(a, n)
+    val toBeAdded = newSnap &~ snap
+    // make sure slow start nodes won't exceed half of all the nodes,
+    // also, make sure a new client won't treat all the servers limited
+    if ((limited + toBeAdded.size)*2 > size) {
+      for ((a, n) <- newSnap &~ snap) addNode(a, n, -1)
+    } else {
+      for ((a, n) <- newSnap &~ snap) addNode(a, n, 1)
+    }
     snap = newSnap
   }
 
@@ -167,10 +189,17 @@ class HeapBalancer[Req, Rep](
       val n = get(1)
       n.load += 1
       fixDown(heap, n.index, size)
+      if (n.maxLoad > 0 && ((n.index > 1 && heap(n.index/2).maxLoad <= 0)
+                            || n.index*2 > size)) {
+        // either having more loads than a normal node or reaching the bottom of the heap,
+        // it will graduate from limited state
+        n.maxLoad = -1
+        limited -= 1
+      }
       n
     }
 
-    node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node) }
+    node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node, false) }
   }
 
   def close(deadline: Time) =
