@@ -18,7 +18,7 @@ case class OpenConnectionsThresholds(
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
-/**x  
+/**  
  * Filter responsible for tracking idle connection, it will refuse requests and try to close idle
  * connections based on the number of active connections.
  *
