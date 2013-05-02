@@ -67,15 +67,18 @@ class AuthenticationProxy(
         Future.value(sg)
 
       case r =>
-       Future.exception(new ClientError("Invalid Reply type %s".format(r.getClass.getName)))
+       Future.exception(ClientError("Invalid Reply type %s".format(r.getClass.getName)))
     }
 
     def acceptLogin(res: Result) = res match {
       case r: OK =>
-        Future.value(res)
+        Future.value(r)
 
-      case err: ServerError =>
-        Future.exception(err)
+      case Error(code, state, msg) =>
+        Future.exception(ServerError(code, state, msg))
+
+      case uknown =>
+        Future.exception(ClientError("Invalid login response type: %s".format(uknown.toString)))
     }
 
     override def apply(conn: ClientConnection) = for {
