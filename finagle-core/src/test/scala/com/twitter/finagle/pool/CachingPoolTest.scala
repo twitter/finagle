@@ -2,7 +2,7 @@ package com.twitter.finagle.pool
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{MockTimer, Service, ServiceFactory, WriteException}
-import com.twitter.util.{Await, Duration, Future, Promise, Time}
+import com.twitter.util.{Await, Duration, Time, Future, Promise}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
@@ -22,6 +22,7 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
     when(underlyingService.isAvailable).thenReturn(true)
     when(underlyingService(any[Any])).thenReturn(Future.value(obj))
     when(underlying()).thenReturn(Future.value(underlyingService))
+
 
     test("reflect the underlying factory availability") {
       val pool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
@@ -225,34 +226,6 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
         // No need to clean up an already disposed object.
         assert(timer.tasks.isEmpty)
-      }
-    }
-
-    test("cache objects when client sends interrupt") {
-      Time.withCurrentTimeFrozen { timeControl =>
-        val cachingPool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
-        val underlyingService = mock[Service[Any, Any]]
-        when(underlyingService.close(any[Time])).thenReturn(Future.Done)
-        val slowService = new Promise[Service[Any, Any]]
-        when(underlying()).thenReturn(slowService)
-
-        val service1 = cachingPool()
-        val exception = new Exception("give up")
-        service1.raise(exception)
-        intercept[WriteException] { Await.result(service1) }
-        service1 onFailure {
-          case WriteException(e) => assert(e === exception)
-          case _ => assert(false, "exception was not write exception")
-        }
-
-        slowService.setValue(underlyingService)
-
-        val service2 = cachingPool()
-        assert(service2.isDefined)
-
-        // not sure how else to verify the underlying is the same since CachingPool wraps
-        when(underlyingService(1)).thenReturn(Future.value(2))
-        assert(Await.result(Await.result(service2)(1)) === 2)
       }
     }
 

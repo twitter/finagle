@@ -10,20 +10,6 @@ import org.specs.mock.Mockito
 
 class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with Mockito {
   "Cancellation" should {
-    "cancel while waiting for connect()" in {
-      val m = new MockChannel
-      val client = m.build()
-      val f = client("123")
-      f.isDefined must beFalse
-      there was no(m.connectFuture).cancel()
-      m.connectFuture.isCancelled must beFalse
-      f.raise(new Exception)
-      there was one(m.connectFuture).cancel()
-      m.connectFuture.isCancelled must beTrue
-      f.isDefined must beTrue
-      Await.result(f) must throwA(WriteException(new CancelledConnectionException))
-    }
-
     "cancel while waiting for a reply" in {
       val m = new MockChannel
       val cli = m.build()
@@ -57,7 +43,7 @@ class CancellationSpec extends SpecificationWithJUnit with IntegrationBase with 
       }
     }
 
-    "cancel white waiting in the queue" in {
+    "cancel while waiting in the queue" in {
       val m = new MockChannel
       val client = m.build()
       m.connectFuture.setSuccess()

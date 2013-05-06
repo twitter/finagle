@@ -1,11 +1,8 @@
 package com.twitter.finagle.pool
 
+import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.{
-  CancelledConnectionException, ClientConnection, Service, ServiceClosedException, ServiceFactory, 
-  ServiceProxy, TooManyWaitersException
-}
-import com.twitter.util.{Future, Promise, Return, Throw, Time}
+import com.twitter.util.{Future, Promise, Time, Throw, Return}
 import java.util.ArrayDeque
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -125,12 +122,20 @@ class WatermarkPool[Req, Rep](
 
     // If we reach this point, we've committed to creating a service
     // (numServices was increased by one).
-    factory(conn) onFailure { _ =>
-      synchronized {
+    val p = new Promise[Service[Req, Rep]]
+    val underlying = factory(conn) map { new ServiceWrapper(_) }
+    underlying respond { res =>
+      p.updateIfEmpty(res)
+      if (res.isThrow) synchronized {
         numServices -= 1
         flushWaiters()
       }
-    } map { new ServiceWrapper(_) }
+    }
+    p.setInterruptHandler { case e =>
+      if (p.updateIfEmpty(Throw(WriteException(e))))
+        underlying onSuccess { _.close() }
+    }
+    p
   }
 
   def close(deadline: Time) = synchronized {

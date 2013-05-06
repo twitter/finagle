@@ -3,9 +3,9 @@ package com.twitter.finagle.pool
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Cache
 import com.twitter.finagle.{
-  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy, WriteException
+  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy
 }
-import com.twitter.util.{Future, Time, Duration, Timer, Promise, Throw}
+import com.twitter.util.{Future, Time, Duration, Timer}
 import scala.annotation.tailrec
 
 /**
@@ -52,23 +52,9 @@ private[finagle] class CachingPool[Req, Rep](
         case Some(service) =>
           Future.value(new WrappedService(service))
         case None =>
-          newConn(conn)
+          factory(conn) map { new WrappedService(_) }
       }
     }
-  }
-
-  private[this] def newConn(conn: ClientConnection) = {
-    val p = new Promise[Service[Req, Rep]]
-
-    val underlying = factory(conn) map { new WrappedService(_) }
-    underlying respond { p.updateIfEmpty(_) }
-
-    p.setInterruptHandler { case e =>
-      if (p.updateIfEmpty(Throw(WriteException(e))))
-        underlying onSuccess { _.close() }
-    }
-
-    p
   }
 
   def close(deadline: Time) = synchronized {
