@@ -32,5 +32,10 @@
       <artifactId>ostrich</artifactId>
       <version>9.1.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-core</artifactId>
+      <version>6.3.3-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>
