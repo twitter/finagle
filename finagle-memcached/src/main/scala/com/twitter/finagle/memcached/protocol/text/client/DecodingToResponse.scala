@@ -1,10 +1,11 @@
 package com.twitter.finagle.memcached.protocol.text.client
 
 import com.twitter.finagle.memcached.protocol._
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
+import java.nio.charset.{Charset => JCharset}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import text.{StatLines, TokensWithData, ValueLines, Tokens}
 
 object AbstractDecodingToResponse {
@@ -36,6 +37,7 @@ abstract class AbstractDecodingToResponse[R <: AnyRef] extends OneToOneDecoder {
 
 class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._
+  private[this] val asciiCharset = JCharset.forName("US-ASCII")
 
   protected def parseResponse(tokens: Seq[ChannelBuffer]) = {
     tokens.headOption match {
@@ -45,9 +47,9 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
       case Some(NOT_STORED)   => NotStored()
       case Some(EXISTS)       => Exists()
       case Some(DELETED)      => Deleted()
-      case Some(ERROR)        => Error(new NonexistentCommand(""))
-      case Some(CLIENT_ERROR) => Error(new ClientError(""))
-      case Some(SERVER_ERROR) => Error(new ServerError(""))
+      case Some(ERROR)        => Error(new NonexistentCommand(parseErrorMessage(tokens)))
+      case Some(CLIENT_ERROR) => Error(new ClientError(parseErrorMessage(tokens)))
+      case Some(SERVER_ERROR) => Error(new ServerError(parseErrorMessage(tokens)))
       case Some(ds)           => Number(ds.toLong)
     }
   }
@@ -68,5 +70,9 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
       Value(tokens(1), valueLine.data, casUnique, flag)
     }
     Values(values)
+  }
+
+  private[this] def parseErrorMessage(tokens: Seq[ChannelBuffer]) = {
+    tokens.lastOption map { _.toString(asciiCharset) } getOrElse("")
   }
 }

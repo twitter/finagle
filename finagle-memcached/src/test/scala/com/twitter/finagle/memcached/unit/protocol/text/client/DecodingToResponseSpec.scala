@@ -59,9 +59,11 @@ class DecodingToResponseSpec extends SpecificationWithJUnit {
       }
 
       "CLIENT_ERROR" in {
-        val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR"))
-        decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error].cause must
-          haveClass[ClientError]
+        val errorMessage = "sad panda error"
+        val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR", errorMessage))
+        val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]
+        error.cause must haveClass[ClientError]
+        error.cause.getMessage() mustEqual errorMessage
       }
     }
   }
