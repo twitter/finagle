@@ -49,6 +49,9 @@ class IdleConnectionFilter[Req, Rep](
     c.onClose ensure { connectionCounter.decrementAndGet() }
     if (accept(c)) {
       queue.add(c)
+      c.onClose ensure {
+        queue.remove(c)
+      }
       super.apply(c) 
     } map { filterFactory(c) andThen _ } else {
       refused.incr()
@@ -77,7 +80,6 @@ class IdleConnectionFilter[Req, Rep](
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) => {
         conn.close()
-        queue.remove(conn)
         true
       }
       case None =>
