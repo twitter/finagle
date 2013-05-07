@@ -3,8 +3,8 @@ package com.twitter.finagle.http
 import org.specs.SpecificationWithJUnit
 
 
-class ParamsMapSpec extends SpecificationWithJUnit {
-  "ParamsMap" should {
+class ParamMapSpec extends SpecificationWithJUnit {
+  "RequestParamsMap" should {
     "no params" in {
       val request = Request("/search.json")
       request.params.get("q") must_== None
@@ -100,6 +100,9 @@ class ParamsMapSpec extends SpecificationWithJUnit {
     "favor first value" in {
       val request = Request("/search.json?q=twitter&q=twitter2")
       request.params.get("q") must_== Some("twitter")
+      request.params.keys.toList must_== "q" :: Nil
+      request.params.keySet.toList must_== "q" :: Nil
+      request.params.keysIterator.toList must_== "q" :: Nil
     }
 
     "getAll" in {
@@ -187,6 +190,62 @@ class ParamsMapSpec extends SpecificationWithJUnit {
       // Java's URL doesn't allow this, but we do.
       val request = Request("/search.json?q=\"twitter\"")
       request.params.get("q") must_== Some("\"twitter\"")
+    }
+  }
+
+  "EmptyParamMap" should {
+    "isValid" in {
+      EmptyParamMap.isValid must beTrue
+    }
+
+    "get" in {
+      EmptyParamMap.get("key") must beNone
+    }
+
+    "getAll" in {
+      EmptyParamMap.getAll("key") must beEmpty
+    }
+
+    "+" in {
+      val map = EmptyParamMap + ("key" -> "value")
+      map.get("key") must beSome("value")
+    }
+
+    "-" in {
+      val map = EmptyParamMap - "key"
+      map.get("key") must beNone
+    }
+  }
+
+  "MapParamMap" should {
+    "get" in {
+      MapParamMap().get("key") must beNone
+      MapParamMap("key" -> "value").get("key") must beSome("value")
+    }
+
+    "keys" in {
+      val paramMap = MapParamMap("a" -> "1", "b" -> "2", "a" -> "3")
+      paramMap.keys.toList.sorted must_== "a" :: "b" :: Nil
+      paramMap.keySet.toList.sorted must_== "a" :: "b" :: Nil
+      paramMap.keysIterator.toList.sorted must_== "a" :: "b" :: Nil
+    }
+
+    "iterator" in {
+      val paramMap = MapParamMap("a" -> "1", "b" -> "2", "a" -> "3")
+      paramMap.iterator.toList.sorted must_==
+        ("a" -> "1") :: ("a" -> "3") :: ("b" -> "2") :: Nil
+    }
+
+    "+" in {
+      val paramMap = MapParamMap() + ("a" -> "1") + ("b" -> "2") + ("a" -> "3")
+      paramMap.get("a") must beSome("3")
+      paramMap.get("b") must beSome("2")
+      paramMap.getAll("a").toList must_== "3" :: Nil
+    }
+
+    "-" in {
+      val paramMap = MapParamMap("a" -> "1", "b" -> "2", "a" -> "3") - "a" - "b"
+      paramMap must beEmpty
     }
   }
 }

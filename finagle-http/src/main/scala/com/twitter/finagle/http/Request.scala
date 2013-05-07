@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
 
 
@@ -22,7 +22,7 @@ abstract class Request extends Message with HttpRequestProxy {
 
   def isRequest = true
 
-  lazy val params = new ParamMap(this)
+  lazy val params: ParamMap = new RequestParamMap(this)
 
   def method: HttpMethod           = getMethod
   def method_=(method: HttpMethod) = setMethod(method)
@@ -117,11 +117,14 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get all values of parameter.  Returns list of values. */
   def getParams(name: String): JList[String] =
-    params.getAll(name).toList
+    params.getAll(name).toList.asJava
 
   /** Get all parameters. */
   def getParams(): JList[JMap.Entry[String, String]] =
-    (params.toList.map { case (k, v) => new AbstractMap.SimpleImmutableEntry(k, v) })
+    (params.toList.map { case (k, v) =>
+      // cast to appease asJava
+      (new AbstractMap.SimpleImmutableEntry(k, v)).asInstanceOf[JMap.Entry[String, String]]
+    }).asJava
 
   /** Check if parameter exists. */
   def containsParam(name: String): Boolean =
@@ -129,7 +132,7 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get parameters names. */
   def getParamNames(): JSet[String] =
-    params.keySet
+    params.keySet.asJava
 
   /** Response associated with request */
   lazy val response: Response = Response(this)

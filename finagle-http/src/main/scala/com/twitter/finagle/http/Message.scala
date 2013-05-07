@@ -10,7 +10,7 @@ import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http.{Cookie, HttpMessage, HttpHeaders, HttpMethod,
   HttpVersion}
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 /**
@@ -30,7 +30,7 @@ abstract class Message extends HttpMessage {
   def version: HttpVersion = getProtocolVersion()
   def version_=(version: HttpVersion) { setProtocolVersion(version) }
 
-  lazy val headers = new HeaderMap(this)
+  lazy val headers: HeaderMap = new MessageHeaderMap(this)
   // Java users: use Netty HttpMessage interface for headers
 
   /** Cookies.  In a request, this uses the Cookie headers.  In a response, it
@@ -39,7 +39,7 @@ abstract class Message extends HttpMessage {
   // Java users: use the interface below for cookies
 
   /** Get iterator over Cookies */
-  def getCookies(): JIterator[Cookie] = cookies.iterator
+  def getCookies(): JIterator[Cookie] = cookies.iterator.asJava
 
   /** Add a cookie */
   def addCookie(cookie: Cookie) {

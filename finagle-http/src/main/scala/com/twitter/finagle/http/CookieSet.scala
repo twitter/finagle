@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import org.jboss.netty.handler.codec.http.{Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import scala.collection.mutable
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 /**
@@ -30,9 +30,9 @@ class CookieSet(message: Message) extends
   private[this] val cookies: mutable.Set[Cookie] = {
     val decoder = new CookieDecoder
     mutable.Set[Cookie]() ++
-      message.getHeaders(cookieHeaderName).map { cookieHeader =>
+      message.getHeaders(cookieHeaderName).asScala.map { cookieHeader =>
         try {
-          decoder.decode(cookieHeader) toList
+          decoder.decode(cookieHeader).asScala.toList
         } catch {
           case e: IllegalArgumentException =>
             _isValid = false
