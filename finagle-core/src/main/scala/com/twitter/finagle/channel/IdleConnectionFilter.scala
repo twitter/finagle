@@ -4,7 +4,6 @@ import com.twitter.collection.BucketGenerationalQueue
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
-import com.twitter.conversions.time._
 
 import com.twitter.util.{Future, Duration}
 import java.util.concurrent.atomic.AtomicInteger
@@ -18,7 +17,7 @@ case class OpenConnectionsThresholds(
   require(lowWaterMark <= highWaterMark, "lowWaterMark must be <= highWaterMark")
 }
 
-/**  
+/**
  * Filter responsible for tracking idle connection, it will refuse requests and try to close idle
  * connections based on the number of active connections.
  *
@@ -49,7 +48,10 @@ class IdleConnectionFilter[Req, Rep](
     c.onClose ensure { connectionCounter.decrementAndGet() }
     if (accept(c)) {
       queue.add(c)
-      super.apply(c) 
+      c.onClose ensure {
+        queue.remove(c)
+      }
+      super.apply(c)
     } map { filterFactory(c) andThen _ } else {
       refused.incr()
       val address = c.remoteAddress
@@ -77,7 +79,6 @@ class IdleConnectionFilter[Req, Rep](
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) => {
         conn.close()
-        queue.remove(conn)
         true
       }
       case None =>
