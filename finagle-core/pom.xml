@@ -36,6 +36,11 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
+      <artifactId>util-app</artifactId>
+      <version>6.3.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
       <artifactId>util-collection</artifactId>
       <version>6.3.3-SNAPSHOT</version>
     </dependency>
