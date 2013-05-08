@@ -4,7 +4,6 @@ import com.twitter.collection.BucketGenerationalQueue
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
-import com.twitter.conversions.time._
 
 import com.twitter.util.{Future, Duration}
 import java.util.concurrent.atomic.AtomicInteger
@@ -42,6 +41,7 @@ class IdleConnectionFilter[Req, Rep](
     queue.collectAll(threshold.idleTimeout).size
   }
   private[this] val refused = statsReceiver.counter("refused")
+  private[this] val closed = statsReceiver.counter("closed")
 
   def openConnections = connectionCounter.get()
 
@@ -80,6 +80,7 @@ class IdleConnectionFilter[Req, Rep](
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) => {
         conn.close()
+        closed.incr()
         true
       }
       case None =>
