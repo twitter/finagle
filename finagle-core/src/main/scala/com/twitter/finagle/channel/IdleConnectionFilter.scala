@@ -42,6 +42,7 @@ class IdleConnectionFilter[Req, Rep](
     queue.collectAll(threshold.idleTimeout).size
   }
   private[this] val refused = statsReceiver.counter("refused")
+  private[this] val closed = statsReceiver.counter("closed")
 
   def openConnections = connectionCounter.get()
 
@@ -80,6 +81,7 @@ class IdleConnectionFilter[Req, Rep](
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) => {
         conn.close()
+        closed.incr()
         true
       }
       case None =>
