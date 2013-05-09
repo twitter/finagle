@@ -134,6 +134,16 @@ class BufferSpec extends SpecificationWithJUnit {
         val br = BufferReader(strAsBytes)
         str mustEqual br.readLengthCodedString()
       }
+
+      "coded string with non-ascii characters" in {
+        val str = "バイトルドットコム"
+        val strAsBytes = new Array[Byte](100)
+        val bw = BufferWriter(strAsBytes)
+        bw.writeLengthCodedString(str)
+
+        val br = BufferReader(strAsBytes)
+        str mustEqual br.readLengthCodedString()
+      }
     }
   }
 }

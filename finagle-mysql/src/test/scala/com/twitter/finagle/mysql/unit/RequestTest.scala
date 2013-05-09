@@ -56,6 +56,7 @@ class RequestTest extends FunSuite with ShouldMatchers {
 
   // supported types
   val strVal = "test"
+  val nonAsciiStrVal = "バイトルドットコム"
   val boolVal = true
   val byteVal = 1.toByte
   val shortVal = 2.toShort
@@ -70,6 +71,7 @@ class RequestTest extends FunSuite with ShouldMatchers {
   val datetime = new Date(millis)
   val params = Array(
     strVal,
+    nonAsciiStrVal,
     boolVal,
     byteVal,
     shortVal,
@@ -133,6 +135,10 @@ class RequestTest extends FunSuite with ShouldMatchers {
 
     test("String") {
       br.readLengthCodedString() should be === strVal
+    }
+
+    test("Non-Ascii String") {
+      br.readLengthCodedString() should be === nonAsciiStrVal
     }
 
     test("Boolean") {

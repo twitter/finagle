@@ -1,5 +1,7 @@
 package com.twitter.finagle.exp.mysql.protocol
 
+import java.nio.charset.{Charset => JCharset}
+
 object Type {
   /** MySQL type codes */
   val DECIMAL     = 0x00;
@@ -35,8 +37,11 @@ object Type {
    * its MySQL binary representation. If the size
    * is unknown -1 is returned.
    */
-  def sizeOf(any: Any) = any match {
-    case s: String      => Buffer.sizeOfLen(s.size) + s.size
+  def sizeOf(any: Any, charset: JCharset = Charset.defaultCharset) = any match {
+    case s: String => {
+      val bytes = s.getBytes(charset)
+      Buffer.sizeOfLen(bytes.size) + bytes.size
+    }
     case b: Array[Byte] => Buffer.sizeOfLen(b.size) + b.size
     case b: Boolean     => 1
     case b: Byte        => 1

@@ -380,11 +380,7 @@ trait BufferWriter {
    def writeLengthCodedString(
      s: String,
      charset: JCharset = Charset.defaultCharset
-   ): BufferWriter = {
-    writeLengthCodedBinary(s.length)
-    writeBytes(s.getBytes(charset))
-    this
-   }
+   ): BufferWriter = writeLengthCodedBytes(s.getBytes(charset))
 
    /**
     * Writes a length coded set of bytes according to the MySQL
