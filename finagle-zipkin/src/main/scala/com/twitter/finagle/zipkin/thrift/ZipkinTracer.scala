@@ -62,17 +62,18 @@ object ZipkinTracer {
 }
 
 /**
- * Zipkin tracer that supports sampling. Will pass through a small subset of the records.
+ * Tracer that supports sampling. Will pass through a small subset of the records.
  * @param underlyingTracer Underlying tracer that accumulates the traces and sends off to the collector.
  * @param initialSampleRate Start off with this sample rate. Can be changed later.
  */
-class ZipkinTracer(underlyingTracer: RawZipkinTracer, initialSampleRate: Float) extends Tracer {
+class SamplingTracer(underlyingTracer: Tracer, initialSampleRate: Float) extends Tracer {
   private[this] val sampler = new Sampler
   setSampleRate(initialSampleRate)
 
   def sampleTrace(traceId: TraceId) = sampler.sampleTrace(traceId)
 
   def setSampleRate(sampleRate: Float) = sampler.setSampleRate(sampleRate)
+  def getSampleRate = sampler.sampleRate
 
   def record(record: Record) {
     if (sampler.sampleRecord(record)) {
@@ -80,3 +81,6 @@ class ZipkinTracer(underlyingTracer: RawZipkinTracer, initialSampleRate: Float) 
     }
   }
 }
+
+class ZipkinTracer(tracer: RawZipkinTracer, initialRate: Float)
+  extends SamplingTracer(tracer, initialRate)
