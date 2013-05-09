@@ -175,7 +175,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.6" withSources(),
+      "com.twitter.common" % "metrics" % "0.0.6",
       jacksonLib)
   ).dependsOn(finagleCore, finagleHttp)
 
