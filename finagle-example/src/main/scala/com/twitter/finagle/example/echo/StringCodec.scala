@@ -1,6 +1,5 @@
 package com.twitter.finagle.example.echo
 
-
 import com.twitter.finagle.{Service, SimpleFilter, ServiceFactory, Codec, CodecFactory}
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
