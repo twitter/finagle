@@ -116,7 +116,7 @@ sealed case class Reporter(
   client: scribe.FinagledClient,
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  private val sourceAddress: Option[String] = None,
+  private val sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
   private val clientAddress: Option[String] = None) extends Monitor {
 
   /**
@@ -131,11 +131,12 @@ sealed case class Reporter(
    * Add a modifier to append a source address (i.e. endpoint) to a generated ServiceException.
    *
    * The endpoint string is the ip of the host concatenated with the port of the socket (e.g.
-   * "127.0.0.1:8080").
+   * "127.0.0.1:8080").  This is retained for orthogonality of exterior
+   * interfaces.  We use the host name internaly.
    */
   def withSource(address: SocketAddress) =
     address match {
-      case isa: InetSocketAddress => copy(sourceAddress = Some(isa.getAddress.getHostAddress + ":" + isa.getPort))
+      case isa: InetSocketAddress => copy(sourceAddress = Some(isa.getAddress.getHostName))
       case _ => this // don't deal with non-InetSocketAddress types, but don't crash either
     }
 

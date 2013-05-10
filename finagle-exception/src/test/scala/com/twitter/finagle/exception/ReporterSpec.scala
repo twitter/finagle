@@ -72,7 +72,8 @@ class ReporterSpec extends SpecificationWithJUnit with Mockito {
       .withSource(socket)
       .withClient()
 
-    val tse = new TestServiceException("service16", "my cool message", clientAddress = Some(InetAddress.getLocalHost.getHostAddress), sourceAddress = Some(socket.getAddress.getHostAddress + ":" + socket.getPort))
+    val tse = new TestServiceException("service16", "my cool message",
+    clientAddress = Some(InetAddress.getLocalHost.getHostAddress), sourceAddress = Some(socket.getAddress.getHostName))
 
     "log entries to a client once upon receive" in {
       reporter.handle(tse.throwable)
