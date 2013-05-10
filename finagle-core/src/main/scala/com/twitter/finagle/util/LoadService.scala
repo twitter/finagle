@@ -9,6 +9,6 @@ import scala.collection.JavaConverters._
 object LoadService {
   def apply[T: ClassManifest](): Seq[T] = {
     val clazz = implicitly[ClassManifest[T]].erasure.asInstanceOf[Class[T]]
-    ServiceLoader.load(clazz, clazz.getClassLoader).iterator().asScala.toSeq
+    ServiceLoader.load(clazz, clazz.getClassLoader).iterator().asScala.toList
   }
 }
