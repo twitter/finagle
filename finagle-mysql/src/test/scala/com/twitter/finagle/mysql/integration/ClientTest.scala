@@ -3,6 +3,7 @@ package com.twitter.finagle.exp.mysql.integration
 import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.exp.mysql.protocol._
 import com.twitter.util.{Await, NonFatal}
+import java.io.{File, FileInputStream}
 import java.net.{ServerSocket, BindException}
 import java.sql.Date
 import java.util.logging.{Level, Logger}
@@ -16,27 +17,35 @@ import scala.collection.mutable
 object ConnectionSettings {
   private val logger = Logger.getLogger("fingle-mysql-test")
 
-  val p = new Properties
-  try {
-    val resource = getClass.getResource("/integration.properties")
-    if (resource == null)
-      logger.log(Level.WARNING, "integration.properties not found")
-    else
-      p.load(resource.openStream())
-  } catch {
-    case NonFatal(e) =>
-      logger.log(Level.WARNING, "Exception while loading integration.properties", e)
-  }
-
-  // Requires mysql running @ localhost:3306
-  // It's likely that mysqld is running if 3306 bind fails.
-  val isAvailable = try {
+  // Check if default mysql port is available.
+  val isPortAvailable = try {
     val socket = new ServerSocket(3306)
     socket.close()
-    false
+    true
   } catch {
-    case e: BindException => true
+    case e: BindException => false
   }
+
+  val propFile = new File(System.getProperty("user.home") +
+   "/.finagle-mysql/integration-test.properties")
+
+  val p = new Properties
+  val propFileExists = try {
+    val fis = new FileInputStream(propFile)
+    p.load(fis)
+    fis.close()
+    true
+  } catch {
+    case NonFatal(e) =>
+      logger.log(Level.WARNING, "Error loading integration.properties, skipping integration test")
+      false
+  }
+
+  // It's likely that we can run this test
+  // if a mysql instance is running and a valid
+  // properties file is found which contains
+  // mysql credentials.
+  val isAvailable = !isPortAvailable && propFileExists
 }
 
 object Connection {
@@ -111,6 +120,18 @@ object SwimmingRecord {
 class ClientTest extends FunSuite with BeforeAndAfterAll {
 
   for (c <- Connection.client) {
+    test("Client with bad credentials should throw ServerError") {
+      val client = Client("localhost:3306", "", "")
+      try {
+        Await.result(client.ping)
+        fail()
+      } catch {
+        // Expected Access Denied Error Code
+        case ServerError(code, _, _) => assert(code == 1045)
+        case _ => fail()
+      }
+    }
+
     test("Ping Server") {
       val pingResult = Await.result(c.ping)
       expectResult(true) { pingResult.isInstanceOf[OK] }
