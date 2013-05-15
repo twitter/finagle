@@ -3,10 +3,17 @@ package com.twitter.finagle.loadbalancer
 import collection.mutable.HashMap
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{ClientConnection, Group, NoBrokersAvailableException,
-  Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.{
+  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory, 
+  ServiceProxy}
 import com.twitter.util._
+import scala.annotation.tailrec
 import util.Random
+
+object HeapBalancer {
+  val Penalty = Int.MaxValue
+  val Zero = Int.MinValue + 1
+}
 
 /**
  * An efficient load balancer that operates on Groups.
@@ -15,14 +22,24 @@ class HeapBalancer[Req, Rep](
   group: Group[ServiceFactory[Req, Rep]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   emptyException: NoBrokersAvailableException = new NoBrokersAvailableException
-)
-  extends ServiceFactory[Req, Rep]
-{
+) extends ServiceFactory[Req, Rep] {
+
+  import HeapBalancer._
+
+  // Every underlying ServiceFactory is represented in the
+  // heap by a Node. If a node's index is < 0, it is discarded.
+  // Load begins at Int.MinValue; loads greater than or equal
+  // to 0 represent downed nodes. This allows us to maintain
+  // a single heap and still load balance in downed scenarios.
   case class Node(
     factory: ServiceFactory[Req, Rep],
     var load: Int,
-    var index: Int
+    var index: Int,
+    var downq: Node = null
   )
+  
+  // Linked list of downed nodes.
+  private[this] var downq: Node = null
 
   private[this] val rng = new Random
 
@@ -46,9 +63,9 @@ class HeapBalancer[Req, Rep](
   private[this] var heap = {
     val heap = new Array[Node](size + 1)
     val failExc = new Exception("Invalid heap operation on index 0")
-    heap(0) = Node(new FailingFactory(failExc), 0, 0)
+    heap(0) = Node(new FailingFactory(failExc), Zero, 0)
     val nodes = (snap.toSeq zipWithIndex) map {
-      case (f, i) => Node(f, 0, i + 1)
+      case (f, i) => Node(f, Zero, i + 1)
     }
     nodes.copyToArray(heap, 1, nodes.size)
     heap
@@ -60,17 +77,23 @@ class HeapBalancer[Req, Rep](
   }
 
   private[this] val loadGauge = statsReceiver.addGauge("load") {
-    val nodes = synchronized { heap.drop(1) }
-    nodes.map(_.load).sum
+    val loads = synchronized {
+      heap drop(1) map { n =>
+        if (n.load < 0) n.load+Penalty
+        else n.load
+      }
+    }
+
+    loads.sum
   }
 
-  private[this] val sizeGauge = statsReceiver.addGauge("size") { size }
+  private[this] val sizeGauge = statsReceiver.addGauge("size") { synchronized { size } }
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
 
   private[this] def addNode(serviceFactory: ServiceFactory[Req, Rep]) {
     size += 1
-    val newNode = Node(serviceFactory, 0, size)
+    val newNode = Node(serviceFactory, Zero, size)
     heap = heap :+ newNode
     fixUp(heap, size)
     adds.incr()
@@ -92,7 +115,7 @@ class HeapBalancer[Req, Rep](
     n.load -= 1
     if (n.index < 0) {
       // n has already been removed from the group, therefore do nothing
-    } else if (n.load == 0 && size > 1) {
+    } else if (n.load == Zero && size > 1) {
       // since we know that n is now <= any element in the heap, we
       // can do interesting stuff without violating the heap
       // invariant.
@@ -114,17 +137,37 @@ class HeapBalancer[Req, Rep](
     }
   }
 
-  private[this] def get(i: Int): Node = {
-    val n = heap(i)
-    if (n.factory.isAvailable || size < i*2) n else {
-      if (size == i*2) get(i*2) else {
-        val left = get(i*2)
-        val right = get(i*2 + 1)
-        if (left.load <= right.load && left.factory.isAvailable)
-          left
-        else
-          right
+  @tailrec
+  private[this] def get(): Node = {
+    var n = downq
+    var m = null: Node
+    while (n != null) {
+      if (n.index < 0) {  // discarded node
+        n = n.downq
+        if (m == null) downq = n
+        else m.downq = n
+      } else if (n.factory.isAvailable) {  // revived node
+        n.load -= Penalty
+        fixUp(heap, n.index)
+        val o = n.downq
+        n.downq = null
+        n = o
+        if (m == null) downq = n
+        else m.downq = n
+      } else {  // unchanged
+        m = n
+        n = n.downq
       }
+    }
+
+    n = heap(1)
+    if (n.factory.isAvailable || n.load >= 0) n else {
+      // Mark as down.
+      n.downq = downq
+      downq = n
+      n.load += Penalty
+      fixDown(heap, 1, size)
+      get()
     }
   }
 
@@ -150,7 +193,7 @@ class HeapBalancer[Req, Rep](
         updateGroup(curSnap)
       if (size == 0)
         return Future.exception(emptyException)
-      val n = get(1)
+      val n = get()
       n.load += 1
       fixDown(heap, n.index, size)
       n
