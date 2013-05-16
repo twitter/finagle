@@ -1,7 +1,8 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.{Logger, Level}
 
@@ -25,31 +26,29 @@ object Client {
    * @param username the username used to authenticate to the mysql instance
    * @param password the password used to authenticate to the mysql instance
    * @param dbname database to initially use
-   * @param logLevel java.util.logging.Logger logging level.
+   * @param logLevel log level for logger used in the finagle ChannelSnooper
+   * and the finagle-mysql netty pipeline.
+   * @param statsReceiver collects finagle stats scoped to "mysql"
    */
-  def apply(host: String, username: String, password: String, dbname: Option[String], logLevel: Level): Client = {
+  def apply(
+    host: String,
+    username: String,
+    password: String,
+    dbname: String = null,
+    logLevel: Level = Level.OFF,
+    statsReceiver: StatsReceiver = NullStatsReceiver
+  ): Client = {
     logger.setLevel(logLevel)
 
     val factory = ClientBuilder()
-      .codec(new MySQL(username, password, dbname))
+      .codec(new MySQL(username, password, Option(dbname)))
       .logger(logger)
       .hosts(host)
       .hostConnectionLimit(1)
+      .reportTo(statsReceiver.scope("mysql"))
       .buildFactory()
 
       apply(factory)
-  }
-
-  def apply(host: String, username: String, password: String): Client = {
-    apply(host, username, password, None, Level.OFF)
-  }
-
-  def apply(host: String, username: String, password: String, dbname: String): Client = {
-    apply(host, username, password, Some(dbname), Level.OFF)
-  }
-
-  def apply(host: String, username: String, password: String, dbname: String, logLevel: Level): Client = {
-    apply(host, username, password, Some(dbname), logLevel)
   }
 }
 
