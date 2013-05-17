@@ -60,6 +60,8 @@ object MySQLClient extends App {
       seq foreach println
     } onFailure { e =>
       println(e)
+    } ensure {
+      client.close()
     }
   }
 
