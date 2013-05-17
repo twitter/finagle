@@ -405,6 +405,17 @@ object Finagle extends Build {
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
 
+  lazy val finagleMdns = Project(
+    id = "finagle-mdns",
+    base = file("finagle-mdns"),
+    settings = Project.defaultSettings ++
+      Scrooge.newSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-mdns",
+    libraryDependencies += "javax.jmdns" % "jmdns" % "3.4.1"
+  ).dependsOn(finagleCore)
+
   lazy val finagleExample = Project(
     id = "finagle-example",
     base = file("finagle-example"),
