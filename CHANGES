@@ -8,41 +8,41 @@ as it is included in Finagle's user's guide.
 6.4.0
 ~~~~~
 
-finagle-core: Add unmanaged cache pool cluster
-finagle-core: Always enable TracingFilter even when no tracers are used.
-finagle-core: cache the cancelled connections in WatermarkPool instead of CachingPool
-finagle-core: Fix behavior of proxy forwarding in StatsReceiver
-finagle-core: Fix usage of RollupStatsReceiver in StatsFactoryWrapper.
-finagle-core: Generalize LoggingFilter
-finagle-core: HeapBalancer: fix handling of unavailable nodes
-finagle-core: Properly synchronize concurrent access to ProxyService state.
-finagle-core: Refactor Heapbalancer, remove usage of per host statsReceiver.
-finagle-core: share worker pools between server and client
-finagle-exception: Fix sourceHost supplied to chickadee exception reporter
-finagle-http: Add HttpConnectHandler and HttpClientCodec in the correct order when setting up an HTTP proxy client.
-finagle-http: add Response(status)
-finagle-http: EncodeBytes/decodeBytes for Request
-finagle-http: Refactor HeaderMap/ParamMap
-finagle-memcache: change to use consistent way to provide failure accrual params
-finagle-memcached: Propagating error message from server to client
-finagle-memcached: support for configuring numReps in KetamaClientBuilder
-finagle-mux: convert tests to use ScalaTest
-finagle-mysql: Ability to deal with non-ascii utf-8 characters
-finagle-mysql: Add ability to pass StatsReceiver to builder
-finagle-mysql: adds support for latin1_bin, paves the way for more charsets.
-finagle-mysql: Encode all the given the error information in the ServerError
-finagle-mysql: Fix improper use of ServiceFactory in Client
-finagle-redis: Fix byte encoding problem with Z(Rev)Rank
-finagle-redis: fixing Nil values in MBulkReplies
-Finagle-zipkin: decoupled sampling logic from ZipkinTracer to make a reusable SamplingTracer
-finagle-zipkin: Improve zipkin trace sampling
-finagle-zipkin: make ZipkinTracer loadable
-finagle: Document metrics
-finagle: Force service loader to return a concrete collection
-finagle: Refactor Future#get to Await.result
-finagle: Upgrade jackson to 1.9.11
-finagle: Upgrade ostrich to 9.1.1
-finagle: Upgrade util to 6.3.4
+ - finagle-core: Add unmanaged cache pool cluster
+ - finagle-core: Always enable TracingFilter even when no tracers are used.
+ - finagle-core: cache the cancelled connections in WatermarkPool instead of CachingPool
+ - finagle-core: Fix behavior of proxy forwarding in StatsReceiver
+ - finagle-core: Fix usage of RollupStatsReceiver in StatsFactoryWrapper.
+ - finagle-core: Generalize LoggingFilter
+ - finagle-core: HeapBalancer: fix handling of unavailable nodes
+ - finagle-core: Properly synchronize concurrent access to ProxyService state.
+ - finagle-core: Refactor Heapbalancer, remove usage of per host statsReceiver.
+ - finagle-core: share worker pools between server and client
+ - finagle-exception: Fix sourceHost supplied to chickadee exception reporter
+ - finagle-http: Add HttpConnectHandler and HttpClientCodec in the correct order when setting up an HTTP proxy client.
+ - finagle-http: add Response(status)
+ - finagle-http: EncodeBytes/decodeBytes for Request
+ - finagle-http: Refactor HeaderMap/ParamMap
+ - finagle-memcache: change to use consistent way to provide failure accrual params
+ - finagle-memcached: Propagating error message from server to client
+ - finagle-memcached: support for configuring numReps in KetamaClientBuilder
+ - finagle-mux: convert tests to use ScalaTest
+ - finagle-mysql: Ability to deal with non-ascii utf-8 characters
+ - finagle-mysql: Add ability to pass StatsReceiver to builder
+ - finagle-mysql: adds support for latin1_bin, paves the way for more charsets.
+ - finagle-mysql: Encode all the given the error information in the ServerError
+ - finagle-mysql: Fix improper use of ServiceFactory in Client
+ - finagle-redis: Fix byte encoding problem with Z(Rev)Rank
+ - finagle-redis: fixing Nil values in MBulkReplies
+ - Finagle-zipkin: decoupled sampling logic from ZipkinTracer to make a reusable SamplingTracer
+ - finagle-zipkin: Improve zipkin trace sampling
+ - finagle-zipkin: make ZipkinTracer loadable
+ - finagle: Document metrics
+ - finagle: Force service loader to return a concrete collection
+ - finagle: Refactor Future#get to Await.result
+ - finagle: Upgrade jackson to 1.9.11
+ - finagle: Upgrade ostrich to 9.1.1
+ - finagle: Upgrade util to 6.3.4
 
 6.3.0
 ~~~~~

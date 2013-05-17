@@ -6,9 +6,9 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.3.0"
+  val utilVersion = "6.3.4"
   val nettyLib = "io.netty" % "netty" % "3.5.12.Final"
-  val ostrichLib = "com.twitter" %% "ostrich" % "9.1.0"
+  val ostrichLib = "com.twitter" %% "ostrich" % "9.1.1"
   val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
@@ -18,7 +18,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.3.0",
+    version := "6.4.0",
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
@@ -175,7 +175,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.6",
+      "com.twitter.common" % "metrics" % "0.0.7",
       jacksonLib)
   ).dependsOn(finagleCore, finagleHttp)
 
@@ -385,7 +385,10 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-exp",
-      libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
+      libraryDependencies ++= Seq(
+        "com.google.caliper" % "caliper" % "0.5-rc1",
+        "com.twitter" % "jsr166e" % "1.0.0"
+      )
     ).dependsOn(finagleCore, finagleTest % "test")
 
   // Uses
