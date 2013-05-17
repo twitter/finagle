@@ -124,53 +124,18 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#apply" data-isabs="false">
-      <a id="apply(String,String,String,String,Level):Client"></a>
+      <a id="apply(String,String,String,String,Level,StatsReceiver):Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="host">host: String</span>, <span name="username">username: String</span>, <span name="password">password: String</span>, <span name="dbname">dbname: String</span>, <span name="logLevel">logLevel: <span name="java.util.logging.Level" class="extype">Level</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="Client.html">Client</a></span>
+        <span class="name">apply</span><span class="params">(<span name="host">host: String</span>, <span name="username">username: String</span>, <span name="password">password: String</span>, <span name="dbname">dbname: String = <span class="symbol">null</span></span>, <span name="logLevel">logLevel: <span name="java.util.logging.Level" class="extype">Level</span> = <span class="symbol"><span class="name"><a href="../../../../../java/package.html">Level.OFF</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../../stats/StatsReceiver.html">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../../package.html">NullStatsReceiver</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="Client.html">Client</a></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#apply" data-isabs="false">
-      <a id="apply(String,String,String,String):Client"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="host">host: String</span>, <span name="username">username: String</span>, <span name="password">password: String</span>, <span name="dbname">dbname: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="Client.html">Client</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#apply" data-isabs="false">
-      <a id="apply(String,String,String):Client"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="host">host: String</span>, <span name="username">username: String</span>, <span name="password">password: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="Client.html">Client</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#apply" data-isabs="false">
-      <a id="apply(String,String,String,Option[String],Level):Client"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="host">host: String</span>, <span name="username">username: String</span>, <span name="password">password: String</span>, <span name="dbname">dbname: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="logLevel">logLevel: <span name="java.util.logging.Level" class="extype">Level</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="Client.html">Client</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Constructs a Client using a single host.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a Client using a single host.</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>a String of host:port combination.</p></dd><dt class="param">username</dt><dd class="cmt"><p>the username used to authenticate to the mysql instance</p></dd><dt class="param">password</dt><dd class="cmt"><p>the password used to authenticate to the mysql instance</p></dd><dt class="param">dbname</dt><dd class="cmt"><p>database to initially use</p></dd><dt class="param">logLevel</dt><dd class="cmt"><p>java.util.logging.Logger logging level.
+      <p class="shortcomment cmt">Constructs a Client using a single host.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a Client using a single host.</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>a String of host:port combination.</p></dd><dt class="param">username</dt><dd class="cmt"><p>the username used to authenticate to the mysql instance</p></dd><dt class="param">password</dt><dd class="cmt"><p>the password used to authenticate to the mysql instance</p></dd><dt class="param">dbname</dt><dd class="cmt"><p>database to initially use</p></dd><dt class="param">logLevel</dt><dd class="cmt"><p>log level for logger used in the finagle ChannelSnooper
+and the finagle-mysql netty pipeline.</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>collects finagle stats scoped to &quot;mysql&quot;
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#apply" data-isabs="false">
       <a id="apply(ServiceFactory[Request, Result]):Client"></a>

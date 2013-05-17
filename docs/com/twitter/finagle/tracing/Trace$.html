@@ -627,6 +627,20 @@ Should be used with Trace.unwind for stack-like properties
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace#traceService" data-isabs="false">
+      <a id="traceService[T](String,String,Option[InetSocketAddress])(⇒ T):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">traceService</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="service">service: String</span>, <span name="rpc">rpc: String</span>, <span name="hostOpt">hostOpt: <span name="scala.Option" class="extype">Option</span>[<span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/package.html">None</a></span></span></span>)</span><span class="params">(<span name="f">f: ⇒ T</span>)</span><span class="result">: T</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Convenience method for event loops in services.</p><div class="fullcomment"><div class="comment cmt"><p>Convenience method for event loops in services.  Put your service handling
+code inside this to get proper tracing with all the correct fields filled in.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.tracing.Trace#tracers" data-isabs="false">
       <a id="tracers:List[Tracer]"></a>
       <h4 class="signature">

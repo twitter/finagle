@@ -121,6 +121,18 @@ communication.</p>
       </span>
       </h4>
       <p class="comment cmt">Decide if we should sample a particular trace or not.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.SamplingTracer" data-isabs="false">
+      <a id="SamplingTracer:SamplingTracer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SamplingTracer.html"><span class="name">SamplingTracer</span></a><span class="result"> extends Tracer</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Tracer that supports sampling.</p>
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Span" data-isabs="false">
       <a id="Span:Span"></a>
       <h4 class="signature">
@@ -153,10 +165,10 @@ communication.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZipkinTracer.html"><span class="name">ZipkinTracer</span></a><span class="result"> extends Tracer</span>
+        <a href="ZipkinTracer.html"><span class="name">ZipkinTracer</span></a><span class="result"> extends SamplingTracer</span>
       </span>
       </h4>
-      <p class="comment cmt">Zipkin tracer that supports sampling.</p>
+      
     </li></ol>
             </div>
 

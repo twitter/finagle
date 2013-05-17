@@ -534,6 +534,19 @@ Returns an error when key exists but does not hold a string value.
       </h4>
       <p class="shortcomment cmt">Gets all field value pairs for given hash</p><div class="fullcomment"><div class="comment cmt"><p>Gets all field value pairs for given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Sequence of field/value pairs
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hIncrBy" data-isabs="false">
+      <a id="hIncrBy(ChannelBuffer,ChannelBuffer,Long):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hIncrBy</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="amount">amount: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Increment a field by a value</p><div class="fullcomment"><div class="comment cmt"><p>Increment a field by a value</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>new value of field
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hKeys" data-isabs="false">
       <a id="hKeys(ChannelBuffer):Future[Seq[ChannelBuffer]]"></a>
       <h4 class="signature">
@@ -598,6 +611,32 @@ Returns an error when key exists but does not hold a string value.
       </span>
       </h4>
       <p class="shortcomment cmt">Sets field value pair in given hash</p><div class="fullcomment"><div class="comment cmt"><p>Sets field value pair in given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if field is new, 0 if field was updated
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hSetNx" data-isabs="false">
+      <a id="hSetNx(ChannelBuffer,ChannelBuffer,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hSetNx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Long" class="extype">Long</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Sets field value pair in given hash only if the field does not yet exist</p><div class="fullcomment"><div class="comment cmt"><p>Sets field value pair in given hash only if the field does not yet exist</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if field is new, 0 if no operation was performed
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hVals" data-isabs="false">
+      <a id="hVals(ChannelBuffer):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hVals</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Gets the values of all fields in given hash</p><div class="fullcomment"><div class="comment cmt"><p>Gets the values of all fields in given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>list of values, or empty list when key does not exist
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>

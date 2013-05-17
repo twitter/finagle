@@ -1,0 +1,201 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Metrics &mdash; Finagle 0.1-SNAPSHOT documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="FAQ.html" title="FAQ"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="metrics">
+<h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
+<p>Here are some of the metrics reported by finagle. All times are in milliseconds. A metric is either
+a count (C) or a statistic (S).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="1%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>closechan</td>
+<td>C</td>
+<td>This counter is incremented every time a connection is closed. Timed
+out connections are closed. By default an idle connection times out in
+5 seconds (hostConnectionIdleTime).</td>
+</tr>
+<tr class="row-even"><td>connection_duration</td>
+<td>S</td>
+<td>A stats (an Histogram) representing the distribution of the duration
+of a connection. closechan` and <cite>connection_duration.count</cite> must be
+equal.</td>
+</tr>
+<tr class="row-odd"><td>connection_received_bytes</td>
+<td>S</td>
+<td>bytes received per connection</td>
+</tr>
+<tr class="row-even"><td>connection_requests</td>
+<td>S</td>
+<td>Number of requests per connection, observed after it closes.</td>
+</tr>
+<tr class="row-odd"><td>connection_sent_bytes</td>
+<td>S</td>
+<td>Bytes sent per connection</td>
+</tr>
+<tr class="row-even"><td>connections</td>
+<td>C</td>
+<td>The current number of connections between client and server.</td>
+</tr>
+<tr class="row-odd"><td>handletime_us</td>
+<td>S</td>
+<td>The walltime elapsed while handling a request.</td>
+</tr>
+<tr class="row-even"><td>requests</td>
+<td>S</td>
+<td>The number of requests dispatched.</td>
+</tr>
+<tr class="row-odd"><td>pending</td>
+<td>C</td>
+<td>Number of pending requests (i.e. requests without responses).</td>
+</tr>
+<tr class="row-even"><td>request_latency_ms</td>
+<td>S</td>
+<td>The time from the beginning of a request until the response is
+received</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="pool-counts">
+<h2>Pool Counts<a class="headerlink" href="#pool-counts" title="Permalink to this headline">¶</a></h2>
+<p>The pool is a collection of tcp connections to a single host.</p>
+<dl class="docutils">
+<dt>pool_cached</dt>
+<dd>finagle&#8217;s default connection pool is called a &#8220;watermark&#8221; pool because it has a lower-bound and
+upper-bound (high and low water marks). The WaterMarkPool keeps persistent connections up the
+lower-bound. It will keep making connections up to upper-bound if you checkout more than
+lower-bound connections, but when you release those connections above the lower-bound, it
+immediately tries to close them. This creates a lot of connection churn if you keep needing more
+than lower-bound connections. As a result, there is a separate facility for caching for a few
+seconds (with some TTL) those connections above the lower bound and not closing them and
+re-opening them after every request. It caches REGARDLESS of whether there are more than
+lower-bound open connections; it&#8217;s always caching UP TO (upper-bound - lower-bound)
+connections. The cache reaches its peak value when you reach your peak concurrency (i.e., &#8220;load&#8221;),
+and then slowly decays, based on the TTL. (The default TTL is 5 seconds).</dd>
+<dt>pool_size</dt>
+<dd><p class="first">represents the number of connections open to the host, as seen by the connection pool. It should
+be between the min and max of your client builder spec.</p>
+<p class="last">If you can see that &#8220;pool_waiters&#8221; is exactly zero, then there is no queueing waiting to get a
+connection from the pool. This means your pool is not under-sized under the current
+workload. That&#8217;s a good thing.</p>
+</dd>
+<dt>pool_waiters</dt>
+<dd>the number of requests that are queued while waiting for a connection.</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/governorlogo.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Metrics</a><ul>
+<li><a class="reference internal" href="#pool-counts">Pool Counts</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ServicesAndFilters.html" title="previous chapter">Services &amp; Filters</a></li>
+      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2013 Twitter, Inc.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

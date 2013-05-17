@@ -54,7 +54,7 @@ acquiring a service. Defaults to infinity.
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a>[Req, Rep], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.HttpClient" class="extype" href="../HttpClient$.html">HttpClient</a>, <a name="com.twitter.finagle.MemcachedClient" class="extype" href="../MemcachedClient$.html">MemcachedClient</a>, <a name="com.twitter.finagle.MuxClient" class="extype" href="../MuxClient$.html">MuxClient</a>, <a name="com.twitter.finagle.RedisClient" class="extype" href="../RedisClient$.html">RedisClient</a>, <a name="com.twitter.finagle.thrift.ThriftClient" class="extype" href="../thrift/ThriftClient.html">ThriftClient</a></div>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.HttpClient" class="extype" href="../HttpClient$.html">HttpClient</a>, <a name="com.twitter.finagle.MemcachedClient" class="extype" href="../MemcachedClient$.html">MemcachedClient</a>, <a name="com.twitter.finagle.MuxClient" class="extype" href="../MuxClient$.html">MuxClient</a>, <a name="com.twitter.finagle.RedisClient" class="extype" href="../RedisClient$.html">RedisClient</a>, <a name="com.twitter.finagle.benchmark.TestClient" class="extype" href="../benchmark/TestClient$.html">TestClient</a>, <a name="com.twitter.finagle.thrift.ThriftClient" class="extype" href="../thrift/ThriftClient.html">ThriftClient</a></div>
         </div></div>
     
 
@@ -321,6 +321,18 @@ com.twitter.finagle.client.DefaultClient.defaultFailureAccrual
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#globalStatsReceiver" data-isabs="false">
+      <a id="globalStatsReceiver:RollupStatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">globalStatsReceiver</span><span class="result">: <a name="com.twitter.finagle.stats.RollupStatsReceiver" class="extype" href="../stats/RollupStatsReceiver.html">RollupStatsReceiver</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">

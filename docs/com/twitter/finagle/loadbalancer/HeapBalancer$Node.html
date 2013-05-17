@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Node</span><span class="params">(<span name="factory">factory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>, <span name="stats">stats: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="load">load: <span name="scala.Int" class="extype">Int</span></span>, <span name="index">index: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Node</span><span class="params">(<span name="factory">factory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>, <span name="load">load: <span name="scala.Int" class="extype">Int</span></span>, <span name="index">index: <span name="scala.Int" class="extype">Int</span></span>, <span name="downq">downq: <a name="com.twitter.finagle.loadbalancer.HeapBalancer.Node" class="extype" href="">Node</a></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Node</span><span class="params">(<span name="factory">factory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>, <span name="stats">stats: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="load">load: <span name="scala.Int" class="extype">Int</span></span>, <span name="index">index: <span name="scala.Int" class="extype">Int</span></span>)</span>
+        <span class="name">Node</span><span class="params">(<span name="factory">factory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>, <span name="load">load: <span name="scala.Int" class="extype">Int</span></span>, <span name="index">index: <span name="scala.Int" class="extype">Int</span></span>, <span name="downq">downq: <a name="com.twitter.finagle.loadbalancer.HeapBalancer.Node" class="extype" href="">Node</a> = <span class="symbol">null</span></span>)</span>
       </span>
       </h4>
       
@@ -177,6 +177,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancer.Node#downq" data-isabs="false">
+      <a id="downq:Node"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">downq</span><span class="result">: <a name="com.twitter.finagle.loadbalancer.HeapBalancer.Node" class="extype" href="">Node</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -372,18 +384,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.loadbalancer.HeapBalancer.Node" class="extype" href="">Node</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.loadbalancer.HeapBalancer.Node#stats" data-isabs="false">
-      <a id="stats:StatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">stats</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

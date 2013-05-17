@@ -48,6 +48,7 @@ User's guide
    Quickstart
    Futures
    ServicesAndFilters
+   Metrics
    FAQ
 
 Notes

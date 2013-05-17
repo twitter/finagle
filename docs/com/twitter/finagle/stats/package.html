@@ -165,7 +165,7 @@ away other types.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NameTranslatingStatsReceiver.html"><span class="name">NameTranslatingStatsReceiver</span></a><span class="result"> extends StatsReceiver with Proxy</span>
+        <a href="NameTranslatingStatsReceiver.html"><span class="name">NameTranslatingStatsReceiver</span></a><span class="result"> extends StatsReceiver</span>
       </span>
       </h4>
       
@@ -250,7 +250,7 @@ names you pass.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="StatsReceiverProxy.html"><span class="name">StatsReceiverProxy</span></a><span class="result"> extends StatsReceiver with Proxy</span>
+        <a href="StatsReceiverProxy.html"><span class="name">StatsReceiverProxy</span></a><span class="result"> extends StatsReceiver</span>
       </span>
       </h4>
       
@@ -285,7 +285,33 @@ names you pass.</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.stats.BroadcastStatsReceiver" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.stats.BroadcastCounter" data-isabs="false">
+      <a id="BroadcastCounter:BroadcastCounter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BroadcastCounter$.html"><span class="name">BroadcastCounter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">BroadcastCounter is a helper object that create a Counter wrapper around multiple
+Counters (n).</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.BroadcastStat" data-isabs="false">
+      <a id="BroadcastStat:BroadcastStat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BroadcastStat$.html"><span class="name">BroadcastStat</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">BroadcastStat is a helper object that create a Counter wrapper around multiple
+Stats (n).</p>
+    </li><li visbl="pub" name="com.twitter.finagle.stats.BroadcastStatsReceiver" data-isabs="false">
       <a id="BroadcastStatsReceiver:BroadcastStatsReceiver"></a>
       <h4 class="signature">
       <span class="modifier_kind">

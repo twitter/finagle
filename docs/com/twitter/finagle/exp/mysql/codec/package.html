@@ -56,7 +56,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Defragging.html"><span class="name">Defragging</span></a><span class="params">(<span name="expected">expected: Int</span>, <span name="packets">packets: Seq[Seq[Packet]]</span>)</span><span class="result"> extends State with Product with Serializable</span>
+        <a href="Defragging.html"><span class="name">Defragging</span></a><span class="params">(<span name="expected">expected: Int</span>, <span name="packets">packets: Seq[Seq[Packet]]</span>, <span name="decoder">decoder: (Packet, Seq[Packet], Seq[Packet]) ⇒ Result</span>)</span><span class="result"> extends State with Product with Serializable</span>
       </span>
       </h4>
       
@@ -72,6 +72,18 @@
       </span>
       </h4>
       <p class="comment cmt">Encoder: Encodes a Request into a ChannelBuffer.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.Handshaking" data-isabs="false">
+      <a id="Handshaking:Handshaking"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Handshaking.html"><span class="name">Handshaking</span></a><span class="params">(<span name="wroteInternalGreet">wroteInternalGreet: Boolean</span>, <span name="serverGreet">serverGreet: Option[ServersGreeting]</span>)</span><span class="result"> extends State with Product with Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.PacketFrameDecoder" data-isabs="false">
       <a id="PacketFrameDecoder:PacketFrameDecoder"></a>
       <h4 class="signature">
@@ -116,15 +128,27 @@ frames.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.WaitingForGreeting" data-isabs="false">
-      <a id="WaitingForGreeting:WaitingForGreeting"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.WaitingForExecuteResults" data-isabs="false">
+      <a id="WaitingForExecuteResults:WaitingForExecuteResults"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="WaitingForGreeting$.html"><span class="name">WaitingForGreeting</span></a><span class="result"> extends State with Product with Serializable</span>
+        <a href="WaitingForExecuteResults$.html"><span class="name">WaitingForExecuteResults</span></a><span class="result"> extends State with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.WaitingForPrepareOK" data-isabs="false">
+      <a id="WaitingForPrepareOK:WaitingForPrepareOK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WaitingForPrepareOK$.html"><span class="name">WaitingForPrepareOK</span></a><span class="result"> extends State with Product with Serializable</span>
       </span>
       </h4>
       

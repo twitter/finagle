@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Defragging</span><span class="params">(<span name="expected">expected: <span name="scala.Int" class="extype">Int</span></span>, <span name="packets">packets: Seq[Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]]</span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.codec.State" class="extype" href="State.html">State</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Defragging</span><span class="params">(<span name="expected">expected: <span name="scala.Int" class="extype">Int</span></span>, <span name="packets">packets: Seq[Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]]</span>, <span name="decoder">decoder: (<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>, Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>], Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]) ⇒ <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="../Result.html">Result</a></span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.codec.State" class="extype" href="State.html">State</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Defragging</span><span class="params">(<span name="expected">expected: <span name="scala.Int" class="extype">Int</span></span>, <span name="packets">packets: Seq[Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]]</span>)</span>
+        <span class="name">Defragging</span><span class="params">(<span name="expected">expected: <span name="scala.Int" class="extype">Int</span></span>, <span name="packets">packets: Seq[Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]]</span>, <span name="decoder">decoder: (<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>, Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>], Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]) ⇒ <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="../Result.html">Result</a></span>)</span>
       </span>
       </h4>
       
@@ -177,6 +177,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.Defragging#decoder" data-isabs="false">
+      <a id="decoder:(Packet, Seq[Packet], Seq[Packet]) ⇒ Result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decoder</span><span class="result">: (<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>, Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>], Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="../protocol/Packet.html">Packet</a>]) ⇒ <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="../Result.html">Result</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">

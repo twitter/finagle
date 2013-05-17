@@ -70,7 +70,7 @@ is very wrong!
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="org.apache.scribe.scribe.FinagledClient" class="extype" href="../../../../org/apache/scribe/scribe$$FinagledClient.html">FinagledClient</a></span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>)</span>
+        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="org.apache.scribe.scribe.FinagledClient" class="extype" href="../../../../org/apache/scribe/scribe$$FinagledClient.html">FinagledClient</a></span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span name="new Some[java.lang.String](java.net.InetAddress.getLocalHost().getHostName())" class="defval">...</span></span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>)</span>
       </span>
       </h4>
       
@@ -547,7 +547,8 @@ implications.
       </span>
       </h4>
       <p class="shortcomment cmt">Add a modifier to append a source address (i.</p><div class="fullcomment"><div class="comment cmt"><p>Add a modifier to append a source address (i.e. endpoint) to a generated ServiceException.</p><p>The endpoint string is the ip of the host concatenated with the port of the socket (e.g.
-&quot;127.0.0.1:8080&quot;).
+&quot;127.0.0.1:8080&quot;).  This is retained for orthogonality of exterior
+interfaces.  We use the host name internaly.
 </p></div></div>
     </li></ol>
             </div>

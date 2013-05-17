@@ -104,7 +104,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends AnyRef</span>
+        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends Closable</span>
       </span>
       </h4>
       
@@ -422,7 +422,7 @@ decoding a row into its appropriate values.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="msg">msg: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: Short</span>, <span name="sqlState">sqlState: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends Exception with Product with Serializable</span>
       </span>
       </h4>
       

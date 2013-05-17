@@ -2,36 +2,36 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>com.twitter.jsr166e.LongAdder</title>
+          <title>com.twitter.finagle.zipkin.InitialSampleRate</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
-      <script type="text/javascript" src="../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <img src="../../../lib/class_big.png" />
-        <p id="owner"><a name="com" class="extype" href="../../package.html">com</a>.<a name="com.twitter" class="extype" href="../package.html">twitter</a>.<a name="com.twitter.jsr166e" class="extype" href="package.html">jsr166e</a></p>
-        <h1>LongAdder</h1>
+        <img src="../../../../lib/object_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.zipkin" class="extype" href="package.html">zipkin</a></p>
+        <h1>InitialSampleRate</h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">LongAdder</span><span class="result"> extends <span name="com.twitter.jsr166e.Striped64" class="extype">Striped64</span> with <span name="java.io.Serializable" class="extype">Serializable</span></span>
+        <span class="name">InitialSampleRate</span><span class="result"> extends <span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="scala.Float" class="extype">Float</span>]</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="com.twitter.jsr166e.Striped64" class="extype">Striped64</span>, <span name="java.lang.Number" class="extype">Number</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="scala.Float" class="extype">Float</span>], <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.Float" class="extype">Float</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.jsr166e.LongAdder" class="in"><span>LongAdder</span></li><li name="com.twitter.jsr166e.Striped64" class="in"><span>Striped64</span></li><li name="java.lang.Number" class="in"><span>Number</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.zipkin.InitialSampleRate" class="in"><span>InitialSampleRate</span></li><li name="com.twitter.app.GlobalFlag" class="in"><span>GlobalFlag</span></li><li name="com.twitter.app.Flag" class="in"><span>Flag</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,22 +55,7 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
-              <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.jsr166e.LongAdder#this" data-isabs="false">
-      <a id="this:LongAdder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">LongAdder</span><span class="params">()</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -138,18 +123,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#add" data-isabs="false">
-      <a id="add(Long):Unit"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#apply" data-isabs="false">
+      <a id="apply():Float"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">add</span><span class="params">(<span name="x">x: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span name="scala.Float" class="extype">Float</span></span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -162,18 +147,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="java.lang.Number#byteValue" data-isabs="false">
-      <a id="byteValue():Byte"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">byteValue</span><span class="params">()</span><span class="result">: <span name="scala.Byte" class="extype">Byte</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Number</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -185,34 +158,34 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#decrement" data-isabs="false">
-      <a id="decrement():Unit"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#default" data-isabs="false">
+      <a id="default:Float"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">default</span><span class="result">: <span name="scala.Float" class="extype">Float</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#defaultString" data-isabs="false">
+      <a id="defaultString:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decrement</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">defaultString</span><span class="result">: String</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#doubleValue" data-isabs="false">
-      <a id="doubleValue():Double"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">doubleValue</span><span class="params">()</span><span class="result">: <span name="scala.Double" class="extype">Double</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.jsr166e.LongAdder" class="extype" href="">LongAdder</a> → Number</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -248,22 +221,34 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#floatValue" data-isabs="false">
-      <a id="floatValue():Float"></a>
+    </li><li visbl="prt" name="com.twitter.app.Flag#flaggable" data-isabs="false">
+      <a id="flaggable:Flaggable[Float]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flaggable</span><span class="result">: <span name="com.twitter.app.Flaggable" class="extype">Flaggable</span>[<span name="scala.Float" class="extype">Float</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#get" data-isabs="false">
+      <a id="get:Option[Float]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">floatValue</span><span class="params">()</span><span class="result">: <span name="scala.Float" class="extype">Float</span></span>
+        <span class="name">get</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Float" class="extype">Float</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.jsr166e.LongAdder" class="extype" href="">LongAdder</a> → Number</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -276,6 +261,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.GlobalFlag#getGlobalFlag" data-isabs="false">
+      <a id="getGlobalFlag:com.twitter.app.Flag[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getGlobalFlag</span><span class="result">: com.twitter.app.Flag[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.GlobalFlag#getValue" data-isabs="false">
+      <a id="getValue:Option[Float]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getValue</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Float" class="extype">Float</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -288,30 +297,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#increment" data-isabs="false">
-      <a id="increment():Unit"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#help" data-isabs="false">
+      <a id="help:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">help</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#isDefined" data-isabs="false">
+      <a id="isDefined:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">increment</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">isDefined</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#intValue" data-isabs="false">
-      <a id="intValue():Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">intValue</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.jsr166e.LongAdder" class="extype" href="">LongAdder</a> → Number</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -324,18 +333,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#longValue" data-isabs="false">
-      <a id="longValue():Long"></a>
+    </li><li visbl="pub" name="com.twitter.app.Flag#name" data-isabs="false">
+      <a id="name:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">longValue</span><span class="params">()</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
+        <span class="name">name</span><span class="result">: String</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.jsr166e.LongAdder" class="extype" href="">LongAdder</a> → Number</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -348,6 +357,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#noArgumentOk" data-isabs="false">
+      <a id="noArgumentOk:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">noArgumentOk</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -372,7 +393,31 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#reset" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.app.Flag#parse" data-isabs="false">
+      <a id="parse():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parse</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#parse" data-isabs="false">
+      <a id="parse(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parse</span><span class="params">(<span name="raw">raw: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.Flag#reset" data-isabs="false">
       <a id="reset():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -383,43 +428,7 @@
         <span class="name">reset</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="java.lang.Number#shortValue" data-isabs="false">
-      <a id="shortValue():Short"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">shortValue</span><span class="params">()</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Number</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#sum" data-isabs="false">
-      <a id="sum():Long"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sum</span><span class="params">()</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#sumThenReset" data-isabs="false">
-      <a id="sumThenReset():Long"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sumThenReset</span><span class="params">()</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -432,7 +441,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.jsr166e.LongAdder#toString" data-isabs="false">
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -443,7 +452,7 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.jsr166e.LongAdder" class="extype" href="">LongAdder</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -496,12 +505,10 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.jsr166e.Striped64" class="parent">
-              <h3>Inherited from <span name="com.twitter.jsr166e.Striped64" class="extype">Striped64</span></h3>
-            </div><div name="java.lang.Number" class="parent">
-              <h3>Inherited from <span name="java.lang.Number" class="extype">Number</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+        <div name="com.twitter.app.GlobalFlag" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.GlobalFlag" class="extype">GlobalFlag</span>[<span name="scala.Float" class="extype">Float</span>]</h3>
+            </div><div name="com.twitter.app.Flag" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.Float" class="extype">Float</span>]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

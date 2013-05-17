@@ -528,37 +528,52 @@ string except the bytes are returned raw.</p></div><dl class="paramcmts block"><
 bytes starting at offset.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferReader#readLengthCodedString" data-isabs="false">
-      <a id="readLengthCodedString():String"></a>
+      <a id="readLengthCodedString(Charset):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readLengthCodedString</span><span class="params">()</span><span class="result">: String</span>
+        <span class="name">readLengthCodedString</span><span class="params">(<span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="Charset$.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: String</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Reads a length encoded string according to the MySQL
 Client/Server protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Reads a length encoded string according to the MySQL
-Client/Server protocol. Uses Charset.defaultCharset to
-decode strings. For more details refer to MySQL
+Client/Server protocol. Uses Charset.defaultCharset by default
+to decode strings. For more details refer to MySQL
 documentation.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a MySQL length coded String starting at
 offset.
 </p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferReader#readNullTerminatedString" data-isabs="false">
-      <a id="readNullTerminatedString():String"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferReader#readNullTerminatedBytes" data-isabs="false">
+      <a id="readNullTerminatedBytes():Array[Byte]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readNullTerminatedString</span><span class="params">()</span><span class="result">: String</span>
+        <span class="name">readNullTerminatedBytes</span><span class="params">()</span><span class="result">: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reads a null-terminated array where
+null is denoted by '\0'.</p><div class="fullcomment"><div class="comment cmt"><p>Reads a null-terminated array where
+null is denoted by '\0'.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a null-terminated String starting at offset.
+</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferReader#readNullTerminatedString" data-isabs="false">
+      <a id="readNullTerminatedString(Charset):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readNullTerminatedString</span><span class="params">(<span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="Charset$.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: String</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Reads a null-terminated string where
 null is denoted by '\0'.</p><div class="fullcomment"><div class="comment cmt"><p>Reads a null-terminated string where
-null is denoted by '\0'. Uses Charset.defaultCharset
+null is denoted by '\0'. Uses Charset.defaultCharset by default
 to decode strings.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a null-terminated String starting at offset.
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">

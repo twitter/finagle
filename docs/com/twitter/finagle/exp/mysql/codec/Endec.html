@@ -364,8 +364,7 @@ on separate threads.
       </span>
       </h4>
       <p class="shortcomment cmt">Logical entry point for the Decoder.</p><div class="fullcomment"><div class="comment cmt"><p>Logical entry point for the Decoder.
-Decodes a packet based on the current state
-of this decoder.
+Decodes a packet based on the current state.
 </p></div></div>
     </li><li visbl="pub" name="org.jboss.netty.channel.SimpleChannelHandler#disconnectRequested" data-isabs="false">
       <a id="disconnectRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
@@ -383,19 +382,18 @@ of this decoder.
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.codec.Endec#encode" data-isabs="false">
-      <a id="encode(Request):ChannelBuffer"></a>
+      <a id="encode(Request,Option[ChannelHandlerContext]):Option[ChannelBuffer]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">encode</span><span class="params">(<span name="req">req: <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="../Request.html">Request</a></span>)</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+        <span class="name">encode</span><span class="params">(<span name="req">req: <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="../Request.html">Request</a></span>, <span name="ctx">ctx: <span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span>]</span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Logical entry point for the Encoder.</p><div class="fullcomment"><div class="comment cmt"><p>Logical entry point for the Encoder.
 Encodes a request into ChannelBuffer.
-Note, some requests change the state of the decoder.
 </p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>

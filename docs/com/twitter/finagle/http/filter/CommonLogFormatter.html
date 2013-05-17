@@ -31,7 +31,7 @@
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Apache-style common log formatter</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.http.filter.LogFormatter" class="extype" href="LogFormatter.html">LogFormatter</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.http.filter.LogFormatter" class="extype" href="LogFormatter.html">LogFormatter</a>, <a name="com.twitter.finagle.filter.LogFormatter" class="extype" href="../../filter/LogFormatter.html">LogFormatter</a>[<a name="com.twitter.finagle.http.Request" class="extype" href="../Request.html">Request</a>, <a name="com.twitter.finagle.http.Response" class="extype" href="../Response.html">Response</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.http.filter.CommonLogFormatter" class="in"><span>CommonLogFormatter</span></li><li name="com.twitter.finagle.http.filter.LogFormatter" class="in"><span>LogFormatter</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.http.filter.CommonLogFormatter" class="in"><span>CommonLogFormatter</span></li><li name="com.twitter.finagle.http.filter.LogFormatter" class="in"><span>LogFormatter</span></li><li name="com.twitter.finagle.filter.LogFormatter" class="in"><span>LogFormatter</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -239,7 +239,19 @@
         <span class="name">format</span><span class="params">(<span name="request">request: <a name="com.twitter.finagle.http.Request" class="extype" href="../Request.html">Request</a></span>, <span name="response">response: <a name="com.twitter.finagle.http.Response" class="extype" href="../Response.html">Response</a></span>, <span name="responseTime">responseTime: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.filter.CommonLogFormatter" class="extype" href="">CommonLogFormatter</a> → <a name="com.twitter.finagle.http.filter.LogFormatter" class="extype" href="LogFormatter.html">LogFormatter</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.filter.CommonLogFormatter" class="extype" href="">CommonLogFormatter</a> → <a name="com.twitter.finagle.filter.LogFormatter" class="extype" href="../../filter/LogFormatter.html">LogFormatter</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.filter.CommonLogFormatter#formatException" data-isabs="false">
+      <a id="formatException(Request,Throwable,Duration):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">formatException</span><span class="params">(<span name="request">request: <a name="com.twitter.finagle.http.Request" class="extype" href="../Request.html">Request</a></span>, <span name="throwable">throwable: Throwable</span>, <span name="responseTime">responseTime: <span name="com.twitter.util.Duration" class="extype">Duration</span></span>)</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.filter.CommonLogFormatter" class="extype" href="">CommonLogFormatter</a> → <a name="com.twitter.finagle.filter.LogFormatter" class="extype" href="../../filter/LogFormatter.html">LogFormatter</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.filter.CommonLogFormatter#formattedDate" data-isabs="false">
       <a id="formattedDate():String"></a>
       <h4 class="signature">
@@ -402,6 +414,8 @@
         <div id="inheritedMembers">
         <div name="com.twitter.finagle.http.filter.LogFormatter" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.http.filter.LogFormatter" class="extype" href="LogFormatter.html">LogFormatter</a></h3>
+            </div><div name="com.twitter.finagle.filter.LogFormatter" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.filter.LogFormatter" class="extype" href="../../filter/LogFormatter.html">LogFormatter</a>[<a name="com.twitter.finagle.http.Request" class="extype" href="../Request.html">Request</a>, <a name="com.twitter.finagle.http.Response" class="extype" href="../Response.html">Response</a>]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

@@ -21,20 +21,21 @@
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ParamMap</span><span class="result"> extends <span name="scala.collection.MapLike" class="extype">MapLike</span>[String, String, Map[String, String]]</span>
+        <span class="name">ParamMap</span><span class="result"> extends <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String] with <span name="scala.collection.immutable.MapLike" class="extype">MapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Adapt params of a Request to a mutable Map.  Handle parameters in the
-URL and form encoded body.  Multipart forms are not supported (not
-needed, could be abusive).
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Request parameter map.</p><p>This is a multi-map.  Use getAll() get all values for a key.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.collection.MapLike" class="extype">MapLike</span>[String, String, Map[String, String]], <span name="scala.collection.generic.Subtractable" class="extype">Subtractable</span>[String, Map[String, String]], <span name="scala.collection.GenMapLike" class="extype">GenMapLike</span>[String, String, Map[String, String]], <span name="scala.collection.IterableLike" class="extype">IterableLike</span>[(String, String), Map[String, String]], <span name="scala.collection.GenIterableLike" class="extype">GenIterableLike</span>[(String, String), Map[String, String]], <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[(String, String), Map[String, String]], <span name="scala.collection.GenTraversableLike" class="extype">GenTraversableLike</span>[(String, String), Map[String, String]], <span name="scala.collection.Parallelizable" class="extype">Parallelizable</span>[(String, String), <span name="scala.collection.parallel.ParMap" class="extype">ParMap</span>[String, String]], <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[(String, String)], <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[(String, String)], <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[(String, String), Map[String, String]], <span name="scala.collection.generic.HasNewBuilder" class="extype">HasNewBuilder</span>[(String, String), Map[String, String]], <span name="scala.Equals" class="extype">Equals</span>, <span name="scala.PartialFunction" class="extype">PartialFunction</span>[String, String], (String) ⇒ String, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String], <span name="scala.collection.immutable.MapLike" class="extype">MapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.Map" class="extype">Map</span>[String, String], <span name="scala.collection.MapLike" class="extype">MapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.generic.Subtractable" class="extype">Subtractable</span>[String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.PartialFunction" class="extype">PartialFunction</span>[String, String], (String) ⇒ String, <span name="scala.collection.GenMap" class="extype">GenMap</span>[String, String], <span name="scala.collection.GenMapLike" class="extype">GenMapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[(String, String)], <span name="scala.collection.Iterable" class="extype">Iterable</span>[(String, String)], <span name="scala.collection.IterableLike" class="extype">IterableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.Equals" class="extype">Equals</span>, <span name="scala.collection.GenIterable" class="extype">GenIterable</span>[(String, String)], <span name="scala.collection.GenIterableLike" class="extype">GenIterableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.immutable.Traversable" class="extype">Traversable</span>[(String, String)], <span name="scala.Immutable" class="extype">Immutable</span>, <span name="scala.collection.Traversable" class="extype">Traversable</span>[(String, String)], <span name="scala.collection.GenTraversable" class="extype">GenTraversable</span>[(String, String)], <span name="scala.collection.generic.GenericTraversableTemplate" class="extype">GenericTraversableTemplate</span>[(String, String), <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>], <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.GenTraversableLike" class="extype">GenTraversableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.Parallelizable" class="extype">Parallelizable</span>[(String, String), <span name="scala.collection.parallel.immutable.ParMap" class="extype">ParMap</span>[String, String]], <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[(String, String)], <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[(String, String)], <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], <span name="scala.collection.generic.HasNewBuilder" class="extype">HasNewBuilder</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.http.EmptyParamMap" class="extype" href="EmptyParamMap$.html">EmptyParamMap</a>, <a name="com.twitter.finagle.http.MapParamMap" class="extype" href="MapParamMap.html">MapParamMap</a>, <a name="com.twitter.finagle.http.RequestParamMap" class="extype" href="RequestParamMap.html">RequestParamMap</a></div>
         </div></div>
     
 
@@ -48,7 +49,7 @@ needed, could be abusive).
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.http.ParamMap" class="in"><span>ParamMap</span></li><li name="scala.collection.MapLike" class="in"><span>MapLike</span></li><li name="scala.collection.generic.Subtractable" class="in"><span>Subtractable</span></li><li name="scala.collection.GenMapLike" class="in"><span>GenMapLike</span></li><li name="scala.collection.IterableLike" class="in"><span>IterableLike</span></li><li name="scala.collection.GenIterableLike" class="in"><span>GenIterableLike</span></li><li name="scala.collection.TraversableLike" class="in"><span>TraversableLike</span></li><li name="scala.collection.GenTraversableLike" class="in"><span>GenTraversableLike</span></li><li name="scala.collection.Parallelizable" class="in"><span>Parallelizable</span></li><li name="scala.collection.TraversableOnce" class="in"><span>TraversableOnce</span></li><li name="scala.collection.GenTraversableOnce" class="in"><span>GenTraversableOnce</span></li><li name="scala.collection.generic.FilterMonadic" class="in"><span>FilterMonadic</span></li><li name="scala.collection.generic.HasNewBuilder" class="in"><span>HasNewBuilder</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="scala.PartialFunction" class="in"><span>PartialFunction</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.http.ParamMap" class="in"><span>ParamMap</span></li><li name="scala.collection.immutable.Map" class="in"><span>Map</span></li><li name="scala.collection.immutable.MapLike" class="in"><span>MapLike</span></li><li name="scala.collection.Map" class="in"><span>Map</span></li><li name="scala.collection.MapLike" class="in"><span>MapLike</span></li><li name="scala.collection.generic.Subtractable" class="in"><span>Subtractable</span></li><li name="scala.PartialFunction" class="in"><span>PartialFunction</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.collection.GenMap" class="in"><span>GenMap</span></li><li name="scala.collection.GenMapLike" class="in"><span>GenMapLike</span></li><li name="scala.collection.immutable.Iterable" class="in"><span>Iterable</span></li><li name="scala.collection.Iterable" class="in"><span>Iterable</span></li><li name="scala.collection.IterableLike" class="in"><span>IterableLike</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="scala.collection.GenIterable" class="in"><span>GenIterable</span></li><li name="scala.collection.GenIterableLike" class="in"><span>GenIterableLike</span></li><li name="scala.collection.immutable.Traversable" class="in"><span>Traversable</span></li><li name="scala.Immutable" class="in"><span>Immutable</span></li><li name="scala.collection.Traversable" class="in"><span>Traversable</span></li><li name="scala.collection.GenTraversable" class="in"><span>GenTraversable</span></li><li name="scala.collection.generic.GenericTraversableTemplate" class="in"><span>GenericTraversableTemplate</span></li><li name="scala.collection.TraversableLike" class="in"><span>TraversableLike</span></li><li name="scala.collection.GenTraversableLike" class="in"><span>GenTraversableLike</span></li><li name="scala.collection.Parallelizable" class="in"><span>Parallelizable</span></li><li name="scala.collection.TraversableOnce" class="in"><span>TraversableOnce</span></li><li name="scala.collection.GenTraversableOnce" class="in"><span>GenTraversableOnce</span></li><li name="scala.collection.generic.FilterMonadic" class="in"><span>FilterMonadic</span></li><li name="scala.collection.generic.HasNewBuilder" class="in"><span>HasNewBuilder</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -68,7 +69,7 @@ needed, could be abusive).
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ParamMap</span><span class="params">(<span name="request">request: <a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a></span>)</span>
+        <span class="name">ParamMap</span><span class="params">()</span>
       </span>
       </h4>
       
@@ -85,17 +86,70 @@ needed, could be abusive).
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Self</span><span class="result"> = Map[String, String]</span>
+        <span class="name">Self</span><span class="result"> = <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="pub" name="scala.collection.MapLike#get" data-isabs="true">
+      <a id="get(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="key">key: String</span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → GenMapLike</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getAll" data-isabs="true">
+      <a id="getAll(String):Iterable[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getAll</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: Iterable[String]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get all parameters with name.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#isValid" data-isabs="true">
+      <a id="isValid:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isValid</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Check if there was a parse error.</p><div class="fullcomment"><div class="comment cmt"><p>Check if there was a parse error.  On a parse error, the parameters
+are treated as empty (versus throwing a parse exception).
+</p></div></div>
+    </li><li visbl="pub" name="scala.collection.MapLike#iterator" data-isabs="true">
+      <a id="iterator:Iterator[(String, String)]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iterator</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[(String, String)]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → IterableLike → GenIterableLike</dd></dl></div>
+    </li></ol>
+            </div>
 
         <div class="values members" id="values">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -133,18 +187,20 @@ needed, could be abusive).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#+" data-isabs="false">
-      <a id="+[B&gt;:String]((String, B)):Map[String, B]"></a>
+      <a id="+[B&gt;:String]((String, B)):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus">+</span><span class="tparams">[<span name="B">B &gt;: String</span>]</span><span class="params">(<span name="kv">kv: (String, B)</span>)</span><span class="result">: Map[String, B]</span>
+        <span class="name" title="gt4s: $plus">+</span><span class="tparams">[<span name="B">B &gt;: String</span>]</span><span class="params">(<span name="kv">kv: (String, B)</span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → GenMapLike</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#+" data-isabs="false">
+      <p class="shortcomment cmt">Add a key/value pair to the map, returning a new map.</p><div class="fullcomment"><div class="comment cmt"><p>Add a key/value pair to the map, returning a new map.
+Overwrites all values if the key exists.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → Map → MapLike → MapLike → GenMapLike</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.immutable.MapLike#+" data-isabs="false">
       <a id="+[B1&gt;:String]((String, B1),(String, B1),(String, B1)*):Map[String, B1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -152,11 +208,11 @@ needed, could be abusive).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus">+</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="kv1">kv1: (String, B1)</span>, <span name="kv2">kv2: (String, B1)</span>, <span name="kvs">kvs: (String, B1)*</span>)</span><span class="result">: <span name="scala.collection.Map" class="extype">Map</span>[String, B1]</span>
+        <span class="name" title="gt4s: $plus">+</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="elem1">elem1: (String, B1)</span>, <span name="elem2">elem2: (String, B1)</span>, <span name="elems">elems: (String, B1)*</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, B1]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#++" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → MapLike</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.immutable.MapLike#++" data-isabs="false">
       <a id="++[B1&gt;:String](GenTraversableOnce[(String, B1)]):Map[String, B1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -164,79 +220,81 @@ needed, could be abusive).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus$plus">++</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="xs">xs: <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[(String, B1)]</span>)</span><span class="result">: <span name="scala.collection.Map" class="extype">Map</span>[String, B1]</span>
+        <span class="name" title="gt4s: $plus$plus">++</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="xs">xs: <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[(String, B1)]</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, B1]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#++" data-isabs="false">
-      <a id="++[B&gt;:(String, String), That](GenTraversableOnce[B])(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="++[B&gt;:(String, String), That](GenTraversableOnce[B])(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus$plus">++</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name" title="gt4s: $plus$plus">++</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#++:" data-isabs="false">
-      <a id="++:[B&gt;:(String, String), That](Traversable[B])(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="++:[B&gt;:(String, String), That](Traversable[B])(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus$plus$colon">++:</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name" title="gt4s: $plus$plus$colon">++:</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#++:" data-isabs="false">
-      <a id="++:[B&gt;:(String, String), That](TraversableOnce[B])(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="++:[B&gt;:(String, String), That](TraversableOnce[B])(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $plus$plus$colon">++:</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name" title="gt4s: $plus$plus$colon">++:</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#-" data-isabs="false">
-      <a id="-(String):Map[String, String]"></a>
+      <a id="-(String):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $minus">-</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name" title="gt4s: $minus">-</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → Subtractable → GenMapLike</dd></dl></div>
+      <p class="shortcomment cmt">Removes a key from this map, returning a new map.</p><div class="fullcomment"><div class="comment cmt"><p>Removes a key from this map, returning a new map.
+All values for the key are removed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → Subtractable → GenMapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.generic.Subtractable#-" data-isabs="false">
-      <a id="-(String,String,String*):Map[String, String]"></a>
+      <a id="-(String,String,String*):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $minus">-</span><span class="params">(<span name="elem1">elem1: String</span>, <span name="elem2">elem2: String</span>, <span name="elems">elems: String*</span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name" title="gt4s: $minus">-</span><span class="params">(<span name="elem1">elem1: String</span>, <span name="elem2">elem2: String</span>, <span name="elems">elems: String*</span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Subtractable</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.generic.Subtractable#--" data-isabs="false">
-      <a id="--(GenTraversableOnce[String]):Map[String, String]"></a>
+      <a id="--(GenTraversableOnce[String]):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name" title="gt4s: $minus$minus">--</span><span class="params">(<span name="xs">xs: <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[String]</span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name" title="gt4s: $minus$minus">--</span><span class="params">(<span name="xs">xs: <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[String]</span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Subtractable</dd></dl></div>
@@ -412,14 +470,14 @@ needed, could be abusive).
               
         </dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#collect" data-isabs="false">
-      <a id="collect[B, That](PartialFunction[(String, String), B])(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="collect[B, That](PartialFunction[(String, String), B])(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">collect</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="pf">pf: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[(String, String), B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name">collect</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="pf">pf: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[(String, String), B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -435,6 +493,18 @@ needed, could be abusive).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.immutable.Iterable#companion" data-isabs="false">
+      <a id="companion:GenericCompanion[Iterable]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">companion</span><span class="result">: <span name="scala.collection.generic.GenericCompanion" class="extype">GenericCompanion</span>[<span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Iterable → Iterable → GenIterable → Traversable → Traversable → GenTraversable → GenericTraversableTemplate</dd></dl></div>
     </li><li visbl="pub" name="scala.Function1#compose" data-isabs="false">
       <a id="compose[A]((A) ⇒ String):(A) ⇒ String"></a>
       <h4 class="signature">
@@ -532,53 +602,53 @@ needed, could be abusive).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → GenMapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#drop" data-isabs="false">
-      <a id="drop(Int):Map[String, String]"></a>
+      <a id="drop(Int):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">drop</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">drop</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#dropRight" data-isabs="false">
-      <a id="dropRight(Int):Map[String, String]"></a>
+      <a id="dropRight(Int):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dropRight</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">dropRight</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#dropWhile" data-isabs="false">
-      <a id="dropWhile(((String, String)) ⇒ Boolean):Map[String, String]"></a>
+      <a id="dropWhile(((String, String)) ⇒ Boolean):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dropWhile</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">dropWhile</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#empty" data-isabs="false">
-      <a id="empty:Map[String, String]"></a>
+      <a id="empty:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">empty</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String]</span>
+        <span class="name">empty</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → Map → Map → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -616,18 +686,18 @@ needed, could be abusive).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#filter" data-isabs="false">
-      <a id="filter(((String, String)) ⇒ Boolean):Map[String, String]"></a>
+      <a id="filter(((String, String)) ⇒ Boolean):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">filter</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">filter</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#filterKeys" data-isabs="false">
+    </li><li visbl="pub" name="scala.collection.immutable.MapLike#filterKeys" data-isabs="false">
       <a id="filterKeys((String) ⇒ Boolean):Map[String, String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -635,19 +705,19 @@ needed, could be abusive).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">filterKeys</span><span class="params">(<span name="p">p: (String) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.collection.Map" class="extype">Map</span>[String, String]</span>
+        <span class="name">filterKeys</span><span class="params">(<span name="p">p: (String) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.MapLike#filterNot" data-isabs="false">
-      <a id="filterNot(((String, String)) ⇒ Boolean):Map[String, String]"></a>
+      <a id="filterNot(((String, String)) ⇒ Boolean):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">filterNot</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">filterNot</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → TraversableLike → GenTraversableLike</dd></dl></div>
@@ -679,14 +749,14 @@ needed, could be abusive).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#flatMap" data-isabs="false">
-      <a id="flatMap[B, That](((String, String)) ⇒ GenTraversableOnce[B])(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="flatMap[B, That](((String, String)) ⇒ GenTraversableOnce[B])(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((String, String)) ⇒ <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((String, String)) ⇒ <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike → FilterMonadic</dd></dl></div>
@@ -750,30 +820,18 @@ needed, could be abusive).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike → TraversableOnce → GenTraversableOnce → FilterMonadic</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#get" data-isabs="false">
-      <a id="get(String):Option[String]"></a>
+    </li><li visbl="pub" name="scala.collection.generic.GenericTraversableTemplate#genericBuilder" data-isabs="false">
+      <a id="genericBuilder[B]:Builder[B, Iterable[B]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
+        <span class="name">genericBuilder</span><span class="tparams">[<span name="B">B</span>]</span><span class="result">: <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[B, <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[B]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Get value</p><div class="fullcomment"><div class="comment cmt"><p>Get value</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → GenMapLike</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getAll" data-isabs="false">
-      <a id="getAll(String):Iterable[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getAll</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: Iterable[String]</span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenericTraversableTemplate</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getBoolean" data-isabs="false">
       <a id="getBoolean(String):Option[Boolean]"></a>
       <h4 class="signature">
@@ -787,14 +845,14 @@ needed, could be abusive).
       </h4>
       <p class="shortcomment cmt">Get Boolean value.</p><div class="fullcomment"><div class="comment cmt"><p>Get Boolean value.  True is &quot;1&quot; or &quot;true&quot;, false is all other values.</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getBooleanOrElse" data-isabs="false">
-      <a id="getBooleanOrElse(String,Boolean):Boolean"></a>
+      <a id="getBooleanOrElse(String,⇒ Boolean):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getBooleanOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">getBooleanOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get Boolean value or default.</p><div class="fullcomment"><div class="comment cmt"><p>Get Boolean value or default. Equivalent to getBoolean(name).getOrElse(default).</p></div></div>
@@ -823,14 +881,14 @@ needed, could be abusive).
       </h4>
       <p class="shortcomment cmt">Get Int value.</p><div class="fullcomment"><div class="comment cmt"><p>Get Int value.  Uses forgiving StringUtil.toSomeInt to parse.</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getIntOrElse" data-isabs="false">
-      <a id="getIntOrElse(String,Int):Int"></a>
+      <a id="getIntOrElse(String,⇒ Int):Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getIntOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+        <span class="name">getIntOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: ⇒ <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get Int value or default.</p><div class="fullcomment"><div class="comment cmt"><p>Get Int value or default.  Equivalent to getInt(name).getOrElse(default).</p></div></div>
@@ -847,26 +905,26 @@ needed, could be abusive).
       </h4>
       <p class="shortcomment cmt">Get Long value.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long value.  Uses forgiving StringUtil.toLong to parse.</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getLongOrElse" data-isabs="false">
-      <a id="getLongOrElse(String,Long):Long"></a>
+      <a id="getLongOrElse(String,⇒ Long):Long"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getLongOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
+        <span class="name">getLongOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: ⇒ <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Long" class="extype">Long</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get Long value or default.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long value or default.  Equivalent to getLong(name).getOrElse(default).</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getOrElse" data-isabs="false">
-      <a id="getOrElse(String,String):String"></a>
+      <a id="getOrElse(String,⇒ String):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: String</span>)</span><span class="result">: String</span>
+        <span class="name">getOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: ⇒ String</span>)</span><span class="result">: String</span>
       </span>
       </h4>
       
@@ -895,38 +953,38 @@ needed, could be abusive).
       </h4>
       <p class="shortcomment cmt">Get Short value.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short value.  Uses forgiving StringUtil.toSomeShort to parse.</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#getShortOrElse" data-isabs="false">
-      <a id="getShortOrElse(String,Short):Short"></a>
+      <a id="getShortOrElse(String,⇒ Short):Short"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getShortOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
+        <span class="name">getShortOrElse</span><span class="params">(<span name="name">name: String</span>, <span name="default">default: ⇒ <span name="scala.Short" class="extype">Short</span></span>)</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get Short value or default.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short value or default.  Equivalent to getShort(name).getOrElse(default).</p></div></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#groupBy" data-isabs="false">
-      <a id="groupBy[K](((String, String)) ⇒ K):Map[K, Map[String, String]]"></a>
+      <a id="groupBy[K](((String, String)) ⇒ K):Map[K, ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">groupBy</span><span class="tparams">[<span name="K">K</span>]</span><span class="params">(<span name="f">f: ((String, String)) ⇒ K</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[K, Map[String, String]]</span>
+        <span class="name">groupBy</span><span class="tparams">[<span name="K">K</span>]</span><span class="params">(<span name="f">f: ((String, String)) ⇒ K</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[K, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#grouped" data-isabs="false">
-      <a id="grouped(Int):Iterator[Map[String, String]]"></a>
+      <a id="grouped(Int):Iterator[ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">grouped</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Map[String, String]]</span>
+        <span class="name">grouped</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
@@ -979,26 +1037,26 @@ needed, could be abusive).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#init" data-isabs="false">
-      <a id="init:Map[String, String]"></a>
+      <a id="init:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">init</span><span class="result">: Map[String, String]</span>
+        <span class="name">init</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#inits" data-isabs="false">
-      <a id="inits:Iterator[Map[String, String]]"></a>
+      <a id="inits:Iterator[ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">inits</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Map[String, String]]</span>
+        <span class="name">inits</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
@@ -1050,33 +1108,7 @@ needed, could be abusive).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenTraversableLike → GenTraversableOnce</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#isValid" data-isabs="false">
-      <a id="isValid:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isValid</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Check if there was a parse error.</p><div class="fullcomment"><div class="comment cmt"><p>Check if there was a parse error.  On a parse error, the parameters
-are treated as empty (versus throwing a parse exception).
-</p></div></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#iterator" data-isabs="false">
-      <a id="iterator:Iterator[(String, String)]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">iterator</span><span class="result">: Iterator[(String, String)]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → IterableLike → GenIterableLike</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#keySet" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#keySet" data-isabs="false">
       <a id="keySet:Set[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1084,10 +1116,10 @@ are treated as empty (versus throwing a parse exception).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">keySet</span><span class="result">: <span name="scala.collection.Set" class="extype">Set</span>[String]</span>
+        <span class="name">keySet</span><span class="result">: Set[String]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.MapLike#keys" data-isabs="false">
       <a id="keys:Iterable[String]"></a>
       <h4 class="signature">
@@ -1103,7 +1135,7 @@ are treated as empty (versus throwing a parse exception).
                 <span class="name">@migration</span>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.8.0)</i> <code>keys</code> returns <code>Iterable[A]</code> rather than <code>Iterator[A]</code>.</p></dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#keysIterator" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#keysIterator" data-isabs="false">
       <a id="keysIterator:Iterator[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1111,10 +1143,10 @@ are treated as empty (versus throwing a parse exception).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">keysIterator</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[String]</span>
+        <span class="name">keysIterator</span><span class="result">: Iterator[String]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#last" data-isabs="false">
       <a id="last:(String, String)"></a>
       <h4 class="signature">
@@ -1152,18 +1184,18 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#map" data-isabs="false">
-      <a id="map[B, That](((String, String)) ⇒ B)(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="map[B, That](((String, String)) ⇒ B)(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((String, String)) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name">map</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((String, String)) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike → FilterMonadic</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#mapValues" data-isabs="false">
+    </li><li visbl="pub" name="scala.collection.immutable.MapLike#mapValues" data-isabs="false">
       <a id="mapValues[C]((String) ⇒ C):Map[String, C]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1171,10 +1203,10 @@ are treated as empty (versus throwing a parse exception).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mapValues</span><span class="tparams">[<span name="C">C</span>]</span><span class="params">(<span name="f">f: (String) ⇒ C</span>)</span><span class="result">: <span name="scala.collection.Map" class="extype">Map</span>[String, C]</span>
+        <span class="name">mapValues</span><span class="tparams">[<span name="C">C</span>]</span><span class="params">(<span name="f">f: (String) ⇒ C</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, C]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableOnce#max" data-isabs="false">
       <a id="max[B&gt;:(String, String)](Ordering[B]):(String, String)"></a>
       <h4 class="signature">
@@ -1272,14 +1304,14 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="prt" name="scala.collection.MapLike#newBuilder" data-isabs="false">
-      <a id="newBuilder:Builder[(String, String), Map[String, String]]"></a>
+      <a id="newBuilder:Builder[(String, String), ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newBuilder</span><span class="result">: <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[(String, String), Map[String, String]]</span>
+        <span class="name">newBuilder</span><span class="result">: <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>MapLike → TraversableLike → HasNewBuilder</dd></dl></div>
@@ -1339,11 +1371,11 @@ are treated as empty (versus throwing a parse exception).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">par</span><span class="result">: <span name="scala.collection.parallel.ParMap" class="extype">ParMap</span>[String, String]</span>
+        <span class="name">par</span><span class="result">: <span name="scala.collection.parallel.immutable.ParMap" class="extype">ParMap</span>[String, String]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Parallelizable</dd></dl></div>
-    </li><li visbl="prt" name="scala.collection.MapLike#parCombiner" data-isabs="false">
+    </li><li visbl="prt" name="scala.collection.immutable.MapLike#parCombiner" data-isabs="false">
       <a id="parCombiner:Combiner[(String, String), ParMap[String, String]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1351,19 +1383,19 @@ are treated as empty (versus throwing a parse exception).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parCombiner</span><span class="result">: <span name="scala.collection.parallel.Combiner" class="extype">Combiner</span>[(String, String), <span name="scala.collection.parallel.ParMap" class="extype">ParMap</span>[String, String]]</span>
+        <span class="name">parCombiner</span><span class="result">: <span name="scala.collection.parallel.Combiner" class="extype">Combiner</span>[(String, String), <span name="scala.collection.parallel.immutable.ParMap" class="extype">ParMap</span>[String, String]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>MapLike → TraversableLike → Parallelizable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>MapLike → MapLike → TraversableLike → Parallelizable</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#partition" data-isabs="false">
-      <a id="partition(((String, String)) ⇒ Boolean):(Map[String, String], Map[String, String])"></a>
+      <a id="partition(((String, String)) ⇒ Boolean):(ParamMap, ParamMap)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">partition</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: (Map[String, String], Map[String, String])</span>
+        <span class="name">partition</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: (<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>)</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1452,29 +1484,17 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#repr" data-isabs="false">
-      <a id="repr:Map[String, String]"></a>
+      <a id="repr:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">repr</span><span class="result">: Map[String, String]</span>
+        <span class="name">repr</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#request" data-isabs="false">
-      <a id="request:Request"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">request</span><span class="result">: <a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="prt" name="scala.collection.TraversableOnce#reversed" data-isabs="false">
       <a id="reversed:List[(String, String)]"></a>
       <h4 class="signature">
@@ -1500,45 +1520,45 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#scan" data-isabs="false">
-      <a id="scan[B&gt;:(String, String), That](B)((B, B) ⇒ B)(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="scan[B&gt;:(String, String), That](B)((B, B) ⇒ B)(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, B) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cbf">cbf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name">scan</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, B) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cbf">cbf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#scanLeft" data-isabs="false">
-      <a id="scanLeft[B, That](B)((B, (String, String)) ⇒ B)(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="scanLeft[B, That](B)((B, (String, String)) ⇒ B)(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scanLeft</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, (String, String)) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name">scanLeft</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, (String, String)) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#scanRight" data-isabs="false">
-      <a id="scanRight[B, That](B)(((String, String), B) ⇒ B)(CanBuildFrom[Map[String, String], B, That]):That"></a>
+      <a id="scanRight[B, That](B)(((String, String), B) ⇒ B)(CanBuildFrom[ParamMap, B, That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scanRight</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: ((String, String), B) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], B, That]</span>)</span><span class="result">: That</span>
+        <span class="name">scanRight</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: ((String, String), B) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, B, That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd><dt>Annotations</dt><dd>
                 <span class="name">@migration</span>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.9.0)</i> The behavior of <code>scanRight</code> has changed. The previous behavior can be reproduced with scanRight.reverse.</p></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap#seq" data-isabs="false">
+    </li><li visbl="pub" name="scala.collection.immutable.Map#seq" data-isabs="false">
       <a id="seq:Map[String, String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1549,7 +1569,7 @@ are treated as empty (versus throwing a parse exception).
         <span class="name">seq</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → GenMapLike → Parallelizable → TraversableOnce → GenTraversableOnce</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Map → Map → GenMap → GenMapLike → Iterable → Iterable → GenIterable → Traversable → Traversable → GenTraversable → Parallelizable → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableOnce#size" data-isabs="false">
       <a id="size:Int"></a>
       <h4 class="signature">
@@ -1563,62 +1583,62 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#slice" data-isabs="false">
-      <a id="slice(Int,Int):Map[String, String]"></a>
+      <a id="slice(Int,Int):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">slice</span><span class="params">(<span name="from">from: <span name="scala.Int" class="extype">Int</span></span>, <span name="until">until: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">slice</span><span class="params">(<span name="from">from: <span name="scala.Int" class="extype">Int</span></span>, <span name="until">until: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#sliding" data-isabs="false">
-      <a id="sliding[B&gt;:(String, String)](Int,Int):Iterator[Map[String, String]]"></a>
+      <a id="sliding[B&gt;:(String, String)](Int,Int):Iterator[ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sliding</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>]</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>, <span name="step">step: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Map[String, String]]</span>
+        <span class="name">sliding</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>]</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>, <span name="step">step: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#sliding" data-isabs="false">
-      <a id="sliding[B&gt;:(String, String)](Int):Iterator[Map[String, String]]"></a>
+      <a id="sliding[B&gt;:(String, String)](Int):Iterator[ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sliding</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>]</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Map[String, String]]</span>
+        <span class="name">sliding</span><span class="tparams">[<span name="B">B &gt;: (String, String)</span>]</span><span class="params">(<span name="size">size: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#span" data-isabs="false">
-      <a id="span(((String, String)) ⇒ Boolean):(Map[String, String], Map[String, String])"></a>
+      <a id="span(((String, String)) ⇒ Boolean):(ParamMap, ParamMap)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">span</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: (Map[String, String], Map[String, String])</span>
+        <span class="name">span</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: (<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>)</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#splitAt" data-isabs="false">
-      <a id="splitAt(Int):(Map[String, String], Map[String, String])"></a>
+      <a id="splitAt(Int):(ParamMap, ParamMap)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">splitAt</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: (Map[String, String], Map[String, String])</span>
+        <span class="name">splitAt</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: (<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>)</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1659,62 +1679,62 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#tail" data-isabs="false">
-      <a id="tail:Map[String, String]"></a>
+      <a id="tail:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tail</span><span class="result">: Map[String, String]</span>
+        <span class="name">tail</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#tails" data-isabs="false">
-      <a id="tails:Iterator[Map[String, String]]"></a>
+      <a id="tails:Iterator[ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tails</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Map[String, String]]</span>
+        <span class="name">tails</span><span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#take" data-isabs="false">
-      <a id="take(Int):Map[String, String]"></a>
+      <a id="take(Int):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">take</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">take</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#takeRight" data-isabs="false">
-      <a id="takeRight(Int):Map[String, String]"></a>
+      <a id="takeRight(Int):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">takeRight</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">takeRight</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#takeWhile" data-isabs="false">
-      <a id="takeWhile(((String, String)) ⇒ Boolean):Map[String, String]"></a>
+      <a id="takeWhile(((String, String)) ⇒ Boolean):ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">takeWhile</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: Map[String, String]</span>
+        <span class="name">takeWhile</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1755,14 +1775,14 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="prt" name="scala.collection.IterableLike#toCollection" data-isabs="false">
-      <a id="toCollection(Map[String, String]):Iterable[(String, String)]"></a>
+      <a id="toCollection(ParamMap):Iterable[(String, String)]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toCollection</span><span class="params">(<span name="repr">repr: Map[String, String]</span>)</span><span class="result">: <span name="scala.collection.Iterable" class="extype">Iterable</span>[(String, String)]</span>
+        <span class="name">toCollection</span><span class="params">(<span name="repr">repr: <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a></span>)</span><span class="result">: <span name="scala.collection.Iterable" class="extype">Iterable</span>[(String, String)]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>IterableLike → TraversableLike</dd></dl></div>
@@ -1814,7 +1834,7 @@ are treated as empty (versus throwing a parse exception).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.TraversableOnce#toMap" data-isabs="false">
+    </li><li visbl="pub" name="scala.collection.immutable.Map#toMap" data-isabs="false">
       <a id="toMap[T, U](&lt;:&lt;[(String, String), (T, U)]):Map[T, U]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1825,7 +1845,7 @@ are treated as empty (versus throwing a parse exception).
         <span class="name">toMap</span><span class="tparams">[<span name="T">T</span>, <span name="U">U</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[(String, String), (T, U)]</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[T, U]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Map → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.MapLike#toSeq" data-isabs="false">
       <a id="toSeq:Seq[(String, String)]"></a>
       <h4 class="signature">
@@ -1873,7 +1893,7 @@ are treated as empty (versus throwing a parse exception).
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → TraversableLike → Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a> → MapLike → Function1 → TraversableLike → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.TraversableLike#toTraversable" data-isabs="false">
       <a id="toTraversable:Traversable[(String, String)]"></a>
       <h4 class="signature">
@@ -1886,7 +1906,58 @@ are treated as empty (versus throwing a parse exception).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.MapLike#updated" data-isabs="false">
+    </li><li visbl="pub" name="scala.collection.immutable.MapLike#transform" data-isabs="false">
+      <a id="transform[C, That]((String, String) ⇒ C)(CanBuildFrom[ParamMap, (String, C), That]):That"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transform</span><span class="tparams">[<span name="C">C</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: (String, String) ⇒ C</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, (String, C), That]</span>)</span><span class="result">: That</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.generic.GenericTraversableTemplate#transpose" data-isabs="false">
+      <a id="transpose[B](((String, String)) ⇒ GenTraversableOnce[B]):Iterable[Iterable[B]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transpose</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="asTraversable">asTraversable: ((String, String)) ⇒ <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[B]</span>)</span><span class="result">: <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[<span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[B]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenericTraversableTemplate</dd><dt>Annotations</dt><dd>
+                <span class="name">@migration</span>
+              
+        </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.9.0)</i> <code>transpose</code> throws an <code>IllegalArgumentException</code> if collections are not uniformly sized.</p></dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.generic.GenericTraversableTemplate#unzip" data-isabs="false">
+      <a id="unzip[A1, A2](((String, String)) ⇒ (A1, A2)):(Iterable[A1], Iterable[A2])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unzip</span><span class="tparams">[<span name="A1">A1</span>, <span name="A2">A2</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="asPair">asPair: ((String, String)) ⇒ (A1, A2)</span>)</span><span class="result">: (<span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[A1], <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[A2])</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenericTraversableTemplate</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.generic.GenericTraversableTemplate#unzip3" data-isabs="false">
+      <a id="unzip3[A1, A2, A3](((String, String)) ⇒ (A1, A2, A3)):(Iterable[A1], Iterable[A2], Iterable[A3])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unzip3</span><span class="tparams">[<span name="A1">A1</span>, <span name="A2">A2</span>, <span name="A3">A3</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="asTriple">asTriple: ((String, String)) ⇒ (A1, A2, A3)</span>)</span><span class="result">: (<span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[A1], <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[A2], <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[A3])</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenericTraversableTemplate</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.immutable.MapLike#updated" data-isabs="false">
       <a id="updated[B1&gt;:String](String,B1):Map[String, B1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1894,10 +1965,10 @@ are treated as empty (versus throwing a parse exception).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">updated</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: B1</span>)</span><span class="result">: <span name="scala.collection.Map" class="extype">Map</span>[String, B1]</span>
+        <span class="name">updated</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: B1</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, B1]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.MapLike#values" data-isabs="false">
       <a id="values:Iterable[String]"></a>
       <h4 class="signature">
@@ -1926,26 +1997,26 @@ are treated as empty (versus throwing a parse exception).
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#view" data-isabs="false">
-      <a id="view(Int,Int):IterableView[(String, String), Map[String, String]]"></a>
+      <a id="view(Int,Int):IterableView[(String, String), ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">view</span><span class="params">(<span name="from">from: <span name="scala.Int" class="extype">Int</span></span>, <span name="until">until: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.IterableView" class="extype">IterableView</span>[(String, String), Map[String, String]]</span>
+        <span class="name">view</span><span class="params">(<span name="from">from: <span name="scala.Int" class="extype">Int</span></span>, <span name="until">until: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.collection.IterableView" class="extype">IterableView</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#view" data-isabs="false">
-      <a id="view:IterableView[(String, String), Map[String, String]]"></a>
+      <a id="view:IterableView[(String, String), ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">view</span><span class="result">: <span name="scala.collection.IterableView" class="extype">IterableView</span>[(String, String), Map[String, String]]</span>
+        <span class="name">view</span><span class="result">: <span name="scala.collection.IterableView" class="extype">IterableView</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike</dd></dl></div>
@@ -1994,51 +2065,75 @@ are treated as empty (versus throwing a parse exception).
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="scala.collection.TraversableLike#withFilter" data-isabs="false">
-      <a id="withFilter(((String, String)) ⇒ Boolean):FilterMonadic[(String, String), Map[String, String]]"></a>
+    </li><li visbl="pub" name="scala.collection.immutable.Map#withDefault" data-isabs="false">
+      <a id="withDefault[B1&gt;:String]((String) ⇒ B1):Map[String, B1]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withFilter</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[(String, String), Map[String, String]]</span>
+        <span class="name">withDefault</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="d">d: (String) ⇒ B1</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, B1]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Map</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.immutable.Map#withDefaultValue" data-isabs="false">
+      <a id="withDefaultValue[B1&gt;:String](B1):Map[String, B1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withDefaultValue</span><span class="tparams">[<span name="B1">B1 &gt;: String</span>]</span><span class="params">(<span name="d">d: B1</span>)</span><span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, B1]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Map</dd></dl></div>
+    </li><li visbl="pub" name="scala.collection.TraversableLike#withFilter" data-isabs="false">
+      <a id="withFilter(((String, String)) ⇒ Boolean):FilterMonadic[(String, String), ParamMap]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withFilter</span><span class="params">(<span name="p">p: ((String, String)) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → FilterMonadic</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#zip" data-isabs="false">
-      <a id="zip[A1&gt;:(String, String), B, That](GenIterable[B])(CanBuildFrom[Map[String, String], (A1, B), That]):That"></a>
+      <a id="zip[A1&gt;:(String, String), B, That](GenIterable[B])(CanBuildFrom[ParamMap, (A1, B), That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zip</span><span class="tparams">[<span name="A1">A1 &gt;: (String, String)</span>, <span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.GenIterable" class="extype">GenIterable</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], (A1, B), That]</span>)</span><span class="result">: That</span>
+        <span class="name">zip</span><span class="tparams">[<span name="A1">A1 &gt;: (String, String)</span>, <span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.GenIterable" class="extype">GenIterable</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, (A1, B), That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#zipAll" data-isabs="false">
-      <a id="zipAll[B, A1&gt;:(String, String), That](GenIterable[B],A1,B)(CanBuildFrom[Map[String, String], (A1, B), That]):That"></a>
+      <a id="zipAll[B, A1&gt;:(String, String), That](GenIterable[B],A1,B)(CanBuildFrom[ParamMap, (A1, B), That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zipAll</span><span class="tparams">[<span name="B">B</span>, <span name="A1">A1 &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.GenIterable" class="extype">GenIterable</span>[B]</span>, <span name="thisElem">thisElem: A1</span>, <span name="thatElem">thatElem: B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], (A1, B), That]</span>)</span><span class="result">: That</span>
+        <span class="name">zipAll</span><span class="tparams">[<span name="B">B</span>, <span name="A1">A1 &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <span name="scala.collection.GenIterable" class="extype">GenIterable</span>[B]</span>, <span name="thisElem">thisElem: A1</span>, <span name="thatElem">thatElem: B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, (A1, B), That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#zipWithIndex" data-isabs="false">
-      <a id="zipWithIndex[A1&gt;:(String, String), That](CanBuildFrom[Map[String, String], (A1, Int), That]):That"></a>
+      <a id="zipWithIndex[A1&gt;:(String, String), That](CanBuildFrom[ParamMap, (A1, Int), That]):That"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zipWithIndex</span><span class="tparams">[<span name="A1">A1 &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Map[String, String], (A1, <span name="scala.Int" class="extype">Int</span>), That]</span>)</span><span class="result">: That</span>
+        <span class="name">zipWithIndex</span><span class="tparams">[<span name="A1">A1 &gt;: (String, String)</span>, <span name="That">That</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[<a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>, (A1, <span name="scala.Int" class="extype">Int</span>), That]</span>)</span><span class="result">: That</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
@@ -2108,14 +2203,14 @@ are treated as empty (versus throwing a parse exception).
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.8.0)</i> use <code>mapValues' instead</code></p></dd></dl></div>
     </li><li visbl="pub" name="scala.collection.IterableLike#projection" data-isabs="false">
-      <a id="projection:IterableView[(String, String), Map[String, String]]"></a>
+      <a id="projection:IterableView[(String, String), ParamMap]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2.8.0) use view' instead">projection</span><span class="result">: <span name="scala.collection.IterableView" class="extype">IterableView</span>[(String, String), Map[String, String]]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2.8.0) use view' instead">projection</span><span class="result">: <span name="scala.collection.IterableView" class="extype">IterableView</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd><dt>Annotations</dt><dd>
@@ -2127,36 +2222,60 @@ are treated as empty (versus throwing a parse exception).
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.collection.MapLike" class="parent">
-              <h3>Inherited from <span name="scala.collection.MapLike" class="extype">MapLike</span>[String, String, Map[String, String]]</h3>
+        <div name="scala.collection.immutable.Map" class="parent">
+              <h3>Inherited from <span name="scala.collection.immutable.Map" class="extype">Map</span>[String, String]</h3>
+            </div><div name="scala.collection.immutable.MapLike" class="parent">
+              <h3>Inherited from <span name="scala.collection.immutable.MapLike" class="extype">MapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
+            </div><div name="scala.collection.Map" class="parent">
+              <h3>Inherited from <span name="scala.collection.Map" class="extype">Map</span>[String, String]</h3>
+            </div><div name="scala.collection.MapLike" class="parent">
+              <h3>Inherited from <span name="scala.collection.MapLike" class="extype">MapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
             </div><div name="scala.collection.generic.Subtractable" class="parent">
-              <h3>Inherited from <span name="scala.collection.generic.Subtractable" class="extype">Subtractable</span>[String, Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.generic.Subtractable" class="extype">Subtractable</span>[String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
+            </div><div name="scala.PartialFunction" class="parent">
+              <h3>Inherited from <span name="scala.PartialFunction" class="extype">PartialFunction</span>[String, String]</h3>
+            </div><div name="scala.Function1" class="parent">
+              <h3>Inherited from (String) ⇒ String</h3>
+            </div><div name="scala.collection.GenMap" class="parent">
+              <h3>Inherited from <span name="scala.collection.GenMap" class="extype">GenMap</span>[String, String]</h3>
             </div><div name="scala.collection.GenMapLike" class="parent">
-              <h3>Inherited from <span name="scala.collection.GenMapLike" class="extype">GenMapLike</span>[String, String, Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.GenMapLike" class="extype">GenMapLike</span>[String, String, <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
+            </div><div name="scala.collection.immutable.Iterable" class="parent">
+              <h3>Inherited from <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>[(String, String)]</h3>
+            </div><div name="scala.collection.Iterable" class="parent">
+              <h3>Inherited from <span name="scala.collection.Iterable" class="extype">Iterable</span>[(String, String)]</h3>
             </div><div name="scala.collection.IterableLike" class="parent">
-              <h3>Inherited from <span name="scala.collection.IterableLike" class="extype">IterableLike</span>[(String, String), Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.IterableLike" class="extype">IterableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
+            </div><div name="scala.Equals" class="parent">
+              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="scala.collection.GenIterable" class="parent">
+              <h3>Inherited from <span name="scala.collection.GenIterable" class="extype">GenIterable</span>[(String, String)]</h3>
             </div><div name="scala.collection.GenIterableLike" class="parent">
-              <h3>Inherited from <span name="scala.collection.GenIterableLike" class="extype">GenIterableLike</span>[(String, String), Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.GenIterableLike" class="extype">GenIterableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
+            </div><div name="scala.collection.immutable.Traversable" class="parent">
+              <h3>Inherited from <span name="scala.collection.immutable.Traversable" class="extype">Traversable</span>[(String, String)]</h3>
+            </div><div name="scala.Immutable" class="parent">
+              <h3>Inherited from <span name="scala.Immutable" class="extype">Immutable</span></h3>
+            </div><div name="scala.collection.Traversable" class="parent">
+              <h3>Inherited from <span name="scala.collection.Traversable" class="extype">Traversable</span>[(String, String)]</h3>
+            </div><div name="scala.collection.GenTraversable" class="parent">
+              <h3>Inherited from <span name="scala.collection.GenTraversable" class="extype">GenTraversable</span>[(String, String)]</h3>
+            </div><div name="scala.collection.generic.GenericTraversableTemplate" class="parent">
+              <h3>Inherited from <span name="scala.collection.generic.GenericTraversableTemplate" class="extype">GenericTraversableTemplate</span>[(String, String), <span name="scala.collection.immutable.Iterable" class="extype">Iterable</span>]</h3>
             </div><div name="scala.collection.TraversableLike" class="parent">
-              <h3>Inherited from <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[(String, String), Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
             </div><div name="scala.collection.GenTraversableLike" class="parent">
-              <h3>Inherited from <span name="scala.collection.GenTraversableLike" class="extype">GenTraversableLike</span>[(String, String), Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.GenTraversableLike" class="extype">GenTraversableLike</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
             </div><div name="scala.collection.Parallelizable" class="parent">
-              <h3>Inherited from <span name="scala.collection.Parallelizable" class="extype">Parallelizable</span>[(String, String), <span name="scala.collection.parallel.ParMap" class="extype">ParMap</span>[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.Parallelizable" class="extype">Parallelizable</span>[(String, String), <span name="scala.collection.parallel.immutable.ParMap" class="extype">ParMap</span>[String, String]]</h3>
             </div><div name="scala.collection.TraversableOnce" class="parent">
               <h3>Inherited from <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[(String, String)]</h3>
             </div><div name="scala.collection.GenTraversableOnce" class="parent">
               <h3>Inherited from <span name="scala.collection.GenTraversableOnce" class="extype">GenTraversableOnce</span>[(String, String)]</h3>
             </div><div name="scala.collection.generic.FilterMonadic" class="parent">
-              <h3>Inherited from <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[(String, String), Map[String, String]]</h3>
+              <h3>Inherited from <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
             </div><div name="scala.collection.generic.HasNewBuilder" class="parent">
-              <h3>Inherited from <span name="scala.collection.generic.HasNewBuilder" class="extype">HasNewBuilder</span>[(String, String), Map[String, String]]</h3>
-            </div><div name="scala.Equals" class="parent">
-              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
-            </div><div name="scala.PartialFunction" class="parent">
-              <h3>Inherited from <span name="scala.PartialFunction" class="extype">PartialFunction</span>[String, String]</h3>
-            </div><div name="scala.Function1" class="parent">
-              <h3>Inherited from (String) ⇒ String</h3>
+              <h3>Inherited from <span name="scala.collection.generic.HasNewBuilder" class="extype">HasNewBuilder</span>[(String, String), <a name="com.twitter.finagle.http.ParamMap" class="extype" href="">ParamMap</a>]</h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

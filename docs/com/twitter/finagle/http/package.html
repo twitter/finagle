@@ -108,18 +108,18 @@
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.HeaderMap" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.http.HeaderMap" data-isabs="true">
       <a id="HeaderMap:HeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="result"> extends MapLike[String, String, Map[String, String]]</span>
+        <a href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="result"> extends Map[String, String] with MapLike[String, String, HeaderMap]</span>
       </span>
       </h4>
-      <p class="comment cmt">Adapt headers of an HttpMessage to a mutable Map.</p>
+      <p class="comment cmt">Message headers map.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.Http" data-isabs="false">
       <a id="Http:Http"></a>
       <h4 class="signature">
@@ -180,6 +180,30 @@
       </span>
       </h4>
       <p class="comment cmt">Adds tracing annotations for each http request we receive.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.MapHeaderMap" data-isabs="false">
+      <a id="MapHeaderMap:MapHeaderMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MapHeaderMap.html"><span class="name">MapHeaderMap</span></a><span class="result"> extends HeaderMap</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Mutable-Map-backed HeaderMap</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.MapParamMap" data-isabs="false">
+      <a id="MapParamMap:MapParamMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MapParamMap.html"><span class="name">MapParamMap</span></a><span class="result"> extends ParamMap</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Map-backed ParamMap.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message" data-isabs="true">
       <a id="Message:Message"></a>
       <h4 class="signature">
@@ -192,6 +216,18 @@
       </span>
       </h4>
       <p class="comment cmt">Rich HttpMessage</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.MessageHeaderMap" data-isabs="false">
+      <a id="MessageHeaderMap:MessageHeaderMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MessageHeaderMap.html"><span class="name">MessageHeaderMap</span></a><span class="result"> extends HeaderMap</span>
+      </span>
+      </h4>
+      <p class="comment cmt">HttpMessage-backed HeaderMap.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.MockResponse" data-isabs="false">
       <a id="MockResponse:MockResponse"></a>
       <h4 class="signature">
@@ -204,18 +240,18 @@
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.http.ParamMap" data-isabs="true">
       <a id="ParamMap:ParamMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ParamMap.html"><span class="name">ParamMap</span></a><span class="result"> extends MapLike[String, String, Map[String, String]]</span>
+        <a href="ParamMap.html"><span class="name">ParamMap</span></a><span class="result"> extends Map[String, String] with MapLike[String, String, ParamMap]</span>
       </span>
       </h4>
-      <p class="comment cmt">Adapt params of a Request to a mutable Map.</p>
+      <p class="comment cmt">Request parameter map.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.ProxyCredentials" data-isabs="false">
       <a id="ProxyCredentials:ProxyCredentials"></a>
       <h4 class="signature">
@@ -252,6 +288,18 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.http.RequestParamMap" data-isabs="false">
+      <a id="RequestParamMap:RequestParamMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestParamMap.html"><span class="name">RequestParamMap</span></a><span class="result"> extends ParamMap</span>
+      </span>
+      </h4>
+      <p class="comment cmt">HttpRequest-backed param map.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.RequestProxy" data-isabs="true">
       <a id="RequestProxy:RequestProxy"></a>
       <h4 class="signature">
@@ -332,6 +380,30 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.http.EmptyParamMap" data-isabs="false">
+      <a id="EmptyParamMap:EmptyParamMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EmptyParamMap$.html"><span class="name">EmptyParamMap</span></a><span class="result"> extends ParamMap</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Empty ParamMap</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.HeaderMap" data-isabs="false">
+      <a id="HeaderMap:HeaderMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HeaderMap$.html"><span class="name">HeaderMap</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.http.Http" data-isabs="false">
       <a id="Http:Http"></a>
       <h4 class="signature">
@@ -366,6 +438,30 @@
       </span>
       <span class="symbol">
         <a href="HttpTracing$.html"><span class="name">HttpTracing</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.MapHeaderMap" data-isabs="false">
+      <a id="MapHeaderMap:MapHeaderMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MapHeaderMap$.html"><span class="name">MapHeaderMap</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.MapParamMap" data-isabs="false">
+      <a id="MapParamMap:MapParamMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MapParamMap$.html"><span class="name">MapParamMap</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

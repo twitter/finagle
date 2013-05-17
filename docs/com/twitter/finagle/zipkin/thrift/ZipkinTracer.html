@@ -25,13 +25,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ZipkinTracer</span><span class="result"> extends <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a></span>
+        <span class="name">ZipkinTracer</span><span class="result"> extends <a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Zipkin tracer that supports sampling. Will pass through a small subset of the records.</p></div><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a>, <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" class="in"><span>ZipkinTracer</span></li><li name="com.twitter.finagle.tracing.Tracer" class="in"><span>Tracer</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" class="in"><span>ZipkinTracer</span></li><li name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="in"><span>SamplingTracer</span></li><li name="com.twitter.finagle.tracing.Tracer" class="in"><span>Tracer</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -65,11 +65,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ZipkinTracer</span><span class="params">(<span name="underlyingTracer">underlyingTracer: <span name="com.twitter.finagle.zipkin.thrift.RawZipkinTracer" class="extype">RawZipkinTracer</span></span>, <span name="initialSampleRate">initialSampleRate: <span name="scala.Float" class="extype">Float</span></span>)</span>
+        <span class="name">ZipkinTracer</span><span class="params">(<span name="tracer">tracer: <span name="com.twitter.finagle.zipkin.thrift.RawZipkinTracer" class="extype">RawZipkinTracer</span></span>, <span name="initialRate">initialRate: <span name="scala.Float" class="extype">Float</span></span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlyingTracer</dt><dd class="cmt"><p>Underlying tracer that accumulates the traces and sends off to the collector.</p></dd><dt class="param">initialSampleRate</dt><dd class="cmt"><p>Start off with this sample rate. Can be changed later.
-</p></dd></dl></div>
+      
     </li></ol>
             </div>
 
@@ -217,6 +216,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.SamplingTracer#getSampleRate" data-isabs="false">
+      <a id="getSampleRate:Float"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSampleRate</span><span class="result">: <span name="scala.Float" class="extype">Float</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -277,7 +288,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#record" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.SamplingTracer#record" data-isabs="false">
       <a id="record(Record):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -288,8 +299,8 @@
         <span class="name">record</span><span class="params">(<span name="record">record: <a name="com.twitter.finagle.tracing.Record" class="extype" href="../../tracing/Record.html">Record</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" class="extype" href="">ZipkinTracer</a> → <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#sampleTrace" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a> → <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.SamplingTracer#sampleTrace" data-isabs="false">
       <a id="sampleTrace(TraceId):Option[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -306,8 +317,8 @@ that a percentage of all traces will be let through for example.
 True: keep it
 False: false throw the data away
 None: i'm going to defer making a decision on this to the child service
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.ZipkinTracer" class="extype" href="">ZipkinTracer</a> → <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.ZipkinTracer#setSampleRate" data-isabs="false">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a> → <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.SamplingTracer#setSampleRate" data-isabs="false">
       <a id="setSampleRate(Float):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -318,7 +329,7 @@ None: i'm going to defer making a decision on this to the child service
         <span class="name">setSampleRate</span><span class="params">(<span name="sampleRate">sampleRate: <span name="scala.Float" class="extype">Float</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -395,7 +406,9 @@ None: i'm going to defer making a decision on this to the child service
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.tracing.Tracer" class="parent">
+        <div name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.zipkin.thrift.SamplingTracer" class="extype" href="SamplingTracer.html">SamplingTracer</a></h3>
+            </div><div name="com.twitter.finagle.tracing.Tracer" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.tracing.Tracer" class="extype" href="../../tracing/Tracer.html">Tracer</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>

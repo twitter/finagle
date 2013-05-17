@@ -580,36 +580,36 @@ more information.
       <p class="shortcomment cmt">Writes a length coded set of bytes according to the MySQL
 client/server protocol.</p>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferWriter#writeLengthCodedString" data-isabs="false">
-      <a id="writeLengthCodedString(String):BufferWriter"></a>
+      <a id="writeLengthCodedString(String,Charset):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLengthCodedString</span><span class="params">(<span name="s">s: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.protocol.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeLengthCodedString</span><span class="params">(<span name="s">s: String</span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="Charset$.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.protocol.BufferWriter" class="extype" href="">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes a length coded string using the MySQL Client/Server
 protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a length coded string using the MySQL Client/Server
-protocol. Uses Charset.defaultCharset to decode the given
-String.</p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write to buffer.
+protocol. Uses Charset.defaultCharset by default to decode
+the given String.</p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write to buffer.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.protocol.BufferWriter#writeNullTerminatedString" data-isabs="false">
-      <a id="writeNullTerminatedString(String):BufferWriter"></a>
+      <a id="writeNullTerminatedString(String,Charset):BufferWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeNullTerminatedString</span><span class="params">(<span name="s">s: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.protocol.BufferWriter" class="extype" href="">BufferWriter</a></span>
+        <span class="name">writeNullTerminatedString</span><span class="params">(<span name="s">s: String</span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span> = <span class="symbol"><span class="name"><a href="Charset$.html">Charset.defaultCharset</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.protocol.BufferWriter" class="extype" href="">BufferWriter</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Writes a null terminated string onto the buffer where
 '\0' denotes null.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a null terminated string onto the buffer where
-'\0' denotes null. Uses Charset.defaultCharset to decode the given
-String.</p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write.
+'\0' denotes null. Uses Charset.defaultCharset by default
+to decode the given String.</p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write.
 </p></dd></dl></div>
     </li></ol>
             </div>

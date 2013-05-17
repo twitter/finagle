@@ -255,6 +255,23 @@ deciding when to update the cache pool cluster
       </h4>
       <p class="shortcomment cmt"> Cache pool based on a static list</p><div class="fullcomment"><div class="comment cmt"><p> Cache pool based on a static list</p></div><dl class="paramcmts block"><dt class="param">cacheNodeSet</dt><dd class="cmt"><p>static set of cache nodes to construct the cluster
 </p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.CachePoolCluster#newUnmanagedZkCluster" data-isabs="false">
+      <a id="newUnmanagedZkCluster(String,ZooKeeperClient):Cluster[CacheNode]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newUnmanagedZkCluster</span><span class="params">(<span name="zkPath">zkPath: String</span>, <span name="zkClient">zkClient: <span name="com.twitter.common.zookeeper.ZooKeeperClient" class="extype">ZooKeeperClient</span></span>)</span><span class="result">: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Zookeeper based cache pool cluster.</p><div class="fullcomment"><div class="comment cmt"><p>Zookeeper based cache pool cluster.
+The cluster will monitor the underlying serverset changes and report the detected underlying
+pool size. The cluster snapshot is unmanaged in a way that any serverset change will be immediately
+reflected.
+</p></div><dl class="paramcmts block"><dt class="param">zkPath</dt><dd class="cmt"><p>the zookeeper path representing the cache pool</p></dd><dt class="param">zkClient</dt><dd class="cmt"><p>zookeeper client talking to the zookeeper, it will only be used to read zookeeper
+</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.CachePoolCluster#newZkCluster" data-isabs="false">
       <a id="newZkCluster(String,ZooKeeperClient,Option[Set[CacheNode]],StatsReceiver):ZookeeperCachePoolCluster"></a>
       <h4 class="signature">

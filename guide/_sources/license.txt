@@ -1,7 +1,7 @@
 License
-======
+=======
 
-Finagle is maintained by Twitter, Inc., and licenced under an 
+Finagle is maintained by Twitter, Inc., and licenced under an
 Apache v2 license (see :ref:`license`)
 
 Authors

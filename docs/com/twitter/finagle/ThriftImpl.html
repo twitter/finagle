@@ -626,6 +626,18 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
       <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichServer#serveIface" data-isabs="false">
+      <a id="serveIface(SocketAddress,AnyRef):ListeningServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveIface</span><span class="params">(<span name="target">target: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="iface">iface: AnyRef</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">$serveIface</p><div class="fullcomment"><div class="comment cmt"><p>$serveIface</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichServer#serveIface" data-isabs="false">
       <a id="serveIface(String,AnyRef):ListeningServer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -636,24 +648,7 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="name">serveIface</span><span class="params">(<span name="target">target: String</span>, <span name="iface">iface: AnyRef</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve the interface implementation <code>iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve the interface implementation <code>iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>
-service TestService {
-  string query(<span class="num">1</span>: string x)
-}
-</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
-into <code>serveIface</code>:</p><pre>
-ThriftImpl(..)
-.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
-  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
-})
-</pre><p>Note that this interface is discovered by reflection. Passing an
-invalid interface implementation will result in a runtime error.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

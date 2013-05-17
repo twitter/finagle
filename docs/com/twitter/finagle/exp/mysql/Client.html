@@ -25,13 +25,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="result"> extends AnyRef</span>
+        <span class="name">Client</span><span class="result"> extends <span name="com.twitter.util.Closable" class="extype">Closable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.util.Closable" class="extype">Closable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.Client" class="in"><span>Client</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -166,17 +166,30 @@
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#close" data-isabs="false">
-      <a id="close():Future[Unit]"></a>
+      <a id="close(Time):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span name="com.twitter.util.Time" class="extype">Time</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Close the ServiceFactory and its underlying resources.</p><div class="fullcomment"><div class="comment cmt"><p>Close the ServiceFactory and its underlying resources.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.Client" class="extype" href="">Client</a> → Closable</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.util.Closable#close" data-isabs="false">
+      <a id="close():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
         <span class="name">close</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Close the ServiceFactory and its underlying resources.</p>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#closeStatement" data-isabs="false">
       <a id="closeStatement(PreparedStatement):Future[Result]"></a>
       <h4 class="signature">
@@ -230,6 +243,18 @@ field or use the update(index, param) method on the
 prepared statement object to change parameters.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Future containing an OK Result or a ResultSet
 for queries that return rows.
 </p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#factory" data-isabs="false">
+      <a id="factory:ServiceFactory[Request, Result]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">factory</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../../ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -504,7 +529,9 @@ and an empty Seq is returned.</p></div><dl class="paramcmts block"><dt class="pa
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="com.twitter.util.Closable" class="parent">
+              <h3>Inherited from <span name="com.twitter.util.Closable" class="extype">Closable</span></h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
