@@ -22,11 +22,14 @@ private object TagMap {
     private[this] val fast = new Array[T](fastSize)
     private[this] val fallback = new HashMap[Int, T]
     private[this] val fastOff = set.range.start
+    private[this] def inFast(tag: Int): Boolean = tag < fastSize+fastOff
+    private[this] def getFast(tag: Int): T = fast(tag-fastOff)
+    private[this] def setFast(tag: Int, el: T) { fast(tag-fastOff) = el }
 
     def map(el: T): Option[Int] = synchronized {
       set.acquire() map { tag =>
-        if (tag < fastSize+fastOff)
-          fast(tag-fastOff) = el
+        if (inFast(tag))
+          setFast(tag, el)
         else
           fallback.put(tag, el)
         tag
@@ -36,9 +39,9 @@ private object TagMap {
     def maybeRemap(tag: Int, newEl: T): Option[T] = synchronized {
       if (!contains(tag)) return None
 
-      val oldEl = if (tag < fastSize+fastOff) {
-        val oldEl = fast(tag-fastOff)
-        fast(tag-fastOff) = newEl
+      val oldEl = if (inFast(tag)) {
+        val oldEl = getFast(tag)
+        setFast(tag, newEl)
         oldEl
       } else {
         val oldEl = fallback.remove(tag)
@@ -50,9 +53,9 @@ private object TagMap {
     }
 
     def unmap(tag: Int): Option[T] = synchronized {
-      val res = if (tag < fastSize+fastOff) {
-        val el = fast(tag-fastOff)
-        fast(tag-fastOff) = null.asInstanceOf[T]
+      val res = if (inFast(tag)) {
+        val el = getFast(tag)
+        setFast(tag, null.asInstanceOf[T])
         Option(el)
       } else
         Option(fallback.remove(tag))
@@ -61,16 +64,14 @@ private object TagMap {
       res
     }
 
-    private[this] def contains(tag: Int) = synchronized {
-      (tag < fastSize+fastOff && fast(tag-fastOff) != null) ||
-        fallback.containsKey(tag)
-    }
+    private[this] def contains(tag: Int) =
+      (inFast(tag) && getFast(tag) != null) || fallback.containsKey(tag)
 
-    // BUG: weird synchronization semantics
-    def iterator: Iterator[(Int, T)] = set.iterator collect {
-      case tag if contains(tag) => synchronized {
-        val el = if (tag < fastSize+fastOff) fast(tag) else fallback.get(tag)
-        (tag, el)
+    def iterator: Iterator[(Int, T)] = set.iterator flatMap { tag =>
+      synchronized {
+        val el = if (inFast(tag)) getFast(tag) else fallback.get(tag)
+        if (el == null) Iterable.empty
+        else Iterator.single((tag, el))
       }
     }
   }
