@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
-import com.twitter.util.Duration
+import com.twitter.concurrent.Broker
+import com.twitter.util.{Duration, Future}
 import java.io.{InputStream, InputStreamReader, OutputStream, OutputStreamWriter, Reader, Writer}
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
@@ -8,8 +9,9 @@ import java.util.{Date, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer._
+import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.handler.codec.http.{Cookie, HttpMessage, HttpHeaders, HttpMethod,
-  HttpVersion}
+  HttpVersion, DefaultHttpChunk, HttpChunk}
 import scala.collection.JavaConverters._
 
 
@@ -20,6 +22,8 @@ import scala.collection.JavaConverters._
  * methods, though only one set of methods should be used.
  */
 abstract class Message extends HttpMessage {
+
+  private[this] val chunks = new Broker[HttpChunk]
 
   def isRequest: Boolean
   def isResponse = !isRequest
@@ -339,11 +343,13 @@ abstract class Message extends HttpMessage {
 
   /** Append ChannelBuffer to content. */
   def write(buffer: ChannelBuffer) {
-    getContent match {
-      case ChannelBuffers.EMPTY_BUFFER =>
-        setContent(buffer)
-      case content =>
-        setContent(ChannelBuffers.wrappedBuffer(content, buffer))
+    if (isChunked) writeChunk(buffer) else {
+      getContent match {
+        case ChannelBuffers.EMPTY_BUFFER =>
+          setContent(buffer)
+        case content =>
+          setContent(ChannelBuffers.wrappedBuffer(content, buffer))
+      }
     }
   }
 
@@ -377,6 +383,17 @@ abstract class Message extends HttpMessage {
   def clearContent() {
     setContent(ChannelBuffers.EMPTY_BUFFER)
   }
+
+  /** Write to the response stream. */
+  def writeChunk(buf: ChannelBuffer) {
+    if (buf.readable()) chunks ! new DefaultHttpChunk(buf)
+  }
+
+  /** End the response stream. */
+  def close() { chunks ! HttpChunk.LAST_CHUNK }
+
+  /** Read a chunk. */
+  def readChunk(): Future[HttpChunk] = chunks?
 }
 
 
