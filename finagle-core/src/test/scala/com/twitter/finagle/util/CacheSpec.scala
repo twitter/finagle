@@ -3,7 +3,7 @@ package com.twitter.finagle.util
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
-import com.twitter.util.{CountDownLatch, Time}
+import com.twitter.util.Time
 import com.twitter.conversions.time._
 import com.twitter.finagle.MockTimer
 

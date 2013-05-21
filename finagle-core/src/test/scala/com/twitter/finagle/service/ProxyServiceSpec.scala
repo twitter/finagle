@@ -1,14 +1,14 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.{CancelledConnectionException, Service}
+import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-
-import com.twitter.util.{Future, Promise, Return, Throw}
-import com.twitter.finagle.{CancelledConnectionException, Service}
 
 class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
   "ProxyService" should {
     val underlying = mock[Service[Int, Int]]
+    underlying.close(any) returns Future.Done
 
     "proxy all methods to the underlying service" in {
       val proxy = new ProxyService(Future.value(underlying))
@@ -23,8 +23,8 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
       proxy.isAvailable must be_==(false)
       there was one(underlying).isAvailable
 
-      proxy.release()
-      there was one(underlying).release()
+      proxy.close()
+      there was one(underlying).close(any)
     }
 
     "buffer requests" in {
@@ -45,8 +45,8 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
       f123.isDefined must beTrue
       f321.isDefined must beTrue
 
-      f123() must be_==(111)
-      f321() must be_==(222)
+      Await.result(f123) must be_==(111)
+      Await.result(f321) must be_==(222)
     }
 
     "fail requests when underlying service provision fails" in {
@@ -58,7 +58,7 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
       promise() = Throw(new Exception("sad panda"))
 
       f.isDefined must beTrue
-      f() must throwA(new Exception("sad panda"))
+      Await.result(f) must throwA(new Exception("sad panda"))
     }
 
     "proxy cancellation" in {
@@ -70,13 +70,13 @@ class ProxyServiceSpec extends SpecificationWithJUnit with Mockito {
       val replyPromise = new Promise[Int]
       underlying(123) returns replyPromise
 
-      f123.cancel()
+      f123.raise(new Exception)
 
       promise() = Return(underlying)
 
       f123.isDefined must beTrue
       replyPromise.isDefined must beFalse
-      f123() must throwA(new CancelledConnectionException)
+      Await.result(f123) must throwA(new CancelledConnectionException)
     }
   }
 }

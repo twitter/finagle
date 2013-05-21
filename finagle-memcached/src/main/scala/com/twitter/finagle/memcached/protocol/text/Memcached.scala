@@ -9,7 +9,6 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 import org.jboss.netty.util.CharsetUtil.UTF_8
@@ -41,10 +40,10 @@ object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
     val pipeline = Channels.pipeline()
 
   //        pipeline.addLast("exceptionHandler", new ExceptionHandler)
-  
+
     pipeline.addLast("decoder", new ServerDecoder(storageCommands))
     pipeline.addLast("decoding2command", new DecodingToCommand)
-  
+
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("response2encoding", new ResponseToEncoding)
     pipeline

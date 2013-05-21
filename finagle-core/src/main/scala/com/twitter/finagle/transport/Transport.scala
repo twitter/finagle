@@ -1,7 +1,8 @@
 package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.util.Future
+import com.twitter.finagle.NoStacktrace
+import com.twitter.util.{Closable, Future, Promise, Time}
 import java.net.SocketAddress
 
 // Mapped: ideally via a util-codec?
@@ -12,7 +13,7 @@ import java.net.SocketAddress
  * to some endpoint, typically via a channel pipeline that performs
  * encoding and decoding.
  */
-trait Transport[In, Out] {
+trait Transport[In, Out] extends Closable {
   /**
    * Write {{req}} to this transport; the returned future
    * acknowledges write completion.
@@ -24,10 +25,7 @@ trait Transport[In, Out] {
    */
   def read(): Future[Out]
 
-  /**
-   * Close the transport; idempotent.
-   */
-  def close()
+  def isOpen: Boolean
 
   /**
    * The channel closed with the given exception. This is the
@@ -63,13 +61,21 @@ trait TransportFactory {
 class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   extends Transport[In, Out]
 {
+  private[this] val closep = new Promise[Throwable]
+
   def write(input: In) = {
     writeq.offer(input)
     Future.Done
   }
-  def read(): Future[Out] = readq.poll()
-  def close() {}
-  val onClose = Future.never
+  def read(): Future[Out] =
+    readq.poll() onFailure { exc =>
+      closep.setValue(exc)
+    }
+  def isOpen = !closep.isDefined
+  def close(deadline: Time) = Future.exception(
+    new IllegalStateException("close() is undefined on QueueTransport"))
+
+  val onClose = closep
   val localAddress = new SocketAddress{}
   val remoteAddress = new SocketAddress{}
 }

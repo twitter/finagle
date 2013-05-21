@@ -1,12 +1,13 @@
 package com.twitter.finagle.redis;
 
+import org.jboss.netty.channel.ChannelPipelineFactory;
+
 import com.twitter.finagle.ClientCodecConfig;
 import com.twitter.finagle.Codec;
 import com.twitter.finagle.ServerCodecConfig;
 import com.twitter.finagle.redis.protocol.Command;
 import com.twitter.finagle.redis.protocol.Reply;
 import com.twitter.util.Function;
-import org.jboss.netty.channel.ChannelPipelineFactory;
 
 /**
  * A compilation test for extending the Redis codec in java.

@@ -1,11 +1,11 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle._
-import com.twitter.finagle.integration.{IntegrationBase, StringCodec}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.util.{Monitor, Promise, Future, Return, Throw}
+import com.twitter.finagle.integration.{IntegrationBase, StringCodec}
+import com.twitter.util.{Await, Future, Monitor, Promise, Return, Throw}
 import java.net.InetSocketAddress
-import java.util.logging.{StreamHandler, Level, Logger}
+import java.util.logging.{Level, Logger, StreamHandler}
 import org.mockito.Matchers
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
@@ -19,6 +19,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
   "MonitorFilter" should {
     val monitor = spy(new MockMonitor)
     val underlying = mock[Service[Int, Int]]
+    underlying.close(any) returns Future.Done
     val reply = new Promise[Int]
     underlying(any) returns reply
     val service = new MonitorFilter(monitor) andThen underlying
@@ -63,6 +64,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
     "when attached to a server, report source for sourced exceptions" in {
       val address = new InetSocketAddress(0)
       val service = mock[Service[String, String]]
+      service.close(any) returns Future.Done
       val server = ServerBuilder()
         .codec(StringCodec)
         .name("MockServer")
@@ -82,7 +84,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
       service(any) throws outer // make server service throw the mock exception
 
       try {
-        val f = client("123")()
+        val f = Await.result(client("123"))
       } catch {
         case e: ChannelException => // deliberately empty. Server exception comes back as ChannelClosedException
       }
@@ -100,6 +102,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
       val preparedFactory = mock[ServiceFactory[String, String]]
       val preparedServicePromise = new Promise[Service[String, String]]
       preparedFactory() returns preparedServicePromise
+      preparedFactory.close(any) returns Future.Done
       preparedFactory.map(Matchers.any()) returns
         preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 

@@ -1,9 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.util.{Future, Time}
-
-import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
-import com.twitter.finagle.builder.StaticCluster
+import com.twitter.finagle.{ClientConnection, Group, Service, ServiceFactory}
+import com.twitter.util.{Await, Future, Stopwatch, Time}
 
 object Benchmark {
   // todo: simulate distributions of loads.
@@ -18,7 +16,7 @@ object Benchmark {
   }
   private[this] class LoadedServiceFactory(i: Int) extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = { loads(i) += 1; Future.value(service) }
-    def close = ()
+    def close(deadline: Time) = Future.Done
   }
   private[this] val factories = 0 until F map { i => new LoadedServiceFactory(i) }
 
@@ -26,14 +24,16 @@ object Benchmark {
     0 until loads.size foreach { i => loads(i) = 0 }
   }
 
-  def bench(factory: ServiceFactory[_, _]) = Time.measure {
+  def bench(factory: ServiceFactory[_, _]) = {
+    val elapsed = Stopwatch.start()
     val outstanding = new Array[Service[_, _]](W)
     0 until N foreach { i =>
       val j = i % W
       // todo: jitter in release. pick one at random.
-      if (outstanding(j) ne null) outstanding(j).release()
-      outstanding(j) = factory()()
+      if (outstanding(j) ne null) outstanding(j).close()
+      outstanding(j) = Await.result(factory())
     }
+    elapsed()
   }
 
   def go(factory: ServiceFactory[_, _], name: String) = {
@@ -55,8 +55,8 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val cluster = new StaticCluster[ServiceFactory[Int, Int]](factories)
-    val heap = new HeapBalancer(cluster)
+    val group = Group[ServiceFactory[Int, Int]](factories:_*)
+    val heap = new HeapBalancer(group)
 
     go(heap, "Heap")
   }

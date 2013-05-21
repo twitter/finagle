@@ -1,0 +1,42 @@
+package com.twitter.finagle
+
+import com.twitter.util.{Await, Closable, Future, Time}
+import java.net.{InetSocketAddress, SocketAddress}
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+
+case class TestAnnouncement(addr: InetSocketAddress, target: String) extends Announcement {
+  def unannounce() = Future.Done
+}
+
+class TestAnnouncer extends Announcer {
+  val scheme = "test"
+  def announce(addr: InetSocketAddress, target: String) =
+    Future.value(TestAnnouncement(addr, target))
+}
+
+@RunWith(classOf[JUnitRunner])
+class AnnouncerTest extends FunSuite {
+  val addr = new InetSocketAddress(0)
+
+  test("reject bad names") {
+    assert(Await.ready(Announcer.announce(addr, "!foo!bar")).poll.get.isThrow)
+  }
+
+  test("reject unknown announcers") {
+    assert(Await.ready(Announcer.announce(addr, "unkown!foobar")).poll.get.isThrow)
+  }
+
+  test("resolve ServiceLoaded announcers") {
+    Await.result(Announcer.announce(addr, "test!xyz")) match {
+      case p: Proxy => assert(p.self === TestAnnouncement(addr, "xyz"))
+      case _ => assert(false)
+    }
+  }
+
+  test("provide a set of announcements") {
+    Announcer.announce(addr, "test!xyz")
+    assert(Announcer.announcements == Set((addr, List("test!xyz"))))
+  }
+}

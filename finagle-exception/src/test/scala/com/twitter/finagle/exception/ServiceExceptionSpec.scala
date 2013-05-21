@@ -4,6 +4,7 @@ import org.specs.SpecificationWithJUnit
 import com.twitter.streamyj.Streamy
 import com.twitter.util.{GZIPStringEncoder, Time}
 import java.lang.{Throwable, StackTraceElement => javaSTE}
+import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 
 /**
  * An object that generates a service exception and verifies its JSON representation.
@@ -14,7 +15,7 @@ private[exception] class TestServiceException(
   time: Option[Time] = None,
   traceId: Option[Long] = None,
   clientAddress: Option[String] = None,
-  sourceAddress: Option[String] = None,
+  sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
   cardinality: Option[Int] = None) {
 
   private val ste = new javaSTE("badclass", "badmethod", "badfile", 42)

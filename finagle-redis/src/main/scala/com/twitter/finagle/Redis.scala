@@ -2,23 +2,25 @@ package com.twitter.finagle
 
 import java.net.SocketAddress
 import com.twitter.finagle.client._
-import com.twitter.finagle.builder.Cluster
+import com.twitter.finagle.dispatch.PipeliningDispatcher
+import com.twitter.finagle.pool.ReusingPool
+import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.redis.protocol.{Command, Reply}
-import com.twitter.finagle.netty3.{PipeliningTransport, Netty3Server}
-import com.twitter.finagle.stats.StatsReceiver
 
-class RedisTransport extends PipeliningTransport[Command, Reply](redis.RedisClientPipelineFactory)
-
-class RedisClient(transport: ((SocketAddress, StatsReceiver)) => ServiceFactory[Command, Reply])
-  extends DefaultClient[Command, Reply](DefaultClient.Config[Command, Reply](transport = transport))
-{
-  def this() = this(new RedisTransport)
-  
-  def newRichClient(cluster: Cluster[SocketAddress]): redis.Client = redis.Client(newClient(cluster).toService)
-  def newRichClient(cluster: String): redis.Client = redis.Client(newClient(cluster).toService)
+trait RedisRichClient { self: Client[Command, Reply] =>
+  def newRichClient(group: Group[SocketAddress]): redis.Client = redis.Client(newClient(group).toService)
+  def newRichClient(group: String): redis.Client = redis.Client(newClient(group).toService)
 }
 
-object Redis extends RedisClient {
-  def defaultClient = this
-}
+object RedisTransporter extends Netty3Transporter[Command, Reply]("redis", redis.RedisClientPipelineFactory)
 
+object RedisClient extends DefaultClient[Command, Reply](
+  name = "redis",
+  endpointer = Bridge[Command, Reply, Command, Reply](RedisTransporter, new PipeliningDispatcher(_)),
+  pool = _ => new ReusingPool(_)
+) with RedisRichClient
+
+object Redis extends Client[Command, Reply] with RedisRichClient {
+  def newClient(group: Group[SocketAddress]): ServiceFactory[Command, Reply] =
+    RedisClient.newClient(group)
+}

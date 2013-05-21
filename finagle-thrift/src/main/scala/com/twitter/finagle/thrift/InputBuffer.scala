@@ -19,7 +19,6 @@ private[thrift] object InputBuffer {
 }
 
 private[thrift] class InputBuffer(bytes: Array[Byte], protocolFactory: TProtocolFactory) {
-  import InputBuffer._
 
   private[this] val memoryTransport = new TMemoryInputTransport(bytes)
   private[this] val iprot = protocolFactory.getProtocol(memoryTransport)

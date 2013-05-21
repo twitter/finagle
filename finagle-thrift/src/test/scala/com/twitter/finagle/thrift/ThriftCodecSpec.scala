@@ -1,17 +1,15 @@
 package com.twitter.finagle.thrift
 
 import org.specs.SpecificationWithJUnit
-import org.specs.matcher.Matcher
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-import org.apache.thrift.{TBase, TApplicationException}
+import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{
   TProtocol, TBinaryProtocol, TMessage, TMessageType}
-import org.apache.thrift.transport.TTransportException
 
-import com.twitter.finagle.{SunkChannel, TooManyConcurrentRequestsException}
+import com.twitter.finagle.SunkChannel
 import com.twitter.silly.Silly
 
 class ThriftCodecSpec extends SpecificationWithJUnit {
@@ -155,7 +153,7 @@ class ThriftCodecSpec extends SpecificationWithJUnit {
       result.response.success must be_==("result")
     }
 
-    "decode replys broken in two" in {
+    "decode replies broken in two" in {
       val buffer = thriftToBuffer("bleep", TMessageType.REPLY, 23, new Silly.bleep_result("result"))
 
       Range(0, buffer.readableBytes - 1).foreach { numBytes =>

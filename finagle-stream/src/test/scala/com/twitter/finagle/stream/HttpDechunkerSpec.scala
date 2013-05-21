@@ -1,12 +1,13 @@
 package com.twitter.finagle.stream
 
-import org.specs.SpecificationWithJUnit
+import com.twitter.conversions.time._
 import com.twitter.finagle.{SunkChannel, SunkChannelFactory}
+import com.twitter.util.Await
+import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{Channels, MessageEvent}
 import org.jboss.netty.handler.codec.http._
-import com.twitter.conversions.time._
-import java.nio.charset.Charset
+import org.specs.SpecificationWithJUnit
 
 class HttpDechunkerSpec extends SpecificationWithJUnit {
 
@@ -34,15 +35,15 @@ class HttpDechunkerSpec extends SpecificationWithJUnit {
       val error = streamResponse.error
 
       Channels.fireMessageReceived(channel, new DefaultHttpChunk(ChannelBuffers.wrappedBuffer("1".getBytes)))
-      messages.sync()(1.second).toString(Charset.defaultCharset) must_== "1"
+      Await.result(messages.sync(), 1.second).toString(Charset.defaultCharset) must_== "1"
 
       Channels.fireMessageReceived(channel, new DefaultHttpChunk(ChannelBuffers.wrappedBuffer("2".getBytes)))
       Channels.fireMessageReceived(channel, HttpChunk.LAST_CHUNK)
       val receiveError = error.sync()
       receiveError.isDefined must_== false
-      messages.sync()(1.second).toString(Charset.defaultCharset) must_== "2"
+      Await.result(messages.sync(), 1.second).toString(Charset.defaultCharset) must_== "2"
       receiveError.isDefined must_== true
-      receiveError(1.second) must_== EOF
+      Await.result(receiveError, 1.second) must_== EOF
     }
   }
 }

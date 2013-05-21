@@ -1,13 +1,43 @@
 package com.twitter.finagle.service
 
+import RetryPolicy._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{MockTimer, Service, WriteException}
-import com.twitter.finagle.stats.{StatsReceiver, Stat}
+import com.twitter.finagle.stats.{Stat, StatsReceiver}
+import com.twitter.finagle.{CancelledRequestException, MockTimer, Service, TimeoutException, WriteException}
 import com.twitter.util._
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
+  "RetryPolicy" should {
+    import RetryPolicy._
+    val NoExceptions: PartialFunction[Try[Nothing], Boolean] = {
+      case _ => false
+    }
+    val timeoutExc = new TimeoutException {
+      protected val timeout = 0.seconds
+      protected val explanation = "!"
+    }
+
+    "WriteExceptionsOnly" in {
+      val weo = WriteExceptionsOnly orElse NoExceptions
+
+      weo(Throw(new Exception)) must beFalse
+      weo(Throw(WriteException(new Exception))) must beTrue
+      weo(Throw(WriteException(new CancelledRequestException))) must beFalse
+      weo(Throw(timeoutExc)) must beFalse
+    }
+
+    "TimeoutAndWriteExceptionsOnly" in {
+      val weo = TimeoutAndWriteExceptionsOnly orElse NoExceptions
+
+      weo(Throw(new Exception)) must beFalse
+      weo(Throw(WriteException(new Exception))) must beTrue
+      weo(Throw(WriteException(new CancelledRequestException))) must beFalse
+      weo(Throw(timeoutExc)) must beTrue
+    }
+  }
+
   "RetryingFilter" should {
     val backoffs = Stream(1.second, 2.seconds, 3.seconds)
     val stats = mock[StatsReceiver]
@@ -24,11 +54,12 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
     "with RetryPolicy.tries" in {
       val filter = new RetryingFilter[Int, Int](RetryPolicy.tries(3, shouldRetry), timer, stats)
       val service = mock[Service[Int, Int]]
+      service.close(any) returns Future.Done
       val retryingService = filter andThen service
 
       "always try once" in {
         service(123) returns Future(321)
-        retryingService(123)() must be_==(321)
+        Await.result(retryingService(123)) must be_==(321)
         there was one(service)(123)
         there was one(retriesStat).add(0)
       }
@@ -37,19 +68,19 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
         service(123) returns Future.exception(WriteException(new Exception))
         val f = retryingService(123)
         there were three(service)(123)
-        f() must throwA[WriteException]
+        Await.result(f) must throwA[WriteException]
       }
 
       "when failed with a non-WriteException, fail immediately" in {
         service(123) returns Future.exception(new Exception("WTF!"))
-        retryingService(123)() must throwA(new Exception("WTF!"))
+        Await.result(retryingService(123)) must throwA(new Exception("WTF!"))
         there was one(service)(123)
         there was one(retriesStat).add(0)
       }
 
       "when no retry occurs, no stat update" in {
         service(123) returns Future(321)
-        retryingService(123)() must be_==(321)
+        Await.result(retryingService(123)) must be_==(321)
         there was one(retriesStat).add(0)
       }
 
@@ -79,11 +110,12 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
     def testPolicy(policy: RetryPolicy[Try[Nothing]]) {
       val filter = new RetryingFilter[Int, Int](policy, timer, stats)
       val service = mock[Service[Int, Int]]
+      service.close(any) returns Future.Done
       val retryingService = filter andThen service
 
       "always try once" in {
         service(123) returns Future(321)
-        retryingService(123)() must be_==(321)
+        Await.result(retryingService(123)) must be_==(321)
         there was one(service)(123)
         there was one(retriesStat).add(0)
       }
@@ -100,7 +132,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
 
         there were two(service)(123)
         there was one(retriesStat).add(1)
-        f() must be_==(321)
+        Await.result(f) must be_==(321)
       }
 
       "give up when the retry strategy is exhausted" in Time.withCurrentTimeFrozen { tc =>
@@ -115,13 +147,13 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
 
         there was one(retriesStat).add(3)
         f.isDefined must beTrue
-        f.isThrow must beTrue
-        f() must throwA(WriteException(new Exception("i'm exhausted")))
+        Await.ready(f).poll.get.isThrow must beTrue
+        Await.result(f) must throwA(WriteException(new Exception("i'm exhausted")))
       }
 
       "when failed with a non-WriteException, fail immediately" in {
         service(123) returns Future.exception(new Exception("WTF!"))
-        retryingService(123)() must throwA(new Exception("WTF!"))
+        Await.result(retryingService(123)) must throwA(new Exception("WTF!"))
         there was one(service)(123)
         timer.tasks must beEmpty
         there was one(retriesStat).add(0)
@@ -129,7 +161,7 @@ class RetryingFilterSpec extends SpecificationWithJUnit with Mockito {
 
       "when no retry occurs, no stat update" in {
         service(123) returns Future(321)
-        retryingService(123)() must be_==(321)
+        Await.result(retryingService(123)) must be_==(321)
         there was one(retriesStat).add(0)
       }
 

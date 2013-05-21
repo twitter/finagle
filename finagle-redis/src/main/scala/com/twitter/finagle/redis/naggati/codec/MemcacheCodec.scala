@@ -17,11 +17,8 @@
 package com.twitter.finagle.redis.naggati
 package codec
 
-import com.twitter.concurrent
-import com.twitter.util.Future
 import java.nio.ByteBuffer
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.{Channel, Channels}
 
 case class MemcacheRequest(line: List[String], data: Option[ByteBuffer], bytesRead: Int) {
   override def toString = {

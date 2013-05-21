@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-core</artifactId>
   <packaging>jar</packaging>
-  <version>6.0.6-SNAPSHOT</version>
+  <version>6.4.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -19,39 +19,50 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
-      <version>3.5.5.Final</version>
+      <version>3.5.12.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
     </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>6.0.6-SNAPSHOT</version>
+      <version>6.4.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-app</artifactId>
+      <version>6.3.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-collection</artifactId>
-      <version>6.0.7-SNAPSHOT</version>
+      <version>6.3.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-core</artifactId>
-      <version>6.0.7-SNAPSHOT</version>
+      <version>6.3.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>6.0.7-SNAPSHOT</version>
+      <version>6.3.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-jvm</artifactId>
-      <version>6.0.7-SNAPSHOT</version>
+      <version>6.3.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging</artifactId>
-      <version>6.0.7-SNAPSHOT</version>
+      <version>6.3.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

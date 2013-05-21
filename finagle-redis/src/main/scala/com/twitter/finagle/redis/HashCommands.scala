@@ -1,12 +1,10 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Long => JLong}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 
 trait Hashes { self: BaseClient =>
@@ -41,8 +39,18 @@ trait Hashes { self: BaseClient =>
     doRequest(HGetAll(key)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toChannelBuffers(messages)))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
   }
+
+  /**
+   * Increment a field by a value
+   * @param hash key, fields, amount
+   * @return new value of field
+   */
+  def hIncrBy(key: ChannelBuffer, field: ChannelBuffer, amount: Long): Future[JLong] = 
+    doRequest(HIncrBy(key, field, amount)) {      
+      case IntegerReply(n) => Future.value(n)
+    }
 
   /**
    * Return all field names stored at key
@@ -53,7 +61,7 @@ trait Hashes { self: BaseClient =>
     doRequest(HKeys(key)) {
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -65,7 +73,7 @@ trait Hashes { self: BaseClient =>
     doRequest(HMGet(key, fields)) {
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -88,7 +96,7 @@ trait Hashes { self: BaseClient =>
   ): Future[Seq[ChannelBuffer]] =
     doRequest(HScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -99,5 +107,26 @@ trait Hashes { self: BaseClient =>
   def hSet(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
     doRequest(HSet(key, field, value)) {
       case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Sets field value pair in given hash only if the field does not yet exist
+   * @param hash key, field, value
+   * @return 1 if field is new, 0 if no operation was performed
+   */
+  def hSetNx(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
+    doRequest(HSetNx(key, field, value)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Gets the values of all fields in given hash
+   * @param hash key
+   * @return list of values, or empty list when key does not exist
+   */
+  def hVals(key: ChannelBuffer): Future[Seq[ChannelBuffer]] = 
+    doRequest(HVals(key)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
+      case EmptyMBulkReply()    => Future.Nil
     }
 }

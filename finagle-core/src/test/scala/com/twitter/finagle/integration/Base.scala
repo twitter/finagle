@@ -3,7 +3,6 @@ package com.twitter.finagle.integration
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.netty3.NewChannelFactory
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{ClientChannelTransport, Transport}
 import java.net.SocketAddress
@@ -63,7 +62,7 @@ trait IntegrationBase extends SpecificationWithJUnit with Mockito {
     val clientBuilder = ClientBuilder()
       .name(name)
       .codec(codecFactory)
-      .newChannelFactory(new NewChannelFactory(() => channelFactory))
+      .channelFactory(channelFactory)
       .hosts(Seq(clientAddress))
       .reportTo(statsReceiver)
       .hostConnectionLimit(1)

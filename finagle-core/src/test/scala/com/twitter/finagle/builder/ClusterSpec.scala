@@ -2,10 +2,11 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.GlobalRequestTimeoutException
-import com.twitter.finagle.integration.{StringCodec, DynamicCluster}
+import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
+import com.twitter.util.Await
 import java.net.SocketAddress
 import org.specs.SpecificationWithJUnit
-import collection.mutable
+import scala.collection.mutable
 
 class ClusterSpec extends SpecificationWithJUnit {
   case class WrappedInt(val value: Int)
@@ -93,10 +94,10 @@ class ClusterSpec extends SpecificationWithJUnit {
           .timeout(1.seconds) //global time out
           .build()
 
-      client("hello1")() must throwA[GlobalRequestTimeoutException]
+      Await.result(client("hello1")) must throwA[GlobalRequestTimeoutException]
 
       // It also should honor timeout specified with the request
-      client("hello2")(10.milliseconds) must throwA[com.twitter.util.TimeoutException]
+      Await.result(client("hello2"), 10.milliseconds) must throwA[com.twitter.util.TimeoutException]
     }
   }
 }

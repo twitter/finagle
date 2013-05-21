@@ -1,13 +1,15 @@
 package com.twitter.finagle.memcached.integration
 
 import java.lang.ProcessBuilder
-import java.net.InetSocketAddress
-import com.twitter.util.RandomSocket
+import java.net.{BindException, ServerSocket, InetSocketAddress}
+import com.twitter.util.{Try, Stopwatch, Duration, RandomSocket}
+import com.twitter.conversions.time._
 import collection.JavaConversions._
+import scala.collection._
 
 object ExternalMemcached { self =>
   class MemcachedBinaryNotFound extends Exception
-  private[this] var processes: List[Process] = List()
+  private[this] var processes: Map[InetSocketAddress, Process] = mutable.Map()
   private[this] val forbiddenPorts = 11000.until(11900)
   private[this] var takenPorts: Set[Int] = Set[Int]()
   // prevent us from taking a port that is anything close to a real memcached port.
@@ -36,24 +38,69 @@ object ExternalMemcached { self =>
     address
   }
 
-  def start(addr:Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
-    val address:InetSocketAddress = addr getOrElse { findAddress().get }
+  def start(address: Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
+    def exec(address: InetSocketAddress) {
+      val cmd = Seq("memcached", "-l", address.getHostName,
+        "-p", address.getPort.toString)
+      val builder = new ProcessBuilder(cmd.toList)
+      processes += (address -> builder.start())
+    }
 
-    val cmd: Seq[String] = Seq("memcached",
-                    "-l", address.getHostName(),
-                    "-p", address.getPort().toString)
-
-    val builder = new ProcessBuilder(cmd.toList)
-    processes ::= builder.start()
-    Thread.sleep(100)
-
-    Some(address)
+    (address orElse findAddress()) flatMap { addr =>
+      try {
+        exec(addr)
+        if (waitForPort(addr.getPort))
+          Some(addr)
+        else
+          None
+      } catch {
+        case _: Throwable => None
+      }
+    }
   }
 
-  def stop() {
-    processes foreach { p =>
-      p.destroy()
-      p.waitFor()
+  def waitForPort(port: Int, timeout: Duration = 5.seconds): Boolean = {
+    val elapsed = Stopwatch.start()
+    def loop(): Boolean = {
+      if (! isPortAvailable(port))
+        true
+      else if (timeout < elapsed())
+        false
+      else {
+        Thread.sleep(100)
+        loop()
+      }
+    }
+    loop()
+  }
+
+  def isPortAvailable(port: Int): Boolean = {
+    var ss: ServerSocket = null
+    var result = false
+    try {
+      ss = new ServerSocket(port)
+      ss.setReuseAddress(true)
+      result = true
+    } catch { case ex: BindException =>
+      result = (ex.getMessage != "Address already in use")
+    } finally {
+      if (ss != null)
+        ss.close()
+    }
+
+    result
+  }
+
+  def stop(addr: Option[InetSocketAddress] = None) {
+    if (!addr.isDefined) {
+      processes.values foreach {
+        p =>
+          p.destroy()
+          p.waitFor()
+      }
+    } else {
+      processes(addr.get).destroy()
+      processes(addr.get).waitFor()
     }
   }
 
@@ -69,5 +116,5 @@ object ExternalMemcached { self =>
     }
   });
 
-  assertMemcachedBinaryPresent()
+  //assertMemcachedBinaryPresent()
 }

@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.silly.Silly
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Promise, Return}
+import com.twitter.util.{Await, Promise, Return, Try}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
 import org.jboss.netty.channel._
@@ -75,7 +75,7 @@ class AsyncServerEndToEndSpec extends SpecificationWithJUnit {
         Channels.write(ch, thriftCall)
       }
 
-      val result = callResults.get(1.second)
+      val result = Try(Await.result(callResults, 1.second))
       result.isReturn must beTrue
 
       result().response.success must be_==("yehyeh")

@@ -1,9 +1,8 @@
 package com.twitter.finagle.service
 
-import com.twitter.util.Future
-
-import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
 import com.twitter.finagle.util.AsyncLatch
+import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
+import com.twitter.util.{Future, Promise, Time}
 
 class SingletonFactory[Req, Rep](service: Service[Req, Rep])
   extends ServiceFactory[Req, Rep]
@@ -14,11 +13,18 @@ class SingletonFactory[Req, Rep](service: Service[Req, Rep])
     latch.incr()
     new Service[Req, Rep] {
       def apply(request: Req) = service(request)
-      override def release() = latch.decr()
+      override def close(deadline: Time) = { latch.decr(); Future.Done }
     }
   }
 
-  def close() = latch.await { service.release() }
+  def close(deadline: Time) = {
+    val p = new Promise[Unit]
+    latch.await { 
+      service.close()
+      p.setValue(())
+    }
+    p
+  }
 
   override def isAvailable = service.isAvailable
 

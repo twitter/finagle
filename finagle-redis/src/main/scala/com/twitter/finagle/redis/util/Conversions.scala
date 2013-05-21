@@ -5,7 +5,6 @@ import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.redis.protocol.Commands.trimList
-import scala.runtime.RichDouble
 
 trait ErrorConversion {
   def getException(msg: String): Throwable
@@ -57,7 +56,7 @@ object StringToChannelBuffer {
 }
 object CBToString {
   def apply(arg: ChannelBuffer, charset: Charset = CharsetUtil.UTF_8) = {
-    new String(arg.array, charset)
+    arg.toString(charset)
   }
   def fromList(args: Seq[ChannelBuffer], charset: Charset = CharsetUtil.UTF_8) =
     args.map { arg => CBToString(arg, charset) }
@@ -104,12 +103,12 @@ object ReplyFormat {
   def toString(items: List[Reply]): List[String] = {
     items flatMap {
       case BulkReply(message)   => List(BytesToString(message.array))
-      case EmptyBulkReply()     => List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
+      case EmptyBulkReply()     => EmptyBulkReplyString
       case IntegerReply(id)     => List(id.toString)
       case StatusReply(message) => List(message)
       case ErrorReply(message)  => List(message)
       case MBulkReply(messages) => ReplyFormat.toString(messages)
-      case EmptyMBulkReply()    => List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
+      case EmptyMBulkReply()    => EmptyMBulkReplyString
       case _                    => Nil
     }
   }
@@ -117,13 +116,17 @@ object ReplyFormat {
   def toChannelBuffers(items: List[Reply]): List[ChannelBuffer] = {
     items flatMap {
       case BulkReply(message)   => List(message)
-      case EmptyBulkReply()     => List(RedisCodec.NIL_VALUE_BA)
+      case EmptyBulkReply()     => EmptyBulkReplyChannelBuffer
       case IntegerReply(id)     => List(ChannelBuffers.wrappedBuffer(Array(id.toByte)))
       case StatusReply(message) => List(StringToChannelBuffer(message))
       case ErrorReply(message)  => List(StringToChannelBuffer(message))
       case MBulkReply(messages) => ReplyFormat.toChannelBuffers(messages)
-      case EmptyMBulkReply()    => List(RedisCodec.NIL_VALUE_BA)
+      case EmptyMBulkReply()    => EmptyBulkReplyChannelBuffer
       case _                    => Nil
     }
   }
+
+  private val EmptyBulkReplyString = List(RedisCodec.NIL_VALUE.toString)
+  private val EmptyMBulkReplyString = List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
+  private val EmptyBulkReplyChannelBuffer = List(RedisCodec.NIL_VALUE_BA)
 }

@@ -4,7 +4,6 @@ import com.twitter.util._
 import _root_.java.util.concurrent.Executors
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.mutable.ArrayBuffer
-import com.twitter.conversions.time._
 import _root_.java.util.Random
 
 /**

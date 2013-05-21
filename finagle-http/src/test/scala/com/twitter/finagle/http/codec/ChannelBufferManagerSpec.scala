@@ -1,12 +1,10 @@
 package com.twitter.finagle.http.codec
 
-import java.nio.charset.Charset
 
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers
 
 import com.twitter.finagle.ChannelBufferUsageException

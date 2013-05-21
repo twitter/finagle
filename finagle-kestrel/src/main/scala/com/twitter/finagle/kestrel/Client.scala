@@ -1,8 +1,7 @@
 package com.twitter.finagle.kestrel
 
 import scala.collection.JavaConversions._
-import _root_.java.util.concurrent.atomic.AtomicBoolean
-import _root_.java.util.logging.{Logger, Level}
+import _root_.java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.util.{
   Future, Duration, Time,
@@ -318,8 +317,8 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     val messages = new Broker[ReadMessage]  // todo: buffer?
     val close = new Broker[Unit]
 
-    val open = Open(queueName, Some(Duration.MaxValue))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
+    val open = Open(queueName, Some(Duration.Top))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
     val abort = Abort(queueName)
 
     def recv(service: Service[Command, Response], command: GetCommand) {
@@ -332,24 +331,24 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
 
             Offer.select(
               ack.recv { _ => recv(service, closeAndOpen) },
-              close.recv { t => service.release(); error ! ReadClosedException }
+              close.recv { t => service.close(); error ! ReadClosedException }
             )
 
           case Return(Values(Seq())) =>
             recv(service, open)
 
           case Return(_) =>
-            service.release()
+            service.close()
             error ! new IllegalArgumentException("invalid reply from kestrel")
 
           case Throw(t) =>
-            service.release()
+            service.close()
             error ! t
         },
 
         close.recv { _ =>
-          service.release()
-          reply.cancel()
+          service.close()
+          reply.raise(ReadClosedException)
           error ! ReadClosedException
         }
       )

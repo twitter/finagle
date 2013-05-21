@@ -1,24 +1,24 @@
-package com.twitter.finagle.mysql
+package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle._
-import com.twitter.finagle.mysql.codec.{PacketFrameDecoder, Endec}  
-import com.twitter.finagle.mysql.protocol._
-import com.twitter.finagle.mysql.protocol.Capability._
+import com.twitter.finagle.exp.mysql.codec.{PacketFrameDecoder, Endec}
+import com.twitter.finagle.exp.mysql.protocol.{Capability, Charset, ServersGreeting, LoginRequest}
 import com.twitter.util.Future
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
+import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
+import org.jboss.netty.handler.codec.frame.FrameDecoder
 
-class MySQL(username: String, password: String, database: Option[String]) 
+class MySQL(username: String, password: String, database: Option[String])
   extends CodecFactory[Request, Result] {
     private[this] val clientCapability = Capability(
-      LongFlag, 
-      Transactions, 
-      Protocol41, 
-      FoundRows, 
-      Interactive, 
-      LongPassword, 
-      ConnectWithDB, 
-      SecureConnection, 
-      LocalFiles
+      Capability.LongFlag,
+      Capability.Transactions,
+      Capability.Protocol41,
+      Capability.FoundRows,
+      Capability.Interactive,
+      Capability.LongPassword,
+      Capability.ConnectWithDB,
+      Capability.SecureConnection,
+      Capability.LocalFiles
     )
 
     def server = throw new Exception("Not yet implemented...")
@@ -38,7 +38,7 @@ class MySQL(username: String, password: String, database: Option[String])
         }
 
         // Authenticate each connection before returning it via a ServiceFactoryProxy.
-        override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) = 
+        override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) =
           new AuthenticationProxy(underlying, username, password, database, clientCapability)
 
       }
@@ -46,36 +46,39 @@ class MySQL(username: String, password: String, database: Option[String])
 }
 
 class AuthenticationProxy(
-    underlying: ServiceFactory[Request, Result], 
-    username: String, 
+    underlying: ServiceFactory[Request, Result],
+    username: String,
     password: String,
     database: Option[String],
-    clientCap: Capability) 
+    clientCap: Capability)
   extends ServiceFactoryProxy(underlying) {
 
-    def makeLoginReq(sg: ServersGreeting) = 
-      LoginRequest(username, password, database, clientCap, sg.salt, sg.serverCap)
-      
+    def makeLoginReq(sg: ServersGreeting) =
+      LoginRequest(username, password, database, clientCap, sg.salt, sg.serverCap, sg.charset)
+
     def acceptGreeting(res: Result) = res match {
       case sg: ServersGreeting if !sg.serverCap.has(Capability.Protocol41) =>
         Future.exception(IncompatibleServer("This client is only compatible with MySQL version 4.1 and later."))
 
-      case sg: ServersGreeting if !Charset.isUTF8(sg.charset) => 
-        Future.exception(IncompatibleServer("This client is only compatible with UTF-8 charset encoding."))
+      case sg: ServersGreeting if !Charset.isCompatible(sg.charset) =>
+        Future.exception(IncompatibleServer("This client is only compatible with UTF-8 and Latin-1 charset encoding."))
 
       case sg: ServersGreeting =>
         Future.value(sg)
 
       case r =>
-       Future.exception(new ClientError("Invalid Reply type %s".format(r.getClass.getName)))
+       Future.exception(ClientError("Invalid Reply type %s".format(r.getClass.getName)))
     }
 
     def acceptLogin(res: Result) = res match {
-      case r: OK => 
-        Future.value(res)
+      case r: OK =>
+        Future.value(r)
 
-      case Error(c, _, m) => 
-        Future.exception(ServerError("Error when authenticating the client "+ c + " - " + m))
+      case Error(code, state, msg) =>
+        Future.exception(ServerError(code, state, msg))
+
+      case uknown =>
+        Future.exception(ClientError("Invalid login response type: %s".format(uknown.toString)))
     }
 
     override def apply(conn: ClientConnection) = for {

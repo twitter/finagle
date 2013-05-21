@@ -1,18 +1,19 @@
 package com.twitter.finagle.memcached.java;
 
-import com.twitter.finagle.memcached.protocol.Response;
-import com.twitter.finagle.memcached.GetResult;
-import com.twitter.finagle.memcached.GetsResult;
-import com.twitter.util.Future;
-import com.twitter.util.Time;
-import org.jboss.netty.buffer.ChannelBuffer;
+import java.util.List;
+import java.util.Map;
+
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
-import com.twitter.util.Function;
 
-import java.util.List;
-import java.util.Map;
+import org.jboss.netty.buffer.ChannelBuffer;
+
+import com.twitter.finagle.memcached.GetResult;
+import com.twitter.finagle.memcached.GetsResult;
+import com.twitter.util.Function;
+import com.twitter.util.Future;
+import com.twitter.util.Time;
 
 public class ClientBase extends Client {
   com.twitter.finagle.memcached.Client underlying;

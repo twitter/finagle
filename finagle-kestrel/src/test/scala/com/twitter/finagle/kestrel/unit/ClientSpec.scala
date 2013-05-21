@@ -5,7 +5,7 @@ import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer, Promise}
+import com.twitter.util.{Await, Future, Duration, Time, MockTimer, Promise}
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 
@@ -53,7 +53,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
 
       messages ! m
       f.isDefined must beTrue
-      f() must be(m)
+      Await.result(f) must be(m)
 
       (h.messages?).isDefined must beFalse
     }
@@ -84,7 +84,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       val m2 = msg(2)
       messages2 ! m2
       f.isDefined must beTrue
-      f() must be(m2)
+      Await.result(f) must be(m2)
     }
 
     "reconnect on failure (with delay)" in Time.withCurrentTimeFrozen { tc =>
@@ -107,7 +107,7 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       error ! new Exception("final sad panda")
 
       errf.isDefined must beTrue
-      errf() must be_==(OutOfRetriesException)
+      Await.result(errf) must be_==(OutOfRetriesException)
     }
 
     "close on close requested" in {
@@ -123,8 +123,8 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     val factory = mock[ServiceFactory[Command, Response]]
     val service = mock[Service[Command, Response]]
     val client = new ConnectedClient(factory)
-    val open = Open(queueName, Some(Duration.MaxValue))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
+    val open = Open(queueName, Some(Duration.Top))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
     val abort = Abort(queueName)
 
     "interrupt current request on close" in {

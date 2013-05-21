@@ -1,9 +1,8 @@
 package com.twitter.finagle.pool
 
+import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.{CancelledConnectionException, ClientConnection, 
-  Service, ServiceClosedException, ServiceFactory, ServiceProxy, TooManyWaitersException}
-import com.twitter.util.{Future, Promise, Return, Throw}
+import com.twitter.util.{Future, Promise, Time, Throw, Return}
 import java.util.ArrayDeque
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -49,7 +48,7 @@ class WatermarkPool[Req, Rep](
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def release() = {
+    override def close(deadline: Time) = {
       val releasable = WatermarkPool.this.synchronized {
         if (!isOpen) {
           numServices -= 1
@@ -75,7 +74,9 @@ class WatermarkPool[Req, Rep](
       }
 
       if (releasable)
-        underlying.release()
+        underlying.close(deadline)
+      else
+        Future.Done
     }
   }
 
@@ -86,8 +87,8 @@ class WatermarkPool[Req, Rep](
       val service = queue.removeFirst()
       if (!service.isAvailable) {
         // Note: since these are ServiceWrappers, accounting is taken
-        // care of by ServiceWrapper.release()
-        service.release()
+        // care of by ServiceWrapper.close()
+        service.close()
         dequeue()
       } else {
         Some(service)
@@ -121,15 +122,23 @@ class WatermarkPool[Req, Rep](
 
     // If we reach this point, we've committed to creating a service
     // (numServices was increased by one).
-    factory(conn) onFailure { _ =>
-      synchronized {
+    val p = new Promise[Service[Req, Rep]]
+    val underlying = factory(conn) map { new ServiceWrapper(_) }
+    underlying respond { res =>
+      p.updateIfEmpty(res)
+      if (res.isThrow) synchronized {
         numServices -= 1
         flushWaiters()
       }
-    } map { new ServiceWrapper(_) }
+    }
+    p.setInterruptHandler { case e =>
+      if (p.updateIfEmpty(Throw(WriteException(e))))
+        underlying onSuccess { _.close() }
+    }
+    p
   }
 
-  def close() = synchronized {
+  def close(deadline: Time) = synchronized {
     // Mark the pool closed, relinquishing completed requests &
     // denying the issuance of further requests. The order here is
     // important: we mark the service unavailable before releasing the
@@ -138,7 +147,7 @@ class WatermarkPool[Req, Rep](
     isOpen = false
 
     // Drain the pool.
-    queue.asScala foreach { _.release() }
+    queue.asScala foreach { _.close() }
     queue.clear()
 
     // Kill the existing waiters.
@@ -146,7 +155,7 @@ class WatermarkPool[Req, Rep](
     waiters.clear()
 
     // Close the underlying factory.
-    factory.close()
+    factory.close(deadline)
   }
 
   override def isAvailable = isOpen && factory.isAvailable

@@ -80,7 +80,7 @@ object Scrooge extends Plugin {
   val genThriftSettings: Seq[Setting[_]] = Seq(
     scroogeThriftSourceFolder <<= (sourceDirectory) { _ / "thrift" },
     scroogeThriftSources <<= (scroogeThriftSourceFolder) { srcDir => (srcDir ** "*.thrift").get },
-    scroogeThriftOutputFolder <<= (sourceManaged) { _ / "scala" },
+    scroogeThriftOutputFolder <<= (sourceManaged) { x => x },
     scroogeThriftIncludeFolders := Seq(),
     scroogeThriftNamespaceMap := Map(),
 
@@ -154,8 +154,7 @@ object Scrooge extends Plugin {
       folder / (name + ".jar")
     },
     
-    libraryDependencies += "com.twitter" % "scrooge-runtime" % "2.3.2" intransitive(),
-
+    libraryDependencies += "com.twitter" %% "scrooge-runtime" % "2.4.0" intransitive(),
     scroogeFetch <<= (
       streams,
       scroogeCacheFolder,

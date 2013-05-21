@@ -1,11 +1,11 @@
 package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.{Service, ServiceException, ShardNotAvailableException}
+import com.twitter.finagle.{Service, ShardNotAvailableException}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
 import com.twitter.concurrent.Broker
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
@@ -32,15 +32,20 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     expected.size mustEqual 99
 
     // Build Ketama client
+    def newMock() = {
+      val s = mock[Service[Command, Response]]
+      s.close(any) returns Future.Done
+      s
+    }
     val clients = Map(
-      ("10.0.1.1", 11211, 600)  -> mock[Service[Command, Response]],
-      ("10.0.1.2", 11211, 300)  -> mock[Service[Command, Response]],
-      ("10.0.1.3", 11211, 200)  -> mock[Service[Command, Response]],
-      ("10.0.1.4", 11211, 350)  -> mock[Service[Command, Response]],
-      ("10.0.1.5", 11211, 1000) -> mock[Service[Command, Response]],
-      ("10.0.1.6", 11211, 800)  -> mock[Service[Command, Response]],
-      ("10.0.1.7", 11211, 950)  -> mock[Service[Command, Response]],
-      ("10.0.1.8", 11211, 100)  -> mock[Service[Command, Response]]
+      ("10.0.1.1", 11211, 600)  -> newMock(),
+      ("10.0.1.2", 11211, 300)  -> newMock(),
+      ("10.0.1.3", 11211, 200)  -> newMock(),
+      ("10.0.1.4", 11211, 350)  -> newMock(),
+      ("10.0.1.5", 11211, 1000) -> newMock(),
+      ("10.0.1.6", 11211, 800)  -> newMock(),
+      ("10.0.1.7", 11211, 950)  -> newMock(),
+      ("10.0.1.8", 11211, 100)  -> newMock()
     ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
     val broker = new Broker[NodeEvent]
     val ketamaClient = new KetamaClient(clients, broker.recv, KeyHasher.KETAMA, 160)
@@ -55,14 +60,14 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
 
         expectedService.apply(any[Incr]) returns Future.value(randomResponse)
 
-        mockClient.incr("foo")().get mustEqual randomResponse.value
+        Await.result(mockClient.incr("foo")).get mustEqual randomResponse.value
       }
     }
 
     "release" in {
       ketamaClient.release()
       clients.values foreach { client =>
-        there was one(client).release()
+        there was one(client).close(any)
       }
     }
 
@@ -86,26 +91,26 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       val broker = new Broker[NodeEvent]
       val ketamaClient = new KetamaClient(services, broker.recv, KeyHasher.KETAMA, 160)
 
-      ketamaClient.get("foo")()
+      Await.result(ketamaClient.get("foo"))
       there was one(serviceA).apply(any)
 
       broker !! NodeMarkedDead(nodeKeyA)
 
       "goes to secondary if primary is down" in {
         serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
-        ketamaClient.get("foo")()
+        Await.result(ketamaClient.get("foo"))
         there was one(serviceB).apply(any)
       }
 
       "throws ShardNotAvailableException when no nodes available" in {
         broker !! NodeMarkedDead(nodeKeyB)
-        ketamaClient.get("foo")() must throwA[ShardNotAvailableException]
+        Await.result(ketamaClient.get("foo")) must throwA[ShardNotAvailableException]
       }
 
       "brings back the dead node" in {
         serviceA(any) returns Future.value(Values(Seq(value)))
         broker !! NodeRevived(nodeKeyA)
-        ketamaClient.get("foo")()
+        Await.result(ketamaClient.get("foo"))
         there was two(serviceA).apply(any)
       }
     }

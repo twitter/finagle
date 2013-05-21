@@ -7,7 +7,7 @@ import com.twitter.common.zookeeper.ServerSet
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.concurrent.Spool
 import com.twitter.finagle.builder.Cluster
-import com.twitter.thrift.{Endpoint, ServiceInstance}
+import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util.{Future, Return, Promise}
 

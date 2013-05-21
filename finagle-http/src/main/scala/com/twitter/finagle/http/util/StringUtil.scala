@@ -1,8 +1,5 @@
 package com.twitter.finagle.http.util
 
-import com.twitter.util.Duration
-import com.twitter.conversions.time._
-
 
 object StringUtil {
 

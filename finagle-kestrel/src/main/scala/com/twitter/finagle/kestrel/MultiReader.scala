@@ -1,17 +1,14 @@
 package com.twitter.finagle.kestrel
 
-import com.twitter.concurrent.{Broker, Offer, Spool}
+import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
-import com.twitter.util.{Duration, Future, Timer}
+import com.twitter.util.{Duration, Timer}
 import _root_.java.lang.{Boolean => JBoolean}
 import _root_.java.net.SocketAddress
-import _root_.java.util.concurrent.ConcurrentHashMap
 import _root_.java.{util => ju}
-import _root_.java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ConcurrentMap
 
 object AllHandlesDiedException extends Exception
 

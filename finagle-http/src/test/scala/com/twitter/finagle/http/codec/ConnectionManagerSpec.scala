@@ -4,10 +4,8 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Promise, Return}
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.UpstreamMessageEvent
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
-import org.mockito.ArgumentCaptor
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 

@@ -1,6 +1,5 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 case object Discard extends Command {

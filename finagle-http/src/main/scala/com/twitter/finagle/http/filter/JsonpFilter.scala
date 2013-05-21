@@ -3,7 +3,6 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.http.{MediaType, Method, Request, Response}
 import com.twitter.util.Future
-import java.io.{ByteArrayOutputStream, PrintWriter}
 import org.jboss.netty.buffer.ChannelBuffers
 
 

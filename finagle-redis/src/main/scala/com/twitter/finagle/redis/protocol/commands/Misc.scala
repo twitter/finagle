@@ -31,6 +31,20 @@ object Auth {
   }
 }
 
+case class Info(section: ChannelBuffer) extends Command {
+  def command = Commands.INFO
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(section match {
+    case ChannelBuffers.EMPTY_BUFFER => Seq(CommandBytes.INFO)
+    case _ => Seq(CommandBytes.INFO, section)
+  })
+}
+
+object Info {
+  def apply(section: Seq[Array[Byte]]) = {
+      new Info(ChannelBuffers.wrappedBuffer(section.head))
+  }
+}
+
 case object Quit extends Command {
   def command = Commands.QUIT
   val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.QUIT))

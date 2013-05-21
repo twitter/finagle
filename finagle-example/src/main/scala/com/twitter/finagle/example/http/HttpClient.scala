@@ -53,7 +53,7 @@ object HttpClient {
 
     // When both request1 and request2 have completed, close the TCP connection(s).
     (request1 join request2) ensure {
-      client.release()
+      client.close()
     }
   }
 

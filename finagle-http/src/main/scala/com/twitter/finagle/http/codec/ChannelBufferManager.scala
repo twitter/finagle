@@ -10,7 +10,6 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.handler.codec.http._
 
 import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.util.StorageUnit

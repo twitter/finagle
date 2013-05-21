@@ -3,7 +3,6 @@ package com.twitter.finagle.service
 import com.twitter.finagle.{
   SimpleFilter, Service, RequestTimeoutException, IndividualRequestTimeoutException}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util
 import com.twitter.util.{Future, Duration, Timer}
 
 /**

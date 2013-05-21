@@ -80,17 +80,22 @@ object Commands {
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
   val AUTH              = "AUTH"
+  val INFO              = "INFO"
   val QUIT              = "QUIT"
 
   // Hash Sets
   val HDEL              = "HDEL"
   val HGET              = "HGET"
   val HGETALL           = "HGETALL"
+  val HINCRBY           = "HINCRBY"
   val HKEYS             = "HKEYS"
+  val HLEN              = "HLEN"
   val HMGET             = "HMGET"
   val HMSET             = "HMSET"
   val HSCAN             = "HSCAN"
   val HSET              = "HSET"
+  val HSETNX            = "HSETNX"
+  val HVALS             = "HVALS"
 
   // Lists
   val LLEN              = "LLEN"
@@ -186,17 +191,21 @@ object Commands {
     FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
     AUTH              -> {Auth(_)},
+    INFO              -> {Info(_)},
     QUIT              -> {_ => Quit},
 
     // hash sets
     HDEL              -> {HDel(_)},
     HGET              -> {HGet(_)},
     HGETALL           -> {HGetAll(_)},
+    HINCRBY           -> {HIncrBy(_)},
     HKEYS             -> {HKeys(_)},
     HMGET             -> {HMGet(_)},
     HMSET             -> {HMSet(_)},
     HSCAN             -> {HScan(_)},
     HSET              -> {HSet(_)},
+    HSETNX            -> {HSetNx(_)},
+    HVALS             -> {HVals(_)},
 
     // Lists
     LLEN              -> {LLen(_)},
@@ -309,17 +318,21 @@ object CommandBytes {
   val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
   val SELECT            = StringToChannelBuffer("SELECT")
   val AUTH              = StringToChannelBuffer("AUTH")
+  val INFO              = StringToChannelBuffer("INFO")
   val QUIT              = StringToChannelBuffer("QUIT")
 
   // Hash Sets
   val HDEL              = StringToChannelBuffer("HDEL")
   val HGET              = StringToChannelBuffer("HGET")
   val HGETALL           = StringToChannelBuffer("HGETALL")
+  val HINCRBY           = StringToChannelBuffer("HINCRBY")
   val HKEYS             = StringToChannelBuffer("HKEYS")
   val HMGET             = StringToChannelBuffer("HMGET")
   val HMSET             = StringToChannelBuffer("HMSET")
   val HSCAN             = StringToChannelBuffer("HSCAN")
   val HSET              = StringToChannelBuffer("HSET")
+  val HSETNX            = StringToChannelBuffer("HSETNX")
+  val HVALS             = StringToChannelBuffer("HVALS")
 
   // Lists
   val LLEN              = StringToChannelBuffer("LLEN")

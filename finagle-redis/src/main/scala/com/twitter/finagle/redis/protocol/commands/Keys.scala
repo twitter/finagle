@@ -1,7 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
 import _root_.java.lang.{Long => JLong}
-import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._

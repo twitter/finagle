@@ -1,20 +1,26 @@
 define service {[
-	line down .05 left .05 then down .05 right .1 then down .05 left .1 then down .1 right .2 then down .1 left .2 then down .1 right .1
-	down
-	box "Codec"
-	box "Transport"
-	box "Service"
+	[
+		line down .05 left .05 then down .05 right .1 then down .05 left .1 then down .1 right .2 then down .1 left .2 then down .1 right .1
+		down
+
+		box wid 1.9 "Codec/Framer"
+		box wid 1.9 "FrameTransport"
+		box wid 1.9 "Dispatcher"
+	]
+
+	box with .n at last [].n+(0,.1) wid last [].wid*1.1 ht last [].ht+boxht*1.1 thickness 2
+	"\fISession\fP" with .s at last box.s+(0,.2)
 ]}
 
 
 define channelservice {[
-	Fun: [
+	[
 		  service
  		"\fB() => \fP" rjust at last [].w
  	]
- 	
-	box  ht 2.4 wid boxwid*3 thickness 2 with .n at Fun.n
-	"\fIServiceFactory - ChannelService\fP" with .s at last box.s+(0,.2)
+
+	box  ht last [].ht+boxht*1.2 wid last [].wid+2 thickness 2 with .n at last [].n+(0,.1)
+	"\fIServiceFactory - NewSession\fP" with .s at last box.s+(0,.2)
 ]}
 
 define stack {[
@@ -24,6 +30,6 @@ define stack {[
 	[service ; service; service] with .n at last [].s+(0,-.2)
 
 	box with .nw at last [].nw wid last [].wid  ht last[].ht+boxht thickness 2
-	"\fIServiceFactory - Pool\fP" with .s at  last box.s+(0,.2)
+	"\fIServiceFactory - SessionPool\fP" with .s at  last box.s+(0,.2)
 	"..." with .n at last box.s+(0,-.2)
 ]}

@@ -1,11 +1,5 @@
 package com.twitter.finagle.protobuf.rpc.channel
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBufferInputStream
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.ChannelHandlerContext
-
-import com.google.protobuf.Message
 
 /**
  *

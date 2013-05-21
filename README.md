@@ -1,4 +1,4 @@
-Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/RunningSbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
+Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
 	
@@ -15,6 +15,7 @@ Finagle and its dependencies are published to maven central with crosspath versi
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
   - <a href="#Simple HTTP Client">Simple HTTP Client</a>
+  - <a href="#HTTP Client To A Standard Web Server">HTTP Client To A Standard Web Server</a>
   - <a href="#Simple Client and Server for Thrift">Simple Client and Server for Thrift</a>
 * <a href="#Finagle Overview">Finagle Overview</a>
   - <a href="#Client Features">Client Features</a>
@@ -174,6 +175,40 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 
 [Top](#Top)
 
+<a name="HTTP Client To A Standard Web Server"></a>
+
+### HTTP Client To A Standard Web Server
+
+If you create a request using HttpVersion.HTTP_1_1, a validating server will require a Hosts header. We could fix this by setting the Host header as in
+
+    httpRequest.setHeader("Host", "someHostName")
+
+More concisely, you can use the RequestBuilder object, shown below. In the following example, we use a Jetty server "someJettyServer:80" which happens to come with a small test file "/d.txt":
+
+    import org.jboss.netty.handler.codec.http.HttpRequest
+    import org.jboss.netty.handler.codec.http.HttpResponse
+    
+    import com.twitter.finagle.Service
+    import com.twitter.finagle.builder.ClientBuilder
+    import com.twitter.finagle.http.Http
+    import com.twitter.finagle.http.RequestBuilder
+    import com.twitter.util.Future
+    
+    object ClientToValidatingServer {
+      def main(args: Array[String]) {
+        val hostNamePort = "someJettyServer:80"
+        val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
+          .codec(Http())
+          .hosts(hostNamePort)
+          .hostConnectionLimit(1)
+          .build()
+    
+        val httpRequest = RequestBuilder().url("http://" + hostNamePort + "/d.txt").buildGet
+        val responseFuture: Future[HttpResponse] = client(httpRequest)
+        responseFuture onSuccess { response => println("Received response: " + response) }
+      }
+    }
+
 <a name="Simple Client and Server for Thrift"></a>
 
 ### Simple Client and Server for Thrift
@@ -186,7 +221,7 @@ Apache Thrift is a binary communication protocol that defines available methods 
 
 To create a Finagle Thrift service, you must implement the `FutureIface` Interface that <a href="https://github.com/twitter/scrooge">Scrooge</a> (a custom Thrift compiler) generates for your service. Scrooge wraps your service method return values with asynchronous `Future` objects to be compatible with Finagle.
 
-* If you are using <a href="https://github.com/harrah/xsbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
+* If you are using <a href="https://github.com/sbt/sbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
 * If you are using <a href="http://maven.apache.org/">maven</a> to manage your project, <a href="http://maven.twttr.com/com/twitter/maven-finagle-thrift-plugin/">maven-finagle-thrift-plugin</a> can also compile Thrift IDL for Finagle.
 
 #### Simple Thrift Server

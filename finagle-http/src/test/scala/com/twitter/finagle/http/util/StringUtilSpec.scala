@@ -1,7 +1,5 @@
 package com.twitter.finagle.http.util
 
-import com.twitter.util.TimeConversions._
-import java.util.Date
 import org.specs.SpecificationWithJUnit
 
 

@@ -1,13 +1,13 @@
 package com.twitter.finagle.memcached.integration
 
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.memcached.Server
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
-import com.twitter.finagle.memcached.Server
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.Service
-import com.twitter.util.Time
 import com.twitter.util.TimeConversions._
+import com.twitter.util.{Await, Time}
 import java.net.InetSocketAddress
 import org.specs.SpecificationWithJUnit
 
@@ -39,13 +39,13 @@ class InterpreterServiceSpec extends SpecificationWithJUnit {
         _ <- client(Set(key, 0, Time.epoch, value))
         r <- client(Get(Seq(key)))
       } yield r
-      result(1.second) mustEqual Values(Seq(Value(key, value, None, Some(zero))))
+      Await.result(result, 1.second) mustEqual Values(Seq(Value(key, value, None, Some(zero))))
       client.isAvailable must beTrue
     }
 
     "quit" in {
       val result = client(Quit())
-      result() mustEqual NoOp()
+      Await.result(result) mustEqual NoOp()
     }
   }
 }

@@ -1,7 +1,6 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.http.Response
-import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandlerContext, MessageEvent, SimpleChannelDownstreamHandler}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 

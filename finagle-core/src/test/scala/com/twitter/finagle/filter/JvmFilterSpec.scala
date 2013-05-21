@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Trace, Record, BufferingTracer, Annotation}
 import com.twitter.jvm.{Jvm, Gc}
-import com.twitter.util.{Promise, Time}
+import com.twitter.util.{Future, Promise, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
@@ -16,6 +16,7 @@ class JvmFilterSpec extends SpecificationWithJUnit with Mockito {
     val mkFilter = new MkJvmFilter(jvm)
     val filter = mkFilter[String, String]()
     val service = mock[Service[String, String]]
+    service.close(any) returns Future.Done
     val p = new Promise[String]
     service(any) returns p
     val filtered = filter andThen service

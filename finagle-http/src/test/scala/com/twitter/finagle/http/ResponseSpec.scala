@@ -20,5 +20,23 @@ class ResponseSpec extends SpecificationWithJUnit {
         response.toString mustMatch """Response\("HTTP/1.1 200 OK"\)"""
       }
     }
+
+    "encode" in {
+      val response = Response()
+      response.headers("Server") = "macaw"
+
+      val expected = "HTTP/1.1 200 OK\r\nServer: macaw\r\n\r\n"
+
+      val actual = response.encodeString()
+      actual must_== expected
+    }
+
+    "decode" in {
+      val response = Response.decodeString(
+        "HTTP/1.1 200 OK\r\nServer: macaw\r\nContent-Length: 0\r\n\r\n")
+
+      response.status            must_== HttpResponseStatus.OK
+      response.headers("Server") must_== "macaw"
+    }
   }
 }

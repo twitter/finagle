@@ -51,6 +51,24 @@ object CachePoolCluster {
    */
   def newZkCluster(zkPath: String, zkClient: ZooKeeperClient, backupPool: Option[Set[CacheNode]] = None, statsReceiver: StatsReceiver = NullStatsReceiver) =
     new ZookeeperCachePoolCluster(zkPath, zkClient, backupPool, statsReceiver)
+
+  /**
+   * Zookeeper based cache pool cluster.
+   * The cluster will monitor the underlying serverset changes and report the detected underlying
+   * pool size. The cluster snapshot is unmanaged in a way that any serverset change will be immediately
+   * reflected.
+   *
+   * @param zkPath the zookeeper path representing the cache pool
+   * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
+   */
+  def newUnmanagedZkCluster(
+    zkPath: String,
+    zkClient: ZooKeeperClient
+  ) = new ZookeeperServerSetCluster(
+    ServerSets.create(zkClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)
+  ) map { case addr: InetSocketAddress =>
+    CacheNode(addr.getHostName, addr.getPort, 1)
+  }
 }
 
 trait CachePoolCluster extends Cluster[CacheNode] {
@@ -157,7 +175,7 @@ class ZookeeperCachePoolCluster private[memcached](
   extends CachePoolCluster {
   import ZookeeperCachePoolCluster._
 
-  private[this] val futurePool = FuturePool.defaultPool
+  private[this] val futurePool = FuturePool.unboundedPool
 
   private[this] val zkServerSetCluster =
     new ZookeeperServerSetCluster(
@@ -250,24 +268,19 @@ class ZookeeperCachePoolCluster private[memcached](
       if (event.getType == Watcher.Event.EventType.None)
         statsReceiver.counter("zkConnectionEvent." + event.getState).incr()
         event.getState match {
+          // actively trying to re-establish the zk connection (hence re-register the cache pool
+          // data watcher) whenever an zookeeper connection expired or disconnected. We could also
+          // only do this when SyncConnected happens, but that would be assuming other components
+          // sharing the zk client (e.g. ZookeeperServerSetCluster) will always actively attempts
+          // to re-establish the zk connection. For now, I'm making it actively re-establishing
+          // the connection itself here.
           case KeeperState.Disconnected =>
             underlyingPoolHealth = UnderlyingZookeeperStatus.Disconnected
+            zookeeperWorkQueue ! ReEstablishZKConn
           case KeeperState.Expired =>
-            // we only need to re-establish the zk connection and re-register the config data
-            // watcher when Expired event happens because this is the event that will close
-            // the zk client (which will lose all attached watchers). We could also do this
-            // only when SyncConnected happens instead of keep retrying, but that would be
-            // assuming other components sharing the zk client (e.g. ZookeeperServerSetCluster)
-            // will always actively attempts to re-establish the zk connection. For now, I'm
-            // making it actively re-establishing the connection itself here.
             underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
             zookeeperWorkQueue ! ReEstablishZKConn
-          case KeeperState.SyncConnected =>
-            // only set the underlyingPoolHealth if it is currently disconnected, otherwise if expired
-            // leave it to the readConfigWork to set it back to healthy
-            if (underlyingPoolHealth == UnderlyingZookeeperStatus.Disconnected) {
-              underlyingPoolHealth = UnderlyingZookeeperStatus.Healthy
-            }
+          case _ =>
         }
     }
   }
@@ -281,6 +294,7 @@ class ZookeeperCachePoolCluster private[memcached](
           case Watcher.Event.EventType.NodeDataChanged =>
             // handle node data change event
             zookeeperWorkQueue ! LoadCachePoolConfig
+          case _ =>
         }
       }
     }
@@ -333,8 +347,8 @@ class ZookeeperCachePoolCluster private[memcached](
       // should be always exactly matching existing memberships, controlled by cache-team operator.
       // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
       // another try
-      val newSet = waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges)
-          .get(CachePoolWaitCompleteTimeout)()
+      val newSet = Await.result(waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges),
+        CachePoolWaitCompleteTimeout)
 
       updatePool(newSet)
     }

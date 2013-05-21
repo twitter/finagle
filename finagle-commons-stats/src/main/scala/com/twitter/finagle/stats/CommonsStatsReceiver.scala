@@ -2,7 +2,6 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.base.Supplier
 import com.twitter.common.stats.{Percentile, Stats}
-import com.twitter.common.util.Sampler
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   val repr = Stats.STATS_PROVIDER
@@ -51,5 +50,4 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
     stats(name)
   }
-
 }

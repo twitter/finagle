@@ -10,8 +10,7 @@ import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer._
 import org.jboss.netty.handler.codec.http.{Cookie, HttpMessage, HttpHeaders, HttpMethod,
   HttpVersion}
-import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import scala.collection.JavaConverters._
 
 
 /**
@@ -31,7 +30,7 @@ abstract class Message extends HttpMessage {
   def version: HttpVersion = getProtocolVersion()
   def version_=(version: HttpVersion) { setProtocolVersion(version) }
 
-  lazy val headers = new HeaderMap(this)
+  lazy val headers: HeaderMap = new MessageHeaderMap(this)
   // Java users: use Netty HttpMessage interface for headers
 
   /** Cookies.  In a request, this uses the Cookie headers.  In a response, it
@@ -40,7 +39,7 @@ abstract class Message extends HttpMessage {
   // Java users: use the interface below for cookies
 
   /** Get iterator over Cookies */
-  def getCookies(): JIterator[Cookie] = cookies.iterator
+  def getCookies(): JIterator[Cookie] = cookies.iterator.asJava
 
   /** Add a cookie */
   def addCookie(cookie: Cookie) {
@@ -383,11 +382,11 @@ abstract class Message extends HttpMessage {
 
 object Message {
   private[http] val Utf8          = Charset.forName("UTF-8")
-  @deprecated("Use MediaType.Json")
+  @deprecated("Use MediaType.Json", "6.1.5")
   val MediaTypeJson         = "application/json"
-  @deprecated("Use MediaType.Javascript")
+  @deprecated("Use MediaType.Javascript", "6.1.5")
   val MediaTypeJavascript   = "application/javascript"
-  @deprecated("Use MediaType.WwwForm")
+  @deprecated("Use MediaType.WwwForm", "6.1.5")
   val MediaTypeWwwForm      = "application/x-www-form-urlencoded"
   val CharsetUtf8           = "charset=utf-8"
   val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8

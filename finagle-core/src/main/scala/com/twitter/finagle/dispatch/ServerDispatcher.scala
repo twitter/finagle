@@ -2,25 +2,9 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
-import com.twitter.util.{Future, Return}
+import com.twitter.util.Closable
+import com.twitter.util.{Future, Return, Time}
 import java.util.concurrent.atomic.AtomicReference
-
-/**
- * A {{ServerDispatcher}} dispatches requests onto services from a
- * source such as a {{Transport}}.
- */
-trait ServerDispatcher {
-  /**
-   * Accept no more requests.
-   */
-  def drain()
-}
-
-object ServerDispatcher {
-  val nil: ServerDispatcher = new ServerDispatcher {
-    def drain() {}
-  }
-}
 
 object SerialServerDispatcher {
   private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
@@ -37,7 +21,7 @@ object SerialServerDispatcher {
  * released after any error.
  */
 class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Service[Req, Rep])
-  extends ServerDispatcher
+  extends Closable
 {
   import SerialServerDispatcher._
 
@@ -45,7 +29,7 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
 
   trans.onClose ensure {
     state.getAndSet(Closed).raise(new CancelledRequestException)
-    service.release()
+    service.close()
   }
 
   private[this] def loop(): Unit = {
@@ -72,8 +56,9 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
   // Note: this is racy, but that's inherent in draining (without
   // protocol support). Presumably, half-closing TCP connection is
   // also possible.
-  def drain() {
+  def close(deadline: Time) = {
     if (state.getAndSet(Draining) eq Idle)
-      trans.close()
+      trans.close(deadline)
+    trans.onClose map(_ => ())
   }
 }

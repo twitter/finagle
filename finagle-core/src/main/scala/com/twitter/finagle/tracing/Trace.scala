@@ -13,7 +13,7 @@ package com.twitter.finagle.tracing
  * the transport.
  */
 
-import com.twitter.util.{Future, Duration, Time, Local}
+import com.twitter.util.{Future, Duration, Time, Local, Stopwatch}
 import java.net.InetSocketAddress
 import scala.util.Random
 
@@ -107,6 +107,7 @@ object Trace {
         case None    => local() = State(Some(traceId), terminal, tracers)
         case Some(s) => local() = s.copy(id = Some(traceId), terminal = terminal)
       }
+
     traceId
   }
 
@@ -122,10 +123,56 @@ object Trace {
     }
   }
 
+  /**
+   * Push the given tracer, create a derivative TraceId and set it to be
+   * the current trace id.
+   * The implementation of this function is more efficient than calling
+   * pushTracer, nextId and setId sequentially as it minimizes the number
+   * of reads and writes to `local`.
+   *
+   * @param tracer the tracer to be pushed
+   * @param terminal true if the next traceId is a terminal id. Future
+   *                 attempts to set nextId will be ignored.
+   */
+  def pushTracerAndSetNextId(tracer: Tracer, terminal: Boolean = false) {
+    val currentState = local()
+    val _nextId = nextId
+    val newState = currentState match {
+      case None => State(None, false, tracer :: Nil)
+      case Some(s) => s.copy(tracers = tracer :: s.tracers)
+    }
+    /* Only set traceId of the current State if terminal is not set */
+    if (!newState.terminal) {
+      _nextId.sampled match {
+        case None =>
+          local() = newState.copy(terminal = terminal,
+            id = Some(_nextId.copy(_sampled = tracer.sampleTrace(_nextId))))
+        case Some(_) => local() = newState.copy(terminal = terminal, id = Some(_nextId))
+      }
+    } else
+      local() = newState
+  }
+
   def state: TraceState = local() getOrElse NoState
   def state_=(state: TraceState) = state match {
     case NoState =>
     case s: State => local.set(Some(s))
+  }
+
+  /**
+   * Convenience method for event loops in services.  Put your service handling
+   * code inside this to get proper tracing with all the correct fields filled in.
+   */
+  def traceService[T](service: String, rpc: String, hostOpt: Option[InetSocketAddress]=None)(f: => T): T = {
+    unwind {
+      Trace.setId(Trace.nextId)
+      Trace.recordRpcname(service, rpc)
+      hostOpt map { Trace.recordServerAddr(_) }
+      Trace.record(Annotation.ServerRecv())
+      try f finally {
+        Trace.record(Annotation.ServerSend())
+      }
+    }
   }
 
   /**
@@ -153,8 +200,9 @@ object Trace {
    * @return return value of the operation
    */
   def time[T](message: String)(f: => T): T = {
-    val (rv, duration) = Duration.inMilliseconds(f)
-    record(message, duration)
+    val elapsed = Stopwatch.start()
+    val rv = f
+    record(message, elapsed())
     rv
   }
 

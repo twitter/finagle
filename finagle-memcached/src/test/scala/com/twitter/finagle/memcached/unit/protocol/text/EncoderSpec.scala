@@ -4,8 +4,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils.{
   stringToChannelBuffer,
   channelBufferToString
 }
-import com.twitter.util.Time
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit

@@ -3,10 +3,10 @@ package com.twitter.finagle.topo
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.stats.OstrichStatsReceiver
-import com.twitter.finagle.thrift.ThriftServerFramedCodec
+import com.twitter.finagle.ThriftMux
 import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
-import com.twitter.util.{Future, JavaTimer}
+import com.twitter.util.{Future, JavaTimer, Await}
 import java.net.InetSocketAddress
 import org.apache.thrift.protocol.TBinaryProtocol
 
@@ -33,21 +33,17 @@ object Backendserver {
     ).apply()
 
     if (args.size != 1) {
-      log.fatal("Server port")
+      log.fatal("Server basePort")
       System.exit(1)
     }
 
     val basePort = args(0).toInt
-
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(basePort+1, 100/*backlog*/, runtime)
     adminService.start()
 
-    ServerBuilder()
-      .name("backend")
-      .codec(ThriftServerFramedCodec())
-      .reportTo(new OstrichStatsReceiver)
-      .bindTo(new InetSocketAddress(basePort))
-      .build(new thrift.Backend.FinagledService(BackendService, new TBinaryProtocol.Factory()))
+    val server = ThriftMux.serveIface(":"+args(0), BackendService)
+
+    Await.ready(server)
   }
 }

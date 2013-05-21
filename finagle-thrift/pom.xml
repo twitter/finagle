@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-thrift</artifactId>
   <packaging>jar</packaging>
-  <version>6.0.6-SNAPSHOT</version>
+  <version>6.4.1-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -34,6 +34,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>silly</groupId>
       <artifactId>silly-thrift</artifactId>
       <version>0.5.0</version>
@@ -43,13 +49,13 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.0.6-SNAPSHOT</version>
+      <version>6.4.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
       <scope>test</scope>
-      <version>6.0.6-SNAPSHOT</version>
+      <version>6.4.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <!--	Uncomment the following to regenerate thrift code.

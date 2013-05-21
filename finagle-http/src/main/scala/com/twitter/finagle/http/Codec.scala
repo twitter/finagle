@@ -12,12 +12,10 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Try, StorageUnit, Future}
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
   ChannelPipelineFactory, UpstreamMessageEvent, Channels,
   ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
 import org.jboss.netty.handler.codec.http._
-import com.twitter.finagle.transport.TransportFactory
 
 case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)

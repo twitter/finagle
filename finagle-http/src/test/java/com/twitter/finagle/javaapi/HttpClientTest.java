@@ -3,15 +3,18 @@ package com.twitter.finagle.javaapi;
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.netty.handler.codec.http.*;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 
-import com.twitter.finagle.*;
+import com.twitter.finagle.Service;
+import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.http.Http;
-import com.twitter.finagle.builder.*;
-import com.twitter.util.Promise;
 import com.twitter.util.Future;
 import com.twitter.util.FutureEventListener;
-import com.twitter.util.*;
+import com.twitter.util.Promise;
 
 public class HttpClientTest {
   public static void main(String args[]) {

@@ -1,11 +1,12 @@
 package com.twitter.finagle.redis.integration
 
-import collection.mutable
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
+import com.twitter.util.Await
 import java.util.UUID
 import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
+import scala.collection.mutable
 
 
 class BtreeClientSpec extends SpecificationWithJUnit {
@@ -91,7 +92,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
     println("Setting " + key + "->" + value)
     client.set(StringToChannelBuffer(key), StringToChannelBuffer(value))
     println("Getting value for key " + key)
-    val getResult = client.get(StringToChannelBuffer(key))()
+    val getResult = Await.result(client.get(StringToChannelBuffer(key)))
     getResult match {
       case Some(n) => println("Got result: " + new String(n.array))
       case None => println("Didn't get the value!")
@@ -122,7 +123,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bAdd(StringToChannelBuffer(outerKey), StringToChannelBuffer(innerKey), StringToChannelBuffer(value))
-        require(target.get() == 1, "BADD failed for " + outerKey + " " + innerKey)
+        require(Await.result(target) == 1, "BADD failed for " + outerKey + " " + innerKey)
       }
     }
 
@@ -132,8 +133,8 @@ class BtreeClientSpec extends SpecificationWithJUnit {
   def testBcard(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
     for ((outerKey, inner) <- dict) {
       val target = client.bCard(StringToChannelBuffer(outerKey))
-      require(inner.size == target.get,
-        "BCARD failed for " + outerKey + " expected " + inner.size + " got " + target.get)
+      require(inner.size == Await.result(target),
+        "BCARD failed for " + outerKey + " expected " + inner.size + " got " + Await.result(target))
       }
 
       println("Test BCARD succeeded")
@@ -143,7 +144,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bGet(StringToChannelBuffer(outerKey), StringToChannelBuffer(innerKey))
-        val targetVal = CBToString(target.get().get)
+        val targetVal = CBToString(Await.result(target).get)
         require(value == targetVal, "BGET failed for " + outerKey + " expected " + value + " got " + targetVal)
       }
     }
@@ -155,7 +156,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bRem(StringToChannelBuffer(outerKey), Seq(StringToChannelBuffer(innerKey)))
-        require(target.get() == 1, "BREM failed for " + outerKey + " " + innerKey)
+        require(Await.result(target) == 1, "BREM failed for " + outerKey + " " + innerKey)
         inner.remove(innerKey)
       }
     }
@@ -166,7 +167,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
   def testBrange(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
     for ((outerKey, inner) <- dict) {
       val innerKeys = inner.toList.sortBy(_._1)
-      val target = client.bRange(StringToChannelBuffer(outerKey), None, None).get()
+      val target = Await.result(client.bRange(StringToChannelBuffer(outerKey), None, None))
       validate(outerKey, innerKeys, target)
     }
 
@@ -179,7 +180,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
       var innerKeys = inner.toList.sortBy(_._1)
       val start = rand.nextInt(innerKeys.size)
       innerKeys = innerKeys.drop(start)
-      val target = client.bRange(StringToChannelBuffer(outerKey), Option(StringToChannelBuffer(innerKeys.head._1)), None).get()
+      val target = Await.result(client.bRange(StringToChannelBuffer(outerKey), Option(StringToChannelBuffer(innerKeys.head._1)), None))
       validate(outerKey, innerKeys, target)
     }
 
@@ -192,7 +193,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
       var innerKeys = inner.toList.sortBy(_._1)
       val end = rand.nextInt(innerKeys.size)
       innerKeys = innerKeys.dropRight(end)
-      val target = client.bRange(StringToChannelBuffer(outerKey), None, Option(StringToChannelBuffer(innerKeys.last._1))).get()
+      val target = Await.result(client.bRange(StringToChannelBuffer(outerKey), None, Option(StringToChannelBuffer(innerKeys.last._1))))
       validate(outerKey, innerKeys, target)
     }
 
@@ -211,11 +212,11 @@ class BtreeClientSpec extends SpecificationWithJUnit {
         Option(StringToChannelBuffer(innerKeys(end)._1)))
 
       if (start > end) {
-        require(target.isThrow, "BRANGE failed for " + outerKey + " return should be a throw")
+        require(Await.ready(target).poll.get.isThrow, "BRANGE failed for " + outerKey + " return should be a throw")
       }
       else {
         innerKeys = innerKeys.slice(start, end + 1)
-        validate(outerKey, innerKeys, target.get())
+        validate(outerKey, innerKeys, Await.result(target))
       }
     }
 
@@ -227,7 +228,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
       var innerKeys = inner.toList.sortBy(_._1)
       val start = UUID.randomUUID().toString
       innerKeys = innerKeys.filter(p => (start <= p._1))
-      val target = client.bRange(StringToChannelBuffer(outerKey), Option(StringToChannelBuffer(start)), None).get()
+      val target = Await.result(client.bRange(StringToChannelBuffer(outerKey), Option(StringToChannelBuffer(start)), None))
       validate(outerKey, innerKeys, target)
     }
 
@@ -239,7 +240,7 @@ class BtreeClientSpec extends SpecificationWithJUnit {
       var innerKeys = inner.toList.sortBy(_._1)
       val end = UUID.randomUUID().toString
       innerKeys = innerKeys.filter(p => (p._1 <= end))
-      val target = client.bRange(StringToChannelBuffer(outerKey), None, Option(StringToChannelBuffer(end))).get()
+      val target = Await.result(client.bRange(StringToChannelBuffer(outerKey), None, Option(StringToChannelBuffer(end))))
       validate(outerKey, innerKeys, target)
     }
 
@@ -258,10 +259,10 @@ class BtreeClientSpec extends SpecificationWithJUnit {
         Option(StringToChannelBuffer(end)))
 
       if (start > end) {
-        require(target.isThrow, "BRANGE failed for " + outerKey + " return should be a throw")
+        require(Await.ready(target).poll.get.isThrow, "BRANGE failed for " + outerKey + " return should be a throw")
       }
       else {
-        validate(outerKey, innerKeys, target.get())
+        validate(outerKey, innerKeys, Await.result(target))
       }
     }
 

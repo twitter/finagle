@@ -7,7 +7,6 @@ package com.twitter.finagle.stats
 
 import com.google.common.util.concurrent.AtomicLongMap
 import com.google.common.cache.{CacheBuilder, CacheLoader}
-import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, SynchronizedBuffer}
 

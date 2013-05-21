@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle</artifactId>
   <packaging>pom</packaging>
-  <version>6.0.6-SNAPSHOT</version>
+  <version>6.4.1-SNAPSHOT</version>
   <distributionManagement>
     <repository>
       <id>artifactory-release</id>
@@ -18,24 +18,29 @@
     </snapshotRepository>
   </distributionManagement>
   <modules>
+    <module>finagle-benchmark</module>
     <module>finagle-commons-stats</module>
     <module>finagle-core</module>
     <module>finagle-example</module>
     <module>finagle-exception</module>
+    <module>finagle-exp</module>
     <module>finagle-http</module>
     <module>finagle-kestrel</module>
+    <module>finagle-mdns</module>
     <module>finagle-memcached</module>
     <module>finagle-mux</module>
+    <module>finagle-mysql</module>
     <module>finagle-native</module>
     <module>finagle-ostrich4</module>
     <module>finagle-redis</module>
     <module>finagle-serversets</module>
     <module>finagle-spdy</module>
+    <module>finagle-stats</module>
     <module>finagle-stream</module>
     <module>finagle-stress</module>
     <module>finagle-test</module>
     <module>finagle-thrift</module>
+    <module>finagle-thriftmux</module>
     <module>finagle-zipkin</module>
-    <module>finagle-benchmark</module>
   </modules>
 </project>

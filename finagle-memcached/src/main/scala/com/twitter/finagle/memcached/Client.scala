@@ -1,13 +1,11 @@
 package com.twitter.finagle.memcached
 
-import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import _root_.java.util.{Map => JMap}
 
-import com.google.common.base.{CharMatcher, Strings}
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
@@ -506,7 +504,7 @@ protected class ConnectedClient(service: Service[Command, Response]) extends Cli
   }
 
   def release() {
-    service.release()
+    service.close()
   }
 }
 
@@ -611,7 +609,7 @@ class KetamaFailureAccrualFactory[Req, Rep](
 }
 
 object KetamaClient {
-  val NumReps = 160
+  val DefaultNumReps = 160
   private val shardNotAvailableDistributor = {
     val failedService = new FailedService(new ShardNotAvailableException)
     new SingletonDistributor(Client(failedService))
@@ -657,16 +655,12 @@ class KetamaClient private[memcached](
   nodeChange foreach {
     case NodeMarkedDead(key) =>
       ejectNode(key)
-      ejectionCount.incr()
     case NodeRevived(key) =>
       reviveNode(key)
-      revivalCount.incr()
     case NodeLeave(key) =>
       removeNode(key)
-      nodeLeaveCount.incr()
     case NodeJoin(key, client) =>
       joinNode(key, client)
-      nodeJoinCount.incr()
   }
 
   override def clientOf(key: String): Client = {
@@ -681,18 +675,22 @@ class KetamaClient private[memcached](
   }
 
   private[this] def ejectNode(key: KetamaClientKey) = synchronized {
-    val node = nodes(key)
-    if (node.state == NodeState.Live) {
-      node.state = NodeState.Ejected
-      rebuildDistributor()
+    nodes.get(key) match {
+      case Some(node) if (node.state == NodeState.Live) =>
+        node.state = NodeState.Ejected
+        rebuildDistributor()
+        ejectionCount.incr()
+      case _ =>
     }
   }
 
   private[this] def reviveNode(key: KetamaClientKey) = synchronized {
-    val node = nodes(key)
-    if (node.state == NodeState.Ejected) {
-      node.state = NodeState.Live
-      rebuildDistributor()
+    nodes.get(key) match {
+      case Some(node) if node.state == NodeState.Ejected =>
+        node.state = NodeState.Live
+        rebuildDistributor()
+        revivalCount.incr()
+      case _ =>
     }
   }
 
@@ -701,6 +699,7 @@ class KetamaClient private[memcached](
       case Some(Node(node, _)) =>
         rebuildDistributor()
         node.handle.release()
+        nodeLeaveCount.incr()
       case _ =>
     }
   }
@@ -711,6 +710,7 @@ class KetamaClient private[memcached](
 
     nodes(key) = Node(KetamaNode(key.identifier, key.weight, Client(service)), NodeState.Live)
     rebuildDistributor()
+    nodeJoinCount.incr()
   }
 
   def release() = synchronized {
@@ -723,9 +723,9 @@ case class KetamaClientBuilder private[memcached] (
   _cluster: Cluster[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
-  _numFailures: Int = 5,
-  _markDeadFor: Duration = 30.seconds,
-  oldLibMemcachedVersionComplianceMode: Boolean = false
+  _failureAccrualParams: (Int, Duration) = (5, 30.seconds),
+  oldLibMemcachedVersionComplianceMode: Boolean = false,
+  numReps: Int = KetamaClient.DefaultNumReps
 ) {
 
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
@@ -754,11 +754,17 @@ case class KetamaClientBuilder private[memcached] (
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
 
+  def numReps(numReps: Int): KetamaClientBuilder =
+    copy(numReps = numReps)
+
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): KetamaClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
 
   def failureAccrualParams(numFailures: Int, markDeadFor: Duration): KetamaClientBuilder =
-    copy(_numFailures = numFailures, _markDeadFor = markDeadFor)
+    copy(_failureAccrualParams = (numFailures, markDeadFor))
+
+  def noFailureAccrual: KetamaClientBuilder =
+    copy(_failureAccrualParams = (Int.MaxValue, Duration.Zero))
 
   def enableOldLibMemcachedVersionComplianceMode(): KetamaClientBuilder =
     copy(oldLibMemcachedVersionComplianceMode = true)
@@ -803,18 +809,21 @@ case class KetamaClientBuilder private[memcached] (
       initialServices,
       nodeChangeBroker.recv,
       keyHasher,
-      KetamaClient.NumReps,
+      numReps,
       statsReceiver,
       oldLibMemcachedVersionComplianceMode
     )
   }
 
-  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = new ServiceFactoryWrapper {
-    def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
-        new KetamaFailureAccrualFactory(
-          factory, _numFailures, _markDeadFor, timer, key, broker
-        )
-      }
+  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = {
+    val (_numFailures, _markDeadFor) = _failureAccrualParams
+    new ServiceFactoryWrapper {
+      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
+          new KetamaFailureAccrualFactory(
+            factory, _numFailures, _markDeadFor, timer, key, broker
+          )
+        }
+    }
   }
 
   private[this] def failureAccrualWrapper(key: KetamaClientKey) = {

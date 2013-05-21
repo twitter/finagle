@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 trait KeyCommand extends Command {
   val key: ChannelBuffer

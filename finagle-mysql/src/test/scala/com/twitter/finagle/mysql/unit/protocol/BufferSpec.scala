@@ -1,7 +1,7 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.exp.mysql.protocol
 
+import com.twitter.finagle.exp.mysql.ClientError
 import org.specs.SpecificationWithJUnit
-import com.twitter.finagle.mysql.ClientError
 
 class BufferSpec extends SpecificationWithJUnit {
   "Buffer" should {
@@ -128,6 +128,16 @@ class BufferSpec extends SpecificationWithJUnit {
         val str = "test" * 100
         val len = Buffer.sizeOfLen(str.size) + str.size
         val strAsBytes = new Array[Byte](len)
+        val bw = BufferWriter(strAsBytes)
+        bw.writeLengthCodedString(str)
+
+        val br = BufferReader(strAsBytes)
+        str mustEqual br.readLengthCodedString()
+      }
+
+      "coded string with non-ascii characters" in {
+        val str = "バイトルドットコム"
+        val strAsBytes = new Array[Byte](100)
         val bw = BufferWriter(strAsBytes)
         bw.writeLengthCodedString(str)
 

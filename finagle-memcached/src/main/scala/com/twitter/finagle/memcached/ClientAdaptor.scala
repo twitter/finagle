@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached
 
 import com.twitter.util.{Time, Future, Bijection}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
 class ClientAdaptor[T](

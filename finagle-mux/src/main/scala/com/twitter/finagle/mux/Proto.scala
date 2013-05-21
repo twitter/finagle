@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux
 
-import com.twitter.util.Try
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}

@@ -1,13 +1,11 @@
 package com.twitter.finagle.channel
 
-import org.jboss.netty.channel.{
-  SimpleChannelDownstreamHandler, Channels,
-  ChannelHandlerContext, MessageEvent}
-
-import com.twitter.util.{Time, Duration, Timer}
-
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.WriteTimedOutException
+import com.twitter.finagle.netty3.Conversions._
+import com.twitter.util.{Time, Duration, Timer}
+import org.jboss.netty.channel.{
+  ChannelHandlerContext, Channels, MessageEvent, SimpleChannelDownstreamHandler
+}
 
 /**
  * A simple handler that times out a write if it fails to complete

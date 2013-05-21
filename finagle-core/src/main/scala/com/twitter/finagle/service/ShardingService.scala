@@ -1,10 +1,9 @@
 package com.twitter.finagle.service
 
-import com.twitter.util.Future
+import com.twitter.util.{Future, Closable, Time}
 import com.twitter.hashing._
-import com.twitter.finagle.builder.{ClientConfig, ClientBuilder}
 import com.twitter.finagle.{
-  Service, ServiceFactory, NotShardableException, ShardNotAvailableException}
+  Service, NotShardableException, ShardNotAvailableException}
 
 /**
  * ShardingService takes a `Distributor` where the handle is a service.
@@ -37,7 +36,8 @@ class ShardingService[Req, Rep](
   }
 
   override def isAvailable: Boolean = distributor.nodes exists { _.isAvailable }
-  override def release() = distributor.nodes foreach { _.release() }
+  override def close(deadline: Time) =
+    Closable.all(distributor.nodes:_*).close(deadline)
 }
 
 private[service] object ShardingService {

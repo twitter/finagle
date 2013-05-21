@@ -5,7 +5,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
-import util.{StringToChannelBuffer, ReplyFormat}
+import util.ReplyFormat
 
 trait BtreeSortedSetCommands { self: BaseClient =>
 
@@ -60,7 +60,7 @@ trait BtreeSortedSetCommands { self: BaseClient =>
     doRequest(BRange(key, startField, endField)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toChannelBuffers(messages)))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
   }
 }

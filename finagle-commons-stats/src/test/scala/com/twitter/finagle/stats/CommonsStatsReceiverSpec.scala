@@ -2,7 +2,6 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.stats.Stats
 import org.specs.SpecificationWithJUnit
-import scala.collection.JavaConversions._
 
 //TODO after each clear Stats
 class CommonsStatsReceiverSpec extends SpecificationWithJUnit {

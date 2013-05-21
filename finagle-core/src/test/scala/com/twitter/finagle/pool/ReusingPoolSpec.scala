@@ -8,10 +8,13 @@ import com.twitter.util.{Future, Promise, Return, Throw}
 class ReusingPoolSpec extends SpecificationWithJUnit with Mockito {
   "ReusingPool" should {
     val underlying = mock[ServiceFactory[Int, Int]]
+    underlying.close(any) returns Future.Done
     underlying.isAvailable returns true
     val service = mock[Service[Int, Int]]
+    service.close(any) returns Future.Done
     service.isAvailable returns true
     val service2 = mock[Service[Int, Int]]
+    service2.close(any) returns Future.Done
     service2.isAvailable returns true
     val underlyingP = new Promise[Service[Int, Int]]
     underlying(any) returns underlyingP
@@ -43,13 +46,13 @@ class ReusingPoolSpec extends SpecificationWithJUnit with Mockito {
       there was one(underlying)(any)
       service.isAvailable returns false
       underlying(any) returns Future.value(service2)
-      there was no(service).release()
+      there was no(service).close(any)
       there was no(service).isAvailable
       pool().poll must beSome(Return(service2))
       there was one(service).isAvailable
-      there was one(service).release()
+      there was one(service).close(any)
       there were two(underlying)(any)
-      there was no(service2).release()
+      there was no(service2).close(any)
     }
 
     "return on failure" in {

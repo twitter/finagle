@@ -1,14 +1,15 @@
 package com.twitter.finagle.memcached.java;
 
+import java.util.Collections;
+import java.util.Set;
+
+import scala.collection.JavaConversions;
+
 import com.twitter.common.zookeeper.ZooKeeperClient;
 import com.twitter.finagle.memcached.CacheNode;
 import com.twitter.finagle.memcached.CachePoolCluster$;
 import com.twitter.finagle.stats.NullStatsReceiver;
 import com.twitter.finagle.stats.StatsReceiver;
-
-import java.util.Collections;
-import java.util.Set;
-import scala.collection.JavaConversions;
 
 /**
  * A Java-friendly CachePoolCluster.
@@ -51,6 +52,21 @@ public class CachePoolClusterUtil {
         JavaConversions.asScalaSet(backupPool).toSet();
     return CachePoolCluster$.MODULE$.newZkCluster(
         zkPath, zkClient, scala.Option.apply(backupSet), statsReceiver);
+  }
+
+  /**
+   * Zookeeper based cache pool cluster.
+   * The cluster will monitor the underlying serverset changes and report the detected underlying
+   * pool size. The cluster snapshot is unmanaged in a way that any serverset change will be immediately
+   * reflected.
+   *
+   * @param zkPath the zookeeper path representing the cache pool
+   * @param zkClient zookeeper client to read zookeeper
+   * @return a Cluster<CacheNode>
+   */
+  public static com.twitter.finagle.builder.Cluster<CacheNode> newUnmanagedZkCluster(
+      String zkPath, ZooKeeperClient zkClient) {
+    return CachePoolCluster$.MODULE$.newUnmanagedZkCluster(zkPath, zkClient);
   }
 
   /**

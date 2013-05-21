@@ -3,7 +3,6 @@ package com.twitter.finagle.exception
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import org.mockito.ArgumentCaptor
-import com.twitter.util.Future
 import org.apache.scribe.{ResultCode, LogEntry, scribe}
 import org.mockito.Matchers._
 import com.twitter.util._
@@ -73,7 +72,8 @@ class ReporterSpec extends SpecificationWithJUnit with Mockito {
       .withSource(socket)
       .withClient()
 
-    val tse = new TestServiceException("service16", "my cool message", clientAddress = Some(InetAddress.getLocalHost.getHostAddress), sourceAddress = Some(socket.getAddress.getHostAddress + ":" + socket.getPort))
+    val tse = new TestServiceException("service16", "my cool message",
+    clientAddress = Some(InetAddress.getLocalHost.getHostAddress), sourceAddress = Some(socket.getAddress.getHostName))
 
     "log entries to a client once upon receive" in {
       reporter.handle(tse.throwable)

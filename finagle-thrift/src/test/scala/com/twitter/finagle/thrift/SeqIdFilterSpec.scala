@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Future, Return, Throw, Promise, Time}
+import com.twitter.util.{Return, Throw, Promise, Time}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.TMemoryBuffer
 import org.mockito.ArgumentCaptor

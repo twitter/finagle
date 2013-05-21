@@ -1,7 +1,6 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
-import org.mockito.ArgumentCaptor
 import com.twitter.util.Future
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito

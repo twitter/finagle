@@ -23,7 +23,7 @@ private[redis] object RedisCodec {
   val EOL_DELIMITER       = "\r\n"
 
   val NIL_VALUE           = NilValue
-  val NIL_VALUE_BA        = StringToChannelBuffer(NilValue)
+  val NIL_VALUE_BA        = ChannelBuffers.EMPTY_BUFFER
 
 
   val STATUS_REPLY_BA     = StringToChannelBuffer("+")

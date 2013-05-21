@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{MediaType, Method, Request, Response, Status}
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
 
 class JsonpFilterSpec extends SpecificationWithJUnit {
@@ -24,7 +24,7 @@ class JsonpFilterSpec extends SpecificationWithJUnit {
     "wrap json" in {
       val request = Request("/test.json", "callback" -> "mycallback")
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/javascript")
       response.contentString must_== "mycallback({});"
     }
@@ -32,7 +32,7 @@ class JsonpFilterSpec extends SpecificationWithJUnit {
     "ignore non-json" in {
       val request = Request("/test.json", "callback" -> "mycallback", "not_json" -> "t")
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.mediaType     must_== Some("not_json")
       response.contentString must_== "{}"
       response.contentType   must_== Some("not_json")
@@ -42,7 +42,7 @@ class JsonpFilterSpec extends SpecificationWithJUnit {
       val request = Request("/test.json", "callback" -> "mycallback")
       request.method = Method.Head
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/json")
       response.contentString must_== "{}"
     }
@@ -51,7 +51,7 @@ class JsonpFilterSpec extends SpecificationWithJUnit {
       // Search Varnish sets callback to blank.  These should not be wrapped.
       val request = Request("/test.json", "callback" -> "")
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/json")
       response.contentString must_== "{}"
     }

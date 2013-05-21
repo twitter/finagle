@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.protocol
 import _root_.java.lang.{Long => JLong}
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffers
 
 trait CommandArgument extends Command
 
@@ -17,7 +17,8 @@ case object WithScores extends CommandArgument {
   }
   override def toString = command
   def toChannelBuffer = commandBytes
-  val asArg = Some(WithScores)
+  @deprecated("Prefer option") val asArg = Some(WithScores)
+  def option(opt: Boolean): Option[this.type] = if (opt) asArg else None
 }
 
 case class Limit(offset: Long, count: Long) extends CommandArgument {

@@ -1,9 +1,6 @@
 package com.twitter.finagle.builder
 
-import com.twitter.concurrent.SpoolSource
-import com.twitter.finagle.stats.InMemoryStatsReceiver
 import org.specs.SpecificationWithJUnit
-import collection.mutable
 
 class NonShrinkingClusterSpec extends SpecificationWithJUnit {
   "SkepticalClusterFilter" should {

@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.naggati.{ProtocolError}
+import com.twitter.finagle.redis.naggati.ProtocolError
 import com.twitter.finagle.redis.ServerError
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -67,7 +67,7 @@ case class NilMBulkReply() extends MultiLineReply {
 }
 
 class ReplyCodec extends UnifiedProtocolCodec {
-  import com.twitter.finagle.redis.naggati.{Emit, Encoder, NextStep}
+  import com.twitter.finagle.redis.naggati.{Encoder, NextStep}
   import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
 

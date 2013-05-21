@@ -4,12 +4,11 @@ package com.twitter.finagle.tracing
  * Tracers record trace events.
  */
 
-import com.twitter.finagle.util.{CloseNotifier, Disposable, Managed}
-import com.twitter.util.{Duration, Future, Time, TimeFormat}
-
-import java.nio.ByteBuffer
+import com.twitter.util.{Duration, Time, TimeFormat}
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
+import com.twitter.finagle.util.LoadService
 
 private[tracing] object RecordTimeFormat
   extends TimeFormat("MMdd HH:mm:ss.SSS")
@@ -51,22 +50,8 @@ object Annotation {
 }
 
 object Tracer {
-  type Factory = (CloseNotifier) => Tracer
-
-  def mkManaged(tracerFactory: Factory): Managed[Tracer] = new Managed[Tracer] {
-    @volatile var handler = { () => {} }
-    private[this] val notifier = new CloseNotifier {
-      def onClose(h: => Unit) = handler = { () => h }
-    }
-    def make() = new Disposable[Tracer] {
-      val underlying = tracerFactory(notifier)
-      def get = underlying
-      def dispose(deadline: Time) = {
-        handler()
-        Future.value(())
-      }
-    }
-  }
+  // Deprecated.
+  type Factory = () => Tracer
 }
 
 trait Tracer {
@@ -80,19 +65,64 @@ trait Tracer {
    * None: i'm going to defer making a decision on this to the child service
    */
   def sampleTrace(traceId: TraceId): Option[Boolean]
-
-  def release() {}
 }
 
 class NullTracer extends Tracer {
-  val factory: Tracer.Factory = (_) => this
+  val factory: Tracer.Factory = () => this
   def record(record: Record) {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
 
 object NullTracer extends NullTracer
-// TODO
-object DefaultTracer extends NullTracer
+
+object BroadcastTracer {
+  def apply(tracers: Seq[Tracer]): Tracer = tracers.filterNot(_ == NullTracer) match {
+    case Seq() => NullTracer
+    case Seq(tracer) => tracer
+    case Seq(first, second) => new Two(first, second)
+    case _ => new N(tracers)
+  }
+
+  private class Two(first: Tracer, second: Tracer) extends Tracer {
+    def record(record: Record) {
+      first.record(record)
+      second.record(record)
+    }
+
+    def sampleTrace(traceId: TraceId) = {
+      val sampledByFirst = first.sampleTrace(traceId)
+      val sampledBySecond = second.sampleTrace(traceId)
+      if (sampledByFirst == Some(true) || sampledBySecond == Some(true))
+        Some(true)
+      else if (sampledByFirst == Some(false) && sampledBySecond == Some(false))
+        Some(false)
+      else
+        None
+    }
+  }
+
+  private class N(tracers: Seq[Tracer]) extends Tracer {
+    def record(record: Record) {
+      tracers foreach { _.record(record) }
+    }
+
+    def sampleTrace(traceId: TraceId) = {
+      if (tracers exists { _.sampleTrace(traceId) == Some(true) })
+        Some(true)
+      else if (tracers forall { _.sampleTrace(traceId) == Some(false) })
+        Some(false)
+      else
+        None
+    }
+  }
+}
+
+object DefaultTracer extends Tracer with Proxy {
+  @volatile var self: Tracer = BroadcastTracer(LoadService[Tracer]())
+
+  def record(record: Record) = self.record(record)
+  def sampleTrace(traceId: TraceId) = self.sampleTrace(traceId)
+}
 
 class BufferingTracer extends Tracer
   with Iterable[Record]
@@ -107,7 +137,7 @@ class BufferingTracer extends Tracer
 }
 
 object ConsoleTracer extends Tracer {
-  val factory: Tracer.Factory = (_) => this
+  val factory: Tracer.Factory = () => this
 
   def record(record: Record) {
     println(record)
@@ -115,4 +145,3 @@ object ConsoleTracer extends Tracer {
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
-

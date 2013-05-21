@@ -1,12 +1,10 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BytesToString, NumberFormat, ReplyFormat}
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.{Future, Time}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 
 trait Keys { self: BaseClient =>
@@ -61,7 +59,7 @@ trait Keys { self: BaseClient =>
   def keys(pattern: ChannelBuffer): Future[Seq[ChannelBuffer]] =
     doRequest(Keys(pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
@@ -73,13 +71,13 @@ trait Keys { self: BaseClient =>
   ): Future[Seq[ChannelBuffer]] =
     doRequest(Scan(cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.value(Seq())
+      case EmptyMBulkReply()    => Future.Nil
     }
 
   /**
    * Gets the ttl of the given key.
    * @param key
-   * @return Option containing either the ttl in seconds if the key exists 
+   * @return Option containing either the ttl in seconds if the key exists
    * and has a timeout, or else nothing.
    */
   def ttl(key: ChannelBuffer): Future[Option[JLong]] =

@@ -1,6 +1,9 @@
 package com.twitter.finagle.memcached.java;
 
+import java.nio.charset.Charset;
+
 import com.google.common.collect.ImmutableSet;
+
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.memcached.CacheNode;
@@ -9,8 +12,6 @@ import com.twitter.finagle.memcached.KetamaClientBuilder;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.finagle.memcached.protocol.text.Memcached;
-
-import java.nio.charset.Charset;
 
 /**
  * This is mainly for internal testing, not for external purpose

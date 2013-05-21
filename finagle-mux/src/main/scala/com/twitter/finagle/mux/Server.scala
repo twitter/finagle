@@ -1,13 +1,12 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.dispatch
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.util.{Future, Return, Throw, Time, Closable}
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
 case class ClientHangupException(cause: Throwable) extends Exception(cause)
@@ -19,7 +18,7 @@ case class ClientDiscardedRequestException(why: String) extends Exception(why)
 private[finagle] class ServerDispatcher(
   trans: Transport[ChannelBuffer, ChannelBuffer],
   service: Service[ChannelBuffer, ChannelBuffer]
-) extends dispatch.ServerDispatcher {
+) extends Closable {
   import Message._
 
   private[this] val pending = new ConcurrentHashMap[Int, Future[_]]
@@ -87,7 +86,7 @@ private[finagle] class ServerDispatcher(
     trans.close()
   }
 
-  def drain() {
+  def close(deadline: Time): Future[Unit] = {
     receive = {
       case Treq(tag, _, _) =>
         trans.write(encode(RreqNack(tag)))
@@ -97,5 +96,9 @@ private[finagle] class ServerDispatcher(
 
     for (tag <- tags.acquire())
       trans.write(encode(Tdrain(tag)))
+
+    // TODO.
+    Future.Done
   }
 }
+

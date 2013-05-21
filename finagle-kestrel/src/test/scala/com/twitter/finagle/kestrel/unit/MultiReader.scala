@@ -6,17 +6,17 @@ import _root_.java.util.concurrent._
 import com.google.common.cache.{LoadingCache, CacheLoader, CacheBuilder}
 import com.twitter.concurrent.{Spool, Broker}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.builder.StaticCluster
+import com.twitter.finagle.builder.{ClientConfig, ClientBuilder, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.{Future, Return, Promise, Time}
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.util.{Await, Future, Promise, Return, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 import scala.collection.mutable.{ArrayBuffer, Set => MSet}
-import com.twitter.finagle.builder.{IncompleteSpecification, ClientConfig, ClientBuilder, Cluster}
-import com.twitter.finagle.service.Backoff
 
 class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
   noDetailedDiffs()
@@ -33,10 +33,11 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
   "MultiReader" should {
     "old-style, static ReadHandle cluster" in {
       val N = 3
-      val handles = 0 until N map { _ => spy(new MockHandle) }
+      val handles = (0 until N).toSeq map { _ => spy(new MockHandle) }
+      val cluster: Cluster[ReadHandle] = new StaticCluster[ReadHandle](handles)
 
       "always grab the first available message" in {
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
 
         val messages = new ArrayBuffer[ReadMessage]
         handle.messages foreach { messages += _ }
@@ -62,7 +63,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
           m
         }
 
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
         (handle.messages??) must be_==(ms(0))
         (handle.messages??) must be_==(ms(2))
         (handle.messages??) must be_==(ms(1))
@@ -70,13 +71,13 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
 
       "propagate closes" in {
         handles foreach { h => there was no(h).close() }
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
         handle.close()
         handles foreach { h => there was one(h).close() }
       }
 
       "propagate errors when everything's errored out" in {
-        val handle = MultiReader(handles)
+        val handle = MultiReader.merge(cluster)
         val e = (handle.error?)
         handles foreach { h =>
           e.isDefined must beFalse
@@ -84,7 +85,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         }
 
         e.isDefined must beTrue
-        e() must be(AllHandlesDiedException)
+        Await.result(e) must be(AllHandlesDiedException)
       }
     }
 
@@ -136,7 +137,6 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
             }
             promise
           }
-          override def release() = ()
         }
       }
 
@@ -160,7 +160,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
           val factory = new ServiceFactory[Command, Response] {
             // use an executor so readReliably doesn't block waiting on an empty queue
             def apply(conn: ClientConnection) = Future(newKestrelService(Some(executor), queues))
-            def close() { }
+            def close(deadline: Time) = Future.Done
             override def toString = "ServiceFactory for %s".format(host)
           }
           mockHostClientBuilder.buildFactory() returns factory
@@ -194,7 +194,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         messages must eventually(be_==(sentMessages.toSet))
@@ -209,7 +209,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         // 0, 3, 6 ...
@@ -232,7 +232,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         messages must eventually(be_==(sentMessages.toSet))
@@ -243,7 +243,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
 
           // write to all 3
           sentMessages.zipWithIndex foreach { case (m, i) =>
-            services(i % services.size).apply(Set("the_queue", Time.now, m))()
+            Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
           }
 
           // expect fewer to be read on each pass
@@ -261,7 +261,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         messages must beEmpty
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
 
         messages must beEmpty // cluster not ready
@@ -279,7 +279,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         hosts.foreach { host => cluster.del(host) }
 
         e.isDefined must beTrue
-        e() must be(AllHandlesDiedException)
+        Await.result(e) must be(AllHandlesDiedException)
       }
 
       "silently handle the removal of a host that was never added" in {
@@ -290,7 +290,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         val sentMessages = 0 until N*10 map { i => "message %d".format(i) }
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
         messages must eventually(be_==(sentMessages.toSet))
         messages.clear()
@@ -298,7 +298,7 @@ class MultiReaderSpec extends SpecificationWithJUnit with Mockito {
         cluster.del(InetSocketAddress.createUnresolved("10.0.0.100", 22133))
 
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          services(i % services.size).apply(Set("the_queue", Time.now, m))()
+          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
         }
         messages must eventually(be_==(sentMessages.toSet))
       }

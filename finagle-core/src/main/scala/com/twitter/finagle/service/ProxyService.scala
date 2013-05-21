@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{CancelledConnectionException, Service, ServiceNotAvailableException,
   TooManyConcurrentRequestsException}
-import com.twitter.util.{Future, Promise, Throw, Return}
+import com.twitter.util.{Future, Promise, Throw, Return, Time}
 import java.util.ArrayDeque
 import scala.collection.JavaConverters._
 
@@ -14,13 +14,14 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
   extends Service[Req, Rep]
 {
   @volatile private[this] var proxy: Service[Req, Rep] =
-    new Service[Req, Rep] {
+    new Service[Req, Rep] { self =>
       private[this] val requestBuffer = new ArrayDeque[(Req, Promise[Rep])]
       private[this] var underlying: Option[Service[Req, Rep]] = None
       private[this] var didRelease = false
+      private[this] val onRelease = new Promise[Unit]
 
       underlyingFuture respond { r =>
-        synchronized {
+        self.synchronized {
           r match {
             case Return(service) =>
               requestBuffer.asScala foreach { case (request, promise) =>
@@ -29,9 +30,13 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
 
               underlying = Some(service)
 
-              if (didRelease) service.release()
+              if (didRelease) {
+                service.close()
+                onRelease.setValue(())
+              }
 
             case Throw(exc) =>
+              onRelease.setValue(())
               requestBuffer.asScala foreach { case (_, promise) => promise() = Throw(exc) }
               underlying = Some(new FailedService(new ServiceNotAvailableException))
           }
@@ -39,7 +44,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
         }
       }
 
-      def apply(request: Req): Future[Rep] = synchronized {
+      def apply(request: Req): Future[Rep] = self.synchronized {
         underlying match {
           case Some(service) => service(request)
           case None =>
@@ -50,7 +55,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
               val waiting = (request, p)
               requestBuffer.addLast(waiting)
               p.setInterruptHandler { case cause =>
-                if (ProxyService.this.synchronized(requestBuffer.remove(waiting)))
+                if (self.synchronized(requestBuffer.remove(waiting)))
                   p.setException(new CancelledConnectionException)
               }
 
@@ -60,7 +65,7 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
       }
 
       override def isAvailable = false
-      override def release() = synchronized { didRelease = true }
+      override def close(deadline: Time) = self.synchronized { didRelease = true; onRelease }
     }
 
   underlyingFuture respond {
@@ -72,6 +77,6 @@ class ProxyService[Req, Rep](underlyingFuture: Future[Service[Req, Rep]], maxWai
   }
 
   def apply(request: Req): Future[Rep] = proxy(request)
-  override def release() = proxy.release()
+  override def close(deadline: Time) = proxy.close(deadline)
   override def isAvailable = proxy.isAvailable
 }

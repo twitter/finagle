@@ -9,7 +9,7 @@ import collection.JavaConversions._
 import scala.util.Random
 
 // Helper classes for spinning up a little redis cluster
-private[twitter] object RedisCluster { self =>
+object RedisCluster { self =>
   import collection.mutable.{Stack => MutableStack}
   val instanceStack = MutableStack[ExternalRedis]()
 
@@ -48,7 +48,7 @@ private[twitter] object RedisCluster { self =>
   });
 }
 
-private[twitter] class ExternalRedis() {
+class ExternalRedis() {
   private[this] val rand = new Random
   private[this] var process: Option[Process] = None
   private[this] val forbiddenPorts = 6300.until(7300)

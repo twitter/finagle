@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.protocol.text.client
 
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.ServerError
 import com.twitter.finagle.memcached.util.ParserUtils

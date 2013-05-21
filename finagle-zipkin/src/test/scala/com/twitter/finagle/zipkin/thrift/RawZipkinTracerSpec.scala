@@ -1,13 +1,11 @@
 package com.twitter.finagle.zipkin.thrift
 
-import org.specs.{SpecificationWithJUnit, Specification}
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import java.util.ArrayList
 
 import com.twitter.conversions.time._
 import com.twitter.util._
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.{CloseNotifier, SharedTimer}
 import com.twitter.finagle.stats.NullStatsReceiver
 
 import org.mockito.Matchers._
@@ -21,10 +19,8 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
   "RawZipkinTracer" should {
     "send all traces to scribe" in {
       val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-        override def newClient() = mock[scribe.FinagledClient]
+        override val client = mock[scribe.FinagledClient]
       }
-      tracer.acquire()
-      doAfter { tracer.release() }
 
       val expected = new LogEntry(
         category = "zipkin",
@@ -60,29 +56,14 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
       there was one(tracer.client).log(Seq(expected))
     }
 
-    "register onClose handler that calls release" in {
-      var callback: () => Unit = null
-      val factory = RawZipkinTracer()
-      val tracer = factory(new CloseNotifier {
-        def onClose(h: => Unit) = callback = () => h
-      }).asInstanceOf[RawZipkinTracer]
-
-      tracer.client mustNot beNull
-      callback()
-      // tracer.release() should set client to null
-      tracer.client must beNull
-    }
-
     "logSpan if a timeout occurs" in {
       val ann1 = Annotation.Message("some_message")
       val ann2 = Annotation.Rpcname("some_service", "rpc_name")
       val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
       val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
-        override def newClient() = mock[scribe.FinagledClient]
+        override val client = mock[scribe.FinagledClient]
       }
-      tracer.acquire()
-      doAfter { tracer.release() }
 
       tracer.client.log(anyObject()) returns Future(ResultCode.Ok)
 

@@ -1,8 +1,8 @@
-package com.twitter.finagle.mysql.codec
+package com.twitter.finagle.exp.mysql.codec
 
-import com.twitter.finagle.mysql.protocol.{Packet, BufferReader}
-import com.twitter.finagle.mysql.util.BufferUtil
-import com.twitter.logging.Logger
+import com.twitter.finagle.exp.mysql.protocol.{Packet, BufferReader}
+import com.twitter.finagle.exp.mysql.util.BufferUtil
+import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder
  * in little endian byte order.
  */
 class PacketFrameDecoder extends FrameDecoder {
-  private[this] val log = Logger("finagle-mysql")
+  private[this] val logger = Logger.getLogger("finagle-mysql")
   override def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Packet = {
     if (buffer.readableBytes < Packet.HeaderSize)
       return null
@@ -31,14 +31,12 @@ class PacketFrameDecoder extends FrameDecoder {
       buffer.resetReaderIndex()
       return null
     }
-      
-    log.debug("<- Decoding MySQL packet (length=%d, seq=%d)".format(length, seq))
 
     val body = new Array[Byte](length)
     buffer.readBytes(body)
 
-    log.debug(BufferUtil.hex(body))
-    
+    // logger.finest("RECEIVED: MySQL packet (length=%d, seq=%d)\n%s".format(length, seq, BufferUtil.hex(body)))
+
     Packet(length, seq, body)
   }
 }

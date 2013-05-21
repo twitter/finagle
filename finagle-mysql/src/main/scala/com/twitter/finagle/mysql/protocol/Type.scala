@@ -1,4 +1,6 @@
-package com.twitter.finagle.mysql.protocol
+package com.twitter.finagle.exp.mysql.protocol
+
+import java.nio.charset.{Charset => JCharset}
 
 object Type {
   /** MySQL type codes */
@@ -31,12 +33,15 @@ object Type {
   val GEOMETRY    = 0xff;
 
   /**
-   * Returns the sizeof the given parameter in 
+   * Returns the sizeof the given parameter in
    * its MySQL binary representation. If the size
    * is unknown -1 is returned.
    */
-  def sizeOf(any: Any) = any match {
-    case s: String      => Buffer.sizeOfLen(s.size) + s.size
+  def sizeOf(any: Any, charset: JCharset = Charset.defaultCharset) = any match {
+    case s: String => {
+      val bytes = s.getBytes(charset)
+      Buffer.sizeOfLen(bytes.size) + bytes.size
+    }
     case b: Array[Byte] => Buffer.sizeOfLen(b.size) + b.size
     case b: Boolean     => 1
     case b: Byte        => 1
@@ -54,7 +59,7 @@ object Type {
   }
 
   /**
-   * Retrieves the MySQL type code for the 
+   * Retrieves the MySQL type code for the
    * given parameter. If the parameter type
    * mapping is unknown -1 is returned.
    */
@@ -73,7 +78,7 @@ object Type {
     case b: Array[Byte] if b.size <= 255         => TINY_BLOB
     case b: Array[Byte] if b.size <= 65535       => BLOB
     case b: Array[Byte] if b.size <= 16777215    => MEDIUM_BLOB
-    
+
     // No support for LONG_BLOBS. In order to implement this correctly
     // in Java/Scala we need to represent this set of bytes as a composition
     // of buffers.
@@ -104,4 +109,3 @@ case object SQLZeroDate extends java.sql.Date(0) {
   override val getTime = 0L
   override val toString = "0000-00-00"
 }
-

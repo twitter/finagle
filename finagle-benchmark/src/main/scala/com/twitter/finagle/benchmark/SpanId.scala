@@ -1,6 +1,6 @@
 package com.twitter.finagle.benchmark
 
-import com.google.caliper.{SimpleBenchmark, Runner}
+import com.google.caliper.SimpleBenchmark
 import com.twitter.finagle.tracing.SpanId
 import scala.util.Random
 import com.twitter.util.RichU64Long

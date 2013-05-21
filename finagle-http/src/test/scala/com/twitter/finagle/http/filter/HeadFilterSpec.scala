@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status}
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import org.specs.SpecificationWithJUnit
 
 class HeadFilterSpec extends SpecificationWithJUnit {
@@ -23,7 +23,7 @@ class HeadFilterSpec extends SpecificationWithJUnit {
       val request = Request("/test.json")
       request.method = Method.Head
 
-      val response = HeadFilter(request, dummyService)()
+      val response = Await.result(HeadFilter(request, dummyService))
       request.method must be_==(Method.Head) // unchanged
       response.contentLength must be_==(Some(Body.length))
       response.contentString must be_==("")
@@ -32,7 +32,7 @@ class HeadFilterSpec extends SpecificationWithJUnit {
     "GET is normal" in {
       val request = Request("/test.json")
 
-      val response = HeadFilter(request, dummyService)()
+      val response = Await.result(HeadFilter(request, dummyService))
       request.method must be_==(Method.Get) // unchanged
       response.contentLength must be_==(None)
       response.contentString must be_==(Body)

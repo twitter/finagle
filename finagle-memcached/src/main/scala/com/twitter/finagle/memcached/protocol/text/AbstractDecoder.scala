@@ -4,7 +4,6 @@ import com.twitter.finagle.memcached.protocol.ClientError
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBufferIndexFinder, ChannelBuffer}
 import org.jboss.netty.channel._
-import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 
 object AbstractDecoder {
@@ -24,7 +23,6 @@ object AbstractDecoder {
 
 abstract class AbstractDecoder extends FrameDecoder {
   import AbstractDecoder._
-  import ParserUtils._
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     start()

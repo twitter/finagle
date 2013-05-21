@@ -1,10 +1,9 @@
 package com.twitter.finagle.benchmark
 
 import com.google.caliper.SimpleBenchmark
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.pool._
-import com.twitter.util.{Duration, JavaTimer}
+import com.twitter.util.{Await, Duration, JavaTimer}
 
 // A simple benchmark for pools that measures only get/put times for
 // when the pool is full (common case).
@@ -22,9 +21,9 @@ class PoolsBenchmark extends SimpleBenchmark {
     val s = new Array[S](width)
     while (i < n) {
       if (i >= width)
-        s(i%width).release()
+        s(i%width).close()
 
-      s(i%width) = pool().get()
+      s(i%width) = Await.result(pool())
 
       i += 1
     }
@@ -39,7 +38,7 @@ class PoolsBenchmark extends SimpleBenchmark {
   }
 
   def timeCachingPool(nreps: Int) {
-    val p = new CachingPool(underlying, width*2, Duration.MaxValue, timer)
+    val p = new CachingPool(underlying, width*2, Duration.Top, timer)
     go(p, width, nreps)
   }
 

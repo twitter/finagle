@@ -1,13 +1,12 @@
 package com.twitter.finagle.stream
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.{
-  Codec, CodecFactory, Service, Filter, ServerCodecConfig, ClientCodecConfig}
-import com.twitter.finagle.netty3.Conversions._
+  Codec, CodecFactory, ServerCodecConfig, ClientCodecConfig}
 import com.twitter.util.{Future, Promise, Return}
 
 /**

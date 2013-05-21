@@ -1,11 +1,15 @@
 import sbt._
 import Keys._
+import Tests._
+import com.typesafe.sbt.SbtSite.site
+import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.0.6"
-  val nettyLib = "io.netty" % "netty" % "3.5.5.Final"
-  val ostrichLib = "com.twitter" %% "ostrich" % "9.0.6"
+  val utilVersion = "6.3.4"
+  val nettyLib = "io.netty" % "netty" % "3.5.12.Final"
+  val ostrichLib = "com.twitter" %% "ostrich" % "9.1.1"
+  val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
@@ -14,16 +18,25 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.0.6",
+    version := "6.4.0",
     organization := "com.twitter",
-    scalaVersion := "2.9.2",
+    crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
-      "org.scala-tools.testing" % "specs_2.9.1" % "1.6.9" % "test",
+      "org.scalatest" %% "scalatest" %"1.9.1" % "test",
+      "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
+        case "2.9.2" => "2.9.1"
+        case "2.10.0" => "2.10"
+        case x => x
+      },
       "junit" % "junit" % "4.8.1" % "test",
       "org.mockito" % "mockito-all" % "1.8.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
-    resolvers += "Coda Hale's Repository" at "http://repo.codahale.com/",
+
+    testOptions in Test <<= scalaVersion map {
+      case "2.10" | "2.10.0" => Seq(Tests.Filter(_ => false))
+      case _ => Seq()
+    },
 
     ivyXML :=
       <dependencies>
@@ -50,7 +63,7 @@ object Finagle extends Build {
     pomIncludeRepository := { _ => false },
     publishMavenStyle := true,
     pomExtra := (
-      <url>https://github.com/twitter/util</url>
+      <url>https://github.com/twitter/finagle</url>
       <licenses>
         <license>
           <name>Apache License, Version 2.0</name>
@@ -74,7 +87,19 @@ object Finagle extends Build {
         Some("snapshots" at nexus + "content/repositories/snapshots")
       else
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    }
+    },
+
+    resourceGenerators in Compile <+=
+      (resourceManaged in Compile, name, version) map { (dir, name, ver) =>
+        val file = dir / "com" / "twitter" / name / "build.properties"
+        val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
+        val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
+        val contents = (
+          "name=%s\nversion=%s\nbuild_revision=%s\nbuild_name=%s"
+        ).format(name, ver, buildRev, buildName)
+        IO.write(file, contents)
+        Seq(file)
+      }
   )
 
   val jmockSettings = Seq(
@@ -91,16 +116,21 @@ object Finagle extends Build {
     id = "finagle",
     base = file("."),
     settings = Project.defaultSettings ++
-      sharedSettings
+      sharedSettings ++
+      Unidoc.settings ++ Seq(
+        Unidoc.unidocExclude := Seq(finagleExample.id)
+      )
   ) aggregate(
     // Core, support.
-    finagleCore, finagleTest, finagleOstrich4,
+    finagleCore, finagleTest, finagleOstrich4, finagleStats,
     finagleZipkin, finagleServersets,
     finagleException, finagleCommonsStats,
+    finagleExp,
 
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
-    finagleMemcached, finagleKestrel,
+    finagleMemcached, finagleKestrel, finagleRedis,
+    finagleMux, finagleThriftMux, finagleMySQL,
 
     // Use and integration
     finagleStress, finagleExample, finagleBenchmark
@@ -123,8 +153,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-core",
-    libraryDependencies ++= Seq(nettyLib, util("core"), util("collection"), util("hashing"),
-      util("jvm"), util("logging"))
+    libraryDependencies ++= Seq(nettyLib, util("app"), util("core"), util("collection"),
+      util("hashing"), util("jvm"), util("logging"))
   ).dependsOn(finagleTest % "test")
 
   lazy val finagleOstrich4 = Project(
@@ -135,7 +165,19 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-ostrich4",
     libraryDependencies ++= Seq(ostrichLib)
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleHttp)
+
+  lazy val finagleStats = Project(
+    id = "finagle-stats",
+    base = file("finagle-stats"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-stats",
+    libraryDependencies ++= Seq(
+      "com.twitter.common" % "metrics" % "0.0.7",
+      jacksonLib)
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
@@ -145,7 +187,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq(util("codec")) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
@@ -159,9 +200,7 @@ object Finagle extends Build {
     name := "finagle-exception",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.codahale" % "jerkson_2.8.1" % "0.1.4",
-      "org.codehaus.jackson" % "jackson-core-asl"  % "1.8.1",
-      "org.codehaus.jackson" % "jackson-mapper-asl" % "1.8.1",
+      jacksonLib,
       "com.twitter" % "streamyj_2.8.1" % "0.3.0" % "test"
     ) ++ thriftLibs
   ).dependsOn(finagleCore, finagleThrift)
@@ -173,7 +212,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-commons-stats",
-    compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq("com.twitter.common" % "stats" % "0.0.35")
   ).dependsOn(finagleCore)
 
@@ -186,12 +224,11 @@ object Finagle extends Build {
     name := "finagle-serversets",
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "client" % "0.0.6",
-      "com.twitter.common.zookeeper" % "group" % "0.0.5"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.23"
     ),
     ivyXML :=
       <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.10">
+        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.23">
           <exclude org="com.google.guava" name="guava"/>
           <exclude org="com.twitter" name="finagle-core"/>
           <exclude org="com.twitter" name="finagle-thrift"/>
@@ -247,7 +284,6 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    compileOrder := CompileOrder.JavaThenScala,
     libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ thriftLibs
   ).dependsOn(finagleCore, finagleTest % "test")
 
@@ -303,9 +339,57 @@ object Finagle extends Build {
     testOptions in Test := Seq(Tests.Filter {
       case "com.twitter.finagle.redis.protocol.integration.ClientServerIntegrationSpec" => false
       case "com.twitter.finagle.redis.integration.ClientSpec" => false
+      case "com.twitter.finagle.redis.integration.BtreeClientSpec" => false
+      case "com.twitter.finagle.redis.integration.ClientServerIntegrationSpec" => false
       case _ => true
     })
   ).dependsOn(finagleCore)
+
+  lazy val finagleMux = Project(
+    id = "finagle-mux",
+    base = file("finagle-mux"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-mux"
+  ).dependsOn(finagleCore)
+
+  lazy val finagleThriftMux = Project(
+    id = "finagle-thriftmux",
+    base = file("finagle-thriftmux"),
+    settings = Project.defaultSettings ++
+      Scrooge.newSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-thriftmux",
+    Scrooge.scroogeThriftNamespaceMap in Test := Map(
+      "com.twitter.finagle.thriftmux.thrift" ->
+        "com.twitter.finagle.thriftmux.thriftscala"
+    )
+  ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
+
+  lazy val finagleMySQL = Project(
+    id = "finagle-mysql",
+    base = file("finagle-mysql"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+    ).settings(
+      name := "finagle-mysql",
+      libraryDependencies ++= Seq(util("logging"))
+    ).dependsOn(finagleCore)
+
+  lazy val finagleExp = Project(
+    id = "finagle-exp",
+    base = file("finagle-exp"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+    ).settings(
+      name := "finagle-exp",
+      libraryDependencies ++= Seq(
+        "com.google.caliper" % "caliper" % "0.5-rc1",
+        "com.twitter" % "jsr166e" % "1.0.0"
+      )
+    ).dependsOn(finagleCore, finagleTest % "test")
 
   // Uses
 
@@ -319,7 +403,7 @@ object Finagle extends Build {
     name := "finagle-stress",
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
-  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp)
+  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
 
   lazy val finagleExample = Project(
     id = "finagle-example",
@@ -336,7 +420,8 @@ object Finagle extends Build {
     )
   ).dependsOn(
     finagleCore, finagleHttp, finagleStream, finagleThrift,
-    finagleMemcached, finagleKestrel, finagleRedis, finagleOstrich4)
+    finagleMemcached, finagleKestrel, finagleRedis, finagleMySQL,
+    finagleOstrich4, finagleStats)
 
   lazy val finagleBenchmark = Project(
     id = "finagle-benchmark",
@@ -350,15 +435,33 @@ object Finagle extends Build {
       util("codec"),
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleStats, finagleOstrich4)
 
-  lazy val finagleMySQL = Project(
-    id = "finagle-mysql",
-    base = file("finagle-mysql"),
-    settings = Project.defaultSettings ++
-      sharedSettings
-    ).settings(
-      name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging"))
-    ).dependsOn(finagleCore)
+  lazy val finagleDoc = Project(
+    id = "finagle-doc",
+    base = file("doc"),
+    settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() /*++ site.includeScaladoc() */ ++ Seq(
+      scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Finagle", "-doc-version", v)),
+      includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt"),
+
+      // Workaround for sbt bug: Without a testGrouping for all test configs,
+      // the wrong tests are run
+      testGrouping <<= definedTests in Test map partitionTests,
+      testGrouping in DocTest <<= definedTests in DocTest map partitionTests
+
+    )).configs(DocTest).settings(inConfig(DocTest)(Defaults.testSettings): _*).settings(
+    unmanagedSourceDirectories in DocTest <+= baseDirectory { _ / "src/sphinx/code" },
+    //resourceDirectory in DocTest <<= baseDirectory { _ / "src/test/resources" }
+
+    // Make the "test" command run both, test and doctest:test
+    test <<= Seq(test in Test, test in DocTest).dependOn
+    ).dependsOn(finagleCore, finagleHttp)
+
+  /* Test Configuration for running tests on doc sources */
+  lazy val DocTest = config("doctest") extend(Test)
+
+  // A dummy partitioning scheme for tests
+  def partitionTests(tests: Seq[TestDefinition]) = {
+    Seq(new Group("inProcess", tests, InProcess))
+  }
 }

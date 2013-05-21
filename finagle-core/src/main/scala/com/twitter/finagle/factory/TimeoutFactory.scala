@@ -1,6 +1,5 @@
 package com.twitter.finagle.factory
 
-import com.twitter.util
 import com.twitter.util.{Future, Duration, Timer}
 
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, ServiceTimeoutException, ClientConnection}
@@ -21,7 +20,7 @@ class TimeoutFactory[Req, Rep](
     res.within(timer, timeout) rescue {
       case exc: java.util.concurrent.TimeoutException =>
         res.raise(exc)
-        res onSuccess { _.release() }
+        res onSuccess { _.close() }
         Future.exception(exception)
     }
   }

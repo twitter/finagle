@@ -1,10 +1,10 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.Future
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 object Client {
 
@@ -53,6 +53,17 @@ class BaseClient(service: Service[Command, Reply]) {
     }
 
   /**
+   * Returns information and statistics about the server
+   * @param section Optional parameter can be used to select a specific section of information
+   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
+   */
+  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
+    doRequest(Info(section)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply() => Future.value(None)
+    }
+
+  /**
    * Deletes all keys in current DB
    */
   def flushDB(): Future[Unit] =
@@ -80,7 +91,7 @@ class BaseClient(service: Service[Command, Reply]) {
   /**
    * Releases underlying service object
    */
-  def release() = service.release()
+  def release() = service.close()
 
   /**
    * Helper function for passing a command to the service
@@ -174,7 +185,7 @@ private[redis] class ConnectedTransactionalClient(
           Future.exception(ClientError("Transaction failed: " + e.toString))
         }
       } ensure {
-        svc.release()
+        svc.close()
       }
     }
   }
@@ -189,7 +200,7 @@ private[redis] class ConnectedTransactionalClient(
   private def exec(svc: Service[Command, Reply]): Future[Seq[Reply]] =
     svc(Exec) flatMap {
       case MBulkReply(messages)  => Future.value(messages)
-      case EmptyMBulkReply()     => Future.value(Seq())
+      case EmptyMBulkReply()     => Future.Nil
       case NilMBulkReply()       => Future.exception(
         new ServerError("One or more keys were modified before transaction"))
       case ErrorReply(message)   => Future.exception(new ServerError(message))
