@@ -20,7 +20,7 @@ import com.twitter.finagle.tracing.TraceId
  * @param _name         The name of the RPC method
  * @param annotations  A sequence of annotations made in this span
  * @param bAnnotations Key-Value annotations, used to attach non timestamped data
- * @param _endpoint    This is the endpoint the span was created on.
+ * @param endpoint     This is the local endpoint the span was created on.
  */
 case class Span(
   traceId      : TraceId,
@@ -28,11 +28,10 @@ case class Span(
   _name        : Option[String],
   annotations  : Seq[ZipkinAnnotation],
   bAnnotations : Seq[BinaryAnnotation],
-  _endpoint    : Option[Endpoint])
+  endpoint     : Endpoint)
 {
   val serviceName = _serviceName getOrElse "Unknown"
   val name = _name getOrElse "Unknown"
-  val endpoint = (_endpoint getOrElse Endpoint.Unknown).boundEndpoint
 
   /**
    * @return a pretty string for this span ID.
@@ -58,20 +57,16 @@ case class Span(
 
     // fill in the host/service data for all the annotations
     annotations map ( _.toThrift ) foreach { a =>
-      val eopt = if (a.isSetHost) Some(a.getHost()) else endpoint.toThrift
-      eopt foreach { e =>
-        e.setService_name(serviceName)
-        a.setHost(e)
-      }
+      val ep = if (a.isSetHost) a.getHost() else endpoint.boundEndpoint.toThrift
+      ep.setService_name(serviceName)
+      a.setHost(ep)
       span.addToAnnotations(a)
     }
 
     bAnnotations map ( _.toThrift ) foreach { a =>
-      val eopt = if (a.isSetHost) Some(a.getHost()) else endpoint.toThrift
-      eopt foreach { e =>
-        e.setService_name(serviceName)
-        a.setHost(e)
-      }
+      val ep = if (a.isSetHost) a.getHost() else endpoint.boundEndpoint.toThrift
+      ep.setService_name(serviceName)
+      a.setHost(ep)
       span.addToBinary_annotations(a)
     }
     span
@@ -80,5 +75,5 @@ case class Span(
 }
 
 object Span {
-  def apply(traceId: TraceId): Span = Span(traceId, None, None, Seq(), Seq(), None)
+  def apply(traceId: TraceId): Span = Span(traceId, None, None, Seq(), Seq(), Endpoint.Unknown)
 }

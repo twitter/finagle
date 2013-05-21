@@ -248,6 +248,10 @@ object Trace {
     record(Annotation.ServerAddr(ia))
   }
 
+  def recordLocalAddr(ia: InetSocketAddress) {
+    record(Annotation.LocalAddr(ia))
+  }
+
   def recordBinary(key: String, value: Any) {
     record(Annotation.BinaryAnnotation(key, value))
   }

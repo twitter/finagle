@@ -24,24 +24,28 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
 
       val expected = new LogEntry(
         category = "zipkin",
-        message = "CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAAAAAew" +
-        "8ABgwAAAAECgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAAELAAMAAAAHc2Vydmlj" +
-        "ZQAACgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQAACg" +
-        "ABAAAAAAdU1MALAAIAAAAGYm9vaG9vDAADCAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UACAAE" +
-        "AA9CQAAKAAEAAAAAB1TUwAsAAgAAAANib28MAAMIAAEBAQEBBgACAAELAAMAAAAHc2VydmljZQ" +
-        "AADwAIDAAAAAULAAEAAAADaTE2CwACAAAAAgAQCAADAAAAAgwABAgAAQEBAQEGAAIAAQsAAwAA" +
-        "AAdzZXJ2aWNlAAALAAEAAAADaTMyCwACAAAABAAAACAIAAMAAAADDAAECAABAQEBAQYAAgABCw" +
-        "ADAAAAB3NlcnZpY2UAAAsAAQAAAANpNjQLAAIAAAAIAAAAAAAAAEAIAAMAAAAEDAAECAABAQEB" +
-        "AQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZkb3VibGULAAIAAAAIQF7TMzMzMzMIAAMAAA" +
-        "AFDAAECAABAQEBAQYAAgABCwADAAAAB3NlcnZpY2UAAAsAAQAAAAZzdHJpbmcLAAIAAAAGd29v" +
-        "cGllCAADAAAABgwABAgAAQEBAQEGAAIAAQsAAwAAAAdzZXJ2aWNlAAACAAkBAA==")
+        message = "CgABAAAAAAAAAHsLAAMAAAAGbWV0aG9kCgAEAAAAAAAAAHsKAAUAAAAAA" +
+          "AAAew8ABgwAAAAECgABAAAAAAdU1MALAAIAAAACY3IMAAMIAAEBAQEBBgACAVkLAA" +
+          "MAAAAHc2VydmljZQAACgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEBAQEBBgACAVk" +
+          "LAAMAAAAHc2VydmljZQAACgABAAAAAAdU1MALAAIAAAAGYm9vaG9vDAADCAABAQEB" +
+          "AQYAAgFZCwADAAAAB3NlcnZpY2UACAAEAA9CQAAKAAEAAAAAB1TUwAsAAgAAAANib" +
+          "28MAAMIAAEBAQEBBgACAVkLAAMAAAAHc2VydmljZQAADwAIDAAAAAcLAAEAAAACY2" +
+          "ELAAIAAAABAQgAAwAAAAAMAAQIAAEBAQEBBgACAVkLAAMAAAAHc2VydmljZQAACwA" +
+          "BAAAAAnNhCwACAAAAAQEIAAMAAAAADAAECAABCgoKCgYAAh+QCwADAAAAB3NlcnZp" +
+          "Y2UAAAsAAQAAAANpMTYLAAIAAAACABAIAAMAAAACDAAECAABAQEBAQYAAgFZCwADA" +
+          "AAAB3NlcnZpY2UAAAsAAQAAAANpMzILAAIAAAAEAAAAIAgAAwAAAAMMAAQIAAEBAQ" +
+          "EBBgACAVkLAAMAAAAHc2VydmljZQAACwABAAAAA2k2NAsAAgAAAAgAAAAAAAAAQAg" +
+          "AAwAAAAQMAAQIAAEBAQEBBgACAVkLAAMAAAAHc2VydmljZQAACwABAAAABmRvdWJs" +
+          "ZQsAAgAAAAhAXtMzMzMzMwgAAwAAAAUMAAQIAAEBAQEBBgACAVkLAAMAAAAHc2Vyd" +
+          "mljZQAACwABAAAABnN0cmluZwsAAgAAAAZ3b29waWUIAAMAAAAGDAAECAABAQEBAQ" +
+          "YAAgFZCwADAAAAB3NlcnZpY2UAAAIACQEA")
       tracer.client.log(anyObject()) returns Future(ResultCode.Ok)
 
-      val inetAddress = InetAddress.getByAddress(Array.fill(4) {
-        1
-      })
-      tracer.record(Record(traceId, Time.fromSeconds(123),
-        Annotation.ClientAddr(new InetSocketAddress(inetAddress, 1))))
+      val localAddress = InetAddress.getByAddress(Array.fill(4) { 1 })
+      val remoteAddress = InetAddress.getByAddress(Array.fill(4) { 10 })
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientAddr(new InetSocketAddress(localAddress, 345))))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.LocalAddr(new InetSocketAddress(localAddress, 345))))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ServerAddr(new InetSocketAddress(remoteAddress, 8080))))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpcname("service", "method")))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i16", 16.toShort)))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i32", 32)))

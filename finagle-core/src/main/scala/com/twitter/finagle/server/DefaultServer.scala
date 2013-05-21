@@ -8,7 +8,7 @@ import com.twitter.finagle.filter.{
 }
 import com.twitter.finagle.service.{TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, ServerStatsReceiver}
-import com.twitter.finagle.tracing.{NullTracer, Tracer, TracingFilter, DefaultTracer}
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger}
 import com.twitter.jvm.Jvm
@@ -118,7 +118,9 @@ case class DefaultServer[Req, Rep, In, Out](
         statsFilter andThen
         timeoutFilter
 
-      filter andThen _
+      val traceDestTransform:Transformer[Req,Rep] = new ServerDestTracingProxy[Req,Rep](_)
+
+      traceDestTransform compose (filter andThen _)
     }
 
     outer compose prepare compose inner

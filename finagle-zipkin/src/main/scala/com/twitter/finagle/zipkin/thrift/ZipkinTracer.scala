@@ -4,7 +4,6 @@ import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, Stats
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
 import com.twitter.finagle.zipkin.{Host, InitialSampleRate}
 import collection.mutable.{SynchronizedMap, HashMap}
-import java.net.InetSocketAddress
 
 object ZipkinTracer {
 
