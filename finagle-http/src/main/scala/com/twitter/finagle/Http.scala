@@ -1,7 +1,8 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{SerialServerDispatcher, SerialClientDispatcher}
+import com.twitter.finagle.dispatch.SerialServerDispatcher
+import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.util.Future
@@ -34,7 +35,7 @@ object HttpTransporter extends Netty3Transporter[HttpRequest, HttpResponse](
 object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
   name = "http",
   endpointer = Bridge[HttpRequest, HttpResponse, HttpRequest, HttpResponse](
-    HttpTransporter, new SerialClientDispatcher(_))
+    HttpTransporter, new HttpClientDispatcher(_))
 ) with HttpRichClient
 
 object HttpListener extends Netty3Listener[HttpResponse, HttpRequest](

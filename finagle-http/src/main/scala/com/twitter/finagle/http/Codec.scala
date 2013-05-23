@@ -336,7 +336,10 @@ case class RichHttp[REQUEST <: Request](
           new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
         else
           underlying
-      }
+
+      override def newClientDispatcher(transport: Transport[REQUEST, Response]) =
+        new HttpClientDispatcher(transport)
+    }
   }
 
   def server = { config =>
