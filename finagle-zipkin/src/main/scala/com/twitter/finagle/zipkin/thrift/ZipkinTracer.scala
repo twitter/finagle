@@ -2,7 +2,7 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
-import com.twitter.finagle.zipkin.{Host, InitialSampleRate}
+import com.twitter.finagle.zipkin.{host => Host, initialSampleRate}
 import collection.mutable.{SynchronizedMap, HashMap}
 
 object ZipkinTracer {
@@ -73,7 +73,7 @@ class SamplingTracer(underlyingTracer: Tracer, initialSampleRate: Float) extends
 
   def this() = this(
     new RawZipkinTracer(Host().getHostName, Host().getPort, DefaultStatsReceiver.scope("zipkin")),
-    InitialSampleRate())
+    initialSampleRate())
 
   def sampleTrace(traceId: TraceId) = sampler.sampleTrace(traceId)
 
