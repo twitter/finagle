@@ -25,7 +25,10 @@ trait HttpRichClient { self: Client[HttpRequest, HttpResponse] =>
 }
 
 object HttpTransporter extends Netty3Transporter[HttpRequest, HttpResponse](
-  "http", http.Http().client(ClientCodecConfig("httpclient")).pipelineFactory
+  "http",
+  http.Http()
+    .enableTracing(true)
+    .client(ClientCodecConfig("httpclient")).pipelineFactory
 )
 
 object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
@@ -35,7 +38,10 @@ object HttpClient extends DefaultClient[HttpRequest, HttpResponse](
 ) with HttpRichClient
 
 object HttpListener extends Netty3Listener[HttpResponse, HttpRequest](
-  "http", http.Http().server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
+  "http",
+  http.Http()
+    .enableTracing(true)
+    .server(ServerCodecConfig("httpserver", new SocketAddress{})).pipelineFactory
 )
 
 object HttpServer extends DefaultServer[HttpRequest, HttpResponse, HttpResponse, HttpRequest](
