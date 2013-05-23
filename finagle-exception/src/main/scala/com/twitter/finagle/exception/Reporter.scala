@@ -5,6 +5,7 @@ import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.scribe.{LogEntry, ResultCode, scribe}
 
+import com.twitter.app.GlobalFlag
 import com.twitter.util.GZIPStringEncoder
 import com.twitter.util.{Time, Monitor, NullMonitor}
 
@@ -12,6 +13,7 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
+import com.twitter.finagle.util.ReporterFactory
 
 
 trait ClientMonitorFactory extends (String => Monitor)
@@ -90,7 +92,7 @@ object Reporter {
   }
 
 
-  private[this] def makeClient(scribeHost: String, scribePort: Int) = {
+  private[exception] def makeClient(scribeHost: String, scribePort: Int) = {
     val service = ClientBuilder() // these are from the zipkin tracer
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
@@ -113,7 +115,7 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-  client: scribe.FinagledClient,
+  client: scribe.FutureIface,
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
@@ -168,5 +170,16 @@ sealed case class Reporter(
     }
 
     false  // did not actually handle
+  }
+}
+
+object host extends GlobalFlag(new InetSocketAddress("localhost", 1463), "Host to scribe exception messages")
+
+class ExceptionReporter extends ReporterFactory {
+  private[this] val client = Reporter.makeClient(host().getHostName, host().getPort)
+
+  def apply(name: String, addr: Option[SocketAddress]) = addr match {
+    case Some(a: InetAddress) => new Reporter(client, name).withClient(a)
+    case _ => new Reporter(client, name)
   }
 }

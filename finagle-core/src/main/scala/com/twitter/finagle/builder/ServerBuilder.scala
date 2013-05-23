@@ -9,7 +9,7 @@ import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, Duration, Future, Monitor, NullMonitor,   Time}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress} 
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
 import javax.net.ssl.SSLEngine
@@ -416,7 +416,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val tracer = config.tracer
     val timer = DefaultTimer.twitter
     val nettyTimer = DefaultTimer
-    
+
     val listener = Netty3Listener[Rep, Req](
       name = config.name,
       pipelineFactory = codec.pipelineFactory,
@@ -461,7 +461,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       monitor = monitor,
       logger = logger,
       statsReceiver = statsReceiver,
-      tracer = tracer
+      tracer = tracer,
+      reporter = NullReporterFactory
     )
 
     val listeningServer = server.serve(config.bindTo, serviceFactory)

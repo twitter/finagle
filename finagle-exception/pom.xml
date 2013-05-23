@@ -14,15 +14,14 @@
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
   </properties>
-  <repositories>
-    <repository>
-      <id>coda</id>
-      <name>coda</name>
-      <url>http://repo.codahale.com</url>
-    </repository>
-  </repositories>
   <dependencies>
     <!-- library dependencies -->
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-scala_2.9.2</artifactId>

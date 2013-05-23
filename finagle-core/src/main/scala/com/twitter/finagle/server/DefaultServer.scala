@@ -10,7 +10,7 @@ import com.twitter.finagle.service.{TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger}
+import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
 import com.twitter.jvm.Jvm
 import com.twitter.util.{CloseAwaitably, Duration, Monitor, Timer, Closable, Return, Throw, Time}
 import java.net.SocketAddress
@@ -61,7 +61,8 @@ case class DefaultServer[Req, Rep, In, Out](
   monitor: Monitor = DefaultMonitor,
   logger: java.util.logging.Logger = DefaultLogger,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
-  tracer: Tracer = DefaultTracer
+  tracer: Tracer = DefaultTracer,
+  reporter: ReporterFactory = LoadedReporterFactory
 ) extends Server[Req, Rep] {
   com.twitter.finagle.Init()
 
@@ -72,7 +73,7 @@ case class DefaultServer[Req, Rep, In, Out](
     val outer: Transformer[Req, Rep] = {
       val handletimeFilter = new HandletimeFilter[Req, Rep](statsReceiver)
       val monitorFilter = new MonitorFilter[Req, Rep](
-        monitor andThen new SourceTrackingMonitor(logger, "server"))
+        reporter(name, None) andThen monitor andThen new SourceTrackingMonitor(logger, "server"))
       val tracingFilter = new TracingFilter[Req, Rep](tracer)
       val jvmFilter= DefaultServer.newJvmFilter[Req, Rep]()
 
@@ -152,6 +153,7 @@ case class DefaultServer[Req, Rep, In, Out](
         case ServerStatsReceiver => statsReceiver.scope(ServerRegistry.nameOf(addr) getOrElse name)
         case sr => sr
       }
+
       val newStack = makeNewStack(scopedStatsReceiver)
 
       val underlying = listener.listen(addr) { transport =>
