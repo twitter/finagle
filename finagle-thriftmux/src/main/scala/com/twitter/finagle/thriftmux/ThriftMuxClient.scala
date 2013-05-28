@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.util.Future
+import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.{TProtocolFactory, TBinaryProtocol}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -26,9 +26,11 @@ case class ThriftMuxClientImpl(
           if (req.oneway) return Future.exception(
             new Exception("ThriftMux does not support one-way messages"))
 
-          service(ChannelBuffers.wrappedBuffer(req.message)) map(ThriftMuxUtil.bufferToArray)
+          service(ChannelBuffers.wrappedBuffer(req.message)) map
+            ThriftMuxUtil.bufferToArray
         }
         override def isAvailable = service.isAvailable
+        override def close(deadline: Time) = service.close(deadline)
       }
     }
 }
