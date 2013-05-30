@@ -50,9 +50,11 @@ class ResponseEncoder extends SimpleChannelDownstreamHandler {
       case response: Response =>
         if (response.isChunked) {
           writeResponse(ctx, e.getFuture(), response, e.getRemoteAddress())
-        // Ensure Content-Length is set if not chunked
-        } else if (!response.containsHeader(HttpHeaders.Names.CONTENT_LENGTH)) {
-          response.contentLength = response.getContent().readableBytes
+        } else {
+          // Ensure Content-Length is set if not chunked
+          if (!response.containsHeader(HttpHeaders.Names.CONTENT_LENGTH)) {
+            response.contentLength = response.getContent().readableBytes
+          }
           super.writeRequested(ctx, e)
         }
       case _ =>
