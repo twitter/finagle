@@ -70,19 +70,13 @@ class ProxySpec extends SpecificationWithJUnit {
       Await.result(externalClient.delete("foo"))
       Await.result(externalClient.get("foo")) must beNone
       Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8))))
-      Seq(None, Some("items"), Some("slabs")).foreach { arg =>
+      Seq(None, Some("slabs")).foreach { arg =>
         val stats = Await.result(externalClient.stats(arg))
         stats must notBeEmpty
         stats.foreach { line =>
           line must startWith("STAT")
         }
       }
-      externalClient.release()
-    }
-
-    "stats is supported (no value)" in {
-      val stats = Await.result(externalClient.stats("items"))
-      stats must beEmpty
       externalClient.release()
     }
 
