@@ -6,6 +6,28 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.4.1
+~~~~~
+
+- `finagle-http`: CookieMap instead of CookieSet
+- `finagle-memcached`: remove items stats test since twemcache does not carry those
+- `finagle-http`: don't choke on HEAD requests
+- `finagle-core`: ReusingPool: fix race between setting Future.never and initiating connect
+- `finagle-thriftmux`: also release services
+- `finagle-http`: Use the correct dispatcher for RichHttp and new API
+- `finagle-exception`: a loadable exception reporter
+- `finagle-core`: make global flags consistently camelCase
+- `finagel-http`: enable tracing by default for Http
+- `finagle-http`: Call super method only if response is not chunked
+- `finagle-core`: Tracing changes to annotate both client and server ip addresses
+- `finagle-http`: Stream interface (i.e. chunked) for HTTP message bodies
+- `finagle-core`: get a resolver instance contained in the main Resolver
+- `finagle-mux`: fix TagMap.iterator
+- `finagle-mdns`: Adding project to sbt
+- `inagle`: Fix doc
+- `finagle-mysql`: refactor endec into proper fsm
+- `finagle`: Update sbt project for (util, ostrich, finagle)
+
 6.4.0
 ~~~~~
 
