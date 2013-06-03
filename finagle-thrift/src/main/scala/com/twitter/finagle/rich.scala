@@ -111,23 +111,38 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     } else if (clsName.endsWith("$FutureIface")) {  // scrooge
       val clientClass = classForName(clsName.dropRight(12)+"$FinagledClient")
 
-      val constructor = try { clientClass.getConstructor(
-        classOf[Service[_, _]], classOf[TProtocolFactory],
-        classOf[Option[_]], classOf[StatsReceiver])
-      } catch {
-        case cause: NoSuchMethodException =>
-          throw new IllegalArgumentException("Iface is not a valid scrooge iface", cause)
-      }
-
       val statsReceiver = group match {
         case NamedGroup(name) => ClientStatsReceiver.scope(name)
         case _ => ClientStatsReceiver.scope(defaultClientName)
       }
 
       val underlying = newClient(group).toService
-      constructor.newInstance(
-        underlying, protocolFactory,
-        None, statsReceiver)
+
+      try {
+        // Scrooge 2
+        val constructor = clientClass.getConstructor(
+          classOf[Service[_, _]], classOf[TProtocolFactory],
+          classOf[Option[_]], classOf[StatsReceiver])
+
+        constructor.newInstance(
+          underlying, protocolFactory,
+          None, statsReceiver)
+      } catch {
+        case cause: NoSuchMethodException =>
+          try {
+            // Scrooge 3
+            val constructor = clientClass.getConstructor(
+              classOf[Service[_, _]], classOf[TProtocolFactory],
+              classOf[String], classOf[StatsReceiver])
+
+            constructor.newInstance(
+              underlying, protocolFactory,
+              "", statsReceiver)
+          } catch {
+            case cause: NoSuchMethodException =>
+              throw new IllegalArgumentException("Iface is not a valid scrooge iface", cause)
+          }
+      }
     } else {
       throw new IllegalArgumentException(
         "Iface %s is not a valid thrift iface".format(clsName))

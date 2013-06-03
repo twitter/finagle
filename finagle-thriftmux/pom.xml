@@ -77,17 +77,51 @@
     <plugins>
       <plugin>
         <groupId>com.twitter</groupId>
+        <artifactId>scrooge-maven-plugin</artifactId>
+        <version>3.1.3</version>
+        <configuration>
+          <thriftNamespaceMappings>
+            <thriftNamespaceMapping>
+              <from>com.twitter.finagle.thriftmux.thrift</from>
+              <to>com.twitter.finagle.thriftmux.thriftscrooge3</to>
+            </thriftNamespaceMapping>
+          </thriftNamespaceMappings>
+          <thriftOpts>
+            <!-- add other Scrooge command line options using thriftOpts -->
+            <thriftOpt>--finagle</thriftOpt>
+            <thriftOpt>--ostrich</thriftOpt>
+          </thriftOpts>
+          <outputDirectory>target/generated-test-sources</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>thrift-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>thrift-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.twitter</groupId>
         <artifactId>maven-finagle-thrift-plugin</artifactId>
         <configuration>
           <thriftGenerators>
             <thriftGenerator>finagle</thriftGenerator>
-            <thriftGenerator>rb</thriftGenerator>
             <thriftGenerator>scrooge</thriftGenerator>
           </thriftGenerators>
           <thriftNamespaceMappings>
             <thriftNamespaceMapping>
               <from>com.twitter.finagle.thriftmux.thrift</from>
-              <to>com.twitter.finagle.thriftmux.thriftscala</to>
+              <to>com.twitter.finagle.thriftmux.thriftscrooge2</to>
             </thriftNamespaceMapping>
           </thriftNamespaceMappings>
           <thriftOpts>

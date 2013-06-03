@@ -1,6 +1,5 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.finagle.{Group, ThriftMux}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
@@ -9,8 +8,18 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
-  test("end-to-end Scrooge") {
-    import com.twitter.finagle.thriftmux.thriftscala.TestService
+  test("end-to-end Scrooge2") {
+    import com.twitter.finagle.thriftmux.thriftscrooge2.TestService
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(x+x)
+    })
+
+    val client = ThriftMux.newIface[TestService.FutureIface](server)
+    assert(client.query("ok").get() == "okok")
+  }
+
+  test("end-to-end Scrooge3") {
+    import com.twitter.finagle.thriftmux.thriftscrooge3.TestService
     val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
       def query(x: String) = Future.value(x+x)
     })

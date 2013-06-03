@@ -5,71 +5,71 @@ import sbt._
 import Keys._
 
 object Scrooge extends Plugin {
-  // keys used to fetch scrooge:
-  val scroogeVersion = SettingKey[String](
-    "scrooge-version",
-    "version of scrooge to download and use"
+  // keys used to fetch scrooge2:
+  val scrooge2Version = SettingKey[String](
+    "scrooge2-version",
+    "version of scrooge2 to download and use"
   )
 
-  val scroogeName = SettingKey[String](
-    "scrooge-name",
-    "scrooge's version-qualified name ('scrooge-' + scrooge-version)"
+  val scrooge2Name = SettingKey[String](
+    "scrooge2-name",
+    "scrooge2's version-qualified name ('scrooge2-' + scrooge2-version)"
   )
 
-  val scroogeCacheFolder = SettingKey[File](
-    "scrooge-cache-folder",
-    "where to unpack the downloaded scrooge package"
+  val scrooge2CacheFolder = SettingKey[File](
+    "scrooge2-cache-folder",
+    "where to unpack the downloaded scrooge2 package"
   )
 
-  val scroogeJar = SettingKey[File](
-    "scrooge-jar",
-    "the local scrooge jar file"
+  val scrooge2Jar = SettingKey[File](
+    "scrooge2-jar",
+    "the local scrooge2 jar file"
   )
 
-  val scroogeFetch = TaskKey[File](
-    "scrooge-fetch",
-    "fetch the scrooge zip package and unpack it into scrooge-cache-folder"
+  val scrooge2Fetch = TaskKey[File](
+    "scrooge2-fetch",
+    "fetch the scrooge2 zip package and unpack it into scrooge2-cache-folder"
   )
 
-  // keys used for actual scrooge generation:
-  val scroogeBuildOptions = SettingKey[Seq[String]](
-    "scrooge-build-options",
-    "command line args to pass to scrooge"
+  // keys used for actual scrooge2 generation:
+  val scrooge2BuildOptions = SettingKey[Seq[String]](
+    "scrooge2-build-options",
+    "command line args to pass to scrooge2"
   )
 
-  val scroogeThriftIncludeFolders = SettingKey[Seq[File]](
-    "scrooge-thrift-include-folders",
+  val scrooge2ThriftIncludeFolders = SettingKey[Seq[File]](
+    "scrooge2-thrift-include-folders",
     "folders to search for thrift 'include' directives"
   )
 
-  val scroogeThriftNamespaceMap = SettingKey[Map[String, String]](
-    "scrooge-thrift-namespace-map",
-    "namespace rewriting, to support generation of java/finagle/scrooge into the same jar"
+  val scrooge2ThriftNamespaceMap = SettingKey[Map[String, String]](
+    "scrooge2-thrift-namespace-map",
+    "namespace rewriting, to support generation of java/finagle/scrooge2 into the same jar"
   )
 
-  val scroogeThriftSourceFolder = SettingKey[File](
-    "scrooge-thrift-source-folder",
+  val scrooge2ThriftSourceFolder = SettingKey[File](
+    "scrooge2-thrift-source-folder",
     "directory containing thrift source files"
   )
 
-  val scroogeThriftSources = SettingKey[Seq[File]](
-    "scrooge-thrift-sources",
+  val scrooge2ThriftSources = SettingKey[Seq[File]](
+    "scrooge2-thrift-sources",
     "thrift source files to compile"
   )
 
-  val scroogeThriftOutputFolder = SettingKey[File](
-    "scrooge-thrift-output-folder",
+  val scrooge2ThriftOutputFolder = SettingKey[File](
+    "scrooge2-thrift-output-folder",
     "output folder for generated scala files (defaults to sourceManaged)"
   )
 
-  val scroogeIsDirty = TaskKey[Boolean](
-    "scrooge-is-dirty",
-    "true if scrooge has decided it needs to regenerate the scala files from thrift sources"
+  val scrooge2IsDirty = TaskKey[Boolean](
+    "scrooge2-is-dirty",
+    "true if scrooge2 has decided it needs to regenerate the scala files from thrift sources"
   )
 
-  val scroogeGen = TaskKey[Seq[File]](
-    "scrooge-gen",
-    "generate scala code from thrift files using scrooge"
+  val scrooge2Gen = TaskKey[Seq[File]](
+    "scrooge2-gen",
+    "generate scala code from thrift files using scrooge2"
   )
 
   /**
@@ -78,18 +78,18 @@ object Scrooge extends Plugin {
    * e.g. inConfig(Assembly)(genThriftSettings)
    */
   val genThriftSettings: Seq[Setting[_]] = Seq(
-    scroogeThriftSourceFolder <<= (sourceDirectory) { _ / "thrift" },
-    scroogeThriftSources <<= (scroogeThriftSourceFolder) { srcDir => (srcDir ** "*.thrift").get },
-    scroogeThriftOutputFolder <<= (sourceManaged) { x => x },
-    scroogeThriftIncludeFolders := Seq(),
-    scroogeThriftNamespaceMap := Map(),
+    scrooge2ThriftSourceFolder <<= (sourceDirectory) { _ / "thrift" },
+    scrooge2ThriftSources <<= (scrooge2ThriftSourceFolder) { srcDir => (srcDir ** "*.thrift").get },
+    scrooge2ThriftOutputFolder <<= (sourceManaged) { x => x },
+    scrooge2ThriftIncludeFolders := Seq(),
+    scrooge2ThriftNamespaceMap := Map(),
 
     // look at includes and our sources to see if anything is newer than any of our output files
-    scroogeIsDirty <<= (
+    scrooge2IsDirty <<= (
       streams,
-      scroogeThriftSources,
-      scroogeThriftOutputFolder,
-      scroogeThriftIncludeFolders
+      scrooge2ThriftSources,
+      scrooge2ThriftOutputFolder,
+      scrooge2ThriftIncludeFolders
     ) map { (out, sources, outputDir, inc) =>
       // figure out if we need to actually rebuild, based on mtimes.
       val allSourceDeps = sources ++ inc.foldLeft(Seq[File]()) { (files, dir) =>
@@ -110,21 +110,21 @@ object Scrooge extends Plugin {
       oldestOutput < newestSource
     },
 
-    // actually run scrooge
-    scroogeGen <<= (
+    // actually run scrooge2
+    scrooge2Gen <<= (
       streams,
-      scroogeIsDirty,
-      scroogeThriftSources,
-      scroogeThriftOutputFolder,
-      scroogeFetch,
-      scroogeBuildOptions,
-      scroogeThriftIncludeFolders,
-      scroogeThriftNamespaceMap
+      scrooge2IsDirty,
+      scrooge2ThriftSources,
+      scrooge2ThriftOutputFolder,
+      scrooge2Fetch,
+      scrooge2BuildOptions,
+      scrooge2ThriftIncludeFolders,
+      scrooge2ThriftNamespaceMap
     ) map { (out, isDirty, sources, outputDir, jar, opts, inc, ns) =>
       // for some reason, sbt sometimes calls us multiple times, often with no source files.
       outputDir.mkdirs()
       if (isDirty && !sources.isEmpty) {
-        out.log.info("Generating scrooge thrift for %s ...".format(sources.mkString(", ")))
+        out.log.info("Generating scrooge2 thrift for %s ...".format(sources.mkString(", ")))
         val sourcePaths = sources.mkString(" ")
         val namespaceMappings = ns.map { case (k, v) =>
           "-n " + k + "=" + v
@@ -140,29 +140,28 @@ object Scrooge extends Plugin {
       }
       (outputDir ** "*.scala").get.toSeq
     },
-    sourceGenerators <+= scroogeGen
+    sourceGenerators <+= scrooge2Gen
   )
 
   val newSettings = Seq(
-    scroogeVersion := "2.5.4",
-    scroogeBuildOptions := Seq("--finagle"),
-    scroogeName <<= (scroogeVersion) { ver => "scrooge-%s".format(ver) },
-    scroogeCacheFolder <<= (baseDirectory) { (base) =>
+    scrooge2Version := "2.6.1",
+    scrooge2BuildOptions := Seq("--finagle"),
+    scrooge2Name <<= (scrooge2Version) { ver => "scrooge-%s".format(ver) },
+    scrooge2CacheFolder <<= (baseDirectory) { (base) =>
       base / "project" / "target"
     },
-    scroogeJar <<= (scroogeCacheFolder, scroogeName) { (folder, name) =>
+    scrooge2Jar <<= (scrooge2CacheFolder, scrooge2Name) { (folder, name) =>
       folder / (name + ".jar")
     },
-    
-    libraryDependencies += "com.twitter" %% "scrooge-runtime" % "2.4.0" intransitive(),
-    scroogeFetch <<= (
+
+    scrooge2Fetch <<= (
       streams,
-      scroogeCacheFolder,
-      scroogeJar,
-      scroogeVersion
+      scrooge2CacheFolder,
+      scrooge2Jar,
+      scrooge2Version
     ) map { (out, cacheFolder, jar, ver) =>
       if (!jar.exists) {
-        out.log.info("Fetching scrooge " + ver + " ...")
+        out.log.info("Fetching scrooge2 " + ver + " ...")
 
         val environment = System.getenv().asScala
         val homeRepo =  "http://maven.twttr.com/"
