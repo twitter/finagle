@@ -17,7 +17,6 @@
 ## See accompanying file LICENSE or visit the Scribe site at:
 ## http://developers.facebook.com/scribe/
 
-namespace cpp scribe.thrift
 namespace java com.twitter.finagle.zipkin.thrift
 
 enum ResultCode

@@ -3,7 +3,7 @@ package com.twitter.finagle.exception
 import com.twitter.util._
 import com.twitter.finagle.util.LoadedReporterFactory
 import java.net.{InetAddress, InetSocketAddress}
-import org.apache.scribe.{ResultCode, LogEntry, scribe}
+import com.twitter.finagle.exception.thrift.{ResultCode, LogEntry, scribe}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.anyObject
