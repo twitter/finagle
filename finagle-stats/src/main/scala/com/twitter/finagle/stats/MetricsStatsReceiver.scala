@@ -32,8 +32,8 @@ class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiver {
 
   def counter(names: String*): Counter =
     getOrElse(counters, names, new Counter {
-      val atomicLong = registry.registerLong(format(names))
-      def incr(delta: Int) = atomicLong.addAndGet(delta)
+      val metricsCounter = registry.registerCounter(format(names))
+      def incr(delta: Int) = metricsCounter.add(delta)
     })
 
   /**

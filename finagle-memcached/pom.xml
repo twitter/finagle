@@ -35,7 +35,7 @@
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>zookeeper-testing</artifactId>
-      <version>0.0.20</version>
+      <version>0.0.34</version>
       <scope>test</scope>
     </dependency>
     <dependency>

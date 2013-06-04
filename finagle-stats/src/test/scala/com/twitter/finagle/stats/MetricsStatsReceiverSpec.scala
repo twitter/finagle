@@ -30,7 +30,7 @@ class MetricsStatsReceiverSpec extends SpecificationWithJUnit with Mockito {
       readInRoot("my_stat.sum") must be_==(input.sum)
       readInRoot("my_stat.count") must be_==(input.size)
       readInRoot("my_stat.avg") must be_==(input.sum / input.size)
-      readInRoot("my_stat.p50") must be_==(input(input.size / 2 - 1))
+      readInRoot("my_stat.p50") must be_==(input((input.size + 1) / 2))
     }
 
     "store and read counter into the root StatsReceiver" in {
