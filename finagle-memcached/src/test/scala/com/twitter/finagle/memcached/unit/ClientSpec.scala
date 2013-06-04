@@ -1,15 +1,15 @@
 package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.{Service, ShardNotAvailableException}
+import com.twitter.finagle.{Group, Service, ShardNotAvailableException}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
 import com.twitter.concurrent.Broker
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Duration, Future}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.specs.mock.Mockito
 import org.specs.SpecificationWithJUnit
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import _root_.java.io.{BufferedReader, InputStreamReader}
 
 class ClientSpec extends SpecificationWithJUnit with Mockito {
@@ -38,17 +38,19 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       s
     }
     val clients = Map(
-      ("10.0.1.1", 11211, 600)  -> newMock(),
-      ("10.0.1.2", 11211, 300)  -> newMock(),
-      ("10.0.1.3", 11211, 200)  -> newMock(),
-      ("10.0.1.4", 11211, 350)  -> newMock(),
-      ("10.0.1.5", 11211, 1000) -> newMock(),
-      ("10.0.1.6", 11211, 800)  -> newMock(),
-      ("10.0.1.7", 11211, 950)  -> newMock(),
-      ("10.0.1.8", 11211, 100)  -> newMock()
-    ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
-    val broker = new Broker[NodeEvent]
-    val ketamaClient = new KetamaClient(clients, broker.recv, KeyHasher.KETAMA, 160)
+      CacheNode("10.0.1.1", 11211, 600)  -> newMock(),
+      CacheNode("10.0.1.2", 11211, 300)  -> newMock(),
+      CacheNode("10.0.1.3", 11211, 200)  -> newMock(),
+      CacheNode("10.0.1.4", 11211, 350)  -> newMock(),
+      CacheNode("10.0.1.5", 11211, 1000) -> newMock(),
+      CacheNode("10.0.1.6", 11211, 800)  -> newMock(),
+      CacheNode("10.0.1.7", 11211, 950)  -> newMock(),
+      CacheNode("10.0.1.8", 11211, 100)  -> newMock()
+    )
+    val mockBuilder = (k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, Duration)) => {
+      clients.get(CacheNode(k.host, k.port, k.weight)).get
+    }
+    val ketamaClient = new KetamaClient(Group(clients.keys.toSeq:_*), KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
 
     "pick the correct node" in {
       val ipToService = clients map { case (key, service) => key.host -> service } toMap
@@ -74,22 +76,27 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
     "ejects dead clients" in {
       val serviceA = smartMock[Service[Command,Response]]
       val serviceB = smartMock[Service[Command,Response]]
-      val keyA = ("10.0.1.1", 11211, 100)
-      val keyB = ("10.0.1.2", 11211, 100)
-      val nodeKeyA = KetamaClientKey(keyA._1, keyA._2, keyA._3)
-      val nodeKeyB = KetamaClientKey(keyB._1, keyB._2, keyB._3)
+      val nodeA = CacheNode("10.0.1.1", 11211, 100)
+      val nodeB = CacheNode("10.0.1.2", 11211, 100)
+      val nodeKeyA = KetamaClientKey(nodeA.host, nodeA.port, nodeA.weight)
+      val nodeKeyB = KetamaClientKey(nodeB.host, nodeB.port, nodeB.weight)
       val services = Map(
-        keyA -> serviceA,
-        keyB -> serviceB
-      ) map { case ((h,p,w), v) => KetamaClientKey(h,p,w) -> v }
+        nodeA -> serviceA,
+        nodeB -> serviceB
+      )
+      val mutableGroup = Group.mutable(services.keys.toSeq:_*)
 
       val key = ChannelBuffers.wrappedBuffer("foo".getBytes)
       val value = smartMock[Value]
       value.key returns key
       serviceA(any) returns Future.value(Values(Seq(value)))
 
-      val broker = new Broker[NodeEvent]
-      val ketamaClient = new KetamaClient(services, broker.recv, KeyHasher.KETAMA, 160)
+      var broker = new Broker[NodeHealth]
+      val mockBuilder = (k: KetamaClientKey, internalBroker: Broker[NodeHealth], _: (Int, Duration)) => {
+        broker = internalBroker
+        services.get(CacheNode(k.host, k.port, k.weight)).get
+      }
+      val ketamaClient = new KetamaClient(mutableGroup, KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
 
       Await.result(ketamaClient.get("foo"))
       there was one(serviceA).apply(any)
@@ -110,6 +117,18 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       "brings back the dead node" in {
         serviceA(any) returns Future.value(Values(Seq(value)))
         broker !! NodeRevived(nodeKeyA)
+        Await.result(ketamaClient.get("foo"))
+        there was two(serviceA).apply(any)
+      }
+
+      "primary leaves and rejoins" in {
+        mutableGroup.update(immutable.Set(nodeB)) // nodeA leaves
+        serviceB(Get(Seq(key))) returns Future.value(Values(Seq(value)))
+        Await.result(ketamaClient.get("foo"))
+        there was one(serviceB).apply(any)
+
+        mutableGroup.update(immutable.Set(nodeA, nodeB)) // nodeA joins
+        serviceA(Get(Seq(key))) returns Future.value(Values(Seq(value)))
         Await.result(ketamaClient.get("foo"))
         there was two(serviceA).apply(any)
       }

@@ -1,25 +1,61 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.io.ByteArrayInputStream
-import _root_.java.net.InetSocketAddress
+import _root_.java.net.{SocketAddress, InetSocketAddress}
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
 import com.twitter.common.quantity.{Amount,Time}
 import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
-import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.concurrent.Spool.*::
+import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Group, Resolver}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
+import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.zookeeper.{ZkResolver, ZookeeperServerSetCluster}
 import com.twitter.util._
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, Watcher}
 import scala.collection.mutable
 
 // Type definition representing a cache node
-case class CacheNode(host: String, port: Int, weight: Int)
+case class CacheNode(host: String, port: Int, weight: Int) extends SocketAddress
+
+/**
+ * Twitter cache pool path resolver.
+ */
+class TwitterCacheResolverException(msg: String) extends Exception(msg)
+class TwitterCacheResolver extends Resolver {
+  val scheme = "twcache"
+
+  def resolve(addr: String) = {
+    addr.split("!") match {
+      // twcache!host1:11211:1,host2:11211:1,host3:11211:2
+      case Array(hosts) =>
+        val group = Group(PartitionedClient.parseHostPortWeights(hosts) map {
+          case (host, port, weight) => new CacheNode(host, port, weight): SocketAddress
+        }:_*)
+        Return(group)
+
+      // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
+      case Array(zkHosts, path) =>
+        val zkResolver = Resolver.get(classOf[ZkResolver]).get
+        val zkClient = zkResolver.zkClientFor(zkResolver.hostSet(zkHosts))
+        val cluster = new ZookeeperCachePoolCluster(
+          zkPath = path,
+          zkClient = zkClient,
+          backupPool = None,
+          statsReceiver = ClientStatsReceiver.scope(scheme).scope(path))
+        Await.result(cluster.ready)
+        val group = Group.fromCluster(cluster) map { case c: CacheNode => c: SocketAddress }
+        Return(group)
+
+      case _ =>
+        Throw(new TwitterCacheResolverException("Invalid twcache format \"%s\"".format(addr)))
+    }
+  }
+}
 
 /**
  * Cache specific cluster implementation.
@@ -173,6 +209,7 @@ class ZookeeperCachePoolCluster private[memcached](
   backupPool: Option[Set[CacheNode]] = None,
   statsReceiver: StatsReceiver = NullStatsReceiver)
   extends CachePoolCluster {
+
   import ZookeeperCachePoolCluster._
 
   private[this] val futurePool = FuturePool.unboundedPool

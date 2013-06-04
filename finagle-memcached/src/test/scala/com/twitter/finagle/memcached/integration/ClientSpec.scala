@@ -18,7 +18,7 @@ import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import com.twitter.finagle.WriteException
+import com.twitter.finagle.{MemcachedClient, WriteException}
 import com.twitter.thrift.Status
 import com.twitter.util.{Await, Duration, Future, Return, Throw}
 import org.jboss.netty.util.CharsetUtil
@@ -1432,6 +1432,115 @@ class ClientSpec extends SpecificationWithJUnit {
 
         Await.result(replicatedClient.append("not-supported", "value")) must throwA[UnsupportedOperationException]
         Await.result(replicatedClient.prepend("not-supported", "value")) must throwA[UnsupportedOperationException]
+      }
+    }
+  }
+
+  "finagle 6 API" should {
+
+    /**
+     * Note: This integration test requires a real Memcached server to run.
+     */
+    var shutdownRegistry = new ShutdownRegistryImpl
+    var memcachedAddress = List[Option[InetSocketAddress]]()
+
+    var zkServerSetCluster: ZookeeperServerSetCluster = null
+    var zookeeperClient: ZooKeeperClient = null
+    val zkPath = "/cache/test/silly-cache"
+    var zookeeperServer: ZooKeeperTestServer = null
+    var zookeeperServerPort: Int = 0
+
+    doBefore {
+      // start zookeeper server and create zookeeper client
+      zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
+      zookeeperServer.startNetwork()
+      zookeeperServerPort = zookeeperServer.getPort()
+
+      // connect to zookeeper server
+      zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
+
+      // create serverset
+      val serverSet = ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath)
+      zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
+
+      // start five memcached server and join the cluster
+      (0 to 4) foreach { _ =>
+        val address: Option[InetSocketAddress] = ExternalMemcached.start()
+        if (address == None) skip("Cannot start memcached. Skipping...")
+        memcachedAddress ::= address
+        zkServerSetCluster.join(address.get)
+      }
+
+      // set cache pool config node data
+      val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = 5)
+      val output: ByteArrayOutputStream = new ByteArrayOutputStream
+      CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
+      zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
+    }
+
+    doAfter {
+      zookeeperClient.close()
+
+      // shutdown zookeeper server and client
+      shutdownRegistry.execute()
+
+      // shutdown memcached server
+      ExternalMemcached.stop()
+    }
+
+    "with static servers list" in {
+      val client = MemcachedClient.newKetamaClient(
+        group = "twcache!localhost:%d,localhost:%d".format(memcachedAddress(0).get.getPort, memcachedAddress(1).get.getPort))
+
+      Await.result(client.delete("foo"))
+      Await.result(client.get("foo")) mustEqual None
+      Await.result(client.set("foo", "bar"))
+      Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+    }
+
+    "with managed cache pool" in {
+      val client = MemcachedClient.newKetamaClient(
+        group = "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+
+      client.delete("foo")()
+      client.get("foo")() mustEqual None
+      client.set("foo", "bar")()
+      client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+
+      val count = 100
+      (0 until count).foreach{
+        n => {
+          client.set("foo"+n, "bar"+n)()
+        }
+      }
+
+      (0 until count).foreach {
+        n => {
+          val c = client.clientOf("foo"+n)
+          c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+        }
+      }
+    }
+
+    "with unmanaged regular zk serverset" in {
+      val client = MemcachedClient.newKetamaClient(
+        group = "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+
+      // Wait for group to contain members
+      Thread.sleep(5000)
+
+      val count = 100
+      (0 until count).foreach{
+        n => {
+          client.set("foo"+n, "bar"+n)()
+        }
+      }
+
+      (0 until count).foreach {
+        n => {
+          val c = client.clientOf("foo"+n)
+          c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+        }
       }
     }
   }

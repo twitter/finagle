@@ -581,12 +581,10 @@ case class KetamaClientKey(host: String, port: Int, weight: Int) {
   private[memcached] def identifier = if (port == 11211) host else host + ":" + port
 }
 
-private[memcached] sealed trait NodeEvent
-private[memcached] case class NodeJoin(key: KetamaClientKey, service: Service[Command, Response]) extends NodeEvent
-private[memcached] case class NodeLeave(key: KetamaClientKey) extends NodeEvent
-private[memcached] sealed trait NodeHealth extends NodeEvent
-private[memcached] case class NodeMarkedDead(key: KetamaClientKey) extends NodeHealth
-private[memcached] case class NodeRevived(key: KetamaClientKey) extends NodeHealth
+private[finagle] sealed trait NodeEvent
+private[finagle] sealed trait NodeHealth extends NodeEvent
+private[finagle] case class NodeMarkedDead(key: KetamaClientKey) extends NodeHealth
+private[finagle] case class NodeRevived(key: KetamaClientKey) extends NodeHealth
 
 class KetamaFailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
@@ -616,25 +614,47 @@ object KetamaClient {
   }
 }
 
-class KetamaClient private[memcached](
-  initialServices: Map[KetamaClientKey, Service[Command, Response]],
-  nodeChange: Offer[NodeEvent],
+class KetamaClient private[finagle](
+  initialServices: Group[CacheNode],
   keyHasher: KeyHasher,
   numReps: Int,
+  failureAccrualParams: (Int, Duration) = (5, 30.seconds),
+  legacyFAClientBuilder: Option[(KetamaClientKey, Broker[NodeHealth], (Int, Duration)) => Service[Command, Response]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   oldLibMemcachedVersionComplianceMode: Boolean = false
 ) extends PartitionedClient {
+
   private object NodeState extends Enumeration {
     type t = this.Value
     val Live, Ejected = Value
   }
   private case class Node(node: KetamaNode[Client], var state: NodeState.Value)
 
-  private[this] val nodes = mutable.Map[KetamaClientKey, Node]() ++ {
-    initialServices map { case (clientKey, service) =>
-      clientKey -> Node(KetamaNode(clientKey.identifier, clientKey.weight, Client(service)), NodeState.Live)
-    }
+  // ketama nodes group maps each cache node to a ketama key/node pair
+  // with memcached rich client as undelying handler
+  val nodeHealthBroker = new Broker[NodeHealth]
+  val ketamaNodeGrp = initialServices.map({
+    node: CacheNode =>
+      val key = KetamaClientKey(node.host, node.port, node.weight)
+      val faClient = legacyFAClientBuilder map { builder =>
+        Client(builder(key, nodeHealthBroker, failureAccrualParams))
+      } getOrElse MemcachedFailureAccrualClient(
+        key, nodeHealthBroker, failureAccrualParams
+      ).newRichClient(node.host+":"+node.port)
+
+      key -> KetamaNode(key.identifier, key.weight, faClient)
+  })
+
+  @volatile private[this] var ketamaNodeSnap = ketamaNodeGrp()
+  @volatile private[this] var nodes = mutable.Map[KetamaClientKey, Node]() ++ {
+    ketamaNodeSnap.toMap mapValues { kn: KetamaNode[Client] => Node(kn, NodeState.Live) }
   }
+
+  nodeHealthBroker.recv foreach {
+    case NodeMarkedDead(key) => ejectNode(key)
+    case NodeRevived(key) => reviveNode(key)
+  }
+
   private[this] val pristineDistributor = buildDistributor(nodes.values map(_.node) toSeq)
   @volatile private[this] var currentDistributor: Distributor[Client] = pristineDistributor
 
@@ -648,22 +668,15 @@ class KetamaClient private[memcached](
   private[this] val nodeJoinCount = statsReceiver.counter("joins")
   private[this] val keyRingRedistributeCount = statsReceiver.counter("redistributes")
 
-  private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) =
+  private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) = synchronized {
     if (nodes.isEmpty) KetamaClient.shardNotAvailableDistributor
     else new KetamaDistributor(nodes, numReps, oldLibMemcachedVersionComplianceMode)
-
-  nodeChange foreach {
-    case NodeMarkedDead(key) =>
-      ejectNode(key)
-    case NodeRevived(key) =>
-      reviveNode(key)
-    case NodeLeave(key) =>
-      removeNode(key)
-    case NodeJoin(key, client) =>
-      joinNode(key, client)
   }
 
   override def clientOf(key: String): Client = {
+    if (ketamaNodeGrp() ne ketamaNodeSnap)
+      updateGroup()
+
     val hash = keyHasher.hashKey(key)
     currentDistributor.nodeForHash(hash)
   }
@@ -672,6 +685,30 @@ class KetamaClient private[memcached](
     val liveNodes = for ((_, Node(node, NodeState.Live)) <- nodes) yield node
     currentDistributor = buildDistributor(liveNodes toSeq)
     keyRingRedistributeCount.incr()
+  }
+
+  private[this] def updateGroup() = synchronized {
+    if (ketamaNodeGrp() ne ketamaNodeSnap) {
+      val old = ketamaNodeSnap
+      ketamaNodeSnap = ketamaNodeGrp()
+
+      // remove old nodes and release clients
+      nodes --= (old &~ ketamaNodeSnap) collect {
+        case (key, node) =>
+          node.handle.release()
+          nodeLeaveCount.incr()
+          key
+      }
+
+      // new joined node appears as Live state
+      nodes ++= (ketamaNodeSnap &~ old) collect {
+        case (key, node) =>
+          nodeJoinCount.incr()
+          key -> Node(node, NodeState.Live)
+      }
+
+      rebuildDistributor()
+    }
   }
 
   private[this] def ejectNode(key: KetamaClientKey) = synchronized {
@@ -692,25 +729,6 @@ class KetamaClient private[memcached](
         revivalCount.incr()
       case _ =>
     }
-  }
-
-  private[this] def removeNode(key: KetamaClientKey) = synchronized {
-    nodes.remove(key) match {
-      case Some(Node(node, _)) =>
-        rebuildDistributor()
-        node.handle.release()
-        nodeLeaveCount.incr()
-      case _ =>
-    }
-  }
-
-  private[this] def joinNode(key: KetamaClientKey, service: Service[Command, Response]): Unit = synchronized {
-    if (nodes contains key)
-      return ()
-
-    nodes(key) = Node(KetamaNode(key.identifier, key.weight, Client(service)), NodeState.Live)
-    rebuildDistributor()
-    nodeJoinCount.incr()
   }
 
   def release() = synchronized {
@@ -773,50 +791,32 @@ case class KetamaClientBuilder private[memcached] (
     val builder =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
-    // A dedicated broker for both cache node health event and cache pool change event.
-    val nodeChangeBroker = new Broker[NodeEvent]
-
-    def prepareNodeJoin(node: CacheNode) = {
-      val key = KetamaClientKey(node.host, node.port, node.weight)
-      val (fa, health) = failureAccrualWrapper(key)
-      val client = builder
-          .hosts(new InetSocketAddress(key.host, key.port))
-          .failureAccrualFactory(fa)
+    def legacyFAClientBuilder(
+      key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
+    ) = {
+      builder.hosts(new InetSocketAddress(key.host, key.port))
+          .failureAccrualFactory(filter(key, broker, faParams) _)
           .build()
-      health foreach { healthEvent =>
-        nodeChangeBroker ! healthEvent
-      }
-
-      (key, client)
-    }
-
-    val (cacheNodes, clusterUpdates) = _cluster.snap
-    val initialServices = (cacheNodes.map(prepareNodeJoin)).toMap
-    clusterUpdates foreach { spool =>
-      spool foreach {
-        case Cluster.Add(node) =>
-          val (key, client) = prepareNodeJoin(node)
-          nodeChangeBroker ! new NodeJoin(key, client)
-        case Cluster.Rem(node) =>
-          nodeChangeBroker ! new NodeLeave(KetamaClientKey(node.host, node.port, node.weight))
-      }
     }
 
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
     val statsReceiver = builder.statsReceiver.scope("memcached_client")
 
     new KetamaClient(
-      initialServices,
-      nodeChangeBroker.recv,
+      Group.fromCluster(_cluster),
       keyHasher,
       numReps,
+      _failureAccrualParams,
+      Some(legacyFAClientBuilder(_, _, _)),
       statsReceiver,
       oldLibMemcachedVersionComplianceMode
     )
   }
 
-  private[this] def filter(key: KetamaClientKey, broker: Broker[NodeHealth])(timer: Timer) = {
-    val (_numFailures, _markDeadFor) = _failureAccrualParams
+  private[this] def filter(
+    key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
+  )(timer: Timer) = {
+    val (_numFailures, _markDeadFor) = faParams
     new ServiceFactoryWrapper {
       def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) = {
           new KetamaFailureAccrualFactory(
@@ -824,11 +824,6 @@ case class KetamaClientBuilder private[memcached] (
           )
         }
     }
-  }
-
-  private[this] def failureAccrualWrapper(key: KetamaClientKey) = {
-    val broker = new Broker[NodeHealth]
-    (filter(key, broker) _, broker.recv)
   }
 }
 

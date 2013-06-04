@@ -36,7 +36,7 @@ class ZkResolver extends Resolver {
   val scheme = "zk"
 
   private[this] var zkClients: Map[Set[InetSocketAddress], ZooKeeperClient] = Map()
-  private[this] def hostSet(hosts: String) = {
+  def hostSet(hosts: String) = {
     val zkGroup = InetResolver.resolve(hosts)() collect { case ia: InetSocketAddress => ia }
     val zkHosts = zkGroup()
     if (zkHosts.isEmpty)
@@ -44,7 +44,7 @@ class ZkResolver extends Resolver {
     zkHosts
   }
 
-  private[this] def zkClientFor(zkHosts: Set[InetSocketAddress]) = {
+  def zkClientFor(zkHosts: Set[InetSocketAddress]) = {
     if (!(zkClients contains zkHosts)) {
       val newZk = new ZooKeeperClient(
         ZooKeeperUtils.DEFAULT_ZK_SESSION_TIMEOUT,
