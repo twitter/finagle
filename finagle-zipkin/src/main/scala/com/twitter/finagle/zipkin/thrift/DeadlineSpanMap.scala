@@ -3,7 +3,7 @@ package com.twitter.finagle.zipkin.thrift
 import collection.mutable.HashMap
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceId
-import com.twitter.util.{Time, Timer, Duration, Future}
+import com.twitter.util.{Time, Timer, Duration, Future, TimerTask}
 
 /**
  * Takes care of storing the spans in a thread safe fashion. If a span
@@ -15,39 +15,42 @@ class DeadlineSpanMap(tracer: RawZipkinTracer,
                       statsReceiver: StatsReceiver,
                       timer: Timer) {
 
-  private[this] val spanMap = HashMap[TraceId, Span]()
+  private[this] val spanMap = HashMap[TraceId, (Span, TimerTask)]()
 
   /**
    * Update the span in the map. If none exists create a new span. Synchronized.
    */
   def update(traceId: TraceId)(f: Span => Span): Span = synchronized {
-    val span = spanMap.get(traceId) match {
-      case Some(s) => f(s)
+    val (span, task) = spanMap.get(traceId) match {
+      case Some((s, t)) => (f(s), t)
       case None =>
         // no span found, let's create a new one
         val span = f(Span(traceId))
 
         // if this new span isn't triggered by a natural end we
         // send off what we have anyway
-        timer.schedule(deadline.fromNow) {
+        val task = timer.schedule(deadline.fromNow) {
           remove(traceId) foreach {
             statsReceiver.scope("log_span").counter("unfinished").incr()
             tracer.logSpan(_)
           }
         }
 
-        span
+        (span, task)
     }
 
-    spanMap.put(traceId, span)
+    spanMap.put(traceId, (span, task))
     span
   }
 
   /**
-   * Remove this span from the map. Synchronized.
+   * Remove this span from the map and cancel its task. Synchronized.
    */
   def remove(traceId: TraceId): Option[Span] = synchronized {
-    spanMap.remove(traceId)
+    for ((span,task) <- spanMap.remove(traceId)) yield {
+      task.cancel()
+      span
+    }
   }
 
   /**
