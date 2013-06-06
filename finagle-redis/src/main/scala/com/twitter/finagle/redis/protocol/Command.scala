@@ -21,6 +21,9 @@ object Commands {
   val EXPIREAT  = "EXPIREAT"
   val KEYS      = "KEYS"
   val PERSIST   = "PERSIST"
+  val PEXPIRE   = "PEXPIRE"
+  val PEXPIREAT = "PEXPIREAT"
+  val PTTL      = "PTTL"
   val RANDOMKEY = "RANDOMKEY"
   val RENAME    = "RENAME"
   val RENAMENX  = "RENAMENX"
@@ -133,6 +136,9 @@ object Commands {
     EXPIREAT          -> {ExpireAt(_)},
     KEYS              -> {Keys(_)},
     PERSIST           -> {Persist(_)},
+    PEXPIRE           -> {PExpire(_)},
+    PEXPIREAT         -> {PExpireAt(_)},
+    PTTL              -> {PTtl(_)},
     RANDOMKEY         -> {_ => Randomkey()},
     RENAME            -> {Rename(_)},
     RENAMENX          -> {RenameNx(_)},
@@ -259,6 +265,9 @@ object CommandBytes {
   val EXPIREAT          = StringToChannelBuffer("EXPIREAT")
   val KEYS              = StringToChannelBuffer("KEYS")
   val PERSIST           = StringToChannelBuffer("PERSIST")
+  val PEXPIRE           = StringToChannelBuffer("PEXPIRE")
+  val PEXPIREAT         = StringToChannelBuffer("PEXPIREAT")
+  val PTTL              = StringToChannelBuffer("PTTL")
   val RANDOMKEY         = StringToChannelBuffer("RANDOMKEY")
   val RENAME            = StringToChannelBuffer("RENAME")
   val RENAMENX          = StringToChannelBuffer("RENAMENX")
