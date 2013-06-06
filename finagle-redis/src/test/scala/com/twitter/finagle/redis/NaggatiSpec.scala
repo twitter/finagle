@@ -62,6 +62,22 @@ class NaggatiSpec extends SpecificationWithJUnit {
             codec(wrap("PERSIST\r\n")) must throwA[ClientError]
             codec(wrap("PERSIST foo\r\n")) mustEqual List(Persist("foo"))
           }
+          "PEXPIRE" >> {
+            codec(wrap("PEXPIRE foo 100000\r\n")) mustEqual List(PExpire("foo", 100000L))
+            codec(wrap("PEXPIRE foo -1\r\n")) must throwA[ClientError]
+          }
+          "PEXPIREAT" >> {
+            codec(wrap("PEXPIREAT foo 100000\r\n")) must throwA[ClientError]
+            val time = Time.now + 10.seconds
+            val foo = s2cb("foo")
+            unwrap(codec(wrap("PEXPIREAT foo %d\r\n".format(time.inMilliseconds)))) {
+              case PExpireAt(foo, timestamp) =>
+                timestamp.inMilliseconds mustEqual time.inMilliseconds
+            }
+          }
+          "PTTL" >> {
+            codec(wrap("PTTL foo\r\n")) mustEqual List(PTtl("foo"))
+          }
           "RENAME" >> {
             codec(wrap("RENAME\r\n")) must throwA[ClientError]
             codec(wrap("RENAME foo\r\n")) must throwA[ClientError]

@@ -113,6 +113,16 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.ttl(foo)) map (_ must beLessThanOrEqualTo(ttl))
       }
 
+      "pExpire(At) & pTtl" in {
+        Await.result(client.set(foo, bar))
+        Await.result(client.pExpire(foo, 100000L)) mustEqual true
+        Await.result(client.pTtl(foo)) map (_ must beLessThanOrEqualTo(100000L))
+
+        val ttl = System.currentTimeMillis() + 20000L
+        Await.result(client.pExpireAt(foo, ttl)) mustEqual true
+        Await.result(client.pTtl(foo)) map (_ must beLessThanOrEqualTo(20000L))
+      }
+
       // Once the scan/hscan pull request gets merged into Redis master,
       // the tests can be uncommented.
       // "scan" in {
