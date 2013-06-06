@@ -4,7 +4,7 @@ import org.apache.thrift.TBase
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TMemoryInputTransport
 
-private[thrift] object InputBuffer {
+private[finagle] object InputBuffer {
   def peelMessage(bytes: Array[Byte], message: TBase[_, _], protocolFactory: TProtocolFactory) = {
     val buffer = new InputBuffer(bytes, protocolFactory)
     message.read(buffer())
@@ -18,7 +18,7 @@ private[thrift] object InputBuffer {
   }
 }
 
-private[thrift] class InputBuffer(bytes: Array[Byte], protocolFactory: TProtocolFactory) {
+private[finagle] class InputBuffer(bytes: Array[Byte], protocolFactory: TProtocolFactory) {
 
   private[this] val memoryTransport = new TMemoryInputTransport(bytes)
   private[this] val iprot = protocolFactory.getProtocol(memoryTransport)

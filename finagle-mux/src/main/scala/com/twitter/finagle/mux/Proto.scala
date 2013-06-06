@@ -9,13 +9,13 @@ case class BadMessageException(why: String) extends Exception(why)
 // TODO: when the new com.twitter.codec.Codec arrives, define Message
 // parsing as a bijection between ChannelBuffers and Message.
 
-private sealed trait Message {
+private[finagle] sealed trait Message {
   val typ: Byte
   val tag: Int
   val buf: ChannelBuffer
 }
 
-private object Message {
+private[finagle] object Message {
   object Types {
     // Application messages:
     val Treq = 1: Byte

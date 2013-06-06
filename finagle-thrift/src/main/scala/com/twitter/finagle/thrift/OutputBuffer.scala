@@ -9,7 +9,7 @@ import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TMemoryBuffer
 import org.apache.thrift.TBase
 
-private[thrift] object OutputBuffer {
+private[finagle] object OutputBuffer {
   def messageToArray(message: TBase[_, _], protocolFactory: TProtocolFactory) = {
     val buffer = new OutputBuffer(protocolFactory)
     message.write(buffer())
@@ -17,7 +17,7 @@ private[thrift] object OutputBuffer {
   }
 }
 
-private[thrift] class OutputBuffer(protocolFactory: TProtocolFactory) {
+private[finagle] class OutputBuffer(protocolFactory: TProtocolFactory) {
   private[this] val memoryBuffer = new TMemoryBuffer(512)
   private[this] val oprot = protocolFactory.getProtocol(memoryBuffer)
 

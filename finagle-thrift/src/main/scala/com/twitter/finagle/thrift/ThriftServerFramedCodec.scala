@@ -89,7 +89,7 @@ private[thrift] class ThriftServerChannelBufferEncoder
   }
 }
 
-private[thrift]
+private[finagle]
 class HandleUncaughtApplicationExceptions(protocolFactory: TProtocolFactory)
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
