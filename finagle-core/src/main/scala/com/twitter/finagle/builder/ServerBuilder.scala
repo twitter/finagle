@@ -3,7 +3,7 @@ package com.twitter.finagle.builder
 import com.twitter.finagle._
 import com.twitter.finagle.channel.OpenConnectionsThresholds
 import com.twitter.finagle.channel.IdleConnectionFilter
-import com.twitter.finagle.dispatch.ExpiringServerDispatcher 
+import com.twitter.finagle.dispatch.ExpiringServerDispatcher
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -450,7 +450,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     )
 
     val channelMaxIdleTime = config.hostConnectionMaxIdleTime getOrElse Duration.Top
-    val channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.Top    
+    val channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.Top
     val serverDispatcher =
       if (channelMaxIdleTime < Duration.Top || channelMaxLifeTime < Duration.Top) {
         val idleTime = if (channelMaxIdleTime < Duration.Top) Some(channelMaxIdleTime) else None

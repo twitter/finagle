@@ -13,7 +13,7 @@ import org.jboss.netty.util.CharsetUtil
 import java.net.InetSocketAddress
 
 /**
- * This Codec is a newline (\n) delimited line-based protocol. Here we re-use existing 
+ * This Codec is a newline (\n) delimited line-based protocol. Here we re-use existing
  * encoders/decoders as provided by Netty. This codec allows us to make requests which
  * are incomplete due to missing newline (\n)
  */
@@ -73,7 +73,7 @@ class ServerChannelConfigurationSpec extends SpecificationWithJUnit {
         .hostConnectionLimit(1)
         .build()
 
-      // Issue a request which is NOT newline-delimited. Server should close connection 
+      // Issue a request which is NOT newline-delimited. Server should close connection
       // after waiting for 2 seconds for a new line
       val r = client("123")
       r() must throwA[ChannelClosedException]
@@ -99,7 +99,7 @@ class ServerChannelConfigurationSpec extends SpecificationWithJUnit {
         .hostConnectionLimit(1)
         .build()
 
-      // Issue a request which is NOT newline-delimited. Server should close connection 
+      // Issue a request which is NOT newline-delimited. Server should close connection
       // after waiting for 2 seconds for a new line
       val r = client("123")
       r() must throwA[ChannelClosedException]
