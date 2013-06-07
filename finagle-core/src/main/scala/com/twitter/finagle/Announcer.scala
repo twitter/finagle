@@ -50,6 +50,9 @@ object Announcer {
     announcers
   }
 
+  def get[T <: Announcer](clazz: Class[T]): Option[T] =
+    announcers find { _.getClass isAssignableFrom clazz } map { _.asInstanceOf[T] }
+
   private[this] val _announcements = mutable.Set[(InetSocketAddress, List[String])]()
   def announcements = synchronized { _announcements.toSet }
 

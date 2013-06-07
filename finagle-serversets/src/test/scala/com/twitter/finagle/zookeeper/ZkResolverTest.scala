@@ -1,6 +1,5 @@
 package com.twitter.finagle.zookeeper
 
-
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.concurrent.Timeouts._
 import org.junit.runner.RunWith

@@ -39,4 +39,9 @@ class AnnouncerTest extends FunSuite {
     Announcer.announce(addr, "test!xyz")
     assert(Announcer.announcements == Set((addr, List("test!xyz"))))
   }
+
+  test("get an announcer instance") {
+    val anmt = Await.result(Announcer.get(classOf[TestAnnouncer]).get.announce(addr, "foo"))
+    assert(anmt === TestAnnouncement(addr, "foo"))
+  }
 }

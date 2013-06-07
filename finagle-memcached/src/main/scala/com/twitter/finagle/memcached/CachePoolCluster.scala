@@ -13,7 +13,7 @@ import com.twitter.finagle.{Group, Resolver}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.zookeeper.{ZkResolver, ZookeeperServerSetCluster}
+import com.twitter.finagle.zookeeper.{ZkClient, ZookeeperServerSetCluster}
 import com.twitter.util._
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, Watcher}
@@ -40,8 +40,7 @@ class TwitterCacheResolver extends Resolver {
 
       // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
       case Array(zkHosts, path) =>
-        val zkResolver = Resolver.get(classOf[ZkResolver]).get
-        val zkClient = zkResolver.zkClientFor(zkResolver.hostSet(zkHosts))
+        val zkClient = ZkClient.get(ZkClient.hostSet(zkHosts))
         val cluster = new ZookeeperCachePoolCluster(
           zkPath = path,
           zkClient = zkClient,
