@@ -308,7 +308,7 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
       "add multiple members and get scores" in {
-        Await.result(client.zAdd(foo, 10.5, bar, (20.1, baz))) mustEqual 2
+        Await.result(client.zAddMulti(foo, Seq((10.5, bar), (20.1, baz))) mustEqual 2
         Await.result(client.zScore(foo, bar)).get mustEqual 10.5
         Await.result(client.zScore(foo, baz)).get mustEqual 20.1
       }
