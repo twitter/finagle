@@ -2,6 +2,8 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.channel.OpenConnectionsThresholds
+import com.twitter.finagle.channel.IdleConnectionFilter
+import com.twitter.finagle.dispatch.ExpiringServerDispatcher
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
@@ -437,8 +439,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
         o.result()
       },
-      channelMaxIdleTime = config.hostConnectionMaxIdleTime getOrElse Duration.Top,
-      channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.Top,
       channelReadTimeout = config.readTimeout getOrElse Duration.Top,
       channelWriteCompletionTimeout = config.writeCompletionTimeout getOrElse Duration.Top,
       tlsConfig = config.newEngine map(Netty3ListenerTLSConfig),
@@ -449,10 +449,22 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       logger = logger
     )
 
+    val channelMaxIdleTime = config.hostConnectionMaxIdleTime getOrElse Duration.Top
+    val channelMaxLifeTime = config.hostConnectionMaxLifeTime getOrElse Duration.Top
+    val serverDispatcher =
+      if (channelMaxIdleTime < Duration.Top || channelMaxLifeTime < Duration.Top) {
+        val idleTime = if (channelMaxIdleTime < Duration.Top) Some(channelMaxIdleTime) else None
+        val lifeTime = if (channelMaxLifeTime < Duration.Top) Some(channelMaxLifeTime) else None
+        ExpiringServerDispatcher[Req, Rep](
+          idleTime, lifeTime, timer,
+          statsReceiver.scope("expired"),
+          codec.newServerDispatcher)
+      } else  codec.newServerDispatcher _
+
     val server = DefaultServer[Req, Rep, Rep, Req](
       name = config.name,
       listener = listener,
-      serviceTransport = codec.newServerDispatcher _,
+      serviceTransport = serverDispatcher,
       requestTimeout = config.requestTimeout getOrElse Duration.Top,
       maxConcurrentRequests = config.maxConcurrentRequests getOrElse Int.MaxValue,
       cancelOnHangup = config.cancelOnHangup,
@@ -465,7 +477,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       reporter = NullReporterFactory
     )
 
-    val listeningServer = server.serve(config.bindTo, serviceFactory)
+    val factory = config.openConnectionsThresholds map { (threshold) =>
+      new IdleConnectionFilter(serviceFactory, threshold, statsReceiver.scope("idle"))
+    } getOrElse serviceFactory
+
+    val listeningServer = server.serve(config.bindTo, factory)
     val closed = new AtomicBoolean(false)
 
     if (!config.daemon) ExitGuard.guard()
