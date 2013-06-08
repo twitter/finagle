@@ -103,7 +103,7 @@ object ReplyFormat {
   def toString(items: List[Reply]): List[String] = {
     items flatMap {
       case BulkReply(message)   => List(BytesToString(message.array))
-      case EmptyBulkReply()     => EmptyBulkReplyString
+      case EmptyBulkReply()     => List(RedisCodec.NIL_VALUE.toString)
       case IntegerReply(id)     => List(id.toString)
       case StatusReply(message) => List(message)
       case ErrorReply(message)  => List(message)
