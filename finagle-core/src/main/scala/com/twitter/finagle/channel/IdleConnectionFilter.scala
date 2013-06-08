@@ -76,7 +76,7 @@ class IdleConnectionFilter[Req, Rep](
     }
   }
 
-  private[channel] def closeIdleConnections() = 
+  private[channel] def closeIdleConnections() =
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) => {
         conn.close()
