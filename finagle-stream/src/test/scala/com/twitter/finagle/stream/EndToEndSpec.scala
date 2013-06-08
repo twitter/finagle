@@ -94,6 +94,7 @@ class EndToEndSpec extends SpecificationWithJUnit {
           }
         }
 
+        skip("the server does not admit concurrent requests")
         "the server does not admit concurrent requests" in {
           // The finagle client, by nature, doesn't allow for this, so
           // we need to go through the trouble of establishing our own

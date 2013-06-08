@@ -1,12 +1,13 @@
 import sbt._
 import Keys._
 import Tests._
+import com.twitter.scrooge.ScroogeSBT
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
   val zkVersion = "3.3.4"
-  val utilVersion = "6.3.4"
+  val utilVersion = "6.3.5"
   val nettyLib = "io.netty" % "netty" % "3.5.12.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % "9.1.1"
   val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
@@ -14,11 +15,13 @@ object Finagle extends Build {
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
+  val scroogeLibs = thriftLibs ++ Seq(
+    "com.twitter" %% "scrooge-runtime" % "3.1.5")
 
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.4.0",
+    version := "6.4.1",
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     libraryDependencies ++= Seq(
@@ -187,7 +190,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    libraryDependencies ++= Seq(util("codec")) ++ thriftLibs
+    libraryDependencies ++= Seq(util("codec")) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
   lazy val finagleException = Project(
@@ -202,7 +205,7 @@ object Finagle extends Build {
       util("codec"),
       jacksonLib,
       "com.twitter" % "streamyj_2.8.1" % "0.3.0" % "test"
-    ) ++ thriftLibs
+    ) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -358,14 +361,21 @@ object Finagle extends Build {
     id = "finagle-thriftmux",
     base = file("finagle-thriftmux"),
     settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings ++
       Scrooge.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-thriftmux",
-    Scrooge.scroogeThriftNamespaceMap in Test := Map(
+    ScroogeSBT.scroogeThriftNamespaceMap in Test := Map(
       "com.twitter.finagle.thriftmux.thrift" ->
-        "com.twitter.finagle.thriftmux.thriftscala"
-    )
+        "com.twitter.finagle.thriftmux.thriftscrooge3"
+    ),
+    Scrooge.scrooge2ThriftNamespaceMap in Test := Map(
+      "com.twitter.finagle.thriftmux.thrift" ->
+        "com.twitter.finagle.thriftmux.thriftscrooge2"
+    ),
+    Scrooge.scrooge2ThriftOutputFolder <<= (sourceManaged) { x => x / "scrooge2" },
+    libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleMux, finagleThrift, finagleOstrich4)
 
   lazy val finagleMySQL = Project(
@@ -405,11 +415,21 @@ object Finagle extends Build {
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
 
+  lazy val finagleMdns = Project(
+    id = "finagle-mdns",
+    base = file("finagle-mdns"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-mdns",
+    libraryDependencies += "javax.jmdns" % "jmdns" % "3.4.1"
+  ).dependsOn(finagleCore)
+
   lazy val finagleExample = Project(
     id = "finagle-example",
     base = file("finagle-example"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-example",
@@ -417,7 +437,7 @@ object Finagle extends Build {
       util("codec"),
       "com.twitter.common" % "flags" % "0.0.1",
       "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
-    )
+    ) ++ scroogeLibs
   ).dependsOn(
     finagleCore, finagleHttp, finagleStream, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis, finagleMySQL,

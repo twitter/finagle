@@ -16,10 +16,10 @@ case class ZipkinAnnotation(
 
   def toThrift: thrift.Annotation = {
     val thriftAnnotation = new thrift.Annotation
+    val localEndpoint = endpoint.boundEndpoint.toThrift
     thriftAnnotation.setTimestamp(timestamp.inMicroseconds)
     thriftAnnotation.setValue(value)
-
-    endpoint.toThrift foreach { thriftAnnotation.setHost(_) }
+    thriftAnnotation.setHost(localEndpoint)
     duration foreach { d => thriftAnnotation.setDuration(d.inMicroseconds.toInt) }
 
     thriftAnnotation
@@ -34,11 +34,11 @@ case class BinaryAnnotation(
 ) {
   def toThrift: thrift.BinaryAnnotation = {
     val thriftAnnotation = new thrift.BinaryAnnotation
+    val localEndpoint = endpoint.boundEndpoint.toThrift
     thriftAnnotation.setKey(key)
     thriftAnnotation.setValue(value)
     thriftAnnotation.setAnnotation_type(annotationType)
-
-    endpoint.toThrift foreach { thriftAnnotation.setHost(_) }
+    thriftAnnotation.setHost(localEndpoint)
 
     thriftAnnotation
   }

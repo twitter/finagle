@@ -52,7 +52,6 @@ class ClientServerTest extends FunSuite with OneInstancePerTest with MockitoSuga
       case Seq(
         Record(`id`, _, Annotation.ClientSend(), None),
         Record(`id`, _, Annotation.ServerRecv(), None),
-        Record(`id`, _, Annotation.ServerAddr(ia), None),
         Record(`id`, _, Annotation.ServerSend(), None),
         Record(`id`, _, Annotation.ClientRecv(), None)) => true
       case _ => false

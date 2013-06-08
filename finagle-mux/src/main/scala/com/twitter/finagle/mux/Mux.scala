@@ -6,6 +6,7 @@ import com.twitter.finagle.pool.ReusingPool
 import com.twitter.finagle.server._
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.stats.StatsReceiver
 
 object MuxTransporter extends Netty3Transporter[ChannelBuffer, ChannelBuffer](
   "mux", mux.PipelineFactory)
@@ -14,7 +15,7 @@ object MuxClient extends DefaultClient[ChannelBuffer, ChannelBuffer](
   name = "mux",
   endpointer = Bridge[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
     MuxTransporter, new mux.ClientDispatcher(_)),
-  pool = _ => new ReusingPool(_)
+  pool = (sr: StatsReceiver) => new ReusingPool(_, sr.scope("reusingpool"))
 )
 
 object MuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer]("mux", mux.PipelineFactory)

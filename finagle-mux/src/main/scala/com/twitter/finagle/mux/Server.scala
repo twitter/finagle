@@ -35,7 +35,6 @@ private[finagle] class ServerDispatcher(
         for (traceId <- traceId)
           Trace.setId(traceId)
         Trace.record(Annotation.ServerRecv())
-        Trace.recordServerAddr(localAddress)
         val f = service(req)
         pending.put(tag, f)
         f respond {

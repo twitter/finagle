@@ -1,7 +1,7 @@
 package com.twitter.finagle.thriftmux.javatest;
 
 import org.junit.Test;
-import com.twitter.finagle.thriftmux.thriftscala.TestService;
+import com.twitter.finagle.thriftmux.thriftscrooge3.TestService;
 import static junit.framework.Assert.assertEquals;
 import com.twitter.util.Future;
 import com.twitter.finagle.*;
