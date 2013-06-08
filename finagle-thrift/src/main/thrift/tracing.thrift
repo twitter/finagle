@@ -17,6 +17,8 @@ const string CLIENT_SEND = "cs"
 const string CLIENT_RECV = "cr"
 const string SERVER_SEND = "ss"
 const string SERVER_RECV = "sr"
+const string SERVER_ADDR = "sa"
+const string CLIENT_ADDR = "ca"
 
 // this represents a host and port in a network
 struct Endpoint {

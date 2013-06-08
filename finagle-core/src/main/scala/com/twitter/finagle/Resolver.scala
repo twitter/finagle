@@ -59,6 +59,9 @@ object Resolver {
     resolvers
   }
 
+  def get[T <: Resolver](clazz: Class[T]): Option[T] =
+    resolvers find { _.getClass isAssignableFrom clazz } map { _.asInstanceOf[T] }
+
   private[this] sealed trait Token
   private[this] case class El(e: String) extends Token
   private[this] object Eq extends Token

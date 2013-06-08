@@ -10,8 +10,8 @@ import com.twitter.finagle.stats.{
   BroadcastStatsReceiver, ClientStatsReceiver, RollupStatsReceiver,
   StatsReceiver, NullStatsReceiver
 }
-import com.twitter.finagle.tracing.{NullTracer, DefaultTracer, Tracer, TracingFilter}
-import com.twitter.finagle.util.{DefaultTimer, DefaultMonitor}
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.util.{DefaultTimer, DefaultMonitor, ReporterFactory, LoadedReporterFactory}
 import com.twitter.util.{Timer, Duration, Monitor}
 import java.net.{SocketAddress, InetSocketAddress}
 
@@ -67,7 +67,8 @@ case class DefaultClient[Req, Rep](
   statsReceiver: StatsReceiver = ClientStatsReceiver,
   hostStatsReceiver: StatsReceiver = NullStatsReceiver,
   tracer: Tracer  = DefaultTracer,
-  monitor: Monitor = DefaultMonitor
+  monitor: Monitor = DefaultMonitor,
+  reporter: ReporterFactory = LoadedReporterFactory
 ) extends Client[Req, Rep] {
   com.twitter.finagle.Init()
   val globalStatsReceiver = new RollupStatsReceiver(statsReceiver)
@@ -114,11 +115,17 @@ case class DefaultClient[Req, Rep](
     }
 
     val monitored: Transformer[Req, Rep] = {
-      val filter = new MonitorFilter[Req, Rep](monitor)
+      val filter = new MonitorFilter[Req, Rep](reporter(name, Some(sa)) andThen monitor)
+      factory => filter andThen factory
+    }
+
+    val traceDest: Transformer[Req, Rep] = {
+      val filter = new ClientDestTracingFilter[Req,Rep](sa)
       factory => filter andThen factory
     }
 
     val newStack: SocketAddress => ServiceFactory[Req, Rep] = monitored compose
+      traceDest compose
       observed compose
       failureAccrual compose
       timeBounded compose

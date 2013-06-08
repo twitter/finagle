@@ -1,12 +1,10 @@
 package com.twitter.finagle.http
 
+import com.twitter.conversions.time._
 import org.specs.SpecificationWithJUnit
-import org.jboss.netty.handler.codec.http.DefaultCookie
 
-
-class CookieSetSpec extends SpecificationWithJUnit {
-
-  "CookieSet" should {
+class CookieMapSpec extends SpecificationWithJUnit {
+  "CookieMap" should {
     "no cookies" in {
       val request = Request()
       request.cookies must beEmpty
@@ -15,44 +13,60 @@ class CookieSetSpec extends SpecificationWithJUnit {
     "request cookie basics" in {
       val request = Request()
       request.headers("Cookie") = "name=value; name2=value2"
-      request.cookies.contains(new DefaultCookie("name", "value"))   must beTrue
-      request.cookies.contains(new DefaultCookie("name2", "value2")) must beTrue
+      request.cookies("name").value must_== "value"
+      request.cookies("name2").value must_== "value2"
       request.cookies.isValid must beTrue
     }
 
     "response cookie basics" in {
       val response = Response()
       response.headers("Set-Cookie") = "name=value; name2=value2"
-      response.cookies.contains(new DefaultCookie("name", "value"))   must beTrue
-      response.cookies.contains(new DefaultCookie("name2", "value2")) must beTrue
+      response.cookies("name").value must_== "value"
+      response.cookies("name2").value must_== "value2"
     }
 
     "cookie with attributes" in {
       val request = Request()
       request.headers("Cookie") = "name=value; Max-Age=23; Domain=.example.com; Path=/"
-      val cookie = request.cookies.iterator.toList.head
-      cookie.getValue    must_== "value"
-      cookie.getMaxAge() must_== 23
-      cookie.getDomain() must_== ".example.com"
-      cookie.getPath()   must_== "/"
+      val cookie = request.cookies("name")
+      cookie.value  must_== "value"
+      cookie.maxAge must_== 23.seconds
+      cookie.domain must_== ".example.com"
+      cookie.path   must_== "/"
     }
 
     "add cookie" in {
       val request = Request()
-      val cookie = new DefaultCookie("name", "value")
+      val cookie = new Cookie("name", "value")
       request.cookies += cookie
-      request.cookies.contains(new DefaultCookie("name", "value")) must beTrue
+      request.cookies("name").value must_== "value"
       request.headers("Cookie") must_== "name=value"
     }
 
     "add same cookie only once" in {
       val request = Request()
-      val cookie = new DefaultCookie("name", "value")
+      val cookie = new Cookie("name", "value")
       request.cookies += cookie
       request.cookies += cookie
-      request.cookies.contains(new DefaultCookie("name", "value")) must beTrue
+      request.cookies("name").value must_== "value"
       request.headers("Cookie") must_== "name=value"
-      request.cookies.iterator.length must_== 1
+      request.cookies must haveSize(1)
+    }
+
+    "add same cookie more than once" in {
+      val request = Request()
+      val cookie = new Cookie("name", "value")
+      val cookie2 = new Cookie("name", "value2")
+      request.cookies.add(cookie)
+      request.cookies.add(cookie2)
+
+      request.cookies must haveSize(2)
+      request.cookies("name").value must_== "value"
+
+      val cookieHeaders = request.headers.getAll("Cookie")
+      cookieHeaders must haveSize(2)
+      cookieHeaders must contain ("name=value")
+      cookieHeaders must contain ("name=value2")
     }
 
     "remove cookie" in {
@@ -60,14 +74,8 @@ class CookieSetSpec extends SpecificationWithJUnit {
       request.headers.add("Cookie", "name=value")
       request.headers.add("Cookie", "name=value2") // same name - gets removed too
 
-      request.cookies -= (new DefaultCookie("name", "value2"))
+      request.cookies -= "name"
       request.cookies must haveSize(0)
-    }
-
-    "netty Cookie.equals is not broken in netty 3.5" in {
-      val cookie1 = new DefaultCookie("name", "value")
-      val cookie2 = new DefaultCookie("name", "value")
-      cookie1 must_==(cookie2)
     }
 
     "invalid cookies are ignored" in {

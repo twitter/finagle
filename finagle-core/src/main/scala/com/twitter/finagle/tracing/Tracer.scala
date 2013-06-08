@@ -42,6 +42,7 @@ object Annotation {
   case class Rpcname(service: String, rpc: String) extends Annotation
   case class ClientAddr(ia: InetSocketAddress)     extends Annotation
   case class ServerAddr(ia: InetSocketAddress)     extends Annotation
+  case class LocalAddr(ia: InetSocketAddress)      extends Annotation
 
   case class BinaryAnnotation(key: String, value: Any) extends Annotation {
     /* Needed to not break backwards compatibility.  Can be removed later */

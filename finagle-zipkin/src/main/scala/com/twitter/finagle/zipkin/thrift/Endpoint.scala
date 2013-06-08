@@ -15,14 +15,14 @@ case class Endpoint(ipv4: Int, port: Short) {
    * @return If this endpoint's ip is 0.0.0.0 or 127.0.0.1 we get the local host and return that.
    */
   def boundEndpoint: Endpoint = {
-    if (ipv4 == 0 || ipv4 == Endpoint.Loopback) Endpoint(Endpoint.getLocalHost, port) else this
+    if (ipv4 == 0 || ipv4 == Endpoint.Loopback) this.copy(ipv4=Endpoint.getLocalHost) else this
   }
 
-  def toThrift: Option[thrift.Endpoint] = {
+  def toThrift: thrift.Endpoint = {
     val e = new thrift.Endpoint
     e.setIpv4(ipv4)
     e.setPort(port)
-    Some(e)
+    e
   }
 }
 
@@ -31,8 +31,15 @@ object Endpoint {
 
   val Loopback = Endpoint.toIpv4(InetAddress.getByAddress(Array[Byte](127,0,0,1)))
 
-  val Unknown = new Endpoint(0, 0) {
-    override def toThrift = None
+  val Unknown = new Endpoint(0, 0)
+
+  val Local = {
+    try {
+      val ipv4 = Endpoint.toIpv4(InetAddress.getLocalHost)
+      Endpoint(ipv4,0)
+    } catch {
+      case _ => Endpoint.Unknown
+    }
   }
 
   def toIpv4(inetAddress: InetAddress): Int =
@@ -41,15 +48,7 @@ object Endpoint {
   /**
    * Get the local host as an integer.
    */
-  val getLocalHost: Int = {
-    try {
-      Endpoint.toIpv4(InetAddress.getLocalHost)
-    } catch {
-      case e =>
-        log.warning("Failed to retrieve local host address: %s".format(e))
-        0
-    }
-  }
+  lazy val getLocalHost: Int = Local.ipv4
 
   /**
    * @return If possible, convert from a SocketAddress object to an Endpoint.

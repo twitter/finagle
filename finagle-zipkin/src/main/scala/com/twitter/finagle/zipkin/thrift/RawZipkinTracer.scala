@@ -8,7 +8,7 @@ import com.twitter.finagle.thrift.{ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
-import com.twitter.util.{Await, Base64StringEncoder, Future}
+import com.twitter.util.{Time, Await, Base64StringEncoder, Future}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -179,22 +179,42 @@ private[thrift] class RawZipkinTracer(
       case tracing.Annotation.BinaryAnnotation(key: String, value: String) =>
         binaryAnnotation(record, key, ByteBuffer.wrap(value.getBytes), thrift.AnnotationType.STRING)
       case tracing.Annotation.BinaryAnnotation(key: String, value) => // Throw error?
+      case tracing.Annotation.LocalAddr(ia: InetSocketAddress) =>
+        setEndpoint(record, ia)
       case tracing.Annotation.ClientAddr(ia: InetSocketAddress) =>
-        setEndpoint(record, ia)
+        mutate(record.traceId) { span =>
+          span.copy(bAnnotations = span.bAnnotations ++ Seq(
+            // use a binary annotation over a regular annotation to avoid a misleading timestamp
+            BinaryAnnotation(thrift.Constants.CLIENT_ADDR,
+                             ByteBuffer.wrap(Array[Byte](1)),
+                             thrift.AnnotationType.BOOL,
+                             Endpoint.fromSocketAddress(ia))))
+        }
       case tracing.Annotation.ServerAddr(ia: InetSocketAddress) =>
-        setEndpoint(record, ia)
+        mutate(record.traceId) { span =>
+          span.copy(bAnnotations = span.bAnnotations ++ Seq(
+            BinaryAnnotation(thrift.Constants.SERVER_ADDR,
+                             ByteBuffer.wrap(Array[Byte](1)),
+                             thrift.AnnotationType.BOOL,
+                             Endpoint.fromSocketAddress(ia))))
+        }
     }
   }
 
   /**
    * Sets the endpoint in the span for any future annotations. Also
-   * sets the endpoint in any previous annotations.
+   * sets the endpoint in any previous annotations that lack one.
    */
   protected def setEndpoint(record: Record, ia: InetSocketAddress) {
     mutate(record.traceId) { span =>
-      val endpoint = Endpoint.fromSocketAddress(ia).boundEndpoint
-      span.copy(_endpoint = Some(endpoint),
-        annotations = span.annotations map { a => ZipkinAnnotation(a.timestamp, a.value, endpoint, a.duration)})
+      val ep = Endpoint.fromSocketAddress(ia).boundEndpoint
+      span.copy(endpoint = ep,
+        annotations = span.annotations map { a =>
+          if (a.endpoint == Endpoint.Unknown)
+            ZipkinAnnotation(a.timestamp, a.value, ep, a.duration)
+          else
+            a
+        })
     }
   }
 

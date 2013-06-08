@@ -763,7 +763,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       statsReceiver = statsReceiver,
       hostStatsReceiver = hostStatsReceiver,
       tracer = tracer,
-      monitor = monitor
+      monitor = monitor,
+      reporter = NullReporterFactory
     )
 
     // Note the direct use of newStack here. This is because we want

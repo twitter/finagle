@@ -3,12 +3,12 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.memcached.protocol.text.{
-  MemcachedClientPipelineFactory, MemcachedServerPipelineFactory
-}
+  MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.ReusingPool
 import com.twitter.finagle.server._
+import com.twitter.finagle.stats.StatsReceiver
 import java.net.SocketAddress
 
 trait MemcachedRichClient { self: Client[Command, Response] =>
@@ -23,7 +23,7 @@ object MemcachedClient extends DefaultClient[Command, Response](
   name = "memcached",
   endpointer = Bridge[Command, Response, Command, Response](
     MemcachedTransporter, new PipeliningDispatcher(_)),
-  pool = _ => new ReusingPool(_)
+  pool = (sr: StatsReceiver) => new ReusingPool(_, sr)
 ) with MemcachedRichClient
 
 object MemcachedListener extends Netty3Listener[Response, Command](

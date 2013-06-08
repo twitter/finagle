@@ -49,5 +49,10 @@ class ResolverTest extends FunSuite {
     assert(Resolver.resolutions == Set(List("test!xyz")))
   }
 
+  test("get a resolver instance") {
+    val group = Resolver.get(classOf[TestResolver]).get.resolve("xyz")()
+    assert(group === TestGroup("xyz"))
+  }
+
   // names
 }

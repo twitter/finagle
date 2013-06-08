@@ -68,20 +68,23 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
         // verify the traces.
         def rec(annot: Annotation) = Record(theId, Time.now, annot)
         val trace = tracer.toSeq
-        val Seq(clientAddr) = 
+        val Seq(clientAddr1, clientAddr2) =
           trace collect { case Record(_, _, Annotation.ClientAddr(addr), _) => addr }
-        val Seq(serverAddr) = 
+        val Seq(serverAddr1, serverAddr2) =
           trace collect { case Record(_, _, Annotation.ServerAddr(addr), _) => addr }
 
-        assert(trace.size === 8)
+        assert(trace.size === 11)
         assert(trace(0) === rec(Annotation.Rpcname("thriftclient", "multiply")))
         assert(trace(1) === rec(Annotation.ClientSend()))
-        assert(trace(2) === rec(Annotation.ClientAddr(clientAddr)))
-        assert(trace(3) === rec(Annotation.Rpcname("thriftserver", "multiply")))
-        assert(trace(4) === rec(Annotation.ServerAddr(serverAddr)))
+        assert(trace(2) === rec(Annotation.ServerAddr(serverAddr1)))
+        assert(trace(3) === rec(Annotation.ClientAddr(clientAddr1)))
+        assert(trace(4) === rec(Annotation.Rpcname("thriftserver", "multiply")))
         assert(trace(5) === rec(Annotation.ServerRecv()))
-        assert(trace(6) === rec(Annotation.ServerSend()))
-        assert(trace(7) === rec(Annotation.ClientRecv()))
+        assert(trace(6) === rec(Annotation.LocalAddr(serverAddr2)))
+        assert(trace(7) === rec(Annotation.ServerAddr(serverAddr2)))
+        assert(trace(8) === rec(Annotation.ClientAddr(clientAddr2)))
+        assert(trace(9) === rec(Annotation.ServerSend()))
+        assert(trace(10) === rec(Annotation.ClientRecv()))
 
         assert(Await.result(client.complex_return("a string")).arg_two
           === "%s".format(Trace.id.spanId.toString))

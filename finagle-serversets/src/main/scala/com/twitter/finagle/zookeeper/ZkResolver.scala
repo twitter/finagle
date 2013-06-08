@@ -36,12 +36,15 @@ class ZkResolver extends Resolver {
   val scheme = "zk"
 
   private[this] var zkClients: Map[Set[InetSocketAddress], ZooKeeperClient] = Map()
-  private[this] def zkClientFor(hosts: String) = {
+  private[this] def hostSet(hosts: String) = {
     val zkGroup = InetResolver.resolve(hosts)() collect { case ia: InetSocketAddress => ia }
     val zkHosts = zkGroup()
     if (zkHosts.isEmpty)
       throw new ZkResolverException("ZK client address \"%s\" resolves to nothing".format(zkHosts))
+    zkHosts
+  }
 
+  private[this] def zkClientFor(zkHosts: Set[InetSocketAddress]) = {
     if (!(zkClients contains zkHosts)) {
       val newZk = new ZooKeeperClient(
         ZooKeeperUtils.DEFAULT_ZK_SESSION_TIMEOUT,
@@ -57,24 +60,33 @@ class ZkResolver extends Resolver {
     zkClients(zkHosts)
   }
 
+  def resolve(zkHosts: Set[InetSocketAddress], path: String, endpoint: Option[String]) = {
+    val group = endpoint match {
+      case Some(endpoint) =>
+        (new ZkGroup(new ServerSetImpl(zkClientFor(zkHosts), path), path)) collect {
+          case inst if inst.getStatus == ALIVE && inst.getAdditionalEndpoints.containsKey(endpoint) =>
+            val ep = inst.getAdditionalEndpoints.get(endpoint)
+            new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
+        }
+
+      case None =>
+        (new ZkGroup(new ServerSetImpl(zkClientFor(zkHosts), path), path)) collect {
+          case inst if inst.getStatus == ALIVE =>
+            val ep = inst.getServiceEndpoint
+            new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
+        }
+    }
+    Return(group)
+  }
+
   def resolve(addr: String) = addr.split("!") match {
     // zk!host:2181!/path
     case Array(hosts, path) =>
-      val group = (new ZkGroup(new ServerSetImpl(zkClientFor(hosts), path), path)) collect {
-        case inst if inst.getStatus == ALIVE =>
-          val ep = inst.getServiceEndpoint
-          new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
-      }
-      Return(group)
+      resolve(hostSet(hosts), path, None)
 
     // zk!host:2181!/path!endpoint
     case Array(hosts, path, endpoint) =>
-      val group = (new ZkGroup(new ServerSetImpl(zkClientFor(hosts), path), path)) collect {
-        case inst if inst.getStatus == ALIVE && inst.getAdditionalEndpoints.containsKey(endpoint) =>
-          val ep = inst.getAdditionalEndpoints.get(endpoint)
-          new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
-      }
-      Return(group)
+      resolve(hostSet(hosts), path, Some(endpoint))
 
     case _ =>
       Throw(new ZkResolverException("Invalid address \"%s\"".format(addr)))

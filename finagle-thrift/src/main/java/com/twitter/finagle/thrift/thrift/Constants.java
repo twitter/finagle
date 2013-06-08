@@ -34,4 +34,8 @@ public class Constants {
 
   public static final String SERVER_RECV = "sr";
 
+  public static final String SERVER_ADDR = "sa";
+
+  public static final String CLIENT_ADDR = "ca";
+
 }

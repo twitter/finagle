@@ -162,7 +162,6 @@ private[thrift] class ThriftServerTracingFilter(
 
       Trace.setId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
-      Trace.recordServerAddr(boundAddress)
       Trace.record(Annotation.ServerRecv())
 
       try {
@@ -195,10 +194,10 @@ private[thrift] class ThriftServerTracingFilter(
       } else {
         // request from client without tracing support
 
-        Trace.recordServerAddr(boundAddress)
         Trace.recordRpcname(serviceName, msg.name)
 
         Trace.record(Annotation.ServerRecv())
+        Trace.record("finagle.thrift.noUpgrade")
 
         service(request) map { response =>
           Trace.record(Annotation.ServerSend())
