@@ -63,6 +63,48 @@ trait Keys { self: BaseClient =>
     }
 
   /**
+   * Set a key's time to live in milliseconds.
+   *
+   * @param key, milliseconds
+   * @return true if the timeout was set.
+   *         false if key does not exist or the timeout could not be set.
+   * @see http://redis.io/commands/pexpire
+   */
+  def pExpire(key: ChannelBuffer, milliseconds: JLong): Future[JBoolean] =
+    doRequest(PExpire(key, milliseconds)) {
+      case IntegerReply(n) => Future.value(n == 1)
+    }
+
+  /**
+   * Set the expiration for a key as a UNIX timestamp specified in milliseconds.
+   *
+   * @param key, timestamp
+   * @return true if the timeout was set.
+   *         false if key does not exist or the timeout could not be set
+   *         (see: EXPIRE).
+   * @see http://redis.io/commands/pexpireat
+   */
+  def pExpireAt(key: ChannelBuffer, timestamp: JLong): Future[JBoolean] =
+    doRequest(PExpireAt(key, Time.fromMilliseconds(timestamp))) {
+      case IntegerReply(n) => Future.value(n == 1)
+    }
+
+  /**
+   * Get the time to live for a key in milliseconds.
+   *
+   * @param key
+   * @return Time to live in milliseconds or None when key does not exist or
+   *         does not have a timeout.
+   * @see
+   */
+  def pTtl(key: ChannelBuffer): Future[Option[JLong]] =
+    doRequest(PTtl(key)) {
+      case IntegerReply(n) =>
+        if (n != -1) Future.value(Some(n))
+        else Future.value(None)
+    }
+
+  /**
    * Returns keys starting at cursor
    * @param cursor, count, pattern
    * @return cursor followed by matching keys
