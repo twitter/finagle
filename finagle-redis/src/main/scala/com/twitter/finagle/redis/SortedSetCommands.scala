@@ -31,15 +31,25 @@ trait SortedSets { self: BaseClient =>
   }
 
   /**
-   * Adds member, score pair to sorted set
+   * Add a member with score to a sorted set
    * @params key, score, member
    * @return Number of elements added to sorted set
    */
-  def zAdd(key: ChannelBuffer, score: JDouble, member: ChannelBuffer): Future[JLong] =
-    doRequest(ZAdd(key, Seq(ZMember(score, member)))) {
+  def zAdd(key: ChannelBuffer, score: JDouble, member: ChannelBuffer): Future[JLong] = {
+    zAddMulti(key, Seq((score, member)))
+  }
+
+  /**
+   * Adds member, score pairs to sorted set
+   * @params key, sequence of (score, member) tuples
+   * @return Number of elements added to sorted set
+   * @note Adding multiple elements only works with redis 2.4 or later.
+   */
+  def zAddMulti(key: ChannelBuffer, members: Seq[(JDouble, ChannelBuffer)]): Future[JLong] = {
+    doRequest(ZAdd(key, members.map { m => ZMember(m._1, m._2) })) {
       case IntegerReply(n) => Future.value(n)
     }
-
+  }
   /**
    * Returns sorted set cardinality of the sorted set at key
    * @param key
