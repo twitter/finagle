@@ -16,12 +16,17 @@ class MkJvmFilter(jvm: Jvm) {
   def apply[Req, Rep](): SimpleFilter[Req, Rep] = new SimpleFilter[Req, Rep] {
     def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
       val begin = Time.now
-      service(req) ensure {
-        buffer(begin) foreach { gc =>
-          val rec = Record(Trace.id, gc.timestamp, Annotation.Message(gc.toString), Some(gc.duration))
-          Trace.record(rec)
+      if (Trace.isActivelyTracing) {
+        service(req) ensure {
+          buffer(begin) foreach { gc =>
+            Trace.record {
+              Record(Trace.id, gc.timestamp, Annotation.Message(gc.toString), Some(gc.duration))
+            }
+          }
         }
       }
+      else
+        service(req)
     }
   }
 }

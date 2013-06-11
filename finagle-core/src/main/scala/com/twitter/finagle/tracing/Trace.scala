@@ -25,7 +25,7 @@ import scala.util.Random
  * `TraceId`.
  * When reporting, we report to all tracers in the list of `Tracer`s.
  */
-object Trace {
+object Trace  {
   sealed trait TraceState
   private case class State(id: Option[TraceId], terminal: Boolean, tracers: List[Tracer]) extends TraceState
   private case object NoState extends TraceState
@@ -50,7 +50,7 @@ object Trace {
   /**
    * @return true if the current trace id is terminal
    */
-  def isTerminal: Boolean = local() map { _.terminal } getOrElse false
+  def isTerminal: Boolean = local() exists { _.terminal }
 
   /**
    * @return the current list of tracers
@@ -183,14 +183,37 @@ object Trace {
     try f finally local.set(saved)
   }
 
-   /**
-    * Record a raw ''Record''.  This will record to a _unique_ set of
-    * tracers in the stack
-    */
-   def record(rec: Record) {
-     if (tracingEnabled)
-       tracers.toSet foreach { t: Tracer => t.record(rec) }
-   }
+  /**
+   * Returns true if tracing is enabled with a good tracer pushed and the current
+   * trace is sampled
+   */
+  def isActivelyTracing: Boolean = {
+    if (!tracingEnabled) false else { // short circuit
+      local() match {
+        case Some(State(Some(TraceId(_, _, _, Some(false), Flags(0L))), _, _)) => false
+        case None => false
+        case Some(State(_, _, Nil)) => false
+        case Some(State(_, _, List(NullTracer))) => false
+        case Some(State(Some(TraceId(_, _, _, _, Flags(Flags.Debug))), _, _)) => true
+        case _ => true // backwards compat: default to trace on incomplete data
+      }
+    }
+  }
+
+  /**
+   * record a raw record without checking if it's sampled/enabled/etc
+   */
+  private[this] def uncheckedRecord(rec: Record) {
+    tracers.distinct.foreach { t: Tracer => t.record(rec) }
+  }
+
+  /**
+   * Record a raw ''Record''.  This will record to a _unique_ set of
+   * tracers in the stack.
+   */
+  def record(rec: => Record) {
+    if (isActivelyTracing) uncheckedRecord(rec)
+  }
 
   /**
    * Time an operation and add an annotation with that duration on it
@@ -221,11 +244,13 @@ object Trace {
     * Convenience methods that construct records of different kinds.
     */
   def record(ann: Annotation) {
-    record(Record(id, Time.now, ann, None))
-  }
+    if (isActivelyTracing)
+      uncheckedRecord(Record(id, Time.now, ann, None))
+   }
 
   def record(ann: Annotation, duration: Duration) {
-    record(Record(id, Time.now, ann, Some(duration)))
+    if (isActivelyTracing)
+      uncheckedRecord(Record(id, Time.now, ann, Some(duration)))
   }
 
   def record(message: String) {
@@ -257,8 +282,10 @@ object Trace {
   }
 
   def recordBinaries(annotations: Map[String, Any]) {
-    for ((key, value) <- annotations) {
-      recordBinary(key, value)
+    if (isActivelyTracing) {
+      for ((key, value) <- annotations) {
+        recordBinary(key, value)
+      }
     }
   }
 }

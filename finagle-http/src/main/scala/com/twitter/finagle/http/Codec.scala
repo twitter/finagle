@@ -240,14 +240,18 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     }
     request.addHeader(Header.Flags, Trace.id.flags.toLong)
 
-    Trace.recordRpcname(serviceName, request.getMethod.getName)
-    Trace.recordBinary("http.uri", stripParameters(request.getUri))
+    if (Trace.isActivelyTracing) {
+      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
-    Trace.record(Annotation.ClientSend())
-    service(request) map { response =>
-      Trace.record(Annotation.ClientRecv())
-      response
+      Trace.record(Annotation.ClientSend())
+      service(request) map { response =>
+        Trace.record(Annotation.ClientRecv())
+        response
+      }
     }
+    else
+      service(request)
   }
 }
 
@@ -288,14 +292,18 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
 
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
-    Trace.recordRpcname(serviceName, request.getMethod.getName)
-    Trace.recordBinary("http.uri", stripParameters(request.getUri))
+    if (Trace.isActivelyTracing) {
+      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
-    Trace.record(Annotation.ServerRecv())
-    service(request) map { response =>
-      Trace.record(Annotation.ServerSend())
-      response
+      Trace.record(Annotation.ServerRecv())
+      service(request) map { response =>
+        Trace.record(Annotation.ServerSend())
+        response
+      }
     }
+    else
+      service(request)
   }
 
   /**

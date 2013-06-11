@@ -78,8 +78,9 @@ private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
     Trace.recordRpcname("memcached", command.name)
     Trace.record(Annotation.ClientSend())
 
-    service(command) map { response =>
-      response match {
+    val response = service(command)
+    if (Trace.isActivelyTracing) {
+      response onSuccess  {
         case Values(values) =>
           command match {
             case cmd: RetrievalCommand =>
@@ -93,13 +94,13 @@ private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
               misses foreach { k =>
                 Trace.recordBinary(k.toString(UTF_8), "Miss")
               }
-              case _ => response
+              case _ =>
           }
-        case _  => response
+        case _  =>
       }
       Trace.record(Annotation.ClientRecv())
-      response
     }
+    response
   }
 }
 

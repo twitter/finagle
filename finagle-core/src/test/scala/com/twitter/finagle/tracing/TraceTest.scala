@@ -221,7 +221,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       assert(Trace.tracers === List(tracer))
       verify(tracer, never()).sampleTrace(currentId)
       Trace.record("Hello world")
-      verify(tracer, times(1)).record(Record(currentId, Time.now, Annotation.Message("Hello world"), None))
+      verify(tracer, never()).record(any[Record])
     }
   }
 
@@ -249,7 +249,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       val tracer = mock[Tracer]
       when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(true))
 
-      val parentId = TraceId(Some(SpanId(123)), Some(SpanId(456)), SpanId(789), Some(false), Flags(0))
+      val parentId = TraceId(Some(SpanId(123)), Some(SpanId(456)), SpanId(789), Some(true), Flags(0))
       Trace.setId(parentId, terminal = true)
       Trace.pushTracerAndSetNextId(tracer)
       val currentId = Trace.id
@@ -260,5 +260,36 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       Trace.record("Hello world")
       verify(tracer, times(1)).record(Record(currentId, Time.now, Annotation.Message("Hello world"), None))
     }
+  }
+
+  test("Trace.isActivelyTracing") {
+    val id = TraceId(Some(SpanId(12)), Some(SpanId(13)), SpanId(14), None, Flags(0L))
+    val tracer = mock[Tracer]
+    Trace.clear()
+    assert(Trace.isActivelyTracing == false) // no tracers, not tracing
+    Trace.setId(id)
+    Trace.pushTracer(NullTracer)
+    assert(Trace.isActivelyTracing == false) // only the null tracer, still false
+    Trace.clear()
+    Trace.setId(id)
+    when(tracer.sampleTrace(any[TraceId])).thenReturn(None)
+    Trace.pushTracer(tracer)
+    assert(Trace.isActivelyTracing == true) // tracer/id is None/None, default to trace
+    Trace.setId(id.copy(_sampled = Some(false)))
+    assert(Trace.isActivelyTracing == false) // tracer/id is None/false, don't trace
+    when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
+    assert(Trace.isActivelyTracing == false) // false/false, better not
+    Trace.setId(id.copy(_sampled = Some(false), flags = Flags().setDebug))
+    assert(Trace.isActivelyTracing == true) // debug should force its way through
+    when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(true))
+    Trace.setId(id.copy(_sampled=Some(false)))
+    assert(Trace.isActivelyTracing == false) // true/false, prefer the trace id's opinion
+    Trace.setId(id.copy(_sampled = Some(true)))
+    assert(Trace.isActivelyTracing == true) // true/true better be true
+    Trace.disable()
+    assert(Trace.isActivelyTracing == false) // disabled with true/true should be false
+    Trace.enable()
+    when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
+    assert(Trace.isActivelyTracing == true) // false/true again prefer the id's opinion
   }
 }

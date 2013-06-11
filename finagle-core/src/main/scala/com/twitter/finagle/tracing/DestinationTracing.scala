@@ -10,18 +10,19 @@ class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
     // traceId is set by any inbound request with tracing enabled
     val filter = new SimpleFilter[Req,Rep] {
       def apply(request: Req, service: Service[Req, Rep]) = {
-        conn.localAddress match {
-          case ia: InetSocketAddress =>
-            Trace.recordLocalAddr(ia)
-            Trace.recordServerAddr(ia)
-          case _ => // do nothing for non-ip address
+        if (Trace.isActivelyTracing) {
+          conn.localAddress match {
+            case ia: InetSocketAddress =>
+              Trace.recordLocalAddr(ia)
+              Trace.recordServerAddr(ia)
+            case _ => // do nothing for non-ip address
+          }
+          conn.remoteAddress match {
+            case ia: InetSocketAddress =>
+              Trace.recordClientAddr(ia)
+            case _ => // do nothing for non-ip address
+          }
         }
-        conn.remoteAddress match {
-          case ia: InetSocketAddress =>
-            Trace.recordClientAddr(ia)
-          case _ => // do nothing for non-ip address
-        }
-
         service(request)
       }
     }
