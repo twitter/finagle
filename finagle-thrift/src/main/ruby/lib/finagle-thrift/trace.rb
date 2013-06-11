@@ -33,7 +33,7 @@ module Trace
         saved_stack = stack.dup
         yield
       ensure
-        @stack = saved
+        @stack = saved_stack
       end
     end
   end
