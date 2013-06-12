@@ -6,6 +6,24 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.5.0
+~~~~~
+
+- `finagle-core`: fix a bug in Trace.unwind in ruby
+- `finagle-core`: speed up tracing when a trace is unsampled.
+- `finagle-redis`: implement PEXPIRE/PEXPIREAT/PTTL
+- `finagle-redis`: Make the multiple argument version of zAdd a separate method.
+- `finagle-serverset`: create a ZkAnnouncer
+- `finagle-thriftmux`: make thriftmux server back compatible with thrift framed codec
+- `finagle-zipkin`: Performance improvement for finagle-zipkin
+- `finagle`: Gizzard: Some followup deps alignment to fix deployment classpath issues
+- `finagle-memcached`: KetamaClient based on finagle-6 API
+- `finagle-exception`: unique namespace for scribe
+- `finagle-thrift`: Add scrooge3 support
+- `finagle`: bump sbt util/finagle version
+- `finagle`: Updating owner list
+- `finagle`: Upgrade util to 6.3.6 and scrooge-runtime to 3.1.2
+
 6.4.1
 ~~~~~
 
