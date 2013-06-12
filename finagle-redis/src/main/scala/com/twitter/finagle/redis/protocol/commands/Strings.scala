@@ -274,16 +274,80 @@ object PSetEx {
   }
 }
 
-case class Set(key: ChannelBuffer, value: ChannelBuffer)
-  extends StrictKeyCommand
-  with StrictValueCommand
-{
+sealed trait TimeToLive
+case class InSeconds(seconds: Long) extends TimeToLive
+case class InMilliseconds(millis: Long) extends TimeToLive
+
+case class Set(
+  key: ChannelBuffer,
+  value: ChannelBuffer,
+  ttl: Option[TimeToLive] = None,
+  nx: Boolean = false,
+  xx: Boolean = false)
+    extends StrictKeyCommand
+    with StrictValueCommand {
   val command = Commands.SET
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.SET, key, value))
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(
+    Seq(CommandBytes.SET, key, value) ++
+      (ttl match {
+        case Some(InSeconds(seconds)) =>
+          Seq(Set.ExBytes, StringToChannelBuffer(seconds.toString))
+        case Some(InMilliseconds(millis)) =>
+          Seq(Set.PxBytes, StringToChannelBuffer(millis.toString))
+        case _ => Seq()
+      }) ++ (if (nx) Seq(Set.NxBytes) else Seq()) ++
+        (if (xx) Seq(Set.XxBytes) else Seq())
+  )
 }
 object Set {
+  private val Ex = "EX"
+  private val Px = "PX"
+  private val Nx = "NX"
+  private val Xx = "XX"
+
+  private val ExBytes = StringToChannelBuffer(Ex)
+  private val PxBytes = StringToChannelBuffer(Px)
+  private val NxBytes = StringToChannelBuffer(Nx)
+  private val XxBytes = StringToChannelBuffer(Xx)
+
   def apply(args: Seq[Array[Byte]]) = {
-    new Set(ChannelBuffers.wrappedBuffer(args(0)), ChannelBuffers.wrappedBuffer(args(1)))
+    RequireClientProtocol(args.size >= 2, "SET requires at least 2 arguments")
+
+    val key = ChannelBuffers.wrappedBuffer(args(0))
+    val value = ChannelBuffers.wrappedBuffer(args(1))
+
+    val set = new Set(ChannelBuffers.wrappedBuffer(args(0)),
+      ChannelBuffers.wrappedBuffer(args(1)))
+
+    def run(args: Seq[Array[Byte]], set: Set): Set = {
+      args.headOption match {
+        case None => set
+        case Some(bytes) => {
+          val flag = CBToString(ChannelBuffers.wrappedBuffer(bytes)).toUpperCase
+          flag match {
+            case Ex => args.tail.headOption match {
+              case None => throw ClientError("Invalid syntax for SET")
+              case Some(bytes) => run(args.tail.tail,
+                set.copy(ttl = Some(InSeconds(RequireClientProtocol.safe {
+                  NumberFormat.toLong(BytesToString(bytes))
+                }))))
+            }
+            case Px => args.tail.headOption match {
+              case None => throw ClientError("Invalid syntax for SET")
+              case Some(bytes) => run(args.tail.tail,
+                set.copy(ttl = Some(InMilliseconds(RequireClientProtocol.safe {
+                  NumberFormat.toLong(BytesToString(bytes))
+                }))))
+            }
+            case Nx => run(args.tail, set.copy(nx = true))
+            case Xx => run(args.tail, set.copy(xx = true))
+            case _ => throw ClientError("Invalid syntax for SET")
+          }
+        }
+      }
+    }
+
+    run(args.drop(2), set)
   }
 }
 
