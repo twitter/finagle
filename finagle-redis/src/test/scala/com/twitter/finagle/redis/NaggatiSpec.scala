@@ -520,7 +520,7 @@ class NaggatiSpec extends SpecificationWithJUnit {
           }
           "SET" >> {
             unwrap(codec(wrap("SET foo bar\r\n"))) {
-              case Set(foo, bar) => BytesToString(bar.array) mustEqual "bar"
+              case Set(foo, bar, _, _, _) => BytesToString(bar.array) mustEqual "bar"
             }
           }
           "SETBIT" >> {
@@ -542,6 +542,31 @@ class NaggatiSpec extends SpecificationWithJUnit {
             codec(wrap("SETNX key\r\n")) must throwA[ClientError]
             unwrap(codec(wrap("SETNX key value\r\n"))) {
               case SetNx(key, value) => BytesToString(value.array) mustEqual "value"
+            }
+          }
+          "New SET Syntax" >> {
+            codec(wrap("SET foo bar 100\r\n")) must throwA[ClientError]
+            codec(wrap("SET foo bar EX NX\r\n")) must throwA[ClientError]
+            codec(wrap("SET foo bar PX NX\r\n")) must throwA[ClientError]
+
+            unwrap(codec(wrap("SET foo bar EX 10\r\n"))) {
+              case Set(key, value, ttl, false, false) =>
+                ttl mustEqual Some(InSeconds(10L))
+            }
+
+            unwrap(codec(wrap("SET foo bar PX 10000\r\n"))) {
+              case Set(key, value, ttl, false, false) =>
+                ttl mustEqual Some(InMilliseconds(10000L))
+            }
+
+            unwrap(codec(wrap("SET foo bar NX EX 10\r\n"))) {
+              case Set(key, value, ttl, true, false) =>
+                ttl mustEqual Some(InSeconds(10))
+            }
+
+            unwrap(codec(wrap("SET foo bar XX\r\n"))) {
+              case Set(key, value, None, false, true) =>
+                BytesToString(value.array) mustEqual "bar"
             }
           }
           "SETRANGE" >> {

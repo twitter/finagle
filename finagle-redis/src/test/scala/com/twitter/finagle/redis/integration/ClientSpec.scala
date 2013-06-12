@@ -220,6 +220,39 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.get(baz)) mustEqual Some(StringToChannelBuffer("fbaz"))
       }
 
+      "new set syntax variations" in {
+        Await.result(client.setExNx(foo, 10L, bar)) mustEqual true
+        Await.result(client.get(foo)) mustEqual Some(bar)
+        Await.result(client.ttl(foo)) map (_ must beLessThanOrEqualTo(10L))
+        Await.result(client.setExNx(foo, 10L, baz)) mustEqual false
+
+        Await.result(client.setPxNx(bar, 10000L, baz)) mustEqual true
+        Await.result(client.get(bar)) mustEqual Some(baz)
+        Await.result(client.ttl(bar)) map (_ must beLessThanOrEqualTo(10L))
+        Await.result(client.setPxNx(bar, 100L, bar)) mustEqual false
+
+        Await.result(client.setXx(baz, foo)) mustEqual false
+        Await.result(client.set(baz, foo))
+        Await.result(client.setXx(baz, bar)) mustEqual true
+        Await.result(client.get(baz)) mustEqual Some(bar)
+
+        Await.result(client.setExXx(boo, 10L, foo)) mustEqual false
+        Await.result(client.set(boo, foo))
+        Await.result(client.setExXx(boo, 10L, bar)) mustEqual true
+        Await.result(client.get(boo)) mustEqual Some(bar)
+        Await.result(client.ttl(boo)) map (_ must beLessThanOrEqualTo(10L))
+
+        Await.result(client.setPxXx(moo, 10000L, foo)) mustEqual false
+        Await.result(client.set(moo, foo))
+        Await.result(client.setPxXx(moo, 10000L, bar)) mustEqual true
+        Await.result(client.get(moo)) mustEqual Some(bar)
+        Await.result(client.ttl(moo)) map (_ must beLessThanOrEqualTo(10L))
+
+        Await.result(client.setPx(num, 10000L, foo))
+        Await.result(client.get(num)) mustEqual Some(foo)
+        Await.result(client.ttl(num)) map (_ must beLessThanOrEqualTo(10L))
+      }
+
       "strlen" in {
         Await.result(client.strlen(foo)) mustEqual 0L
         Await.result(client.set(foo, bar))
