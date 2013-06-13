@@ -29,6 +29,9 @@ case class OpenConnectionsThresholds(
  *
  * NB: the connection is tracked after the server response, so that the server processing time is
  * not count in the idle timeout.
+ *
+ * Note: this will not properly handle multiple outstanding messages per connection and should not
+ * be used for duplex protocols such as finagle-mux.
  */
 class IdleConnectionFilter[Req, Rep](
   self: ServiceFactory[Req, Rep],
@@ -41,12 +44,19 @@ class IdleConnectionFilter[Req, Rep](
     queue.collectAll(threshold.idleTimeout).size
   }
   private[this] val refused = statsReceiver.counter("refused")
+  private[this] val closed = statsReceiver.counter("closed")
 
   def openConnections = connectionCounter.get()
 
   override def apply(c: ClientConnection) = {
     c.onClose ensure { connectionCounter.decrementAndGet() }
-    if (accept(c)) super.apply(c) map { filterFactory(c) andThen _ } else {
+    if (accept(c)) {
+      queue.add(c)
+      c.onClose ensure {
+        queue.remove(c)
+      }
+      self(c) map { filterFactory(c) andThen _ }
+    } else {
       refused.incr()
       val address = c.remoteAddress
       c.close()
@@ -72,7 +82,10 @@ class IdleConnectionFilter[Req, Rep](
   private[channel] def closeIdleConnections() =
     queue.collect(threshold.idleTimeout) match {
       case Some(conn) =>
-        conn.close(); true
+        conn.close()
+        closed.incr()
+        true
+
       case None =>
         false
     }
