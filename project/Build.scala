@@ -455,7 +455,7 @@ object Finagle extends Build {
       util("codec"),
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
-  ).dependsOn(finagleCore, finagleStats, finagleOstrich4)
+  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",
