@@ -1,0 +1,19 @@
+scala_library(name='scala',
+  dependencies=[
+    pants('3rdparty:thrift-0.5.0'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-thrift'),
+    pants('util/util-app'),
+    pants('util/util-core'),
+    compiled_idl(
+      idl_deps=pants('finagle/finagle-zipkin/src/main/thrift'),
+      compiler='scrooge-legacy',
+      language='scala',
+      rpc_style='finagle'
+    )
+  ],
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-zipkin/src/main/resources')
+  ]
+)

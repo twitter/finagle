@@ -1,0 +1,11 @@
+junit_tests(name='scala',
+  dependencies=[
+    pants('3rdparty:junit'),
+    pants('3rdparty:netty'),
+    pants('3rdparty:specs'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-redis'),
+    pants('util/util-core')
+  ],
+  sources=rglobs('*.scala')
+)

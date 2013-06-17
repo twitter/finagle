@@ -56,9 +56,6 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>-Xmx1024m -Djava.net.preferIPv4Stack=true</argLine>
-          <excludes>
-            <exclude>**/TestClient.class</exclude>
-          </excludes>
         </configuration>
       </plugin>
     </plugins>

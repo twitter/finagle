@@ -14,12 +14,6 @@ object ExternalMemcached { self =>
   private[this] var takenPorts: Set[Int] = Set[Int]()
   // prevent us from taking a port that is anything close to a real memcached port.
 
-  private[this] def assertMemcachedBinaryPresent() {
-    val p = new ProcessBuilder("memcached", "-help").start()
-    p.waitFor()
-    require(p.exitValue() == 0, "memcached binary must be present.")
-  }
-
   private[this] def findAddress() = {
     var address : Option[InetSocketAddress] = None
     var tries = 100
@@ -38,7 +32,11 @@ object ExternalMemcached { self =>
     address
   }
 
-  def start(address: Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
+  // Use overloads instead of default args to support java integration tests
+
+  def start(): Option[InetSocketAddress] = start(None)
+
+  def start(address: Option[InetSocketAddress]): Option[InetSocketAddress] = {
     def exec(address: InetSocketAddress) {
       val cmd = Seq("memcached", "-l", address.getHostName,
         "-p", address.getPort.toString)
@@ -114,7 +112,5 @@ object ExternalMemcached { self =>
     override def run() {
       self.stop()
     }
-  });
-
-  //assertMemcachedBinaryPresent()
+  })
 }

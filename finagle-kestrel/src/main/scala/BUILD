@@ -1,0 +1,10 @@
+scala_library(name='scala',
+  dependencies=[
+    pants('3rdparty:guava'),
+    pants('3rdparty:netty'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-memcached'),
+    pants('util/util-core'),
+  ],
+  sources=rglobs('*.scala'),
+)

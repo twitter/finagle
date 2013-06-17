@@ -1,0 +1,12 @@
+scala_library(name='scala',
+  dependencies=[
+    pants('3rdparty:netty'),
+    pants('util/util-app'),
+    pants('util/util-collection'),
+    pants('util/util-core'),
+    pants('util/util-hashing'),
+    pants('util/util-jvm'),
+    pants('util/util-logging')
+  ],
+  sources=rglobs('*.scala'),
+)

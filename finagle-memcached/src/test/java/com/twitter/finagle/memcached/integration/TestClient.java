@@ -1,6 +1,14 @@
 package com.twitter.finagle.memcached.integration;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+
+import scala.Option;
+
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
@@ -9,27 +17,32 @@ import com.twitter.finagle.memcached.java.ClientBase;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.finagle.memcached.protocol.text.Memcached;
+import com.twitter.util.Await;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class TestClient extends TestCase {
-  public static void main(String[] args) {
-    System.out.println(new TestClient().run().wasSuccessful());
+public class TestClient {
+  private Option<InetSocketAddress> address;
+
+  @Before
+  public void setUp() {
+    address = ExternalMemcached.start();
+    Assume.assumeTrue(address.isDefined());
   }
 
-  public void testGetAndSet() {
+  @Test
+  public void testGetAndSet() throws Exception {
     Service<Command, Response> service =
       ClientBuilder.safeBuild(
         ClientBuilder
           .get()
-          .hosts("localhost:11211")
-          .codec(new Memcached(null))
+          .hosts(address.get())
+          .codec(new Memcached())
           .hostConnectionLimit(1));
 
     Client client = ClientBase.newInstance(service);
-    client.delete("foo").get();
-    client.set("foo", "bar").get();
-    System.out.println("hello?");
-    client.get("foo").get().toString(Charset.defaultCharset());
+    Await.ready(client.set("foo", "bar"));
+    assertEquals("bar",
+        Await.<ChannelBuffer>result(client.get("foo")).toString(Charset.defaultCharset()));
   }
 }

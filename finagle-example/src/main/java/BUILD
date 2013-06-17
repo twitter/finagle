@@ -1,0 +1,10 @@
+java_library(name='java',
+  dependencies=[
+    pants('3rdparty:netty'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-example/src/main/thrift:compiled'),
+    pants('finagle/finagle-kestrel'),
+    pants('util/util-core'),
+  ],
+  sources=rglobs('*.java')
+)
