@@ -1,10 +1,10 @@
 Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
-	
+
 Finagle and its dependencies are published to maven central with crosspath versions. It is published with the most current Scala 2.9.x version. Use with sbt is simple:
 
-	libraryDependencies += "com.twitter" %% "finagle-core" % "6.0.5" 
+	libraryDependencies += "com.twitter" %% "finagle-core" % "6.0.5"
 
 ---
 
@@ -187,13 +187,13 @@ More concisely, you can use the RequestBuilder object, shown below. In the follo
 
     import org.jboss.netty.handler.codec.http.HttpRequest
     import org.jboss.netty.handler.codec.http.HttpResponse
-    
+
     import com.twitter.finagle.Service
     import com.twitter.finagle.builder.ClientBuilder
     import com.twitter.finagle.http.Http
     import com.twitter.finagle.http.RequestBuilder
     import com.twitter.util.Future
-    
+
     object ClientToValidatingServer {
       def main(args: Array[String]) {
         val hostNamePort = "someJettyServer:80"
@@ -202,7 +202,7 @@ More concisely, you can use the RequestBuilder object, shown below. In the follo
           .hosts(hostNamePort)
           .hostConnectionLimit(1)
           .build()
-    
+
         val httpRequest = RequestBuilder().url("http://" + hostNamePort + "/d.txt").buildGet
         val responseFuture: Future[HttpResponse] = client(httpRequest)
         responseFuture onSuccess { response => println("Received response: " + response) }
@@ -1438,17 +1438,21 @@ The following example shows the _imperative_ style, which uses an event listener
 
 The following example shows the _functional_ style, which is similar to the way in which you write Scala code:
 
+    import scala.runtime.BoxedUnit;
     Future<String> future = executor.schedule(job);
-      future.onSuccess( new Function<String, Void>() {
-        public Void apply(String value) { System.out.println(value);
-      } ).onFailure(...).ensure(...);
+      future.onSuccess( new Function<String, BoxedUnit>() {
+        public BoxedUnit apply(String value) {
+          System.out.println(value);
+          return BoxedUnit.UNIT;
+        }
+      }).onFailure(...).ensure(...);
 
 The following example shows the _functional_ style for the `map` method:
 
     Future<String> future = executor.schedule(job);
-    Future<Integer> result = future.map(new Function<String, Integer>() {
-      public Integer apply(String value) { return Integer.valueOf(value);
-      }
+    Future<Integer> result = future.map( new Function<String, Integer>() {
+      public Integer apply(String value) { return Integer.valueOf(value); }
+    });
 
 [Top](#Top)
 
