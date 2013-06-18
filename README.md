@@ -1,10 +1,12 @@
+[![Build Status](https://secure.travis-ci.org/twitter/finagle.png)](http://travis-ci.org/twitter/finagle)
+
 Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
-	
+
 Finagle and its dependencies are published to maven central with crosspath versions. It is published with the most current Scala 2.9.x version. Use with sbt is simple:
 
-	libraryDependencies += "com.twitter" %% "finagle-core" % "6.0.5" 
+	libraryDependencies += "com.twitter" %% "finagle-core" % "6.0.5"
 
 ---
 
@@ -187,13 +189,13 @@ More concisely, you can use the RequestBuilder object, shown below. In the follo
 
     import org.jboss.netty.handler.codec.http.HttpRequest
     import org.jboss.netty.handler.codec.http.HttpResponse
-    
+
     import com.twitter.finagle.Service
     import com.twitter.finagle.builder.ClientBuilder
     import com.twitter.finagle.http.Http
     import com.twitter.finagle.http.RequestBuilder
     import com.twitter.util.Future
-    
+
     object ClientToValidatingServer {
       def main(args: Array[String]) {
         val hostNamePort = "someJettyServer:80"
@@ -202,7 +204,7 @@ More concisely, you can use the RequestBuilder object, shown below. In the follo
           .hosts(hostNamePort)
           .hostConnectionLimit(1)
           .build()
-    
+
         val httpRequest = RequestBuilder().url("http://" + hostNamePort + "/d.txt").buildGet
         val responseFuture: Future[HttpResponse] = client(httpRequest)
         responseFuture onSuccess { response => println("Received response: " + response) }
