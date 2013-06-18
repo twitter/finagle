@@ -1,4 +1,6 @@
-package com.twitter.finagle.core.util
+package com.twitter.finagle.util
+
+import java.net.{InetSocketAddress, UnknownHostException, InetAddress}
 
 
 object NetUtil {
@@ -8,4 +10,35 @@ object NetUtil {
   /* Check if string is an IPv4 address. */
   def isIpv4Address(ip: String): Boolean =
     Ipv4Regex.pattern.matcher(ip).matches
+
+  /**
+   * Convenient method only used to be travis CI compliant
+   */
+  def getLocalHost(): InetAddress = {
+    try {
+      InetAddress.getLocalHost
+    } catch {
+      case uhe: UnknownHostException =>
+        new InetSocketAddress(0).asInstanceOf[InetAddress]
+    }
+  }
+
+  /**
+   * Convenient method only used to be travis CI compliant
+   */
+  def getLocalHostName(): String = {
+    try {
+      InetAddress.getLocalHost.getHostName
+    } catch {
+      case uhe: UnknownHostException =>
+        Option(uhe.getMessage) match {
+          case Some(host) =>
+            host.split(":") match {
+              case Array(hostName, _) => hostName
+              case _ => "unknown_host"
+            }
+          case None => "unknown_host"
+        }
+    }
+  }
 }

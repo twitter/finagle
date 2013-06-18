@@ -7,6 +7,7 @@ import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import com.twitter.finagle.util.NetUtil
 
 /**
  * An object that generates a service exception and verifies its JSON representation.
@@ -17,7 +18,7 @@ private[exception] class TestServiceException(
   time: Option[Time] = None,
   traceId: Option[Long] = None,
   clientAddress: Option[String] = None,
-  sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
+  sourceAddress: Option[String] = Some(NetUtil.getLocalHostName()),
   cardinality: Option[Int] = None) {
 
   private val ste = new javaSTE("badclass", "badmethod", "badfile", 42)

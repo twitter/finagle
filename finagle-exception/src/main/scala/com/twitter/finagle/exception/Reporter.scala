@@ -13,7 +13,7 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
-import com.twitter.finagle.util.ReporterFactory
+import com.twitter.finagle.util.{NetUtil, ReporterFactory}
 
 
 trait ClientMonitorFactory extends (String => Monitor)
@@ -118,7 +118,7 @@ sealed case class Reporter(
   client: scribe.FutureIface,
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  private val sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
+  private val sourceAddress: Option[String] = Some(NetUtil.getLocalHostName()),
   private val clientAddress: Option[String] = None) extends Monitor {
 
   /**
@@ -126,7 +126,7 @@ sealed case class Reporter(
    *
    * The endpoint string is the ip address of the host (e.g. "127.0.0.1").
    */
-  def withClient(address: InetAddress = InetAddress.getLocalHost) =
+  def withClient(address: InetAddress = NetUtil.getLocalHost()) =
     copy(clientAddress = Some(address.getHostAddress))
 
   /**
