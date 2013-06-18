@@ -19,7 +19,7 @@ object NetUtil {
       InetAddress.getLocalHost
     } catch {
       case uhe: UnknownHostException =>
-        new InetSocketAddress(0).asInstanceOf[InetAddress]
+        InetAddress.getByName("127.0.0.1")
     }
   }
 
