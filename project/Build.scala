@@ -133,7 +133,7 @@ object Finagle extends Build {
     // Protocols
     finagleHttp, finagleStream, finagleNative, finagleThrift,
     finagleMemcached, finagleKestrel, finagleRedis,
-    finagleMux, finagleThriftMux, finagleMySQL,
+    finagleMux, finagleThriftMux, finagleMySQL, finagleZooKeeper,
 
     // Use and integration
     finagleStress, finagleExample, finagleBenchmark
@@ -387,6 +387,16 @@ object Finagle extends Build {
       name := "finagle-mysql",
       libraryDependencies ++= Seq(util("logging"))
     ).dependsOn(finagleCore)
+
+  lazy val finagleZooKeeper = Project(
+    id = "finagle-zookeeper-exp",
+    base = file("finagle-zookeeper-exp"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-zookeeper-exp",
+    libraryDependencies ++= Seq(util("logging"))
+  ).dependsOn(finagleCore)
 
   lazy val finagleExp = Project(
     id = "finagle-exp",
