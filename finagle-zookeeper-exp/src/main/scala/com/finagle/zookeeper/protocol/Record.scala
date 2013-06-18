@@ -11,5 +11,4 @@ trait Record {
    * @return
    */
   def serialize: Array[Byte]
-
 }
