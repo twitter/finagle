@@ -12,8 +12,11 @@ trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandle
 
   private[this] lazy val printStream = new PrintStream(System.out, true, "UTF-8")
 
-  def printer(message: String) {
+  def printer(message: String, exc: Throwable = null) {
     printStream.println(message)
+    if (exc != null) {
+      exc.printStackTrace(printStream)
+    }
   }
 
   def print(id: java.lang.Integer, indicator: String, message: String) {
@@ -76,7 +79,7 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     printUp(ctx.getChannel, e.toString)
     if (e.isInstanceOf[ExceptionEvent])
-      e.asInstanceOf[ExceptionEvent].getCause.printStackTrace()
+      printer("Snooped exception", e.asInstanceOf[ExceptionEvent].getCause)
 
     ctx.sendUpstream(e)
   }
@@ -88,9 +91,9 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
 }
 
 object ChannelSnooper {
-  def apply(name: String)(thePrinter: String => Unit) =
+  def apply(name: String)(thePrinter: (String, Throwable) => Unit) =
     new SimpleChannelSnooper(name) {
-      override def printer(message: String) = thePrinter(message)
+      override def printer(message: String, exc: Throwable = null) = thePrinter(message, exc)
     }
 
   def addLast(name: String, p: ChannelPipeline) =
