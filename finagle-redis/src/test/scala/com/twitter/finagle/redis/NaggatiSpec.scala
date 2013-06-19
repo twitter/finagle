@@ -270,7 +270,22 @@ class NaggatiSpec extends SpecificationWithJUnit {
                 verify("myset", 0, -1, Some(WithScores))
               }
             }
-
+            
+            // Ensure that, after encoding, the bytes we threw in are the bytes we get back
+            def testZRangeBytes(key: Array[Byte]) = {
+              val zrange = ZRange.get(org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer(key), 0, 1, None)
+              val keyBack = zrange match { 
+                case ZRange(key, start, stop, withScores) => key
+              }
+              val bytesBack = keyBack.toByteBuffer.array
+              key.toSeq mustEqual bytesBack.toSeq
+            }
+            
+            val goodKey = Array[Byte](58, 49, 127)
+            val nonAsciiKey = Array[Byte](58, 49, -128)
+            testZRangeBytes(goodKey)
+            testZRangeBytes(nonAsciiKey)
+            
           } // ZRANGE
 
           "ZRANGEBYSCORE/ZREVRANGEBYSCORE" >> {
