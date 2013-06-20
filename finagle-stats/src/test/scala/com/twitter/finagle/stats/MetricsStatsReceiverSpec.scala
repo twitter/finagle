@@ -20,19 +20,6 @@ class MetricsStatsReceiverSpec extends SpecificationWithJUnit with Mockito {
       readInRoot("my_gauge") must be_==(x)
     }
 
-    "store and read stat into the root StatsReceiver" in {
-      val stat = rootReceiver.stat("my_stat")
-      val input = 0 to 100
-      input foreach { x => stat.add(x.toFloat) }
-      readInRoot("my_stat.count") must be_==(input.size)
-      readInRoot("my_stat.min") must be_==(input.min)
-      readInRoot("my_stat.max") must be_==(input.max)
-      readInRoot("my_stat.sum") must be_==(input.sum)
-      readInRoot("my_stat.count") must be_==(input.size)
-      readInRoot("my_stat.avg") must be_==(input.sum / input.size)
-      readInRoot("my_stat.p50") must be_==(input((input.size + 1) / 2))
-    }
-
     "store and read counter into the root StatsReceiver" in {
       rootReceiver.counter("my_counter").incr()
       readInRoot("my_counter") must be_==(1)

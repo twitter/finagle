@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>metrics</artifactId>
-      <version>0.0.8</version>
+      <version>0.0.9</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>

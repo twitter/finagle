@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
 
 object MetricsStatsReceiver {
-  val defaultRegistry = Metrics.createDetached()
+  val defaultRegistry = Metrics.root()
 }
 
 class MetricsStatsReceiver(val registry: Metrics) extends StatsReceiver {
