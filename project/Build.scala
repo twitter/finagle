@@ -8,7 +8,7 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 object Finagle extends Build {
   val zkVersion = "3.3.4"
   val utilVersion = "6.3.6"
-  val nettyLib = "io.netty" % "netty" % "3.5.12.Final"
+  val nettyLib = "io.netty" % "netty" % "3.6.6.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % "9.1.1"
   val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
   val thriftLibs = Seq(

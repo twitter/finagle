@@ -19,6 +19,7 @@ class SunkChannelFactory extends ChannelFactory {
     new SunkChannel(this, pipeline, sink)
 
   def releaseExternalResources() = ()
+  def shutdown() = ()
 }
 
 class SunkChannel(

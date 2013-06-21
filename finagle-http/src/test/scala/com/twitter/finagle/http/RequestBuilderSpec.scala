@@ -20,17 +20,17 @@ class RequestBuilderSpec extends SpecificationWithJUnit {
   val MULTIPART0 =
 """--Boundary
 Content-Disposition: form-data; name="k1"
-Content-Type: charset=UTF-8
+Content-Type: text/plain; charset=UTF-8
 
 v1
 --Boundary
 Content-Disposition: form-data; name="k2"
-Content-Type: charset=UTF-8
+Content-Type: text/plain; charset=UTF-8
 
 v2
 --Boundary
 Content-Disposition: form-data; name="k3"
-Content-Type: charset=UTF-8
+Content-Type: text/plain; charset=UTF-8
 
 v3
 --Boundary--
