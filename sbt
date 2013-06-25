@@ -34,7 +34,7 @@ java -ea                          \
   -XX:MaxPermSize=1024m           \
   -XX:SurvivorRatio=128           \
   -XX:MaxTenuringThreshold=0      \
-  -XX:ReservedCodeCacheSize=64m   \
+  -XX:ReservedCodeCacheSize=128m  \
   -Xss8M                          \
   -Xms512M                        \
   -Xmx1G                          \
