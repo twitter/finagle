@@ -20,35 +20,61 @@ import com.twitter.util.Duration
 trait MemcachedRichClient { self: Client[Command, Response] =>
   def newRichClient(group: Group[SocketAddress]): memcached.Client = memcached.Client(newClient(group).toService)
   def newRichClient(group: String): memcached.Client = memcached.Client(newClient(group).toService)
+  def newTwemcacheClient(group: Group[SocketAddress]) = memcached.TwemcacheClient(newClient(group).toService)
+  def newTwemcacheClient(group: String) = memcached.TwemcacheClient(newClient(group).toService)
 }
 
 trait MemcachedKetamaClient {
-  def newKetamaClient(group: String, keyHasher: KeyHasher = KeyHasher.KETAMA, useFailureAccrual: Boolean = true): memcached.Client = {
-    newKetamaClient(Resolver.resolve(group)(), keyHasher, useFailureAccrual)
+  def newKetamaClient(
+    group: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
+  ): memcached.Client = {
+    newKetamaClient(Resolver.resolve(group)(), keyHasher, ejectFailedHost)
   }
 
   def newKetamaClient(
-      group: Group[SocketAddress],
-      keyHasher: KeyHasher,
-      ejectFailedHost: Boolean
+    group: Group[SocketAddress],
+    keyHasher: KeyHasher,
+    ejectFailedHost: Boolean
   ): memcached.Client = {
-    val cacheNodes = group collect {
-      case node: CacheNode => node
-      case addr: InetSocketAddress => new CacheNode(addr.getHostName, addr.getPort, 1)
-    }
-
-    val faParams =
-      if (ejectFailedHost) MemcachedFailureAccrualClient.DefaultFailureAccrualParams
-      else (Int.MaxValue, Duration.Zero)
-
     new KetamaClient(
-      cacheNodes,
+      cacheNodesGrp(group),
       keyHasher,
       KetamaClient.DefaultNumReps,
-      faParams,
+      faParams(ejectFailedHost),
       None,
       ClientStatsReceiver.scope("memcached_client")
     )
+  }
+
+  def newTwemcacheKetamaClient(
+    group: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
+  ): memcached.TwemcacheClient = {
+    newTwemcacheKetamaClient(Resolver.resolve(group)(), keyHasher, ejectFailedHost)
+  }
+
+  def newTwemcacheKetamaClient(
+    group: Group[SocketAddress],
+    keyHasher: KeyHasher,
+    ejectFailedHost: Boolean
+  ): memcached.TwemcacheClient = {
+    new KetamaClient(
+      cacheNodesGrp(group),
+      keyHasher,
+      KetamaClient.DefaultNumReps,
+      faParams(ejectFailedHost),
+      None,
+      ClientStatsReceiver.scope("twemcache_client")
+    ) with TwemcachePartitionedClient
+  }
+
+  private def cacheNodesGrp(group: Group[SocketAddress]) = group collect {
+    case node: CacheNode => node
+    case addr: InetSocketAddress => new CacheNode(addr.getHostName, addr.getPort, 1)
+  }
+
+  private def faParams(ejectFailedHost: Boolean) = {
+    if (ejectFailedHost) MemcachedFailureAccrualClient.DefaultFailureAccrualParams
+    else (Int.MaxValue, Duration.Zero)
   }
 }
 

@@ -332,8 +332,8 @@ trait Client extends BaseClient[ChannelBuffer] {
  *
  * @param  service  the underlying Memcached Service.
  */
-protected class ConnectedClient(service: Service[Command, Response]) extends Client {
-  private[this] def rawGet(command: RetrievalCommand) = {
+protected class ConnectedClient(protected val service: Service[Command, Response]) extends Client {
+  protected def rawGet(command: RetrievalCommand) = {
     val keys = immutable.Set(command.keys map { _.toString(UTF_8) }: _*)
 
     service(command) map {
@@ -610,7 +610,7 @@ object KetamaClient {
   val DefaultNumReps = 160
   private val shardNotAvailableDistributor = {
     val failedService = new FailedService(new ShardNotAvailableException)
-    new SingletonDistributor(Client(failedService))
+    new SingletonDistributor(TwemcacheClient(failedService): Client)
   }
 }
 
@@ -636,11 +636,11 @@ class KetamaClient private[finagle](
   val ketamaNodeGrp = initialServices.map({
     node: CacheNode =>
       val key = KetamaClientKey(node.host, node.port, node.weight)
-      val faClient = legacyFAClientBuilder map { builder =>
-        Client(builder(key, nodeHealthBroker, failureAccrualParams))
+      val faClient: Client = legacyFAClientBuilder map { builder =>
+        TwemcacheClient(builder(key, nodeHealthBroker, failureAccrualParams))
       } getOrElse MemcachedFailureAccrualClient(
         key, nodeHealthBroker, failureAccrualParams
-      ).newRichClient(node.host+":"+node.port)
+      ).newTwemcacheClient(node.host+":"+node.port)
 
       key -> KetamaNode(key.identifier, key.weight, faClient)
   })

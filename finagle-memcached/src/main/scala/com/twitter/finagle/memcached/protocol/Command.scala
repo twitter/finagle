@@ -87,3 +87,8 @@ case class Delete(key: ChannelBuffer) extends Command("Delete") with KeyValidati
 }
 case class Stats(args: Seq[ChannelBuffer]) extends NonStorageCommand("Stats")
 case class Quit() extends Command("Quit")
+
+// twemcache specific commands
+case class Upsert(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer, version: ChannelBuffer)
+    extends StorageCommand(key, flags, expiry, value, "Upsert")
+case class Getv(keys: Seq[ChannelBuffer]) extends RetrievalCommand("Getv")
