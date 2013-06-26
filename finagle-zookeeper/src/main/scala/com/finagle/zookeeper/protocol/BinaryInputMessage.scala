@@ -1,5 +1,7 @@
 package com.finagle.zookeeper.protocol
 
+import java.lang.Integer
+
 /**
  * Incoming binary message related set of methods.
  *
@@ -10,13 +12,13 @@ trait BinaryInputMessage {
 
   def readByte: Byte
   def readBoolean: Boolean
-  //TODO: FIx deprecation waring
   def readInteger: Integer
   def readLong: Long
   def readFloat: Float
   def readDouble: Double
   def readString: String
   def readBuffer: Array[Byte]
+
   //TODO: Add rest of composite types
 
 }
