@@ -12,7 +12,15 @@ trait SerializableRecord {
    * Output the record to a byte representation down the wire.
    * @param out The wire output stream
    */
-  def serialize(out: OutputStream)
+  def serialize(out: OutputStream) {
+    serialize(new BinaryMessageSerializer(out))
+  }
+
+  /**
+   * Output a record using a MessageSerializer wrapper
+   * @param out
+   */
+  def serialize(out: MessageSerializer)
 }
 
 trait RecordDeserializer {
@@ -22,5 +30,12 @@ trait RecordDeserializer {
    * @param input The wire input stream
    * @return
    */
-  def deserialize(input: InputStream): SerializableRecord
+  def deserialize(input: InputStream): SerializableRecord =
+    deserialize(new BinaryMessageDeserializer(input))
+
+  /**
+   * Read a record using a MessageDeserializer wrapper
+   * @param input
+   */
+  def deserialize(input: MessageDeserializer): SerializableRecord
 }
