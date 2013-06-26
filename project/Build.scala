@@ -389,12 +389,12 @@ object Finagle extends Build {
     ).dependsOn(finagleCore)
 
   lazy val finagleZooKeeper = Project(
-    id = "finagle-zookeeper-exp",
-    base = file("finagle-zookeeper-exp"),
+    id = "finagle-zookeeper",
+    base = file("finagle-zookeeper"),
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-zookeeper-exp",
+    name := "finagle-zookeeper",
     libraryDependencies ++= Seq(util("logging"))
   ).dependsOn(finagleCore)
 
