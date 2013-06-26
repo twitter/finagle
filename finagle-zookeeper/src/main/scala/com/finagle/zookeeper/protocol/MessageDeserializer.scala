@@ -8,7 +8,7 @@ import java.lang.Integer
  * Caution: Any method call can modify the position inside
  * the buffer after consuming a data item.
  */
-trait BinaryInputMessage {
+trait MessageDeserializer {
 
   def readByte: Byte
   def readBoolean: Boolean

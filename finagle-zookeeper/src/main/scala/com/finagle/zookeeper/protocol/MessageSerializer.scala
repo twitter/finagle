@@ -6,7 +6,7 @@ package com.finagle.zookeeper.protocol
  * Caution: Any method call can modify the position inside
  * the buffer after consuming a data item.
  */
-class BinaryOutputMessage {
+class MessageSerializer {
 
   def writeByte: Byte
   def writeBoolean: Boolean
