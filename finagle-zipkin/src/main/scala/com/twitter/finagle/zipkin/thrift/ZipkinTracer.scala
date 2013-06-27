@@ -60,6 +60,13 @@ object ZipkinTracer {
    */
   def mk(statsReceiver: StatsReceiver): Tracer =
     mk(Host().getHostName, Host().getPort, statsReceiver, Sampler.DefaultSampleRate)
+
+  /**
+   * Util method since java can't make use of default params.
+   * @return sr stats receiver to send successes/failures to
+   */
+  def mk(): Tracer =
+    mk(NullStatsReceiver)
 }
 
 /**
