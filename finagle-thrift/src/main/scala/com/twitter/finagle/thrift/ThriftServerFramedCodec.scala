@@ -12,6 +12,7 @@ import org.jboss.netty.channel.{
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.logging.Logging
 
 object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodecFactory
@@ -91,8 +92,9 @@ private[thrift] class ThriftServerChannelBufferEncoder
 
 private[finagle]
 class HandleUncaughtApplicationExceptions(protocolFactory: TProtocolFactory)
-  extends SimpleFilter[Array[Byte], Array[Byte]]
+  extends SimpleFilter[Array[Byte], Array[Byte]] with Logging
 {
+
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) =
     service(request) handle {
       case e if !e.isInstanceOf[TException] =>
@@ -111,6 +113,9 @@ class HandleUncaughtApplicationExceptions(protocolFactory: TProtocolFactory)
         val x = new TApplicationException(
           TApplicationException.INTERNAL_ERROR,
           "Internal error processing " + name + ": '" + e + "'")
+
+        // log the exception if enabled
+        log.warning(e, "Error processing request")
 
         x.write(buffer())
         buffer().writeMessageEnd()
