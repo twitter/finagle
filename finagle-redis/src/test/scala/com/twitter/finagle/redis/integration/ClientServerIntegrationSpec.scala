@@ -9,9 +9,14 @@ import com.twitter.finagle.redis.util._
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
+import org.junit.Ignore
 import org.specs.SpecificationWithJUnit
 import scala.collection.immutable
 
+
+// TODO(John Sirois): Convert these tests to run conditionally when an env-var is present at the
+// least to get CI coverage.
+@Ignore("These are ignored in the pom")
 class ClientServerIntegrationSpec extends SpecificationWithJUnit {
   lazy val svcClient = ClientBuilder()
     .name("redis-client")

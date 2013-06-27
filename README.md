@@ -1441,17 +1441,21 @@ The following example shows the _imperative_ style, which uses an event listener
 
 The following example shows the _functional_ style, which is similar to the way in which you write Scala code:
 
+    import scala.runtime.BoxedUnit;
     Future<String> future = executor.schedule(job);
-      future.onSuccess( new Function<String, Void>() {
-        public Void apply(String value) { System.out.println(value);
-      } ).onFailure(...).ensure(...);
+      future.onSuccess( new Function<String, BoxedUnit>() {
+        public BoxedUnit apply(String value) {
+          System.out.println(value);
+          return BoxedUnit.UNIT;
+        }
+      }).onFailure(...).ensure(...);
 
 The following example shows the _functional_ style for the `map` method:
 
     Future<String> future = executor.schedule(job);
-    Future<Integer> result = future.map(new Function<String, Integer>() {
-      public Integer apply(String value) { return Integer.valueOf(value);
-      }
+    Future<Integer> result = future.map( new Function<String, Integer>() {
+      public Integer apply(String value) { return Integer.valueOf(value); }
+    });
 
 [Top](#Top)
 

@@ -1,10 +1,13 @@
 package com.twitter.finagle.thriftmux.javatest;
 
 import org.junit.Test;
+
+import com.twitter.finagle.ListeningServer;
+import com.twitter.finagle.ThriftMux;
 import com.twitter.finagle.thriftmux.thriftscrooge3.TestService;
-import static junit.framework.Assert.assertEquals;
 import com.twitter.util.Future;
-import com.twitter.finagle.*;
+
+import static junit.framework.Assert.assertEquals;
 
 public class EndToEndTest {
   @Test

@@ -1,0 +1,20 @@
+scala_library(name='scala',
+  dependencies=[
+    pants('3rdparty:gson'),
+    pants('3rdparty:guava'),
+    pants('3rdparty:netty'),
+    pants('3rdparty:zookeeper'),
+    pants('3rdparty/com/twitter/common:io'),
+    pants('3rdparty/com/twitter/common:quantity'),
+    pants('3rdparty/com/twitter/common/zookeeper:client'),
+    pants('3rdparty/com/twitter/common/zookeeper:server-set'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-serversets'),
+    pants('util/util-core'),
+    pants('util/util-hashing'),
+  ],
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-memcached/src/main/resources')
+  ],
+)

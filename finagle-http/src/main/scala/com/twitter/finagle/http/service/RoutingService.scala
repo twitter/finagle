@@ -4,6 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.path.Path
 import com.twitter.util.Future
+import org.jboss.netty.handler.codec.http.HttpMethod
 
 
 /**
@@ -47,4 +48,12 @@ object RoutingService {
        def apply(request: Request)       = routes(Path(request.path))
        def isDefinedAt(request: Request) = routes.isDefinedAt(Path(request.path))
      })
+
+  def byMethodAndPath[REQUEST](routes: PartialFunction[(HttpMethod, String), Service[REQUEST, Response]]) =
+    new RoutingService(
+      new PartialFunction[Request, Service[REQUEST, Response]] {
+        def apply(request: Request) = routes((request.method, request.path))
+
+        def isDefinedAt(request: Request) = routes.isDefinedAt((request.method, request.path))
+      })
 }

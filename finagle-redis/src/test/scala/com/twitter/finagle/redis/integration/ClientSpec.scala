@@ -5,10 +5,14 @@ import com.twitter.finagle.redis.protocol.{Limit, _}
 import com.twitter.finagle.redis.util.{CBToString, RedisCluster, ReplyFormat, StringToChannelBuffer}
 import com.twitter.finagle.redis.{ClientError, Redis, TransactionalClient}
 import com.twitter.util.Await
+import org.junit.Ignore
 import org.specs.SpecificationWithJUnit
 import scala.collection.{Set => CollectionSet}
 
 
+// TODO(John Sirois): Convert these tests to run conditionally when an env-var is present at the
+// least to get CI coverage.
+@Ignore("These are ignored in the pom")
 class ClientSpec extends SpecificationWithJUnit {
 
   "A BaseClient" should {

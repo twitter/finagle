@@ -6,6 +6,21 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.5.1
+~~~~~
+
+- `finagle-http`: Move routing by path and method function to RoutingService
+- `finagle-redis`: Switching from Strings to ChannelBuffers for Scored Zrange commands
+- `finagle-stats`: Upgrade metrics to 0.0.9
+- `finagle-stream`: Revert "Stream interface (i.e. chunked) for HTTP message bodies"
+- `finagle`: Fix documentation about Java & Future
+- `finagle`: Refresh OWNERS/GROUPS in all subdirectories
+- `finagle`: Upgrade Netty version to 3.6.6.Final
+- `finagle`: Upgrade ostrich version to 9.1.2
+- `finagle`: Upgrade util version to 6.3.7
+- `finagle-redis`: Implement new SET syntax introduced in redis 2.6.12
+- `finagle-core`: Open connection threshold et al
+
 6.5.0
 ~~~~~
 

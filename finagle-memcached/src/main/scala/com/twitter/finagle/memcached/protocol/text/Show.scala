@@ -61,6 +61,9 @@ class CommandToEncoding extends OneToOneEncoder {
   private[this] val REPLACE       = "replace"
   private[this] val CAS           = "cas"
 
+  private[this] val GETV          = "getv"
+  private[this] val UPSERT        = "upsert"
+
   private[this] val QUIT          = "quit"
   private[this] val STATS         = "stats"
 
@@ -81,6 +84,10 @@ class CommandToEncoding extends OneToOneEncoder {
       encode(ctx, ch, Gets(keys))
     case Gets(keys) =>
       Tokens(Seq[ChannelBuffer](GETS) ++ keys)
+    case Getv(keys) =>
+      Tokens(Seq[ChannelBuffer](GETV) ++ keys)
+    case Upsert(key, flags, expiry, value, version) =>
+      TokensWithData(Seq(UPSERT, key, flags.toString, expiry.inSeconds.toString), value, Some(version))
     case Incr(key, amount) =>
       Tokens(Seq(INCR, key, amount.toString))
     case Decr(key, amount) =>

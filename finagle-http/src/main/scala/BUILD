@@ -1,0 +1,12 @@
+scala_library(name='scala',
+  dependencies=[
+    pants('3rdparty:commons-lang'),
+    pants('3rdparty:guava'),
+    pants('3rdparty:netty'),
+    pants('finagle/finagle-core'),
+    pants('util/util-logging'),
+    pants('util/util-codec'),
+    pants('util/util-core'),
+  ],
+  sources=rglobs('*.scala')
+)

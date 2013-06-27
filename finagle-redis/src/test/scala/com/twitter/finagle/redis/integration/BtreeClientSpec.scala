@@ -5,10 +5,14 @@ import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 import com.twitter.util.Await
 import java.util.UUID
 import org.jboss.netty.buffer.ChannelBuffer
+import org.junit.Ignore
 import org.specs.SpecificationWithJUnit
 import scala.collection.mutable
 
 
+// TODO(John Sirois): Convert these tests to run conditionally when an env-var is present at the
+// least to get CI coverage.
+@Ignore("These are ignored in the pom")
 class BtreeClientSpec extends SpecificationWithJUnit {
 
   {

@@ -1,0 +1,12 @@
+java_library(name='java',
+  dependencies=[
+    pants('3rdparty:guava'),
+    pants('3rdparty:netty'),
+    pants('3rdparty:scala-library'),
+    pants('3rdparty/com/twitter/common/zookeeper:client'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-memcached/src/main/scala'),
+    pants('util/util-core'),
+  ],
+  sources=rglobs('*.java')
+)

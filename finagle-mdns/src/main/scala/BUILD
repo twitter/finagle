@@ -1,0 +1,11 @@
+scala_library(name='scala',
+  dependencies=[
+    pants('3rdparty:jmdns'),
+    pants('finagle/finagle-core'),
+    pants('util/util-core')
+  ],
+  sources=rglobs('*.scala'),
+  resources=[
+    pants('finagle/finagle-mdns/src/main/resources')
+  ]
+)

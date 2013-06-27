@@ -85,6 +85,8 @@ object Commands {
   val AUTH              = "AUTH"
   val INFO              = "INFO"
   val QUIT              = "QUIT"
+  val SLAVEOF           = "SLAVEOF"
+  val CONFIG            = "CONFIG"
 
   // Hash Sets
   val HDEL              = "HDEL"
@@ -199,6 +201,8 @@ object Commands {
     AUTH              -> {Auth(_)},
     INFO              -> {Info(_)},
     QUIT              -> {_ => Quit},
+    SLAVEOF           -> {SlaveOf(_)},
+    CONFIG            -> {Config(_)},
 
     // hash sets
     HDEL              -> {HDel(_)},
@@ -329,6 +333,8 @@ object CommandBytes {
   val AUTH              = StringToChannelBuffer("AUTH")
   val INFO              = StringToChannelBuffer("INFO")
   val QUIT              = StringToChannelBuffer("QUIT")
+  val SLAVEOF           = StringToChannelBuffer("SLAVEOF")
+  val CONFIG            = StringToChannelBuffer("CONFIG")
 
   // Hash Sets
   val HDEL              = StringToChannelBuffer("HDEL")
