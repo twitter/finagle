@@ -85,6 +85,7 @@
             <thriftGenerator>scrooge</thriftGenerator>
           </thriftGenerators>
         </configuration>
+        <version>0.0.12</version>
       </plugin>
     </plugins>
   </build>
