@@ -42,7 +42,7 @@ class HttpMuxerTest extends FunSuite {
 
     assert(Response(Await.result(muxService(Request("/foo/bar/")))).contentString == reply1)
 
-    assert(Response(Await.result(muxService(Request("/foo/boo/baz")))).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(muxService(Request("/foo/boo/baz")))).contentString == reply3)
 
     assert(Response(Await.result(muxService(Request("/foo/boo/baz/blah")))).contentString == reply3)
 
@@ -64,7 +64,7 @@ class HttpMuxerTest extends FunSuite {
 
     assert(Response(Await.result(mux2(Request("/foo/bar/")))).contentString == r1)
 
-    assert(Response(Await.result(mux2(Request("/foo/boo/baz")))).status == HttpResponseStatus.NOT_FOUND)
+    assert(Response(Await.result(mux2(Request("/foo/boo/baz")))).contentString == r3)
 
     assert(Response(Await.result(mux2(Request("/foo/boo/baz/blah")))).contentString == r3)
 

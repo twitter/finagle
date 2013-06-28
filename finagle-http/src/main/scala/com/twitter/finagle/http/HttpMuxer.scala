@@ -52,9 +52,9 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
 
     // find the longest prefix of path; patterns are already sorted by length in descending order.
     val matching = sorted.find { case (pattern, _) =>
-      (pattern.endsWith("/") && path.startsWith(pattern)) || // prefix
+      (pattern.endsWith("/") && (path.startsWith(pattern))) || // prefix
       (!pattern.endsWith("/") && path == pattern) // exact match
-    }
+    } orElse sorted.find { case (pattern, _) => (path+"/")==pattern }
 
     matching match {
       case Some((_, service)) => service(request)
