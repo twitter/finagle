@@ -3,190 +3,107 @@ package com.twitter.finagle.postgres.protocol
 import com.twitter.logging.Logger
 import java.util.concurrent.ConcurrentLinkedQueue
 import collection.mutable.ListBuffer
-import scala.PartialFunction
 
-trait State {self =>
-  def accept: PartialFunction[Message, (Option[PgResponse], State)] = Map.empty
 
-  def andThen(f: PartialFunction[PgResponse, State]): State = new State {
-    override def accept = {
-      self.accept.andThen {
-        case (Some(Error(details)), s) => (Some(Error(details)), s)
-        case (Some(r), _) => (None, f(r))
-        case (None, s) => (None, this)
-      }
-    }
+trait State
+
+case object AuthenticationRequired extends State
+
+case object AuthenticationInProgress extends State
+
+case object AwaitingPassword extends State
+
+case class AggregatingAuthData(statuses: Map[String, String], processId: Int, secretKey: Int) extends State
+
+case object Connected extends State
+
+case object Parsing extends State
+
+case object Binding extends State
+
+case object SimpleQuery extends State
+
+case class AggregateRows(fields: IndexedSeq[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends State
+
+case class EmitOnReadyForQuery[R <: PgResponse](emit: R) extends State
+
+class ConnectionStateMachine(state: State = AuthenticationRequired) extends StateMachine[Message, PgResponse, State] {
+  private[this] val logger = Logger("pgsql state machine")
+
+  startState(state)
+
+  transition {
+    case (StartupMessage(_, _), AuthenticationRequired) => (None, AuthenticationInProgress)
+    case (AuthenticationOk(), AuthenticationInProgress) => (None, AggregatingAuthData(Map(), -1, -1))
+    case (AuthenticationCleartextPassword(), AuthenticationInProgress) => (Some(PasswordRequired(ClearText)), AwaitingPassword)
+    case (AuthenticationMD5Password(salt), AuthenticationInProgress) => (Some(PasswordRequired(Md5(salt))), AwaitingPassword)
+    case (PasswordMessage(_), AwaitingPassword) => (None, AuthenticationInProgress)
+
+    case (ErrorResponse(details), AuthenticationRequired | AuthenticationInProgress | AwaitingPassword) => (Some(Error(details)), AuthenticationRequired)
   }
 
-  def andThenReturn(f: PartialFunction[PgResponse, (Option[PgResponse], State)]): State = new State {
-    override def accept = {
-      self.accept.andThen {
-        case (Some(Error(details)), s) => (Some(Error(details)), s)
-        case (Some(r), _) => f(r)
-        case (None, s) => (None, this)
-      }
-    }
+  transition {
+    case (ParameterStatus(name, value), AggregatingAuthData(statuses, processId, secretKey)) => (None, AggregatingAuthData(statuses = statuses + (name -> value), processId, secretKey))
+    case (BackendKeyData(processId, secretKey), AggregatingAuthData(statuses, _, _)) => (None, AggregatingAuthData(statuses, processId, secretKey))
+    case (ReadyForQuery(_), AggregatingAuthData(statuses, processId, secretKey)) => (Some(AuthenticatedResponse(statuses, processId, secretKey)), Connected)
+
+    case (ErrorResponse(details), AggregatingAuthData(_, _, _)) => (Some(Error(details)), AuthenticationRequired)
   }
 
-  def orElse(other: State) = new State {
-    override def accept = self.accept.orElse(other.accept)
+  transition {
+    case (Query(_), Connected) => (None, SimpleQuery)
+    case (Parse(_, _, _), Connected) => (None, Parsing)
+    case (Bind(_, _, _, _, _), Connected) => (None, Binding)
+    case (ErrorResponse(details), Connected) => (Some(Error(details)), Connected)
   }
-}
 
-case object AuthenticationRequired extends State {
-  override def accept = {
-    case StartupMessage(_, _) => (None, AuthenticationInProgress)
+  transition {
+    case (EmptyQueryResponse, SimpleQuery) => (None, EmitOnReadyForQuery(SelectResult(IndexedSeq(), List())))
+    case (CommandComplete(CreateTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(DropTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(Insert(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
+    case (CommandComplete(Update(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
+    case (CommandComplete(Delete(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
+    case (RowDescription(fields), SimpleQuery) => (None, AggregateRows(fields.map(f => Field(f.name, f.fieldFormat, f.dataType))))
+    case (ErrorResponse(details), SimpleQuery) => (None, EmitOnReadyForQuery(Error(details)))
   }
-}
 
-case object AuthenticationInProgress extends State {
-
-
-  override def accept = {
-    case PasswordMessage(_) => (None, this)
-    case AuthenticationCleartextPassword() => (Some(PasswordRequired(ClearText)), this)
-    case AuthenticationMD5Password(salt) => (Some(PasswordRequired(Md5(salt))), this)
-    case AuthenticationOk() => (None, AggregatingAuthData(Map(), -1, -1))
-    case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
+  transition {
+    case (row: DataRow, state: AggregateRows) =>
+      state.buff += row
+      (None, state)
+    case (CommandComplete(Select(count)), AggregateRows(fields, rows)) => (None, EmitOnReadyForQuery(SelectResult(fields, rows.toList)))
+    case (ErrorResponse(details), AggregateRows(_, _)) => (Some(Error(details)), Connected)
   }
-}
 
-case class AggregatingAuthData(statuses: Map[String, String], processId: Int, secretKey: Int) extends State {
-  override def accept = {
-    case ParameterStatus(name, value) => (None, copy(statuses = statuses + (name -> value)))
-    case BackendKeyData(pid, secret) => (None, copy(processId = pid, secretKey = secret))
-    case ReadyForQuery(_) => (Some(AuthenticatedResponse(statuses, processId, secretKey)), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), AuthenticationRequired)
+  transition {
+    case (ReadyForQuery(_), EmitOnReadyForQuery(response)) => (Some(response), Connected)
+    case (ErrorResponse(details), EmitOnReadyForQuery(response)) => (Some(Error(details)), Connected)
   }
-}
 
-case object Connected extends State {
+  transition {
+    case (NoticeResponse(details), s) =>
+      logger.ifInfo("Notice from server " + details)
+      (None, s)
+    case (notification: NotificationResponse, s) =>
+      logger.ifInfo("Notification from server " + notification)
+      (None, s)
+    case (ParameterStatus(name, value), s) =>
+      logger.ifInfo("Params changed " + name + " " + value)
+      (None, s)
 
-  override def accept = {
-    case Query(_) => (None, new AwaitReadyForQueryWrapper(SimpleQuery.simpleQueryHandler))
-    case Parse(_, _, _) => (None, Parsing)
-    case Bind(_, _, _, _, _) => (None, Binding)
-    case Describe(false, _) => (None, AwaitParamsDescription.andThen {
-      case ParamsResponse(types) => AwaitRowDescription.andThenReturn {
-        case RowDescriptions(fields) => (Some(Descriptions(types, fields)), Connected)
-      }
-    })
-    case Describe(true, _) => (None, AwaitRowDescription)
-    case Execute(_, _) => (None, EmptyQueryResponseHandler.orElse(AwaitUpdateQueryResult).orElse(AggregateRowData()))
-    case Sync => (None, AwaitReadyForQuery(ReadyForQueryResponse, Connected))
-
-  }
-}
-
-class AwaitReadyForQueryWrapper(underlying: State) extends State {
-  override def accept = underlying.accept.andThen {
-    case (Some(emit), state) => (None, AwaitReadyForQuery(emit, state))
-    case (None, state) => (None, new AwaitReadyForQueryWrapper(state))
-  }
-}
-
-case class AwaitReadyForQuery(emit: PgResponse, next: State) extends State {
-  override def accept = {
-    case ReadyForQuery(_) => (Some(emit), next)
-    case ErrorResponse(details) => (Some(Error(details)), next)
-  }
-}
-
-case object AwaitParamsDescription extends State {
-
-  override def accept = {
-    case ParameterDescription(types) => (Some(ParamsResponse(types)), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
   }
 
 }
 
-case object AwaitRowDescription extends State {
-  override def accept = {
-    case RowDescription(fields) =>
-      (Some(RowDescriptions(fields.map(f => Field(f.name, f.fieldFormat, f.dataType)))), Connected)
-    case NoData => (Some(RowDescriptions(IndexedSeq())), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
-  }
-}
 
-case class AggregateRowData(buff: ListBuffer[DataRow] = ListBuffer()) extends State {
-  override def accept = {
-    case row: DataRow =>
-      buff += row
-      (None, this)
-    case CommandComplete(_) => (Some(Rows(buff.toList, completed = true)), Connected)
-    case PortalSuspended => (Some(Rows(buff.toList, completed = false)), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
-  }
-
-}
-
-case object AwaitUpdateQueryResult extends State {
-  override def accept = {
-    case CommandComplete(tag) => (Some(parseTag(tag)), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
-  }
-
-  private[this] def parseTag(tag: String) = {
-    if (tag == "CREATE TABLE") {
-      CommandCompleteResponse(1)
-    } else if (tag == "DROP TABLE") {
-      CommandCompleteResponse(1)
-    } else if (tag == "SELECT 0") {
-      Rows(List(), completed = true)
-    } else {
-      val parts = tag.split(" ")
-
-      parts(0) match {
-        case "INSERT" => CommandCompleteResponse(parts(2).toInt)
-        case "DELETE" => CommandCompleteResponse(parts(1).toInt)
-        case "UPDATE" => CommandCompleteResponse(parts(1).toInt)
-        case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
-      }
-    }
-  }
-
-
-}
-
-case object EmptyQueryResponseHandler extends State {
-  override def accept = {
-    case EmptyQueryResponse => (Some(SelectResult(IndexedSeq(), List())), Connected) // TODO exception???ª
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
-  }
-
-}
-
-object SimpleQuery {
-  private[this] val selectQuerySequence: State = AwaitRowDescription.andThen {
-    case RowDescriptions(fields) => AggregateRowData().andThenReturn {
-      case Rows(data, true) => (Some(SelectResult(fields, data)), Connected)
-    }
-  }
-
-  val simpleQueryHandler = EmptyQueryResponseHandler.orElse(AwaitUpdateQueryResult).orElse(selectQuerySequence)
-}
-
-case object Parsing extends State {
-  override def accept = {
-    case ParseComplete => (Some(ParseCompletedResponse), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
-  }
-}
-
-case object Binding extends State {
-  override def accept = {
-    case BindComplete => (Some(BindCompletedResponse), Connected)
-    case ErrorResponse(details) => (Some(Error(details)), Connected)
-  }
-}
-
-class Connection(@volatile private[this] var state: State = AuthenticationRequired,
-                 @volatile private[this] var busy: Boolean = false) {
-  private[this] val logger = Logger(getClass.getName)
+class Connection {
+  private[this] val logger = Logger("connection")
 
   private[this] val frontendQueue = new ConcurrentLinkedQueue[FrontendMessage]
+
+  private[this] val stateMachine = new ConnectionStateMachine()
+  @volatile private[this] var busy = false
 
   def send(msg: FrontendMessage) {
     logger.ifDebug("Frontend message accepted " + msg)
@@ -202,32 +119,18 @@ class Connection(@volatile private[this] var state: State = AuthenticationRequir
         logger.ifWarning("Backend message respondend and no frontend messages were sent")
       } else {
         logger.ifDebug("Frontend message is pending " + pending)
-        state = state.accept(pending)._2
+        val _ = stateMachine.onEvent(pending)
         busy = true
       }
     }
 
-    val (result, newState) = handleMisc.orElse(state.accept)(msg)
-    state = newState
+    val result = stateMachine.onEvent(msg)
     if (result.isDefined) {
       busy = false
       frontendQueue.poll
     }
-    logger.ifDebug("Result " + result + " new state " + state)
+    logger.ifDebug("Emiting result " + result)
     result
-  }
-
-  def handleMisc: PartialFunction[Message, (Option[PgResponse], State)] = {
-    case NoticeResponse(details) =>
-      logger.ifInfo("Notice from server " + details)
-      (None, state)
-    case notification:NotificationResponse =>
-      logger.ifInfo("Notification from server " + notification)
-      (None, state)
-    case ParameterStatus(name, value) =>
-      logger.ifInfo("Params changed " + name + " " + value)
-      (None, state)
-
   }
 
 }

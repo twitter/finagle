@@ -45,7 +45,21 @@ case class FieldDescription(
 
 case class DataRow(data: IndexedSeq[ChannelBuffer]) extends BackendMessage
 
-case class CommandComplete(tag: String) extends BackendMessage
+sealed trait CommandCompleteStatus
+
+case object CreateTable extends CommandCompleteStatus
+
+case object DropTable extends CommandCompleteStatus
+
+case class Insert(count : Int) extends CommandCompleteStatus
+
+case class Update(count : Int) extends CommandCompleteStatus
+
+case class Delete(count : Int) extends CommandCompleteStatus
+
+case class Select(count: Int) extends CommandCompleteStatus
+
+case class CommandComplete(status: CommandCompleteStatus) extends BackendMessage
 
 case class ReadyForQuery(status: Char) extends BackendMessage
 
@@ -234,17 +248,20 @@ class BackendMessageParser {
     logger.ifDebug("fields " + fieldNumber)
     val fields = new Array[ChannelBuffer](fieldNumber)
 
-    0.until(fieldNumber).foreach {
-      i =>
+    for (i <- 0.until(fieldNumber)) {
         val length = content.readInt
-        val index = content.readerIndex
-        val slice = content.slice(index, length)
-        content.readerIndex(index + length)
+        if (length == -1) {
+          fields(i) = null
+        } else {
+          val index = content.readerIndex
+          val slice = content.slice(index, length)
+          content.readerIndex(index + length)
 
-        logger.ifDebug("index " + i)
-        fields(i) = slice
-        logger.ifDebug("bytes " + length)
-        content.readerIndex(index + length)
+          logger.ifDebug("index " + i)
+          fields(i) = slice
+          logger.ifDebug("bytes " + length)
+          content.readerIndex(index + length)
+        }
     }
 
     Some(new DataRow(fields))
@@ -287,7 +304,25 @@ class BackendMessageParser {
 
     val tag = Buffers.readCString(content)
 
-    Some(new CommandComplete(tag))
+    Some(new CommandComplete(parseTag(tag)))
+  }
+
+  def parseTag(tag: String) : CommandCompleteStatus = {
+    if (tag == "CREATE TABLE") {
+      CreateTable
+    } else if (tag == "DROP TABLE") {
+      DropTable
+    } else {
+      val parts = tag.split(" ")
+
+      parts(0) match {
+        case "SELECT" => Select(parts(1).toInt)
+        case "INSERT" => Insert(parts(2).toInt)
+        case "DELETE" => Delete(parts(1).toInt)
+        case "UPDATE" => Update(parts(1).toInt)
+        case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+      }
+    }
   }
 
   def parseS(packet: Packet): Option[BackendMessage] = {

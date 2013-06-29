@@ -90,7 +90,9 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   private[this] def extractRows(rs: SelectResult): List[Row] = {
     val (fieldNames, fieldParsers) = processFields(rs.fields)
 
-    rs.rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map(pair => pair._2(pair._1))))
+    rs.rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map {
+      case (d, p) => if (d == null) null else p(d)
+    }))
   }
 
   private[this] class PreparedStatementImpl(name: String) extends PreparedStatement {
