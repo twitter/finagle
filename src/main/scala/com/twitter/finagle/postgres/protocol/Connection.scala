@@ -100,35 +100,17 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
 class Connection {
   private[this] val logger = Logger("connection")
 
-  private[this] val frontendQueue = new ConcurrentLinkedQueue[FrontendMessage]
-
   private[this] val stateMachine = new ConnectionStateMachine()
-  @volatile private[this] var busy = false
 
   def send(msg: FrontendMessage) {
     logger.ifDebug("Frontend message accepted " + msg)
-    frontendQueue.offer(msg)
+    val _ = stateMachine.onEvent(msg)
   }
 
   def receive(msg: BackendMessage): Option[PgResponse] = {
     logger.ifDebug("Backend message received " + msg)
 
-    if (!busy) {
-      val pending = frontendQueue.peek
-      if (pending == null) {
-        logger.ifWarning("Backend message respondend and no frontend messages were sent")
-      } else {
-        logger.ifDebug("Frontend message is pending " + pending)
-        val _ = stateMachine.onEvent(pending)
-        busy = true
-      }
-    }
-
     val result = stateMachine.onEvent(msg)
-    if (result.isDefined) {
-      busy = false
-      frontendQueue.poll
-    }
     logger.ifDebug("Emiting result " + result)
     result
   }

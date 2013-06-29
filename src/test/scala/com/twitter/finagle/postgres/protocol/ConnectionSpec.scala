@@ -8,7 +8,7 @@ trait ConnectionSpec {
 
   args(sequential = true)
 
-  implicit var connection: ConnectionStateMachine = new ConnectionStateMachine()
+  implicit var connection = new ConnectionStateMachine()
 
   def withConnection(block: => Unit) {
     connection = new ConnectionStateMachine()
