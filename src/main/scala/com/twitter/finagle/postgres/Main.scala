@@ -1,7 +1,7 @@
 package com.twitter.finagle.postgres
 
 import com.twitter.logging.Logger
-import com.twitter.util.Future
+import com.twitter.util.{Future, Await}
 import protocol.ServerError
 
 //import com.twitter.util.Future
@@ -30,7 +30,7 @@ object Main {
         ps.fire()
     }
     try {
-      logger.ifDebug("Rows " + f.get)
+      logger.ifDebug("Rows " + Await.result(f))
     }
     catch {
       case s: ServerError => logger.ifDebug("error error")
@@ -41,7 +41,7 @@ object Main {
         User(row.getString("email"), row.getString("name"))
     }
     //
-    logger.debug("Responded " + f2.get)
+    logger.debug("Responded " + Await.result(f2))
 
 
     //    val fp = client.send(Communication.request(new Parse(name = "1", query = "select * from users"), flush = true)) {
