@@ -166,7 +166,10 @@ case class ResultSet(rows: List[Row]) extends QueryResponse
 
 object ResultSet {
 
-  def apply(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value], rows: List[DataRow]) = new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map(pair => pair._2(pair._1)))))
+  // TODO copy-paste
+  def apply(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value], rows: List[DataRow]) = new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
+    case (d, p) => if (d == null) null else p(d)
+  }))))
 
   def apply(fields: IndexedSeq[Field], rows: List[DataRow]): ResultSet = {
     val (fieldNames, fieldParsers) = processFields(fields)

@@ -1,7 +1,6 @@
 package com.twitter.finagle.postgres.protocol
 
 import com.twitter.logging.Logger
-import java.util.concurrent.ConcurrentLinkedQueue
 import collection.mutable.ListBuffer
 
 
@@ -23,7 +22,18 @@ case object Binding extends State
 
 case object SimpleQuery extends State
 
+case object ExecutePreparedStatement extends State
+
+case object Syncing extends State
+
+case object AwaitParamsDescription extends State
+
 case class AggregateRows(fields: IndexedSeq[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends State
+
+// TODO ugly
+case class AggregateRowsWithoutFields(buff: ListBuffer[DataRow] = ListBuffer()) extends State
+
+case class AwaitRowDescription(types: IndexedSeq[Int]) extends State
 
 case class EmitOnReadyForQuery[R <: PgResponse](emit: R) extends State
 
@@ -54,7 +64,38 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (Query(_), Connected) => (None, SimpleQuery)
     case (Parse(_, _, _), Connected) => (None, Parsing)
     case (Bind(_, _, _, _, _), Connected) => (None, Binding)
+    case (Describe(_, _), Connected) => (None, AwaitParamsDescription)
+    case (Execute(_, _), Connected) => (None, ExecutePreparedStatement)
+    case (Sync, Connected) => (None, Syncing)
     case (ErrorResponse(details), Connected) => (Some(Error(details)), Connected)
+  }
+
+  transition {
+    case (ParameterDescription(types), AwaitParamsDescription) => (None, AwaitRowDescription(types))
+    case (RowDescription(fields), AwaitParamsDescription) => (Some(RowDescriptions(fields.map(f => Field(f.name, f.fieldFormat, f.dataType)))), Connected)
+    case (NoData, AwaitParamsDescription) => (Some(RowDescriptions(IndexedSeq())), Connected)
+    case (ErrorResponse(details), AwaitParamsDescription) => (Some(Error(details)), Connected)
+  }
+
+  transition {
+    case (RowDescription(fields), AwaitRowDescription(types)) => (Some(RowDescriptions(fields.map(f => Field(f.name, f.fieldFormat, f.dataType)))), Connected)
+    case (NoData, AwaitRowDescription(types)) => (Some(RowDescriptions(IndexedSeq())), Connected)
+    case (ErrorResponse(details), AwaitRowDescription(_)) => (Some(Error(details)), Connected)
+  }
+
+  transition {
+    case (BindComplete, Binding) => (Some(BindCompletedResponse), Connected)
+    case (ErrorResponse(details), Binding) => (Some(Error(details)), Connected)
+  }
+
+  transition {
+    case (ParseComplete, Parsing) => (Some(ParseCompletedResponse), Connected)
+    case (ErrorResponse(details), Parsing) => (Some(Error(details)), Connected)
+  }
+
+  transition {
+    case (ReadyForQuery(_), Syncing) => (Some(ReadyForQueryResponse), Connected)
+    case (ErrorResponse(details), Syncing) => (Some(Error(details)), Connected)
   }
 
   transition {
@@ -67,6 +108,24 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (RowDescription(fields), SimpleQuery) => (None, AggregateRows(fields.map(f => Field(f.name, f.fieldFormat, f.dataType))))
     case (ErrorResponse(details), SimpleQuery) => (None, EmitOnReadyForQuery(Error(details)))
   }
+
+  transition {
+    case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult(IndexedSeq(), List())), Connected)
+    case (CommandComplete(CreateTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
+    case (CommandComplete(DropTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
+    case (CommandComplete(Insert(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
+    case (CommandComplete(Update(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
+    case (CommandComplete(Delete(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
+    case (row:DataRow, ExecutePreparedStatement) => (None, AggregateRowsWithoutFields(ListBuffer(row)))
+    case (row:DataRow, state:AggregateRowsWithoutFields) =>
+      state.buff += row
+      (None, state)
+    case (PortalSuspended, AggregateRowsWithoutFields(buff)) => (Some(Rows(buff.toList, completed = false)), Connected)
+    case (CommandComplete(Select(_)), AggregateRowsWithoutFields(buff)) => (Some(Rows(buff.toList, completed = true)), Connected)
+    case (ErrorResponse(details), ExecutePreparedStatement) => (Some(Error(details)), Connected)
+    case (ErrorResponse(details), AggregateRowsWithoutFields(_)) => (Some(Error(details)), Connected)
+  }
+
 
   transition {
     case (row: DataRow, state: AggregateRows) =>
