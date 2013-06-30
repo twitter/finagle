@@ -30,7 +30,6 @@ case object AwaitParamsDescription extends State
 
 case class AggregateRows(fields: IndexedSeq[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends State
 
-// TODO ugly
 case class AggregateRowsWithoutFields(buff: ListBuffer[DataRow] = ListBuffer()) extends State
 
 case class AwaitRowDescription(types: IndexedSeq[Int]) extends State
