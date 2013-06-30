@@ -18,7 +18,7 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(EmptyQueryResponse)
       receive(ReadyForQuery('I'))
 
-      response === SelectResult(IndexedSeq(), List())
+      response === Some(SelectResult(IndexedSeq(), List()))
 
     }
 
@@ -30,7 +30,7 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(CommandComplete(CreateTable))
       receive(ReadyForQuery('I'))
 
-      response === CommandCompleteResponse(1)
+      response === Some(CommandCompleteResponse(1))
 
     }
 
@@ -42,7 +42,7 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(CommandComplete(Delete(2)))
       receive(ReadyForQuery('I'))
 
-      response === CommandCompleteResponse(2)
+      response === Some(CommandCompleteResponse(2))
 
     }
 
@@ -54,7 +54,7 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(CommandComplete(Insert(1)))
       receive(ReadyForQuery('I'))
 
-      response === CommandCompleteResponse(1)
+      response === Some(CommandCompleteResponse(1))
 
     }
 
@@ -66,7 +66,7 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(CommandComplete(Update(1)))
       receive(ReadyForQuery('I'))
 
-      response === CommandCompleteResponse(1)
+      response === Some(CommandCompleteResponse(1))
 
     }
 
@@ -79,7 +79,7 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(CommandComplete(Select(0)))
       receive(ReadyForQuery('I'))
 
-      response === SelectResult(IndexedSeq(Field("email", 0, 1043)), List())
+      response === Some(SelectResult(IndexedSeq(Field("email", 0, 1043)), List()))
 
     }
 
@@ -97,11 +97,9 @@ class SimpleQuerySpec extends Specification with ConnectionSpec {
       receive(CommandComplete(Select(2)))
       receive(ReadyForQuery('I'))
 
-      response === SelectResult(IndexedSeq(Field("email", 0, 1043)), List(row1, row2))
+      response === Some(SelectResult(IndexedSeq(Field("email", 0, 1043)), List(row1, row2)))
 
     }
-
-
 
   }
 }

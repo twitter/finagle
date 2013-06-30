@@ -37,6 +37,6 @@ trait ConnectionSpec {
     connection = new ConnectionStateMachine(state)
   }
 
-  def response = result.get
+  def response = result
 
 }
