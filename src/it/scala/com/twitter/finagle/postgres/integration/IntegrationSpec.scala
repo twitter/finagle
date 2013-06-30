@@ -120,14 +120,14 @@ class IntegrationSpec extends Specification {
         two <- prep.exec("Minnie Mouse", "ms.mouse@mouse.com")
       } yield one.affectedRows + two.affectedRows
 
-      fi.get === 2
+      Await.result(fi) === 2
 
       val f = client.select("select  * from users") {
         row =>
           User(row.getString("email"), row.getString("name"))
       }
 
-      f.get.size === 3
+      Await.result(f).size === 3
     }
 
     "wrong query should throw exception" in {
