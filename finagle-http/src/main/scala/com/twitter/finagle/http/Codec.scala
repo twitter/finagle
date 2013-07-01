@@ -101,6 +101,8 @@ case class Http(
     copy(_channelBufferUsageTracker = Some(usageTracker))
   def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
   def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
+  def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
+  def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
 
   def client = { config =>
     new Codec[HttpRequest, HttpResponse] {
