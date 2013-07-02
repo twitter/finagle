@@ -30,23 +30,13 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>streamyj</artifactId>
-      <version>0.4.3-SNAPSHOT</version>
+      <version>0.4.3-20130702051138-777b32b</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>0.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
-      <version>1.9.11</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.11</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
