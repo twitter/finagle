@@ -101,21 +101,26 @@ case class UnknownChannelException(underlying: Throwable, override val remoteAdd
  */
 trait WriteException extends Exception with SourcedException
 
-object WriteException {
+/**
+ * Default implementation for WriteException that wraps an underlying exception.
+ */
+case class ChannelWriteException(underlying: Throwable)
+  extends ChannelException(underlying)
+  with WriteException
+  with NoStacktrace
+{
+  override def fillInStackTrace = this
+  override def getStackTrace = underlying.getStackTrace
+}
 
-  def apply(underlying: Throwable): WriteException = new ChannelException(underlying)
-    with WriteException
-    with NoStacktrace
-  {
-    override def fillInStackTrace = this
-    override def getStackTrace = underlying.getStackTrace
-  }
+object WriteException {
+  def apply(underlying: Throwable): WriteException =
+    ChannelWriteException(underlying)
 
   def unapply(t: Throwable): Option[Throwable] = t match {
     case we: WriteException => Some(we.getCause)
     case _ => None
   }
-
 }
 
 case class SslHandshakeException(underlying: Throwable, override val remoteAddress: SocketAddress)
