@@ -64,7 +64,7 @@ private[finagle] object Message {
         // Currently we require the 3-tuple, but this is not
         // necessarily required.
         case Some(traceId) =>
-          val hd = ChannelBuffers.directBuffer(1+1+1+24+1+1+1)
+          val hd = ChannelBuffers.buffer(1+1+1+24+1+1+1)
           hd.writeByte(2) // 2 entries
 
           hd.writeByte(Keys.TraceId) // key 0 (traceid)

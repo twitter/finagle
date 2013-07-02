@@ -71,6 +71,11 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
+      <artifactId>util-app</artifactId>
+      <version>6.3.8-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime</artifactId>
       <version>3.1.4-SNAPSHOT</version>
     </dependency>
