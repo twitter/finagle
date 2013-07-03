@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
 
@@ -37,8 +37,13 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TProtocolFactory}
  *
  * @param framed when true, use Apache Thrift's
  * [[http://people.apache.org/~jfarrell/thrift/0.6.1/javadoc/org/apache/thrift/transport/TFramedTransport.html framed transport]]
+ *
+ * @param clientId The client ID to be set in request header
  */
-case class ThriftImpl private[finagle](protocolFactory: TProtocolFactory, framed: Boolean = true)
+case class ThriftImpl private[finagle](
+    protocolFactory: TProtocolFactory,
+    framed: Boolean = true,
+    clientId: Option[ClientId] = None)
   extends Client[ThriftClientRequest, Array[Byte]] with Server[Array[Byte], Array[Byte]]
   with ThriftRichClient with ThriftRichServer
 {
@@ -47,7 +52,8 @@ case class ThriftImpl private[finagle](protocolFactory: TProtocolFactory, framed
   private[this] val client = new thrift.ThriftClient(
     if (framed) thrift.ThriftFramedTransporter 
     else thrift.ThriftBufferedTransporter(protocolFactory),
-    protocolFactory)
+    protocolFactory,
+    clientId = clientId)
 
   private[this] val server = new thrift.ThriftServer(
     if (framed) thrift.ThriftFramedListener
@@ -81,6 +87,13 @@ case class ThriftImpl private[finagle](protocolFactory: TProtocolFactory, framed
    */  
   def withBufferedTransport(): ThriftImpl =
     copy(framed = false)
+
+  /**
+   * Produce a [[com.twitter.finagle.ThriftImpl]] using
+   * the provided client ID.
+   */  
+  def withClientId(clientId: ClientId): ThriftImpl =
+    copy(clientId = Some(clientId))
 }
 
 /**
@@ -142,4 +155,11 @@ object Thrift
    */
   def withBufferedTransport(): ThriftImpl =
     thrift.withBufferedTransport()
+
+  /**
+   * Produce a [[com.twitter.finagle.ThriftImpl]] using
+   * the provided client ID.
+   */  
+  def withClientId(clientId: ClientId): ThriftImpl =
+    thrift.withClientId(clientId)
 }
