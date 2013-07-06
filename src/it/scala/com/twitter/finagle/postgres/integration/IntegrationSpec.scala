@@ -44,6 +44,16 @@ class IntegrationSpec extends Specification {
 
       Await.result(f).size === 0
     }
+    "Prepared statement select on empty table should return empty list" in {
+      val f = for {
+        prep <- client.prepare("select * from users where email = $1")
+        users <- prep.select("mickey@mouse.com") {
+          row => User(row.getString("email"), row.getString("name"))
+        }
+      } yield users
+
+      Await.result(f).size === 0
+    }
 
     "inserting item should work" in {
       val fi = client.executeUpdate("insert into users(email, name) values ('mickey@mouse.com', 'Mickey Mouse')," +
