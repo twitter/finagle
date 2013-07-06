@@ -122,6 +122,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (PortalSuspended, AggregateRowsWithoutFields(buff)) => (Some(Rows(buff.toList, completed = false)), Connected)
     case (CommandComplete(Select(0)), ExecutePreparedStatement) => (Some(Rows(List.empty, completed = true)), Connected)
     case (CommandComplete(Select(_)), AggregateRowsWithoutFields(buff)) => (Some(Rows(buff.toList, completed = true)), Connected)
+    case (CommandComplete(Insert(_)), AggregateRowsWithoutFields(buff)) => (Some(Rows(buff.toList, completed = true)), Connected)
     case (ErrorResponse(details), ExecutePreparedStatement) => (Some(Error(details)), Connected)
     case (ErrorResponse(details), AggregateRowsWithoutFields(_)) => (Some(Error(details)), Connected)
   }
