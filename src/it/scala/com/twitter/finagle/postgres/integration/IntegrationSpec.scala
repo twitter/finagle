@@ -32,14 +32,14 @@ class IntegrationSpec extends Specification {
 
     "select on empty table should return empty list" in {
       val f = client.select("select  * from users") {row =>
-        User(row.getString("email"), row.getString("name"))
+        User(row.get[String]("email"), row.get[String]("name"))
       }
 
       Await.result(f).size === 0
     }
     "Empty query" in {
       val f = client.select("") {row =>
-        User(row.getString("email"), row.getString("name"))
+        User(row.get[String]("email"), row.get[String]("name"))
       }
 
       Await.result(f).size === 0
@@ -48,7 +48,7 @@ class IntegrationSpec extends Specification {
       val f = for {
         prep <- client.prepare("select * from users where email = $1")
         users <- prep.select("mickey@mouse.com") {
-          row => User(row.getString("email"), row.getString("name"))
+          row => User(row.get[String]("email"), row.get[String]("name"))
         }
       } yield users
 
@@ -66,7 +66,7 @@ class IntegrationSpec extends Specification {
       val f = for {
         prep <- client.prepare("select * from users where email=$1 and name=$2")
         users <- prep.select("mickey@mouse.com", "Mickey Mouse") {
-          row => User(row.getString("email"), row.getString("name"))
+          row => User(row.get[String]("email"), row.get[String]("name"))
         }
       } yield users
 
@@ -80,7 +80,7 @@ class IntegrationSpec extends Specification {
       val f = for {
         prep <- client.prepare("select * from users where email=$1 and name=$2")
         users <- prep.select("one param only") {
-          row => User(row.getString("email"), row.getString("name"))
+          row => User(row.get[String]("email"), row.get[String]("name"))
         }
       } yield users
 
@@ -92,7 +92,7 @@ class IntegrationSpec extends Specification {
       Await.result(fd) === OK(1)
 
       val f = client.select("select  * from users") { row =>
-        User(row.getString("email"), row.getString("name"))
+        User(row.get[String]("email"), row.get[String]("name"))
       }
 
       Await.result(f).size === 1
@@ -114,7 +114,7 @@ class IntegrationSpec extends Specification {
 
       val f = client.select("select  * from users") {
         row =>
-          User(row.getString("email"), row.getString("name"))
+          User(row.get[String]("email"), row.get[String]("name"))
       }
 
       Await.result(f).size === 1
@@ -134,7 +134,7 @@ class IntegrationSpec extends Specification {
 
       val f = client.select("select  * from users") {
         row =>
-          User(row.getString("email"), row.getString("name"))
+          User(row.get[String]("email"), row.get[String]("name"))
       }
 
       Await.result(f).size === 3

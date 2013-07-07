@@ -27,29 +27,7 @@ case class PasswordRequired(encoding: PasswordEncoding) extends PgResponse
 
 case class AuthenticatedResponse(params: Map[String, String], processId: Int, secretKey: Int) extends PgResponse
 
-sealed trait Value
-
-case class StringValue(s: String) extends Value
-
-case class BooleanValue(b: Boolean) extends Value
-
-case class ByteValue(b: Byte) extends Value
-
-case class ShortValue(s: Short) extends Value
-
-case class IntValue(i: Int) extends Value
-
-case class LongValue(l: Long) extends Value
-
-case class FloatValue(f: Float) extends Value
-
-case class DoubleValue(d: Double) extends Value
-
-case class TimestampValue(t: Timestamp) extends Value
-
-case class DateValue(d: SQLDate) extends Value
-
-case object NullValue extends Value
+case class Value[+A](value:A)
 
 case class Rows(rows: List[DataRow], completed: Boolean) extends PgResponse
 

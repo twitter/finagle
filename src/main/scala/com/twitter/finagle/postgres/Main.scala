@@ -38,7 +38,7 @@ object Main {
 
     val f2 = client.select("select * from users") {
       row =>
-        User(row.getString("email"), row.getString("name"))
+        User(row.get[String]("email"), row.get[String]("name"))
     }
     //
     logger.debug("Responded " + Await.result(f2))
@@ -50,7 +50,7 @@ object Main {
 
     //    logger.ifDebug("Responded " + fp.get)
     //    val f = client.select("select * from users") { row =>
-    //      User(row.getString("email"), row.getString("name"))
+    //      User(row.get[String]("email"), row.get[String]("name"))
     //    }
     //
     //    logger.debug("Responded " + f.get)
@@ -93,7 +93,7 @@ object Main {
     //    //    }
     //
     //    val f = client.select("select * from users") { row =>
-    //      User(row.getString("email"), row.getString("name"))
+    //      User(row.get[String]("email"), row.get[String]("name"))
     //    }
     //    //
     //    logger.debug("Responded " + f.get)

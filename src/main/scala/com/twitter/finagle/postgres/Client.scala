@@ -14,7 +14,6 @@ import protocol.Query
 import protocol.SelectResult
 import protocol.RowDescriptions
 import protocol.Rows
-import protocol.StringValue
 import protocol.Value
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -60,7 +59,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
       case BindCompletedResponse => Future.value(())
     }
 
-  private[this] def describe(name: String): Future[(IndexedSeq[String], IndexedSeq[ChannelBuffer => Value])] = send(PgRequest(Describe(portal = true, name = name), flush = true)) {
+  private[this] def describe(name: String): Future[(IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]])] = send(PgRequest(Describe(portal = true, name = name), flush = true)) {
     case RowDescriptions(fields) => Future.value(processFields(fields))
   }
 
@@ -80,7 +79,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
     case some => throw new UnsupportedOperationException("TODO Support exceptions correctly " + some)
   })
 
-  private[this] def processFields(fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value]) = {
+  private[this] def processFields(fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
     val names = fields.map(f => f.name)
     val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType))
 
@@ -134,28 +133,22 @@ object Client {
 
 }
 
-class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value]) {
+class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value[Any]]) {
 
   private[this] val indexMap = fields.zipWithIndex.toMap
 
-  def get(name: String): Option[Value] = {
-    indexMap.get(name).map(vals(_))
-  }
-
-  def getString(name: String): String = {
-    val value = get(name) map {
-      case StringValue(s) => s
-      case _ => throw new IllegalStateException("Expected string value")
+  def get[A](name: String)(implicit mf:Manifest[A]):A = {
+    indexMap.get(name).map(vals(_)) match {
+      case Some(Value(x:A)) => x
+      case _ => throw new IllegalStateException("Expected type " + mf.toString)
     }
-    value.get
   }
 
-  def get(index: Int): Value = vals(index)
+  def get(index: Int): Value[Any] = vals(index)
 
-  def values(): IndexedSeq[Value] = vals
+  def values(): IndexedSeq[Value[Any]] = vals
 
   override def toString = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'}"
-
 }
 
 sealed trait QueryResponse
@@ -167,7 +160,7 @@ case class ResultSet(rows: List[Row]) extends QueryResponse
 object ResultSet {
 
   // TODO copy-paste
-  def apply(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value], rows: List[DataRow]) = new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
+  def apply(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value[Any]], rows: List[DataRow]) = new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
     case (d, p) => if (d == null) null else p(d)
   }))))
 
@@ -177,7 +170,7 @@ object ResultSet {
     apply(fieldNames, fieldParsers, rows)
   }
 
-  private[this] def processFields(fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value]) = {
+  private[this] def processFields(fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
     val names = fields.map(f => f.name)
     val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType))
 
