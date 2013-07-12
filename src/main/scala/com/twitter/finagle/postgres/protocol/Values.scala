@@ -2,6 +2,8 @@ package com.twitter.finagle.postgres.protocol
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
+import java.sql.Timestamp
+
 object Type {
   val BOOL = 16
   val BYTE_A = 17
@@ -49,6 +51,7 @@ object Type {
   val RECORD = 2249
   val VOID = 2278
   val UUID = 2950
+  val ENUM = 16448
 
 }
 
@@ -81,7 +84,11 @@ trait ValueParser {
 
   def parseVarChar(b: ChannelBuffer): Value[String]
 
-  def parseTimestampTZ(b: ChannelBuffer): Value[String]
+  def parseTimestamp(b: ChannelBuffer): Value[Timestamp]
+
+  def parseTimestampTZ(b: ChannelBuffer): Value[Timestamp]
+
+  def parseEnum(b: ChannelBuffer): Value[String]
 
 }
 
@@ -112,7 +119,11 @@ object StringValueParser extends ValueParser {
 
   def parseVarChar(b: ChannelBuffer) = parseStr(b)
 
-  def parseTimestampTZ(b: ChannelBuffer) = parseStr(b)
+  def parseTimestamp(b: ChannelBuffer) = Value[Timestamp](Timestamp.valueOf(b.toString(Charsets.Utf8)))
+
+  def parseTimestampTZ(b: ChannelBuffer) = parseTimestamp(b)
+
+  def parseEnum(b: ChannelBuffer) = parseStr(b)
 
   private[this] def parseInt(b: ChannelBuffer) = Value[Int](b.toString(Charsets.Utf8).toInt)
 
@@ -144,7 +155,9 @@ object ValueParser {
         case INET => valueParser.parseInet
         case BP_CHAR => valueParser.parseBpChar
         case VAR_CHAR => valueParser.parseVarChar
+        case TIMESTAMP => valueParser.parseTimestamp
         case TIMESTAMP_TZ => valueParser.parseTimestampTZ
+        case ENUM => valueParser.parseEnum
         case _ => throw Errors.client("Data type '" + dataType + "' is not supported")
       }
     r
@@ -154,13 +167,26 @@ object ValueParser {
 
 object StringValueEncoder {
   def encode(value: Any): ChannelBuffer = {
-    val result = ChannelBuffers.dynamicBuffer()
-    if (value == null) {
-      result.writeInt(-1)
-    } else {
-      result.writeBytes(value.toString.getBytes(Charsets.Utf8))
+    value match {
+      case s: String => encodeString(s)
+      case t: Timestamp => encodeTimestamp(t)
+      case _ => encodeError()
     }
+  }
+
+  private[this] def encodeString(s: String): ChannelBuffer = {
+    val result = ChannelBuffers.dynamicBuffer()
+    result.writeBytes(s.getBytes(Charsets.Utf8))
     result
   }
-}
 
+  private[this] def encodeTimestamp(t: Timestamp): ChannelBuffer = {
+    encodeString(t.toString())
+  }
+
+  private[this] def encodeError(): ChannelBuffer = {
+    val buf = ChannelBuffers.dynamicBuffer()
+    buf.writeInt(-1)
+    buf
+  }
+}
