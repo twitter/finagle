@@ -167,26 +167,12 @@ object ValueParser {
 
 object StringValueEncoder {
   def encode(value: Any): ChannelBuffer = {
-    value match {
-      case s: String => encodeString(s)
-      case t: Timestamp => encodeTimestamp(t)
-      case _ => encodeError()
-    }
-  }
-
-  private[this] def encodeString(s: String): ChannelBuffer = {
     val result = ChannelBuffers.dynamicBuffer()
-    result.writeBytes(s.getBytes(Charsets.Utf8))
+    if (value == null) {
+      result.writeInt(-1)
+    } else {
+      result.writeBytes(value.toString.getBytes(Charsets.Utf8))
+    }
     result
-  }
-
-  private[this] def encodeTimestamp(t: Timestamp): ChannelBuffer = {
-    encodeString(t.toString())
-  }
-
-  private[this] def encodeError(): ChannelBuffer = {
-    val buf = ChannelBuffers.dynamicBuffer()
-    buf.writeInt(-1)
-    buf
   }
 }
