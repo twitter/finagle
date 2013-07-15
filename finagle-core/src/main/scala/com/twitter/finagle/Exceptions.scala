@@ -175,7 +175,7 @@ class ServiceTimeoutException(
   with TimeoutException
 {
   override protected val explanation =
-    "creating a service/connection or reserving a service/connection from the service/connection pool"
+    "creating a service/connection or reserving a service/connection from the service/connection pool " + serviceName
 }
 
 // Subclass this for application exceptions
