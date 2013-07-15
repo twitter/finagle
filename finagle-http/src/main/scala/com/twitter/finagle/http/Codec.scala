@@ -3,18 +3,19 @@ package com.twitter.finagle.http
 /**
  * This puts it all together: The HTTP codec itself.
  */
-import java.net.InetSocketAddress
-
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 
 import com.twitter.conversions.storage._
-
+import com.twitter.finagle._
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle._
 import com.twitter.util.{Try, StorageUnit, Future}
+import java.net.InetSocketAddress
+import org.jboss.netty.channel.{
+  ChannelPipelineFactory, UpstreamMessageEvent, Channels,
+  ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
+import org.jboss.netty.handler.codec.http._
 
 case class BadHttpRequest(httpVersion: HttpVersion, method: HttpMethod, uri: String, codecError: String)
   extends DefaultHttpRequest(httpVersion, method, uri)
@@ -107,17 +108,12 @@ case class Http(
         def getPipeline() = {
           val pipeline = Channels.pipeline()
           pipeline.addLast("httpCodec", new HttpClientCodec())
-          pipeline.addLast("httpTracingClientAddr", new HttpTracingClientAddr)
           pipeline.addLast(
             "httpDechunker",
             new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
 
           if (_decompressionEnabled)
             pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
-
-          pipeline.addLast(
-            "connectionLifecycleManager",
-            new ClientConnectionManager)
 
           pipeline
         }
@@ -126,10 +122,14 @@ case class Http(
       override def prepareConnFactory(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
       ): ServiceFactory[HttpRequest, HttpResponse] =
-        if (_enableTracing)
-          new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen underlying
-        else
-          underlying
+        if (_enableTracing) {
+          new HttpClientTracingFilter[HttpRequest, HttpResponse](config.serviceName) andThen
+            super.prepareConnFactory(underlying)
+        } else
+          super.prepareConnFactory(underlying)
+
+      override def newClientDispatcher(transport: Transport[HttpRequest, HttpResponse]) =
+        new HttpClientDispatcher(transport)
     }
   }
 
@@ -145,7 +145,7 @@ case class Http(
 
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
           val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
-          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt 
+          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
           pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
 
           if (_compressionLevel > 0) {
@@ -200,23 +200,20 @@ object HttpTracing {
     val SpanId = "X-B3-SpanId"
     val ParentSpanId = "X-B3-ParentSpanId"
     val Sampled = "X-B3-Sampled"
+    val Flags = "X-B3-Flags"
 
-    val All = Seq(TraceId, SpanId, ParentSpanId, Sampled)
+    val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
   }
-}
 
-/**
- * Captures the client address and port and adds it to the current trace.
- */
-private class HttpTracingClientAddr extends SimpleChannelDownstreamHandler {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
-    ctx.getChannel.getLocalAddress()  match {
-      case ia: InetSocketAddress => Trace.recordClientAddr(ia)
-      case _ => () // nothing
+  /**
+   * Remove any parameters from url.
+   */
+  private[http] def stripParameters(uri: String): String = {
+    uri.indexOf('?') match {
+      case -1 => uri
+      case n  => uri.substring(0, n)
     }
-
-    super.writeRequested(ctx, e)
   }
 }
 
@@ -241,15 +238,20 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
     Trace.id.sampled foreach { sampled =>
       request.addHeader(Header.Sampled, sampled.toString)
     }
+    request.addHeader(Header.Flags, Trace.id.flags.toLong)
 
-    Trace.recordRpcname(serviceName, request.getMethod.getName)
-    Trace.recordBinary("http.uri", request.getUri)
+    if (Trace.isActivelyTracing) {
+      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
-    Trace.record(Annotation.ClientSend())
-    service(request) map { response =>
-      Trace.record(Annotation.ClientRecv())
-      response
+      Trace.record(Annotation.ClientSend())
+      service(request) map { response =>
+        Trace.record(Annotation.ClientRecv())
+        response
+      }
     }
+    else
+      service(request)
   }
 }
 
@@ -265,17 +267,24 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
 
     if (Header.Required.forall { request.containsHeader(_) }) {
-      val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
       val spanId = SpanId.fromString(request.getHeader(Header.SpanId))
-      val parentSpanId = SpanId.fromString(request.getHeader(Header.ParentSpanId))
-
-      val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
-        Try(sampled.toBoolean).toOption
-      }
 
       spanId foreach { sid =>
-        Trace.pushId(TraceId(traceId, parentSpanId, sid, sampled))
+        val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
+        val parentSpanId = SpanId.fromString(request.getHeader(Header.ParentSpanId))
+
+        val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
+          Try(sampled.toBoolean).toOption
+        }
+
+        val flags = getFlags(request)
+        Trace.setId(TraceId(traceId, parentSpanId, sid, sampled, flags))
       }
+    } else if (request.containsHeader(Header.Flags)) {
+      // even if there are no id headers we want to get the debug flag
+      // this is to allow developers to just set the debug flag to ensure their
+      // trace is collected
+      Trace.setId(Trace.id.copy(flags = getFlags(request)))
     }
 
     // remove so the header is not visible to users
@@ -283,14 +292,28 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
 
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
-    Trace.recordRpcname(serviceName, request.getMethod.getName)
-    Trace.recordServerAddr(boundAddress)
-    Trace.recordBinary("http.uri", request.getUri)
+    if (Trace.isActivelyTracing) {
+      Trace.recordRpcname(serviceName, request.getMethod.getName)
+      Trace.recordBinary("http.uri", stripParameters(request.getUri))
 
-    Trace.record(Annotation.ServerRecv())
-    service(request) map { response =>
-      Trace.record(Annotation.ServerSend())
-      response
+      Trace.record(Annotation.ServerRecv())
+      service(request) map { response =>
+        Trace.record(Annotation.ServerSend())
+        response
+      }
+    }
+    else
+      service(request)
+  }
+
+  /**
+   * Safely extract the flags from the header, if they exist. Otherwise return empty flag.
+   */
+  def getFlags(request: Req): Flags = {
+    try {
+      Flags(Option(request.getHeader(Header.Flags)).map(_.toLong).getOrElse(0L))
+    } catch {
+      case _ => Flags()
     }
   }
 }
@@ -321,7 +344,10 @@ case class RichHttp[REQUEST <: Request](
           new HttpClientTracingFilter[REQUEST, Response](config.serviceName) andThen underlying
         else
           underlying
-      }
+
+      override def newClientDispatcher(transport: Transport[REQUEST, Response]) =
+        new HttpClientDispatcher(transport)
+    }
   }
 
   def server = { config =>

@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <style type="text/css">
+      body {
+        font-family: 'Georgia', serif;
+        font-size: 17px;
+      }
+      
+      .content {
+        width: 530px;
+        margin: 40px auto;
+      }
+      
+      h1, h2, h3, h4, h5 {
+        font-family: 'Garamond', 'Georgia', serif;
+        font-weight: normal;
+        color: #444;
+      }
+      
+      blockquote {
+        font-style: italic;
+        color: #444;
+      }
+      
+      ul {
+        margin: 15px 0 15 px 0;
+        list-style: none;
+        line-height: 1.4;
+      }
+
+      ul li:before {
+        content: '\2014\a0';
+        color: #888;
+        position: absolute;
+        margin-left: -16px;
+      }
+    </style>
+    
+  <title>Finagle</title>
+  </head>
+  
+  <body>
+  <a href="https://github.com/twitter/finagle"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  <div class="content">
+    <h1>Finagle</h1>
+    
+    <blockquote style="margin: 0;">
+      Finagle is an extensible RPC system for the JVM, used to
+      construct high-concurrency servers. Finagle implements uniform
+      client and server APIs for several protocols, and is designed
+      for high performance and concurrency. Most of Finagle’s code is
+      protocol agnostic, simplifying the implementation of new
+      protocols.
+      <p/>
+      Finagle is written in Scala, but provides both Scala and Java idiomatic
+      APIs.
+    </blockquote>
+
+    <ul>
+      <li><a href="https://github.com/twitter/finagle">Github project</a></li>
+      <li><a href="guide">User’s guide</a></li>
+      <li><a href="docs/#com.twitter.finagle.package">API documentation</a></li>
+      <li><a href="http://groups.google.com/group/finaglers?hl=en">Google groups</a></li>
+    </ul>
+    
+    <h2>Contributing</h2>
+    
+    Finagle is actively maintained by Twitter’s infrastructure 
+    team, but we have <a href="https://github.com/twitter/finagle/graphs/contributors">
+    many external contributors</a> as well. Before endeavoring on large
+    changes, please discuss them with the
+    <a href="http://groups.google.com/group/finaglers?hl=en">Google groups</a>
+    to receive feedback and suggestions.
+    
+    <h2>Other resources</h2>
+    
+    <ul>
+      <li><a href="http://engineering.twitter.com/2011/08/finagle-protocol-agnostic-rpc-system.html">
+        Twitter engineering blog post</a> motivating and introducting Finagle</li>
+      <li>Twitter’s <a href="http://twitter.github.com/scala_school/">Scala School</a> ends with an
+      <a href="http://twitter.github.com/scala_school/finagle.html">introduction to Finagle</a>, and finally
+      <a href="http://twitter.github.com/scala_school/searchbird.html">an example distributed system</a>.</li>
+      <li>A <a href="http://days2011.scala-lang.org/node/138/286">talk introducing Finagle</a>, given by <a href="https://github.com/mariusaeriksen">Marius</a> at ScalaDays 2011</li>
+      <li><a href="http://monkey.org/~marius/talks/twittersystems/#1">Slides</a> from another talk explaining
+      the role of Finagle in Twitter’s distributed systems</li>
+      <li>A <a href="http://blog.oskarsson.nu/post/40196324612/the-twitter-stack">blog post</a>
+      explaning Twitter’s server stack, in which Finagle plays a central role</li>
+      <li>Matt Ho’s <a href="http://marakana.com/s/post/1416/twitter_finagle_for_the_asynchronous_programmer_matt_ho_video">NEScala talk</a> about Finagle</li>
+    </ul>
+
+  </div>
+  </body>
+</html>

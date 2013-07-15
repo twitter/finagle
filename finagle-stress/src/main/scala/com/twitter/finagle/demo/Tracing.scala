@@ -11,7 +11,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.thrift.{ThriftServerFramedCodec, ThriftClientFramedCodec}
 import com.twitter.finagle.tracing.{Trace, ConsoleTracer}
 
-object Tracing1Service extends Tracing1.ServiceIface {
+object Tracing1Service extends Tracing1.FutureIface {
   private[this] val transport = ClientBuilder()
     .hosts("localhost:6002")
     .codec(ThriftClientFramedCodec())
@@ -19,14 +19,14 @@ object Tracing1Service extends Tracing1.ServiceIface {
     .build()
 
   private[this] val t2Client =
-    new Tracing2.ServiceToClient(transport, new TBinaryProtocol.Factory())
+    new Tracing2.FinagledClient(transport, new TBinaryProtocol.Factory())
 
   def main(args: Array[String]) {
     ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(new InetSocketAddress(6001))
       .name("tracing1")
-      .build(new Tracing1.Service(this, new TBinaryProtocol.Factory()))
+      .build(new Tracing1.FinagledService(this, new TBinaryProtocol.Factory()))
   }
 
   def computeSomething(): Future[String] = {
@@ -39,7 +39,7 @@ object Tracing1Service extends Tracing1.ServiceIface {
   }
 }
 
-object Tracing2Service extends Tracing2.ServiceIface {
+object Tracing2Service extends Tracing2.FutureIface {
   private[this] val transport = ClientBuilder()
     .hosts("localhost:6003")
     .codec(ThriftClientFramedCodec())
@@ -47,14 +47,14 @@ object Tracing2Service extends Tracing2.ServiceIface {
     .build()
 
   private[this] val t3Client =
-    new Tracing3.ServiceToClient(transport, new TBinaryProtocol.Factory())
+    new Tracing3.FinagledClient(transport, new TBinaryProtocol.Factory())
 
   def main(args: Array[String]) {
     ServerBuilder()
       .codec(ThriftServerFramedCodec())
       .bindTo(new InetSocketAddress(6002))
       .name("tracing2")
-      .build(new Tracing2.Service(this, new TBinaryProtocol.Factory()))
+      .build(new Tracing2.FinagledService(this, new TBinaryProtocol.Factory()))
   }
 
   def computeSomethingElse(): Future[String] = {
@@ -71,7 +71,7 @@ object Tracing2Service extends Tracing2.ServiceIface {
   }
 }
 
-object Tracing3Service extends Tracing3.ServiceIface {
+object Tracing3Service extends Tracing3.FutureIface {
   private[this] val count = new AtomicInteger(0)
 
   def main(args: Array[String]) {
@@ -79,7 +79,7 @@ object Tracing3Service extends Tracing3.ServiceIface {
       .codec(ThriftServerFramedCodec())
       .bindTo(new InetSocketAddress(6003))
       .name("tracing3")
-      .build(new Tracing3.Service(this, new TBinaryProtocol.Factory()))
+      .build(new Tracing3.FinagledService(this, new TBinaryProtocol.Factory()))
   }
 
   def oneMoreThingToCompute(): Future[String] = {
@@ -99,7 +99,7 @@ object Client {
       .hostConnectionLimit(1)
       .build()
 
-    val client = new Tracing1.ServiceToClient(
+    val client = new Tracing1.FinagledClient(
       transport, new TBinaryProtocol.Factory())
 
     Trace.pushTracer(ConsoleTracer)

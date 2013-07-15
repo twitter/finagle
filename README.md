@@ -1,8 +1,12 @@
-Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/RunningSbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
+Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
-	$ ./sbt update compile
+	$ ./sbt test
 
-- - -
+Finagle and its dependencies are published to maven central with crosspath versions. It is published with the most current Scala 2.9.x version. Use with sbt is simple:
+
+	libraryDependencies += "com.twitter" %% "finagle-core" % "6.0.5"
+
+---
 
 <a name="Top"></a>
 
@@ -11,6 +15,7 @@ Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/Run
 * <a href="#Quick Start">Quick Start</a>
   - <a href="#Simple HTTP Server">Simple HTTP Server</a>
   - <a href="#Simple HTTP Client">Simple HTTP Client</a>
+  - <a href="#HTTP Client To A Standard Web Server">HTTP Client To A Standard Web Server</a>
   - <a href="#Simple Client and Server for Thrift">Simple Client and Server for Thrift</a>
 * <a href="#Finagle Overview">Finagle Overview</a>
   - <a href="#Client Features">Client Features</a>
@@ -40,6 +45,7 @@ Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/Run
 * <a href="#Building a Robust Server">Building a Robust Server</a>
 * <a href="#Building a Robust Client">Building a Robust Client</a>
 * <a href="#Creating Filters to Transform Requests and Responses">Creating Filters to Transform Requests and Responses</a>
+* <a href="#Configuring Finagle Servers and Clients">Configuring Finagle Servers and Clients</a>
 * <a href="#Using ServerSet Objects">Using ServerSet Objects</a>
 * <a href="#Java Design Patterns for Finagle">Java Design Patterns for Finagle</a>
   - <a href="#Using Future Objects With Java">Using Future Objects With Java</a>
@@ -50,6 +56,7 @@ Finagle is built using [sbt](http://code.google.com/p/simple-build-tool/wiki/Run
   - <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 * <a href="#Additional Samples">Additional Samples</a>
 * <a href="#API Reference Documentation">API Reference Documentation</a>
+* <a href="#Example Maven Project">Example Maven Project</a>
 
 <a name="Quick Start"></a>
 
@@ -79,8 +86,8 @@ The following server, which is shown in both Scala and Java, responds to a clien
 
     val address: SocketAddress = new InetSocketAddress(10000)                                  // 3
 
-    val server: Server[HttpRequest, HttpResponse] = ServerBuilder()                            // 4
-      .codec(Http)
+    val server: Server = ServerBuilder()                                                       // 4
+      .codec(Http())
       .bindTo(address)
       .name("HttpServer")
       .build(service)
@@ -95,7 +102,7 @@ The following server, which is shown in both Scala and Java, responds to a clien
     };
 
     ServerBuilder.safeBuild(service, ServerBuilder.get()                                       // 4
-      .codec(Http.get())
+      .codec(Http())
       .name("HttpServer")
       .bindTo(new InetSocketAddress("localhost", 10000)));                                     // 3
 
@@ -124,7 +131,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Scala HTTP Client Implementation
 
     val client: Service[HttpRequest, HttpResponse] = ClientBuilder()                           // 1
-      .codec(Http)
+      .codec(Http())
       .hosts(address)
       .hostConnectionLimit(1)
       .build()
@@ -138,7 +145,7 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 ##### Java HTTP Client Implementation
 
     Service<HttpRequest, HttpResponse> client = ClientBuilder.safeBuild(ClientBuilder.get()    // 1
-      .codec(Http.get())
+      .codec(Http())
       .hosts("localhost:10000")
       .hostConnectionLimit(1));
 
@@ -168,6 +175,40 @@ The client, which is shown in both Scala and Java, connects to the server, and i
 
 [Top](#Top)
 
+<a name="HTTP Client To A Standard Web Server"></a>
+
+### HTTP Client To A Standard Web Server
+
+If you create a request using HttpVersion.HTTP_1_1, a validating server will require a Hosts header. We could fix this by setting the Host header as in
+
+    httpRequest.setHeader("Host", "someHostName")
+
+More concisely, you can use the RequestBuilder object, shown below. In the following example, we use a Jetty server "someJettyServer:80" which happens to come with a small test file "/d.txt":
+
+    import org.jboss.netty.handler.codec.http.HttpRequest
+    import org.jboss.netty.handler.codec.http.HttpResponse
+
+    import com.twitter.finagle.Service
+    import com.twitter.finagle.builder.ClientBuilder
+    import com.twitter.finagle.http.Http
+    import com.twitter.finagle.http.RequestBuilder
+    import com.twitter.util.Future
+
+    object ClientToValidatingServer {
+      def main(args: Array[String]) {
+        val hostNamePort = "someJettyServer:80"
+        val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
+          .codec(Http())
+          .hosts(hostNamePort)
+          .hostConnectionLimit(1)
+          .build()
+
+        val httpRequest = RequestBuilder().url("http://" + hostNamePort + "/d.txt").buildGet
+        val responseFuture: Future[HttpResponse] = client(httpRequest)
+        responseFuture onSuccess { response => println("Received response: " + response) }
+      }
+    }
+
 <a name="Simple Client and Server for Thrift"></a>
 
 ### Simple Client and Server for Thrift
@@ -177,6 +218,11 @@ Apache Thrift is a binary communication protocol that defines available methods 
     service Hello {
       string hi();
     }
+
+To create a Finagle Thrift service, you must implement the `FutureIface` Interface that <a href="https://github.com/twitter/scrooge">Scrooge</a> (a custom Thrift compiler) generates for your service. Scrooge wraps your service method return values with asynchronous `Future` objects to be compatible with Finagle.
+
+* If you are using <a href="https://github.com/sbt/sbt">sbt</a> to build your project, the <a href="https://github.com/twitter/sbt-scrooge">sbt-scrooge</a> plugin automatically compiles your Thrift IDL. **Note:** The latest release version of this plugin is only compatible with sbt 0.11.2.
+* If you are using <a href="http://maven.apache.org/">maven</a> to manage your project, <a href="http://maven.twttr.com/com/twitter/maven-finagle-thrift-plugin/">maven-finagle-thrift-plugin</a> can also compile Thrift IDL for Finagle.
 
 #### Simple Thrift Server
 
@@ -203,14 +249,14 @@ In this Finagle example, the `ThriftServer` object implements the `Hello` servic
 
 ##### Java Thrift Server Implementation
 
-    Hello.ServiceIface processor = new Hello.ServiceIface() {                    // 1
-    public Future<String> hi() {                                                 // 2
-      return Future.value("hi");
+    Hello.FutureIface processor = new Hello.FutureIface() {                      // 1
+      public Future<String> hi() {                                               // 2
+        return Future.value("hi");
       }
-    }
+    };
 
     ServerBuilder.safeBuild(                                                     // 4
-      new Hello.Service(processor, new TBinaryProtocol.Factory()),               // 3
+      new Hello.FinagledService(processor, new TBinaryProtocol.Factory()),       // 3
       ServerBuilder.get()
         .name("HelloService")
         .codec(ThriftServerFramedCodec.get())
@@ -258,13 +304,16 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
 
 ##### Java Thrift Client Implementation
 
-    Service<ThriftClientRequest, byte[]> client = ClientBuilder.safeBuild(ClientBuilder.get()  // 1
+    Service<ThriftClientRequest, byte[]> service = ClientBuilder.safeBuild(ClientBuilder.get() // 1
       .hosts(new InetSocketAddress(8080))
-      .codec(new ThriftClientFramedCodecFactory())
+      .codec(ThriftClientFramedCodec.get())
       .hostConnectionLimit(1));
 
-    Hello.ServiceIface client =
-      new Hello.ServiceToClient(client, new TBinaryProtocol.Factory());                        // 2
+    Hello.FinagledClient client = new Hello.FinagledClient(                                    // 2
+      service,
+      new TBinaryProtocol.Factory(),
+      "HelloService",
+      new InMemoryStatsReceiver());
 
     client.hi().addEventListener(new FutureEventListener<String>() {
       public void onSuccess(String s) {                                                        // 3
@@ -272,7 +321,7 @@ In this Finagle example, the `ThriftClient` object creates a Finagle client that
       }
 
       public void onFailure(Throwable t) {
-        System.out.println("Exception! ", t.toString());
+        System.out.println("Exception! " + t.toString());
       }
     });
 
@@ -304,7 +353,7 @@ Use the Finagle library to implement asynchronous Remote Procedure Call (RPC) cl
 * Load Balancing
 * Failure Detection
 * Failover/Retry
-* Distributed Tracing (a la [Dapper](http://research.google.com/pubs/pub36356.html))
+* Distributed Tracing (à la [Dapper](http://research.google.com/pubs/pub36356.html))
 * Service Discovery (e.g., via Zookeeper)
 * Rich Statistics
 * Native OpenSSL Bindings
@@ -597,7 +646,7 @@ A client is a `Service` and can be wrapped by `Filter` objects. Typically, you c
 </tr>
 <tr>
 <td>retries</td>
-<td>Number of retries per request (only applies to recoverable errors)</td>
+<td>Number of tries (not retries) per request (only applies to recoverable errors)</td>
 <td><I>None</I></td>
 </tr>
 </tbody>
@@ -868,7 +917,7 @@ Usually a producer makes a `Promise` and casts it to a `Future` before giving it
       }
       promise
     }
-    
+
 You are discouraged from creating your own Promises. Instead, where possible, use `Future` combinators to compose actions (discussed next).
 
 [Top](#Top)
@@ -918,7 +967,7 @@ A more complex variation of scatter/gather pattern is to perform a sequence of a
 
     import com.twitter.finagle.util.Timer._
 
-    val results: Seq[Future[Result]] = partitions.map { partition =>
+    val timedResults: Seq[Future[Result]] = partitions.map { partition =>
       partition.get(query).within(1.second) handle {
         case _: TimeoutException => EmptyResult
       }
@@ -941,7 +990,7 @@ A `FuturePool` object enables you to place a blocking operation on its own threa
       val diskIoFuturePool = FuturePool(Executors.newFixedThreadPool(4))
 
       def apply(path: String) = {
-        val blockingOperation = {
+        def blockingOperation = {
           scala.Source.fromFile(path) // potential to block
         }
         // give this blockingOperation to the future pool to execute
@@ -1031,7 +1080,8 @@ The following example encapsulates the filters and service in the previous examp
         = handleExceptions andThen authorize andThen respond
 
       val server: Server = ServerBuilder()
-        .codec(Http)
+        .name("myService")
+        .codec(Http())
         .bindTo(new InetSocketAddress(8080))
         .build(myService)
       }
@@ -1048,7 +1098,7 @@ In this example, the `HandleExceptions` filter is executed before the `authorize
 A robust client has little to do with the lines of code (SLOC) that goes into it; rather, the robustness depends on how you configure the client and the testing you put into it. Consider the following HTTP client:
 
     val client = ClientBuilder()
-      .codec(Http)
+      .codec(Http())
       .hosts("localhost:10000,localhost:10001,localhost:10003")
       .hostConnectionLimit(1)             // max number of connections at a time to a host
       .connectionTimeout(1.second)        // max time to spend establishing a TCP connection
@@ -1057,7 +1107,7 @@ A robust client has little to do with the lines of code (SLOC) that goes into it
       .logger(Logger.getLogger("http"))
       .build()
 
-The `ClientBuilder` object creates and configures a load balanced HTTP client that balances requests among 3 (local) endpoints. The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
+The `ClientBuilder` object creates and configures a load-balanced HTTP client that balances requests among 3 (local) endpoints. The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
 
 The following examples show how to invoke this client from Scala and Java, respectively:
 
@@ -1143,11 +1193,197 @@ A client can access a cluster, as follows:
 
 [Top](#Top)
 
+
+
+
+
+
+
+<a name="Configuring Finagle Servers and Clients"></a>
+
+## Configuring Finagle Servers and Clients
+
+Finagle offers a wealth of options for configuring servers and clients. For many if not most Finagle users, the defaults are both sensible and sufficient, and this section is unnecessary. Both servers and clients require a small number of configuration parameters (below: <a href="#ClientBuilder Required Parameters">clients</a>, <a href="#ServerBuilder Required Parameters">servers</a>).
+
+* <a href="#Using the ClientBuilder and ServerBuilder">Using the ClientBuilder and ServerBuilder</a>
+* <a href="#ClientBuilder Required Parameters">ClientBuilder Required Parameters</a>
+* <a href="#ServerBuilder Required Parameters">ServerBuilder Required Parameters</a>
+* <a href="#Clusters">Clusters</a>
+* <a href="#Idle Times">Idle Times</a>
+* <a href="#Timeouts">Timeouts</a>
+* <a href="#Configuring Connections>Configuring Connections</a>
+* <a href="#maxConcurrentRequests>maxConcurrentRequests</a>
+* <a href="#Retries">Retries</a>
+* <a href="#Debugging">Debugging</a>
+
+
+### Using the ClientBuilder and ServerBuilder
+
+A client is specified as follows:
+
+    val client: Service[Req, Resp] = ClientBuilder()
+      .configParam1(val1)
+      .configParam2(val2)
+      ...
+      .build()
+
+Each `configParam` is initialized with a value (`val`); the params are initialized in order, top to bottom. Conceptually, the builder acts like an immutable map. If `configParamX` and `configParamY` are mutually exclusive, the later one overrides the earlier one. At the end, `build`, called with no arguments, actually constructs the client; this is the only operation with any side-effects.
+
+A server looks similar:
+
+    val server: Server = ServerBuilder()
+      .configParam1(val1)
+      .configParam2(val2)
+      ...
+      .build(myService)
+
+Unlike in the ClientBuilder, the ServerBuilder's `build` call takes a single argument, the service that will be visible to connected clients.
+
+These builders are immutable/persistent; this has correctness advantages and also allows constructing "template" builders that might encapsulate a certain set of parameters. This is a useful and common design pattern.
+
+
+### ClientBuilder Required Parameters
+
+The ClientBuilder has two main abstractions. The first is the trio of **client**, **hosts**, and **connections**. A client can connect to one or more hosts and specify a policy that distributes requests to those hosts. And each host may allow one or more individual connections to it, exposing concurrency among requests from its connected clients and allowing parallel execution.
+
+![_Relationship between clients, hosts, and connections._](https://raw.github.com/twitter/finagle/master/doc/client-abstraction.png)
+
+<!--1) Spend a bit more time explaining layers inside clients and servers and terminology used. E.g. host is kind of ambiguous just by itself. Obviously, a good picture should clear this up. Maybe just start on nailing this picture or pictures (coud be easier to have one pic for server layers and one for client layers to explain in detail each one, and then one bigger one with both but less detail to use when illustrating e.g. timeouts that happen across the wire between these two.) Once we are happy with pictures I think descriptions of various config args will follow easily.-->
+
+The second main abstraction is the **codec**, which is responsible for turning a discrete request or response into a stream of bytes to send across the network, and vice versa.
+
+These concepts are so important that they are required when specifying any client:
+
+> The `ClientBuilder` requires the definition of `cluster` or `hosts`, `codec`, and `hostConnectionLimit`. In Scala, these are statically type checked, and in Java the lack of any of the above causes a runtime error.
+
+Alternatively, a Java ClientBuilder is statically type checked by using `ClientBuilder.safeBuild()`.
+
+* `hosts` must contain a list of hosts or `cluster` an explicitly specified cluster.
+* The `codec` implements the network protocol used by the client, and consequently determines the types of request and reply.
+* `hostConnectionLimit` specifies the maximum number of connections that are established to each host.
+
+If you don't specify those, and you're using Scala, you'll see an error message that indicates the `Builder is not fully configured` with details on the requested (incomplete) configuration.
+
+### ServerBuilder Required Parameters
+
+`ServerBuilder` has three required parameters: a `codec`, a service name (a string) (called as `name`), and an address (typically `InetSocketAddress(serverPort)`) (called as `bindTo`). Just as with the client, in Scala these are statically type checked; Java can be statically type checked by using `ServerBuilder.safeBuild()`; otherwise in Java the lack of any of the above causes a runtime error.
+
+### Clusters
+
+The purpose of a Cluster is to abstract a group of identical servers, where requests to the cluster can be routed to any server in that cluster. Note that clusters have dynamic membership. <a href="#Building a Robust Client">Recall that</a>:
+
+> The Finagle balancing strategy is to pick the endpoint with the least number of outstanding requests, which is similar to a *least connections* strategy in other load balancers. The Finagle load balancer deliberately introduces jitter to avoid synchronicity (and thundering herds) in a distributed system. It also supports failover.
+
+<!-- Marius: "I would drop the part about custom load balancers. If you're in that territory you already need to be deeply familiar with the code."-->
+<!--If this default strategy does not meet your needs, the simplest way to implement a custom load balancing strategy is to create your own client per endpoint and then write your own load balancer across that. The <a href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala">HeapBalancer</a> code provides a solid starting point; note it uses a heap to identify the endpoint with the least number of requests (`Ordering.by { _.load }`, where `load` is the number of connections).-->
+
+
+### Idle Times
+
+> `hostConnectionIdleTime` vs. `hostConnectionMaxIdleTime`: with respect to the `ClientBuilder`, what's the difference?
+
+`hostConnectionIdleTime` applies to the caching pool: "the amount of time a connection is allowed to linger (when it otherwise would have been closed by the pool) before being closed". More precisely, it is applied to any connection between the low and high watermarks. `hostConnectionMaxIdleTime` applies to the physical connection: "the maximum time a connection is allowed to linger unused".
+
+### Timeouts
+
+Clients have several timeout parameters during the connection process, which consists of the following steps:
+
+<!--1. Request connection
+2. Establish socket with remote host
+3. (Possibly) placed in queue waiting for connection
+4. Acquire connection
+5. Dispatch request to remote host (host will then service the request)
+6. Receive response from remote host
+7. Satisfy the Finagle `Future`-->
+
+1. Make a request.
+2. Ask the load balancer where to connect to (the load balancer chooses the least connected endpoint).
+3. Ask that endpoint's pool for a connection. Most of the time, there is an existing unused connection in the pool and that connection is returned. Otherwise, a connection is acquired or, depending on pool policies, the request may be queued. A queued request may be satisfied by giving a connection back to the pool, or establishing one when possible according to pooling policies.
+4. When a connection is established, we create a socket and connect.
+5. Dispatch the request on the given connection.
+6. Wait until you receive a reply, then satisfy the `Future`.
+7. Give the connection back to the pool.
+
+<!--timeout is applied to [1,6]; connectTimeout is applied to [1,3]; tcpConnectTimeout is applied to 4; requestTimeout to [5,6].-->
+
+The configurable timeout parameters are:
+
+<!--2) Maybe add markers if form of numbers in the picture, so when you describe a timeout, you could just say, e.g. this is timeout between points 2 and 4 in the picture.-->
+
+* `connectTimeout` - total time to acquire a connection regardless of whether it's an actual connect attempt or waiting in the queue for one to free up. (1&ndash;3)
+* `tcpConnectTimeout` - TCP-level connect timeout, equivalent to Netty's `connectTimeoutMillis` and the second parameter to Java's `java.net.Socket.connect(SocketAddress, int)`. It is specifically the maximum time to wait between a socket connection attempt and its success. By default, this is set to 10 milliseconds, which may be insufficient for distant servers. (4)
+* `requestTimeout` - per-request timeout, meaning for each retry, the attempt may take this long. This timer begins counting only when the connection is established. (5&ndash;6)
+* `timeout` - top-level timeout applied from the issuance of a request (through `service(request)`) until the satisfaction of its reply future.  No request will take longer than this. (1&ndash;6)
+
+![_Timeline of a client request, with timeouts._](https://raw.github.com/twitter/finagle/master/doc/request-timeline.png)
+
+### Configuring Connections
+
+Finagle manages a connection pool for clients. Connections to a server are expensive to build, so when Finagle establishes a connection for a particular request, it maintains that connection even after the request is complete. Then another request can reuse the same connection. The management of this pool is handled by Finagle, but you can configure some of the pool parameters.
+
+How do connections work in the presence of the connection pool? The following points explain the relevant behavior in terms of the parameters that you can set.
+
+* When the client is built, no connections are established eagerly.
+* When you send the first request, it will establish a connection and give it to that request.
+* When that request is complete, the request will release the connection to the _watermark_ pool. `hostConnectionCoresize` sets the size of this pool; the watermark pool maintains this number of connections (per host).
+* If there are more than `hostConnectionCoresize` outstanding requests, new connections will be established on demand up to `hostConnectionLimit`. Once those requests complete, they will be released to the _cachingPool_, which will keep them around for `hostConnectionIdleTime`. if a new connection is requested within `hostConnectionIdleTime`, it will reuse that connection.
+* Any connection-level errors (write exceptions or timeouts) will make the connection unavailable and will be discarded immediately.
+
+Setting `hostConnectionLimit` specifies the maximum number of connections that are allowed per host; Finagle guarantees it will never have more active connections than this limit. `hostConnectionCoresize` sets a minimum number of connections; unless they time out from idleness, the pool never has fewer connections than this limit.
+
+If you set these two parameters to be the same, the consequence is that Finagle won't establish more than that number of connections per host, and it won't relinquish healthy connections. However, this doesn't mean that you will always see the same number of connections. To _get_ these connections, you need requests. Finagle does not proactively establish connections (when the client is built, no connections are established eagerly). When a new request is dispatched, the following happens:
+
+    if num(active connections) == max, enqueue it
+    otherwise establish a new connection and dispatch it
+
+When a request is complete, the connection is re-added to the pool only if it is healthy (is alive and hasn't been closed by the server).
+
+However, there are some other parameters at play, too: if the client specifies idle timeouts, the connection is jettisoned if idle (for the parameterized amount of time). Unless the connection count is maximized to every host, requests will never queue.
+
+Another useful parameter is limiting the number of waiters by setting `hostConnectionMaxWaiters`; requests that arrive when the number of waiters exceeds this number immediately return a `Future.exception(TooManyWaitersException)`.
+
+Reducing high lock contention via a fast, lock-free buffer is the goal of the experimental `expHostConnectionBufferSize(n)` parameter in the pool, where `n` should be set to the number of expected outstanding requests at a time (overestimating is better than underestimating, and power-of-two sizes of `n` may be faster). This parameter is currently experimental and will eventually be integrated into the mainline code (as `hostConnectionBufferSize`).
+
+Note that finagle also exports a number of useful stats that allow you to inspect the state of the pool(s), load balancers, and queues. These are usually illustrative in explaining exactly why there are N connections to a given host.
+
+### maxConcurrentRequests
+
+`maxConcurrentRequests` is the maximum number of requests you are telling Finagle that your server implementation can handle concurrently at any time. If exceeded, Finagle will insert new requests in an unbounded queue waiting for their turn. Note that setting maxConcurrentRequests will not result in explicitly rejecting requests, due to the unbounded queue. However, it effectively can, due to timeouts upstream and consequent cancellations.
+
+### Retries
+
+The `ClientBuilder` allows specifying a `retryPolicy` or a number of `retries`. These are mutually exclusive and each can override the other; if you specify both in the `ClientBuilder`, the later one will override the earlier one.
+
+Note that "retries" actually means "tries"; `retry=1` means 1 try with no retries; `retry=2` means 1 try with 1 retry, and so on. We apologize for this historical vestige.
+
+### Debugging
+
+One good trick for debugging is to add a logger:
+
+    ServerBuilder() // or ClientBuilder()
+      ...
+      .logger(java.util.logging.Logger.getLogger("debug"))
+      ...
+
+While logging server behavior, it may be useful to have access to information about the client for any particular request. The ClientId companion object provides a `.current()` method that returns the id of the client from which the current request originated. Its docs (`finagle/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/authentication.scala`) note that
+
+>  [`ClientID`] is set at the beginning of the request and is available throughout the life-cycle of the request. It is [available] iff the client has an upgraded finagle connection and has chosen to specify the client ID in its codec.
+
+Loggers should only be used for debugging; logs are very verbose.
+
+
+
+
+
+
+
+[Top](#Top)
+
 <a name="Java Design Patterns for Finagle"></a>
 
 ## Java Design Patterns for Finagle
 
-The implementations of RPC servers and clients in Java are similar to Scala implementations. You can write your Java services in the _imperative_ style, which is the traditional Java programming style, or you can write in the _functional_ style, which uses functions as objects and is the basis for Scala. Most differences between Java and Scala implementations are related to exception handling.  
+The implementations of RPC servers and clients in Java are similar to Scala implementations. You can write your Java services in the _imperative_ style, which is the traditional Java programming style, or you can write in the _functional_ style, which uses functions as objects and is the basis for Scala. Most differences between Java and Scala implementations are related to exception handling.
 
 [Top](#Top)
 
@@ -1202,17 +1438,21 @@ The following example shows the _imperative_ style, which uses an event listener
 
 The following example shows the _functional_ style, which is similar to the way in which you write Scala code:
 
+    import scala.runtime.BoxedUnit;
     Future<String> future = executor.schedule(job);
-      future.onSuccess( new Function<String, Void>() {
-        public Void apply(String value) { System.out.println(value);
-      } ).onFailure(...).ensure(...);
+      future.onSuccess( new Function<String, BoxedUnit>() {
+        public BoxedUnit apply(String value) {
+          System.out.println(value);
+          return BoxedUnit.UNIT;
+        }
+      }).onFailure(...).ensure(...);
 
 The following example shows the _functional_ style for the `map` method:
 
     Future<String> future = executor.schedule(job);
-    Future<Integer> result = future.map(new Function<String, Integer>() {
-      public Integer apply(String value) { return Integer.valueOf(value);
-      }
+    Future<Integer> result = future.map( new Function<String, Integer>() {
+      public Integer apply(String value) { return Integer.valueOf(value); }
+    });
 
 [Top](#Top)
 
@@ -1224,7 +1464,7 @@ When you create a server in Java, you have several options. You can create a ser
 
 * <a href="#Server Imports">Server Imports</a>
 * <a href="#Performing Synchronous Operations">Performing Synchronous Operations</a>
-* <a href="#Performing Asynchronous Operations">Performing Asynchronous Operations</a>
+* <a href="#Chaining Asynchronous Operations">Chaining Asynchronous Operations</a>
 * <a href="#Invoking the Server">Invoking the Server</a>
 
 [Top](#Top)
@@ -1273,13 +1513,23 @@ In this example, the `try` `catch` block causes the server to either return a re
 
 [Top](#Top)
 
-<a name="Performing Asynchronous Operations"></a>
+<a name="Chaining Asynchronous Operations"></a>
 
-#### Performing Asynchronous Operations
+#### Chaining Asynchronous Operations
 
-In Java, you can implement asynchronous operations by calling a `Future` object's `getContentAsync` method to obtain the content from an asynchronous request. The `Future` object's `transformedBy` method transforms the content of the `Future` object from one data type to another, with the help of a `FutureTransformer` object. You typically override the object's `map` method to perform the actual conversion. A `Throwable` object is provided when an exception occurs to communicate information about the kind of exception. The following example shows this pattern:
+In Java, you can chain multiple asynchronous operations by calling a `Future` object's `transformedBy` method.
+This is done by supplying a `FutureTransformer` object to a `Future` object's `transformedBy` method.
+You typically implement `FutureTransformer`'s `map` method to perform the actual conversion, and `FutureTransformer`'s `handle` method which is called when an exception occurs. The following example shows this pattern:
+**Note:** If you need to perform blocking operations, see: <a href="#Implementing a Pool for Blocking Operations in Java">Implementing a Pool for Blocking Operations in Java</a>
 
     public class HTTPServer extends Service<HttpRequest, HttpResponse> {
+
+      private Future<String> getContentAsync(HttpRequest request) {
+        // asynchronously gets content, possibly by submitting
+        // a function to a FuturePool
+        ...
+      }
+
       public Future<HttpResponse> apply(HttpRequest request) {
 
         Future<String> contentFuture = getContentAsync(request);
@@ -1314,7 +1564,7 @@ The following example shows the instantiation and invocation of the server. Call
       public static void main(String[] args) {
         ServerBuilder.safeBuild(new HTTPServer(),
                                 ServerBuilder.get()
-                                             .codec(Http.get())
+                                             .codec(Http())
                                              .name("HTTPServer")
                                              .bindTo(new InetSocketAddress("localhost", 8080)));
 
@@ -1376,7 +1626,7 @@ The following example shows the instantiation and invocation of a client. Callin
         Service<HttpRequest, HttpResponse> httpClient =
           ClientBuilder.safeBuild(
             ClientBuilder.get()
-                         .codec(Http.get())
+                         .codec(Http())
                          .hosts(new InetSocketAddress(8080))
                          .hostConnectionLimit(1));
 
@@ -1441,7 +1691,7 @@ Use the `Try` and `Throw` classes in `com.twitter.util` to implement a more gene
 
 #### Handling Asynchronous Responses
 
-To handle asynchronous responses, you add a `FutureEventListener` to listen for a response. Finagle invokes the `onSuccess` method when a response arrives or invokes `onFailure` for an exception: 
+To handle asynchronous responses, you add a `FutureEventListener` to listen for a response. Finagle invokes the `onSuccess` method when a response arrives or invokes `onFailure` for an exception:
 
         httpClient.apply(request).addEventListener(new FutureEventListener<HttpResponse>() {
           @Override
@@ -1470,7 +1720,7 @@ To prevent blocking operations from executing on the main Finagle thread, you mu
 * <a href="#Setting Up Your Thread Pool">Setting Up Your Thread Pool</a>
 * <a href="#Invoking the Blocking Operation">Invoking the Blocking Operation</a>
 
-**Note:** Jakob Homan provides an example implementation of a thread pool that executes Scala closures on <a href="https://github.com/jghoman/finagle-java-example">GitHub</a>. 
+**Note:** Jakob Homan provides an example implementation of a thread pool that executes Scala closures on <a href="https://github.com/jghoman/finagle-java-example">GitHub</a>.
 
 [Top](#Top)
 
@@ -1496,10 +1746,10 @@ The `Util` project contains a `Function0` class that represents a Scala closure.
 The following example shows a Thrift server that places the blocking operation defined in the `Future0` object's `apply` method in the Java thread pool, where it will eventually execute and return a result:
 
     public static class HelloServer implements Hello.ServiceIface {
-      ExecutorService pool = Executors.newFixedThreadPool(4);                        // Java thread pool
-      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(threads); // Java Future thread pool
-		
-      public Future<Integer> blockingOperation() {  
+      ExecutorService pool = Executors.newFixedThreadPool(4);                     // Java thread pool
+      ExecutorServiceFuturePool futurePool = new ExecutorServiceFuturePool(pool); // Java Future thread pool
+
+      public Future<Integer> blockingOperation() {
 	      Function0<Integer> blockingWork = new BlockingOperation();
         return futurePool.apply(blockingWork);
       }
@@ -1584,3 +1834,49 @@ For additional information about Finagle, see the [Finagle homepage](http://twit
 # Administrivia
 
 We use [Semantic Versioning](http://semver.org/) for published artifacts.
+
+<a name="Example Maven Project"></a>
+# Example Maven Project
+Wondering how to get started with a finagle project of your very own? Here's a good place to start:
+
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+
+      <groupId>com.myorg</groupId>
+      <artifactId>myapp</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <packaging>jar</packaging>
+
+      <name>myapp</name>
+
+      <!-- Tell maven where to find finagle -->
+      <repositories>
+        <repository>
+          <id>twitter</id>
+          <url>http://maven.twttr.com/</url>
+        </repository>
+      </repositories>
+
+      <dependencies>
+        <!-- At the very least you will need finagle-core, and probably
+             some other sub modules as well (see below) -->
+        <dependency>
+          <groupId>com.twitter</groupId>
+          <artifactId>finagle-core</artifactId>
+          <type>pom</type>
+          <version>5.3.1</version>
+        </dependency>
+
+        <!-- Be sure to depend on the various finagle sub modules that you need.
+             For example, here's how you would depend on finagle-thrift -->
+        <dependency>
+          <groupId>com.twitter</groupId>
+          <artifactId>finagle-thrift</artifactId>
+          <type>pom</type>
+          <version>5.3.1</version>
+        </dependency>
+      </dependencies>
+    </project>
+
+[Top](#Top)

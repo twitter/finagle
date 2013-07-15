@@ -43,11 +43,13 @@ module FinagleThrift
       TIMESTAMP = 1
       VALUE = 2
       HOST = 3
+      DURATION = 4
 
       FIELDS = {
         TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
         VALUE => {:type => ::Thrift::Types::STRING, :name => 'value'},
-        HOST => {:type => ::Thrift::Types::STRUCT, :name => 'host', :class => FinagleThrift::Endpoint, :optional => true}
+        HOST => {:type => ::Thrift::Types::STRUCT, :name => 'host', :class => FinagleThrift::Endpoint, :optional => true},
+        DURATION => {:type => ::Thrift::Types::I32, :name => 'duration', :optional => true}
       }
 
       def struct_fields; FIELDS; end
@@ -91,6 +93,7 @@ module FinagleThrift
       PARENT_ID = 5
       ANNOTATIONS = 6
       BINARY_ANNOTATIONS = 8
+      DEBUG = 9
 
       FIELDS = {
         TRACE_ID => {:type => ::Thrift::Types::I64, :name => 'trace_id'},
@@ -98,7 +101,8 @@ module FinagleThrift
         ID => {:type => ::Thrift::Types::I64, :name => 'id'},
         PARENT_ID => {:type => ::Thrift::Types::I64, :name => 'parent_id', :optional => true},
         ANNOTATIONS => {:type => ::Thrift::Types::LIST, :name => 'annotations', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::Annotation}},
-        BINARY_ANNOTATIONS => {:type => ::Thrift::Types::LIST, :name => 'binary_annotations', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::BinaryAnnotation}}
+        BINARY_ANNOTATIONS => {:type => ::Thrift::Types::LIST, :name => 'binary_annotations', :element => {:type => ::Thrift::Types::STRUCT, :class => FinagleThrift::BinaryAnnotation}},
+        DEBUG => {:type => ::Thrift::Types::BOOL, :name => 'debug'}
       }
 
       def struct_fields; FIELDS; end
@@ -134,17 +138,17 @@ module FinagleThrift
       TRACE_ID = 1
       SPAN_ID = 2
       PARENT_SPAN_ID = 3
-      DEBUG = 4
       SAMPLED = 5
       CLIENT_ID = 6
+      FLAGS = 7
 
       FIELDS = {
         TRACE_ID => {:type => ::Thrift::Types::I64, :name => 'trace_id'},
         SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'span_id'},
         PARENT_SPAN_ID => {:type => ::Thrift::Types::I64, :name => 'parent_span_id', :optional => true},
-        DEBUG => {:type => ::Thrift::Types::BOOL, :name => 'debug'},
         SAMPLED => {:type => ::Thrift::Types::BOOL, :name => 'sampled', :optional => true},
-        CLIENT_ID => {:type => ::Thrift::Types::STRUCT, :name => 'client_id', :class => FinagleThrift::ClientId, :optional => true}
+        CLIENT_ID => {:type => ::Thrift::Types::STRUCT, :name => 'client_id', :class => FinagleThrift::ClientId, :optional => true},
+        FLAGS => {:type => ::Thrift::Types::I64, :name => 'flags', :optional => true}
       }
 
       def struct_fields; FIELDS; end

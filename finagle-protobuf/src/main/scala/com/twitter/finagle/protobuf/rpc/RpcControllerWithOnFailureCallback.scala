@@ -15,21 +15,13 @@ class RpcControllerWithOnFailureCallback extends RpcController {
     cancelRequested = false
   }
 
-  def failed(): Boolean = {
-    throw new RuntimeException("Not implemented")
-  }
+  def failed(): Boolean = { throw new RuntimeException("Not implemented") }
 
-  def errorText(): String = {
-    throw new RuntimeException("Not implemented")
-  }
+  def errorText(): String = { throw new RuntimeException("Not implemented") }
 
-  def startCancel(): Unit = {
-    cancelRequested = true;
-  }
+  def startCancel(): Unit = { cancelRequested = true; }
 
-  def setFailed(reason: String): Unit = {
-    throw new RuntimeException("Not implemented")
-  }
+  def setFailed(reason: String): Unit = { throw new RuntimeException("Not implemented") }
 
   def setFailed(e: Throwable): Unit = {
     callaback.run(adapt(e))
@@ -37,9 +29,7 @@ class RpcControllerWithOnFailureCallback extends RpcController {
 
   def isCanceled() = cancelRequested;
 
-  def notifyOnCancel(callback: RpcCallback[Object]): Unit = {
-    throw new RuntimeException("Not implemented")
-  }
+  def notifyOnCancel(callback: RpcCallback[Object]): Unit = { throw new RuntimeException("Not implemented") }
 
   def onFailure(callback: RpcCallback[Throwable]): RpcControllerWithOnFailureCallback = {
     this.callaback = callback

@@ -1,14 +1,13 @@
-package com.twitter.finagle.redis
-package protocol
+package com.twitter.finagle.redis.protocol
 
-import util._
+import com.twitter.finagle.redis.naggati.ProtocolError
+import com.twitter.finagle.redis.ServerError
+import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object RequireServerProtocol extends ErrorConversion {
   override def getException(msg: String) = new ServerError(msg)
 }
-
-class ServerError(message: String) extends Exception(message)
 
 sealed abstract class Reply extends RedisMessage
 sealed abstract class SingleLineReply extends Reply { // starts with +,-, or :
@@ -30,48 +29,51 @@ case class ErrorReply(message: String) extends SingleLineReply {
   RequireServerProtocol(message != null && message.length > 0, "ErrorReply had empty message")
   override def getMessageTuple() = (RedisCodec.ERROR_REPLY, message)
 }
-case class IntegerReply(id: Int) extends SingleLineReply {
+case class IntegerReply(id: Long) extends SingleLineReply {
   override def getMessageTuple() = (RedisCodec.INTEGER_REPLY, id.toString)
 }
 
-case class BulkReply(message: Array[Byte]) extends MultiLineReply {
-  RequireServerProtocol(message != null && message.length > 0, "BulkReply had empty message")
-
-  import RedisCodec.{ARG_SIZE_MARKER, EOL_DELIMITER}
-
-  override def toChannelBuffer = {
-    val mlen = message.length
-    val exlen = 1 + 2 + 2 // 1 byte for marker, 2 bytes for first EOL, 2 for second
-    val header = "%c%d%s".format(ARG_SIZE_MARKER, mlen, EOL_DELIMITER)
-    val buffer = ChannelBuffers.dynamicBuffer(mlen + exlen)
-    buffer.writeBytes(header.getBytes)
-    buffer.writeBytes(message)
-    buffer.writeBytes(EOL_DELIMITER.getBytes)
-    buffer
-  }
+case class BulkReply(message: ChannelBuffer) extends MultiLineReply {
+  RequireServerProtocol(message.hasArray && message.readableBytes > 0,
+    "BulkReply had empty message")
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(List(message), false)
 }
 case class EmptyBulkReply() extends MultiLineReply {
-  val message = RedisCodec.NIL_VALUE
-  val messageBytes = StringToBytes(message)
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List("$-1"))
+  val message = "$-1"
+  override def toChannelBuffer =
+    ChannelBuffers.wrappedBuffer(RedisCodec.NIL_BULK_REPLY_BA,
+      RedisCodec.EOL_DELIMITER_BA)
 }
 
-case class MBulkReply(messages: List[Array[Byte]]) extends MultiLineReply {
+case class MBulkReply(messages: List[Reply]) extends MultiLineReply {
   RequireServerProtocol(
     messages != null && messages.length > 0,
     "Multi-BulkReply had empty message list")
-  override def toChannelBuffer = RedisCodec.toUnifiedFormat(messages)
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(ReplyFormat.toChannelBuffers(messages))
 }
 case class EmptyMBulkReply() extends MultiLineReply {
-  val message = RedisCodec.NIL_VALUE
-  val messageBytes = StringToBytes(message)
-  override def toChannelBuffer = RedisCodec.toInlineFormat(List("*0"))
+  val message = "*0"
+  override def toChannelBuffer =
+    ChannelBuffers.wrappedBuffer(RedisCodec.EMPTY_MBULK_REPLY_BA,
+      RedisCodec.EOL_DELIMITER_BA)
+}
+case class NilMBulkReply() extends MultiLineReply {
+  val message = "*-1"
+  override def toChannelBuffer =
+    ChannelBuffers.wrappedBuffer(RedisCodec.NIL_MBULK_REPLY_BA,
+      RedisCodec.EOL_DELIMITER_BA)
 }
 
 class ReplyCodec extends UnifiedProtocolCodec {
-  import com.twitter.naggati.{Emit, Encoder, NextStep}
-  import com.twitter.naggati.Stages._
+  import com.twitter.finagle.redis.naggati.{Encoder, NextStep}
+  import com.twitter.finagle.redis.naggati.Stages._
   import RedisCodec._
+
+  val encode = new Encoder[Reply] {
+    def encode(obj: Reply) = Some(obj.toChannelBuffer)
+  }
 
   val decode = readBytes(1) { bytes =>
     bytes(0) match {
@@ -82,28 +84,24 @@ class ReplyCodec extends UnifiedProtocolCodec {
       case INTEGER_REPLY =>
         readLine { line =>
           RequireServerProtocol.safe {
-            emit(IntegerReply(NumberFormat.toInt(line)))
+            emit(IntegerReply(NumberFormat.toLong(line)))
           }
         }
       case BULK_REPLY =>
         decodeBulkReply
       case MBULK_REPLY =>
-        val doneFn = { lines: List[Array[Byte]] =>
+        val doneFn = { lines: List[Reply] =>
           lines.length match {
             case empty if empty == 0 => EmptyMBulkReply()
             case n => MBulkReply(lines)
           }
         }
         RequireServerProtocol.safe {
-          readLine { line => decodeUnifiedFormat(NumberFormat.toLong(line), doneFn) }
+          readLine { line => decodeMBulkReply(NumberFormat.toLong(line), doneFn) }
         }
       case b: Byte =>
         throw new ServerError("Unknown response format(%c) found".format(b.asInstanceOf[Char]))
     }
-  }
-
-  val encode = new Encoder[Reply] {
-    def encode(obj: Reply) = Some(obj.toChannelBuffer)
   }
 
   def decodeBulkReply = readLine { line =>
@@ -116,10 +114,59 @@ class ReplyCodec extends UnifiedProtocolCodec {
           if (eol(0) != '\r' || eol(1) != '\n') {
             throw new ServerError("Expected EOL after line data and didn't find it")
           }
-          emit(BulkReply(bytes))
-        } //readBytes
-      } // readBytes
-    } // match
-  } // decodeBulkReply
+          emit(BulkReply(ChannelBuffers.wrappedBuffer(bytes)))
+        }
+      }
+    }
+  }
 
+  def decodeMBulkReply[T <: AnyRef](argCount: Long, doneFn: List[Reply] => T) =
+    argCount match {
+      case n if n < 0 => emit(NilMBulkReply())
+      case n => decodeMBulkLines(n, Nil, { lines => doneFn(lines) } )
+    }
+
+  def decodeMBulkLines[T <: AnyRef](
+    i: Long,
+    lines: List[Reply],
+    doneFn: List[Reply] => T): NextStep =
+  {
+    if (i <= 0) {
+      emit(doneFn(lines.reverse))
+    } else {
+      readLine { line =>
+        val header = line(0)
+        header match {
+          case ARG_SIZE_MARKER =>
+            val size = NumberFormat.toInt(line.drop(1))
+            if (size < 1) {
+              decodeMBulkLines(i - 1, EmptyBulkReply() :: lines, doneFn)
+            } else {
+              readBytes(size) { byteArray =>
+                readBytes(2) { eol =>
+                  if (eol(0) != '\r' || eol(1) != '\n') {
+                    throw new ProtocolError("Expected EOL after line data and didn't find it")
+                  }
+                  decodeMBulkLines(i - 1,
+                    BulkReply(ChannelBuffers.wrappedBuffer(byteArray)) :: lines, doneFn)
+                }
+              }
+            }
+          case STATUS_REPLY =>
+            decodeMBulkLines(i - 1, StatusReply(BytesToString(
+              line.drop(1).getBytes)) :: lines, doneFn)
+          case ARG_COUNT_MARKER =>
+            decodeMBulkLines(line.drop(1).toLong, lines, doneFn)
+          case INTEGER_REPLY =>
+            decodeMBulkLines(i - 1, IntegerReply(NumberFormat.toLong(
+              BytesToString(line.drop(1).getBytes))) :: lines, doneFn)
+          case ERROR_REPLY =>
+            decodeMBulkLines(i - 1, ErrorReply(BytesToString(
+              line.drop(1).getBytes)) :: lines, doneFn)
+          case b: Char =>
+            throw new ProtocolError("Expected size marker $, got " + b)
+        }
+      }
+    }
+  }
 }

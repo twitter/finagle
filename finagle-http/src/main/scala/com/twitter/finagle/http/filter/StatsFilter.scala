@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Duration, Future, Return, Time, Throw}
+import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
 
 
 /** Statistic filter.
@@ -19,15 +19,15 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
   extends SimpleFilter[REQUEST, Response] {
 
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
-    val startTime = Time.now
+    val elapsed = Stopwatch.start()
     val future = service(request)
     future respond {
       case Return(response) =>
-        count(startTime.untilNow, response)
+        count(elapsed(), response)
       case Throw(_) =>
         // Treat exceptions as empty 500 errors
         val response = Response(request.version, Status.InternalServerError)
-        count(startTime.untilNow, response)
+        count(elapsed(), response)
     }
     future
   }

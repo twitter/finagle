@@ -4,7 +4,7 @@ import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.Service
 import com.twitter.finagle.stream.{Stream, StreamResponse}
-import com.twitter.util.{Future, Timer, Time, JavaTimer}
+import com.twitter.util.{Future, Timer, JavaTimer}
 import com.twitter.conversions.time._
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer

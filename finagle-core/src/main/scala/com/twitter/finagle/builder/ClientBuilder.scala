@@ -45,34 +45,24 @@ package com.twitter.finagle.builder
  * instead of a compiler error.
  */
 
-import java.net.{InetSocketAddress, SocketAddress}
-import java.util.logging.Logger
-import java.util.concurrent.{Executors, TimeUnit}
-
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel._
-import org.jboss.netty.channel.socket.nio._
-import org.jboss.netty.handler.ssl._
-import org.jboss.netty.handler.timeout.IdleStateHandler
-
-import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.util.{Future, Duration, Try, Monitor, NullMonitor, Promise, Return }
-import com.twitter.util.TimeConversions._
-import javax.net.ssl.SSLContext
-
-import com.twitter.finagle.channel._
-import com.twitter.finagle.util._
-import com.twitter.finagle.pool._
 import com.twitter.finagle._
-import com.twitter.finagle.service._
-import com.twitter.finagle.factory._
-import com.twitter.finagle.filter.{MonitorFilter, ExceptionSourceFilter}
-import com.twitter.finagle.stats.{
-  StatsReceiver, RollupStatsReceiver,
-  NullStatsReceiver, GlobalStatsReceiver}
-import com.twitter.finagle.loadbalancer.HeapBalancer
-import com.twitter.finagle.ssl.{Engine, Ssl, SslConnectHandler}
-import tracing.{NullTracer, TracingFilter, Tracer}
+import com.twitter.finagle.filter.ExceptionSourceFilter
+import com.twitter.finagle.netty3.ChannelSnooper
+import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
+  RetryPolicy, RetryingFilter, TimeoutFilter}
+import com.twitter.finagle.ssl.{Engine, Ssl}
+import com.twitter.finagle.stats.{GlobalStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing.{NullTracer, Tracer}
+import com.twitter.finagle.util._
+import com.twitter.util.TimeConversions._
+import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Time, Timer, Try}
+import java.net.SocketAddress
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.logging.{Logger, Level}
+import javax.net.ssl.SSLContext
+import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline}
+import scala.annotation.implicitNotFound
+import scala.collection.mutable
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -96,23 +86,13 @@ object ClientBuilder {
    * Provides a typesafe `build` for Java.
    */
   def safeBuild[Req, Rep](builder: Complete[Req, Rep]): Service[Req, Rep] =
-    builder.build()
+    builder.build()(ClientConfigEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildFactory` for Java.
    */
   def safeBuildFactory[Req, Rep](builder: Complete[Req, Rep]): ServiceFactory[Req, Rep] =
-    builder.buildFactory()
-
-  private[finagle] val defaultChannelFactory =
-    new ReferenceCountedChannelFactory(
-      new LazyRevivableChannelFactory(() =>
-        new NioClientSocketChannelFactory(
-          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientBoss")),
-          Executors.newCachedThreadPool(new NamedPoolThreadFactory("FinagleClientIO"))
-        )
-      )
-    )
+    builder.buildFactory()(ClientConfigEvidence.FullyConfigured)
 }
 
 object ClientConfig {
@@ -120,22 +100,52 @@ object ClientConfig {
   type FullySpecified[Req, Rep] = ClientConfig[Req, Rep, Yes, Yes, Yes]
 }
 
+@implicitNotFound("Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}")
+private[builder] trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
+
+private[builder] object ClientConfigEvidence {
+  implicit object FullyConfigured extends ClientConfigEvidence[ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
+}
+
 // Necessary because of the 22 argument limit on case classes
-final case class ClientHostConfig(
+private[builder] final case class ClientHostConfig(
   private val _hostConnectionCoresize    : Option[Int]                   = None,
   private val _hostConnectionLimit       : Option[Int]                   = None,
   private val _hostConnectionIdleTime    : Option[Duration]              = None,
   private val _hostConnectionMaxWaiters  : Option[Int]                   = None,
   private val _hostConnectionMaxIdleTime : Option[Duration]              = None,
-  private val _hostConnectionMaxLifeTime : Option[Duration]              = None) {
-
+  private val _hostConnectionMaxLifeTime : Option[Duration]              = None,
+  private val _hostConnectionBufferSize  : Option[Int]                   = None) {
   val hostConnectionCoresize    = _hostConnectionCoresize
   val hostConnectionLimit       = _hostConnectionLimit
   val hostConnectionIdleTime    = _hostConnectionIdleTime
   val hostConnectionMaxWaiters  = _hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConnectionMaxLifeTime
+  val hostConnectionBufferSize  = _hostConnectionBufferSize
 }
+
+private[builder] final case class StatsReceiverConfig(
+  statsReceiver     : Option[StatsReceiver] = None,
+  hostStatsReceiver : Option[StatsReceiver] = None
+)
+
+private[builder] final case class ClientTimeoutConfig(
+  private val _tcpConnectTimeout: Duration         = 10.milliseconds,
+  private val _connectTimeout   : Duration         = Duration.Top,
+  private val _requestTimeout   : Duration         = Duration.Top,
+  private val _timeout          : Duration         = Duration.Top,
+  private val _readerIdleTimeout: Option[Duration] = None,
+  private val _writerIdleTimeout: Option[Duration] = None
+) {
+  val tcpConnectTimeout         = _tcpConnectTimeout
+  val requestTimeout            = _requestTimeout
+  val connectTimeout            = _connectTimeout
+  val timeout                   = _timeout
+  val readerIdleTimeout         = _readerIdleTimeout
+  val writerIdleTimeout         = _writerIdleTimeout
+}
+
 
 /**
  * TODO: do we really need to specify HasCodec? -- it's implied in a
@@ -144,29 +154,27 @@ final case class ClientHostConfig(
  * Note: these are documented in ClientBuilder, as that is where they
  * are accessed by the end-user.
  */
-final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
-  private val _cluster                   : Option[Cluster[SocketAddress]]               = None,
+private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
+  private val _cluster                   : Option[Cluster[SocketAddress]]        = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
-  private val _tcpConnectTimeout         : Duration                      = 10.milliseconds,
-  private val _connectTimeout            : Duration                      = Duration.MaxValue,
-  private val _requestTimeout            : Duration                      = Duration.MaxValue,
-  private val _timeout                   : Duration                      = Duration.MaxValue,
   private val _keepAlive                 : Option[Boolean]               = None,
-  private val _readerIdleTimeout         : Option[Duration]              = None,
-  private val _writerIdleTimeout         : Option[Duration]              = None,
-  private val _statsReceiver             : Option[StatsReceiver]         = None,
+  private val _statsReceiverConfig       : StatsReceiverConfig           = StatsReceiverConfig(),
   private val _monitor                   : Option[String => Monitor]     = None,
-  private val _name                      : Option[String]                = Some("client"),
+  private val _name                      : String                        = "client",
   private val _sendBufferSize            : Option[Int]                   = None,
   private val _recvBufferSize            : Option[Int]                   = None,
   private val _retryPolicy               : Option[RetryPolicy[Try[Nothing]]]  = None,
   private val _logger                    : Option[Logger]                = None,
-  private val _channelFactory            : Option[ReferenceCountedChannelFactory] = None,
+  private val _channelFactory            : Option[ChannelFactory]        = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
-  private val _failureAccrual            : Option[ServiceFactoryWrapper]  = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
-  private val _tracerFactory             : Tracer.Factory                = NullTracer.factory,
+  private val _httpProxy                 : Option[SocketAddress]          = None,
+  private val _socksProxy                : Option[SocketAddress]          = None,
+  private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
+  private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
-  private val _expFailFast               : Boolean                       = false)
+  private val _failFast                  : Boolean                       = true,
+  private val _timeoutConfig             : ClientTimeoutConfig           = new ClientTimeoutConfig,
+  private val _daemon                    : Boolean                       = false)
 {
   import ClientConfig._
 
@@ -177,15 +185,17 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
    */
   val cluster                   = _cluster
   val codecFactory              = _codecFactory
-  val tcpConnectTimeout         = _tcpConnectTimeout
-  val requestTimeout            = _requestTimeout
-  val connectTimeout            = _connectTimeout
-  val timeout                   = _timeout
-  val statsReceiver             = _statsReceiver
+  val statsReceiver             = _statsReceiverConfig.statsReceiver
+  val hostStatsReceiver         = _statsReceiverConfig.hostStatsReceiver
+  val tcpConnectTimeout         = _timeoutConfig.tcpConnectTimeout
+  val requestTimeout            = _timeoutConfig.requestTimeout
+  val connectTimeout            = _timeoutConfig.connectTimeout
+  val timeout                   = _timeoutConfig.timeout
+  val readerIdleTimeout         = _timeoutConfig.readerIdleTimeout
+  val writerIdleTimeout         = _timeoutConfig.writerIdleTimeout
+  val timeoutConfig             = _timeoutConfig
   val monitor                   = _monitor
   val keepAlive                 = _keepAlive
-  val readerIdleTimeout         = _readerIdleTimeout
-  val writerIdleTimeout         = _writerIdleTimeout
   val name                      = _name
   val hostConnectionCoresize    = _hostConfig.hostConnectionCoresize
   val hostConnectionLimit       = _hostConfig.hostConnectionLimit
@@ -193,6 +203,7 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val hostConnectionMaxWaiters  = _hostConfig.hostConnectionMaxWaiters
   val hostConnectionMaxIdleTime = _hostConfig.hostConnectionMaxIdleTime
   val hostConnectionMaxLifeTime = _hostConfig.hostConnectionMaxLifeTime
+  val hostConnectionBufferSize  = _hostConfig.hostConnectionBufferSize
   val hostConfig                = _hostConfig
   val sendBufferSize            = _sendBufferSize
   val recvBufferSize            = _recvBufferSize
@@ -200,38 +211,46 @@ final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionL
   val logger                    = _logger
   val channelFactory            = _channelFactory
   val tls                       = _tls
+  val httpProxy                 = _httpProxy
+  val socksProxy                = _socksProxy
   val failureAccrual            = _failureAccrual
-  val tracerFactory             = _tracerFactory
-  val expFailFast               = _expFailFast
+  val tracer                    = _tracer
+  val failFast                  = _failFast
+  val daemon                    = _daemon
 
   def toMap = Map(
     "cluster"                   -> _cluster,
     "codecFactory"              -> _codecFactory,
-    "tcpConnectTimeout"         -> Some(_tcpConnectTimeout),
-    "requestTimeout"            -> Some(_requestTimeout),
-    "connectTimeout"            -> Some(_connectTimeout),
-    "timeout"                   -> Some(_timeout),
+    "tcpConnectTimeout"         -> Some(_timeoutConfig.tcpConnectTimeout),
+    "requestTimeout"            -> Some(_timeoutConfig.requestTimeout),
+    "connectTimeout"            -> Some(_timeoutConfig.connectTimeout),
+    "timeout"                   -> Some(_timeoutConfig.timeout),
     "keepAlive"                 -> Some(_keepAlive),
-    "readerIdleTimeout"         -> Some(_readerIdleTimeout),
-    "writerIdleTimeout"         -> Some(_writerIdleTimeout),
-    "statsReceiver"             -> _statsReceiver,
+    "statsReceiver"             -> _statsReceiverConfig.statsReceiver,
+    "hostStatsReceiver"         -> _statsReceiverConfig.hostStatsReceiver,
+    "readerIdleTimeout"         -> _timeoutConfig.readerIdleTimeout,
+    "writerIdleTimeout"         -> _timeoutConfig.writerIdleTimeout,
     "monitor"                   -> _monitor,
-    "name"                      -> _name,
+    "name"                      -> Some(_name),
     "hostConnectionCoresize"    -> _hostConfig.hostConnectionCoresize,
     "hostConnectionLimit"       -> _hostConfig.hostConnectionLimit,
     "hostConnectionIdleTime"    -> _hostConfig.hostConnectionIdleTime,
     "hostConnectionMaxWaiters"  -> _hostConfig.hostConnectionMaxWaiters,
     "hostConnectionMaxIdleTime" -> _hostConfig.hostConnectionMaxIdleTime,
     "hostConnectionMaxLifeTime" -> _hostConfig.hostConnectionMaxLifeTime,
+    "hostConnectionBufferSize"  -> _hostConfig.hostConnectionBufferSize,
     "sendBufferSize"            -> _sendBufferSize,
     "recvBufferSize"            -> _recvBufferSize,
     "retryPolicy"               -> _retryPolicy,
     "logger"                    -> _logger,
     "channelFactory"            -> _channelFactory,
     "tls"                       -> _tls,
+    "httpProxy"                 -> _httpProxy,
+    "socksProxy"                -> _socksProxy,
     "failureAccrual"            -> _failureAccrual,
-    "tracerFactory"             -> Some(_tracerFactory),
-    "expFailFast"               -> expFailFast
+    "tracer"                    -> Some(_tracer),
+    "failFast"                  -> failFast,
+    "daemon"                    -> daemon
   )
 
   override def toString = {
@@ -355,14 +374,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     withConfig(_.copy(_codecFactory = Some(codecFactory)))
 
-  @deprecated("Use tcpConnectTimeout instead")
+  @deprecated("Use tcpConnectTimeout instead", "5.0.1")
   def connectionTimeout(duration: Duration): This = tcpConnectTimeout(duration)
 
   /**
    * Specify the TCP connection timeout.
    */
   def tcpConnectTimeout(duration: Duration): This =
-    withConfig(_.copy(_tcpConnectTimeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_tcpConnectTimeout = duration)))
 
   /**
    * The request timeout is the time given to a *single* request (if
@@ -372,7 +391,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * the request and the receipt of the response.
    */
   def requestTimeout(duration: Duration): This =
-    withConfig(_.copy(_requestTimeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_requestTimeout = duration)))
 
   /**
    * The connect timeout is the timeout applied to the acquisition of
@@ -383,7 +402,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * {{factory()}} will always be satisfied within this timeout.
    */
   def connectTimeout(duration: Duration): This =
-    withConfig(_.copy(_connectTimeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_connectTimeout = duration)))
 
   /**
    * Total request timeout.  This timeout is applied from the issuance
@@ -394,7 +413,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Applicable only to service-builds ({{build()}})
    */
   def timeout(duration: Duration): This =
-    withConfig(_.copy(_timeout = duration))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_timeout = duration)))
 
   /**
    * Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).
@@ -406,26 +425,36 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The maximum time a connection may have received no data.
    */
   def readerIdleTimeout(duration: Duration): This =
-    withConfig(_.copy(_readerIdleTimeout = Some(duration)))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_readerIdleTimeout = Some(duration))))
 
   /**
    * The maximum time a connection may not have sent any data.
    */
   def writerIdleTimeout(duration: Duration): This =
-    withConfig(_.copy(_writerIdleTimeout = Some(duration)))
+    withConfig(c => c.copy(_timeoutConfig = c.timeoutConfig.copy(_writerIdleTimeout = Some(duration))))
 
   /**
    * Report stats to the given {{StatsReceiver}}.  This will report
-   * verbose client statistics and counters, that in turn may be
+   * verbose global statistics and counters, that in turn may be
    * exported to monitoring applications.
+   * NB: per hosts statistics will *NOT* be exported to this receiver
+   *     @see reportHostStats(receiver: StatsReceiver)
    */
   def reportTo(receiver: StatsReceiver): This =
-    withConfig(_.copy(_statsReceiver = Some(receiver)))
+    withConfig(cfg => cfg.copy(_statsReceiverConfig = StatsReceiverConfig(Some(receiver), cfg.hostStatsReceiver)))
+
+  /**
+   * Report per host stats to the given {{StatsReceiver}}.
+   * The statsReceiver will be scoped per client, like this:
+   * client/connect_latency_ms_max/0.0.0.0:64754
+   */
+  def reportHostStats(receiver: StatsReceiver): This =
+    withConfig(cfg => cfg.copy(_statsReceiverConfig = StatsReceiverConfig(cfg.statsReceiver, Some(receiver))))
 
   /**
    * Give a meaningful name to the client. Required.
    */
-  def name(value: String): This = withConfig(_.copy(_name = Some(value)))
+  def name(value: String): This = withConfig(_.copy(_name = value))
 
   /**
    * The maximum number of connections that are allowed per host.
@@ -468,6 +497,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionMaxLifeTime = Some(timeout))))
 
   /**
+   * Experimental option to buffer `size` connections from the pool.
+   * The buffer is fast and lock-free, reducing contention for
+   * services with very high requests rates. The buffer size should
+   * be sized roughly to the expected concurrency. Buffers sized by
+   * power-of-twos may be faster due to the use of modular
+   * arithmetic.
+   *
+   * '''Note:''' This will be integrated into the mainline pool, at
+   * which time the experimental option will go away.
+   */
+  def expHostConnectionBufferSize(size: Int): This =
+    withConfig(c => c.copy(_hostConfig =  c.hostConfig.copy(_hostConnectionBufferSize = Some(size))))
+
+  /**
    * The number of retries applied. Only applicable to service-builds ({{build()}})
    */
   def retries(value: Int): This =
@@ -491,7 +534,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * meaningfully reference count factory usage, and so the caller is
    * responsible for calling ``releaseExternalResources()''.
    */
-  def channelFactory(cf: ReferenceCountedChannelFactory): This =
+  def channelFactory(cf: ChannelFactory): This =
     withConfig(_.copy(_channelFactory = Some(cf)))
 
   /**
@@ -503,20 +546,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates  
+   * This allows the user to use client certificates
    * No SSL Hostname Validation is performed
    */
   def tls(sslContext : SSLContext): This =
-    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))    
-  
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, None)))
+
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates  
+   * This allows the user to use client certificates
    * SSL Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext : SSLContext, hostname : Option[String]): This =
-    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))  
-    
+    withConfig(_.copy(_tls = Some({ () => Ssl.client(sslContext)  }, hostname)))
+
   /**
    * Do not perform TLS validation. Probably dangerous.
    */
@@ -524,11 +567,38 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     withConfig(_.copy(_tls = Some({ () => Ssl.clientWithoutCertificateValidation()}, None)))
 
   /**
+   * Make connections via the given HTTP proxy.
+   * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+   */
+  def httpProxy(httpProxy: SocketAddress): This =
+    withConfig(_.copy(_httpProxy = Some(httpProxy)))
+
+  /**
+   * Make connections via the given SOCKS proxy.
+   * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+   */
+  def socksProxy(socksProxy: SocketAddress): This =
+    withConfig(_.copy(_socksProxy = Some(socksProxy)))
+
+  /**
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
    */
+  @deprecated("Use tracer() instead", "7.0.0")
   def tracerFactory(factory: Tracer.Factory): This =
-    withConfig(_.copy(_tracerFactory = factory))
+    tracer(factory())
+
+  // API compatibility method
+  @deprecated("Use tracer() instead", "7.0.0")
+  def tracerFactory(t: Tracer): This =
+    tracer(t)
+
+  /**
+   * Specifies a tracer that receives trace events.
+   * See [[com.twitter.finagle.tracing]] for details.
+   */
+  def tracer(t: Tracer): This =
+    withConfig(_.copy(_tracer = t))
 
   def monitor(mFactory: String => Monitor): This =
     withConfig(_.copy(_monitor = Some(mFactory)))
@@ -545,166 +615,49 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * is dead for, once marked.
    */
   def failureAccrualParams(params: (Int, Duration)): This = {
-    val filter = FailureAccrualFactory.wrapper(params._1, params._2)
-    failureAccrual(filter)
+    failureAccrualFactory(FailureAccrualFactory.wrapper(params._1, params._2) _)
   }
 
   def failureAccrual(failureAccrual: ServiceFactoryWrapper): This = {
-    withConfig(_.copy(_failureAccrual = Some(failureAccrual)))
+    failureAccrualFactory { (_) => failureAccrual }
   }
 
+  def failureAccrualFactory(factory: Timer => ServiceFactoryWrapper): This = {
+    withConfig(_.copy(_failureAccrual = Some(factory)))
+  }
+
+  @deprecated(
+    "No longer experimental: Use failFast()." +
+    "The new default value is true, so replace .expFailFast(true) with nothing at all",
+    "5.3.10")
+  def expFailFast(onOrOff: Boolean): This =
+    failFast(onOrOff)
+
   /**
-   * An experimental "fail-fast" mode that marks a host dead on
-   * connection failure. The host remains dead until we
-   * succesfully connect.
+   * Marks a host dead on connection failure. The host remains dead
+   * until we succesfully connect.
    *
    * Intermediate connection attempts *are* respected, but host
    * availability is turned off during the reconnection period.
    */
-  def expFailFast(onOrOff: Boolean): This =
-   withConfig(_.copy(_expFailFast = onOrOff))
+  def failFast(onOrOff: Boolean): This =
+    withConfig(_.copy(_failFast = onOrOff))
 
-  /* BUILDING */
-  /* ======== */
+  /**
+   * When true, the client is daemonized. As with java threads, a
+   * process can exit only when all remaining clients are daemonized.
+   * False by default.
+   */
+  def daemon(daemonize: Boolean): This =
+    withConfig(_.copy(_daemon = daemonize))
 
-  private[this] def buildBootstrap(codec: Codec[Req, Rep], host: SocketAddress) = {
-    val cf = config.channelFactory getOrElse ClientBuilder.defaultChannelFactory
-    cf.acquire()
+  /*** BUILD ***/
 
-    val bs = new ClientBootstrap(cf)
-    val pf = new ChannelPipelineFactory {
-      override def getPipeline = {
-        val pipeline = codec.pipelineFactory.getPipeline
+  private[finagle] lazy val statsReceiver =
+    (config.statsReceiver getOrElse NullStatsReceiver).scope(config.name)
 
-        pipeline.addFirst("channelStatsHandler", new ChannelStatsHandler(statsReceiver))
-        pipeline.addFirst("channelRequestStatsHandler",
-          new ChannelRequestStatsHandler(statsReceiver)
-        )
-
-        if (config.readerIdleTimeout.isDefined || config.writerIdleTimeout.isDefined) {
-          pipeline.addFirst("idleReactor", new IdleChannelHandler)
-          pipeline.addFirst("idleDetector",
-            new IdleStateHandler(Timer.defaultNettyTimer,
-              config.readerIdleTimeout.map(_.inMilliseconds).getOrElse(0L),
-              config.writerIdleTimeout.map(_.inMilliseconds).getOrElse(0L),
-              0,
-              TimeUnit.MILLISECONDS))
-        }
-
-        for ((engineFactory, hostname) <- config.tls) {
-          val engine = engineFactory()
-          engine.self.setUseClientMode(true)
-          engine.self.setEnableSessionCreation(true)
-          val sslHandler = new SslHandler(engine.self)
-          val verifier = hostname map {
-            SslConnectHandler.sessionHostnameVerifier(_) _
-          } getOrElse { Function.const(None) _ }
-
-          pipeline.addFirst("sslConnect",
-            new SslConnectHandler(sslHandler, verifier))
-          pipeline.addFirst("ssl", sslHandler)
-        }
-
-        for (logger <- config.logger) {
-          pipeline.addFirst("channelSnooper",
-            ChannelSnooper(config.name.get)(logger.info))
-        }
-
-        pipeline
-      }
-    }
-
-    bs.setPipelineFactory(pf)
-    bs.setOption("remoteAddress", host)
-    bs.setOption("connectTimeoutMillis", config.tcpConnectTimeout.inMilliseconds)
-    bs.setOption("tcpNoDelay", true)  // fin NAGLE.  get it?
-    // bs.setOption("soLinger", 0)  (TODO)
-    config.keepAlive foreach { value => bs.setOption("keepAlive", value) }
-    bs.setOption("reuseAddress", true)
-    config.sendBufferSize foreach { s => bs.setOption("sendBufferSize", s)    }
-    config.recvBufferSize foreach { s => bs.setOption("receiveBufferSize", s) }
-    bs
-  }
-
-  private[this] def buildPool(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) = {
-    // These are conservative defaults, but probably the only safe
-    // thing to do.
-    val lowWatermark  = config.hostConnectionCoresize   getOrElse(1)
-    val highWatermark = config.hostConnectionLimit      getOrElse(Int.MaxValue)
-    val idleTime      = config.hostConnectionIdleTime   getOrElse(5.seconds)
-    val maxWaiters    = config.hostConnectionMaxWaiters getOrElse(Int.MaxValue)
-
-    val underlyingFactory = if (idleTime > 0.seconds && highWatermark > lowWatermark) {
-      new CachingPool(
-        factory,
-        highWatermark - lowWatermark,
-        idleTime,
-        statsReceiver = statsReceiver)
-    } else {
-      factory
-    }
-
-    new WatermarkPool[Req, Rep](
-      underlyingFactory, lowWatermark, highWatermark,
-      statsReceiver, maxWaiters)
-  }
-
-  private[finagle] lazy val statsReceiver = {
-    val statsReceiver = config.statsReceiver getOrElse NullStatsReceiver
-    config.name match {
-      case Some(name) => statsReceiver.scope(name)
-      case None       => statsReceiver
-    }
-  }
-
-  private[this] def hostToServiceFactory(codec: Codec[Req, Rep], host: SocketAddress): ServiceFactory[Req, Rep] = {
-    // The per-host stack is as follows:
-    //
-    //   ChannelService
-    //   Pool
-    //   Timeout
-    //   Failure accrual
-    //   Stats
-    //
-    // the pool & below are host-specific,
-
-    val hostStatsReceiver = new RollupStatsReceiver(statsReceiver).withSuffix(
-      host match {
-        case iaddr: InetSocketAddress => "%s:%d".format(iaddr.getHostName, iaddr.getPort)
-        case other => other.toString
-      }
-    )
-
-    var factory: ServiceFactory[Req, Rep] = null
-    val bs = buildBootstrap(codec, host)
-    factory = codec.rawPrepareClientConnFactory(new ChannelServiceFactory[Any, Any](bs, hostStatsReceiver))
-
-    if (config.hostConnectionMaxIdleTime.isDefined ||
-        config.hostConnectionMaxLifeTime.isDefined) {
-      factory = factory map { service =>
-        new ExpiringService(
-          service,
-          config.hostConnectionMaxIdleTime,
-          config.hostConnectionMaxLifeTime)
-      }
-    }
-
-    factory = buildPool(factory, hostStatsReceiver)
-    factory = requestTimeoutFilter andThen factory
-    factory = failureAccrualFactory(factory)
-
-    if (config.expFailFast) {
-      factory = new FailFastFactory(
-        factory, hostStatsReceiver.scope("failfast"), Timer.default)
-    }
-
-    val statsFilter = new StatsFilter[Req, Rep](hostStatsReceiver)
-    factory = statsFilter andThen factory
-
-    factory = monitorFilter andThen factory
-
-    factory
-  }
+  private[finagle] lazy val hostStatsReceiver =
+    config.hostStatsReceiver map(_.scope(config.name)) getOrElse statsReceiver
 
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
@@ -712,74 +665,179 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def buildFactory()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): ServiceFactory[Req, Rep] = {
-    val factory = internalBuildFactory()
-    exceptionSourceFilter andThen factory
-  }
+    val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name))
 
-  private[this] def internalBuildFactory()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
-  ): ServiceFactory[Req, Rep] = {
+    // We configure a client based on the parameters of the client
+    // builder. TODO: this should be moved to its own toplevel class
+    // that we can unittest independently.
+    import com.twitter.finagle.client._
+    import com.twitter.finagle.netty3.{Netty3Transporter, Netty3TransporterTLSConfig}
 
-    val closing = new Promise[Unit]
-    val closeNotifier = CloseNotifier.makeLifo(closing)
-
-    Timer.register(closeNotifier)
     GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
-    val cluster = config.cluster.get
-    val codec = config.codecFactory.get(ClientCodecConfig(serviceName = config.name.get))
-    val tracer = config.tracerFactory(closeNotifier)
+    val tracer = config.tracer
+    val timer = DefaultTimer.twitter
+    val nettyTimer = DefaultTimer
+    val monitor = config.monitor map { newMonitor => newMonitor(config.name) } getOrElse NullMonitor
+    val logger = config.logger getOrElse Logger.getLogger(config.name)
 
-    val hostFactories = cluster map { host => hostToServiceFactory(codec, host) }
-    var factory: ServiceFactory[Req, Rep] =
-      new HeapBalancer(hostFactories, statsReceiver.scope("loadbalancer"))
-      {
-        override def close() = {
-          super.close()
-          closing.updateIfEmpty(Return(()))
+    val newChannel: ChannelPipeline => Channel = {
+      val factory = config.channelFactory getOrElse Netty3Transporter.channelFactory
+      factory.newChannel(_)
+    }
+
+    // The transporter connects to actual endpoints, providing a typed
+    // session transport.
+    val transporter = Netty3Transporter[Req, Rep](
+      name = config.name,
+      pipelineFactory = codec.pipelineFactory,
+      newChannel = newChannel,
+      newTransport = codec.newClientTransport(_, statsReceiver),
+      tlsConfig = config.tls map { case (e, v) => Netty3TransporterTLSConfig(e, v) },
+      httpProxy = config.httpProxy,
+      socksProxy = config.socksProxy,
+      channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.Top,
+      channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.Top,
+      channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.info) },
+      channelOptions = {
+        val o = new mutable.MapBuilder[String, Object, Map[String, Object]](Map())
+        o += "connectTimeoutMillis" -> (config.tcpConnectTimeout.inMilliseconds: java.lang.Long)
+        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
+        o += "reuseAddress" -> java.lang.Boolean.TRUE
+        for (v <- config.keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
+        for (s <- config.sendBufferSize) o += "sendBufferSize" -> (s: java.lang.Integer)
+        for (s <- config.recvBufferSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
+        o.result()
+      }
+    )
+
+    val measureConn: Transformer[Req, Rep] = underlying =>
+      new ServiceFactoryProxy(underlying) {
+        // TODO: this stat should really be rolled up
+        val stat = statsReceiver.stat("codec_connection_preparation_latency_ms")
+        override def apply(conn: ClientConnection) = {
+          val begin = Time.now
+          super.apply(conn) ensure {
+            stat.add((Time.now - begin).inMilliseconds)
+          }
         }
       }
 
-    /*
-     * Everything above this point in the stack (load balancer, pool)
-     * expect that the we only release after the last request is done.
-     * Thus, the Refcounted factory serves as a rectifier.
-     */
-    factory = new RefcountedFactory(factory)
+    val prepareConn: Transformer[Req, Rep] =
+      measureConn compose (codec.prepareConnFactory _)
 
-    factory = connectTimeoutFactory(factory)
+    val endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep] = {
+      val bridged = Bridge[Req, Rep, Req, Rep](transporter, codec.newClientDispatcher(_))
+      (addr, statsReceiver) => prepareConn(bridged(addr, statsReceiver))
+    }
 
-    // We maintain a separate log of factory failures here so that
-    // factory failures are captured in the service failure
-    // stats. Logically these are service failures, but since the
-    // requests are never dispatched to the underlying stack, they
-    // don't get recorded there.
-    factory = new StatsFactoryWrapper(factory, statsReceiver)
-    factory = tracingFilter(tracer) andThen factory
-    factory = codec.prepareServiceFactory(factory)
+    val pool = DefaultPool[Req, Rep](
+      low = config.hostConnectionCoresize getOrElse 1,
+      high = Seq(config.hostConnectionCoresize getOrElse 1,
+        config.hostConnectionLimit getOrElse Int.MaxValue).max,
+      bufferSize = config.hostConnectionBufferSize getOrElse 0,
+      idleTime = config.hostConnectionIdleTime getOrElse 5.seconds,
+      maxWaiters = config.hostConnectionMaxWaiters getOrElse Int.MaxValue,
+      timer = timer
+    )
 
-    factory
+    // The client puts it all together: given a binder, a pool and
+    // other paramters, it composes a load-balanced client.
+    val client = DefaultClient[Req, Rep](
+      name = config.name,
+      endpointer = endpointer,
+      pool = pool,
+      maxIdletime = config.hostConnectionMaxIdleTime getOrElse Duration.Top,
+      maxLifetime = config.hostConnectionMaxLifeTime getOrElse Duration.Top,
+      requestTimeout = config.requestTimeout,
+      failureAccrual = {
+        val wrapper = config.failureAccrual map { newFailureAccrual =>
+            newFailureAccrual(timer) } getOrElse ServiceFactoryWrapper.identity
+        wrapper.andThen(_)
+      },
+      failFast = config.failFast && codec.failFastOk,
+      serviceTimeout = config.connectTimeout,
+      timer = timer,
+      statsReceiver = statsReceiver,
+      hostStatsReceiver = hostStatsReceiver,
+      tracer = tracer,
+      monitor = monitor,
+      reporter = NullReporterFactory
+    )
+
+    // Note the direct use of newStack here. This is because we want
+    // to control how stats receivers are scoped.
+    val factory = codec.prepareServiceFactory(
+      client.newStack(Group.fromCluster(config.cluster.get)))
+
+    if (!config.daemon) ExitGuard.guard()
+    new ServiceFactoryProxy[Req, Rep](factory) {
+      private[this] val closed = new AtomicBoolean(false)
+      override def close(deadline: Time): Future[Unit] = {
+        if (!closed.compareAndSet(false, true)) {
+          logger.log(Level.WARNING, "Close on ServiceFactory called multiple times!",
+            new Exception/*stack trace please*/)
+          return Future.exception(new IllegalStateException)
+        }
+
+        super.close(deadline) ensure {
+          if (!config.daemon) ExitGuard.unguard()
+        }
+      }
+    }
   }
+
+  @deprecated("Used for ABI compat", "5.0.1")
+  def buildFactory(
+    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): ServiceFactory[Req, Rep] = buildFactory()(
+    new ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]{})
 
   /**
    * Construct a Service.
    */
   def build()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
+      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = {
-    var service: Service[Req, Rep] = new FactoryToService[Req, Rep](internalBuildFactory())
+    val underlying: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
+    val service = config.cluster match {
+      case Some(cluster) if !cluster.ready.isDefined =>
+        new ProxyService(cluster.ready map Function.const(underlying),
+          config.hostConnectionMaxWaiters getOrElse Int.MaxValue)
+      case _ => underlying
+    }
+
+    val timer = DefaultTimer.twitter
 
     // We keep the retrying filter after the load balancer so we can
     // retry across different hosts rather than the same one repeatedly.
-    service = retryFilter andThen service
-    service = globalTimeoutFilter andThen service
-    service = exceptionSourceFilter andThen service
-    service
+    val filter = exceptionSourceFilter andThen globalTimeoutFilter(timer) andThen retryFilter(timer)
+    val composed = filter andThen service
+
+    new ServiceProxy[Req, Rep](composed) {
+      private[this] val released = new AtomicBoolean(false)
+      override def close(deadline: Time): Future[Unit] = {
+        if (!released.compareAndSet(false, true)) {
+          val logger = config.logger getOrElse Logger.getLogger(config.name)
+          logger.log(Level.WARNING, "Release on Service called multiple times!",
+            new Exception/*stack trace please*/)
+          return Future.exception(new IllegalStateException)
+        }
+        super.close(deadline)
+      }
+    }
   }
+
+  @deprecated("Used for ABI compat", "5.0.1")
+  def build(
+    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
+      ThisConfig =:= FullySpecifiedConfig
+  ): Service[Req, Rep] = build()(
+    new ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]{})
 
   /**
    * Construct a Service, with runtime checks for builder
@@ -795,47 +853,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def unsafeBuildFactory(): ServiceFactory[Req, Rep] =
     withConfig(_.validated).buildFactory()
 
-  protected def failureAccrualFactory(factory: ServiceFactory[Req, Rep]) =
-    config.failureAccrual map { _ andThen factory } getOrElse(factory)
+  private def exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](config.name)
 
-  protected def monitorFilter =
-    config.monitor map { monitorFactory =>
-      new MonitorFilter[Req, Rep](monitorFactory(config.name.get))
-    } getOrElse(identityFilter)
-
-  protected def connectTimeoutFactory(factory: ServiceFactory[Req, Rep]) =
-    if (config.connectTimeout < Duration.MaxValue) {
-      val exception = new ServiceTimeoutException(config.connectTimeout)
-      new TimeoutFactory(factory, config.connectTimeout, exception)
-    } else {
-      factory
-    }
-
-  protected def exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](config.name.get)
-
-  protected def retryFilter =
+  private def retryFilter(timer: Timer) =
     config.retryPolicy map { retryPolicy =>
-      new RetryingFilter[Req, Rep](retryPolicy, Timer.default, statsReceiver)
+      new RetryingFilter[Req, Rep](retryPolicy, timer, statsReceiver)
     } getOrElse(identityFilter)
 
-
-  protected def requestTimeoutFilter =
-    if (config.requestTimeout < Duration.MaxValue) {
-      val exception = new IndividualRequestTimeoutException(config.requestTimeout)
-      new TimeoutFilter[Req, Rep](config.requestTimeout, exception)
-    } else {
-      identityFilter
-    }
-
-  protected def globalTimeoutFilter =
-    if (config.timeout < Duration.MaxValue) {
+  private def globalTimeoutFilter(timer: Timer) =
+    if (config.timeout < Duration.Top) {
       val exception = new GlobalRequestTimeoutException(config.timeout)
-      new TimeoutFilter[Req, Rep](config.timeout, exception)
+      new TimeoutFilter[Req, Rep](config.timeout, exception, timer)
     } else {
       identityFilter
     }
 
-  protected def tracingFilter(tracer: Tracer) = new TracingFilter[Req, Rep](tracer)
-
-  protected val identityFilter = Filter.identity[Req, Rep]
+  private val identityFilter = Filter.identity[Req, Rep]
 }

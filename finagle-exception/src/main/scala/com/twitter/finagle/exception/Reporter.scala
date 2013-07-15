@@ -1,11 +1,11 @@
 package com.twitter.finagle.exception
 
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
-import scala.collection.JavaConversions._
 
 import org.apache.thrift.protocol.TBinaryProtocol
-import org.apache.scribe.{LogEntry, ResultCode, scribe}
+import com.twitter.finagle.exception.thrift.{LogEntry, ResultCode, scribe}
 
+import com.twitter.app.GlobalFlag
 import com.twitter.util.GZIPStringEncoder
 import com.twitter.util.{Time, Monitor, NullMonitor}
 
@@ -13,6 +13,7 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
+import com.twitter.finagle.util.ReporterFactory
 
 
 trait ClientMonitorFactory extends (String => Monitor)
@@ -91,14 +92,14 @@ object Reporter {
   }
 
 
-  private[this] def makeClient(scribeHost: String, scribePort: Int) = {
-    val service = ClientBuilder() // these are from the b3 tracer
+  private[exception] def makeClient(scribeHost: String, scribePort: Int) = {
+    val service = ClientBuilder() // these are from the zipkin tracer
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .hostConnectionLimit(5)
       .build()
 
-    new scribe.ServiceToClient(service, new TBinaryProtocol.Factory())
+    new scribe.FinagledClient(service, new TBinaryProtocol.Factory())
   }
 }
 
@@ -114,10 +115,10 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-  client: scribe.ServiceToClient,
+  client: scribe.FutureIface,
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  private val sourceAddress: Option[String] = None,
+  private val sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
   private val clientAddress: Option[String] = None) extends Monitor {
 
   /**
@@ -132,11 +133,12 @@ sealed case class Reporter(
    * Add a modifier to append a source address (i.e. endpoint) to a generated ServiceException.
    *
    * The endpoint string is the ip of the host concatenated with the port of the socket (e.g.
-   * "127.0.0.1:8080").
+   * "127.0.0.1:8080").  This is retained for orthogonality of exterior
+   * interfaces.  We use the host name internaly.
    */
   def withSource(address: SocketAddress) =
     address match {
-      case isa: InetSocketAddress => copy(sourceAddress = Some(isa.getAddress.getHostAddress + ":" + isa.getPort))
+      case isa: InetSocketAddress => copy(sourceAddress = Some(isa.getAddress.getHostName))
       case _ => this // don't deal with non-InetSocketAddress types, but don't crash either
     }
 
@@ -160,13 +162,24 @@ sealed case class Reporter(
    * implications.
    */
   def handle(t: Throwable) = {
-    client.Log(createEntry(t) :: Nil) onSuccess {
-      case ResultCode.OK => statsReceiver.counter("report_exception_ok").incr()
-      case ResultCode.TRY_LATER => statsReceiver.counter("report_exception_try_later").incr()
+    client.log(createEntry(t) :: Nil) onSuccess {
+      case ResultCode.Ok => statsReceiver.counter("report_exception_ok").incr()
+      case ResultCode.TryLater => statsReceiver.counter("report_exception_try_later").incr()
     } onFailure {
       case e => statsReceiver.counter("report_exception_" + e.toString).incr()
     }
 
     false  // did not actually handle
+  }
+}
+
+object host extends GlobalFlag(new InetSocketAddress("localhost", 1463), "Host to scribe exception messages")
+
+class ExceptionReporter extends ReporterFactory {
+  private[this] val client = Reporter.makeClient(host().getHostName, host().getPort)
+
+  def apply(name: String, addr: Option[SocketAddress]) = addr match {
+    case Some(a: InetAddress) => new Reporter(client, name).withClient(a)
+    case _ => new Reporter(client, name)
   }
 }

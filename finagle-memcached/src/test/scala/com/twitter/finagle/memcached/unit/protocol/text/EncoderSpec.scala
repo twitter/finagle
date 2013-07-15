@@ -4,13 +4,12 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils.{
   stringToChannelBuffer,
   channelBufferToString
 }
-import com.twitter.util.Time
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
-import org.specs.Specification
 import org.specs.mock.Mockito
+import org.specs.SpecificationWithJUnit
 
-class EncoderSpec extends Specification with Mockito {
+class EncoderSpec extends SpecificationWithJUnit with Mockito {
   "Encoder" should {
     val channel = smartMock[Channel]
     val context = smartMock[ChannelHandlerContext]

@@ -1,6 +1,6 @@
 package com.twitter.finagle.filter
 
-import com.twitter.util.{Monitor, Future, Return, Throw}
+import com.twitter.util.{Monitor, Future}
 
 import com.twitter.finagle.{SimpleFilter, Service}
 

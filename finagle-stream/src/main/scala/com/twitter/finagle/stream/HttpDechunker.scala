@@ -21,30 +21,29 @@ class HttpDechunker extends BrokerChannelHandler {
     ch: Channel,
     out: Broker[ChannelBuffer],
     err: Broker[Throwable],
-    close: Offer[Unit])
-  {
+    close: Offer[Unit]
+  ) {
     Offer.select(
       close { _=>
         ch.close()
         error(err, EOF)
       },
-
       upstreamEvent {
         case MessageValue(chunk: HttpChunk, _) =>
           val content = chunk.getContent
+
           val sendOf =
-            if (content.readable)
-              out.send(content)
-            else
-              Offer.const(())
+            if (content.readable) out.send(content) else Offer.const(())
 
           if (chunk.isLast) {
             ch.close()
-            sendOf andThen error(err, EOF)
+            sendOf.sync() ensure { error(err, EOF) }
           } else {
             ch.setReadable(false)
-            sendOf andThen ch.setReadable(true)
-            read(ch, out, err, close)
+            sendOf.sync() ensure {
+              ch.setReadable(true)
+              read(ch, out, err, close)
+            }
           }
 
         case MessageValue(invalid, ctx) =>

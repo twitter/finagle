@@ -8,10 +8,10 @@ import java.util.{Date, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer._
-import org.jboss.netty.handler.codec.http.{Cookie, HttpMessage, HttpHeaders, HttpMethod,
-  HttpVersion}
-import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
+import org.jboss.netty.channel.ChannelFuture
+import org.jboss.netty.handler.codec.http.{HttpMessage, HttpHeaders, HttpMethod,
+  HttpVersion, DefaultHttpChunk, HttpChunk}
+import scala.collection.JavaConverters._
 
 
 /**
@@ -31,16 +31,18 @@ abstract class Message extends HttpMessage {
   def version: HttpVersion = getProtocolVersion()
   def version_=(version: HttpVersion) { setProtocolVersion(version) }
 
-  lazy val headers = new HeaderMap(this)
+  lazy val headers: HeaderMap = new MessageHeaderMap(this)
   // Java users: use Netty HttpMessage interface for headers
 
-  /** Cookies.  In a request, this uses the Cookie headers.  In a response, it
-    * uses the Set-Cookie headers. */
-  lazy val cookies = new CookieSet(this)
+  /**
+   * Cookies. In a request, this uses the Cookie headers.
+   * In a response, it uses the Set-Cookie headers.
+   */
+  lazy val cookies = new CookieMap(this)
   // Java users: use the interface below for cookies
 
   /** Get iterator over Cookies */
-  def getCookies(): JIterator[Cookie] = cookies.iterator
+  def getCookies(): JIterator[Cookie] = cookies.valuesIterator.asJava
 
   /** Add a cookie */
   def addCookie(cookie: Cookie) {
@@ -48,8 +50,8 @@ abstract class Message extends HttpMessage {
   }
 
   /** Remove a cookie */
-  def removeCookie(cookie: Cookie) {
-    cookies -= cookie
+  def removeCookie(name: String) {
+    cookies -= name
   }
 
   /** Accept header */
@@ -272,7 +274,15 @@ abstract class Message extends HttpMessage {
   def getLength(): Int = length
 
   /** Get the content as a string. */
-  def contentString: String = getContent.toString(Message.Utf8)
+  def contentString: String = {
+    val encoding = try {
+      Charset.forName(charset getOrElse "UTF-8")
+    } catch {
+      case _ => Message.Utf8
+    }
+    getContent.toString(encoding)
+  }
+
   def getContentString(): String = contentString
 
   /** Set the content as a string. */
@@ -374,12 +384,12 @@ abstract class Message extends HttpMessage {
 
 
 object Message {
-  private val Utf8          = Charset.forName("UTF-8")
-  @deprecated("Use MediaType.Json")
+  private[http] val Utf8          = Charset.forName("UTF-8")
+  @deprecated("Use MediaType.Json", "6.1.5")
   val MediaTypeJson         = "application/json"
-  @deprecated("Use MediaType.Javascript")
+  @deprecated("Use MediaType.Javascript", "6.1.5")
   val MediaTypeJavascript   = "application/javascript"
-  @deprecated("Use MediaType.WwwForm")
+  @deprecated("Use MediaType.WwwForm", "6.1.5")
   val MediaTypeWwwForm      = "application/x-www-form-urlencoded"
   val CharsetUtf8           = "charset=utf-8"
   val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8

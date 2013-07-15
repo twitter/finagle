@@ -1,15 +1,18 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.filter.{
+  LogFormatter => CoreLogFormatter,
+  LoggingFilter => CoreLoggingFilter
+}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Future, Return, Throw, Time}
+import com.twitter.util.{Duration, Future, Return, Throw, Time, Stopwatch}
 import java.util.TimeZone
 import org.apache.commons.lang.time.FastDateFormat
 
 
-trait LogFormatter {
-  def format(request: Request, response: Response, responseTime: Duration): String
+trait LogFormatter extends CoreLogFormatter[Request, Response] {
   def escape(s: String): String = LogFormatter.escape(s)
 }
 
@@ -111,6 +114,8 @@ class CommonLogFormatter extends LogFormatter {
     builder.toString
   }
 
+  def formatException(request: Request, throwable: Throwable, responseTime: Duration): String = throw new UnsupportedOperationException("Log throwables as empty 500s instead")
+
   def formattedDate(): String =
     DateFormat.format(Time.now.toDate)
 }
@@ -123,24 +128,14 @@ class CommonLogFormatter extends LogFormatter {
  * Note this may be used upstream of a ValidateRequestFilter, so the URL and
  * parameters may be invalid.
  */
-class LoggingFilter[REQUEST <: Request](log: Logger, formatter: LogFormatter)
-  extends SimpleFilter[REQUEST, Response] {
+class LoggingFilter[REQUEST <: Request](
+  val log: Logger,
+  val formatter: CoreLogFormatter[REQUEST, Response]
+) extends CoreLoggingFilter[REQUEST, Response] {
 
-  def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
-    val startTime = Time.now
-    val future = service(request)
-    future respond {
-      case Return(response) =>
-        log(startTime.untilNow, request, response)
-      case Throw(_) =>
-        // Treat exceptions as empty 500 errors
-        val response = Response(request.version, Status.InternalServerError)
-        log(startTime.untilNow, request, response)
-    }
-    future
-  }
-
-  protected def log(duration: Duration, request: Request, response: Response) {
+  // Treat exceptions as empty 500 errors
+  override protected def logException(duration: Duration, request: REQUEST, throwable: Throwable) {
+    val response = Response(request.version, Status.InternalServerError)
     val line = formatter.format(request, response, duration)
     log.info(line)
   }

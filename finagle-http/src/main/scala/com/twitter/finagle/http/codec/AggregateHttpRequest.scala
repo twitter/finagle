@@ -4,7 +4,6 @@ package com.twitter.finagle.http.codec
  * Aggregate HTTP chunked HTTP requests (ie. POSTs with 100-continue)
  */
 
-import scala.collection.JavaConversions._
 
 import org.jboss.netty.channel.{
   MessageEvent, Channels, ChannelHandlerContext}
@@ -15,7 +14,7 @@ import org.jboss.netty.handler.codec.http.{
 import org.jboss.netty.buffer.{
   ChannelBuffer, ChannelBuffers}
 
-import com.twitter.finagle.util.Conversions._
+import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.channel.LeftFoldUpstreamHandler
 
 

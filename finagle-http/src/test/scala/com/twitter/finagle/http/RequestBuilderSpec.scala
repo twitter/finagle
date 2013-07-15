@@ -1,16 +1,42 @@
 package com.twitter.finagle.http
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import java.net.URL
 import scala.collection.JavaConverters._
 
-object RequeatBuilderSpec extends Specification {
+class RequestBuilderSpec extends SpecificationWithJUnit {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
 
   val BODY0 = copiedBuffer("blah".getBytes)
+  val FORM0 = Seq (
+    "k1" -> "v1",
+    "k2" -> "v2",
+    "k3" -> "v3"
+  )
+
+  val MULTIPART0 =
+"""--Boundary
+Content-Disposition: form-data; name="k1"
+Content-Type: text/plain; charset=UTF-8
+
+v1
+--Boundary
+Content-Disposition: form-data; name="k2"
+Content-Type: text/plain; charset=UTF-8
+
+v2
+--Boundary
+Content-Disposition: form-data; name="k3"
+Content-Type: text/plain; charset=UTF-8
+
+v3
+--Boundary--
+""".replace("\r\n", "\n")
+
+  val FORMPOST0 = "k1=v1&k2=v2&k3=v3"
 
   "RequestBuilder" should {
     "reject non-http urls" in {
@@ -231,6 +257,27 @@ object RequeatBuilderSpec extends Specification {
       builder4.buildDelete.getHeaders(A) must_== triple
       builder4.buildPut(BODY0).getHeaders(A) must_== triple
       builder4.buildPost(BODY0).getHeaders(A) must_== triple
+    }
+
+    "build form" in {
+      val builder0 = RequestBuilder()
+        .url(URL0)
+        .addFormElement(FORM0:_*)
+
+      val req0 = builder0.buildFormPost(false)
+      val content = Request(req0).contentString.replace("\r\n", "\n")
+      content must_== FORMPOST0
+    }
+
+    "build multipart form" in {
+      val builder0 = RequestBuilder()
+        .url(URL0)
+        .addFormElement(FORM0:_*)
+
+      val req0 = builder0.buildFormPost(true)
+      val content = "--[^-\r\n]+".r.replaceAllIn(Request(req0).contentString, "--Boundary")
+                    .replace("\r\n", "\n")
+      content must_== MULTIPART0
     }
   }
 }

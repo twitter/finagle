@@ -9,12 +9,12 @@ import com.twitter.util.Future
 object ThriftServer {
   def main(args: Array[String]) {
     // Implement the Thrift Interface
-    val processor = new Hello.ServiceIface {
+    val processor = new Hello.FutureIface {
       def hi() = Future.value("hi")
     }
 
     // Convert the Thrift Processor to a Finagle Service
-    val service = new Hello.Service(processor, new TBinaryProtocol.Factory())
+    val service = new Hello.FinagledService(processor, new TBinaryProtocol.Factory())
 
     val server: Server = ServerBuilder()
       .bindTo(new InetSocketAddress(8080))

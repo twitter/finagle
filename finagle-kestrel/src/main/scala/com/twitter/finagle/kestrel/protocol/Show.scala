@@ -1,11 +1,10 @@
 package com.twitter.finagle.kestrel.protocol
 
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-import org.jboss.netty.buffer.{ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffers
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.channel._
 import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
-import com.twitter.finagle.kestrel.protocol._
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.util.Duration
 

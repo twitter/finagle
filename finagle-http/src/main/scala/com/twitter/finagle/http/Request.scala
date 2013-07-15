@@ -1,12 +1,15 @@
 package com.twitter.finagle.http
 
+import com.google.common.base.Charsets
 import com.twitter.finagle.http.netty.HttpRequestProxy
 import java.net.{InetAddress, InetSocketAddress}
+import java.io.ByteArrayOutputStream
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, DefaultHttpResponse, HttpMessage,
-  HttpMethod, HttpRequest, HttpVersion, QueryStringEncoder}
-import scala.collection.JavaConversions._
+import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
+import org.jboss.netty.handler.codec.http._
+import scala.collection.JavaConverters._
 import scala.reflect.BeanProperty
 
 
@@ -19,7 +22,7 @@ abstract class Request extends Message with HttpRequestProxy {
 
   def isRequest = true
 
-  lazy val params = new ParamMap(this)
+  lazy val params: ParamMap = new RequestParamMap(this)
 
   def method: HttpMethod           = getMethod
   def method_=(method: HttpMethod) = setMethod(method)
@@ -40,9 +43,13 @@ abstract class Request extends Message with HttpRequestProxy {
   @BeanProperty
   def fileExtension: String = {
     val p = path
-    p.lastIndexOf('.') match {
+    val leaf = p.lastIndexOf('/') match {
+      case -1 => p
+      case n  => p.substring(n + 1)
+    }
+    leaf.lastIndexOf('.') match {
       case -1 => ""
-      case n  => p.substring(n + 1).toLowerCase
+      case n  => leaf.substring(n + 1).toLowerCase
     }
   }
 
@@ -70,7 +77,7 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get parameter value.  Returns value or null. */
   def getParam(name: String): String =
-    params.get(name).getOrElse(null)
+    params.get(name).orNull
 
   /** Get parameter value.  Returns value or default. */
   def getParam(name: String, default: String): String =
@@ -110,11 +117,14 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get all values of parameter.  Returns list of values. */
   def getParams(name: String): JList[String] =
-    params.getAll(name).toList
+    params.getAll(name).toList.asJava
 
   /** Get all parameters. */
   def getParams(): JList[JMap.Entry[String, String]] =
-    (params.toList.map { case (k, v) => new AbstractMap.SimpleImmutableEntry(k, v) })
+    (params.toList.map { case (k, v) =>
+      // cast to appease asJava
+      (new AbstractMap.SimpleImmutableEntry(k, v)).asInstanceOf[JMap.Entry[String, String]]
+    }).asJava
 
   /** Check if parameter exists. */
   def containsParam(name: String): Boolean =
@@ -122,17 +132,50 @@ abstract class Request extends Message with HttpRequestProxy {
 
   /** Get parameters names. */
   def getParamNames(): JSet[String] =
-    params.keySet
+    params.keySet.asJava
 
   /** Response associated with request */
   lazy val response: Response = Response(this)
 
   /** Get response associated with request. */
   def getResponse(): Response = response
+
+  /** Encode an HTTP message to String */
+  def encodeString(): String = {
+    new String(encodeBytes(), "UTF-8")
+  }
+
+  /** Encode an HTTP message to Array[Byte] */
+  def encodeBytes(): Array[Byte] = {
+    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
+    encoder.offer(this)
+    val buffer = encoder.poll()
+    val bytes = new Array[Byte](buffer.readableBytes())
+    buffer.readBytes(bytes)
+    bytes
+  }
+
+  override def toString =
+    "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
 }
 
 
 object Request {
+
+  /** Decode a Request from a String */
+  def decodeString(s: String): Request = {
+    decodeBytes(s.getBytes("UTF-8"))
+  }
+
+  /** Decode a Request from Array[Byte] */
+  def decodeBytes(b: Array[Byte]): Request = {
+    val decoder = new DecoderEmbedder(
+      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+    decoder.offer(ChannelBuffers.wrappedBuffer(b))
+    val httpRequest = decoder.poll().asInstanceOf[HttpRequest]
+    assert(httpRequest ne null)
+    Request(httpRequest)
+  }
 
   /** Create Request from parameters.  Convenience method for testing. */
   def apply(params: Tuple2[String, String]*): MockRequest =
@@ -196,4 +239,31 @@ object Request {
     // Create an external MockRequest
     def external = withIp("8.8.8.8")
   }
+
+  /** Create a query string from URI and parameters. */
+  def queryString(uri: String, params: Tuple2[String, String]*): String = {
+    val encoder = new QueryStringEncoder(uri)
+    params.foreach { case (key, value) =>
+      encoder.addParam(key, value)
+    }
+    encoder.toString
+  }
+
+  /**
+   * Create a query string from parameters.  The results begins with "?" only if
+   * params is non-empty.
+   */
+  def queryString(params: Tuple2[String, String]*): String =
+    queryString("", params: _*)
+
+  /** Create a query string from URI and parameters. */
+  def queryString(uri: String, params: Map[String, String]): String =
+    queryString(uri, params.toSeq: _*)
+
+  /**
+   * Create a query string from parameters.  The results begins with "?" only if
+   * params is non-empty.
+   */
+  def queryString(params: Map[String, String]): String =
+    queryString("", params.toSeq: _*)
 }

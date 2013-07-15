@@ -2,42 +2,11 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.Proc
 import com.twitter.finagle.{
-  WriteException, ServiceFactory, ServiceFactoryProxy, ClientConnection, FailFastException}
-import com.twitter.util.{
-  Return, Timer, TimerTask, Future, Duration, Time, Throw}
-import java.net.ConnectException
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{ConcurrentLinkedQueue}
-import java.util.logging.{Logger, Level}
+  ClientConnection, ServiceFactory, ServiceFactoryProxy, FailedFastException}
+import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
 import scala.util.Random
-
-private[service] class Proc[T](iteratee: T => Unit) {
-  private[this] val q = new ConcurrentLinkedQueue[T]
-  private[this] val nq = new AtomicInteger(0)
-  @volatile private[this] var closed = false
-
-  def close() { closed = true }
-
-  def !(elem: T) {
-    q.offer(elem)
-    if (nq.getAndIncrement() == 0)
-      do {
-        if (closed)
-          return
-        // Swallow exceptions as these would cause
-        // unbounded queue growth.
-        try iteratee(q.remove()) catch {
-           case exc =>
-             Logger.getLogger("").log(Level.WARNING, "Exception thrown in proc", exc)
-         }
-      } while (nq.decrementAndGet() > 0)
-  }
-}
-
-private[service] object Proc {
-  def apply[T](iteratee: T => Unit): Proc[T] = new Proc(iteratee)
-}
 
 private[finagle] object FailFastFactory {
   private sealed trait State
@@ -49,8 +18,14 @@ private[finagle] object FailFastFactory {
     val Success, Fail, Timeout, TimeoutFail, Close = Value
   }
 
-  private val defaultBackoffs = Backoff.exponential(1.second, 2) take 5
+  private val defaultBackoffs = (Backoff.exponential(1.second, 2) take 5) ++ Backoff.const(32.seconds)
   private val rng = new Random
+
+  // This perhaps should be a write exception, but in reality it's
+  // only dispatched when all hosts in the cluster are failed, and so
+  // we don't want to retry. This is a bit of a kludge--we should
+  // reconsider having this logic in the load balancer instead.
+  private val failedFastExc = Future.exception(new FailedFastException)
 }
 
 /**
@@ -108,7 +83,7 @@ private[finagle] class FailFastFactory[Req, Rep](
         case Throw(exc) => proc ! Observation.TimeoutFail
         case Return(service) =>
           proc ! Observation.Success
-          service.release()
+          service.close()
       }
 
     case Observation.Close =>
@@ -140,17 +115,19 @@ private[finagle] class FailFastFactory[Req, Rep](
     }
 
   override def apply(conn: ClientConnection) =
-    self(conn) respond {
-      case Throw(_) => proc ! Observation.Fail
-      case Return(_) if state != Ok => proc ! Observation.Success
-      case _ =>
+    if (state != Ok) failedFastExc else {
+      self(conn) respond {
+        case Throw(_) => proc ! Observation.Fail
+        case Return(_) if state != Ok => proc ! Observation.Success
+        case _ =>
+      }
     }
 
   override def isAvailable = self.isAvailable && state == Ok
   override val toString = "fail_fast_%s".format(self.toString)
 
-  override def close() = {
+  override def close(deadline: Time) = {
     proc ! Observation.Close
-    self.close()
+    self.close(deadline)
   }
 }

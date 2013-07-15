@@ -1,13 +1,10 @@
 package com.twitter.finagle.example.stream
 
-import com.twitter.concurrent.{Channel, Observer}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stream.{Stream, StreamResponse}
 import com.twitter.conversions.time._
 import com.twitter.util.{Base64StringEncoder => Base64, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpVersion, HttpMethod, DefaultHttpRequest}
 import org.jboss.netty.util.CharsetUtil
 
@@ -43,21 +40,18 @@ object HosebirdClient {
       streamResponse <- client(request)
     } {
       val httpResponse = streamResponse.httpResponse
-      val channel = streamResponse.channel
       if (httpResponse.getStatus.getCode != 200) {
         println(httpResponse.toString)
-        client.release()
+        client.close()
         clientFactory.close()
       } else {
-        var observer: Observer = null
         var messageCount = 0 // Wait for 1000 messages then shut down.
-        observer = channel.respond { buffer =>
+        streamResponse.messages foreach { buffer =>
           messageCount += 1
           println(buffer.toString(CharsetUtil.UTF_8))
           println("--")
           if (messageCount == 1000) {
-            observer.dispose()
-            client.release()
+            client.close()
             clientFactory.close()
           }
           // We return a Future indicating when we've completed processing the message.

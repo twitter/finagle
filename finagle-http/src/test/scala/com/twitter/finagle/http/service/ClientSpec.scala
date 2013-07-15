@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 import org.jboss.netty.channel.local._
 import org.jboss.netty.channel._
@@ -8,13 +8,12 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.handler.codec.http._
 
 import com.twitter.util.TimeConversions._
-import com.twitter.util.Throw
-import com.twitter.finagle.builder.{
-  ClientBuilder, ReferenceCountedChannelFactory}
+import com.twitter.util.{Await, Throw, Try}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
 import com.twitter.finagle.ChannelClosedException
 
-object ClientSpec extends Specification {
+class ClientSpec extends SpecificationWithJUnit {
   def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[HttpRequest, HttpResponse] => Unit) {
     val cf = new DefaultLocalServerChannelFactory()
 
@@ -32,7 +31,7 @@ object ClientSpec extends Specification {
 
     val builder =
       ClientBuilder()
-        .channelFactory(new ReferenceCountedChannelFactory(new DefaultLocalClientChannelFactory))
+        .channelFactory(new DefaultLocalClientChannelFactory)
         .hosts(Seq(serverAddress))
         .hostConnectionLimit(1)
         .codec(Http())
@@ -59,7 +58,7 @@ object ClientSpec extends Specification {
         // No failures have happened yet.
         client.isAvailable must beTrue
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future get(1.second)
+        val resolved = Try(Await.result(future, 1.second))
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]
@@ -72,7 +71,7 @@ object ClientSpec extends Specification {
           .retries(10)
           .build()
         val future = client(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
-        val resolved = future get(1.second)
+        val resolved = Try(Await.result(future, 1.second))
         resolved.isThrow must beTrue
         val Throw(cause) = resolved
         cause must haveClass[ChannelClosedException]

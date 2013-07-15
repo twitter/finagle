@@ -1,20 +1,16 @@
 package com.twitter.finagle.stream
 
 import com.twitter.concurrent._
-import com.twitter.concurrent._
-import com.twitter.conversions.time._
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.util.{Future, CountDownLatch, Promise, Return}
+import com.twitter.util.{Await, Future, Promise, Return, Try}
 import java.net.InetSocketAddress
 import java.nio.charset.Charset
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.jboss.netty.handler.codec.http.{
-  DefaultHttpRequest, HttpRequest, HttpMethod, HttpVersion}
-import org.specs.Specification
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.specs.SpecificationWithJUnit
 
-object DuplexStreamSpec extends Specification {
+class DuplexStreamSpec extends SpecificationWithJUnit {
   class SimpleService extends Service[DuplexStreamHandle, Offer[ChannelBuffer]] {
     var handle: Promise[DuplexStreamHandle] = new Promise[DuplexStreamHandle]
     var input: Promise[Offer[ChannelBuffer]] = new Promise[Offer[ChannelBuffer]]
@@ -32,7 +28,7 @@ object DuplexStreamSpec extends Specification {
   }
 
   implicit def bufferToString(buf: ChannelBuffer): String = {
-    buf.toString(Charset.defaultCharset)
+    buf.toString(Charset.forName("UTF-8"))
   }
 
   "SimpleService" should {
@@ -52,51 +48,51 @@ object DuplexStreamSpec extends Specification {
         .hostConnectionLimit(1)
         .buildFactory()
 
-      val client = factory()()
+      val client = Await.result(factory())
 
       val outbound = new Broker[ChannelBuffer]
-      val handle = client(outbound.recv)()
+      val handle = Await.result(client(outbound.recv))
       val inbound = handle.messages
 
       "receive and reverse" in {
         service.input.isDefined mustEqual true
-        val input = service.input()
-        input() foreach { str =>
-          service.output.send(bufferToString(str).reverse)()
+        val input = Await.result(service.input)
+        input.sync() foreach { str =>
+          service.output.send(bufferToString(str).reverse).sync()
         }
 
-        outbound.send("hello")()
-        bufferToString(inbound()()) mustEqual "olleh"
+        outbound.send("hello").sync()
+        bufferToString(Await.result(inbound.sync())) mustEqual "olleh"
       }
 
       "send two consequitive messages and receive them" in {
         var count = 0
 
         service.input.isDefined mustEqual true
-        val input = service.input()
+        val input = Await.result(service.input)
 
         input foreach { _ =>
           count += 1
           if (count == 2) {
-            service.output.send("done")()
+            service.output.send("done").sync()
           }
         }
-        outbound.send("hello")()
-        outbound.send("world")()
-        bufferToString(inbound()()) mustEqual "done"
+        outbound.send("hello").sync()
+        outbound.send("world").sync()
+        bufferToString(Await.result(inbound.sync())) mustEqual "done"
         count mustEqual 2
       }
 
       "server closes when client initiates close" in {
-        service.handle().onClose.isDefined mustEqual false
+        Await.result(service.handle).onClose.isDefined mustEqual false
         handle.close()
-        service.handle().onClose.get(1.seconds) mustEqual Return(())
+        Try(Await.result(Await.result(service.handle).onClose, 1.seconds)) mustEqual Return(())
       }
 
       "client closes when server initiates close" in {
         handle.onClose.isDefined mustEqual false
-        service.handle().close()
-        handle.onClose.get(1.seconds) mustEqual Return(())
+        Await.result(service.handle).close()
+        Try(Await.result(handle.onClose, 1.seconds)) mustEqual Return(())
       }
     }
   }

@@ -1,17 +1,16 @@
 package com.twitter.finagle.memcached.java;
 
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+
 import com.twitter.finagle.Service;
-import com.twitter.finagle.memcached.KetamaClientKey;
-import com.twitter.finagle.memcached.KetamaClient;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * A Java-friendly memcached client.

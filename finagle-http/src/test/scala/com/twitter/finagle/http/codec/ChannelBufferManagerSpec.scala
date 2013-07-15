@@ -1,18 +1,16 @@
 package com.twitter.finagle.http.codec
 
-import java.nio.charset.Charset
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.buffer.ChannelBuffers
 
 import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.conversions.storage._
 
-object ChannelBufferManagerSpec extends Specification with Mockito {
+class ChannelBufferManagerSpec extends SpecificationWithJUnit with Mockito {
   val me = mock[MessageEvent]
   val c = mock[Channel]
   val ctx = mock[ChannelHandlerContext]

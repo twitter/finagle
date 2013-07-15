@@ -1,39 +1,19 @@
 package com.twitter.finagle.builder
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.GlobalRequestTimeoutException
+import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
+import com.twitter.util.Await
+import java.net.SocketAddress
 import org.specs.SpecificationWithJUnit
-import com.twitter.concurrent.Spool
-import com.twitter.util.{Return, Promise}
-import collection.mutable
+import scala.collection.mutable
 
 class ClusterSpec extends SpecificationWithJUnit {
   case class WrappedInt(val value: Int)
 
-  class ClusterInt extends Cluster[Int] {
-    var set = mutable.HashSet.empty[Int]
-    var changes = new Promise[Spool[Cluster.Change[Int]]]
-
-    def add(value: Int) = {
-      set += value
-      performChange(Cluster.Add(value))
-    }
-
-    def del(value: Int) = {
-      set -= value
-      performChange(Cluster.Rem(value))
-    }
-
-    private[this] def performChange(change: Cluster.Change[Int]) = {
-      val newTail = new Promise[Spool[Cluster.Change[Int]]]
-      changes() = Return(change *:: newTail)
-      changes = newTail
-    }
-
-    def snap = (set.toSeq, changes)
-  }
-
   "Cluster map" should {
     val N = 10
-    val cluster1 = new ClusterInt()
+    val cluster1 = new DynamicCluster[Int]()
     val cluster2 = cluster1.map(a => WrappedInt(a))
 
     "provide 1-1 mapping to the result cluster" in {
@@ -84,6 +64,40 @@ class ClusterSpec extends SpecificationWithJUnit {
       changes must haveSize(9)
       for (ch <- changes take 8)
         ch.value mustNot be(changes(8).value)
+    }
+  }
+
+  "Cluster ready" should {
+    "wait on cluster initialization" in {
+      val cluster = new DynamicCluster[Int]()
+      val ready = cluster.ready
+      ready.isDefined must beFalse
+      cluster.del(1)
+      ready.isDefined must beFalse
+      cluster.add(1)
+      ready.isDefined must beTrue
+    }
+
+    "always be defined on StaticCluster" in {
+      val cluster = new StaticCluster[Int](Seq[Int](1, 2))
+      cluster.ready.isDefined must beTrue
+    }
+
+    // Cluster initialization should honor global timeout as well as timeout specified
+    // together with the requests
+    "honor timeout while waiting for cluster to initialize" in {
+      val cluster = new DynamicCluster[SocketAddress](Seq[SocketAddress]()) //empty cluster
+      val client = ClientBuilder()
+          .cluster(cluster)
+          .codec(StringCodec)
+          .hostConnectionLimit(1)
+          .timeout(1.seconds) //global time out
+          .build()
+
+      Await.result(client("hello1")) must throwA[GlobalRequestTimeoutException]
+
+      // It also should honor timeout specified with the request
+      Await.result(client("hello2"), 10.milliseconds) must throwA[com.twitter.util.TimeoutException]
     }
   }
 }

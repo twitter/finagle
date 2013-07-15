@@ -1,13 +1,12 @@
 package com.twitter.finagle.pool
 
-import collection.mutable.Queue
-import scala.annotation.tailrec
-
-import com.twitter.util.{Future, Time, Duration}
-
-import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, ServiceClosedException, ClientConnection}
-import com.twitter.finagle.util.{Timer, Cache}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util.Cache
+import com.twitter.finagle.{
+  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy
+}
+import com.twitter.util.{Future, Time, Duration, Timer}
+import scala.annotation.tailrec
 
 /**
  * A pool that temporarily caches items from the underlying one, up to
@@ -17,12 +16,12 @@ private[finagle] class CachingPool[Req, Rep](
   factory: ServiceFactory[Req, Rep],
   cacheSize: Int,
   ttl: Duration,
-  timer: com.twitter.util.Timer = Timer.default,
+  timer: Timer,
   statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep]
 {
   private[this] val cache =
-    new Cache[Service[Req, Rep]](cacheSize, ttl, timer, Some(_.release()))
+    new Cache[Service[Req, Rep]](cacheSize, ttl, timer, Some(_.close()))
   @volatile private[this] var isOpen = true
   private[this] val sizeGauge =
     statsReceiver.addGauge("pool_cached") { cache.size }
@@ -30,18 +29,19 @@ private[finagle] class CachingPool[Req, Rep](
   private[this] class WrappedService(underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def release() =
-      if (this.isAvailable && CachingPool.this.isOpen)
+    override def close(deadline: Time) =
+      if (this.isAvailable && CachingPool.this.isOpen) {
         cache.put(underlying)
-      else
-        underlying.release()
+        Future.Done
+      } else
+        underlying.close(deadline)
   }
 
   @tailrec
   private[this] def get(): Option[Service[Req, Rep]] = {
     cache.get() match {
       case s@Some(service) if service.isAvailable => s
-      case Some(service) /* unavailable */ => service.release(); get()
+      case Some(service) /* unavailable */ => service.close(); get()
       case None => None
     }
   }
@@ -57,14 +57,14 @@ private[finagle] class CachingPool[Req, Rep](
     }
   }
 
-  def close() = synchronized {
+  def close(deadline: Time) = synchronized {
     isOpen = false
 
     cache.evictAll()
-    factory.close()
+    factory.close(deadline)
   }
 
-  override def isAvailable = isOpen
+  override def isAvailable = isOpen && factory.isAvailable
 
   override val toString = "caching_pool_%s".format(factory.toString)
 }

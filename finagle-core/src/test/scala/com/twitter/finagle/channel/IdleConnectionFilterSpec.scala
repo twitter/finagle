@@ -1,14 +1,16 @@
 package com.twitter.finagle.channel
 
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
+import com.twitter.util.TimeConversions._
+import com.twitter.util.{Await, Future, Promise, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import com.twitter.finagle.{Service, ServiceFactory, ClientConnection}
-import com.twitter.util.TimeConversions._
-import com.twitter.util.{Time, Future, Promise}
 
 class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
   "IdleConnectionFilter" should {
-    val underlying = ServiceFactory.const(mock[Service[String, String]])
+    val service = mock[Service[String, String]]
+    service.close(any) returns Future.Done
+    val underlying = ServiceFactory.const(service)
 
     val threshold = OpenConnectionsThresholds(2, 4, 1.second)
     val filter = new IdleConnectionFilter(underlying, threshold)
@@ -19,6 +21,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
       c.onClose returns closeFuture
       c.close() answers { _ =>
         closeFuture.setValue(())
+        closeFuture
       }
       filter(c)
       (c, closeFuture)
@@ -81,6 +84,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
         c.onClose returns closeFuture
         c.close() answers { _ =>
           closeFuture.setValue(())
+          closeFuture
         }
         spyFilter(c)
 
@@ -106,7 +110,7 @@ class IdleConnectionFilterSpec extends SpecificationWithJUnit with Mockito {
         // Open all connections
         (1 to threshold.highWaterMark) map { _ =>
           val (c,_) = open(spyFilter)
-          spyFilter.filterFactory(c)("titi", underlying(c)())
+          spyFilter.filterFactory(c)("titi", Await.result(underlying(c)))
         }
 
         // Simulate response from the server

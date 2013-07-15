@@ -1,32 +1,38 @@
 package com.twitter.finagle.thrift
 
-import collection.JavaConversions._
-
-import org.apache.thrift.protocol.{TMessage, TMessageType}
+import com.twitter.finagle._
+import com.twitter.finagle.tracing._
+import com.twitter.finagle.util.ByteArrays
+import com.twitter.util.Future
+import java.net.InetSocketAddress
+import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory, TBinaryProtocol}
+import org.apache.thrift.{TApplicationException, TException}
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
   SimpleChannelDownstreamHandler, MessageEvent, Channels,
   ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
-import java.net.InetSocketAddress
-
-import com.twitter.util.Future
-import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Annotation, TraceId, SpanId}
-import com.twitter.finagle.util.ByteArrays
-import org.apache.thrift.{TApplicationException, TException}
 
 object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodecFactory
+  def apply(protocolFactory: TProtocolFactory) =
+    new ThriftServerFramedCodecFactory(protocolFactory)
+
   def get()   = apply()
 }
 
-class ThriftServerFramedCodecFactory extends CodecFactory[Array[Byte], Array[Byte]]#Server {
+class ThriftServerFramedCodecFactory(protocolFactory: TProtocolFactory)
+    extends CodecFactory[Array[Byte], Array[Byte]]#Server
+{
+  def this() = this(new TBinaryProtocol.Factory())
   def apply(config: ServerCodecConfig) =
-    new ThriftServerFramedCodec(config)
+    new ThriftServerFramedCodec(config, protocolFactory)
 }
 
-class ThriftServerFramedCodec(config: ServerCodecConfig) extends Codec[Array[Byte], Array[Byte]] {
+class ThriftServerFramedCodec(
+    config: ServerCodecConfig,
+    protocolFactory: TProtocolFactory = new TBinaryProtocol.Factory()
+) extends Codec[Array[Byte], Array[Byte]] {
   def pipelineFactory =
     new ChannelPipelineFactory {
       def getPipeline() = {
@@ -38,13 +44,32 @@ class ThriftServerFramedCodec(config: ServerCodecConfig) extends Codec[Array[Byt
       }
     }
 
-  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
-    val boundAddress = config.boundAddress match {
-      case ia: InetSocketAddress => ia
-      case _ => new InetSocketAddress(0)
-    }
-    val trace = new ThriftServerTracingFilter(config.serviceName, boundAddress)
-    trace andThen HandleUncaughtApplicationExceptions andThen factory
+  private[this] val boundAddress = config.boundAddress match {
+    case ia: InetSocketAddress => ia
+    case _ => new InetSocketAddress(0)
+  }
+
+  private[this] val preparer = ThriftServerPreparer(
+    protocolFactory, config.serviceName, boundAddress)
+
+  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) =
+    preparer.prepare(factory)
+}
+
+private case class ThriftServerPreparer(
+  protocolFactory: TProtocolFactory, 
+  serviceName: String, 
+  boundAddress: InetSocketAddress) {
+
+  private[this] val uncaughtExceptionsFilter = 
+    new HandleUncaughtApplicationExceptions(protocolFactory)
+
+  def prepare(
+    factory: ServiceFactory[Array[Byte], Array[Byte]]
+  ): ServiceFactory[Array[Byte], Array[Byte]] = factory map { service =>
+    val trace = new ThriftServerTracingFilter(
+      serviceName, boundAddress, protocolFactory)
+    trace andThen uncaughtExceptionsFilter andThen service
   }
 }
 
@@ -64,7 +89,8 @@ private[thrift] class ThriftServerChannelBufferEncoder
   }
 }
 
-private[thrift] object HandleUncaughtApplicationExceptions
+private[finagle]
+class HandleUncaughtApplicationExceptions(protocolFactory: TProtocolFactory)
   extends SimpleFilter[Array[Byte], Array[Byte]]
 {
   def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) =
@@ -73,10 +99,10 @@ private[thrift] object HandleUncaughtApplicationExceptions
         // NB! This is technically incorrect for one-way calls,
         // but we have no way of knowing it here. We may
         // consider simply not supporting one-way calls at all.
-        val msg = InputBuffer.readMessageBegin(request)
+        val msg = InputBuffer.readMessageBegin(request, protocolFactory)
         val name = msg.name
 
-        val buffer = new OutputBuffer
+        val buffer = new OutputBuffer(protocolFactory)
         buffer().writeMessageBegin(
           new TMessage(name, TMessageType.EXCEPTION, msg.seqid))
 
@@ -94,7 +120,8 @@ private[thrift] object HandleUncaughtApplicationExceptions
 
 private[thrift] class ThriftServerTracingFilter(
   serviceName: String,
-  boundAddress: InetSocketAddress
+  boundAddress: InetSocketAddress,
+  protocolFactory: TProtocolFactory
 ) extends SimpleFilter[Array[Byte], Array[Byte]]
 {
   // Concurrency is not an issue here since we have an instance per
@@ -104,7 +131,7 @@ private[thrift] class ThriftServerTracingFilter(
   private[this] var isUpgraded = false
 
   private[this] lazy val successfulUpgradeReply = Future {
-    val buffer = new OutputBuffer
+    val buffer = new OutputBuffer(protocolFactory)
     buffer().writeMessageBegin(
       new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, 0))
     val upgradeReply = new thrift.UpgradeReply
@@ -120,9 +147,9 @@ private[thrift] class ThriftServerTracingFilter(
     // What to do on exceptions here?
     if (isUpgraded) {
       val header = new thrift.RequestHeader
-      val request_ = InputBuffer.peelMessage(request, header)
+      val request_ = InputBuffer.peelMessage(request, header, protocolFactory)
 
-      val msg = new InputBuffer(request_)().readMessageBegin()
+      val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
       val sampled = if (header.isSetSampled) Some(header.isSampled) else None
       // if true, we trace this request. if None client does not trace, we get to decide
 
@@ -130,12 +157,11 @@ private[thrift] class ThriftServerTracingFilter(
         if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
         SpanId(header.getSpan_id),
-        sampled)
+        sampled,
+        if (header.isSetFlags) Flags(header.getFlags) else Flags())
 
-
-      Trace.pushId(traceId)
+      Trace.setId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
-      Trace.recordServerAddr(boundAddress)
       Trace.record(Annotation.ServerRecv())
 
       try {
@@ -145,14 +171,14 @@ private[thrift] class ThriftServerTracingFilter(
           case response =>
             Trace.record(Annotation.ServerSend())
             val responseHeader = new thrift.ResponseHeader
-            ByteArrays.concat(OutputBuffer.messageToArray(responseHeader), response)
+            ByteArrays.concat(OutputBuffer.messageToArray(responseHeader, protocolFactory), response)
         }
       } finally {
         ClientId.clear()
       }
 
     } else {
-      val buffer = new InputBuffer(request)
+      val buffer = new InputBuffer(request, protocolFactory)
       val msg = buffer().readMessageBegin()
 
       // TODO: only try once?
@@ -168,10 +194,10 @@ private[thrift] class ThriftServerTracingFilter(
       } else {
         // request from client without tracing support
 
-        Trace.recordServerAddr(boundAddress)
         Trace.recordRpcname(serviceName, msg.name)
 
         Trace.record(Annotation.ServerRecv())
+        Trace.record("finagle.thrift.noUpgrade")
 
         service(request) map { response =>
           Trace.record(Annotation.ServerSend())

@@ -1,12 +1,11 @@
 package com.twitter.finagle.kestrel
 package unit
 
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.concurrent.{ChannelSource, Channel}
-import com.twitter.util.{Future, Duration, Time, Return, Throw, MockTimer, Promise}
+import com.twitter.util.{Await, Future, Duration, Time, MockTimer, Promise}
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 
@@ -21,14 +20,12 @@ class MockClient extends Client {
   def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]] = null
   def delete(queueName: String): Future[Response] = null
   def flush(queueName: String): Future[Response] = null
-  def from(queueName: String, waitUpTo: Duration = 0.seconds): Channel[ChannelBuffer] = null
-  def to(queueName: String): ChannelSource[ChannelBuffer] = null
   def read(queueName: String): ReadHandle = null
   def write(queueName: String, offer: Offer[ChannelBuffer]): Future[Throwable] = null
   def close() {}
 }
 
-object ClientSpec extends Specification with Mockito {
+class ClientSpec extends SpecificationWithJUnit with Mockito {
   def buf(i: Int) = ChannelBuffers.wrappedBuffer("%d".format(i).getBytes)
   def msg(i: Int) = {
     val m = mock[ReadMessage]
@@ -56,7 +53,7 @@ object ClientSpec extends Specification with Mockito {
 
       messages ! m
       f.isDefined must beTrue
-      f() must be(m)
+      Await.result(f) must be(m)
 
       (h.messages?).isDefined must beFalse
     }
@@ -87,7 +84,7 @@ object ClientSpec extends Specification with Mockito {
       val m2 = msg(2)
       messages2 ! m2
       f.isDefined must beTrue
-      f() must be(m2)
+      Await.result(f) must be(m2)
     }
 
     "reconnect on failure (with delay)" in Time.withCurrentTimeFrozen { tc =>
@@ -110,7 +107,7 @@ object ClientSpec extends Specification with Mockito {
       error ! new Exception("final sad panda")
 
       errf.isDefined must beTrue
-      errf() must be_==(OutOfRetriesException)
+      Await.result(errf) must be_==(OutOfRetriesException)
     }
 
     "close on close requested" in {
@@ -126,22 +123,26 @@ object ClientSpec extends Specification with Mockito {
     val factory = mock[ServiceFactory[Command, Response]]
     val service = mock[Service[Command, Response]]
     val client = new ConnectedClient(factory)
-    val open = Open(queueName, Some(Duration.MaxValue))
-    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.MaxValue))
+    val open = Open(queueName, Some(Duration.Top))
+    val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
     val abort = Abort(queueName)
 
-    "cancel current request on close" in {
-      factory.make returns Future(service)
+    "interrupt current request on close" in {
+      factory.apply() returns Future(service)
       val promise = new Promise[Response]()
+      @volatile var wasInterrupted = false
+      promise.setInterruptHandler { case _cause =>
+        wasInterrupted = true
+      }
       service(open) returns promise
       service(closeAndOpen) returns promise
       service(abort) returns Future(Values(Seq()))
 
       val rh = client.read(queueName)
 
-      promise.isCancelled must beFalse
+      wasInterrupted must beFalse
       rh.close()
-      promise.isCancelled must beTrue
+      wasInterrupted must beTrue
     }
   }
 }

@@ -2,7 +2,6 @@ package com.twitter.finagle.example.echo
 
 import com.twitter.finagle.builder.ClientBuilder
 import java.net.InetSocketAddress
-import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 
 object EchoClient {
@@ -22,7 +21,7 @@ object EchoClient {
       error.printStackTrace()
     } ensure {
       // All done! Close TCP connection(s):
-      client.release()
+      client.close()
     }
   }
 }

@@ -1,13 +1,13 @@
 package com.twitter.finagle.http.service
 
-import org.specs.Specification
-import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Request, Response, Status}
+import org.specs.SpecificationWithJUnit
+import com.twitter.finagle.http.{Request, Status}
 import com.twitter.finagle.http.path._
 import com.twitter.finagle.http.path.{Path => FPath}
+import com.twitter.util.Await
 
 
-object RoutingServiceSpec extends Specification {
+class RoutingServiceSpec extends SpecificationWithJUnit {
 
   "RoutingServiceSpec" should {
     "RoutingService.byPath" in {
@@ -15,8 +15,8 @@ object RoutingServiceSpec extends Specification {
         case "/test.json" => NullService
       }
 
-      service(Request("/test.json"))().status must_== Status.Ok
-      service(Request("/unknown"))().status   must_== Status.NotFound
+      Await.result(service(Request("/test.json"))).status must_== Status.Ok
+      Await.result(service(Request("/unknown"))).status   must_== Status.NotFound
     }
 
     "RoutingService.byPathObject" in {
@@ -24,8 +24,8 @@ object RoutingServiceSpec extends Specification {
         case Root / "test" ~ "json" => NullService
       }
 
-      service(Request("/test.json"))().status must_== Status.Ok
-      service(Request("/unknown"))().status   must_== Status.NotFound
+      Await.result(service(Request("/test.json"))).status must_== Status.Ok
+      Await.result(service(Request("/unknown"))).status   must_== Status.NotFound
     }
   }
 }

@@ -26,15 +26,15 @@ private[finagle] trait CumulativeGauge {
   private[this] def removeGauge(underlyingGauge: UnderlyingGauge) = synchronized {
     // This does a GC also.
     underlying = underlying filter { _.get map { _ ne underlyingGauge } getOrElse false }
-    if (underlying.isEmpty) 
+    if (underlying.isEmpty)
       deregister()
   }
 
   def addGauge(f: => Float): Gauge = synchronized {
     val shouldRegister = underlying.isEmpty
-    val underlyingGauge = UnderlyingGauge(() => f)   
+    val underlyingGauge = UnderlyingGauge(() => f)
     underlying ::= new WeakReference(underlyingGauge)
-    if (shouldRegister) 
+    if (shouldRegister)
       register()
     underlyingGauge
   }

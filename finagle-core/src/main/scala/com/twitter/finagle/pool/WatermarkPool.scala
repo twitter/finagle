@@ -1,14 +1,11 @@
 package com.twitter.finagle.pool
 
-import scala.annotation.tailrec
-import scala.collection.mutable.Queue
-
-import com.twitter.util.{Future, Promise, Return, Throw}
-import com.twitter.finagle.{
-  Service, ServiceFactory, ServiceClosedException,
-  TooManyWaitersException, ServiceProxy,
-  CancelledConnectionException, ClientConnection}
+import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.util.{Future, Promise, Time, Throw, Return}
+import java.util.ArrayDeque
+import scala.annotation.tailrec
+import scala.collection.JavaConverters._
 
 /**
  * The watermark pool is an object pool with low & high
@@ -29,13 +26,13 @@ class WatermarkPool[Req, Rep](
     maxWaiters: Int = Int.MaxValue)
   extends ServiceFactory[Req, Rep]
 {
-  private[this] val queue       = Queue[ServiceWrapper]()
-  private[this] val waiters     = Queue[Promise[Service[Req, Rep]]]()
+  private[this] val queue       = new ArrayDeque[ServiceWrapper]()
+  private[this] val waiters     = new ArrayDeque[Promise[Service[Req, Rep]]]()
   private[this] var numServices = 0
-  private[this] var isOpen      = true
+  @volatile private[this] var isOpen      = true
 
-  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { waiters.size }
-  private[this] val sizeStat = statsReceiver.addGauge("pool_size") { numServices }
+  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { synchronized { waiters.size } }
+  private[this] val sizeStat = statsReceiver.addGauge("pool_size") { synchronized { numServices } }
 
   /**
    * Flush waiters by creating new services for them. This must
@@ -43,35 +40,43 @@ class WatermarkPool[Req, Rep](
    */
   private[this] def flushWaiters() = synchronized {
     while (numServices < highWatermark && !waiters.isEmpty) {
-      val waiter = waiters.dequeue()
-      val res = this() respond { waiter() = _ }
-      waiter.linkTo(res)
+      val waiter = waiters.removeFirst()
+      waiter.become(this())
     }
   }
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def release() = WatermarkPool.this.synchronized {
-      if (!isOpen) {
-        underlying.release()
-        numServices -= 1
-      } else if (!isAvailable) {
-        underlying.release()
-        numServices -= 1
-        // If we just disposed of an service, and this bumped us beneath
-        // the high watermark, then we are free to satisfy the first
-        // waiter.
-        flushWaiters()
-      } else if (!waiters.isEmpty) {
-        val waiter = waiters.dequeue()
-        waiter() = Return(this)
-      } else if (numServices <= lowWatermark) {
-        queue += this
-      } else {
-        underlying.release()
-        numServices -= 1
+    override def close(deadline: Time) = {
+      val releasable = WatermarkPool.this.synchronized {
+        if (!isOpen) {
+          numServices -= 1
+          true
+        } else if (!isAvailable) {
+          numServices -= 1
+          // If we just disposed of an service, and this bumped us beneath
+          // the high watermark, then we are free to satisfy the first
+          // waiter.
+          flushWaiters()
+          true
+        } else if (!waiters.isEmpty) {
+          val waiter = waiters.removeFirst()
+          waiter() = Return(this)
+          false
+        } else if (numServices <= lowWatermark) {
+          queue.addLast(this)
+          false
+        } else {
+          numServices -= 1
+          true
+        }
       }
+
+      if (releasable)
+        underlying.close(deadline)
+      else
+        Future.Done
     }
   }
 
@@ -79,11 +84,11 @@ class WatermarkPool[Req, Rep](
     if (queue.isEmpty) {
       None
     } else {
-      val service = queue.dequeue()
+      val service = queue.removeFirst()
       if (!service.isAvailable) {
         // Note: since these are ServiceWrappers, accounting is taken
-        // care of by ServiceWrapper.release()
-        service.release()
+        // care of by ServiceWrapper.close()
+        service.close()
         dequeue()
       } else {
         Some(service)
@@ -91,36 +96,49 @@ class WatermarkPool[Req, Rep](
     }
   }
 
-  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (!isOpen)
       return Future.exception(new ServiceClosedException)
 
-    dequeue() match {
-      case Some(service) =>
-        Future.value(service)
-      case None if numServices < highWatermark =>
-        numServices += 1
-        factory(conn) onFailure { _ =>
-          synchronized {
-            numServices -= 1
-            flushWaiters()
+    synchronized {
+      dequeue() match {
+        case Some(service) =>
+          return Future.value(service)
+        case None if numServices < highWatermark =>
+          numServices += 1
+        case None if waiters.size >= maxWaiters =>
+          return Future.exception(new TooManyWaitersException)
+        case None =>
+          val p = new Promise[Service[Req, Rep]]
+          waiters.addLast(p)
+          p.setInterruptHandler { case _cause =>
+            // TODO: use cause
+            if (WatermarkPool.this.synchronized(waiters.remove(p)))
+              p.setException(new CancelledConnectionException)
           }
-        } map { new ServiceWrapper(_) }
-      case None if waiters.size >= maxWaiters =>
-        Future.exception(new TooManyWaitersException)
-      case None =>
-        val promise = new Promise[Service[Req, Rep]]
-        waiters += promise
-        promise onCancellation {
-          // remove ourselves from the waitlist if we're still there.
-          val dq = synchronized { waiters.dequeueFirst { _ eq promise } }
-          dq foreach { _() = Throw(new CancelledConnectionException) }
-        }
-        promise
+          return p
+      }
     }
+
+    // If we reach this point, we've committed to creating a service
+    // (numServices was increased by one).
+    val p = new Promise[Service[Req, Rep]]
+    val underlying = factory(conn) map { new ServiceWrapper(_) }
+    underlying respond { res =>
+      p.updateIfEmpty(res)
+      if (res.isThrow) synchronized {
+        numServices -= 1
+        flushWaiters()
+      }
+    }
+    p.setInterruptHandler { case e =>
+      if (p.updateIfEmpty(Throw(WriteException(e))))
+        underlying onSuccess { _.close() }
+    }
+    p
   }
 
-  def close() = synchronized {
+  def close(deadline: Time) = synchronized {
     // Mark the pool closed, relinquishing completed requests &
     // denying the issuance of further requests. The order here is
     // important: we mark the service unavailable before releasing the
@@ -129,18 +147,18 @@ class WatermarkPool[Req, Rep](
     isOpen = false
 
     // Drain the pool.
-    queue foreach { _.release() }
+    queue.asScala foreach { _.close() }
     queue.clear()
 
     // Kill the existing waiters.
-    waiters foreach { _() = Throw(new ServiceClosedException) }
+    waiters.asScala foreach { _() = Throw(new ServiceClosedException) }
     waiters.clear()
 
     // Close the underlying factory.
-    factory.close()
+    factory.close(deadline)
   }
 
-  override def isAvailable = isOpen
+  override def isAvailable = isOpen && factory.isAvailable
 
   override val toString = "watermark_pool_%s".format(factory.toString)
 }

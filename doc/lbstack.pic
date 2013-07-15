@@ -1,0 +1,17 @@
+.\" Shows ServiceFactory stack
+.sp
+.PS
+maxpswid=100
+maxpsht=100
+boxwid=1.4
+.ps +10
+
+copy "service.pic"
+
+stack; move; stack
+
+box "\fIServiceFactory (LoadBalancer) - GroupSession\fP" with .n at 1/2 of the way between 2nd last [].sw and last [].se + (0, -.5) wid 2*last [].wid + movewid thickness 2
+
+.\" box with .nw at Fst.nw ht Fst.Bound.ht
+.\" box with .nw at 3rd last [].nw wid 3*last [].wid ht last [].ht
+.PE

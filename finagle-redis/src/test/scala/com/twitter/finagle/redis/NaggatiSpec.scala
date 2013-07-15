@@ -1,23 +1,30 @@
-package com.twitter.finagle.redis
-package protocol
+package com.twitter.finagle.redis.protocol
 
-import util._
 
-import org.specs.Specification
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import com.twitter.conversions.time._
-import com.twitter.naggati.test._
-import com.twitter.util.{Future, Time}
-import org.jboss.netty.channel.Channel
+import com.twitter.finagle.redis.{ClientError, ServerError}
+import com.twitter.finagle.redis.naggati.test._
+import com.twitter.finagle.redis.util._
+import com.twitter.util.Time
+import org.specs.SpecificationWithJUnit
+import org.jboss.netty.buffer.ChannelBuffer
 
-class NaggatiSpec extends Specification {
+class NaggatiSpec extends SpecificationWithJUnit {
   import com.twitter.logging.Logger
   Logger.reset()
   val log = Logger()
   log.setUseParentHandlers(false)
   log.setLevel(Logger.ALL)
 
-  def wrap(s: String) = ChannelBuffers.wrappedBuffer(s.getBytes) 
+  val foo = StringToChannelBuffer("foo")
+  val bar = StringToChannelBuffer("bar")
+  val baz = StringToChannelBuffer("baz")
+  val boo = StringToChannelBuffer("boo")
+  val moo = StringToChannelBuffer("moo")
+  val key = s2cb("key")
+
+  def wrap(s: String) = StringToChannelBuffer(s)
+  implicit def s2cb(s: String) = StringToChannelBuffer(s)
 
   "A Redis Request" should {
     val commandCodec = new CommandCodec
@@ -27,13 +34,13 @@ class NaggatiSpec extends Specification {
       "inline requests" >> {
         "key commands" >> {
           "DEL" >> {
-            codec(wrap("DEL foo\r\n")) mustEqual List(Del(List("foo")))
-            codec(wrap("DEL foo bar\r\n")) mustEqual List(Del(List("foo", "bar")))
+            codec(wrap("DEL foo\r\n")) mustEqual List(Del(List(foo)))
+            codec(wrap("DEL foo bar\r\n")) mustEqual List(Del(List(foo, bar)))
             codec(wrap("DEL\r\n")) must throwA[ClientError]
           }
           "EXISTS" >> {
             codec(wrap("EXISTS\r\n")) must throwA[ClientError]
-            codec(wrap("EXISTS foo\r\n")) mustEqual List(Exists("foo"))
+            codec(wrap("EXISTS foo\r\n")) mustEqual List(Exists(foo))
           }
           "EXPIRE" >> {
             codec(wrap("EXPIRE foo 100\r\n")) mustEqual List(Expire("foo", 100))
@@ -42,8 +49,10 @@ class NaggatiSpec extends Specification {
           "EXPIREAT" >> {
             codec(wrap("EXPIREAT foo 100\r\n")) must throwA[ClientError]
             val time = Time.now + 10.seconds
+            val foo = s2cb("foo")
             unwrap(codec(wrap("EXPIREAT foo %d\r\n".format(time.inSeconds)))) {
-              case ExpireAt("foo", timestamp) => timestamp.inSeconds mustEqual time.inSeconds
+              case ExpireAt(foo, timestamp) =>
+              timestamp.inSeconds mustEqual time.inSeconds
             }
           }
           "KEYS" >> {
@@ -52,6 +61,22 @@ class NaggatiSpec extends Specification {
           "PERSIST" >> {
             codec(wrap("PERSIST\r\n")) must throwA[ClientError]
             codec(wrap("PERSIST foo\r\n")) mustEqual List(Persist("foo"))
+          }
+          "PEXPIRE" >> {
+            codec(wrap("PEXPIRE foo 100000\r\n")) mustEqual List(PExpire("foo", 100000L))
+            codec(wrap("PEXPIRE foo -1\r\n")) must throwA[ClientError]
+          }
+          "PEXPIREAT" >> {
+            codec(wrap("PEXPIREAT foo 100000\r\n")) must throwA[ClientError]
+            val time = Time.now + 10.seconds
+            val foo = s2cb("foo")
+            unwrap(codec(wrap("PEXPIREAT foo %d\r\n".format(time.inMilliseconds)))) {
+              case PExpireAt(foo, timestamp) =>
+                timestamp.inMilliseconds mustEqual time.inMilliseconds
+            }
+          }
+          "PTTL" >> {
+            codec(wrap("PTTL foo\r\n")) mustEqual List(PTtl("foo"))
           }
           "RENAME" >> {
             codec(wrap("RENAME\r\n")) must throwA[ClientError]
@@ -83,21 +108,21 @@ class NaggatiSpec extends Specification {
             bad.foreach { e =>
               codec(wrap("%s\r\n".format(e))) must throwA[ClientError]
             }
-
+            val nums = s2cb("nums")
             unwrap(codec(wrap("ZADD nums 3.14159 pi\r\n"))) {
-              case ZAdd("nums", members) =>
+              case ZAdd(nums, members) =>
                 unwrap(members) { case ZMember(3.14159, value) =>
-                    BytesToString(value) mustEqual "pi"
+                    BytesToString(value.array) mustEqual "pi"
                 }
             }
             unwrap(codec(wrap("ZADD nums 3.14159 pi 2.71828 e\r\n"))) {
-              case ZAdd("nums", members) => members match {
+              case ZAdd(nums, members) => members.toList match {
                 case pi :: e :: Nil =>
                   unwrap(List(pi)) { case ZMember(3.14159, value) =>
-                    BytesToString(value) mustEqual "pi"
+                    BytesToString(value.array) mustEqual "pi"
                   }
                   unwrap(List(e)) { case ZMember(2.71828, value) =>
-                    BytesToString(value) mustEqual "e"
+                    BytesToString(value.array) mustEqual "e"
                   }
                 case _ => fail("Expected two elements in list")
               }
@@ -107,7 +132,7 @@ class NaggatiSpec extends Specification {
           "ZCARD" >> {
             codec(wrap("ZCARD\r\n")) must throwA[ClientError]
             unwrap(codec(wrap("ZCARD foo\r\n"))) {
-              case ZCard(key) => key mustEqual "foo"
+              case ZCard(key) => BytesToString(key.array) mustEqual "foo"
             }
           }
 
@@ -134,13 +159,14 @@ class NaggatiSpec extends Specification {
             bad.foreach { b =>
               codec(wrap("%s\r\n".format(b))) must throwA[ClientError]
             }
+            val key = s2cb("key")
             unwrap(codec(wrap("ZINCRBY key 2 one\r\n"))) {
-              case ZIncrBy("key", 2, member) => BytesToString(member) mustEqual "one"
+              case ZIncrBy(key, 2, member) => BytesToString(member.array) mustEqual "one"
             }
             unwrap(codec(wrap("ZINCRBY key 2.1 one\r\n"))) {
-              case ZIncrBy("key", value, member) =>
+              case ZIncrBy(key, value, member) =>
                 value mustEqual 2.1
-                BytesToString(member) mustEqual "one"
+                BytesToString(member.array) mustEqual "one"
             }
           }
 
@@ -155,7 +181,7 @@ class NaggatiSpec extends Specification {
               "%s foo 1 a AGGREGATE SUM AGGREGATE MAX")
             List("ZINTERSTORE","ZUNIONSTORE").foreach { cmd =>
               def doCmd(rcmd: String) = codec(wrap(rcmd.format(cmd)))
-              def verify(k: String, n: Int)(f: (List[String],Option[Weights],Option[Aggregate]) => Unit): PartialFunction[Command,Unit] =
+              def verify(k: String, n: Int)(f: (Seq[ChannelBuffer],Option[Weights],Option[Aggregate]) => Unit): PartialFunction[Command,Unit] =
                 cmd match {
                   case "ZINTERSTORE" => {
                     case ZInterStore(k, n, keys, w, a) => f(keys,w,a)
@@ -177,35 +203,35 @@ class NaggatiSpec extends Specification {
               }
               unwrap(doCmd("%s out 2 zset1 zset2\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
-                  keys mustEqual List("zset1", "zset2")
+                  keys.map(s => BytesToString(s.array)) mustEqual List("zset1", "zset2")
                   weights must beNone
                   aggregate must beNone
                 }
               }
               unwrap(doCmd("%s out 2 zset1 zset2 WEIGHTS 2 3\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
-                  keys mustEqual List("zset1", "zset2")
+                  keys.map(s => BytesToString(s.array)) mustEqual List("zset1", "zset2")
                   weights must beSome(Weights(2, 3))
                   aggregate must beNone
                 }
               }
               unwrap(doCmd("%s out 2 zset1 zset2 aggregate sum\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
-                  keys mustEqual List("zset1", "zset2")
+                  keys.map(s => BytesToString(s.array)) mustEqual List("zset1", "zset2")
                   aggregate must beSome(Aggregate.Sum)
                   weights must beNone
                 }
               }
               unwrap(doCmd("%s out 2 zset1 zset2 weights 2 3 aggregate min\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
-                  keys mustEqual List("zset1", "zset2")
+                  keys.map(s => BytesToString(s.array)) mustEqual List("zset1", "zset2")
                   weights must beSome(Weights(2, 3))
                   aggregate must beSome(Aggregate.Min)
                 }
               }
               unwrap(doCmd("%s out 2 zset1 zset2 aggregate max weights 2 3\r\n")) {
                 verify("out", 2) { (keys, weights, aggregate) =>
-                  keys mustEqual List("zset1", "zset2")
+                  keys.map(s => BytesToString(s.array)) mustEqual List("zset1", "zset2")
                   weights must beSome(Weights(2, 3))
                   aggregate must beSome(Aggregate.Max)
                 }
@@ -244,12 +270,27 @@ class NaggatiSpec extends Specification {
                 verify("myset", 0, -1, Some(WithScores))
               }
             }
-
+            
+            // Ensure that, after encoding, the bytes we threw in are the bytes we get back
+            def testZRangeBytes(key: Array[Byte]) = {
+              val zrange = ZRange.get(org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer(key), 0, 1, None)
+              val keyBack = zrange match { 
+                case ZRange(key, start, stop, withScores) => key
+              }
+              val bytesBack = keyBack.toByteBuffer.array
+              key.toSeq mustEqual bytesBack.toSeq
+            }
+            
+            val goodKey = Array[Byte](58, 49, 127)
+            val nonAsciiKey = Array[Byte](58, 49, -128)
+            testZRangeBytes(goodKey)
+            testZRangeBytes(nonAsciiKey)
+            
           } // ZRANGE
 
           "ZRANGEBYSCORE/ZREVRANGEBYSCORE" >> {
             val bad = List(
-              "%s", "%s key", "%s key -inf", "%s key -inf foo", "%s key foo +inf", 
+              "%s", "%s key", "%s key -inf", "%s key -inf foo", "%s key foo +inf",
               "%s key 0 1 NOSCORES", "%s key 0 1 LIMOT 1 2", "%s key 0 1 LIMIT foo 1",
               "%s key 0 1 LIMIT 1 foo", "%s key 0 1 WITHSCORES WITHSCORES",
               "%s key 0 1 LIMIT 0 1 LIMIT 0 1 WITHSCORES", "%s key 0 1 LIMIT 0 1 NOSCORES",
@@ -320,7 +361,7 @@ class NaggatiSpec extends Specification {
             val bad = List("%s", "%s key", "%s key member member")
             List("ZRANK", "ZREVRANK").foreach { cmd =>
               def doCmd(s: String) = codec(wrap("%s\r\n".format(s.format(cmd))))
-              def verify(k: String)(f: Array[Byte] => Unit): PartialFunction[Command,Unit] = {
+              def verify(k: String)(f: ChannelBuffer => Unit): PartialFunction[Command,Unit] = {
                 cmd match {
                   case "ZRANK" => {
                     case ZRank(k, m) => f(m)
@@ -343,12 +384,12 @@ class NaggatiSpec extends Specification {
               }
               unwrap(doCmd("%s myzset three")) {
                 verify("myzset") { m =>
-                  BytesToString(m) mustEqual "three"
+                  BytesToString(m.array) mustEqual "three"
                 }
               }
               unwrap(doCmd("%s myzset four")) {
                 verify("myzset") { m =>
-                  BytesToString(m) mustEqual "four"
+                  BytesToString(m.array) mustEqual "four"
                 }
               }
             }
@@ -358,13 +399,14 @@ class NaggatiSpec extends Specification {
             List("ZREM", "ZREM key").foreach { bad =>
               codec(wrap("%s\r\n".format(bad))) must throwA[ClientError]
             }
+            val key = s2cb("key")
             unwrap(codec(wrap("ZREM key member1\r\n"))) {
-              case ZRem("key", members) =>
-                BytesToString.fromList(members) mustEqual List("member1")
+              case ZRem(key, members) =>
+                CBToString.fromList(members) mustEqual List("member1")
             }
             unwrap(codec(wrap("ZREM key member1 member2\r\n"))) {
-              case ZRem("key", members) =>
-                BytesToString.fromList(members) mustEqual List("member1", "member2")
+              case ZRem(key, members) =>
+                CBToString.fromList(members) mustEqual List("member1", "member2")
             }
           }
 
@@ -375,8 +417,9 @@ class NaggatiSpec extends Specification {
             bad.foreach { b =>
               codec(wrap("%s\r\n".format(b.format(cmd)))) must throwA[ClientError]
             }
+            val key = s2cb("key")
             unwrap(codec(wrap(cmd + " key 0 1\r\n"))) {
-              case ZRemRangeByRank("key", start, stop) =>
+              case ZRemRangeByRank(key, start, stop) =>
                 start must beEqualTo(0)
                 stop must beEqualTo(1)
             }
@@ -389,8 +432,9 @@ class NaggatiSpec extends Specification {
             bad.foreach { b =>
               codec(wrap("%s\r\n".format(b.format(cmd)))) must throwA[ClientError]
             }
+            val key = s2cb("key")
             unwrap(codec(wrap(cmd + " key -inf (2.0\r\n"))) {
-              case ZRemRangeByScore("key", min, max) =>
+              case ZRemRangeByScore(key, min, max) =>
                 min mustEqual ZInterval.MIN
                 max mustEqual ZInterval.exclusive(2)
             }
@@ -400,8 +444,9 @@ class NaggatiSpec extends Specification {
             List("ZSCORE","ZSCORE key").foreach { bad =>
               codec(wrap("%s\r\n".format(bad))) must throwA[ClientError]
             }
+            val myset = s2cb("myset")
             unwrap(codec(wrap("ZSCORE myset one\r\n"))) {
-              case ZScore("myset", one) => BytesToString(one) mustEqual "one"
+              case ZScore(myset, one) => BytesToString(one.array) mustEqual "one"
             }
           }
 
@@ -411,9 +456,24 @@ class NaggatiSpec extends Specification {
           "APPEND" >> {
             codec(wrap("APPEND\r\n")) must throwA[ClientError]
             codec(wrap("APPEND foo\r\n")) must throwA[ClientError]
+            val foo = s2cb("foo")
             unwrap(codec(wrap("APPEND foo bar\r\n"))) {
-              case Append("foo", value) => BytesToString(value) mustEqual "bar"
+              case Append(foo, value) => BytesToString(value.array) mustEqual "bar"
             }
+          }
+          "BITCOUNT" >> {
+            codec(wrap("BITCOUNT foo\r\n")) mustEqual List(BitCount("foo"))
+            codec(wrap("BITCOUNT foo 0\r\n")) must throwA[ClientError]
+            codec(wrap("BITCOUNT foo 0 1\r\n")) mustEqual
+              List(BitCount("foo", Some(0), Some(1)))
+          }
+          "BITOP" >> {
+            codec(wrap("BITOP\r\n")) must throwA[ClientError]
+            codec(wrap("BITOP AND baz foo bar\r\n")) mustEqual
+              List(BitOp(BitOp.And, "baz", Seq(s2cb("foo"), s2cb("bar"))))
+            codec(wrap("BITOP NOT foo bar baz\r\n")) must throwA[ClientError]
+            codec(wrap("BITOP NOT foo bar\r\n")) mustEqual
+              List(BitOp(BitOp.Not, "foo", Seq("bar")))
           }
           "DECR" >> {
             codec(wrap("DECR 1\r\n")) mustEqual List(Decr("1"))
@@ -442,8 +502,9 @@ class NaggatiSpec extends Specification {
           "GETSET" >> {
             codec(wrap("GETSET\r\n")) must throwA[ClientError]
             codec(wrap("GETSET key\r\n")) must throwA[ClientError]
+            val key = s2cb("key")
             unwrap(codec(wrap("GETSET key value\r\n"))) {
-              case GetSet("key", value) => BytesToString(value) mustEqual "value"
+              case GetSet(key, value) => BytesToString(value.array) mustEqual "value"
             }
           }
           "INCR" >> {
@@ -457,20 +518,24 @@ class NaggatiSpec extends Specification {
             codec(wrap("INCRBY foo\r\n")) must throwA[ClientError]
           }
           "MGET" >> {
-            codec(wrap("MGET foo bar\r\n")) mustEqual List(MGet(List("foo","bar")))
+            codec(wrap("MGET foo bar\r\n")) mustEqual List(MGet(List(foo, bar)))
           }
           "MSETNX" >> {
             codec(wrap("MSETNX\r\n")) must throwA[ClientError]
             codec(wrap("MSETNX foo\r\n")) must throwA[ClientError]
             unwrap(codec(wrap("MSETNX foo bar\r\n"))) {
               case MSetNx(map) =>
-                map must haveKey("foo")
-                BytesToString(map("foo")) mustEqual "bar"
+                map must haveKey(foo)
+                BytesToString(map(foo).array) mustEqual "bar"
             }
+          }
+          "PSETEX" >> {
+            codec(wrap("PSETEX\r\n")) must throwA[ClientError]
+            codec(wrap("PSETEX foo 1000 bar\r\n")) mustEqual List(PSetEx("foo", 1000L, "bar"))
           }
           "SET" >> {
             unwrap(codec(wrap("SET foo bar\r\n"))) {
-              case Set("foo", bar) => BytesToString(bar) mustEqual "bar"
+              case Set(foo, bar, _, _, _) => BytesToString(bar.array) mustEqual "bar"
             }
           }
           "SETBIT" >> {
@@ -484,14 +549,39 @@ class NaggatiSpec extends Specification {
             codec(wrap("SETEX key\r\n")) must throwA[ClientError]
             codec(wrap("SETEX key 30\r\n")) must throwA[ClientError]
             unwrap(codec(wrap("SETEX key 30 value\r\n"))) {
-              case SetEx("key", 30, value) => BytesToString(value) mustEqual "value"
+              case SetEx(key, 30, value) => BytesToString(value.array) mustEqual "value"
             }
           }
           "SETNX" >> {
             codec(wrap("SETNX\r\n")) must throwA[ClientError]
             codec(wrap("SETNX key\r\n")) must throwA[ClientError]
             unwrap(codec(wrap("SETNX key value\r\n"))) {
-              case SetNx("key", value) => BytesToString(value) mustEqual "value"
+              case SetNx(key, value) => BytesToString(value.array) mustEqual "value"
+            }
+          }
+          "New SET Syntax" >> {
+            codec(wrap("SET foo bar 100\r\n")) must throwA[ClientError]
+            codec(wrap("SET foo bar EX NX\r\n")) must throwA[ClientError]
+            codec(wrap("SET foo bar PX NX\r\n")) must throwA[ClientError]
+
+            unwrap(codec(wrap("SET foo bar EX 10\r\n"))) {
+              case Set(key, value, ttl, false, false) =>
+                ttl mustEqual Some(InSeconds(10L))
+            }
+
+            unwrap(codec(wrap("SET foo bar PX 10000\r\n"))) {
+              case Set(key, value, ttl, false, false) =>
+                ttl mustEqual Some(InMilliseconds(10000L))
+            }
+
+            unwrap(codec(wrap("SET foo bar NX EX 10\r\n"))) {
+              case Set(key, value, ttl, true, false) =>
+                ttl mustEqual Some(InSeconds(10))
+            }
+
+            unwrap(codec(wrap("SET foo bar XX\r\n"))) {
+              case Set(key, value, None, false, true) =>
+                BytesToString(value.array) mustEqual "bar"
             }
           }
           "SETRANGE" >> {
@@ -499,7 +589,7 @@ class NaggatiSpec extends Specification {
             codec(wrap("SETRANGE key\r\n")) must throwA[ClientError]
             codec(wrap("SETRANGE key 0\r\n")) must throwA[ClientError]
             unwrap(codec(wrap("SETRANGE key 0 value\r\n"))) {
-              case SetRange("key", 0, value) => BytesToString(value) mustEqual "value"
+              case SetRange(key, 0, value) => BytesToString(value.array) mustEqual "value"
             }
           }
           "STRLEN" >> {
@@ -507,9 +597,29 @@ class NaggatiSpec extends Specification {
             codec(wrap("STRLEN foo\r\n")) mustEqual List(Strlen("foo"))
           }
         } // string commands
+        "list commands" >> {
+          "LPUSH" >> {
+            unwrap(codec(wrap("LPUSH foo bar\r\n"))) {
+              case LPush(key, List(value)) => {
+                CBToString(key) mustEqual "foo"
+                CBToString(value) mustEqual "bar"
+              }
+            }
+          }
+        } // list commands
+        "set commands" >> {
+          "SADD" >> {
+            unwrap(codec(wrap("SADD foo bar\r\n"))) {
+              case SAdd(key, List(member)) => {
+                CBToString(key) mustEqual "foo"
+                CBToString(member) mustEqual "bar"
+              }
+            }
+          }
+        }
       } // inline
 
-      def unwrap(list: List[AnyRef])(fn: PartialFunction[Command,Unit]) = list match {
+      def unwrap(list: Seq[AnyRef])(fn: PartialFunction[Command,Unit]) = list.toList match {
         case head :: Nil => head match {
           case c: Command => fn.isDefinedAt(c) match {
             case true => fn(c)
@@ -535,7 +645,7 @@ class NaggatiSpec extends Specification {
           codec(wrap("$3\r\n")) mustEqual Nil
           codec(wrap("foo\r\n")) mustEqual Nil
           codec(wrap("$3\r\n")) mustEqual Nil
-          codec(wrap("bar\r\n")) mustEqual List(MGet(List("foo","bar")))
+          codec(wrap("bar\r\n")) mustEqual List(MGet(List(foo, bar)))
         }
         "MSET" >> {
           codec(wrap("*5\r\n")) mustEqual Nil
@@ -550,11 +660,10 @@ class NaggatiSpec extends Specification {
           codec(wrap("$5\r\n")) mustEqual Nil
           codec(wrap("Hello\r\n")) match {
             case MSet(kv) :: Nil =>
-              val nkv = kv.map { case(k,v) => (k, BytesToString(v)) }
+              val nkv = kv.map { case(k,v) => (BytesToString(k.array), BytesToString(v.array)) }
               nkv mustEqual Map(
                 "foo" -> "bar baz",
-                "bar" -> "Hello"
-                )
+                "bar" -> "Hello")
             case _ => fail("Expected MSet to be returned")
           }
         }
@@ -569,13 +678,14 @@ class NaggatiSpec extends Specification {
       }
 
       "Inline Requests" >> {
-        codec.send(Get("foo")) mustEqual List("GET foo\r\n")
+        codec.send(Get("foo")) mustEqual List("*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n")
       }
+
       "Unified Requests" >> {
         val value = "bar\r\nbaz"
         val valSz = 8
         val expected = "*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$%d\r\n%s\r\n".format(valSz, value)
-        codec.send(Set("foo", value.getBytes)) mustEqual List(expected)
+        codec.send(Set(foo, s2cb(value))) mustEqual List(expected)
       }
     } // Encode properly
 
@@ -604,22 +714,26 @@ class NaggatiSpec extends Specification {
         codec(wrap(":-2147483648\r\n")) mustEqual List(IntegerReply(-2147483648))
         codec(wrap(":0\r\n")) mustEqual List(IntegerReply(0))
         codec(wrap(":2147483647\r\n")) mustEqual List(IntegerReply(2147483647))
-        codec(wrap(":2147483648\r\n")) must throwA[ServerError]
-        codec(wrap(":-2147483649\r\n")) must throwA[ServerError]
+        codec(wrap(":2147483648\r\n")) mustEqual List(IntegerReply(2147483648L))
+        codec(wrap(":9223372036854775807\r\n")) mustEqual List(IntegerReply(9223372036854775807L))
+        codec(wrap(":9223372036854775808\r\n")) must throwA[ServerError]
+        codec(wrap(":-9223372036854775807\r\n")) mustEqual List(IntegerReply(-9223372036854775807L))
+        codec(wrap(":-9223372036854775809\r\n")) must throwA[ServerError]
+        codec(wrap(":-2147483649\r\n")) mustEqual List(IntegerReply(-2147483649L))
         codec(wrap(":1\r\n:2\r\n")) mustEqual List(IntegerReply(1), IntegerReply(2))
         codec(wrap(":\r\n")) must throwA[ServerError]
       }
       "bulk replies" >> {
         codec(wrap("$3\r\nfoo\r\n")) match {
           case reply :: Nil => reply match {
-            case BulkReply(msg) => BytesToString(msg) mustEqual "foo"
+            case BulkReply(msg) => CBToString(msg) mustEqual "foo"
             case _ => fail("Expected BulkReply, got something else")
           }
           case _ => fail("Found no or multiple reply lines")
         }
         codec(wrap("$8\r\nfoo\r\nbar\r\n")) match {
           case reply :: Nil => reply match {
-            case BulkReply(msg) => BytesToString(msg) mustEqual "foo\r\nbar"
+            case BulkReply(msg) => CBToString(msg) mustEqual "foo\r\nbar"
             case _ => fail("Expected BulkReply, got something else")
           }
           case _ => fail("Found no or multiple reply lines")
@@ -627,11 +741,11 @@ class NaggatiSpec extends Specification {
         codec(wrap("$3\r\nfoo\r\n$3\r\nbar\r\n")) match {
           case fooR :: barR :: Nil =>
             fooR match {
-              case BulkReply(msg) => BytesToString(msg) mustEqual "foo"
+              case BulkReply(msg) => CBToString(msg) mustEqual "foo"
               case _ => fail("Expected BulkReply")
             }
             barR match {
-              case BulkReply(msg) => BytesToString(msg) mustEqual "bar"
+              case BulkReply(msg) => CBToString(msg) mustEqual "bar"
               case _ => fail("Expected BulkReply")
             }
           case _ => fail("Expected two elements in list")
@@ -656,7 +770,7 @@ class NaggatiSpec extends Specification {
         codec(wrap("World\r\n")) match {
           case reply :: Nil => reply match {
             case MBulkReply(msgs) =>
-              BytesToString.fromList(msgs) mustEqual List("foo","bar","Hello","World")
+              ReplyFormat.toString(msgs) mustEqual List("foo","bar","Hello","World")
             case _ => fail("Expected MBulkReply")
           }
           case _ => fail("Expected one element in list")
@@ -670,9 +784,9 @@ class NaggatiSpec extends Specification {
         codec(wrap("bar\r\n")) match {
           case reply :: Nil => reply match {
             case MBulkReply(msgs) =>
-              BytesToString.fromList(msgs) mustEqual List(
+              ReplyFormat.toString(msgs) mustEqual List(
                 "foo",
-                BytesToString(RedisCodec.NIL_VALUE_BA),
+                "nil",
                 "bar")
             case _ => fail("Expected MBulkReply")
           }
@@ -701,11 +815,12 @@ class NaggatiSpec extends Specification {
       }
       "Bulk Replies" >> {
         val expected = "$8\r\nfoo\r\nbar\r\n"
-        codec.send(BulkReply("foo\r\nbar".getBytes)) mustEqual List(expected)
+        codec.send(BulkReply(StringToChannelBuffer("foo\r\nbar"))) mustEqual List(expected)
       }
       "Multi Bulk Replies" >> {
-        val messages = StringToBytes.fromList(List("foo","bar","Hello","World"))
-        val expected = "*4\r\n$3\r\nfoo\r\n$3\r\nbar\r\n$5\r\nHello\r\n$5\r\nWorld\r\n"
+        val messages = List(BulkReply(StringToChannelBuffer("foo")),
+          BulkReply(StringToChannelBuffer("bar")))
+        val expected = "*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"
         codec.send(MBulkReply(messages)) mustEqual List(expected)
       }
     } // Encode properly

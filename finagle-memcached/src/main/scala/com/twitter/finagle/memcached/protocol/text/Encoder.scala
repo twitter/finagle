@@ -1,11 +1,8 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.protocol.text._
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.buffer.ChannelBuffers
-import java.net.InetSocketAddress
-import com.twitter.finagle.tracing.Trace
 
 object Encoder {
   private val SPACE         = " ".getBytes
@@ -17,11 +14,6 @@ class Encoder extends OneToOneEncoder {
   import Encoder._
 
   def encode(context: ChannelHandlerContext, channel: Channel, message: AnyRef) = {
-    // set the addr for this trace
-    context.getChannel.getLocalAddress() match {
-      case ia: InetSocketAddress => Trace.recordClientAddr(ia)
-      case _ => () // nothing
-    }
     message match {
       case Tokens(tokens) =>
         val buffer = ChannelBuffers.dynamicBuffer(10 * tokens.size)

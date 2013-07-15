@@ -1,87 +1,92 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle.integration.DynamicCluster
-import com.twitter.util.{CountDownLatch, Promise}
+import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
+import com.twitter.finagle.{Service, TooManyConcurrentRequestsException}
+import com.twitter.util.{Await, CountDownLatch, Future, Promise}
 import java.net.{InetSocketAddress, SocketAddress}
-import org.specs.Specification
-import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
-import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
-import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
-import org.jboss.netty.util.CharsetUtil
-import com.twitter.finagle.{SimpleFilter, Codec, CodecFactory, Service, ServiceFactory}
+import org.specs.SpecificationWithJUnit
 
-class EndToEndSpec extends Specification {
-  val constRes = new Promise[String]
-  val arrivalLatch = new CountDownLatch(1)
-  val service = new Service[String, String] {
-    def apply(request: String) = {
-      arrivalLatch.countDown()
-      constRes
-    }
-  }
-
+class EndToEndSpec extends SpecificationWithJUnit {
   "Finagle client" should {
-    val address = new InetSocketAddress(0)
-    val server = ServerBuilder()
-      .codec(StringCodec)
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(service)
-
-    val cluster = new DynamicCluster[SocketAddress](Seq(server.localAddress))
-    val client = ClientBuilder()
-      .cluster(cluster)
-      .codec(StringCodec)
-      .hostConnectionLimit(1)
-      .build()
-
     "handle pending request after a host is deleted from cluster" in {
-      // create a pending request; delete the server from cluster; then verify the request can still finish
+      val constRes = new Promise[String]
+      val arrivalLatch = new CountDownLatch(1)
+      val service = new Service[String, String] {
+        def apply(request: String) = {
+          arrivalLatch.countDown()
+          constRes
+        }
+      }
+      val address = new InetSocketAddress(0)
+      val server = ServerBuilder()
+        .codec(StringCodec)
+        .bindTo(address)
+        .name("FinagleServer")
+        .build(service)
+      val cluster = new DynamicCluster[SocketAddress](Seq(server.localAddress))
+      val client = ClientBuilder()
+        .cluster(cluster)
+        .codec(StringCodec)
+        .hostConnectionLimit(1)
+        .build()
+
+      // create a pending request; delete the server from cluster
+      //  then verify the request can still finish
       val response = client("123")
       arrivalLatch.await()
       cluster.del(server.localAddress)
       response.isDefined must beFalse
       constRes.setValue("foo")
-      response() must be_==("foo")
+      Await.result(response) must be_==("foo")
+    }
+
+
+    "queue requests while waiting for cluster to initialize" in {
+      val echo = new Service[String, String] {
+        def apply(request: String) = Future.value(request)
+      }
+      val address = new InetSocketAddress(0)
+      val server = ServerBuilder()
+        .codec(StringCodec)
+        .bindTo(address)
+        .name("FinagleServer")
+        .build(echo)
+
+      // start with an empty cluster
+      val cluster = new DynamicCluster[SocketAddress](Seq[SocketAddress]())
+      val client = ClientBuilder()
+        .cluster(cluster)
+        .codec(StringCodec)
+        .hostConnectionLimit(1)
+        .hostConnectionMaxWaiters(5)
+        .build()
+
+      val responses = new Array[Future[String]](5)
+      0 until 5 foreach { i =>
+        responses(i) = client(i.toString)
+        responses(i).isDefined must beFalse
+      }
+
+      // more than 5 requests will result in MaxQueuedRequestsExceededException
+      val r = client("123")
+      r.isDefined must beTrue
+      Await.ready(r).poll.get.isThrow must beTrue
+      Await.result(r) must throwA(new TooManyConcurrentRequestsException)
+
+      // make cluster available, now queued requests should be processed
+      val thread = new Thread {
+        override def run = cluster.add(server.localAddress)
+      }
+
+      cluster.ready.map { _ =>
+        0 until 5 foreach { i =>
+          Await.result(responses(i)) must be_==(i.toString)
+        }
+      }
+      thread.start()
+      thread.join()
     }
   }
 }
 
 
-object StringCodec extends StringCodec
-
-class StringCodec extends CodecFactory[String, String] {
-  def server = Function.const {
-    new Codec[String, String] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline = {
-          val pipeline = Channels.pipeline()
-          pipeline.addLast("frameDecoder", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-          pipeline.addLast("stringDecoder", new StringDecoder(CharsetUtil.UTF_8))
-          pipeline.addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8))
-          pipeline
-        }
-      }
-    }
-  }
-
-  def client = Function.const {
-    new Codec[String, String] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline = {
-          val pipeline = Channels.pipeline()
-          pipeline.addLast("stringEncode", new StringEncoder(CharsetUtil.UTF_8))
-          pipeline.addLast("stringDecode", new StringDecoder(CharsetUtil.UTF_8))
-          pipeline
-        }
-      }
-      
-      override def prepareConnFactory(factory: ServiceFactory[String, String]) =
-        (new AddNewlineFilter) andThen factory
-    }
-  }
-
-  class AddNewlineFilter extends SimpleFilter[String, String] {
-    def apply(request: String, service: Service[String, String]) = service(request + "\n")
-  }
-}

@@ -1,0 +1,2 @@
+com.twitter.finagle.mdns.LocalResolver
+com.twitter.finagle.mdns.MDNSResolver

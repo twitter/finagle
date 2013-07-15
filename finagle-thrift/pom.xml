@@ -1,15 +1,15 @@
-<project 
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
   <artifactId>finagle-thrift</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>6.5.2-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
-    <artifactId>scala-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../../parents/scala-parent/pom.xml</relativePath>
+    <artifactId>scala-parent-292</artifactId>
+    <version>0.0.4</version>
+    <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
     <git.dir>${project.basedir}/../../.git</git.dir>
@@ -20,39 +20,72 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>0.5.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
-      <version>1.5.8</version>
+      <version>1.6.1</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>silly</groupId>
       <artifactId>silly-thrift</artifactId>
       <version>0.5.0</version>
+      <scope>test</scope>
     </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>3.0.1-SNAPSHOT</version>
+      <version>6.5.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-test</artifactId>
-      <version>3.0.1-SNAPSHOT</version>
+      <scope>test</scope>
+      <version>6.5.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- preferIPv4Stack is needed to prevent confusion for running the tests on ipv6 systems (MacOSX) -->
+          <argLine>-Djava.net.preferIPv4Stack=true</argLine>
+        </configuration>
+      </plugin>
+      <!--	Uncomment the following to regenerate thrift code.
+      <plugin>
         <groupId>com.twitter</groupId>
         <artifactId>maven-finagle-thrift-plugin</artifactId>
         <configuration>
           <thriftGenerators>
-            <thriftGenerator>finagle</thriftGenerator>
+          <thriftGenerator>finagle</thriftGenerator>
           </thriftGenerators>
+        </configuration>
+       </plugin>
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*.thrift</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

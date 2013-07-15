@@ -1,22 +1,22 @@
 package com.twitter.finagle.kestrel.unit
 
-import org.specs.Specification
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.kestrel.protocol._
+import com.google.common.cache.{CacheBuilder, CacheLoader}
 import com.twitter.conversions.time._
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.kestrel.Interpreter
+import com.twitter.finagle.kestrel.protocol._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.util.StateMachine.InvalidStateTransition
-import com.twitter.util.{MapMaker, Time}
+import com.twitter.util.Time
 import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
+import org.jboss.netty.buffer.ChannelBuffer
+import org.specs.SpecificationWithJUnit
 
-object InterpreterSpec extends Specification {
+class InterpreterSpec extends SpecificationWithJUnit {
   "Interpreter" should {
-    val queues = MapMaker[ChannelBuffer, BlockingDeque[ChannelBuffer]] { config =>
-      config.compute { key =>
-        new LinkedBlockingDeque[ChannelBuffer]
-      }
-    }
+    val queues = CacheBuilder.newBuilder()
+      .build(new CacheLoader[ChannelBuffer, BlockingDeque[ChannelBuffer]] {
+        def load(k: ChannelBuffer) = new LinkedBlockingDeque[ChannelBuffer]
+      })
     val interpreter = new Interpreter(queues)
 
     "set & get" in {
@@ -35,12 +35,6 @@ object InterpreterSpec extends Specification {
       "set & get/abort" in {
         interpreter(Set("name", Time.now, "rawr"))
         interpreter(Abort("name")) must throwA[InvalidStateTransition]
-      }
-
-      "set & get/open & get/open/abort" in {
-        interpreter(Set("name", Time.now, "rawr"))
-        interpreter(Open("name"))
-        //interpreter(Get("name", collection.Set(Open(), Abort()))) must throwA[InvalidStateTransition]
       }
 
       "set & get/open & get/close" in {
@@ -63,7 +57,9 @@ object InterpreterSpec extends Specification {
 
     "timeouts" in {
       "set & get/t=1" in {
-
+        interpreter(Get("name", Some(1.millisecond))) mustEqual Values(Seq())
+        interpreter(Set("name", Time.now, "rawr"))
+        interpreter(Get("name", Some(1.second))) mustEqual Values(Seq(Value("name", "rawr")))
       }
     }
 
@@ -83,26 +79,6 @@ object InterpreterSpec extends Specification {
       interpreter(Set("name", Time.now, "rawr"))
       interpreter(FlushAll())
       interpreter(Get("name")) mustEqual Values(Seq.empty)
-    }
-
-    "version" in {
-
-    }
-
-    "shutDown" in {
-
-    }
-
-    "dumpConfig" in {
-
-    }
-
-    "stats" in {
-
-    }
-
-    "dumpStats" in {
-
     }
   }
 }

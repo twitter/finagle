@@ -2,10 +2,10 @@ package com.twitter.finagle.http.path
 
 import com.twitter.finagle.http.{Method, ParamMap}
 import com.twitter.finagle.http.path.{Path => FPath} // conflicts with spec's Path
-import org.specs.Specification
+import org.specs.SpecificationWithJUnit
 
 
-object PathSpec extends Specification {
+class PathSpec extends SpecificationWithJUnit {
 
   "Path" should {
     "/foo/bar" in {
@@ -51,9 +51,10 @@ object PathSpec extends Specification {
     ":? extractor with IntParamMatcher and LongParamMatcher" in {
       object I extends IntParamMatcher("i")
       object L extends LongParamMatcher("l")
+      object D extends DoubleParamMatcher("d")
 
-      ((FPath("/test.json") :? ParamMap("i" -> "1", "l" -> "2147483648")) match {
-        case Root / "test.json" :? (I(i) :& L(l)) => i == 1 && l == 2147483648L
+      ((FPath("/test.json") :? ParamMap("i" -> "1", "l" -> "2147483648", "d" -> "1.3")) match {
+        case Root / "test.json" :? (I(i) :& L(l) :& D(d)) => i == 1 && l == 2147483648L && d == 1.3D
         case _                                    => false
       }) must beTrue
 

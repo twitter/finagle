@@ -1,23 +1,86 @@
 package com.twitter.finagle.service
 
-import java.{util => ju}
-import java.util.{concurrent => juc}
-import scala.collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{RetryFailureException, SimpleFilter, Service, WriteException}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.util._
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.{
+  CancelledRequestException, Service, SimpleFilter, TimeoutException, WriteException
+}
+import com.twitter.util._
+import java.util.{concurrent => juc}
+import java.{util => ju}
+import scala.collection.JavaConversions._
 
 trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
-object RetryPolicy {
-  val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
-    case Throw(_: WriteException) => true
+/**
+ * A retry policy abstract class. This is convenient to use for Java programmers. Simply implement
+ * the two abstract methods `shouldRetry` and `backoffAt` and you're good to go!
+ */
+abstract class SimpleRetryPolicy[A](i: Int)
+  extends Function[A, Option[(Duration, RetryPolicy[A])]] with RetryPolicy[A]
+{
+  def this() = this(0)
+
+  final def apply(e: A) = {
+    if (shouldRetry(e)) {
+      backoffAt(i) match {
+        case Duration.Top =>
+          None
+        case howlong =>
+          Some((howlong, new SimpleRetryPolicy[A](i + 1) {
+            def shouldRetry(a: A) = SimpleRetryPolicy.this.shouldRetry(a)
+            def backoffAt(retry: Int) = SimpleRetryPolicy.this.backoffAt(retry)
+          }))
+      }
+    } else {
+      None
+    }
   }
 
-  def tries(numTries: Int) = {
-    backoff[Try[Nothing]](Backoff.const(0.second) take (numTries - 1))(WriteExceptionsOnly)
+  /**
+   * Given a value, decide whether it is retryable. Typically the value is an exception.
+   */
+  def shouldRetry(a: A): Boolean
+
+  /**
+   * Given a number of retries, return how long to wait till the next retry. Note that this is
+   * zero-indexed. To implement a finite number of retries, implement a method like:
+   *     `if (i > 3) return never`
+   */
+  def backoffAt(retry: Int): Duration
+
+  /**
+   * A convenience method to access Duration.forever from Java. This is a sentinel value that
+   * signals no-further-retries.
+   */
+  final val never = Duration.Top
+}
+
+object RetryPolicy extends JavaSingleton {
+  object RetryableWriteException {
+    def unapply(thr: Throwable): Option[Throwable] = thr match {
+      case WriteException(_: CancelledRequestException) => None
+      case WriteException(exc) => Some(exc)
+      case _ => None
+    }
+  }
+
+  val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(RetryableWriteException(_)) => true
+  }
+
+  val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
+    case Throw(_: TimeoutException) => true
+  }
+
+  def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)
+
+  def tries[A](
+    numTries: Int,
+    shouldRetry: PartialFunction[A, Boolean]
+  ): RetryPolicy[A] = {
+    backoff[A](Backoff.const(0.second) take (numTries - 1))(shouldRetry)
   }
 
   /**
@@ -26,10 +89,8 @@ object RetryPolicy {
   def backoffJava[A](
     backoffs: juc.Callable[ju.Iterator[Duration]],
     shouldRetry: PartialFunction[A, Boolean]
-  ): RetryPolicy[Try[Nothing]] = {
-    backoff[Try[Nothing]](backoffs.call().toStream) {
-      case Throw(_: WriteException) => true
-    }
+  ): RetryPolicy[A] = {
+    backoff[A](backoffs.call().toStream)(shouldRetry)
   }
 
   def backoff[A](
@@ -73,7 +134,7 @@ object RetryingFilter {
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(shouldRetry: PartialFunction[Try[Rep], Boolean])(implicit timer: Timer) =
+  )(shouldRetry: PartialFunction[Try[Nothing], Boolean])(implicit timer: Timer) =
     new RetryingFilter[Req, Rep](RetryPolicy.backoff(backoffs)(shouldRetry), timer, statsReceiver)
 }
 
@@ -97,9 +158,7 @@ class RetryingFilter[Req, Rep](
     if (d > 0.seconds) {
       val promise = new Promise[Rep]
       timer.schedule(Time.now + d) {
-        val rep = f
-        promise.linkTo(rep)
-        rep.proxyTo(promise)
+        promise.become(f)
       }
       promise
     } else f

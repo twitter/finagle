@@ -1,16 +1,18 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.{IndividualRequestTimeoutException, MockTimer, Service}
+import com.twitter.util.{Await, Promise, Time}
 import org.specs.SpecificationWithJUnit
 import org.specs.mock.Mockito
-import com.twitter.finagle.util.Timer
-import com.twitter.conversions.time._
-import com.twitter.util.{Promise, Time}
-import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
 
 class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
   "TimeoutFilter" should {
     val timer = new MockTimer
-    val promise = new Promise[String]
+    val promise = new Promise[String] {
+      @volatile var interrupted: Option[Throwable] = None
+      setInterruptHandler { case exc => interrupted = Some(exc) }
+    }
     val service = new Service[String, String] {
       def apply(request: String) = promise
     }
@@ -23,18 +25,20 @@ class TimeoutFilterSpec extends SpecificationWithJUnit with Mockito {
       promise.setValue("1")
       val res = timeoutService("blah")
       res.isDefined must beTrue
-      res() mustBe "1"
+      Await.result(res) mustBe "1"
     }
 
     "times out a request that is not successful, cancels underlying" in Time.withCurrentTimeFrozen { tc =>
       val res = timeoutService("blah")
       res.isDefined must beFalse
-      promise.isCancelled must beFalse
+      promise.interrupted must beNone
       tc.advance(2.seconds)
       timer.tick()
       res.isDefined must beTrue
-      promise.isCancelled must beTrue
-     res() must throwA(exception)
+      promise.interrupted must beLike {
+        case Some(_: java.util.concurrent.TimeoutException) => true
+      }
+     Await.result(res) must throwA(exception)
     }
   }
 }

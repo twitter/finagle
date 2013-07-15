@@ -2,10 +2,10 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{MediaType, Method, Request, Response, Status}
-import com.twitter.util.Future
-import org.specs.Specification
+import com.twitter.util.{Await, Future}
+import org.specs.SpecificationWithJUnit
 
-object JsonpFilterSpec extends Specification {
+class JsonpFilterSpec extends SpecificationWithJUnit {
 
   val dummyService = new Service[Request, Response] {
    def apply(request: Request): Future[Response] = {
@@ -24,7 +24,7 @@ object JsonpFilterSpec extends Specification {
     "wrap json" in {
       val request = Request("/test.json", "callback" -> "mycallback")
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/javascript")
       response.contentString must_== "mycallback({});"
     }
@@ -32,7 +32,7 @@ object JsonpFilterSpec extends Specification {
     "ignore non-json" in {
       val request = Request("/test.json", "callback" -> "mycallback", "not_json" -> "t")
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.mediaType     must_== Some("not_json")
       response.contentString must_== "{}"
       response.contentType   must_== Some("not_json")
@@ -42,7 +42,7 @@ object JsonpFilterSpec extends Specification {
       val request = Request("/test.json", "callback" -> "mycallback")
       request.method = Method.Head
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/json")
       response.contentString must_== "{}"
     }
@@ -51,7 +51,7 @@ object JsonpFilterSpec extends Specification {
       // Search Varnish sets callback to blank.  These should not be wrapped.
       val request = Request("/test.json", "callback" -> "")
 
-      val response = JsonpFilter(request, dummyService)()
+      val response = Await.result(JsonpFilter(request, dummyService))
       response.contentType   must_== Some("application/json")
       response.contentString must_== "{}"
     }

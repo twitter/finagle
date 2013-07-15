@@ -61,8 +61,8 @@ module Trace
     end
   end
 
-  class B3Tracer < Tracer
-    B3_CATEGORY = "b3"
+  class ZipkinTracer < Tracer
+    TRACER_CATEGORY = "zipkin"
     def initialize(scribe, max_buffer)
       @scribe = scribe
       @max_buffer = max_buffer
@@ -113,7 +113,7 @@ module Trace
           oprot = Thrift::BinaryProtocol.new(trans)
           span.to_thrift.write(oprot)
           binary = Base64.encode64(buf).gsub("\n", "")
-          @scribe.log(binary, B3_CATEGORY)
+          @scribe.log(binary, TRACER_CATEGORY)
         end
       end
       reset
@@ -121,12 +121,13 @@ module Trace
   end
 
   class Span
-    attr_accessor :name, :annotations, :binary_annotations
+    attr_accessor :name, :annotations, :binary_annotations, :debug
     def initialize(name, span_id)
       @name = name
       @span_id = span_id
       @annotations = []
       @binary_annotations = []
+      @debug = span_id.debug?
     end
 
     def to_thrift
@@ -136,7 +137,8 @@ module Trace
         :id => @span_id.span_id.to_i,
         :parent_id => @span_id.parent_id.nil? ? nil : @span_id.parent_id.to_i,
         :annotations => @annotations.map { |a| a.to_thrift },
-        :binary_annotations => @binary_annotations.map { |a| a.to_thrift }
+        :binary_annotations => @binary_annotations.map { |a| a.to_thrift },
+        :debug => @debug
       )
     end
   end
@@ -147,7 +149,8 @@ module Trace
     SERVER_SEND = "ss"
     SERVER_RECV = "sr"
 
-    attr_reader :value, :host, :timestamp
+    # write access for tests
+    attr_accessor :value, :host, :timestamp
     def initialize(value, host)
       @timestamp = (Time.now.to_f * 1000 * 1000).to_i # micros
       @value = value

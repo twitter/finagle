@@ -1,11 +1,9 @@
-package com.twitter.finagle.redis
-package protocol
+package com.twitter.finagle.redis.protocol
 
-import util._
-import RedisCodec._
-
-import com.twitter.naggati.{Emit, Encoder, NextStep, ProtocolError}
-import com.twitter.naggati.Stages._
+import com.twitter.finagle.redis.naggati.{NextStep, ProtocolError}
+import com.twitter.finagle.redis.naggati.Stages._
+import com.twitter.finagle.redis.protocol.RedisCodec._
+import com.twitter.finagle.redis.util._
 
 trait UnifiedProtocolCodec {
 
@@ -31,7 +29,7 @@ trait UnifiedProtocolCodec {
           case ARG_SIZE_MARKER =>
             val size = NumberFormat.toInt(line.drop(1))
             if (size < 1) {
-              decodeRequestLines(i - 1, lines.+:(RedisCodec.NIL_VALUE_BA), doneFn)
+              decodeRequestLines(i - 1, lines.+:(RedisCodec.NIL_VALUE_BA.array), doneFn)
             } else {
               readBytes(size) { byteArray =>
                 readBytes(2) { eol =>
@@ -42,6 +40,14 @@ trait UnifiedProtocolCodec {
                 }
               }
             }
+          case STATUS_REPLY =>
+            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+          case ARG_COUNT_MARKER =>
+            decodeRequestLines(line.drop(1).toLong, lines, doneFn)
+          case INTEGER_REPLY =>
+            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
+          case ERROR_REPLY =>
+            decodeRequestLines(i - 1, lines.+:(line.drop(1).getBytes), doneFn)
           case b: Char =>
             throw new ProtocolError("Expected size marker $, got " + b)
         } // header match

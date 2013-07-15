@@ -2,10 +2,8 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{
   SimpleFilter, Service, RequestTimeoutException, IndividualRequestTimeoutException}
-import com.twitter.finagle.util.Timer
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util
-import com.twitter.util.{Future, Duration}
+import com.twitter.util.{Future, Duration, Timer}
 
 /**
  * A filter to apply a global timeout to the request. This allows,
@@ -14,16 +12,17 @@ import com.twitter.util.{Future, Duration}
 class TimeoutFilter[Req, Rep](
     timeout: Duration,
     exception: RequestTimeoutException,
-    timer: util.Timer = Timer.default)
+    timer: Timer)
     extends SimpleFilter[Req, Rep] {
-  def this(timeout: Duration) = this(timeout, new IndividualRequestTimeoutException(timeout))
+  def this(timeout: Duration, timer: Timer) =
+    this(timeout, new IndividualRequestTimeoutException(timeout), timer)
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val res = service(request)
 
     res.within(timer, timeout) rescue {
-      case _: java.util.concurrent.TimeoutException =>
-        res.cancel()
+      case exc: java.util.concurrent.TimeoutException =>
+        res.raise(exc)
         Trace.record(TimeoutFilter.TimeoutAnnotation)
         Future.exception(exception)
     }

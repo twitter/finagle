@@ -13,6 +13,8 @@ object InetSocketAddressUtil {
    *
    */
   def parseHosts(hosts: String): Seq[InetSocketAddress] = {
+    if (hosts == ":*") return Seq(new InetSocketAddress(0))
+
     val hostPorts = hosts split Array(' ', ',') filter (!_.isEmpty) map (_.split(":"))
     hostPorts map { hp =>
       require(hp.size == 2, "You must specify host and port")

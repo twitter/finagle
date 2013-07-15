@@ -1,7 +1,18 @@
 package com.twitter.finagle.exception
 
-import com.codahale.jerkson.Json.generate
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.Time
+
+private object JsonGenerator {
+  private[this] val writer = {
+    val mapper = new ObjectMapper
+    mapper.registerModule(DefaultScalaModule)
+    mapper.writer
+  }
+
+  def generate(in: Any): String = writer.writeValueAsString(in)
+}
 
 /**
  * Model classes for exception serialization to JSON
@@ -13,7 +24,7 @@ import com.twitter.util.Time
  * These classes are private to the exception package because they must adhere to the chickadee
  * specification.
  *
- * TraceId is from BigBrotherBird.
+ * TraceId is from Zipkin.
  */
 sealed private[exception] case class ServiceException private[ServiceException] (
   private val jsonValue: Map[String,Any]) {
@@ -41,7 +52,7 @@ sealed private[exception] case class ServiceException private[ServiceException] 
   /**
    * Include a source (i.e. server) address
    */
-  def withSource(address: String) = copy(jsonValue.updated("source", address))
+  def withSource(address: String) = copy(jsonValue.updated("sourceAddress", address))
 
   /**
    * Increment the cardinality of the ServiceException, adding the element if it does not
@@ -54,7 +65,7 @@ sealed private[exception] case class ServiceException private[ServiceException] 
   /**
    * Generate a json representation of this using jerkson
    */
-  def toJson: String = generate(jsonValue)
+  def toJson: String = JsonGenerator.generate(jsonValue)
 }
 
 /**
@@ -71,6 +82,6 @@ sealed private[exception] case class ExceptionContents(e: Throwable) {
   val jsonValue = Map(
     "exceptionClass" -> e.getClass.getName,
     "message" -> e.getMessage,
-    "stacktrace" -> generateStackTrace(e.getStackTrace)
+    "stackTrace" -> generateStackTrace(e.getStackTrace)
   )
 }

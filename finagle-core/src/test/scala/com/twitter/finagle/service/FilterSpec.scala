@@ -1,10 +1,9 @@
 package com.twitter.finagle.service
 
-import org.specs.SpecificationWithJUnit
-
-import com.twitter.finagle.{Service, Filter}
-import com.twitter.util.{Throw, Future}
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Filter, Service}
+import com.twitter.util.{Await, Future, Throw, Try}
+import org.specs.SpecificationWithJUnit
 
 class FilterSpec extends SpecificationWithJUnit {
   "filters" should {
@@ -30,8 +29,8 @@ class FilterSpec extends SpecificationWithJUnit {
 
         val result = (filter andThen service)(123)
 
-        result.isReturn must beTrue
-        result() must be_==(123 * 2)
+        Await.ready(result).poll.get.isReturn must beTrue
+        Await.result(result) must be_==(123 * 2)
       }
 
       "when synchronous exceptions are thrown" in {
@@ -44,14 +43,14 @@ class FilterSpec extends SpecificationWithJUnit {
         }
 
         "with simple composition" in {
-          intToString.andThen(exceptionThrowingService)("1").get(1.second) must
+          Try(Await.result(intToString.andThen(exceptionThrowingService)("1"), 1.second)) must
             be_==(Throw(e))
         }
 
         "with transitive composition" in {
-          stringToInt.andThen(intToString.andThen(exceptionThrowingService))(1).get(1.second) must
+          Try(Await.result(stringToInt.andThen(intToString.andThen(exceptionThrowingService))(1), 1.second)) must
             be_==(Throw(e))
-          (stringToInt.andThen(intToString)).andThen(exceptionThrowingService)(1).get(1.second) must
+          Try(Await.result((stringToInt.andThen(intToString)).andThen(exceptionThrowingService)(1), 1.second)) must
             be_==(Throw(e))
         }
       }

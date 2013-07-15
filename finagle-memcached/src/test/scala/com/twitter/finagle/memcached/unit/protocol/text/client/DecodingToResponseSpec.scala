@@ -1,15 +1,15 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
-import org.specs.Specification
+import com.twitter.finagle.memcached.protocol
 import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
+import com.twitter.finagle.memcached.protocol.text.{Tokens, StatLines}
+import com.twitter.finagle.memcached.protocol.{ClientError, Info => MCInfo, InfoLines, Stored, NonexistentCommand, NotFound, Exists}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil.UTF_8
-import com.twitter.finagle.memcached.protocol.text.{Tokens, StatLines}
-import com.twitter.finagle.memcached.protocol
-import com.twitter.finagle.memcached.protocol.{ClientError, Info => MCInfo, InfoLines, Stored, NonexistentCommand, NotFound, Exists, Value}
+import org.specs.SpecificationWithJUnit
 
-object DecodingToResponseSpec extends Specification {
+class DecodingToResponseSpec extends SpecificationWithJUnit {
   "DecodingToResponse" should {
     val decodingToResponse = new DecodingToResponse
 
@@ -59,9 +59,11 @@ object DecodingToResponseSpec extends Specification {
       }
 
       "CLIENT_ERROR" in {
-        val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR"))
-        decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error].cause must
-          haveClass[ClientError]
+        val errorMessage = "sad panda error"
+        val buffer = Tokens(Seq[ChannelBuffer]("CLIENT_ERROR", errorMessage))
+        val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]
+        error.cause must haveClass[ClientError]
+        error.cause.getMessage() mustEqual errorMessage
       }
     }
   }

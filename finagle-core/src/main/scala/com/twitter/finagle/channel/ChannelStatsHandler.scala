@@ -5,15 +5,14 @@ package com.twitter.finagle.channel
  * shared as to keep statistics across a number of channels.
  */
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Time, Future}
-
+import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.Logger
-
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{SimpleChannelHandler, ChannelHandlerContext, MessageEvent}
+import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
+  ExceptionEvent, MessageEvent, SimpleChannelHandler}
 
-class ChannelStatsHandler(statsReceiver: StatsReceiver)
+class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicLong)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
 {
@@ -25,25 +24,23 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-
-  private[this] val connectionCount = new AtomicInteger(0)
-
-  private[this] val connectionGauge = statsReceiver.addGauge("connections") { connectionCount.get }
+  private[this] val closeChans = statsReceiver.counter("closechans")
 
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
     connects.incr()
     connectionCount.incrementAndGet()
 
-    val connectTime = Time.now
+    val elapsed = Stopwatch.start()
     onClose ensure {
+      closeChans.incr()
       val (channelReadCount, channelWriteCount) =
         ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
 
       connectionReceivedBytes.add(channelReadCount.get)
       connectionSentBytes.add(channelWriteCount.get)
 
-      connectionDuration.add(connectTime.untilNow.inMilliseconds)
+      connectionDuration.add(elapsed().inMilliseconds)
       connectionCount.decrementAndGet()
     }
   }
@@ -75,5 +72,25 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     }
 
     super.messageReceived(ctx, e)
+  }
+
+  private[this] val pendingClose = new AtomicInteger(0)
+  private[this] val closesCount = statsReceiver.counter("closes")
+  private[this] val closedCount = statsReceiver.counter("closed")
+
+  override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    closesCount.incr()
+    super.closeRequested(ctx, e)
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    closedCount.incr()
+    super.channelClosed(ctx, e)
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
+    statsReceiver.scope("exn").counter(m).incr()
+    super.exceptionCaught(ctx, e)
   }
 }
