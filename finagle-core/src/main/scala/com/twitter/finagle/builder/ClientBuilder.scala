@@ -155,7 +155,7 @@ private[builder] final case class ClientTimeoutConfig(
  * are accessed by the end-user.
  */
 private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
-  private val _cluster                   : Option[Cluster[SocketAddress]]        = None,
+  private val _group                     : Option[Group[SocketAddress]]        = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _keepAlive                 : Option[Boolean]               = None,
   private val _statsReceiverConfig       : StatsReceiverConfig           = StatsReceiverConfig(),
@@ -183,7 +183,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
    * Nevertheless, we want a friendly public API so we create delegators without
    * underscores.
    */
-  val cluster                   = _cluster
+  val group                     = _group
   val codecFactory              = _codecFactory
   val statsReceiver             = _statsReceiverConfig.statsReceiver
   val hostStatsReceiver         = _statsReceiverConfig.hostStatsReceiver
@@ -219,7 +219,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val daemon                    = _daemon
 
   def toMap = Map(
-    "cluster"                   -> _cluster,
+    "group"                     -> _group,
     "codecFactory"              -> _codecFactory,
     "tcpConnectTimeout"         -> Some(_timeoutConfig.tcpConnectTimeout),
     "requestTimeout"            -> Some(_timeoutConfig.requestTimeout),
@@ -264,7 +264,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   }
 
   def validated: ClientConfig[Req, Rep, Yes, Yes, Yes] = {
-    cluster      getOrElse { throw new IncompleteSpecification("No hosts were specified") }
+    group        getOrElse { throw new IncompleteSpecification("No hosts were specified") }
     codecFactory getOrElse { throw new IncompleteSpecification("No codec was specified") }
     hostConnectionLimit getOrElse {
       throw new IncompleteSpecification("No host connection limit was specified")
@@ -344,7 +344,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def cluster(
     cluster: Cluster[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    withConfig(_.copy(_cluster = Some(cluster)))
+    withConfig(_.copy(_group = Some(Group.fromCluster(cluster))))
+
+  def group(
+    group: Group[SocketAddress]
+  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
+    withConfig(_.copy(_group = Some(group)))
 
   /**
    * Specify the codec. The codec implements the network protocol
@@ -770,7 +775,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // Note the direct use of newStack here. This is because we want
     // to control how stats receivers are scoped.
     val factory = codec.prepareServiceFactory(
-      client.newStack(Group.fromCluster(config.cluster.get)))
+      client.newStack(config.group.get))
 
     if (!config.daemon) ExitGuard.guard()
     new ServiceFactoryProxy[Req, Rep](factory) {
@@ -804,9 +809,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = {
     val underlying: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
-    val service = config.cluster match {
-      case Some(cluster) if !cluster.ready.isDefined =>
-        new ProxyService(cluster.ready map Function.const(underlying),
+    val service = config.group match {
+      case Some(group) if group.members.isEmpty =>
+        new ProxyService(Group.pollUntilTrue[SocketAddress](group, !_.members.isEmpty) map Function.const(underlying),
           config.hostConnectionMaxWaiters getOrElse Int.MaxValue)
       case _ => underlying
     }

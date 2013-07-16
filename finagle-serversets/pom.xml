@@ -77,5 +77,10 @@
       <artifactId>finagle-core</artifactId>
       <version>6.5.2-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-zk-common</artifactId>
+      <version>6.3.8-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

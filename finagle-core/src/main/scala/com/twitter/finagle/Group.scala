@@ -1,7 +1,10 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.{Closable, Future, Duration, Timer}
 
 /**
  * A group is a dynamic set of `T`-typed values. It is used to
@@ -136,6 +139,26 @@ object NamedGroup {
 }
 
 object Group {
+  val timer = DefaultTimer.twitter
+  val defaultBackoff = (Backoff.linear(100.milliseconds, 100.milliseconds) take 5) ++ Backoff.const(1.second)
+
+  /**
+   * Returns a Future that is satisfied when the
+   * predicate is affirmed. The group is polled
+   * with the given backoff strategy.
+   */
+  def pollUntilTrue[T](
+    group: Group[T],
+    p: Group[T] => Boolean,
+    backoff: Stream[Duration] = defaultBackoff
+  ): Future[Unit] = {
+    def poll(ds: Stream[Duration]): Future[Unit] = {
+      if (p(group)) Future.Done
+      else timer.doLater(ds.head)(()) flatMap { _ => poll(ds.tail) }
+    }
+    poll(backoff)
+  }
+
   /**
    * Construct a `T`-typed static group from the given elements.
    *

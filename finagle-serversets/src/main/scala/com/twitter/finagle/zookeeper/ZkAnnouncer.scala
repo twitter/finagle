@@ -22,8 +22,10 @@ class ZkAnnouncerException(msg: String) extends Exception(msg)
  * process is similar: leave the path, then remove either the additional endpoint
  * or the main endpoint, re-join only if the main endpoint exists.
  */
-class ZkAnnouncer extends Announcer { self =>
+class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
   val scheme = "zk"
+
+  def this() = this(DefaultZkClientFactory)
 
   private[this] case class ServerSetConf(
     client: ZooKeeperClient,
@@ -82,11 +84,11 @@ class ZkAnnouncer extends Announcer { self =>
     addr: InetSocketAddress,
     endpoint: Option[String]
   ): Future[Announcement] = {
-    val zkHosts = ZkClient.hostSet(hosts)
+    val zkHosts = factory.hostSet(hosts)
     if (zkHosts.isEmpty)
       Future.exception(new ZkAnnouncerException("ZK client address \"%s\" resolves to nothing".format(hosts)))
     else
-      announce(ZkClient.get(zkHosts), path, shardId, addr, endpoint)
+      announce(factory.get(zkHosts)._1, path, shardId, addr, endpoint)
   }
 
   def announce(

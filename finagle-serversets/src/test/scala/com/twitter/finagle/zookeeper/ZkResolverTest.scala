@@ -1,23 +1,34 @@
 package com.twitter.finagle.zookeeper
 
-import org.scalatest.concurrent.Eventually._
-import org.scalatest.concurrent.Timeouts._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite}
 import com.twitter.common.zookeeper.ServerSetImpl
+import com.twitter.conversions.time._
 import com.twitter.finagle.Resolver
 import com.twitter.thrift.Status._
 import com.twitter.util.Await
-import scala.collection.JavaConverters._
+import com.twitter.util.Duration
 import java.net.InetSocketAddress
+import org.junit.runner.RunWith
+import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.Timeouts._
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.time._
+import org.scalatest.{BeforeAndAfter, FunSuite}
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ZkResolverTest extends FunSuite with BeforeAndAfter {
+  val zkTimeout = 100.milliseconds
   val inst = new ZkInstance
   import inst._
+  val factory = new ZkClientFactory(zkTimeout)
+  implicit val patienceConfig = PatienceConfig(
+    timeout = toSpan(zkTimeout*3),
+    interval = toSpan(zkTimeout))
+
   before(start())
   after(stop())
+
+  def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
   test("represent the underlying ServerSet") {
     val serverSet = new ServerSetImpl(zookeeperClient, "/foo/bar/baz")
@@ -48,7 +59,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   }
 
   test("resolve ALIVE endpoints") {
-    val res = new ZkResolver
+    val res = new ZkResolver(factory)
     val clust = res.resolve("localhost:%d!/foo/bar/baz".format(zookeeperAddress.getPort))()
     assert(clust().isEmpty)
     val inetClust = clust collect { case ia: InetSocketAddress => ia }

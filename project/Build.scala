@@ -225,9 +225,11 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-serversets",
+    fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.5",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.42"
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.42",
+      util("zk-common")
     ),
     ivyXML :=
       <dependencies>
