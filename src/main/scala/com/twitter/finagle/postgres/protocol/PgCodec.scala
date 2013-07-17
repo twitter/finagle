@@ -6,8 +6,11 @@ import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import com.twitter.logging.Logger
 import com.twitter.util.Future
+import scala.Some
+import com.twitter.finagle.postgres.ResultSet
+import scala.collection.mutable
 
-class PgCodec(user: String, password: Option[String], database: String) extends CodecFactory[PgRequest, PgResponse] {
+class PgCodec(user: String, password: Option[String], database: String, id:String) extends CodecFactory[PgRequest, PgResponse] {
   def server = throw new UnsupportedOperationException("client only")
 
   def client = Function.const {
@@ -24,9 +27,9 @@ class PgCodec(user: String, password: Option[String], database: String) extends 
 
       override def prepareServiceFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
         val errorHandling = new HandleErrorsProxy(underlying)
-        new AuthenticationProxy(errorHandling, user, password, database)
+        val authProxy = new AuthenticationProxy(errorHandling, user, password, database)
+        new CustomOIDProxy(authProxy, id)
       }
-
     }
   }
 
@@ -34,8 +37,6 @@ class PgCodec(user: String, password: Option[String], database: String) extends 
 
 class HandleErrorsProxy(delegate: ServiceFactory[PgRequest, PgResponse])
   extends ServiceFactoryProxy(delegate) {
-
-  private val logger = Logger(getClass.getName)
 
   override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
     for {
@@ -95,6 +96,44 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
     }
   }
 
+}
+
+object CustomOIDProxy {
+  val serviceOIDMap = new mutable.HashMap[String, Map[String, String]]()
+}
+
+class CustomOIDProxy(delegate:ServiceFactory[PgRequest, PgResponse], id:String) extends ServiceFactoryProxy(delegate) {
+  val customTypes = """
+                      |SELECT      t.typname as type, t.oid as oid
+                      |FROM        pg_type t
+                      |LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+                      |WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))
+                      |AND         NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
+                      |AND         n.nspname NOT IN ('pg_catalog', 'information_schema')
+                    """.stripMargin
+
+  override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
+    for {
+      service <- delegate.apply(conn)
+      typeResponse <- service(new PgRequest(new Query(customTypes)))
+      _ <- handleTypeResponse(typeResponse)
+    } yield service
+  }
+
+  def handleTypeResponse(response:PgResponse):Future[Unit] = {
+    val result:ResultSet = response match {
+      case SelectResult(fields, rows) => ResultSet(fields, rows, Map())
+      case _ => throw Errors.client("Expected a SelectResult")
+    }
+
+    val typeMap:Map[String, String] = result.rows.map { row =>
+      (row.get[String]("oid"), row.get[String]("type"))
+    }.toMap
+
+    CustomOIDProxy.serviceOIDMap += id -> typeMap
+
+    Future(Unit)
+  }
 }
 
 

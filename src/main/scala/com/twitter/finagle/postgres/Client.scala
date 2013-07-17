@@ -16,13 +16,15 @@ import protocol.RowDescriptions
 import protocol.Rows
 import protocol.Value
 import org.jboss.netty.buffer.ChannelBuffer
+import scala.util.Random
 
-class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
+class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
   private[this] lazy val underlying = factory.apply()
   private[this] val counter = new AtomicInteger(0)
+  private[this] lazy val customTypes = CustomOIDProxy.serviceOIDMap(id)
 
   def query(sql: String): Future[QueryResponse] = sendQuery(sql) {
-    case SelectResult(fields, rows) => Future(ResultSet(fields, rows))
+    case SelectResult(fields, rows) => Future(ResultSet(fields, rows, customTypes))
     case CommandCompleteResponse(affected) => Future(OK(affected))
   }
 
@@ -44,6 +46,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
   } yield new PreparedStatementImpl(name)
 
   def close() {
+    CustomOIDProxy.serviceOIDMap.remove(id)
     factory.close()
   }
 
@@ -81,7 +84,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
 
   private[this] def processFields(fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
     val names = fields.map(f => f.name)
-    val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType))
+    val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType, customTypes))
 
     (names, parsers)
   }
@@ -103,7 +106,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
         exec <- execute(name)
       } yield exec match {
           case CommandCompleteResponse(rows) => OK(rows)
-          case Rows(rows, true) => ResultSet(fieldNames, fieldParsers, rows)
+          case Rows(rows, true) => ResultSet(fieldNames, fieldParsers, rows, customTypes)
         }
       f transform {
         result =>
@@ -122,13 +125,15 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse]) {
 object Client {
 
   def apply(host: String, username: String, password: Option[String], database: String): Client = {
+    val id = Random.alphanumeric.take(28).mkString
+
     val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
-      .codec(new PgCodec(username, password, database))
+      .codec(new PgCodec(username, password, database, id))
       .hosts(host)
       .hostConnectionLimit(1)
       .buildFactory()
 
-    new Client(factory)
+    new Client(factory, id)
   }
 
 }
@@ -160,19 +165,19 @@ case class ResultSet(rows: List[Row]) extends QueryResponse
 object ResultSet {
 
   // TODO copy-paste
-  def apply(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value[Any]], rows: List[DataRow]) = new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
+  def apply(fieldNames: IndexedSeq[String], fieldParsers: IndexedSeq[ChannelBuffer => Value[Any]], rows: List[DataRow], customTypes:Map[String, String]) = new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
     case (d, p) => if (d == null) null else p(d)
   }))))
 
-  def apply(fields: IndexedSeq[Field], rows: List[DataRow]): ResultSet = {
-    val (fieldNames, fieldParsers) = processFields(fields)
+  def apply(fields: IndexedSeq[Field], rows: List[DataRow], customTypes:Map[String, String]): ResultSet = {
+    val (fieldNames, fieldParsers) = processFields(fields, customTypes)
 
-    apply(fieldNames, fieldParsers, rows)
+    apply(fieldNames, fieldParsers, rows, customTypes)
   }
 
-  private[this] def processFields(fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
+  private[this] def processFields(fields: IndexedSeq[Field], customTypes:Map[String, String]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
     val names = fields.map(f => f.name)
-    val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType))
+    val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType, customTypes))
 
     (names, parsers)
   }

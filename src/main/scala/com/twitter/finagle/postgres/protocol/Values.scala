@@ -4,6 +4,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import scala.util.parsing.combinator.RegexParsers
 
 import java.sql.Timestamp
+import com.twitter.logging.Logger
 
 object Type {
   val BOOL = 16
@@ -52,9 +53,6 @@ object Type {
   val RECORD = 2249
   val VOID = 2278
   val UUID = 2950
-  val ENUM = 16448
-
-  val HSTORE = 16663
 }
 
 trait ValueParser {
@@ -90,10 +88,9 @@ trait ValueParser {
 
   def parseTimestampTZ(b: ChannelBuffer): Value[Timestamp]
 
-  def parseEnum(b: ChannelBuffer): Value[String]
-
   def parseHStore(b: ChannelBuffer): Value[Map[String, String]]
 
+  def parseUnknown(b: ChannelBuffer): Value[String]
 }
 
 object StringValueParser extends ValueParser {
@@ -127,8 +124,6 @@ object StringValueParser extends ValueParser {
 
   def parseTimestampTZ(b: ChannelBuffer) = parseTimestamp(b)
 
-  def parseEnum(b: ChannelBuffer) = parseStr(b)
-
   def parseHStore(b: ChannelBuffer) = {
     val data = b.toString(Charsets.Utf8)
 
@@ -138,6 +133,8 @@ object StringValueParser extends ValueParser {
     }
   }
 
+  def parseUnknown(b: ChannelBuffer) = parseStr(b)
+
   private[this] def parseInt(b: ChannelBuffer) = Value[Int](b.toString(Charsets.Utf8).toInt)
 
   private[this] def parseStr(b: ChannelBuffer) = Value[String](b.toString(Charsets.Utf8))
@@ -146,7 +143,9 @@ object StringValueParser extends ValueParser {
 
 object ValueParser {
 
-  def parserOf(format: Int, dataType: Int): ChannelBuffer => Value[Any] = {
+  private[this] val logger = Logger("value parser")
+
+  def parserOf(format: Int, dataType: Int, customTypes:Map[String, String]): ChannelBuffer => Value[Any] = {
     val valueParser: ValueParser = format match {
       case 0 => StringValueParser
       case _ => throw new UnsupportedOperationException("TODO Add support for binary format")
@@ -170,12 +169,17 @@ object ValueParser {
         case VAR_CHAR => valueParser.parseVarChar
         case TIMESTAMP => valueParser.parseTimestamp
         case TIMESTAMP_TZ => valueParser.parseTimestampTZ
-<<<<<<< HEAD
-        case ENUM => valueParser.parseEnum
-=======
-        case HSTORE => valueParser.parseHStore
->>>>>>> add hstore parsing
-        case _ => throw Errors.client("Data type '" + dataType + "' is not supported")
+        case _ => {
+          customTypes.get(dataType.toString) match {
+            case Some("hstore") => {
+              valueParser.parseHStore
+            }
+            case _ => {
+              logger.ifDebug("Unknown data type " + dataType + ", parsing as a unknown")
+              valueParser.parseUnknown
+            }
+          }
+        }
       }
     r
 
@@ -192,9 +196,6 @@ object StringValueEncoder {
     }
     result
   }
-<<<<<<< HEAD
-}
-=======
 }
 
 object HStoreStringParser extends RegexParsers {
@@ -208,5 +209,3 @@ object HStoreStringParser extends RegexParsers {
     case failure:NoSuccess => None
   }
 }
-
->>>>>>> add hstore parsing
