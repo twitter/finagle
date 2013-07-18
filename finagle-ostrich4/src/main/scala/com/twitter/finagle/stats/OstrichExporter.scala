@@ -8,7 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
 class OstrichExporter extends HttpMuxHandler {
-  val pattern = "/stats"
+  val pattern = "/stats.json"
 
   def apply(request: HttpRequest): Future[HttpResponse] = {
     def getParam(name: String): Option[String] = Option(request.getHeader(name))
