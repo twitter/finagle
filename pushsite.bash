@@ -12,7 +12,7 @@ echo 'making unidoc...' 1>&2
 ./sbt unidoc >/dev/null 2>&1
 
 echo 'cloning...' 1>&2
-git clone -b gh-pages --single-branch git@github.com:twitter/finagle.git $dir >/dev/null 2>&1
+git clone -b gh-pages git@github.com:twitter/finagle.git $dir >/dev/null 2>&1
 
 savedir=$(pwd)
 cd $dir
