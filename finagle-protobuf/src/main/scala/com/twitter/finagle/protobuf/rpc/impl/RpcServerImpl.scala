@@ -7,7 +7,7 @@ import com.twitter.util.Duration
 import com.twitter.util.FuturePool
 import com.twitter.finagle.builder.{Server, ServerBuilder, ServerConfig}
 import java.net.InetSocketAddress
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 import scala.None
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
@@ -20,7 +20,7 @@ import com.google.protobuf.Descriptors._
 
 class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, handler: ServiceExceptionHandler[Message], executorService: ExecutorService) extends RpcServer {
 
-  private val log = LoggerFactory.getLogger(getClass)
+  private val log = Logger.getLogger(getClass.toString)
 
   Preconditions.checkNotNull(executorService)
   Preconditions.checkNotNull(handler)
@@ -40,7 +40,7 @@ class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any,
 
 class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceExceptionHandler[Message], futurePool: FuturePool) extends com.twitter.finagle.Service[(String, Message), (String, Message)] {
 
-  private val log = LoggerFactory.getLogger(getClass)
+  private val log = Logger.getLogger(getClass.toString)
 
   def apply(request: (String, Message)) = {
 
@@ -67,7 +67,7 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
         })
       } catch {
         case e: RuntimeException => {
-          log.warn("#apply# Exception: ", e)
+          log.warning("#apply# Exception: "+e.getMessage)
           if (handler.canHandle(e)) {
             promise.setValue((methodName, handler.handle(e, constructEmptyResponseMessage(m))))
           } else {

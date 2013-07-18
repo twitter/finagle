@@ -32,6 +32,7 @@
     <module>finagle-mysql</module>
     <module>finagle-native</module>
     <module>finagle-ostrich4</module>
+    <module>finagle-protobuf</module>
     <module>finagle-redis</module>
     <module>finagle-serversets</module>
     <module>finagle-spdy</module>

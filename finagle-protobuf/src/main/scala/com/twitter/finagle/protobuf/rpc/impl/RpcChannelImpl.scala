@@ -7,7 +7,7 @@ import com.google.protobuf.Message
 import com.google.protobuf.RpcChannel
 import com.google.protobuf.RpcController
 import com.google.protobuf.Service
-import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 import com.twitter.util.Duration
 import com.twitter.util.FuturePool
 import com.twitter.finagle.builder.ClientBuilder
@@ -20,7 +20,7 @@ import com.twitter.finagle.protobuf.rpc.ExceptionResponseHandler
 
 class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any, Any, Any], s: Service, handler: ExceptionResponseHandler[Message], executorService: ExecutorService) extends RpcChannel {
 
-  private val log = LoggerFactory.getLogger(getClass)
+  private val log = Logger.getLogger(getClass.toString)
 
   private val futurePool = FuturePool(executorService)
 
@@ -52,10 +52,10 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
         })
     } onFailure {
       e =>
-        log.warn("#callMethod# Failed.", e)
+        log.warning("#callMethod# Failed. "+ e.getMessage)
         e match {
           case cc: ChannelClosedException => if (retries > 1) {
-            log.warn("#callMethod# Retrying.")
+            log.warning("#callMethod# Retrying.")
             callMethod(m, controller, request, responsePrototype, done, retries - 1);
           } else {
             controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
