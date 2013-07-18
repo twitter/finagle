@@ -589,6 +589,18 @@ doesn't exist, the operation has no effect.</p></div><dl class="paramcmts block"
       <p class="shortcomment cmt">Send a quit command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a quit command to the server. Alternative to release, for
 protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>none
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.ConnectedClient#rawGet" data-isabs="false">
+      <a id="rawGet(RetrievalCommand):Future[GetResult]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rawGet</span><span class="params">(<span name="command">command: <a name="com.twitter.finagle.memcached.protocol.RetrievalCommand" class="extype" href="protocol/RetrievalCommand.html">RetrievalCommand</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.memcached.GetResult" class="extype" href="GetResult.html">GetResult</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.ConnectedClient#release" data-isabs="false">
       <a id="release():Unit"></a>
       <h4 class="signature">
@@ -631,6 +643,19 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
       <p class="shortcomment cmt">Replace an item if it exists.</p><div class="fullcomment"><div class="comment cmt"><p>Replace an item if it exists. If it doesn't exist, the operation has no
 effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.ConnectedClient#service" data-isabs="false">
+      <a id="service:Service[Command, Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">service</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="protocol/Response.html">Response</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">the underlying Memcached Service.</p><div class="fullcomment"><div class="comment cmt"><p>the underlying Memcached Service.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.ConnectedClient#set" data-isabs="false">
       <a id="set(String,Int,Time,ChannelBuffer):Future[Unit]"></a>
       <h4 class="signature">

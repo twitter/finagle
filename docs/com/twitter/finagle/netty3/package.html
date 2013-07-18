@@ -86,7 +86,7 @@ package netty3 can move into its own package, so that only the
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Netty3Listener.html"><span class="name">Netty3Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: ChannelPipelineFactory</span>, <span name="channelSnooper">channelSnooper: Option[ChannelSnooper]</span>, <span name="channelFactory">channelFactory: ServerChannelFactory</span>, <span name="bootstrapOptions">bootstrapOptions: Map[String, AnyRef]</span>, <span name="channelMaxIdleTime">channelMaxIdleTime: Duration</span>, <span name="channelMaxLifeTime">channelMaxLifeTime: Duration</span>, <span name="channelReadTimeout">channelReadTimeout: Duration</span>, <span name="channelWriteCompletionTimeout">channelWriteCompletionTimeout: Duration</span>, <span name="tlsConfig">tlsConfig: Option[Netty3ListenerTLSConfig]</span>, <span name="timer">timer: Timer</span>, <span name="nettyTimer">nettyTimer: Timer</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="monitor">monitor: Monitor</span>, <span name="logger">logger: Logger</span>)</span><span class="result"> extends Listener[In, Out] with Product with Serializable</span>
+        <a href="Netty3Listener.html"><span class="name">Netty3Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: String</span>, <span name="pipelineFactory">pipelineFactory: ChannelPipelineFactory</span>, <span name="channelSnooper">channelSnooper: Option[ChannelSnooper]</span>, <span name="channelFactory">channelFactory: ServerChannelFactory</span>, <span name="bootstrapOptions">bootstrapOptions: Map[String, AnyRef]</span>, <span name="channelReadTimeout">channelReadTimeout: Duration</span>, <span name="channelWriteCompletionTimeout">channelWriteCompletionTimeout: Duration</span>, <span name="tlsConfig">tlsConfig: Option[Netty3ListenerTLSConfig]</span>, <span name="timer">timer: Timer</span>, <span name="nettyTimer">nettyTimer: Timer</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="monitor">monitor: Monitor</span>, <span name="logger">logger: Logger</span>)</span><span class="result"> extends Listener[In, Out] with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">A listener using Netty3 which is given a ChannelPipelineFactory
@@ -209,18 +209,6 @@ endpoint.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.netty3.NumWorkers" data-isabs="false">
-      <a id="NumWorkers:NumWorkers"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="NumWorkers$.html"><span class="name">NumWorkers</span></a><span class="result"> extends GlobalFlag[Int]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.netty3.WorkerPool" data-isabs="false">
       <a id="WorkerPool:WorkerPool"></a>
       <h4 class="signature">
@@ -230,6 +218,18 @@ endpoint.</p>
       </span>
       <span class="symbol">
         <a href="WorkerPool$.html"><span class="name">WorkerPool</span></a><span class="result"> extends NioWorkerPool</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.netty3.numWorkers" data-isabs="false">
+      <a id="numWorkers:numWorkers"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="numWorkers$.html"><span class="name">numWorkers</span></a><span class="result"> extends GlobalFlag[Int]</span>
       </span>
       </h4>
       

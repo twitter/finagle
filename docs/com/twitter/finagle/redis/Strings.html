@@ -524,6 +524,38 @@ number of seconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set k
 number of seconds.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setex
 </p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setExNx" data-isabs="false">
+      <a id="setExNx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setExNx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="seconds">seconds: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value with the specified expire time in seconds
+only if the key does not already exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value with the specified expire time in seconds
+only if the key does not already exist.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setExXx" data-isabs="false">
+      <a id="setExXx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setExXx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="seconds">seconds: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value with the specified expire time in seconds
+only if the key already exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value with the specified expire time in seconds
+only if the key already exist.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set
+</p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setNx" data-isabs="false">
       <a id="setNx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
       <h4 class="signature">
@@ -538,6 +570,52 @@ number of seconds.
       <p class="shortcomment cmt">Set key to hold string value if key does not exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold string value if key does not exist. In that case, it is
 equal to SET. When key already holds a value, no operation is performed.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if the key was set, 0 if the key was not set.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setnx
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setPx" data-isabs="false">
+      <a id="setPx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setPx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="millis">millis: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value with the specified expire time in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value with the specified expire time in milliseconds.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setPxNx" data-isabs="false">
+      <a id="setPxNx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setPxNx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="millis">millis: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value with the specified expire time in milliseconds
+only if the key does not already exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value with the specified expire time in milliseconds
+only if the key does not already exist.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setPxXx" data-isabs="false">
+      <a id="setPxXx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setPxXx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="millis">millis: <span name="scala.Long" class="extype">Long</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value with the specified expire time in milliseconds
+only if the key already exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value with the specified expire time in milliseconds
+only if the key already exist.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set
 </p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setRange" data-isabs="false">
       <a id="setRange(ChannelBuffer,Int,ChannelBuffer):Future[Long]"></a>
@@ -554,6 +632,20 @@ equal to SET. When key already holds a value, no operation is performed.
 offset, for the entire length of value.</p><div class="fullcomment"><div class="comment cmt"><p>Overwrites part of the string stored at key, starting at the specified
 offset, for the entire length of value.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the string after it was modified.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setrange
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#setXx" data-isabs="false">
+      <a id="setXx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setXx</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set key to hold the string value only if the key already exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value only if the key already exist.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set
 </p></span></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Strings#strlen" data-isabs="false">
       <a id="strlen(ChannelBuffer):Future[Long]"></a>

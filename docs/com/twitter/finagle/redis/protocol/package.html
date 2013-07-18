@@ -156,6 +156,66 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Config" data-isabs="true">
+      <a id="Config:Config"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Config.html"><span class="name">Config</span></a><span class="result"> extends Command</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigGet" data-isabs="false">
+      <a id="ConfigGet:ConfigGet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigGet.html"><span class="name">ConfigGet</span></a><span class="params">(<span name="param">param: ChannelBuffer</span>)</span><span class="result"> extends Config with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigHelper" data-isabs="true">
+      <a id="ConfigHelper:ConfigHelper"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigHelper.html"><span class="name">ConfigHelper</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigResetStat" data-isabs="false">
+      <a id="ConfigResetStat:ConfigResetStat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigResetStat.html"><span class="name">ConfigResetStat</span></a><span class="params">()</span><span class="result"> extends Config with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigSet" data-isabs="false">
+      <a id="ConfigSet:ConfigSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigSet.html"><span class="name">ConfigSet</span></a><span class="params">(<span name="param">param: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Config with Product with Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Decr" data-isabs="false">
       <a id="Decr:Decr"></a>
       <h4 class="signature">
@@ -441,6 +501,30 @@
       </span>
       <span class="symbol">
         <a href="HVals.html"><span class="name">HVals</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.InMilliseconds" data-isabs="false">
+      <a id="InMilliseconds:InMilliseconds"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="InMilliseconds.html"><span class="name">InMilliseconds</span></a><span class="params">(<span name="millis">millis: Long</span>)</span><span class="result"> extends TimeToLive with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.InSeconds" data-isabs="false">
+      <a id="InSeconds:InSeconds"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="InSeconds.html"><span class="name">InSeconds</span></a><span class="params">(<span name="seconds">seconds: Long</span>)</span><span class="result"> extends TimeToLive with Product with Serializable</span>
       </span>
       </h4>
       
@@ -768,6 +852,30 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PExpire" data-isabs="false">
+      <a id="PExpire:PExpire"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PExpire.html"><span class="name">PExpire</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="milliseconds">milliseconds: Long</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PExpireAt" data-isabs="false">
+      <a id="PExpireAt:PExpireAt"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PExpireAt.html"><span class="name">PExpireAt</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="timestamp">timestamp: Time</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PSetEx" data-isabs="false">
       <a id="PSetEx:PSetEx"></a>
       <h4 class="signature">
@@ -777,6 +885,18 @@
       </span>
       <span class="symbol">
         <a href="PSetEx.html"><span class="name">PSetEx</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="millis">millis: Long</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with StrictValueCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PTtl" data-isabs="false">
+      <a id="PTtl:PTtl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PTtl.html"><span class="name">PTtl</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
       </span>
       </h4>
       
@@ -1004,7 +1124,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with StrictValueCommand with Product with Serializable</span>
+        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="value">value: ChannelBuffer</span>, <span name="ttl">ttl: Option[TimeToLive]</span>, <span name="nx">nx: Boolean</span>, <span name="xx">xx: Boolean</span>)</span><span class="result"> extends Command with StrictKeyCommand with StrictValueCommand with Product with Serializable</span>
       </span>
       </h4>
       
@@ -1065,6 +1185,18 @@
       </span>
       <span class="symbol">
         <a href="SingleLineReply.html"><span class="name">SingleLineReply</span></a><span class="result"> extends Reply</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.SlaveOf" data-isabs="false">
+      <a id="SlaveOf:SlaveOf"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SlaveOf.html"><span class="name">SlaveOf</span></a><span class="params">(<span name="host">host: ChannelBuffer</span>, <span name="port">port: ChannelBuffer</span>)</span><span class="result"> extends Command with Product with Serializable</span>
       </span>
       </h4>
       
@@ -1161,6 +1293,18 @@
       </span>
       <span class="symbol">
         <a href="Strlen.html"><span class="name">Strlen</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>)</span><span class="result"> extends Command with StrictKeyCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.TimeToLive" data-isabs="true">
+      <a id="TimeToLive:TimeToLive"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="TimeToLive.html"><span class="name">TimeToLive</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -1663,6 +1807,54 @@ See http://redis.</p>
       </span>
       <span class="symbol">
         <a href="Commands$.html"><span class="name">Commands</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Config" data-isabs="false">
+      <a id="Config:Config"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Config$.html"><span class="name">Config</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigGet" data-isabs="false">
+      <a id="ConfigGet:ConfigGet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigGet$.html"><span class="name">ConfigGet</span></a><span class="result"> extends ConfigHelper with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigResetStat" data-isabs="false">
+      <a id="ConfigResetStat:ConfigResetStat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigResetStat$.html"><span class="name">ConfigResetStat</span></a><span class="result"> extends ConfigHelper with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.ConfigSet" data-isabs="false">
+      <a id="ConfigSet:ConfigSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ConfigSet$.html"><span class="name">ConfigSet</span></a><span class="result"> extends ConfigHelper with Serializable</span>
       </span>
       </h4>
       
@@ -2182,6 +2374,30 @@ See http://redis.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PExpire" data-isabs="false">
+      <a id="PExpire:PExpire"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PExpire$.html"><span class="name">PExpire</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PExpireAt" data-isabs="false">
+      <a id="PExpireAt:PExpireAt"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PExpireAt$.html"><span class="name">PExpireAt</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PSetEx" data-isabs="false">
       <a id="PSetEx:PSetEx"></a>
       <h4 class="signature">
@@ -2191,6 +2407,18 @@ See http://redis.</p>
       </span>
       <span class="symbol">
         <a href="PSetEx$.html"><span class="name">PSetEx</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.PTtl" data-isabs="false">
+      <a id="PTtl:PTtl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PTtl$.html"><span class="name">PTtl</span></a><span class="result"> extends Serializable</span>
       </span>
       </h4>
       
@@ -2467,6 +2695,18 @@ See http://redis.</p>
       </span>
       <span class="symbol">
         <a href="SetRange$.html"><span class="name">SetRange</span></a><span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.SlaveOf" data-isabs="false">
+      <a id="SlaveOf:SlaveOf"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SlaveOf$.html"><span class="name">SlaveOf</span></a><span class="result"> extends Serializable</span>
       </span>
       </h4>
       

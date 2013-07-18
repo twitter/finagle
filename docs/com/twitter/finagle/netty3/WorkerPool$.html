@@ -31,7 +31,7 @@
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="org.jboss.netty.channel.socket.nio.NioWorkerPool" class="extype">NioWorkerPool</span>, <span name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool" class="extype">AbstractNioWorkerPool</span>[<span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span>], <span name="org.jboss.netty.util.ExternalResourceReleasable" class="extype">ExternalResourceReleasable</span>, <span name="org.jboss.netty.channel.socket.nio.WorkerPool" class="extype">WorkerPool</span>[<span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="org.jboss.netty.channel.socket.nio.NioWorkerPool" class="extype">NioWorkerPool</span>, <span name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool" class="extype">AbstractNioWorkerPool</span>[<span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span>], <span name="org.jboss.netty.util.ExternalResourceReleasable" class="extype">ExternalResourceReleasable</span>, <span name="org.jboss.netty.channel.socket.nio.WorkerPool" class="extype">WorkerPool</span>[<span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span>], <span name="org.jboss.netty.channel.socket.nio.NioSelectorPool" class="extype">NioSelectorPool</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.netty3.WorkerPool" class="in"><span>WorkerPool</span></li><li name="org.jboss.netty.channel.socket.nio.NioWorkerPool" class="in"><span>NioWorkerPool</span></li><li name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool" class="in"><span>AbstractNioWorkerPool</span></li><li name="org.jboss.netty.util.ExternalResourceReleasable" class="in"><span>ExternalResourceReleasable</span></li><li name="org.jboss.netty.channel.socket.nio.WorkerPool" class="in"><span>WorkerPool</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.netty3.WorkerPool" class="in"><span>WorkerPool</span></li><li name="org.jboss.netty.channel.socket.nio.NioWorkerPool" class="in"><span>NioWorkerPool</span></li><li name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool" class="in"><span>AbstractNioWorkerPool</span></li><li name="org.jboss.netty.util.ExternalResourceReleasable" class="in"><span>ExternalResourceReleasable</span></li><li name="org.jboss.netty.channel.socket.nio.WorkerPool" class="in"><span>WorkerPool</span></li><li name="org.jboss.netty.channel.socket.nio.NioSelectorPool" class="in"><span>NioSelectorPool</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -150,18 +150,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="prt" name="org.jboss.netty.channel.socket.nio.NioWorkerPool#createWorker" data-isabs="false">
-      <a id="createWorker(Executor):NioWorker"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">createWorker</span><span class="params">(<span name="arg0">arg0: <span name="java.util.concurrent.Executor" class="extype">Executor</span></span>)</span><span class="result">: <span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="org.jboss.netty.channel.socket.nio" class="extype" href="../../../../org/jboss/netty/channel/socket/nio/package.html">nio</a>] </dd><dt>Definition Classes</dt><dd>NioWorkerPool → AbstractNioWorkerPool</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -225,6 +213,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool#init" data-isabs="false">
+      <a id="init():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">init</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="org.jboss.netty.channel.socket.nio" class="extype" href="../../../../org/jboss/netty/channel/socket/nio/package.html">nio</a>] </dd><dt>Definition Classes</dt><dd>AbstractNioWorkerPool</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -249,6 +249,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="prt" name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool#newWorker" data-isabs="false">
+      <a id="newWorker(Executor):NioWorker"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newWorker</span><span class="params">(<span name="arg0">arg0: <span name="java.util.concurrent.Executor" class="extype">Executor</span></span>)</span><span class="result">: <span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="org.jboss.netty.channel.socket.nio" class="extype" href="../../../../org/jboss/netty/channel/socket/nio/package.html">nio</a>] </dd><dt>Definition Classes</dt><dd>AbstractNioWorkerPool</dd></dl></div>
     </li><li visbl="pub" name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool#nextWorker" data-isabs="false">
       <a id="nextWorker():NioWorker"></a>
       <h4 class="signature">
@@ -285,6 +297,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool#rebuildSelectors" data-isabs="false">
+      <a id="rebuildSelectors():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rebuildSelectors</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractNioWorkerPool → NioSelectorPool</dd></dl></div>
     </li><li visbl="pub" name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool#releaseExternalResources" data-isabs="false">
       <a id="releaseExternalResources():Unit"></a>
       <h4 class="signature">
@@ -297,6 +321,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractNioWorkerPool → ExternalResourceReleasable</dd></dl></div>
+    </li><li visbl="pub" name="org.jboss.netty.channel.socket.nio.AbstractNioWorkerPool#shutdown" data-isabs="false">
+      <a id="shutdown():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shutdown</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractNioWorkerPool → NioSelectorPool</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -369,7 +405,27 @@
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="prt" name="org.jboss.netty.channel.socket.nio.NioWorkerPool#createWorker" data-isabs="false">
+      <a id="createWorker(Executor):NioWorker"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">createWorker</span><span class="params">(<span name="arg0">arg0: <span name="java.util.concurrent.Executor" class="extype">Executor</span></span>)</span><span class="result">: <span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="org.jboss.netty.channel.socket.nio" class="extype" href="../../../../org/jboss/netty/channel/socket/nio/package.html">nio</a>] </dd><dt>Definition Classes</dt><dd>NioWorkerPool → AbstractNioWorkerPool</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
@@ -381,6 +437,8 @@
               <h3>Inherited from <span name="org.jboss.netty.util.ExternalResourceReleasable" class="extype">ExternalResourceReleasable</span></h3>
             </div><div name="org.jboss.netty.channel.socket.nio.WorkerPool" class="parent">
               <h3>Inherited from <span name="org.jboss.netty.channel.socket.nio.WorkerPool" class="extype">WorkerPool</span>[<span name="org.jboss.netty.channel.socket.nio.NioWorker" class="extype">NioWorker</span>]</h3>
+            </div><div name="org.jboss.netty.channel.socket.nio.NioSelectorPool" class="parent">
+              <h3>Inherited from <span name="org.jboss.netty.channel.socket.nio.NioSelectorPool" class="extype">NioSelectorPool</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

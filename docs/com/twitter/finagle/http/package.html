@@ -72,18 +72,31 @@
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.http.CookieSet" data-isabs="false">
-      <a id="CookieSet:CookieSet"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.http.Cookie" data-isabs="false">
+      <a id="Cookie:Cookie"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CookieSet.html"><span class="name">CookieSet</span></a><span class="result"> extends SetLike[Cookie, Set[Cookie]]</span>
+        <a href="Cookie.html"><span class="name">Cookie</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      <p class="comment cmt">Adapt cookies of a Message to a mutable Set.</p>
+      <p class="comment cmt">Scala wrapper around Netty cookies.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.http.CookieMap" data-isabs="false">
+      <a id="CookieMap:CookieMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="CookieMap.html"><span class="name">CookieMap</span></a><span class="result"> extends Map[String, Cookie] with MapLike[String, Cookie, CookieMap]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Adapt cookies of a Message to a mutable Map where cookies are indexed by
+their name.</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.FileElement" data-isabs="false">
       <a id="FileElement:FileElement"></a>
       <h4 class="signature">

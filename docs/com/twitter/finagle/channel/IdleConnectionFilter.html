@@ -35,7 +35,8 @@ connections based on the number of active connections.</p><p>Each time a message
 - if above low watermark: collect (close) idle connections, but accept the connection.
 - if above high watermark: collect (close) idle connections, and refuse/accept the
   connection depending if we managed to close an idle connection.</p><p>NB: the connection is tracked after the server response, so that the server processing time is
-not count in the idle timeout.
+not count in the idle timeout.</p><p>Note: this will not properly handle multiple outstanding messages per connection and should not
+be used for duplex protocols such as finagle-mux.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.ServiceFactoryProxy" class="extype" href="../ServiceFactoryProxy.html">ServiceFactoryProxy</a>[Req, Rep], <a name="com.twitter.finagle.ProxyServiceFactory" class="extype" href="../ProxyServiceFactory.html">ProxyServiceFactory</a>[Req, Rep], <span name="scala.Proxy" class="extype">Proxy</span>, <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[Req, Rep], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<a name="com.twitter.finagle.ClientConnection" class="extype" href="../ClientConnection.html">ClientConnection</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[Req, Rep]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>

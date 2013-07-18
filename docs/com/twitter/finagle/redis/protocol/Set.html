@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Set</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a> with <a name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="extype" href="StrictKeyCommand.html">StrictKeyCommand</a> with <a name="com.twitter.finagle.redis.protocol.StrictValueCommand" class="extype" href="StrictValueCommand.html">StrictValueCommand</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Set</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.redis.protocol.TimeToLive" class="extype" href="TimeToLive.html">TimeToLive</a>]</span>, <span name="nx">nx: <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="xx">xx: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="Command.html">Command</a> with <a name="com.twitter.finagle.redis.protocol.StrictKeyCommand" class="extype" href="StrictKeyCommand.html">StrictKeyCommand</a> with <a name="com.twitter.finagle.redis.protocol.StrictValueCommand" class="extype" href="StrictValueCommand.html">StrictValueCommand</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Set</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span>
+        <span class="name">Set</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="ttl">ttl: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.redis.protocol.TimeToLive" class="extype" href="TimeToLive.html">TimeToLive</a>] = <span class="symbol">scala.None</span></span>, <span name="nx">nx: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>, <span name="xx">xx: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>)</span>
       </span>
       </h4>
       
@@ -312,6 +312,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Set#nx" data-isabs="false">
+      <a id="nx:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nx</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Set#productArity" data-isabs="false">
       <a id="productArity:Int"></a>
       <h4 class="signature">
@@ -408,6 +420,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.protocol.Set" class="extype" href="">Set</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Set#ttl" data-isabs="false">
+      <a id="ttl:Option[TimeToLive]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ttl</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.redis.protocol.TimeToLive" class="extype" href="TimeToLive.html">TimeToLive</a>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="prt" name="com.twitter.finagle.redis.protocol.KeyCommand#validate" data-isabs="false">
       <a id="validate():Unit"></a>
       <h4 class="signature">
@@ -477,6 +501,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.protocol.Set#xx" data-isabs="false">
+      <a id="xx:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">xx</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 

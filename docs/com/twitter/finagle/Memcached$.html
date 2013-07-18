@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Memcached</span><span class="result"> extends <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>] with <a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a> with <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>]</span>
+        <span class="name">Memcached</span><span class="result"> extends <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>] with <a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a> with <a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a> with <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>]</span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>], <a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a>, <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>], <a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a>, <a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a>, <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.Memcached" class="in"><span>Memcached</span></li><li name="com.twitter.finagle.Server" class="in"><span>Server</span></li><li name="com.twitter.finagle.MemcachedRichClient" class="in"><span>MemcachedRichClient</span></li><li name="com.twitter.finagle.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.Memcached" class="in"><span>Memcached</span></li><li name="com.twitter.finagle.Server" class="in"><span>Server</span></li><li name="com.twitter.finagle.MemcachedKetamaClient" class="in"><span>MemcachedKetamaClient</span></li><li name="com.twitter.finagle.MemcachedRichClient" class="in"><span>MemcachedRichClient</span></li><li name="com.twitter.finagle.Client" class="in"><span>Client</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -265,6 +265,30 @@
 group resolved by <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
 group resolved by <code>target</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedKetamaClient#newKetamaClient" data-isabs="false">
+      <a id="newKetamaClient(Group[SocketAddress],KeyHasher,Boolean):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newKetamaClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="keyHasher">keyHasher: <span name="com.twitter.hashing.KeyHasher" class="extype">KeyHasher</span></span>, <span name="ejectFailedHost">ejectFailedHost: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="memcached/Client.html">Client</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedKetamaClient#newKetamaClient" data-isabs="false">
+      <a id="newKetamaClient(String,KeyHasher,Boolean):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newKetamaClient</span><span class="params">(<span name="group">group: String</span>, <span name="keyHasher">keyHasher: <span name="com.twitter.hashing.KeyHasher" class="extype">KeyHasher</span> = <span class="symbol"><span class="name"><a href="../../package.html">KeyHasher.KETAMA</a></span></span></span>, <span name="ejectFailedHost">ejectFailedHost: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="memcached/Client.html">Client</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.MemcachedRichClient#newRichClient" data-isabs="false">
       <a id="newRichClient(String):Client"></a>
       <h4 class="signature">
@@ -315,6 +339,54 @@ group resolved by <code>target</code>.
       </h4>
       <p class="shortcomment cmt">Create a new Service connected to <code>group</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new Service connected to <code>group</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedRichClient#newTwemcacheClient" data-isabs="false">
+      <a id="newTwemcacheClient(String):TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTwemcacheClient</span><span class="params">(<span name="group">group: String</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.TwemcacheClient" class="extype" href="memcached/TwemcacheClient.html">TwemcacheClient</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedRichClient#newTwemcacheClient" data-isabs="false">
+      <a id="newTwemcacheClient(Group[SocketAddress]):TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTwemcacheClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.TwemcacheClient" class="extype" href="memcached/TwemcacheClient.html">TwemcacheClient</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedKetamaClient#newTwemcacheKetamaClient" data-isabs="false">
+      <a id="newTwemcacheKetamaClient(Group[SocketAddress],KeyHasher,Boolean):TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTwemcacheKetamaClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="keyHasher">keyHasher: <span name="com.twitter.hashing.KeyHasher" class="extype">KeyHasher</span></span>, <span name="ejectFailedHost">ejectFailedHost: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.TwemcacheClient" class="extype" href="memcached/TwemcacheClient.html">TwemcacheClient</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedKetamaClient#newTwemcacheKetamaClient" data-isabs="false">
+      <a id="newTwemcacheKetamaClient(String,KeyHasher,Boolean):TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTwemcacheKetamaClient</span><span class="params">(<span name="group">group: String</span>, <span name="keyHasher">keyHasher: <span name="com.twitter.hashing.KeyHasher" class="extype">KeyHasher</span> = <span class="symbol"><span class="name"><a href="../../package.html">KeyHasher.KETAMA</a></span></span></span>, <span name="ejectFailedHost">ejectFailedHost: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.TwemcacheClient" class="extype" href="memcached/TwemcacheClient.html">TwemcacheClient</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -523,6 +595,8 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <div id="inheritedMembers">
         <div name="com.twitter.finagle.Server" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<a name="com.twitter.finagle.memcached.protocol.Command" class="extype" href="memcached/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.memcached.protocol.Response" class="extype" href="memcached/protocol/Response.html">Response</a>]</h3>
+            </div><div name="com.twitter.finagle.MemcachedKetamaClient" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.MemcachedKetamaClient" class="extype" href="MemcachedKetamaClient.html">MemcachedKetamaClient</a></h3>
             </div><div name="com.twitter.finagle.MemcachedRichClient" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.MemcachedRichClient" class="extype" href="MemcachedRichClient.html">MemcachedRichClient</a></h3>
             </div><div name="com.twitter.finagle.Client" class="parent">

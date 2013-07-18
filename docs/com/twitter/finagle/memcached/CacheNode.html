@@ -25,13 +25,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">CacheNode</span><span class="params">(<span name="host">host: String</span>, <span name="port">port: <span name="scala.Int" class="extype">Int</span></span>, <span name="weight">weight: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">CacheNode</span><span class="params">(<span name="host">host: String</span>, <span name="port">port: <span name="scala.Int" class="extype">Int</span></span>, <span name="weight">weight: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="java.net.SocketAddress" class="extype">SocketAddress</span> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.memcached.CacheNode" class="in"><span>CacheNode</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.memcached.CacheNode" class="in"><span>CacheNode</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="java.net.SocketAddress" class="in"><span>SocketAddress</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -468,12 +468,14 @@
         <div id="inheritedMembers">
         <div name="scala.Serializable" class="parent">
               <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
-              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
             </div><div name="scala.Product" class="parent">
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="java.net.SocketAddress" class="parent">
+              <h3>Inherited from <span name="java.net.SocketAddress" class="extype">SocketAddress</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

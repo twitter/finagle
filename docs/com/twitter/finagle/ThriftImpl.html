@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftImpl</span><span class="params">(<span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>, <span name="framed">framed: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a> with <a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">ThriftImpl</span><span class="params">(<span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>, <span name="framed">framed: <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="clientId">clientId: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="thrift/ClientId.html">ClientId</a>]</span>)</span><span class="result"> extends <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a> with <a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -191,6 +191,18 @@ use it only through com.twitter.finagle.Thrift</p></span></dd></dl><div class="t
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftImpl" class="extype" href="">ThriftImpl</a> → Equals</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftImpl#clientId" data-isabs="false">
+      <a id="clientId:Option[ClientId]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clientId</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="thrift/ClientId.html">ClientId</a>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -735,6 +747,19 @@ a buffered transport.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Not recommended. Use only if absolutely required
 for legacy purposes.
 </p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftImpl#withClientId" data-isabs="false">
+      <a id="withClientId(ClientId):ThriftImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withClientId</span><span class="params">(<span name="clientId">clientId: <a name="com.twitter.finagle.thrift.ClientId" class="extype" href="thrift/ClientId.html">ClientId</a></span>)</span><span class="result">: <a name="com.twitter.finagle.ThriftImpl" class="extype" href="">ThriftImpl</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Produce a <a name="com.twitter.finagle.ThriftImpl" class="extype" href="">ThriftImpl</a> using
+the provided client ID.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftImpl#withProtocolFactory" data-isabs="false">
       <a id="withProtocolFactory(TProtocolFactory):ThriftImpl"></a>
       <h4 class="signature">

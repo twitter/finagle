@@ -331,6 +331,53 @@ false otherwise.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#pExpire" data-isabs="false">
+      <a id="pExpire(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pExpire</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="milliseconds">milliseconds: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set a key's time to live in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set a key's time to live in milliseconds.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the timeout was set.
+        false if key does not exist or the timeout could not be set.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/pexpire
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#pExpireAt" data-isabs="false">
+      <a id="pExpireAt(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pExpireAt</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="timestamp">timestamp: <span name="java.lang.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Set the expiration for a key as a UNIX timestamp specified in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set the expiration for a key as a UNIX timestamp specified in milliseconds.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the timeout was set.
+        false if key does not exist or the timeout could not be set
+        (see: EXPIRE).</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/pexpireat
+</p></span></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#pTtl" data-isabs="false">
+      <a id="pTtl(ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pTtl</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get the time to live for a key in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Get the time to live for a key in milliseconds.
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>Time to live in milliseconds or None when key does not exist or
+        does not have a timeout.
+@see
+</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Keys#scan" data-isabs="false">
       <a id="scan(Long,Option[Long],Option[ChannelBuffer]):Future[Seq[ChannelBuffer]]"></a>
       <h4 class="signature">

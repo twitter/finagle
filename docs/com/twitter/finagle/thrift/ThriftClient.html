@@ -78,7 +78,7 @@ Thrift struct described <a href="https://github.com/twitter/finagle/blob/master/
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftClient</span><span class="params">(<span name="transporter">transporter: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]]</span>, <span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>, <span name="serviceName">serviceName: String = <span class="symbol">&quot;unknown&quot;</span></span>)</span>
+        <span class="name">ThriftClient</span><span class="params">(<span name="transporter">transporter: (<span name="java.net.SocketAddress" class="extype">SocketAddress</span>, <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.transport.Transport" class="extype" href="../transport/Transport.html">Transport</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]]</span>, <span name="protocolFactory">protocolFactory: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>, <span name="serviceName">serviceName: String = <span class="symbol">&quot;unknown&quot;</span></span>, <span name="clientId">clientId: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.thrift.ClientId" class="extype" href="ClientId.html">ClientId</a>] = <span class="symbol">scala.None</span></span>)</span>
       </span>
       </h4>
       
@@ -547,6 +547,18 @@ group resolved by <code>target</code>.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="../client/DefaultClient.html">DefaultClient</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#reporter" data-isabs="false">
+      <a id="reporter:ReporterFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reporter</span><span class="result">: <a name="com.twitter.finagle.util.ReporterFactory" class="extype" href="../util/ReporterFactory.html">ReporterFactory</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="../client/DefaultClient.html">DefaultClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#requestTimeout" data-isabs="false">
       <a id="requestTimeout:Duration"></a>
       <h4 class="signature">

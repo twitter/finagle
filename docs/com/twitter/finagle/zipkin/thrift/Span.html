@@ -25,14 +25,14 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Span</span><span class="params">(<span name="traceId">traceId: <a name="com.twitter.finagle.tracing.TraceId" class="extype" href="../../tracing/TraceId.html">TraceId</a></span>, <span name="_serviceName">_serviceName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_name">_name: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="annotations">annotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation" class="extype" href="ZipkinAnnotation.html">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation" class="extype" href="BinaryAnnotation.html">BinaryAnnotation</a>]</span>, <span name="_endpoint">_endpoint: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.zipkin.thrift.Endpoint" class="extype" href="Endpoint.html">Endpoint</a>]</span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Span</span><span class="params">(<span name="traceId">traceId: <a name="com.twitter.finagle.tracing.TraceId" class="extype" href="../../tracing/TraceId.html">TraceId</a></span>, <span name="_serviceName">_serviceName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_name">_name: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="annotations">annotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation" class="extype" href="ZipkinAnnotation.html">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation" class="extype" href="BinaryAnnotation.html">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a name="com.twitter.finagle.zipkin.thrift.Endpoint" class="extype" href="Endpoint.html">Endpoint</a></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>The span itself is an immutable datastructure. Mutations are done
 through copying &amp; updating span references elsewhere.
 </p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>Contains the Trace id (same for whole trace), Span id (same for just one
-rpc call) and parent id (links to the parent span in this trace, if None this is the root span)</p></dd><dt class="param">_serviceName</dt><dd class="cmt"><p>The name of the service handling the RPC</p></dd><dt class="param">_name</dt><dd class="cmt"><p>The name of the RPC method</p></dd><dt class="param">annotations</dt><dd class="cmt"><p>A sequence of annotations made in this span</p></dd><dt class="param">bAnnotations</dt><dd class="cmt"><p>Key-Value annotations, used to attach non timestamped data</p></dd><dt class="param">_endpoint</dt><dd class="cmt"><p>This is the endpoint the span was created on.
+rpc call) and parent id (links to the parent span in this trace, if None this is the root span)</p></dd><dt class="param">_serviceName</dt><dd class="cmt"><p>The name of the service handling the RPC</p></dd><dt class="param">_name</dt><dd class="cmt"><p>The name of the RPC method</p></dd><dt class="param">annotations</dt><dd class="cmt"><p>A sequence of annotations made in this span</p></dd><dt class="param">bAnnotations</dt><dd class="cmt"><p>Key-Value annotations, used to attach non timestamped data</p></dd><dt class="param">endpoint</dt><dd class="cmt"><p>This is the local endpoint the span was created on.
 </p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -69,11 +69,11 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Span</span><span class="params">(<span name="traceId">traceId: <a name="com.twitter.finagle.tracing.TraceId" class="extype" href="../../tracing/TraceId.html">TraceId</a></span>, <span name="_serviceName">_serviceName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_name">_name: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="annotations">annotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation" class="extype" href="ZipkinAnnotation.html">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation" class="extype" href="BinaryAnnotation.html">BinaryAnnotation</a>]</span>, <span name="_endpoint">_endpoint: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.zipkin.thrift.Endpoint" class="extype" href="Endpoint.html">Endpoint</a>]</span>)</span>
+        <span class="name">Span</span><span class="params">(<span name="traceId">traceId: <a name="com.twitter.finagle.tracing.TraceId" class="extype" href="../../tracing/TraceId.html">TraceId</a></span>, <span name="_serviceName">_serviceName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_name">_name: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="annotations">annotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.ZipkinAnnotation" class="extype" href="ZipkinAnnotation.html">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: Seq[<a name="com.twitter.finagle.zipkin.thrift.BinaryAnnotation" class="extype" href="BinaryAnnotation.html">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a name="com.twitter.finagle.zipkin.thrift.Endpoint" class="extype" href="Endpoint.html">Endpoint</a></span>)</span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>Contains the Trace id (same for whole trace), Span id (same for just one
-rpc call) and parent id (links to the parent span in this trace, if None this is the root span)</p></dd><dt class="param">_serviceName</dt><dd class="cmt"><p>The name of the service handling the RPC</p></dd><dt class="param">_name</dt><dd class="cmt"><p>The name of the RPC method</p></dd><dt class="param">annotations</dt><dd class="cmt"><p>A sequence of annotations made in this span</p></dd><dt class="param">bAnnotations</dt><dd class="cmt"><p>Key-Value annotations, used to attach non timestamped data</p></dd><dt class="param">_endpoint</dt><dd class="cmt"><p>This is the endpoint the span was created on.
+rpc call) and parent id (links to the parent span in this trace, if None this is the root span)</p></dd><dt class="param">_serviceName</dt><dd class="cmt"><p>The name of the service handling the RPC</p></dd><dt class="param">_name</dt><dd class="cmt"><p>The name of the RPC method</p></dd><dt class="param">annotations</dt><dd class="cmt"><p>A sequence of annotations made in this span</p></dd><dt class="param">bAnnotations</dt><dd class="cmt"><p>Key-Value annotations, used to attach non timestamped data</p></dd><dt class="param">endpoint</dt><dd class="cmt"><p>This is the local endpoint the span was created on.
 </p></dd></dl></div>
     </li></ol>
             </div>
@@ -144,18 +144,6 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Span#_endpoint" data-isabs="false">
-      <a id="_endpoint:Option[Endpoint]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_endpoint</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<a name="com.twitter.finagle.zipkin.thrift.Endpoint" class="extype" href="Endpoint.html">Endpoint</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">This is the endpoint the span was created on.</p>
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Span#_name" data-isabs="false">
       <a id="_name:Option[String]"></a>
       <h4 class="signature">
@@ -254,7 +242,7 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
         <span class="name">endpoint</span><span class="result">: <a name="com.twitter.finagle.zipkin.thrift.Endpoint" class="extype" href="Endpoint.html">Endpoint</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">This is the local endpoint the span was created on.</p>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">

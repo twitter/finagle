@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Appserver</span><span class="result"> extends AnyRef</span>
+        <span class="name">Appserver</span><span class="result"> extends <span name="com.twitter.app.App" class="extype">App</span> with <span name="com.twitter.logging.Logging" class="extype">Logging</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="com.twitter.logging.Logging" class="extype">Logging</span>, <span name="com.twitter.app.App" class="extype">App</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.topo.Appserver" class="in"><span>Appserver</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.topo.Appserver" class="in"><span>Appserver</span></li><li name="com.twitter.logging.Logging" class="in"><span>Logging</span></li><li name="com.twitter.app.App" class="in"><span>App</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -123,6 +123,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.App#args" data-isabs="false">
+      <a id="args:Array[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">args</span><span class="result">: <span name="scala.Array" class="extype">Array</span>[String]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -135,6 +147,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.topo.Appserver#basePort" data-isabs="false">
+      <a id="basePort:Flag[Int]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">basePort</span><span class="result">: <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.Int" class="extype">Int</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.topo.Appserver#clientAddrs" data-isabs="false">
+      <a id="clientAddrs:Flag[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clientAddrs</span><span class="result">: <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[<span name="java.lang.String" class="extype">String</span>]]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -150,6 +186,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.logging.Logging#defaultLogLevel" data-isabs="false">
+      <a id="defaultLogLevel:Level"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultLogLevel</span><span class="result">: <span name="com.twitter.logging.Level" class="extype">Level</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Logging</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -189,6 +237,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.App#flag" data-isabs="false">
+      <a id="flag:Flags"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flag</span><span class="result">: <span name="com.twitter.app.Flags" class="extype">Flags</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -213,6 +273,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.App#init" data-isabs="false">
+      <a id="init(⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">init</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -225,18 +297,54 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.logging.Logging#log" data-isabs="false">
+      <a id="log:Logger"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">log</span><span class="result">: <span name="com.twitter.logging.Logger" class="extype">Logger</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Logging</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.topo.Appserver#main" data-isabs="false">
-      <a id="main(Array[String]):ListeningServer"></a>
+      <a id="main():Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">main</span><span class="params">(<span name="args">args: <span name="scala.Array" class="extype">Array</span>[String]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="../ListeningServer.html">ListeningServer</a></span>
+        <span class="name">main</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.app.App#main" data-isabs="false">
+      <a id="main(Array[String]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">main</span><span class="params">(<span name="args">args: <span name="scala.Array" class="extype">Array</span>[String]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.app.App#name" data-isabs="false">
+      <a id="name:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -273,6 +381,54 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.App#onExit" data-isabs="false">
+      <a id="onExit(⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onExit</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.App#postmain" data-isabs="false">
+      <a id="postmain(⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postmain</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.app.App#premain" data-isabs="false">
+      <a id="premain(⇒ Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">premain</span><span class="params">(<span name="f">f: ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.topo.Appserver#responseSample" data-isabs="false">
+      <a id="responseSample:Flag[Seq[(Duration, StorageUnit)]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseSample</span><span class="result">: <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span>)]]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -297,6 +453,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.topo.Appserver#useThriftmux" data-isabs="false">
+      <a id="useThriftmux:Flag[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">useThriftmux</span><span class="result">: <span name="com.twitter.app.Flag" class="extype">Flag</span>[<span name="scala.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -349,7 +517,11 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="com.twitter.logging.Logging" class="parent">
+              <h3>Inherited from <span name="com.twitter.logging.Logging" class="extype">Logging</span></h3>
+            </div><div name="com.twitter.app.App" class="parent">
+              <h3>Inherited from <span name="com.twitter.app.App" class="extype">App</span></h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

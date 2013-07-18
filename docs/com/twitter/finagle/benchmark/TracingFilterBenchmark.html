@@ -138,6 +138,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#addr" data-isabs="false">
+      <a id="addr:InetSocketAddress"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addr</span><span class="result">: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -210,6 +222,30 @@
       </span>
       <span class="symbol">
         <span class="name">echoServiceWithFilter</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#echoServiceWithZipkin" data-isabs="false">
+      <a id="echoServiceWithZipkin:Service[Int, Int]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">echoServiceWithZipkin</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#echoWithDoubleZipkinBroadcast" data-isabs="false">
+      <a id="echoWithDoubleZipkinBroadcast:Service[Int, Int]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">echoWithDoubleZipkinBroadcast</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
       </span>
       </h4>
       
@@ -486,15 +522,39 @@
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#timeTracingFilter" data-isabs="false">
-      <a id="timeTracingFilter(Int):Unit"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#timeBroadcastDoubleZipkin" data-isabs="false">
+      <a id="timeBroadcastDoubleZipkin(Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">timeTracingFilter</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">timeBroadcastDoubleZipkin</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#timeNullTracer" data-isabs="false">
+      <a id="timeNullTracer(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timeNullTracer</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.benchmark.TracingFilterBenchmark#timeZipkinTracer" data-isabs="false">
+      <a id="timeZipkinTracer(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timeZipkinTracer</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       

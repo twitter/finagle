@@ -164,6 +164,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Group#defaultBackoff" data-isabs="false">
+      <a id="defaultBackoff:Stream[Duration]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultBackoff</span><span class="result">: <span name="scala.collection.immutable.Stream" class="extype">Stream</span>[<span name="com.twitter.util.Duration" class="extype">Duration</span>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.Group#empty" data-isabs="false">
       <a id="empty[T]:Group[T]"></a>
       <h4 class="signature">
@@ -318,6 +330,22 @@ bridge.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Group#pollUntilTrue" data-isabs="false">
+      <a id="pollUntilTrue[T](Group[T],(Group[T]) ⇒ Boolean,Stream[Duration]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pollUntilTrue</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[T]</span>, <span name="p">p: (<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[T]) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="backoff">backoff: Stream[<span name="com.twitter.util.Duration" class="extype">Duration</span>]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns a Future that is satisfied when the
+predicate is affirmed.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Future that is satisfied when the
+predicate is affirmed. The group is polled
+with the given backoff strategy.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -330,6 +358,18 @@ bridge.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Group#timer" data-isabs="false">
+      <a id="timer:TimerFromNettyTimer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timer</span><span class="result">: <a name="com.twitter.finagle.util.TimerFromNettyTimer" class="extype" href="util/TimerFromNettyTimer.html">TimerFromNettyTimer</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">

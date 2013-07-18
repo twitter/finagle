@@ -241,6 +241,18 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.ChannelWriteException" data-isabs="false">
+      <a id="ChannelWriteException:ChannelWriteException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelWriteException.html"><span class="name">ChannelWriteException</span></a><span class="params">(<span name="underlying">underlying: Throwable</span>)</span><span class="result"> extends ChannelException with WriteException with NoStacktrace with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Default implementation for WriteException that wraps an underlying exception.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Client" data-isabs="true">
       <a id="Client:Client[Req, Rep]"></a>
       <h4 class="signature">
@@ -473,6 +485,18 @@ factories in one (when available).</p>
       </h4>
       <p class="comment cmt">Trait ListeningServer represents a bound and listening
 server.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.MemcachedKetamaClient" data-isabs="true">
+      <a id="MemcachedKetamaClient:MemcachedKetamaClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="MemcachedKetamaClient.html"><span class="name">MemcachedKetamaClient</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.MemcachedRichClient" data-isabs="true">
       <a id="MemcachedRichClient:MemcachedRichClient"></a>
       <h4 class="signature">
@@ -988,7 +1012,7 @@ ServiceFactory.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftImpl.html"><span class="name">ThriftImpl</span></a><span class="params">(<span name="protocolFactory">protocolFactory: TProtocolFactory</span>, <span name="framed">framed: Boolean</span>)</span><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with Server[Array[Byte], Array[Byte]] with ThriftRichClient with ThriftRichServer with Product with Serializable</span>
+        <a href="ThriftImpl.html"><span class="name">ThriftImpl</span></a><span class="params">(<span name="protocolFactory">protocolFactory: TProtocolFactory</span>, <span name="framed">framed: Boolean</span>, <span name="clientId">clientId: Option[ClientId]</span>)</span><span class="result"> extends Client[ThriftClientRequest, Array[Byte]] with Server[Array[Byte], Array[Byte]] with ThriftRichClient with ThriftRichServer with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">Client and server for <a href="http://thrift.apache.org">Apache Thrift</a>.</p>
@@ -1296,7 +1320,7 @@ into <code>serveIface</code>:</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Memcached$.html"><span class="name">Memcached</span></a><span class="result"> extends Client[Command, Response] with MemcachedRichClient with Server[Command, Response]</span>
+        <a href="Memcached$.html"><span class="name">Memcached</span></a><span class="result"> extends Client[Command, Response] with MemcachedRichClient with MemcachedKetamaClient with Server[Command, Response]</span>
       </span>
       </h4>
       
@@ -1308,7 +1332,7 @@ into <code>serveIface</code>:</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MemcachedClient$.html"><span class="name">MemcachedClient</span></a><span class="result"> extends DefaultClient[Command, Response] with MemcachedRichClient</span>
+        <a href="MemcachedClient$.html"><span class="name">MemcachedClient</span></a><span class="result"> extends DefaultClient[Command, Response] with MemcachedRichClient with MemcachedKetamaClient</span>
       </span>
       </h4>
       
@@ -1565,6 +1589,18 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       <p class="comment cmt">A client for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a></p>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxListener" data-isabs="false">
+      <a id="ThriftMuxListener:ThriftMuxListener"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftMuxListener$.html"><span class="name">ThriftMuxListener</span></a><span class="result"> extends Netty3Listener[ChannelBuffer, ChannelBuffer]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxServer" data-isabs="false">
       <a id="ThriftMuxServer:ThriftMuxServer"></a>
       <h4 class="signature">
@@ -1577,6 +1613,18 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       <p class="comment cmt">A server for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftMuxer" data-isabs="false">
+      <a id="ThriftMuxer:ThriftMuxer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThriftMuxer$.html"><span class="name">ThriftMuxer</span></a><span class="result"> extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.WriteException" data-isabs="false">
       <a id="WriteException:WriteException"></a>
       <h4 class="signature">
@@ -1721,6 +1769,18 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.group" data-isabs="false">
+      <a id="group:group"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="group/package.html"><span class="name">group</span></a>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.http" data-isabs="false">
       <a id="http:http"></a>
       <h4 class="signature">
@@ -1766,6 +1826,18 @@ into <code>serveIface</code>:</p>
       </span>
       <span class="symbol">
         <a href="loadbalancer/package.html"><span class="name">loadbalancer</span></a>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.mdns" data-isabs="false">
+      <a id="mdns:mdns"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="mdns/package.html"><span class="name">mdns</span></a>
       </span>
       </h4>
       

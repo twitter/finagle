@@ -204,6 +204,18 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Getv" data-isabs="false">
+      <a id="Getv:Getv"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Getv.html"><span class="name">Getv</span></a><span class="params">(<span name="keys">keys: Seq[ChannelBuffer]</span>)</span><span class="result"> extends RetrievalCommand with Product with Serializable</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Incr" data-isabs="false">
       <a id="Incr:Incr"></a>
       <h4 class="signature">
@@ -441,6 +453,18 @@
       </span>
       <span class="symbol">
         <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends Response with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.protocol.Upsert" data-isabs="false">
+      <a id="Upsert:Upsert"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Upsert.html"><span class="name">Upsert</span></a><span class="params">(<span name="key">key: ChannelBuffer</span>, <span name="flags">flags: Int</span>, <span name="expiry">expiry: Time</span>, <span name="value">value: ChannelBuffer</span>, <span name="version">version: ChannelBuffer</span>)</span><span class="result"> extends StorageCommand with Product with Serializable</span>
       </span>
       </h4>
       

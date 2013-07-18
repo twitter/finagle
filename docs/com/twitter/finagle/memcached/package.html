@@ -68,7 +68,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: String</span>, <span name="port">port: Int</span>, <span name="weight">weight: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: String</span>, <span name="port">port: Int</span>, <span name="weight">weight: Int</span>)</span><span class="result"> extends SocketAddress with Product with Serializable</span>
       </span>
       </h4>
       
@@ -354,6 +354,66 @@ the key value.</p>
       </span>
       </h4>
       <p class="comment cmt"> Cache pool based on a static list</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.TwemcacheClient" data-isabs="true">
+      <a id="TwemcacheClient:TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="TwemcacheClient.html"><span class="name">TwemcacheClient</span></a><span class="result"> extends Client</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.TwemcacheConnectedClient" data-isabs="true">
+      <a id="TwemcacheConnectedClient:TwemcacheConnectedClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="TwemcacheConnectedClient.html"><span class="name">TwemcacheConnectedClient</span></a><span class="result"> extends TwemcacheClient</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Twemcache commands implementation.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.TwemcachePartitionedClient" data-isabs="true">
+      <a id="TwemcachePartitionedClient:TwemcachePartitionedClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="TwemcachePartitionedClient.html"><span class="name">TwemcachePartitionedClient</span></a><span class="result"> extends TwemcacheClient</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Twemcache commands implemenation for a partitioned client.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.TwitterCacheResolver" data-isabs="false">
+      <a id="TwitterCacheResolver:TwitterCacheResolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TwitterCacheResolver.html"><span class="name">TwitterCacheResolver</span></a><span class="result"> extends Resolver</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.TwitterCacheResolverException" data-isabs="false">
+      <a id="TwitterCacheResolverException:TwitterCacheResolverException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TwitterCacheResolverException.html"><span class="name">TwitterCacheResolverException</span></a><span class="result"> extends Exception</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Twitter cache pool path resolver.</p>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" data-isabs="false">
       <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>
       <h4 class="signature">
@@ -467,6 +527,18 @@ the key value.</p>
       </span>
       <span class="symbol">
         <a href="PartitionedClient$.html"><span class="name">PartitionedClient</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.TwemcacheClient" data-isabs="false">
+      <a id="TwemcacheClient:TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TwemcacheClient$.html"><span class="name">TwemcacheClient</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

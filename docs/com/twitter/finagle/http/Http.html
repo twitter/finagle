@@ -322,14 +322,14 @@
       </h4>
       
     </li><li visbl="pub" name="com.twitter.finagle.http.Http#client" data-isabs="false">
-      <a id="client:(ClientCodecConfig) ⇒ Codec[HttpRequest, HttpResponse] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]): com.twitter.finagle.http.codec.HttpClientDispatcher }"></a>
+      <a id="client:(ClientCodecConfig) ⇒ Codec[HttpRequest, HttpResponse] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]): com.twitter.finagle.http.codec.HttpClientDispatcher[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse] }"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">client</span><span class="result">: (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]): com.twitter.finagle.http.codec.HttpClientDispatcher }</span>
+        <span class="name">client</span><span class="result">: (<a name="com.twitter.finagle.ClientCodecConfig" class="extype" href="../ClientCodecConfig.html">ClientCodecConfig</a>) ⇒ <a name="com.twitter.finagle.Codec" class="extype" href="../Codec.html">Codec</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]): com.twitter.finagle.http.codec.HttpClientDispatcher[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse] }</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Http" class="extype" href="">Http</a> → <a name="com.twitter.finagle.CodecFactory" class="extype" href="../CodecFactory.html">CodecFactory</a></dd></dl></div>
@@ -459,6 +459,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.Http#maxHeaderSize" data-isabs="false">
+      <a id="maxHeaderSize(StorageUnit):Http"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxHeaderSize</span><span class="params">(<span name="size">size: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.Http" class="extype" href="">Http</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.http.Http#maxInitialLineLength" data-isabs="false">
+      <a id="maxInitialLineLength(StorageUnit):Http"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxInitialLineLength</span><span class="params">(<span name="length">length: <span name="com.twitter.util.StorageUnit" class="extype">StorageUnit</span></span>)</span><span class="result">: <a name="com.twitter.finagle.http.Http" class="extype" href="">Http</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.http.Http#maxRequestSize" data-isabs="false">
       <a id="maxRequestSize(StorageUnit):Http"></a>
       <h4 class="signature">

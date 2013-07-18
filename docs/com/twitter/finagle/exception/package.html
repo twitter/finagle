@@ -60,6 +60,18 @@
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.exception.ExceptionReporter" data-isabs="false">
+      <a id="ExceptionReporter:ExceptionReporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExceptionReporter.html"><span class="name">ExceptionReporter</span></a><span class="result"> extends ReporterFactory</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.exception.MonitorFactory" data-isabs="true">
       <a id="MonitorFactory:MonitorFactory"></a>
       <h4 class="signature">
@@ -80,7 +92,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: FinagledClient</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="sourceAddress">sourceAddress: Option[String]</span>, <span name="clientAddress">clientAddress: Option[String]</span>)</span><span class="result"> extends Monitor with Product with Serializable</span>
+        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: FutureIface</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="sourceAddress">sourceAddress: Option[String]</span>, <span name="clientAddress">clientAddress: Option[String]</span>)</span><span class="result"> extends Monitor with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">An implementation of ExceptionReceiver custom to the chickadee reporting service.</p>
@@ -128,6 +140,30 @@
       </h4>
       <p class="comment cmt">A collection of methods to construct a Monitor that logs to a ScribeHandler
 specifically for the chickadee exception reporting service.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.host" data-isabs="false">
+      <a id="host:host"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="host$.html"><span class="name">host</span></a><span class="result"> extends GlobalFlag[InetSocketAddress]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift" data-isabs="false">
+      <a id="thrift:thrift"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="thrift/package.html"><span class="name">thrift</span></a>
+      </span>
+      </h4>
+      
     </li></ol>
             </div>
 

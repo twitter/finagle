@@ -457,7 +457,7 @@ methods, though only one set of methods should be used.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addCookie</span><span class="params">(<span name="cookie">cookie: <span name="org.jboss.netty.handler.codec.http.Cookie" class="extype">Cookie</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">addCookie</span><span class="params">(<span name="cookie">cookie: <a name="com.twitter.finagle.http.Cookie" class="extype" href="Cookie.html">Cookie</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Add a cookie</p>
@@ -718,18 +718,19 @@ Codec, but this method allows you to override that.</p></div></div>
       </h4>
       
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#cookies" data-isabs="false">
-      <a id="cookies:CookieSet"></a>
+      <a id="cookies:CookieMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">cookies</span><span class="result">: <a name="com.twitter.finagle.http.CookieSet" class="extype" href="CookieSet.html">CookieSet</a></span>
+        <span class="name">cookies</span><span class="result">: <a name="com.twitter.finagle.http.CookieMap" class="extype" href="CookieMap.html">CookieMap</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies.  In a request, this uses the Cookie headers.  In a response, it
-uses the Set-Cookie headers.</p></div></div>
+      <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies. In a request, this uses the Cookie headers.
+In a response, it uses the Set-Cookie headers.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#date" data-isabs="false">
       <a id="date:Option[String]"></a>
       <h4 class="signature">
@@ -873,7 +874,7 @@ uses the Set-Cookie headers.</p></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getCookies</span><span class="params">()</span><span class="result">: <span name="java.util.Iterator" class="extype">Iterator</span>[<span name="org.jboss.netty.handler.codec.http.Cookie" class="extype">Cookie</span>]</span>
+        <span class="name">getCookies</span><span class="params">()</span><span class="result">: <span name="java.util.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.http.Cookie" class="extype" href="Cookie.html">Cookie</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Get iterator over Cookies</p>
@@ -1163,14 +1164,14 @@ preserved, though may not be appropriate for the new media type.
       </h4>
       <p class="shortcomment cmt">Set Referer [sic] header</p>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#removeCookie" data-isabs="false">
-      <a id="removeCookie(Cookie):Unit"></a>
+      <a id="removeCookie(String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">removeCookie</span><span class="params">(<span name="cookie">cookie: <span name="org.jboss.netty.handler.codec.http.Cookie" class="extype">Cookie</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">removeCookie</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Remove a cookie</p>

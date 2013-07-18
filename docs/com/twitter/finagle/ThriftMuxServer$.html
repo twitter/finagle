@@ -29,7 +29,21 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A server for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>.</p><p><code>TestService.FutureIface</code> must be implemented and passed
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A server for thrift served over <a name="com.twitter.finagle.mux" class="extype" href="mux/package.html">mux</a>. It's
+also backward compatible with thrift clients that use framed
+transport and binary protocol with strict write. It switches to the
+backward-compatible mode when the first request is not recognized
+as a valid mux message but can be successfully handled by the
+underlying thrift server. Since a thrift message that is encoded
+by binary protocol with strict write starts with a header
+0x800100xx, mux does not confuse it with a valid mux message (
+0x80 = -128 is an invalid mux message type) and the server can
+reliably detect the non-mux thrift client and switch to the
+backward-compatible mode afterwards. Note the server is also
+compatible with Finagle thrift clients. It correctly responds to
+the protocol up-negotiation request and passes the tracing
+information embedded in the thrift requests to mux which has
+native tracing support.</p><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>
 ThriftMuxServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
