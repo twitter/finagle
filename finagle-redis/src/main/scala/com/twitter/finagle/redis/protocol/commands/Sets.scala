@@ -2,6 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.util.GetMonadArg
 import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.redis.util.StringToChannelBuffer
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 case class SAdd(key: ChannelBuffer, values: Seq[ChannelBuffer]) extends StrictKeyCommand {
@@ -80,4 +81,15 @@ case class SPop(key: ChannelBuffer) extends StrictKeyCommand {
 
 object SPop {
   def apply(args: Seq[Array[Byte]]): SPop = SPop(GetMonadArg(args, CommandBytes.SPOP))
+}
+
+case class SRandMember(key: ChannelBuffer, count:Int = 1) extends StrictKeyCommand {
+  val command = Commands.SRANDMEMBER
+  override def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.SRANDMEMBER, key, StringToChannelBuffer(count.toString)))
+}
+
+object SRandMember {
+  def apply(args: Seq[Array[Byte]]): SRandMember = 
+    SRandMember(GetMonadArg(args, CommandBytes.SRANDMEMBER))
 }
