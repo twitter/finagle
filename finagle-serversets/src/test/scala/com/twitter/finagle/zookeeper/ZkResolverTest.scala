@@ -22,7 +22,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   import inst._
   val factory = new ZkClientFactory(zkTimeout)
   implicit val patienceConfig = PatienceConfig(
-    timeout = toSpan(zkTimeout*3),
+    timeout = toSpan(1.second),
     interval = toSpan(zkTimeout))
 
   before(start())
