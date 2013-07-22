@@ -75,7 +75,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-zk-common</artifactId>
-      <version>6.3.8-SNAPSHOT</version>
+      <version>6.3.9-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
