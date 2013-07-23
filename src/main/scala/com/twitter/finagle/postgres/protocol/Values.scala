@@ -192,9 +192,20 @@ object StringValueEncoder {
     if (value == null) {
       result.writeInt(-1)
     } else {
-      result.writeBytes(value.toString.getBytes(Charsets.Utf8))
+      result.writeBytes(convertValue(value).toString.getBytes(Charsets.Utf8))
     }
     result
+  }
+
+  def convertValue(value:Any):Any = {
+    value match {
+      case m:collection.Map[String, String] => { // this is an hstore, so turn it into one
+        m.map { case (k, v) =>
+          """"%s" => "%s"""".format(k, v.replace("\\", "\\\\").replace("\"", "\\\""))
+        }.mkString(",")
+      }
+      case _ => value
+    }
   }
 }
 
