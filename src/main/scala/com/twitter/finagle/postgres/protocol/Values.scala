@@ -200,9 +200,12 @@ object StringValueEncoder {
   def convertValue[A](value:A)(implicit mf:Manifest[A]):Any = {
     value match {
       case m:collection.Map[_, _] => { // this is an hstore, so turn it into one
+        def escape(s:String):String = {
+          s.replace("'", "''")
+        }
         m.map { case (k:String, v:String) =>
-          """"%s" => "%s"""".format(k, v.replace("\\", "\\\\").replace("\"", "\\\""))
-        }.mkString(",")
+          """"%s" => "%s"""".format(escape(k), escape(v))
+        }.mkString("'", ",", "'")
       }
       case _ => value
     }
