@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-benchmark</artifactId>
   <packaging>jar</packaging>
-  <version>6.5.2-SNAPSHOT</version>
+  <version>6.5.3-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -25,22 +25,22 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.5.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.5.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.5.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-zipkin</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.5.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

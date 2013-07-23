@@ -6,6 +6,17 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.5.2
+~~~~~
+
+- finagle-ostrich4: set stats export URI to stats.json
+- finagle-core: Introduce StabilizingGroup which cautiously removes items from a Group
+- finagle-core: Add group method to ClientBuilder
+- finagle-core: Add service/client name to ServiceTimeoutException
+- finagle-mux: Don't allocate headers via direct buffers
+- finagle-http: Implement missing modifiers in Http case class
+- finagle-memcache: added support for twemcache commands
+
 6.5.1
 ~~~~~
 
