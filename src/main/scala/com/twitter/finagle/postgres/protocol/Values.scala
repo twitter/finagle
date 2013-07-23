@@ -201,11 +201,11 @@ object StringValueEncoder {
     value match {
       case m:collection.Map[_, _] => { // this is an hstore, so turn it into one
         def escape(s:String):String = {
-          s.replace("'", "''").replace("\\", "\\\\").replace("\"", "\\\"")
+          s.replace("\\", "\\\\").replace("\"", "\\\"")
         }
         m.map { case (k:String, v:String) =>
           """"%s" => "%s"""".format(escape(k), escape(v))
-        }.mkString("'", ",", "'")
+        }.mkString(",")
       }
       case _ => value
     }
