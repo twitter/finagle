@@ -146,10 +146,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">announce</span><span class="params">(<span name="addr">addr: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>, <span name="target">target: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Announcement" class="extype" href="../Announcement.html">Announcement</a>]</span>
+        <span class="name">announce</span><span class="params">(<span name="ia">ia: <span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span></span>, <span name="addr">addr: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Announcement" class="extype" href="../Announcement.html">Announcement</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Announce an address via MDNS.</p><div class="fullcomment"><div class="comment cmt"><p>Announce an address via MDNS.</p><p>The target must be in the style of <code>[name]._[group]._tcp.local.</code>
+      <p class="shortcomment cmt">Announce an address via MDNS.</p><div class="fullcomment"><div class="comment cmt"><p>Announce an address via MDNS.</p><p>The addr must be in the style of <code>[name]._[group]._tcp.local.</code>
 (e.g. myservice._twitter._tcp.local.). In order to ensure uniqueness
 the final name will be [name]/[port]/[pid].
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.mdns.MDNSAnnouncer" class="extype" href="">MDNSAnnouncer</a> → <a name="com.twitter.finagle.Announcer" class="extype" href="../Announcer.html">Announcer</a></dd></dl></div>

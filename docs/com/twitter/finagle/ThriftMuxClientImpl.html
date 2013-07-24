@@ -37,14 +37,14 @@ service TestService {
 <code>TestService.FutureIface</code>. This is then passed
 into <code>newIface</code>:</p><pre>
 ThriftMuxClientImpl(...).newIface[TestService.FutureIface](
-  target, classOf[TestService.FutureIface])
+  addr, classOf[TestService.FutureIface])
 </pre><p>However note that the Scala compiler can insert the latter
 <code>Class</code> for us, for which another variant of <code>newIface</code> is
 provided:</p><pre>
-ThriftMuxClientImpl(...).newIface[TestService.FutureIface](target)
+ThriftMuxClientImpl(...).newIface[TestService.FutureIface](addr)
 </pre><p>In Java, we need to provide the class object:</p><pre>
 TestService.FutureIface client =
-  ThriftMuxClientImpl(...).newIface(target, TestService.FutureIface.<span class="kw">class</span>);
+  ThriftMuxClientImpl(...).newIface(addr, TestService.FutureIface.<span class="kw">class</span>);
 </pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a>, <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
@@ -328,12 +328,12 @@ TestService.FutureIface client =
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newClient</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>target</code>.
+group resolved by <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
+group resolved by <code>addr</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
       <a id="newIface[Iface](Group[SocketAddress])(ClassManifest[Iface]):Iface"></a>
@@ -359,7 +359,7 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="target">target: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -391,7 +391,7 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="target">target: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="addr">addr: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -407,10 +407,10 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newService</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new servie connected to <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new servie connected to <code>target</code>.
+      <p class="shortcomment cmt">Create a new servie connected to <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new servie connected to <code>addr</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
       <a id="newService(Group[SocketAddress]):Service[ThriftClientRequest, Array[Byte]]"></a>

@@ -390,12 +390,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
+        <span class="name">newClient</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="../ServiceFactory.html">ServiceFactory</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>target</code>.
+group resolved by <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
+group resolved by <code>addr</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
       <a id="newService(String):Service[Int, Int]"></a>
@@ -405,10 +405,10 @@ group resolved by <code>target</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
+        <span class="name">newService</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Int" class="extype">Int</span>, <span name="scala.Int" class="extype">Int</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new servie connected to <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new servie connected to <code>target</code>.
+      <p class="shortcomment cmt">Create a new servie connected to <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new servie connected to <code>addr</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
       <a id="newService(Group[SocketAddress]):Service[Int, Int]"></a>

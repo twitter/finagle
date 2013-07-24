@@ -464,8 +464,8 @@
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="factory">factory: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>addr</code>
-</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>addr</code>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.server.DefaultServer" class="extype" href="server/DefaultServer.html">DefaultServer</a> → <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serve" data-isabs="false">
       <a id="serve(String,Service[HttpRequest, HttpResponse]):ListeningServer"></a>
@@ -475,10 +475,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code>.
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serve" data-isabs="false">
       <a id="serve(String,ServiceFactory[HttpRequest, HttpResponse]):ListeningServer"></a>
@@ -488,10 +489,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code>.
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serve" data-isabs="false">
       <a id="serve(SocketAddress,Service[HttpRequest, HttpResponse]):ListeningServer"></a>
@@ -504,8 +506,8 @@
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>addr</code>
-</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>addr</code>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,Service[HttpRequest, HttpResponse]):ListeningServer"></a>
@@ -518,8 +520,8 @@
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,ServiceFactory[HttpRequest, HttpResponse]):ListeningServer"></a>
       <h4 class="signature">
@@ -531,8 +533,8 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,String,Service[HttpRequest, HttpResponse]):ListeningServer"></a>
       <h4 class="signature">
@@ -541,11 +543,11 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,String,ServiceFactory[HttpRequest, HttpResponse]):ListeningServer"></a>
       <h4 class="signature">
@@ -554,11 +556,11 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="forum">forum: String</span>, <span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="forum">forum: String</span>, <span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.server.DefaultServer#serveTransport" data-isabs="false">
       <a id="serveTransport(ServiceFactory[HttpRequest, HttpResponse],Transport[HttpResponse, HttpRequest]):Unit"></a>
       <h4 class="signature">

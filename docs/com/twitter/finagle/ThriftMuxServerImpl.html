@@ -379,8 +379,8 @@ ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="k
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="newService">newService: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>addr</code>
-</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>addr</code>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMuxServerImpl" class="extype" href="">ThriftMuxServerImpl</a> → <a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serve" data-isabs="false">
       <a id="serve(String,Service[Array[Byte], Array[Byte]]):ListeningServer"></a>
@@ -390,10 +390,11 @@ ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="k
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code>.
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serve" data-isabs="false">
       <a id="serve(String,ServiceFactory[Array[Byte], Array[Byte]]):ListeningServer"></a>
@@ -403,10 +404,11 @@ ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="k
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code>.
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serve" data-isabs="false">
       <a id="serve(SocketAddress,Service[Array[Byte], Array[Byte]]):ListeningServer"></a>
@@ -419,8 +421,8 @@ ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="k
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>addr</code>
-</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>addr</code>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,Service[Array[Byte], Array[Byte]]):ListeningServer"></a>
@@ -433,8 +435,8 @@ ThriftMuxServerImpl(..).serveIface(<span class="lit">":*"</span>, <span class="k
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,ServiceFactory[Array[Byte], Array[Byte]]):ListeningServer"></a>
       <h4 class="signature">
@@ -446,8 +448,8 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,String,Service[Array[Byte], Array[Byte]]):ListeningServer"></a>
       <h4 class="signature">
@@ -456,11 +458,11 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: String</span>, <span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Server#serveAndAnnounce" data-isabs="false">
       <a id="serveAndAnnounce(String,String,ServiceFactory[Array[Byte], Array[Byte]]):ListeningServer"></a>
       <h4 class="signature">
@@ -469,11 +471,11 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveAndAnnounce</span><span class="params">(<span name="forum">forum: String</span>, <span name="target">target: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="forum">forum: String</span>, <span name="addr">addr: String</span>, <span name="service">service: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Serve <code>service</code> on <code>target</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> on <code>target</code> and announce with <code>name</code>. Announcements will be removed
-when the service is closed. Omitting the <code>target</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichServer#serveIface" data-isabs="false">
       <a id="serveIface(SocketAddress,AnyRef):ListeningServer"></a>
       <h4 class="signature">
@@ -482,7 +484,7 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveIface</span><span class="params">(<span name="target">target: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="iface">iface: AnyRef</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serveIface</span><span class="params">(<span name="addr">addr: <span name="java.net.SocketAddress" class="extype">SocketAddress</span></span>, <span name="iface">iface: AnyRef</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">$serveIface</p><div class="fullcomment"><div class="comment cmt"><p>$serveIface</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>
@@ -494,7 +496,7 @@ when the service is closed. Omitting the <code>target</code> will bind to an eph
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serveIface</span><span class="params">(<span name="target">target: String</span>, <span name="iface">iface: AnyRef</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
+        <span class="name">serveIface</span><span class="params">(<span name="addr">addr: String</span>, <span name="iface">iface: AnyRef</span>)</span><span class="result">: <a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichServer" class="extype" href="ThriftRichServer.html">ThriftRichServer</a></dd></dl></div>

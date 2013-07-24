@@ -293,10 +293,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">resolve</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
+        <span class="name">resolve</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Resolve a group from a target name, a string.</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a group from a target name, a string. Resolve uses
+      <p class="shortcomment cmt">Resolve a group from an address, a string.</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a group from an address, a string. Resolve uses
 <code>Resolver</code>s to do this. These are loaded via the Java
 <a href="http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>
 mechanism. The default resolver is &quot;inet&quot;, resolving DNS
@@ -306,9 +306,9 @@ an exclamation mark (&quot;bang&quot;). For example: inet!twitter.com:80
 resolves the name &quot;twitter.com:80&quot; using the &quot;inet&quot; resolver. If no
 resolver name is present, the inet resolver is used.</p><p>Names resolved by this mechanism are also a
 <a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a>. By default, this name is
-simply the <code>target</code> string, but it can be overriden by prefixing
-a name separated by an equals sign from the rest of the target.
-For example, the target &quot;www=inet!google.com:80&quot; resolves
+simply the <code>addr</code> string, but it can be overriden by prefixing
+a name separated by an equals sign from the rest of the addr.
+For example, the addr &quot;www=inet!google.com:80&quot; resolves
 &quot;google.com:80&quot; with the inet resolver, but the returned group's
 <a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a> name is &quot;www&quot;.
 </p></div></div>

@@ -271,11 +271,11 @@ finagle, for example com.twitter.finagle.Http:</p><pre>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
+        <span class="name">newClient</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[Req, Rep]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>target</code>.</p>
+group resolved by <code>addr</code>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
       <a id="newService(String):Service[Req, Rep]"></a>
       <h4 class="signature">
@@ -284,10 +284,10 @@ group resolved by <code>target</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="target">target: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
+        <span class="name">newService</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[Req, Rep]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new servie connected to <code>target</code>.</p>
+      <p class="shortcomment cmt">Create a new servie connected to <code>addr</code>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
       <a id="newService(Group[SocketAddress]):Service[Req, Rep]"></a>
       <h4 class="signature">
