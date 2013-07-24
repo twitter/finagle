@@ -54,7 +54,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
     val matching = sorted.find { case (pattern, _) =>
       (pattern.endsWith("/") && path.startsWith(pattern)) || // prefix
       (!pattern.endsWith("/") && path == pattern) // exact match
-    }
+    } orElse sorted.find { case (pattern, _) => (path+"/")==pattern }
 
     matching match {
       case Some((_, service)) => service(request)
