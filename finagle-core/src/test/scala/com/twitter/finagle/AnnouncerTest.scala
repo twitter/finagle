@@ -6,14 +6,14 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-case class TestAnnouncement(addr: InetSocketAddress, target: String) extends Announcement {
+case class TestAnnouncement(ia: InetSocketAddress, addr: String) extends Announcement {
   def unannounce() = Future.Done
 }
 
 class TestAnnouncer extends Announcer {
   val scheme = "test"
-  def announce(addr: InetSocketAddress, target: String) =
-    Future.value(TestAnnouncement(addr, target))
+  def announce(ia: InetSocketAddress, addr: String) =
+    Future.value(TestAnnouncement(ia, addr))
 }
 
 @RunWith(classOf[JUnitRunner])

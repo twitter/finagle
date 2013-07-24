@@ -130,17 +130,17 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
    * Requiring the shardId here is an unfortunate artifact of the implementation of ServerSets. For most uses
    * setting it to 0 is sufficient
    */
-  def announce(addr: InetSocketAddress, target: String): Future[Announcement] =
-    target.split("!") match {
+  def announce(ia: InetSocketAddress, addr: String): Future[Announcement] =
+    addr.split("!") match {
       // zk!host!/full/path!shardId
       case Array(hosts, path, shardId) =>
-        announce(hosts, path, shardId.toInt, addr, None)
+        announce(hosts, path, shardId.toInt, ia, None)
 
       // zk!host!/full/path!shardId!endpoint
       case Array(hosts, path, shardId, endpoint) =>
-        announce(hosts, path, shardId.toInt, addr, Some(endpoint))
+        announce(hosts, path, shardId.toInt, ia, Some(endpoint))
 
       case _ =>
-        Future.exception(new ZkAnnouncerException("Invalid target \"%s\"".format(target)))
+        Future.exception(new ZkAnnouncerException("Invalid addr \"%s\"".format(addr)))
     }
 }

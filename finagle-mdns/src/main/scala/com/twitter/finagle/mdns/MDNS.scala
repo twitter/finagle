@@ -6,8 +6,8 @@ import java.lang.management.ManagementFactory
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
 
-class MDNSTargetException(target: String)
-  extends Exception("Invalid MDNS target \"%s\"".format(target))
+class MDNSAddressException(addr: String)
+  extends Exception("Invalid MDNS address \"%s\"".format(addr))
 
 private case class MdnsRecord(
   name: String,
@@ -35,9 +35,9 @@ private object MDNS {
 
   def mkName(ps: Any*) = ps.mkString("/")
 
-  def parse(target: String) = target.split("\\.") match {
+  def parse(addr: String) = addr.split("\\.") match {
     case Array(name, app, prot, domain) => (name, app + "." + prot, domain)
-    case _ => throw new MDNSTargetException(target)
+    case _ => throw new MDNSAddressException(addr)
   }
 }
 
@@ -56,14 +56,14 @@ class MDNSAnnouncer extends Announcer {
   /**
    * Announce an address via MDNS.
    *
-   * The target must be in the style of `[name]._[group]._tcp.local.`
+   * The addr must be in the style of `[name]._[group]._tcp.local.`
    * (e.g. myservice._twitter._tcp.local.). In order to ensure uniqueness
    * the final name will be [name]/[port]/[pid].
    */
-  def announce(addr: InetSocketAddress, target: String): Future[Announcement] = {
-    val (name, regType, domain) = parse(target)
-    val serviceName = mkName(name, addr.getPort, pid)
-    announcer.announce(addr, serviceName, regType, domain)
+  def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
+    val (name, regType, domain) = parse(addr)
+    val serviceName = mkName(name, ia.getPort, pid)
+    announcer.announce(ia, serviceName, regType, domain)
   }
 }
 
@@ -82,11 +82,11 @@ class MDNSResolver extends Resolver {
   /**
    * Resolve a service via mdns
    *
-   * The target must be in the style of `[name]._[group]._tcp.local.`
+   * The address must be in the style of `[name]._[group]._tcp.local.`
    * (e.g. "myservice._twitter._tcp.local.").
    */
-  def resolve(target: String): Try[Group[SocketAddress]] = {
-    val (name, regType, domain) = parse(target)
+  def resolve(addr: String): Try[Group[SocketAddress]] = {
+    val (name, regType, domain) = parse(addr)
     resolver.resolve(regType, domain) map { group =>
       group collect {
         case record if record.name.startsWith(name) => record.addr

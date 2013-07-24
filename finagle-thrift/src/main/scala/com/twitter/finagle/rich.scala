@@ -36,7 +36,7 @@ private object ThriftUtil {
  *
  * {{{
  * $clientExampleObject.newIface[TestService.FutureIface](
- *   target, classOf[TestService.FutureIface])
+ *   addr, classOf[TestService.FutureIface])
  * }}}
  *
  * However note that the Scala compiler can insert the latter
@@ -44,14 +44,14 @@ private object ThriftUtil {
  * provided:
  *
  * {{{
- * $clientExampleObject.newIface[TestService.FutureIface](target)
+ * $clientExampleObject.newIface[TestService.FutureIface](addr)
  * }}}
  *
  * In Java, we need to provide the class object:
  *
  * {{{
  * TestService.FutureIface client =
- *   $clientExampleObject.newIface(target, TestService.FutureIface.class);
+ *   $clientExampleObject.newIface(addr, TestService.FutureIface.class);
  * }}}
  *
  * @define clientUse
@@ -88,8 +88,8 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $clientUse
    */
-  def newIface[Iface](target: String, cls: Class[_]): Iface =
-    newIface(Resolver.resolve(target)(), cls)
+  def newIface[Iface](addr: String, cls: Class[_]): Iface =
+    newIface(Resolver.resolve(addr)(), cls)
 
   /**
    * $clientUse
@@ -154,8 +154,8 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $clientUse
    */
-  def newIface[Iface: ClassManifest](target: String): Iface =
-    newIface[Iface](Resolver.resolve(target)())
+  def newIface[Iface: ClassManifest](addr: String): Iface =
+    newIface[Iface](Resolver.resolve(addr)())
 
   /**
    * $clientUse
@@ -248,10 +248,10 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
    * Note that this interface is discovered by reflection. Passing an
    * invalid interface implementation will result in a runtime error.
    */
-  def serveIface(target: String, iface: AnyRef): ListeningServer =
-    serve(target, serverFromIface(iface))
+  def serveIface(addr: String, iface: AnyRef): ListeningServer =
+    serve(addr, serverFromIface(iface))
 
   /** $serveIface */
-  def serveIface(target: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(target, serverFromIface(iface))
+  def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
+    serve(addr, serverFromIface(iface))
 }
