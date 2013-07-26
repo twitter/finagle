@@ -189,7 +189,7 @@ object ValueParser {
 object StringValueEncoder {
   def encode(value: Any): ChannelBuffer = {
     val result = ChannelBuffers.dynamicBuffer()
-    if (value == null) {
+    if (value == null || value == None) {
       result.writeInt(-1)
     } else {
       result.writeBytes(convertValue(value).toString.getBytes(Charsets.Utf8))

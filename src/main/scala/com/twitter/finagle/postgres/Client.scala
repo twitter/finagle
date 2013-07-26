@@ -142,6 +142,13 @@ class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value[Any]]) {
 
   private[this] val indexMap = fields.zipWithIndex.toMap
 
+  def getOption[A](name: String)(implicit mf: Manifest[A]): Option[A] = {
+    indexMap.get(name).map(vals(_)) match {
+      case Some(Value(x)) => Some(x.asInstanceOf[A])
+      case _ => None
+    }
+  }
+
   def get[A](name: String)(implicit mf:Manifest[A]):A = {
     indexMap.get(name).map(vals(_)) match {
       case Some(Value(x)) => x.asInstanceOf[A]
