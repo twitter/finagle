@@ -106,7 +106,7 @@ private[thrift] class RawZipkinTracer(
       val s = span.toThrift
       val baos = new ByteArrayOutputStream
       s.write(protocolFactory.getProtocol(new TIOStreamTransport(baos)))
-      val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray)
+      val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray) + '\n'
       msgs = msgs :+ new LogEntry(category = TraceCategory, message = serializedBase64Span)
     } catch {
       case e => statsReceiver.scope("create_log_entries").scope("error").

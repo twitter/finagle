@@ -38,7 +38,7 @@ class RawZipkinTracerSpec extends SpecificationWithJUnit with Mockito {
           "AAwAAAAQMAAQIAAEBAQEBBgACAVkLAAMAAAAHc2VydmljZQAACwABAAAABmRvdWJs" +
           "ZQsAAgAAAAhAXtMzMzMzMwgAAwAAAAUMAAQIAAEBAQEBBgACAVkLAAMAAAAHc2Vyd" +
           "mljZQAACwABAAAABnN0cmluZwsAAgAAAAZ3b29waWUIAAMAAAAGDAAECAABAQEBAQ" +
-          "YAAgFZCwADAAAAB3NlcnZpY2UAAAIACQEA")
+          "YAAgFZCwADAAAAB3NlcnZpY2UAAAIACQEA\n")
       tracer.client.log(anyObject()) returns Future(ResultCode.Ok)
 
       val localAddress = InetAddress.getByAddress(Array.fill(4) { 1 })
