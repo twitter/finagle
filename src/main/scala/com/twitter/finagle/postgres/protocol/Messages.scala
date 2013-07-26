@@ -457,8 +457,12 @@ case class Bind(portal: String = Strings.empty, name: String = Strings.empty, fo
     builder.writeShort(asShort(params.length))
 
     for (param <- params) {
-      builder.writeInt(param.readableBytes)
-      builder.writeBuf(param)
+      if (param.readableBytes == 4 && param.getInt(0) == -1) {
+        builder.writeInt(-1)  // NULL.
+      } else {
+        builder.writeInt(param.readableBytes)
+        builder.writeBuf(param)
+      }
     }
 
     if (resultFormats.isEmpty) {
