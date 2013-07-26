@@ -18,20 +18,26 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class ZkResolverTest extends FunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds
-  val inst = new ZkInstance
-  import inst._
+  var inst: ZkInstance = _
   val factory = new ZkClientFactory(zkTimeout)
+
   implicit val patienceConfig = PatienceConfig(
     timeout = toSpan(1.second),
     interval = toSpan(zkTimeout))
 
-  before(start())
-  after(stop())
+  before {
+    inst = new ZkInstance
+    inst.start()
+  }
+
+  after {
+    inst.stop()
+  }
 
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
   test("represent the underlying ServerSet") {
-    val serverSet = new ServerSetImpl(zookeeperClient, "/foo/bar/baz")
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
     val clust = new ZkGroup(serverSet, "/foo/bar/baz")
     assert(clust().isEmpty)
 
@@ -60,11 +66,11 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
 
   test("resolve ALIVE endpoints") {
     val res = new ZkResolver(factory)
-    val clust = res.resolve("localhost:%d!/foo/bar/baz".format(zookeeperAddress.getPort))()
+    val clust = res.resolve("localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort))()
     assert(clust().isEmpty)
     val inetClust = clust collect { case ia: InetSocketAddress => ia }
     assert(inetClust() === inetClust())
-    val serverSet = new ServerSetImpl(zookeeperClient, "/foo/bar/baz")
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
     val addr = new InetSocketAddress("127.0.0.1", 8080)
     val blahAddr = new InetSocketAddress("10.0.0.1", 80)
     val status8080 = serverSet.join(
@@ -82,7 +88,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
       Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
     eventually { assert(inetClust().size == 1) }
 
-    val blahClust = res.resolve("localhost:%d!/foo/bar/baz!blah".format(zookeeperAddress.getPort))()
+    val blahClust = res.resolve("localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort))()
     eventually { assert(blahClust().size == 1) }
     assert(blahClust() === blahClust())
     assert {
@@ -92,6 +98,6 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
   }
 
   test("resolves from the main resolver") {
-    assert(Resolver.resolve("zk!localhost:%d!/foo/bar/baz!blah".format(zookeeperAddress.getPort)).isReturn)
+    assert(Resolver.resolve("zk!localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort)).isReturn)
   }
 }
