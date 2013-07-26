@@ -45,9 +45,14 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
     name <- parse(sql)
   } yield new PreparedStatementImpl(name)
 
-  def close() {
-    CustomOIDProxy.serviceOIDMap.remove(id)
-    factory.close()
+  def close() = {
+    underlying flatMap { service =>
+      resetConnection() flatMap { response => service.close() }
+    }
+  }
+
+  private[this] def resetConnection(): Future[QueryResponse] = {
+    sync() flatMap { _ => query("DISCARD ALL;") }
   }
 
   private[this] def parse(sql: String): Future[String] = {

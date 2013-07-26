@@ -51,6 +51,8 @@ case object CreateTable extends CommandCompleteStatus
 
 case object DropTable extends CommandCompleteStatus
 
+case object DiscardAll extends CommandCompleteStatus
+
 case class Insert(count : Int) extends CommandCompleteStatus
 
 case class Update(count : Int) extends CommandCompleteStatus
@@ -312,6 +314,8 @@ class BackendMessageParser {
       CreateTable
     } else if (tag == "DROP TABLE") {
       DropTable
+    } else if (tag == "DISCARD ALL") {
+      DiscardAll
     } else {
       val parts = tag.split(" ")
 

@@ -104,6 +104,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (CommandComplete(Insert(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
     case (CommandComplete(Update(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
     case (CommandComplete(Delete(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
+    case (CommandComplete(DiscardAll), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (RowDescription(fields), SimpleQuery) => (None, AggregateRows(fields.map(f => Field(f.name, f.fieldFormat, f.dataType))))
     case (ErrorResponse(details), SimpleQuery) => (None, EmitOnReadyForQuery(Error(details)))
   }
