@@ -8,7 +8,7 @@ package object zookeeper {
    * Conenience renamings.
    * TODO: These shluld go in favor of a better approach.
    */
-  type ZookeeperRequest = SerializableRecord
-  type ZookeeperResponse = SerializableRecord
+  type ZookeeperRequest = (SerializableRecord, SerializableRecord)
+  type ZookeeperResponse = (SerializableRecord, SerializableRecord)
 
 }
