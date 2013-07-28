@@ -18,8 +18,8 @@ trait MessageDeserializer {
   def readLong: Long
   def readFloat: Float
   def readDouble: Double
-  def readString: Option[String]
-  def readBuffer: Option[Array[Byte]]
+  def readString: String
+  def readBuffer: Array[Byte]
 
   //TODO: Add rest of composite types
 }
@@ -40,30 +40,30 @@ class BinaryMessageDeserializer(inputStream: InputStream) extends MessageDeseria
 
   def readDouble: Double = streamWrapper.readDouble
 
-  def readString: Option[String] = {
+  def readString: String = {
     val length = streamWrapper.readInt
 
     length match {
-      case -1 => None
+      case -1 => throw new IllegalStateException()
       case _ => {
         val byteBuffer = new Array[Byte](length)
 
         streamWrapper.readFully(byteBuffer)
-        new Some(new String(byteBuffer, StandardCharsets.UTF_8))
+        new String(byteBuffer, StandardCharsets.UTF_8)
       }
     }
   }
 
-  def readBuffer: Option[Array[Byte]] = {
+  def readBuffer: Array[Byte] = {
     val length = streamWrapper.readInt
 
     length match {
-      case -1 => None
+      case -1 => throw new IllegalStateException()
       case _ => {
         val byteBuffer = new Array[Byte](length)
 
         streamWrapper.readFully(byteBuffer)
-        new Some(byteBuffer)
+        byteBuffer
       }
     }
   }
