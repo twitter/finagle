@@ -24,6 +24,7 @@ object Finagle extends Build {
     version := "6.5.2",
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
+    scalaVersion := "2.9.2",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" %"1.9.1" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
@@ -261,7 +262,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6"
-    )
+    ),
+    initialCommands := """import com.twitter.finagle.http.path._"""
   ).dependsOn(finagleCore)
 
   lazy val finagleNative = Project(
