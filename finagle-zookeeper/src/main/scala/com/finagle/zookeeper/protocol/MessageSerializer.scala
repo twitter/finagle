@@ -3,6 +3,7 @@ package com.finagle.zookeeper.protocol
 import java.lang.Integer
 import java.io.{DataOutputStream, OutputStream}
 import java.nio.charset.StandardCharsets
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Outgoing binary message related set of methods.
@@ -25,44 +26,44 @@ trait MessageSerializer {
   //TODO: Add rest of composite types
 }
 
-class BinaryMessageSerializer(outputStream: OutputStream) extends MessageSerializer {
-
-  private val streamWrapper = new DataOutputStream(outputStream)
+class BinaryMessageSerializer(outputStream: ChannelBuffer) extends MessageSerializer {
 
   def writeByte(byte: Byte): MessageSerializer = {
-    streamWrapper.writeByte(byte); this
+    outputStream.writeByte(byte); this
   }
 
+  // TODO: Find a more idiomatic way to do it.
   def writeBoolean(boolean: Boolean): MessageSerializer = {
-    streamWrapper.writeBoolean(boolean); this
+    outputStream.writeByte( if (boolean) 1 else 0)
+    this
   }
 
   def writeInteger(integer: Integer): MessageSerializer = {
-    streamWrapper.writeInt(integer); this
+    outputStream.writeInt(integer); this
   }
 
   def writeLong(long: Long): MessageSerializer = {
-    streamWrapper.writeLong(long); this
+    outputStream.writeLong(long); this
   }
 
   def writeFloat(float: Float): MessageSerializer = {
-    streamWrapper.writeFloat(float); this
+    outputStream.writeFloat(float); this
   }
 
   def writeDouble(double: Double): MessageSerializer = {
-    streamWrapper.writeDouble(double); this
+    outputStream.writeDouble(double); this
   }
 
   // TODO: Should consider ZooKeeper stringToBuffer optimization
   def writeString(string: String): MessageSerializer = {
-    streamWrapper.writeInt(string.length)
-    streamWrapper.write(string.getBytes(StandardCharsets.UTF_8))
+    outputStream.writeInt(string.length)
+    outputStream.writeBytes(string.getBytes(StandardCharsets.UTF_8))
     this
   }
 
   def writeBuffer(buffer: Array[Byte]): MessageSerializer = {
-    streamWrapper.writeInt(buffer.length)
-    streamWrapper.write(buffer)
+    outputStream.writeInt(buffer.length)
+    outputStream.writeBytes(buffer)
     this
   }
 }

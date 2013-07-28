@@ -3,6 +3,7 @@ package com.finagle.zookeeper.protocol
 import java.lang.Integer
 import java.io.{DataInputStream, InputStream}
 import java.nio.charset.StandardCharsets
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Incoming binary message related set of methods.
@@ -24,45 +25,46 @@ trait MessageDeserializer {
   //TODO: Add rest of composite types
 }
 
-class BinaryMessageDeserializer(inputStream: InputStream) extends MessageDeserializer {
+class BinaryMessageDeserializer(inputStream: ChannelBuffer) extends MessageDeserializer {
 
-  private val streamWrapper = new DataInputStream(inputStream)
+  def readByte: Byte = inputStream.readByte
 
-  def readByte: Byte = streamWrapper.readByte
+  def readBoolean: Boolean = inputStream.readByte match {
+    case 1 => true
+    case 0 => false
+  }
 
-  def readBoolean: Boolean = streamWrapper.readBoolean
+  def readInteger: Integer = inputStream.readInt
 
-  def readInteger: Integer = streamWrapper.readInt
+  def readLong: Long = inputStream.readLong
 
-  def readLong: Long = streamWrapper.readLong
+  def readFloat: Float = inputStream.readFloat
 
-  def readFloat: Float = streamWrapper.readFloat
-
-  def readDouble: Double = streamWrapper.readDouble
+  def readDouble: Double = inputStream.readDouble
 
   def readString: String = {
-    val length = streamWrapper.readInt
+    val length = inputStream.readInt
 
     length match {
       case -1 => throw new IllegalStateException()
       case _ => {
         val byteBuffer = new Array[Byte](length)
 
-        streamWrapper.readFully(byteBuffer)
+        inputStream.readBytes(byteBuffer, 0, length)
         new String(byteBuffer, StandardCharsets.UTF_8)
       }
     }
   }
 
   def readBuffer: Array[Byte] = {
-    val length = streamWrapper.readInt
+    val length = inputStream.readInt
 
     length match {
       case -1 => throw new IllegalStateException()
       case _ => {
         val byteBuffer = new Array[Byte](length)
 
-        streamWrapper.readFully(byteBuffer)
+        inputStream.readBytes(byteBuffer, 0, length)
         byteBuffer
       }
     }

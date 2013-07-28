@@ -1,6 +1,7 @@
 package com.finagle.zookeeper.protocol
 
 import java.io.{InputStream,OutputStream}
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Every unit of communication between a client and a server should
@@ -12,7 +13,7 @@ trait SerializableRecord {
    * Output the record to a byte representation down the wire.
    * @param out The wire output stream
    */
-  def serialize(out: OutputStream) {
+  def serialize(out: ChannelBuffer) {
     serialize(new BinaryMessageSerializer(out))
   }
 
@@ -32,7 +33,7 @@ trait RecordDeserializer {
    * @param input The wire input stream
    * @return
    */
-  def deserialize(input: InputStream): SerializableRecord =
+  def deserialize(input: ChannelBuffer): SerializableRecord =
     deserialize(new BinaryMessageDeserializer(input))
 
   /**
