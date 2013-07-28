@@ -18,6 +18,8 @@ trait SerializableRecord {
 
   /**
    * Output a record using a MessageSerializer wrapper
+   *
+   * Every partciular record should implement this method according to its structure.
    * @param out
    */
   def serialize(out: MessageSerializer)
@@ -35,6 +37,8 @@ trait RecordDeserializer {
 
   /**
    * Read a record using a MessageDeserializer wrapper
+   *
+   * Every partciular record should implement this method according to its structure.
    * @param input
    */
   def deserialize(input: MessageDeserializer): SerializableRecord
