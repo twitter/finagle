@@ -8,7 +8,7 @@ case class RequestHeader(xid: Integer, kind: Integer) extends SerializableRecord
 // TODO: Switched from type to kind since type is a reserved word in scala
 // Not sure if best decision
 
-  override def serialize(out: MessageSerializer) {
+  def serialize(out: MessageSerializer) {
     out.writeInteger(xid)
     out.writeInteger(kind)
   }

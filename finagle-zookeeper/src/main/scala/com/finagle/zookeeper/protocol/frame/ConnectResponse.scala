@@ -9,7 +9,7 @@ case class ConnectResponse(protocolVersion: Int,
                             ) extends SerializableRecord{
 
 
-  override def serialize(out: MessageSerializer) {
+  def serialize(out: MessageSerializer) {
     out.writeInteger(protocolVersion)
     out.writeInteger(timeOut)
     out.writeLong(sessionID)
