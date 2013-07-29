@@ -625,15 +625,15 @@ class ClientSpec extends SpecificationWithJUnit {
         membersOne must have size(1)
         membersOne must exist(m => allMembers.contains(m))
 
-        val membersTwo = Await.result(client.sRandMember(key, count = 2))
+        val membersTwo = Await.result(client.sRandMember(key, count = Some(2)))
         membersTwo must have size(2)
         membersTwo must haveTheSameElementsAs(allMembers)
 
-        val membersSet = Await.result(client.sRandMember(key, count = 5))
+        val membersSet = Await.result(client.sRandMember(key, count = Some(5)))
         membersSet must have size(2)
         membersSet must haveTheSameElementsAs(allMembers)
 
-        val membersNeg = Await.result(client.sRandMember(key, count = -4))
+        val membersNeg = Await.result(client.sRandMember(key, count = Some(-4)))
         membersNeg must have size(4)
       }
     }
