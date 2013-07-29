@@ -4,14 +4,23 @@ import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
+import protocol.frame.ReplyHeader
 
 /**
  * This is the core artifact of the module, implementing the transition to the wire protocol.
  *
  * It uses a state machine behaviour because of the logic of the Zookeeper protocol.
  */
-class ZookeeperHighlevelEncoderDecoder extends SimpleChannelHandler with StateMachine {
+class ZookeeperEncoderDecoder extends SimpleChannelHandler with StateMachine {
   private[this] val logger = Logger.getLogger("finagle-zookeeper")
+
+  /**
+   * Session-related state
+   *
+   * TODO: Currently incomplete set of variables
+   */
+  private[this] var negotiatedTimeout: Long = _
+
 
   /**
    * Possible states of the client
@@ -24,7 +33,18 @@ class ZookeeperHighlevelEncoderDecoder extends SimpleChannelHandler with StateMa
   case object AuthFailed extends State
   case object NotConnected extends State
 
-  //TODO: Not sure if ok, maybe transition is better.
+  /**
+   * Timestamp of the last event prcessed from the server
+   */
+  @volatile private[this] var lastEvent: Long = _
+
+  private[this] def markEvent(time: Long) {
+    this.synchronized {
+      lastEvent = time
+    }
+  }
+
+  //TODO: Not sure if ok, maybe transition is better due to the race conditions that may occur.
   reset()
 
   /**
@@ -36,15 +56,18 @@ class ZookeeperHighlevelEncoderDecoder extends SimpleChannelHandler with StateMa
 
   def reset() {
     state = NotConnected
+    lastEvent = 0
   }
 
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     super.channelConnected(ctx, e)
+    logger.info("Connected to Zookeeper server.")
     begin()
   }
 
   override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     super.channelDisconnected(ctx, e)
+    logger.info("Connection lost.")
     reset()
   }
 
@@ -66,9 +89,21 @@ class ZookeeperHighlevelEncoderDecoder extends SimpleChannelHandler with StateMa
    * @param e
    */
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
-    case frame: ChannelBuffer => (null, null)
-    case _ =>
+    case frame: ChannelBuffer => {
+      /**
+       * Extract the header and deconstruct message.
+       */
+      ReplyHeader.deserialize(frame) match {
+        case ReplyHeader(xid, _, err) => xid match {
+          case _ => logger.warning("Unknown header type received.")
+        }
+        case _ => throw new UnsupportedOperationException("Cannot deserialize header response")
+      }
+    }
+
+    case _ => {
       Channels.disconnect(ctx.getChannel)
       logger.severe("Bad message event type received.")
+    }
   }
 }
