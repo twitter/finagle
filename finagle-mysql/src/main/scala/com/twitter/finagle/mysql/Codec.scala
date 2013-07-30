@@ -7,8 +7,13 @@ import com.twitter.util.Future
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
-class MySQL(username: String, password: String, database: Option[String])
-  extends CodecFactory[Request, Result] {
+class MySQL(
+  username: String,
+  password: String,
+  database: Option[String],
+  hooks: Option[Service[Request, Result] => Future[Unit]] = None)
+    extends CodecFactory[Request, Result] {
+
     private[this] val clientCapability = Capability(
       Capability.LongFlag,
       Capability.Transactions,
@@ -38,11 +43,24 @@ class MySQL(username: String, password: String, database: Option[String])
         }
 
         // Authenticate each connection before returning it via a ServiceFactoryProxy.
-        override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) =
-          new AuthenticationProxy(underlying, username, password, database, clientCapability)
-
+        override def prepareConnFactory(underlying: ServiceFactory[Request, Result]) = {
+          val newFactory = new AuthenticationProxy(underlying, username, password, database, clientCapability)
+          hooks map {hook => new HookProxy(newFactory, hook)} getOrElse newFactory
+        }
       }
     }
+}
+
+class HookProxy(
+  underlying: ServiceFactory[Request, Result],
+  hook: Service[Request, Result] => Future[Unit]
+) extends ServiceFactoryProxy(underlying) {
+
+  override def apply(conn: ClientConnection): Future[Service[Request, Result]] =
+    self(conn) flatMap { service =>
+      hook(service) map (_ => service)
+    }
+
 }
 
 class AuthenticationProxy(
