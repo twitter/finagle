@@ -262,8 +262,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6"
-    ),
-    initialCommands := """import com.twitter.finagle.http.path._"""
+    )
   ).dependsOn(finagleCore)
 
   lazy val finagleNative = Project(
