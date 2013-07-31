@@ -19,12 +19,12 @@ case class ConnectResponse(protocolVersion: Int,
 }
 
 object ConnectResponse extends RecordDeserializer {
-  def deserialize(input: MessageDeserializer): SerializableRecord = {
-    new ConnectResponse(
+  def deserialize(input: MessageDeserializer) = {
+    Some(new ConnectResponse(
       input.readInteger,
       input.readInteger,
       input.readLong,
       input.readBuffer
-    )
+    ))
   }
 }

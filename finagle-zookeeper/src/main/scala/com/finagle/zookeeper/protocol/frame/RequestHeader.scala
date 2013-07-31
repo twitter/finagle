@@ -16,10 +16,10 @@ case class RequestHeader(xid: Integer, kind: Integer) extends SerializableRecord
 
 object RequestHeader extends RecordDeserializer {
 
-  def deserialize(input: MessageDeserializer): SerializableRecord = {
-    new RequestHeader(
+  def deserialize(input: MessageDeserializer) = {
+    Some(new RequestHeader(
       input.readInteger,
       input.readInteger
-    )
+    ))
   }
 }

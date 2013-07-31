@@ -33,7 +33,7 @@ trait RecordDeserializer {
    * @param input The wire input stream
    * @return
    */
-  def deserialize(input: ChannelBuffer): SerializableRecord =
+  def deserialize(input: ChannelBuffer): Option[SerializableRecord] =
     deserialize(new BinaryMessageDeserializer(input))
 
   /**
@@ -42,5 +42,5 @@ trait RecordDeserializer {
    * Every partciular record should implement this method according to its structure.
    * @param input
    */
-  def deserialize(input: MessageDeserializer): SerializableRecord
+  def deserialize(input: MessageDeserializer): Option[SerializableRecord]
 }

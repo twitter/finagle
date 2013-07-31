@@ -125,20 +125,9 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
      * By now, the buffer should contain one pair of header and body, and one at most
      */
     case frame: ChannelBuffer => {
-      /**
-       * Extract the header and deconstruct message.
-       */
-      ReplyHeader.deserialize(frame) match {
-        case reply @ ReplyHeader(xid, _, err) => xid match {
 
-          case _ => {
-            logger.warning("Unknown header type received.")
-            //TODO: For the moment, just propagate the header received. We shall later take care of the body.
-            Channels.fireMessageReceived(ctx, (Some(reply), None))
-          }
-        }
-        case _ =>
-      }
+//            Channels.fireMessageReceived(ctx, (Some(reply), None))
+
     }
 
     case _ => {

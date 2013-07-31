@@ -17,12 +17,12 @@ case class ReplyHeader(xid: Integer, zxid:Long, err: Integer) extends Serializab
 
 object ReplyHeader extends RecordDeserializer {
 
-  def deserialize(input: MessageDeserializer): SerializableRecord = {
-    new ReplyHeader(
+  def deserialize(input: MessageDeserializer) = {
+    Some(new ReplyHeader(
       input.readInteger,
       input.readLong,
       input.readInteger
-    )
+    ))
   }
 }
 

@@ -22,14 +22,14 @@ case class ConnectRequest(protocolVersion: Int,
 }
 
 object ConnectRequest extends RecordDeserializer {
-  def deserialize(input: MessageDeserializer): SerializableRecord = {
-    new ConnectRequest(
+  def deserialize(input: MessageDeserializer) = {
+    Some(new ConnectRequest(
       input.readInteger,
       input.readLong,
       input.readInteger,
       input.readLong,
       input.readBuffer
-    )
+    ))
   }
 
   def default: ConnectRequest = new ConnectRequest(0,0,2000,0,new Array[Byte](16))
