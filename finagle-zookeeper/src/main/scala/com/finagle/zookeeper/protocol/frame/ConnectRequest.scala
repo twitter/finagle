@@ -9,7 +9,7 @@ case class ConnectRequest(protocolVersion: Int,
                           timeOut: Int,
                           sessionID: Long,
                           password: Array[Byte]
-                           ) extends SerializableRecord with AwaitsResponse {
+                           ) extends SerializableRecord with ExpectsResponse {
 
 
   def serialize(out: MessageSerializer) {

@@ -1,6 +1,6 @@
 package com.finagle.zookeeper.protocol
 
-trait AwaitsResponse {
+trait ExpectsResponse {
 
   def responseDeserializer: HeaderBodyDeserializer
 

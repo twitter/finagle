@@ -6,7 +6,7 @@ import com.twitter.util.StateMachine
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import protocol.frame.ReplyHeader
-import protocol.{AwaitsResponse, HeaderBodyDeserializer}
+import protocol.{ExpectsResponse, HeaderBodyDeserializer}
 
 /**
  * This is the core artifact of the module, implementing the transition to the wire protocol.
@@ -103,7 +103,7 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
          * Mark if a response is expected.
          */
         request match {
-          case (_, requestBody: AwaitsResponse) => {
+          case (_, Some(requestBody: ExpectsResponse)) => {
             logger.info("AwaitingResponse request received.")
 
             pendingRequests = requestBody.responseDeserializer :: pendingRequests
@@ -141,7 +141,20 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
      */
     case frame: ChannelBuffer => {
 
-//            Channels.fireMessageReceived(ctx, (Some(reply), None))
+      logger.info("Incoming response.")
+
+      val response: ZookeeperResponse = state match {
+        case Connecting => {
+          val deserializer = pendingRequests.last
+          pendingRequests = pendingRequests.init
+          deserializer.deserializeResponse(frame)
+        }
+
+        case _ => throw new UnsupportedOperationException("Client in unsupported state.")
+      }
+
+      logger.info("Received message:" + response)
+      Channels.fireMessageReceived(ctx, response)
 
     }
 
