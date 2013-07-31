@@ -130,10 +130,11 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
        */
       ReplyHeader.deserialize(frame) match {
         case reply @ ReplyHeader(xid, _, err) => xid match {
+
           case _ => {
             logger.warning("Unknown header type received.")
             //TODO: For the moment, just propagate the header received. We shall later take care of the body.
-            Channels.fireMessageReceived(ctx, reply)
+            Channels.fireMessageReceived(ctx, (Some(reply), None))
           }
         }
         case _ =>
