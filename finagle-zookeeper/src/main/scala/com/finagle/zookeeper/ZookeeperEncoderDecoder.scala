@@ -6,6 +6,7 @@ import com.twitter.util.StateMachine
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
 import protocol.frame.ReplyHeader
+import protocol.{AwaitsResponse, HeaderBodyDeserializer}
 
 /**
  * This is the core artifact of the module, implementing the transition to the wire protocol.
@@ -29,6 +30,8 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
    * TODO: Currently incomplete set of variables
    */
   private[this] var negotiatedTimeout: Long = _
+
+  private [this] var pendingRequests: List[HeaderBodyDeserializer] = List()
 
   /**
    * Possible states of the client
@@ -94,8 +97,20 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
         logger.info("Incoming request received:" + request)
 
         val binaryEncoding = requestToChannelBuffer(request)
-
         Channels.write(ctx, e.getFuture, binaryEncoding, e.getRemoteAddress)
+
+        /**
+         * Mark if a response is expected.
+         */
+        request match {
+          case (_, requestBody: AwaitsResponse) => {
+            logger.info("AwaitingResponse request received.")
+
+            pendingRequests = requestBody.responseDeserializer :: pendingRequests
+          }
+
+          case _ => logger.info("Request not added to pending.")
+        }
       }
 
       case _ => throw UnknownCommandException()
