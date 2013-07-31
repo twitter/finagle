@@ -23,14 +23,10 @@ trait MessageSerializer {
   def writeString(string: String): MessageSerializer
   def writeBuffer(buffer: Array[Byte]): MessageSerializer
 
-  def writerIndex: Int
-
   //TODO: Add rest of composite types
 }
 
 class BinaryMessageSerializer(outputStream: ChannelBuffer) extends MessageSerializer {
-
-  def writerIndex = outputStream.writerIndex
 
   def writeByte(byte: Byte): MessageSerializer = {
     outputStream.writeByte(byte); this
