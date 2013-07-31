@@ -1,5 +1,6 @@
 package com.finagle.zookeeper
 
+import errors.UnknownCommandException
 import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import java.util.logging.Logger
@@ -11,8 +12,16 @@ import protocol.frame.ReplyHeader
  *
  * It uses a state machine behaviour because of the logic of the Zookeeper protocol.
  */
-class ZookeeperEncoderDecoder extends SimpleChannelHandler with StateMachine {
+class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
+                              val desiredTimeout: Int = 1000,
+                              var sessionID: Long = 0,
+                              var password: Array[Byte] = new Array[Byte](16))
+  extends SimpleChannelHandler
+  with StateMachine {
+
   private[this] val logger = Logger.getLogger("finagle-zookeeper")
+
+  logger.info("Constructing main pipeline component.")
 
   /**
    * Session-related state
@@ -20,7 +29,6 @@ class ZookeeperEncoderDecoder extends SimpleChannelHandler with StateMachine {
    * TODO: Currently incomplete set of variables
    */
   private[this] var negotiatedTimeout: Long = _
-
 
   /**
    * Possible states of the client
@@ -54,7 +62,10 @@ class ZookeeperEncoderDecoder extends SimpleChannelHandler with StateMachine {
     state = Connecting
   }
 
-  def reset() {
+  /**
+   * Constructor code, grouped inside a method for clarity of purpose.
+   */
+  private[this] def reset() {
     state = NotConnected
     lastEvent = 0
   }
@@ -72,8 +83,26 @@ class ZookeeperEncoderDecoder extends SimpleChannelHandler with StateMachine {
   }
 
   /**
+   * When a new request is issued
+   * @param ctx
+   * @param e
+   */
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+
+    e.getMessage match {
+      case request: ZookeeperRequest => {
+        logger.info("Incoming request received:" + request)
+        Channels.write(ctx, e.getFuture, requestToChannelBuffer(request), e.getRemoteAddress)
+      }
+
+      case _ => throw UnknownCommandException()
+    }
+
+  }
+
+  /**
    * A ChannelBuffer with a server response should be avaible from the previous element.
-   * In the pipeline.
+   * in the pipeline.
    *
    * This response is made up of a header and, possibly, a response body.
    *
@@ -89,15 +118,22 @@ class ZookeeperEncoderDecoder extends SimpleChannelHandler with StateMachine {
    * @param e
    */
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) = e.getMessage match {
+    /**
+     * By now, the buffer should contain one pair of header and body, and one at most
+     */
     case frame: ChannelBuffer => {
       /**
        * Extract the header and deconstruct message.
        */
       ReplyHeader.deserialize(frame) match {
-        case ReplyHeader(xid, _, err) => xid match {
-          case _ => logger.warning("Unknown header type received.")
+        case reply @ ReplyHeader(xid, _, err) => xid match {
+          case _ => {
+            logger.warning("Unknown header type received.")
+            //TODO: For the moment, just propagate the header received. We shall later take care of the body.
+            Channels.fireMessageReceived(ctx, reply)
+          }
         }
-        case _ => throw new UnsupportedOperationException("Cannot deserialize header response")
+        case _ =>
       }
     }
 

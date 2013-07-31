@@ -31,4 +31,6 @@ object ConnectRequest extends RecordDeserializer {
       input.readBuffer
     )
   }
+
+  def default: ConnectRequest = new ConnectRequest(0,0,2000,0,new Array[Byte](16))
 }

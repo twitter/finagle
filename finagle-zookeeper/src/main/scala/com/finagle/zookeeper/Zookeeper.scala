@@ -36,6 +36,7 @@ object ZookeeperClientPipelineFactory extends ChannelPipelineFactory{
 
     /**
      * First element in the pipeline does the packet splitting from the wire.
+     * It does only upstream handling.
      */
     pipeline.addLast("PackageSplitter", new LengthFieldBasedFrameDecoder(
       //TODO: this should be smaller I guess
@@ -46,6 +47,7 @@ object ZookeeperClientPipelineFactory extends ChannelPipelineFactory{
       // The length field is skipped.
       4)
     )
+    pipeline.addLast("PackageDeserializer", new ZookeeperEncoderDecoder())
     pipeline
   }
 
