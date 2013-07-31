@@ -85,6 +85,11 @@ object -> {
 }
 
 
+/**
+ * Path separator extractor:
+ *   Path("/1/2/3/test.json") match {
+ *     case Root / "1" / "2" / "3" / "test.json" => ...
+ */
 case class /(parent: Path, child: String) extends Path {
   lazy val toList: List[String] = parent.toList ++ List(child)
   def lastOption: Option[String] = Some(child)
@@ -115,7 +120,7 @@ case object Root extends Path {
 /**
  * Path separator extractor:
  *   Path("/1/2/3/test.json") match {
- *     case Root / "1" / "2" / "3" / "test.json" => ...
+ *     case "1" /: "2" /: _ =>  ...
  */
 object /: {
   def unapply(path: Path): Option[(String, Path)] = {
