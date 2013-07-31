@@ -2,8 +2,11 @@ package com.finagle
 
 import zookeeper.protocol.SerializableRecord
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import java.util.logging.Logger
 
 package object zookeeper {
+
+  val logger = Logger.getLogger("finagle-zookeeper")
 
   /**
    * Conenience renamings.
@@ -38,7 +41,8 @@ package object zookeeper {
       /**
        * Write back the length information
        */
-      outputBuffer.setInt(0, outputBuffer.writerIndex)
+      logger.info("Complete packet size: " + outputBuffer.writerIndex())
+      outputBuffer.setInt(0, outputBuffer.writerIndex - 4)
 
       outputBuffer
     }

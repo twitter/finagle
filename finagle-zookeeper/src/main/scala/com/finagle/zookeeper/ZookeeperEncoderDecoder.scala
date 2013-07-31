@@ -92,7 +92,10 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
     e.getMessage match {
       case request: ZookeeperRequest => {
         logger.info("Incoming request received:" + request)
-        Channels.write(ctx, e.getFuture, requestToChannelBuffer(request), e.getRemoteAddress)
+
+        val binaryEncoding = requestToChannelBuffer(request)
+
+        Channels.write(ctx, e.getFuture, binaryEncoding, e.getRemoteAddress)
       }
 
       case _ => throw UnknownCommandException()
