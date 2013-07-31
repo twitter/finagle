@@ -1,14 +1,15 @@
 package com.finagle.zookeeper.protocol.frame
 
-import com.finagle.zookeeper.protocol.{MessageDeserializer, RecordDeserializer, MessageSerializer, SerializableRecord}
+import com.finagle.zookeeper.protocol._
 import java.io.OutputStream
+import scala.Some
 
 case class ConnectRequest(protocolVersion: Int,
                           lastZXIDSeen: Long,
                           timeOut: Int,
                           sessionID: Long,
                           password: Array[Byte]
-                           ) extends SerializableRecord{
+                           ) extends SerializableRecord with AwaitsResponse {
 
 
   def serialize(out: MessageSerializer) {
@@ -18,6 +19,8 @@ case class ConnectRequest(protocolVersion: Int,
     out.writeLong(sessionID)
     out.writeBuffer(password)
   }
+
+  def responseDeserializer = new HeaderBodyDeserializer(bodyDeserializer = ConnectResponse)
 
 }
 
