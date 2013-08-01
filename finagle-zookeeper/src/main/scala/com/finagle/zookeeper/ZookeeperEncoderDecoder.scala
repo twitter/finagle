@@ -59,7 +59,6 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
    */
   private[this] def start() {
     state = Connecting
-    //TODO: Connect message should be fired from here
   }
 
   /**
@@ -137,6 +136,8 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
     deserializer
   }
 
+  private[this] def sendRequest(request: ZookeeperRequest) {}
+
   /**
    * A ChannelBuffer with a server response should be avaible from the previous element.
    * in the pipeline.
@@ -169,7 +170,7 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
        */
       state match {
         case Connecting => response match {
-          case (_ , connectResponse: Some[ConnectResponse]) => parseConnectResponse(connectResponse.get)
+          case (_ ,  Some(connectResponse: ConnectResponse)) => parseConnectResponse(connectResponse)
           case _ => {
             logger.severe("Bad connect response received.")
           }
