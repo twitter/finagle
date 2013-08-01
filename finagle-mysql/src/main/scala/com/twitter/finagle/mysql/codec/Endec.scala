@@ -41,7 +41,7 @@ class Endec extends SimpleChannelHandler {
   private[this] def transition(s: State) = { state = s }
 
   /**
-   * Netty downstream handler. The message event should contain a packet from
+   * Netty upstream handler. The message event should contain a packet from
    * the MySQL server.
    */
   override def messageReceived(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {
@@ -55,7 +55,7 @@ class Endec extends SimpleChannelHandler {
   }
 
   /**
-   * Netty upstream handler. The message event should contain an
+   * Netty downstream handler. The message event should contain an
    * object of type Request.
    */
   override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = evt.getMessage match {

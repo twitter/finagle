@@ -42,5 +42,6 @@
     <module>finagle-thrift</module>
     <module>finagle-thriftmux</module>
     <module>finagle-zipkin</module>
+    <module>finagle-zookeeper</module>
   </modules>
 </project>
