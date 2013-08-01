@@ -8,7 +8,12 @@ case class ConnectRequest(protocolVersion: Int,
                           lastZXIDSeen: Long,
                           timeOut: Int,
                           sessionID: Long,
-                          password: Array[Byte]
+                          password: Array[Byte],
+                          /**
+                           * Support for read only connections/ not suppported
+                           * by old servers
+                           */
+                          canReadOnly: Option[Boolean]
                            ) extends SerializableRecord with ExpectsResponse {
 
 
@@ -18,6 +23,10 @@ case class ConnectRequest(protocolVersion: Int,
     out.writeInteger(timeOut)
     out.writeLong(sessionID)
     out.writeBuffer(password)
+    canReadOnly match {
+      case Some(value) => out.writeBoolean(value)
+      case None =>
+    }
   }
 
   def responseDeserializer = new HeaderBodyDeserializer(bodyDeserializer = ConnectResponse)
@@ -31,9 +40,17 @@ object ConnectRequest extends RecordDeserializer {
       input.readLong,
       input.readInteger,
       input.readLong,
-      input.readBuffer
+      input.readBuffer,
+      try {
+        Some(input.readBoolean)
+      } catch {
+      case _ => {
+        logger.info("Old server, ReadOnly mode not allowed.")
+        None
+      }
+    }
     ))
   }
 
-  def default: ConnectRequest = new ConnectRequest(0,0,2000,0,new Array[Byte](16))
+  def default: ConnectRequest = new ConnectRequest(0,0,2000,0,new Array[Byte](16), Some(false))
 }

@@ -2,10 +2,19 @@ package com.finagle.zookeeper.protocol.frame
 
 import com.finagle.zookeeper.protocol.{MessageDeserializer, RecordDeserializer, MessageSerializer, SerializableRecord}
 
+/**
+ *
+ * @param protocolVersion
+ * @param timeOut
+ * @param sessionID
+ * @param password
+ * @param isReadOnly
+ */
 case class ConnectResponse(protocolVersion: Int,
                            timeOut: Int,
                            sessionID: Long,
-                           password: Array[Byte]
+                           password: Array[Byte],
+                           isReadOnly: Option[Boolean]
                             ) extends SerializableRecord{
 
 
@@ -24,7 +33,15 @@ object ConnectResponse extends RecordDeserializer {
       input.readInteger,
       input.readInteger,
       input.readLong,
-      input.readBuffer
+      input.readBuffer,
+      try {
+        Some(input.readBoolean)
+      } catch {
+        case _ => {
+          logger.info("Old server, ReadOnly mode not allowed.")
+          None
+        }
+      }
     ))
   }
 }
