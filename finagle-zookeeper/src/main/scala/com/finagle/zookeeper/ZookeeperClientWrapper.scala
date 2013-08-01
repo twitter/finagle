@@ -20,7 +20,12 @@ object ZookeeperClientWrapper {
 
     testClient(None, Some(ConnectRequest.default))
       .onFailure(_ => logger.info("Failure occured"))
-      .onSuccess(_ => logger.info("Success"))
+      .onSuccess(response => {
+        response match {
+          case (_, body) => logger.info("Got " + body)
+        }
+        logger.info("Success")
+      })
 
   }
 

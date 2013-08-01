@@ -5,7 +5,7 @@ import org.jboss.netty.channel._
 import com.twitter.util.StateMachine
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
-import protocol.frame.ReplyHeader
+import protocol.frame.{ConnectResponse, ReplyHeader}
 import protocol.{ExpectsResponse, HeaderBodyDeserializer}
 
 /**
@@ -24,13 +24,6 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
 
   logger.info("Constructing main pipeline component.")
 
-  /**
-   * Session-related state
-   *
-   * TODO: Currently incomplete set of variables
-   */
-  private[this] var negotiatedTimeout: Long = _
-
   private [this] var pendingRequests: List[HeaderBodyDeserializer] = List()
 
   /**
@@ -45,9 +38,12 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
   case object NotConnected extends State
 
   /**
-   * Timestamp of the last event prcessed from the server
+   * State attributes of the client
    */
-  @volatile private[this] var lastEvent: Long = _
+  private[this] var lastEvent: Long = _
+  private[this] var isReadOnly: Boolean = _
+  private[this] var negotiatedTimeout: Long = _
+
 
   private[this] def markEvent(time: Long) {
     this.synchronized {
@@ -61,8 +57,9 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
   /**
    * Begin connection establishment phase.
    */
-  def begin() {
+  private[this] def start() {
     state = Connecting
+    //TODO: Connect message should be fired from here
   }
 
   /**
@@ -73,10 +70,26 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
     lastEvent = 0
   }
 
+  private[this] def parseConnectResponse(connectResponse: ConnectResponse) {
+    logger.info("Running client setup based on server response.")
+    /**
+     * Setting client state based on ZookeeperResponse
+     */
+    sessionID = connectResponse.sessionID
+    negotiatedTimeout = connectResponse.timeOut
+    password = connectResponse.password
+    isReadOnly = connectResponse.isReadOnly match {
+      case Some(respondedvalue) => respondedvalue
+      case None => true
+    }
+
+    if (canBeRO != isReadOnly) logger.warning("Expected R/W but got R/O.")
+  }
+
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     super.channelConnected(ctx, e)
     logger.info("Connected to Zookeeper server.")
-    begin()
+    start()
   }
 
   override def channelDisconnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
@@ -118,6 +131,12 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
 
   }
 
+  private[this] def popExpectedMessageDeserializer: HeaderBodyDeserializer = {
+    val deserializer = pendingRequests.last
+    pendingRequests = pendingRequests.init
+    deserializer
+  }
+
   /**
    * A ChannelBuffer with a server response should be avaible from the previous element.
    * in the pipeline.
@@ -142,25 +161,28 @@ class ZookeeperEncoderDecoder(val canBeRO: Boolean = false,
     case frame: ChannelBuffer => {
 
       logger.info("Incoming response.")
+      val response: ZookeeperResponse = popExpectedMessageDeserializer deserializeResponse frame
+      logger.info("Received message:" + response)
 
-      val response: ZookeeperResponse = state match {
-        case Connecting => {
-          val deserializer = pendingRequests.last
-          pendingRequests = pendingRequests.init
-          deserializer.deserializeResponse(frame)
+      /**
+       * Based on the state of the client we might do additional processing
+       */
+      state match {
+        case Connecting => response match {
+          case (_ , connectResponse: Some[ConnectResponse]) => parseConnectResponse(connectResponse.get)
+          case _ => {
+            logger.severe("Bad connect response received.")
+          }
         }
-
-        case _ => throw new UnsupportedOperationException("Client in unsupported state.")
       }
 
-      logger.info("Received message:" + response)
       Channels.fireMessageReceived(ctx, response)
 
     }
 
     case _ => {
       Channels.disconnect(ctx.getChannel)
-      logger.severe("Bad message event type received.")
+      logger.severe("Unknown message event type received.")
     }
   }
 }
