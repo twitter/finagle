@@ -155,8 +155,8 @@ class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value[Any]]) {
   }
 
   def get[A](name: String)(implicit mf:Manifest[A]):A = {
-    indexMap.get(name).map(vals(_)) match {
-      case Some(Value(x)) => x.asInstanceOf[A]
+    getOption[A](name) match {
+      case Some(x) => x
       case _ => throw new IllegalStateException("Expected type " + mf.toString)
     }
   }
