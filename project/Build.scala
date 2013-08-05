@@ -6,6 +6,7 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
+  val libVersion = "6.5.2"
   val zkVersion = "3.3.4"
   val utilVersion = "6.3.8"
   val nettyLib = "io.netty" % "netty" % "3.6.6.Final"
@@ -21,7 +22,7 @@ object Finagle extends Build {
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.5.2",
+    version := libVersion,
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
     scalaVersion := "2.9.2",
