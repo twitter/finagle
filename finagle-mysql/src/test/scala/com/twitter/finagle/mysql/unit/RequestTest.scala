@@ -2,8 +2,7 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.exp.mysql.protocol.{BufferReader, Buffer, Command, Type}
 import java.sql.{Timestamp, Date => SQLDate}
-import java.util.Calendar
-import java.util.Date
+import java.util.{TimeZone, Calendar, Date}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers
@@ -90,7 +89,7 @@ class RequestTest extends FunSuite with ShouldMatchers {
   val ps = PreparedStatement(stmtId, params.size)
   ps.parameters = params
   val flags, iteration = 0
-  val req = ExecuteRequest(ps, flags.toByte, iteration)
+  val req = ExecuteRequest(ps, TimeZone.getDefault, flags.toByte, iteration)
 
   val br = BufferReader(req.toChannelBuffer)
   br.skip(4) // header

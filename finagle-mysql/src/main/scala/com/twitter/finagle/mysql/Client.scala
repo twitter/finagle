@@ -5,6 +5,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.{Logger, Level}
+import java.util.TimeZone
 
 case class ClientError(msg: String) extends Exception(msg)
 case class ServerError(code: Short, sqlState: String, message: String) extends Exception(message)
@@ -14,10 +15,17 @@ object Client {
   private[this] val logger = Logger.getLogger("finagle-mysql")
 
   /**
+   * Constructs a Client given a ServiceFactory and TimeZone.
+   */
+  def apply(factory: ServiceFactory[Request, Result], timeZone: TimeZone): Client = {
+    new Client(factory, timeZone)
+  }
+
+  /**
    * Constructs a Client given a ServiceFactory.
    */
   def apply(factory: ServiceFactory[Request, Result]): Client = {
-    new Client(factory)
+    new Client(factory, TimeZone.getDefault)
   }
 
   /**
@@ -36,7 +44,8 @@ object Client {
     password: String,
     dbname: String = null,
     logLevel: Level = Level.OFF,
-    statsReceiver: StatsReceiver = NullStatsReceiver
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    timeZone: TimeZone = TimeZone.getDefault
   ): Client = {
     logger.setLevel(logLevel)
 
@@ -48,11 +57,11 @@ object Client {
       .reportTo(statsReceiver.scope("mysql"))
       .buildFactory()
 
-      apply(factory)
+      apply(factory, timeZone)
   }
 }
 
-class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
+class Client(val factory: ServiceFactory[Request, Result], val timeZone: TimeZone = TimeZone.getDefault) extends Closable {
   private[this] val service = factory.toService
 
   /**
@@ -99,7 +108,7 @@ class Client(val factory: ServiceFactory[Request, Result]) extends Closable {
    * @return a Future containing an OK Result or a ResultSet
    * for queries that return rows.
    */
-  def execute(ps: PreparedStatement): Future[Result] = send(ExecuteRequest(ps)) {
+  def execute(ps: PreparedStatement): Future[Result] = send(ExecuteRequest(ps, timeZone)) {
     case rs: ResultSet =>
       ps.bindParameters()
       Future.value(rs)

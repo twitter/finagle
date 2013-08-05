@@ -5,6 +5,7 @@ import com.twitter.finagle.exp.mysql.protocol.{Command, Packet, Buffer, BufferWr
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers._
 import scala.annotation.tailrec
+import java.util.TimeZone
 
 abstract class Request(seq: Short) {
   /**
@@ -52,7 +53,7 @@ case class PrepareRequest(sqlStatement: String)
  * Uses the binary protocol to build an execute request for
  * a prepared statement.
  */
-case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount: Int = 1)
+case class ExecuteRequest(ps: PreparedStatement, timeZone: TimeZone = TimeZone.getDefault, flags: Byte = 0, iterationCount: Int = 1)
   extends CommandRequest(Command.COM_STMT_EXECUTE) {
     private[this] val log = Logger("finagle-mysql")
 
@@ -121,9 +122,9 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case d: Double      => writer.writeDouble(d)
       case b: Array[Byte] => writer.writeLengthCodedBytes(b)
       // Dates
-      case t: java.sql.Timestamp    => TimestampValue.write(t, writer)
-      case d: java.sql.Date         => DateValue.write(d, writer)
-      case d: java.util.Date        => TimestampValue.write(new java.sql.Timestamp(d.getTime), writer)
+      case t: java.sql.Timestamp    => TimestampValue.write(t, timeZone, writer)
+      case d: java.sql.Date         => DateValue.write(d, timeZone, writer)
+      case d: java.util.Date        => TimestampValue.write(new java.sql.Timestamp(d.getTime), timeZone, writer)
       case _  => writer // skip null and uknown values
     }
 
