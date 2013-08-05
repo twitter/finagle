@@ -2,7 +2,7 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.exp.mysql.protocol.{BufferReader, BufferWriter, SQLZeroDate, SQLZeroTimestamp, Type}
 import java.sql.{Timestamp, Date => SQLDate}
-import java.util.Calendar
+import java.util.{TimeZone, Calendar}
 import java.nio.charset.{Charset => JCharset}
 
 /**
@@ -162,10 +162,11 @@ object TimestampValue {
    * Write a java.sql.Timestamp into its
    * MySQL binary representation.
    * @param Timestamp to write
+   * @param TimeZone to write timestamp in
    * @param BufferWriter to write to.
    */
-  def write(ts: Timestamp, buffer: BufferWriter) = {
-    val cal = Calendar.getInstance
+  def write(ts: Timestamp, timeZone: TimeZone, buffer: BufferWriter) = {
+    val cal = Calendar.getInstance(timeZone)
     cal.setTimeInMillis(ts.getTime)
     buffer.writeByte(11)
     buffer.writeShort(cal.get(Calendar.YEAR))
@@ -230,10 +231,11 @@ object DateValue {
    * Writes a java.sql.Date into its
    * MySQL binary representation.
    * @param Date to write
+   * @param TimeZone to write date in
    * @param BufferWriter to write to.
    */
-  def write(date: SQLDate, buffer: BufferWriter) = {
-    val cal = Calendar.getInstance
+  def write(date: SQLDate, timeZone: TimeZone, buffer: BufferWriter) = {
+    val cal = Calendar.getInstance(timeZone)
     cal.setTimeInMillis(date.getTime)
     buffer.writeByte(4)
     buffer.writeShort(cal.get(Calendar.YEAR))
