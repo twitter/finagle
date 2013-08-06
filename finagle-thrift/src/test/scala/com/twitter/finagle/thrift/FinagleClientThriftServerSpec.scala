@@ -152,8 +152,10 @@ class FinagleClientThriftServerSpec extends SpecificationWithJUnit {
       }
     }
 
-    "framed transport" in {
-      doit(new TFramedTransport.Factory(), ThriftClientFramedCodec())
+    if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+      "framed transport" in {
+        doit(new TFramedTransport.Factory(), ThriftClientFramedCodec())
+      }
     }
 
     "buffered transport" in {

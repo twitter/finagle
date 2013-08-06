@@ -91,30 +91,32 @@ class StabilizingGroupTest extends FunSuite {
     }
   }
 
-  test("be aware of adds while unstable") {
-    val ctx = new Context
-    import ctx._
-    Time.withCurrentTimeFrozen { tc =>
-      healthStatus.mkHealthy()
-      assert(stableGroup() === sourceGroup())
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+    test("be aware of adds while unstable") {
+      val ctx = new Context
+      import ctx._
+      Time.withCurrentTimeFrozen { tc =>
+        healthStatus.mkHealthy()
+        assert(stableGroup() === sourceGroup())
 
-      healthStatus.mkUnhealthy()
-      sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
+        healthStatus.mkUnhealthy()
+        sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
 
-      eventually {
-        tc.advance(grace)
-        assert(stableGroup() === (1 to 10).toSet)
-      }
+        eventually {
+          tc.advance(grace)
+          assert(stableGroup() === (1 to 10).toSet)
+        }
 
-      healthStatus.mkHealthy()
-      eventually {
-        tc.advance(pollSpan)
-        sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
-      }
+        healthStatus.mkHealthy()
+        eventually {
+          tc.advance(pollSpan)
+          sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
+        }
 
-      eventually {
-        tc.advance(grace)
-        assert(stableGroup() === Set(1,2,3,4))
+        eventually {
+          tc.advance(grace)
+          assert(stableGroup() === Set(1,2,3,4))
+        }
       }
     }
   }

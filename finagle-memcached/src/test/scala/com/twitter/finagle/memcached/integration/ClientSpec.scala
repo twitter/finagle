@@ -1041,41 +1041,43 @@ class ClientSpec extends SpecificationWithJUnit {
         }
       }
 
-      "replica down" in {
-        // create my cluster client solely based on a zk client and a path
-        val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
-        Await.result(mycluster1.ready) // give it sometime for the cluster to get the initial set of memberships
-        val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
-        Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+        "replica down" in {
+          // create my cluster client solely based on a zk client and a path
+          val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
+          Await.result(mycluster1.ready) // give it sometime for the cluster to get the initial set of memberships
+          val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
+          Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-        val client1 = KetamaClientBuilder()
-            .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
-            .cachePoolCluster(mycluster1)
-            .failureAccrualParams(Int.MaxValue, 0.seconds)
-            .build()
-        val client2 = KetamaClientBuilder()
-            .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
-            .cachePoolCluster(mycluster2)
-            .failureAccrualParams(Int.MaxValue, 0.seconds)
-            .build()
-        val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
+          val client1 = KetamaClientBuilder()
+              .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+              .cachePoolCluster(mycluster1)
+              .failureAccrualParams(Int.MaxValue, 0.seconds)
+              .build()
+          val client2 = KetamaClientBuilder()
+              .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+              .cachePoolCluster(mycluster2)
+              .failureAccrualParams(Int.MaxValue, 0.seconds)
+              .build()
+          val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
-        Await.result(replicatedClient.set("foo", "bar")) mustEqual ConsistentReplication(())
-        Await.result(replicatedClient.getAll("foo")) mustEqual ConsistentReplication(Some(stringToChannelBuffer("bar")))
+          Await.result(replicatedClient.set("foo", "bar")) mustEqual ConsistentReplication(())
+          Await.result(replicatedClient.getAll("foo")) mustEqual ConsistentReplication(Some(stringToChannelBuffer("bar")))
 
-        // primary pool down
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+          // primary pool down
+          ExternalMemcached.stop(firstPoolAddresses(0))
+          ExternalMemcached.stop(firstPoolAddresses(1))
 
-        Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(Some(v)))) => v equals stringToChannelBuffer("bar") }
-        Await.result(replicatedClient.set("foo", "baz")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(()))) => true }
+          Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(Some(v)))) => v equals stringToChannelBuffer("bar") }
+          Await.result(replicatedClient.set("foo", "baz")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(()))) => true }
 
-        // bring back primary pool
-        ExternalMemcached.start(firstPoolAddresses(0))
-        ExternalMemcached.start(firstPoolAddresses(1))
+          // bring back primary pool
+          ExternalMemcached.start(firstPoolAddresses(0))
+          ExternalMemcached.start(firstPoolAddresses(1))
 
-        Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Return(None), Return(Some(v)))) => v equals stringToChannelBuffer("baz") }
-        Await.result(replicatedClient.set("foo", "baz")) mustEqual ConsistentReplication(())
+          Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Return(None), Return(Some(v)))) => v equals stringToChannelBuffer("baz") }
+          Await.result(replicatedClient.set("foo", "baz")) mustEqual ConsistentReplication(())
+        }
       }
 
       "non supported operation" in {
