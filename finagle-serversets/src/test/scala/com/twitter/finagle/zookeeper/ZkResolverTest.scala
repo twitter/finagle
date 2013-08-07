@@ -64,6 +64,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
     }
   }
 
+if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
   test("resolve ALIVE endpoints") {
     val res = new ZkResolver(factory)
     val clust = res.resolve("localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort))()
