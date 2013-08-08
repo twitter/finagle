@@ -42,25 +42,27 @@ class Context {
 
 @RunWith(classOf[JUnitRunner])
 class StabilizingGroupTest extends FunSuite {
-  test("delay removals while healthy") {
-    val ctx = new Context
-    import ctx._
-    Time.withCurrentTimeFrozen { tc =>
-      healthStatus.mkHealthy()
-      assert(stableGroup() === sourceGroup())
-
-      sourceGroup.update(sourceGroup() - 10)
-      assert(limboSize === 1)
-      eventually {
-        tc.advance(grace)
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+    test("delay removals while healthy") {
+      val ctx = new Context
+      import ctx._
+      Time.withCurrentTimeFrozen { tc =>
+        healthStatus.mkHealthy()
         assert(stableGroup() === sourceGroup())
-      }
 
-      sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
-      assert(limboSize === 4)
-      eventually {
-        tc.advance(grace)
-        assert(stableGroup() === sourceGroup())
+        sourceGroup.update(sourceGroup() - 10)
+        assert(limboSize === 1)
+        eventually {
+          tc.advance(grace)
+          assert(stableGroup() === sourceGroup())
+        }
+
+        sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
+        assert(limboSize === 4)
+        eventually {
+          tc.advance(grace)
+          assert(stableGroup() === sourceGroup())
+        }
       }
     }
   }
