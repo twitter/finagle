@@ -4,6 +4,7 @@ junit_tests(name='scala',
     pants('3rdparty:mockito-all'),
     pants('3rdparty:junit'),
     pants('util/util-core'),
+    pants('util/util-codec'),
     pants('finagle/finagle-core'),
     pants('finagle/finagle-test'),
     pants('finagle/finagle-zipkin')
