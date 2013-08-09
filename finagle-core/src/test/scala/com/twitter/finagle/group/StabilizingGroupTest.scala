@@ -65,35 +65,33 @@ class StabilizingGroupTest extends FunSuite {
         }
       }
     }
-  }
 
-  test("queue removals while unstable") {
-    val ctx = new Context
-    import ctx._
-    Time.withCurrentTimeFrozen { tc =>
-      healthStatus.mkHealthy()
-      assert(stableGroup() === sourceGroup())
-
-      healthStatus.mkUnhealthy()
-      assert(stableGroup() === sourceGroup())
-      sourceGroup.update(sourceGroup() - 10)
-      assert(stableGroup() != sourceGroup())
-      assert(stableGroup() === (1 to 10).toSet)
-      assert(limboSize === 1)
-      sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
-      assert(stableGroup() != sourceGroup())
-      assert(stableGroup() === (1 to 10).toSet)
-      assert(limboSize === 5)
-
-      healthStatus.mkHealthy()
-      eventually {
-        tc.advance(grace)
+    test("queue removals while unstable") {
+      val ctx = new Context
+      import ctx._
+      Time.withCurrentTimeFrozen { tc =>
+        healthStatus.mkHealthy()
         assert(stableGroup() === sourceGroup())
+
+        healthStatus.mkUnhealthy()
+        assert(stableGroup() === sourceGroup())
+        sourceGroup.update(sourceGroup() - 10)
+        assert(stableGroup() != sourceGroup())
+        assert(stableGroup() === (1 to 10).toSet)
+        assert(limboSize === 1)
+        sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
+        assert(stableGroup() != sourceGroup())
+        assert(stableGroup() === (1 to 10).toSet)
+        assert(limboSize === 5)
+
+        healthStatus.mkHealthy()
+        eventually {
+          tc.advance(grace)
+          assert(stableGroup() === sourceGroup())
+        }
       }
     }
-  }
 
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
     test("be aware of adds while unstable") {
       val ctx = new Context
       import ctx._
