@@ -16,7 +16,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
   type Iface = B.ServiceIface
   def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
 
-  val processor =  new B.ServiceIface {
+  val processor = new B.ServiceIface {
     def add(a: Int, b: Int) = Future.exception(new AnException)
     def add_one(a: Int, b: Int) = Future.Void
     def multiply(a: Int, b: Int) = Future { a * b }
@@ -27,13 +27,13 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
     def someway() = Future.Void
   }
 
-  val ifaceToService =  new B.Service(_, _)
+  val ifaceToService = new B.Service(_, _)
   val serviceToIface = new B.ServiceToClient(_, _)
 
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(Span(2, Seconds)), interval = scaled(Span(5, Millis)))
 
-  testThrift("unique trace ID") { (client, tracer) => 
+  testThrift("unique trace ID") { (client, tracer) =>
     Time.withCurrentTimeFrozen { tc =>
       val anException = Some(Throw(new AnException))
       val f1 = client.add(1, 2)
@@ -43,12 +43,12 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       val idSet1 = (tracer map(_.traceId.traceId)).toSet
       tracer.clear()
 
-      val f2 = client.add(2, 3) 
+      val f2 = client.add(2, 3)
       eventually {
         assert(f2.poll === anException)
       }
       val idSet2 = (tracer map(_.traceId.traceId)).toSet
-  
+
       assert(idSet1 != idSet2)
     }
   }
@@ -64,7 +64,7 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
         val theId = idSet.head
         assert(theId.parentId === Trace.id.spanId)
         assert(theId.traceId === Trace.id.traceId)
-        
+
         // verify the traces.
         def rec(annot: Annotation) = Record(theId, Time.now, annot)
         val trace = tracer.toSeq
