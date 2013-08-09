@@ -86,7 +86,7 @@ trait Sets { self: BaseClient =>
     * @param key, count
     * @return a sequence with count random entries from the set
     */
-  def sRandMember(key: ChannelBuffer, count:Option[Int] = None): Future[Seq[ChannelBuffer]] =
+  def sRandMember(key: ChannelBuffer, count: Option[Int] = None): Future[Seq[ChannelBuffer]] =
     doRequest(SRandMember(key, count.getOrElse(1))) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply() => Future.Nil
