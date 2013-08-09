@@ -12,6 +12,7 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneInstancePerTest {
   before { Trace.clear() }
+  after { Trace.clear() }
 
   val Seq(id0, id1, id2) = 0 until 3 map { i =>
     TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i), None, Flags(i))
