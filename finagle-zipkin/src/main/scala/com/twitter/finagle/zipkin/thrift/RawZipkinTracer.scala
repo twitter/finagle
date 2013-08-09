@@ -109,8 +109,7 @@ private[thrift] class RawZipkinTracer(
       val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray) + '\n'
       msgs = msgs :+ new LogEntry(category = TraceCategory, message = serializedBase64Span)
     } catch {
-      case e => statsReceiver.scope("create_log_entries").scope("error").
-        counter("%s".format(e.toString)).incr()
+      case e: Throwable => statsReceiver.counter("create_log_entries", "error", e.getClass.getName).incr()
     }
 
     msgs
@@ -125,7 +124,7 @@ private[thrift] class RawZipkinTracer(
       case ResultCode.TryLater => statsReceiver.scope("log_span").counter("try_later").incr()
       case _ => () /* ignore */
     } onFailure {
-      case e => statsReceiver.scope("log_span").scope("error").counter("%s".format(e.toString)).incr()
+      case e: Throwable => statsReceiver.counter("log_span", "error", e.getClass.getName).incr()
     } map(_ => ())
 
   /**
