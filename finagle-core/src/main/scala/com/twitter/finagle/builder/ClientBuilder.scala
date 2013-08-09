@@ -705,7 +705,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       socksProxy = config.socksProxy,
       channelReaderTimeout = config.readerIdleTimeout getOrElse Duration.Top,
       channelWriterTimeout = config.writerIdleTimeout getOrElse Duration.Top,
-      channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.info) },
+      channelSnooper = config.logger map { log => ChannelSnooper(config.name)(log.log(Level.INFO, _, _)) },
       channelOptions = {
         val o = new mutable.MapBuilder[String, Object, Map[String, Object]](Map())
         o += "connectTimeoutMillis" -> (config.tcpConnectTimeout.inMilliseconds: java.lang.Long)
