@@ -1041,8 +1041,7 @@ class ClientSpec extends SpecificationWithJUnit {
         }
       }
 
-      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
-        "replica down" in {
+      "replica down" in {
           // create my cluster client solely based on a zk client and a path
           val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
           Await.result(mycluster1.ready) // give it sometime for the cluster to get the initial set of memberships
@@ -1077,7 +1076,6 @@ class ClientSpec extends SpecificationWithJUnit {
 
           Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Return(None), Return(Some(v)))) => v equals stringToChannelBuffer("baz") }
           Await.result(replicatedClient.set("foo", "baz")) mustEqual ConsistentReplication(())
-        }
       }
 
       "non supported operation" in {
@@ -1372,7 +1370,7 @@ class ClientSpec extends SpecificationWithJUnit {
         }
       }
 
-      "replica down" in {
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "replica down" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
         Await.result(mycluster1.ready) // give it sometime for the cluster to get the initial set of memberships
