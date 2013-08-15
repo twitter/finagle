@@ -24,7 +24,7 @@ object OutOfRetriesException extends Exception
  * an offer to acknowledge.
  */
 
-case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit], abort: Offer[Unit])
+case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit], abort: Offer[Unit] = Offer.const(Unit))
 
 /**
  * An ongoing transactional read (from {{read}}).
