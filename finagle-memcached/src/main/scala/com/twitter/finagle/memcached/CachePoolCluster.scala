@@ -4,19 +4,15 @@ import _root_.java.io.ByteArrayInputStream
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
-import com.twitter.common.quantity.{Amount,Time}
 import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.concurrent.Spool.*::
 import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Group, Resolver}
 import com.twitter.finagle.builder.Cluster
-import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{DefaultZkClientFactory, ZookeeperServerSetCluster}
 import com.twitter.util._
-import org.apache.zookeeper.Watcher.Event.KeeperState
-import org.apache.zookeeper.{WatchedEvent, Watcher}
 import scala.collection.mutable
 
 // Type definition representing a cache node
@@ -180,14 +176,8 @@ class StaticCachePoolCluster(cacheNodeSet: Set[CacheNode]) extends CachePoolClus
  * ZooKeeper based cache pool cluster companion object
  */
 object ZookeeperCachePoolCluster {
-  private val DefaultZkConnectionRetryBackoff =
-    (Backoff.exponential(1.second, 2) take 6) ++ Backoff.const(60.seconds)
   private val CachePoolWaitCompleteTimeout = 10.seconds
   private val BackupPoolFallBackTimeout = 10.seconds
-  private object UnderlyingZookeeperStatus extends Enumeration {
-    type t = Value
-    val Healthy, Disconnected, Expired = Value
-  }
 }
 
 /**
@@ -203,15 +193,13 @@ object ZookeeperCachePoolCluster {
  * @param statsReceiver Optional, the destination to report the stats to
  */
 class ZookeeperCachePoolCluster private[memcached](
-  zkPath: String,
-  zkClient: ZooKeeperClient,
+  protected val zkPath: String,
+  protected val zkClient: ZooKeeperClient,
   backupPool: Option[Set[CacheNode]] = None,
-  statsReceiver: StatsReceiver = NullStatsReceiver)
-  extends CachePoolCluster {
+  protected val statsReceiver: StatsReceiver = NullStatsReceiver)
+  extends CachePoolCluster with ZookeeperStateMonitor {
 
   import ZookeeperCachePoolCluster._
-
-  private[this] val futurePool = FuturePool.unboundedPool
 
   private[this] val zkServerSetCluster =
     new ZookeeperServerSetCluster(
@@ -237,114 +225,6 @@ class ZookeeperCachePoolCluster private[memcached](
     underlyingSize
   }
 
-  private[this] var underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
-  private[this] val underlyingHealthGauge = statsReceiver.addGauge("underlyingPoolHealth") { underlyingPoolHealth.id }
-  private[this] val readCachePoolFailedCounter = statsReceiver.counter("readCachePoolConfig.failed")
-  private[this] val readCachePoolSucceededCounter = statsReceiver.counter("readCachePoolConfig.succeeded")
-  private[this] val reloadCachePoolWorkCounter = statsReceiver.counter("reloadCachePool")
-  private[this] val reEstablishZkConnWorkCounter = statsReceiver.counter("reEstablishZkConnection")
-
-  private sealed trait ZKPoolWork
-  private case object LoadCachePoolConfig extends ZKPoolWork
-  private case object ReEstablishZKConn extends ZKPoolWork
-
-  private[this] val zookeeperWorkQueue = new Broker[ZKPoolWork]
-
-  /**
-   * Read work items of the broker and schedule the work with future pool. If the scheduled work
-   * failed, it will repeatedly retry itself in a backoff manner (with a timer) until succeeded,
-   * which will recursively call this method to restart the process again.
-   *
-   * This function guarantees that at any given time there will be only one thread (future pool thread)
-   * blocking on zookeeper IO work. Multiple ZK connection events or cache pool change events would only
-   * queue up the work, and each work will be picked up only after the previous one finished successfully
-   */
-  private[this] def loopZookeeperWork {
-    def scheduleReadCachePoolConfig(
-      alsoUpdatePool: Boolean,
-      backoff: Stream[Duration] = DefaultZkConnectionRetryBackoff
-    ): Unit = {
-      futurePool {
-        readCachePoolConfigData(alsoUpdatePool)
-      } onFailure { ex =>
-        readCachePoolFailedCounter.incr()
-        backoff match {
-          case wait #:: rest =>
-            CachePoolCluster.timer.doLater(wait) { scheduleReadCachePoolConfig(alsoUpdatePool, rest) }
-        }
-      } onSuccess { _ =>
-        // If succeeded, loop back to consume the next work queued at the broker
-        readCachePoolSucceededCounter.incr()
-        underlyingPoolHealth = UnderlyingZookeeperStatus.Healthy
-        loopZookeeperWork
-      }
-    }
-
-    // get one work item off the broker and schedule it into the future pool
-    // if there's no work available yet, this only registers a call back to the broker so that whoever
-    // provides work item would then do the scheduling
-    zookeeperWorkQueue.recv.sync() onSuccess {
-      case LoadCachePoolConfig => {
-        reloadCachePoolWorkCounter.incr()
-        scheduleReadCachePoolConfig(alsoUpdatePool = true)
-      }
-      case ReEstablishZKConn => {
-        reEstablishZkConnWorkCounter.incr()
-        scheduleReadCachePoolConfig(alsoUpdatePool = false)
-      }
-    }
-  }
-
-  // Kick off the loop to process zookeeper work queue
-  loopZookeeperWork
-
-  private[this] val zkConnectionWatcher: Watcher = new Watcher() {
-    // NOTE: Ensure that the processing of events is not a blocking operation.
-    override def process(event: WatchedEvent) = {
-      if (event.getType == Watcher.Event.EventType.None)
-        statsReceiver.counter("zkConnectionEvent." + event.getState).incr()
-        event.getState match {
-          // actively trying to re-establish the zk connection (hence re-register the cache pool
-          // data watcher) whenever an zookeeper connection expired or disconnected. We could also
-          // only do this when SyncConnected happens, but that would be assuming other components
-          // sharing the zk client (e.g. ZookeeperServerSetCluster) will always actively attempts
-          // to re-establish the zk connection. For now, I'm making it actively re-establishing
-          // the connection itself here.
-          case KeeperState.Disconnected =>
-            underlyingPoolHealth = UnderlyingZookeeperStatus.Disconnected
-            zookeeperWorkQueue ! ReEstablishZKConn
-          case KeeperState.Expired =>
-            underlyingPoolHealth = UnderlyingZookeeperStatus.Expired
-            zookeeperWorkQueue ! ReEstablishZKConn
-          case _ =>
-        }
-    }
-  }
-
-  private[this] val cachePoolConfigDataWatcher: Watcher = new Watcher() {
-    // NOTE: Ensure that the processing of events is not a blocking operation.
-    override def process(event: WatchedEvent) = {
-      if (event.getState == KeeperState.SyncConnected) {
-        statsReceiver.counter("cachePoolChangeEvent." + event.getType).incr()
-        event.getType match {
-          case Watcher.Event.EventType.NodeDataChanged =>
-            // handle node data change event
-            zookeeperWorkQueue ! LoadCachePoolConfig
-          case _ =>
-        }
-      }
-    }
-  }
-
-  // Register top-level connection watcher to monitor zk change.
-  // This watcher will live across different zk connection
-  zkClient.register(zkConnectionWatcher)
-
-  // Read the config data and update the pool for the first time during constructing
-  // This will also attach a data change event watcher (cachePoolConfigDataWatcher) to
-  // the zk client so that future config data change event will trigger this again.
-  zookeeperWorkQueue ! LoadCachePoolConfig
-
   // Falling back to use the backup pool (if provided) after a certain timeout.
   // Meanwhile, the first time invoke of updating pool will still proceed once it successfully
   // get the underlying pool config data and a complete pool members ready, by then it
@@ -359,35 +239,22 @@ class ZookeeperCachePoolCluster private[memcached](
     }
   }
 
-  /**
-   * Read the immediate parent zookeeper node data for the cache pool config data, then invoke
-   * the cache pool update function once the configured requirement is met, as well as attaching
-   * a config data watcher which will perform the same action automatically whenever the config
-   * data is changed again
-   */
-  private[this] def readCachePoolConfigData(alsoUpdatePool: Boolean): Unit = synchronized {
-    // read cache pool config data and attach the node data change watcher
-    val data = zkClient
-        .get(Amount.of(CachePoolWaitCompleteTimeout.inMilliseconds, Time.MILLISECONDS))
-        .getData(zkPath, cachePoolConfigDataWatcher, null)
+  override def applyZKData(data: Array[Byte]): Unit = {
+    val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
 
-    if (alsoUpdatePool && data != null) {
-      val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
+    // apply the cache pool config to the cluster
+    val expectedClusterSize = cachePoolConfig.cachePoolSize
+    val (snapshotSeq, snapshotChanges) = zkServerSetCluster.snap
 
-      // apply the cache pool config to the cluster
-      val expectedClusterSize = cachePoolConfig.cachePoolSize
-      val (snapshotSeq, snapshotChanges) = zkServerSetCluster.snap
+    // TODO: this can be blocking or non-blocking, depending on the protocol
+    // for now I'm making it blocking call as the current known scenario is that cache config data
+    // should be always exactly matching existing memberships, controlled by cache-team operator.
+    // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
+    // another try
+    val newSet = Await.result(waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges),
+      CachePoolWaitCompleteTimeout)
 
-      // TODO: this can be blocking or non-blocking, depending on the protocol
-      // for now I'm making it blocking call as the current known scenario is that cache config data
-      // should be always exactly matching existing memberships, controlled by cache-team operator.
-      // It will only block for 10 seconds after which it should trigger alerting metrics and schedule
-      // another try
-      val newSet = Await.result(waitForClusterComplete(snapshotSeq.toSet, expectedClusterSize, snapshotChanges),
-        CachePoolWaitCompleteTimeout)
-
-      updatePool(newSet)
-    }
+    updatePool(newSet)
   }
 
   /**

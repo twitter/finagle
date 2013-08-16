@@ -327,6 +327,36 @@ trait Client extends BaseClient[ChannelBuffer] {
   )
 }
 
+trait ProxyClient extends Client {
+  protected def proxyClient: Client
+
+  def getResult(keys: Iterable[String]) = proxyClient.getResult(keys)
+
+  def getsResult(keys: Iterable[String]) = proxyClient.getsResult(keys)
+
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.set(key, flags, expiry, value)
+
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.add(key, flags, expiry, value)
+
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.replace(key, flags, expiry, value)
+
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.append(key, flags, expiry, value)
+
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.prepend(key, flags, expiry, value)
+
+  def incr(key: String, delta: Long) = proxyClient.incr(key, delta)
+
+  def decr(key: String, delta: Long) = proxyClient.decr(key, delta)
+
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = proxyClient.cas(key, flags, expiry, value, casUnique)
+
+  def delete(key: String) = proxyClient.delete(key)
+
+  def stats(args: Option[String]) = proxyClient.stats(args)
+
+  def release() { proxyClient.release() }
+}
+
 /**
  * A Client connected to an individual Memcached server.
  *

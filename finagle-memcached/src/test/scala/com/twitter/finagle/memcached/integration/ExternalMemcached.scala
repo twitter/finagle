@@ -1,13 +1,52 @@
 package com.twitter.finagle.memcached.integration
 
+import collection.JavaConversions._
+import com.twitter.conversions.time._
+import com.twitter.finagle.memcached.Server
+import com.twitter.util.{Stopwatch, Duration, RandomSocket}
 import java.lang.ProcessBuilder
 import java.net.{BindException, ServerSocket, InetSocketAddress}
-import com.twitter.util.{Try, Stopwatch, Duration, RandomSocket}
-import com.twitter.conversions.time._
-import collection.JavaConversions._
 import scala.collection._
 
-object ExternalMemcached { self =>
+object TestCacheServer {
+  def apply(): TestMemcachedInstance = {
+    if (!Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) InternalMemcached
+    else ExternalMemcached
+  }
+}
+
+abstract class TestMemcachedInstance {
+  def start(address: Option[InetSocketAddress] = None): Option[InetSocketAddress]
+  def stop(addr: Option[InetSocketAddress] = None): Unit
+}
+
+private[memcached] object InternalMemcached extends TestMemcachedInstance {
+  private[this] var servers: Map[InetSocketAddress, Server] = mutable.Map()
+
+  def start(address: Option[InetSocketAddress] = None): Option[InetSocketAddress] = {
+    try {
+      val server = new Server(address.getOrElse(new InetSocketAddress(0)))
+      val addr = server.start().localAddress.asInstanceOf[InetSocketAddress]
+      servers += (addr -> server)
+      Some(addr)
+    } catch {
+      case _ => None
+    }
+  }
+
+  def stop(addr: Option[InetSocketAddress] = None) {
+    if (!addr.isDefined) {
+      servers.values foreach { s => s.stop(true) }
+      servers = mutable.Map()
+    }
+    else {
+      servers(addr.get).stop(true)
+      servers -= addr.get
+    }
+  }
+}
+
+object ExternalMemcached extends TestMemcachedInstance { self =>
   class MemcachedBinaryNotFound extends Exception
   private[this] var processes: Map[InetSocketAddress, Process] = mutable.Map()
   private[this] val forbiddenPorts = 11000.until(11900)

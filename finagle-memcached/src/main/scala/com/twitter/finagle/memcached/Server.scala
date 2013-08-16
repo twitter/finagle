@@ -4,7 +4,7 @@ import _root_.java.net.SocketAddress
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.AtomicMap
-import com.twitter.util.SynchronizedLruMap
+import com.twitter.util.{Await, SynchronizedLruMap}
 import org.jboss.netty.buffer.ChannelBuffer
 
 /**
@@ -36,11 +36,12 @@ class Server(address: SocketAddress) {
     server.get
   }
 
-  def stop() {
+  def stop(blocking: Boolean = false) {
     require(server.isDefined, "Server is not open!")
 
     server.foreach { server =>
-      server.close()
+      if (blocking) Await.result(server.close())
+      else server.close()
       this.server = None
     }
   }
