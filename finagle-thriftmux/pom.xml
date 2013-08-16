@@ -89,7 +89,6 @@
           <thriftOpts>
             <!-- add other Scrooge command line options using thriftOpts -->
             <thriftOpt>--finagle</thriftOpt>
-            <thriftOpt>--ostrich</thriftOpt>
           </thriftOpts>
           <outputDirectory>target/generated-test-sources</outputDirectory>
         </configuration>
@@ -126,7 +125,6 @@
           </thriftNamespaceMappings>
           <thriftOpts>
             <thriftOpt>--finagle</thriftOpt>
-            <thriftOpt>--ostrich</thriftOpt>
           </thriftOpts>
         </configuration>
         <version>0.0.12</version>
