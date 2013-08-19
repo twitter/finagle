@@ -21,7 +21,8 @@ object HeapBalancer {
 class HeapBalancer[Req, Rep](
   group: Group[ServiceFactory[Req, Rep]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  emptyException: NoBrokersAvailableException = new NoBrokersAvailableException
+  emptyException: NoBrokersAvailableException = new NoBrokersAvailableException,
+  rng: Random = new Random
 ) extends ServiceFactory[Req, Rep] {
 
   import HeapBalancer._
@@ -40,8 +41,6 @@ class HeapBalancer[Req, Rep](
   
   // Linked list of downed nodes.
   private[this] var downq: Node = null
-
-  private[this] val rng = new Random
 
   private[this] val HeapOps = Heap[Node](
     Ordering.by(_.load),
@@ -125,8 +124,8 @@ class HeapBalancer[Req, Rep](
       swap(heap, i, size)
       fixDown(heap, i, size - 1)
 
-      // pick a random index in the shrunk heap, insert n
-      val j = rng.nextInt(size -1) + 1
+      // pick a random node with which we can swap n
+      val j = rng.nextInt(size) + 1
       swap(heap, j, size)
       fixUp(heap, j)
 
