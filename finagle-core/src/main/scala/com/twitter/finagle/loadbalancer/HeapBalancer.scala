@@ -15,6 +15,15 @@ object HeapBalancer {
   val Zero = Int.MinValue + 1
 }
 
+object HeapBalancerFactory extends LoadBalancerFactory {
+  def apply[Req, Rep](
+      group: Group[ServiceFactory[Req, Rep]],
+      statsReceiver: StatsReceiver,
+      emptyException: NoBrokersAvailableException) =
+    new HeapBalancer[Req,Rep](group, statsReceiver, emptyException)
+}
+
+
 /**
  * An efficient load balancer that operates on Groups.
  */
