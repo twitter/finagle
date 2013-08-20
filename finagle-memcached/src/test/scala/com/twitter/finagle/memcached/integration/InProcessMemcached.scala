@@ -1,17 +1,14 @@
-package com.twitter.finagle.memcached
+package com.twitter.finagle.memcached.integration
 
 import _root_.java.net.SocketAddress
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.util.AtomicMap
+import com.twitter.finagle.memcached.{InterpreterService, Interpreter, Entry}
 import com.twitter.util.{Await, SynchronizedLruMap}
 import org.jboss.netty.buffer.ChannelBuffer
 
-/**
- * An in-process memcached server.
- */
-@deprecated("Moved into test", "7.0.0")
-class Server(address: SocketAddress) {
+class InProcessMemcached(address: SocketAddress) {
   val concurrencyLevel = 16
   val slots = 500000
   val slotsPerLru = slots / concurrencyLevel
@@ -26,9 +23,9 @@ class Server(address: SocketAddress) {
 
   private[this] val serverSpec =
     ServerBuilder()
-      .name("finagle")
-      .codec(Memcached())
-      .bindTo(address)
+        .name("finagle")
+        .codec(Memcached())
+        .bindTo(address)
 
   private[this] var server: Option[BuiltServer] = None
 

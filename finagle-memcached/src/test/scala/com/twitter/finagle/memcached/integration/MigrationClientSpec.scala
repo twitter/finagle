@@ -33,6 +33,8 @@ class MigrationClientSpec extends FunSuite with BeforeAndAfterEach with BeforeAn
   var zookeeperClient: ZooKeeperClient = null
   var connectionFactory: NIOServerCnxn.Factory = null
 
+  var testServers: List[TestMemcachedServer] = List()
+
   override def beforeEach() {
     val zookeeperAddress = RandomSocket.nextAddress
     zookeeperServerPort = zookeeperAddress.getPort
@@ -51,18 +53,24 @@ class MigrationClientSpec extends FunSuite with BeforeAndAfterEach with BeforeAn
     val oldPoolCluster = new ZookeeperServerSetCluster(
       ServerSets.create(zookeeperClient, ZooKeeperUtils.OPEN_ACL_UNSAFE, oldPoolPath))
     (0 to 1) foreach { _ =>
-      val address: Option[InetSocketAddress] = TestCacheServer().start()
-      if (address == None) fail("Cannot start memcached. Skipping...")
-      oldPoolCluster.join(address.get)
+      TestMemcachedServer.start() match {
+        case Some(server) =>
+          oldPoolCluster.join(server.address)
+          testServers :+= server
+        case None => fail("Cannot start memcached.")
+      }
     }
 
     // set-up new pool
     val newPoolCluster = new ZookeeperServerSetCluster(
       ServerSets.create(zookeeperClient, ZooKeeperUtils.OPEN_ACL_UNSAFE, newPoolPath))
     (0 to 1) foreach { _ =>
-      val address: Option[InetSocketAddress] = TestCacheServer().start()
-      if (address == None) fail("Cannot start memcached. Skipping...")
-      newPoolCluster.join(address.get)
+      TestMemcachedServer.start() match {
+        case Some(server) =>
+          newPoolCluster.join(server.address)
+          testServers :+= server
+        case None => fail("Cannot start memcached.")
+      }
     }
 
     // set config data
@@ -83,7 +91,8 @@ class MigrationClientSpec extends FunSuite with BeforeAndAfterEach with BeforeAn
     connectionFactory.shutdown()
 
     // shutdown memcached server
-    TestCacheServer().stop()
+    testServers foreach { _.stop() }
+    testServers = List()
   }
 
   def waitForEventualResult[A](op: () => A, result: A, timeout: Duration = 5.seconds): Boolean = {

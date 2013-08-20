@@ -11,7 +11,7 @@ import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
-import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster, CachePoolConfig, Client, KetamaClientBuilder, PartitionedClient}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.replication._
@@ -19,7 +19,6 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{MemcachedClient, WriteException}
-import com.twitter.thrift.Status
 import com.twitter.util.{Await, Duration, Future, Return, Throw}
 import org.jboss.netty.util.CharsetUtil
 import org.specs.SpecificationWithJUnit
@@ -31,14 +30,16 @@ class ClientSpec extends SpecificationWithJUnit {
      * Note: This integration test requires a real Memcached server to run.
      */
     var client: Client = null
+    var testServer: Option[TestMemcachedServer] = None
 
     val stats = new SummarizingStatsReceiver
 
     doBefore {
-      ExternalMemcached.start() match {
-        case Some(address) =>
+      testServer = TestMemcachedServer.start()
+      testServer match {
+        case Some(server) =>
           val service = ClientBuilder()
-            .hosts(Seq(address))
+            .hosts(Seq(server.address))
             .codec(new Memcached(stats))
             .hostConnectionLimit(1)
             .build()
@@ -50,7 +51,7 @@ class ClientSpec extends SpecificationWithJUnit {
     }
 
     doAfter {
-      ExternalMemcached.stop()
+      testServer map { _.stop() }
     }
 
     "simple client" in {
@@ -72,7 +73,7 @@ class ClientSpec extends SpecificationWithJUnit {
         )
       }
 
-      "gets" in {
+      if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "gets" in {
         Await.result(client.set("foos", "xyz"))
         Await.result(client.set("bazs", "xyz"))
         Await.result(client.set("bazs", "zyx"))
@@ -87,7 +88,7 @@ class ClientSpec extends SpecificationWithJUnit {
         )
       }
 
-      "cas" in {
+      if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "cas" in {
         Await.result(client.set("x", "y"))
         val Some((value, casUnique)) = Await.result(client.gets("x"))
         value.toString(CharsetUtil.UTF_8) must be_==("y")
@@ -123,7 +124,7 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.decr("foo", l)) mustEqual Some(0L)
       }
 
-      "stats" in {
+      if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "stats" in {
         val stats = Await.result(client.stats())
         stats must notBeEmpty
         stats.foreach { stat =>
@@ -175,15 +176,15 @@ class ClientSpec extends SpecificationWithJUnit {
        * We already proved above that we can hit a real memcache server,
        * so we can use our own for the partitioned client test.
        */
-      var server1: Server = null
-      var server2: Server = null
+      var server1: InProcessMemcached = null
+      var server2: InProcessMemcached = null
       var address1: InetSocketAddress = null
       var address2: InetSocketAddress = null
 
       doBefore {
-        server1 = new Server(new InetSocketAddress(0))
+        server1 = new InProcessMemcached(new InetSocketAddress(0))
         address1 = server1.start().localAddress.asInstanceOf[InetSocketAddress]
-        server2 = new Server(new InetSocketAddress(0))
+        server2 = new InProcessMemcached(new InetSocketAddress(0))
         address2 = server2.start().localAddress.asInstanceOf[InetSocketAddress]
       }
 
@@ -224,7 +225,7 @@ class ClientSpec extends SpecificationWithJUnit {
      * Note: This integration test requires a real Memcached server to run.
      */
     var shutdownRegistry = new ShutdownRegistryImpl
-    var memcachedAddress = List[Option[InetSocketAddress]]()
+    var testServers: List[TestMemcachedServer] = List()
 
     var zkServerSetCluster: ZookeeperServerSetCluster = null
     var zookeeperClient: ZooKeeperClient = null
@@ -245,10 +246,12 @@ class ClientSpec extends SpecificationWithJUnit {
 
       // start five memcached server and join the cluster
       (0 to 4) foreach { _ =>
-        val address: Option[InetSocketAddress] = ExternalMemcached.start()
-        if (address == None) skip("Cannot start memcached. Skipping...")
-        memcachedAddress ::= address
-        zkServerSetCluster.join(address.get)
+        TestMemcachedServer.start() match  {
+          case Some(server) =>
+            testServers :+= server
+            zkServerSetCluster.join(server.address)
+          case None => skip("Cannot start memcached. Skipping...")
+        }
       }
 
       // set cache pool config node data
@@ -268,7 +271,8 @@ class ClientSpec extends SpecificationWithJUnit {
       shutdownRegistry.execute()
 
       // shutdown memcached server
-      ExternalMemcached.stop()
+      testServers foreach { _.stop() }
+      testServers = List()
     }
 
     "Simple ClusterClient using finagle load balancing" in {
@@ -287,11 +291,11 @@ class ClientSpec extends SpecificationWithJUnit {
           }
         }
 
-        val tmpClients = memcachedAddress map {
-          case(addr) =>
+        val tmpClients = testServers map {
+          case(server) =>
             Client(
               ClientBuilder()
-                .hosts(addr.get)
+                .hosts(server.address)
                 .codec(new Memcached)
                 .hostConnectionLimit(1)
                 .build())
@@ -313,10 +317,6 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
     }
-
-    /**
-     * Temporarily disable this integration tests due its unstableness.
-     * Fix is tracked by CACHE-609
 
     "Cache specific cluster" in {
       "add and remove" in {
@@ -340,8 +340,8 @@ class ClientSpec extends SpecificationWithJUnit {
         /***** remove 2 servers from the zk serverset ******/
         // cache pool should remain the same size at this moment
         expectPoolStatus(myPool, currentSize = 10, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
-          additionalServers(0).update(Status.DEAD)
-          additionalServers(1).update(Status.DEAD)
+          additionalServers(0).leave()
+          additionalServers(1).leave()
         }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
 
         // update config data node, which triggers the pool update
@@ -353,8 +353,8 @@ class ClientSpec extends SpecificationWithJUnit {
         /***** remove 2 more then add 3 ******/
         // cache pool should remain the same size at this moment
         expectPoolStatus(myPool, currentSize = 8, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
-          additionalServers(2).update(Status.DEAD)
-          additionalServers(3).update(Status.DEAD)
+          additionalServers(2).leave()
+          additionalServers(3).leave()
           addMoreServers(3)
         }.get(2.seconds)() must throwA[com.twitter.util.TimeoutException]
 
@@ -365,7 +365,7 @@ class ClientSpec extends SpecificationWithJUnit {
         }.get(10.seconds)() mustNot throwA[Exception]
       }
 
-      "zk failures test" in {
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "zk failures test" in {
         // the cluster initially must have 5 members
         val myPool = initializePool(5)
 
@@ -463,7 +463,7 @@ class ClientSpec extends SpecificationWithJUnit {
         }
       }
 
-      "cache pool is changing" in {
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "cache pool is changing" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster = initializePool(5)
 
@@ -495,8 +495,8 @@ class ClientSpec extends SpecificationWithJUnit {
 
         // remove 2 cache servers and update cache pool config data, now there should be 7 shards
         expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
-          additionalServers(0).update(Status.DEAD)
-          additionalServers(1).update(Status.DEAD)
+          additionalServers(0).leave()
+          additionalServers(1).leave()
           updateCachePoolConfigData(7)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
@@ -504,8 +504,8 @@ class ClientSpec extends SpecificationWithJUnit {
 
         // remove another 2 cache servers and update cache pool config data, now there should be 5 shards
         expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 5, expectedAdd = 0, expectedRem = 2) {
-          additionalServers(2).update(Status.DEAD)
-          additionalServers(3).update(Status.DEAD)
+          additionalServers(2).leave()
+          additionalServers(3).leave()
           updateCachePoolConfigData(5)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
@@ -529,8 +529,8 @@ class ClientSpec extends SpecificationWithJUnit {
 
         // remove 2 and add 2, now there should be still 9 shards
         expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 2) {
-          additionalServers(0).update(Status.DEAD)
-          additionalServers(1).update(Status.DEAD)
+          additionalServers(0).leave()
+          additionalServers(1).leave()
           addMoreServers(2)
           updateCachePoolConfigData(9)
         }.get(10.seconds)() mustNot throwA[Exception]
@@ -569,14 +569,13 @@ class ClientSpec extends SpecificationWithJUnit {
 
         // remove 2 cache servers and update cache pool config data, now there should be 7 shards
         expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
-          additionalServers(0).update(Status.DEAD)
-          additionalServers(1).update(Status.DEAD)
+          additionalServers(0).leave()
+          additionalServers(1).leave()
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
         trackCacheShards.size mustBe 7
       }
     }
-    */
 
     def updateCachePoolConfigData(size: Int) {
       val cachePoolConfig: CachePoolConfig = new CachePoolConfig(cachePoolSize = size)
@@ -589,8 +588,9 @@ class ClientSpec extends SpecificationWithJUnit {
     // de-register these services by expiring corresponding zk client session
     def addMoreServers(size: Int): List[EndpointStatus] = {
       (1 to size) map { _ =>
-        val address: Option[InetSocketAddress] = ExternalMemcached.start()
-        zkServerSetCluster.joinServerSet(address.get)
+        val server = TestMemcachedServer.start()
+        testServers :+= server.get
+        zkServerSetCluster.joinServerSet(server.get.address)
       } toList
     }
 
@@ -666,8 +666,8 @@ class ClientSpec extends SpecificationWithJUnit {
      * Note: This integration test requires a real Memcached server to run.
      */
     var shutdownRegistry = new ShutdownRegistryImpl
-    var firstPoolAddresses = List[Option[InetSocketAddress]]()
-    var secondPoolAddresses = List[Option[InetSocketAddress]]()
+    var firstTestServerPool = List[TestMemcachedServer]()
+    var secondTestServerPool = List[TestMemcachedServer]()
 
     val firstPoolPath = "/cache/test/silly-cache-1"
     val secondPoolPath = "/cache/test/silly-cache-2"
@@ -686,19 +686,23 @@ class ClientSpec extends SpecificationWithJUnit {
       val firstPoolCluster = new ZookeeperServerSetCluster(
         ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, firstPoolPath))
       (0 to 1) foreach { _ =>
-        val address: Option[InetSocketAddress] = ExternalMemcached.start()
-        if (address == None) skip("Cannot start memcached. Skipping...")
-        firstPoolAddresses :+= address
-        firstPoolCluster.join(address.get)
+        TestMemcachedServer.start() match {
+          case Some(server) =>
+            firstTestServerPool :+= server
+            firstPoolCluster.join(server.address)
+          case None => skip("Cannot start memcached. Skipping...")
+        }
       }
 
       val secondPoolCluster = new ZookeeperServerSetCluster(
         ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, secondPoolPath))
       (0 to 1) foreach { _ =>
-        val address: Option[InetSocketAddress] = ExternalMemcached.start()
-        if (address == None) skip("Cannot start memcached. Skipping...")
-        secondPoolAddresses :+= address
-        secondPoolCluster.join(address.get)
+        TestMemcachedServer.start() match {
+          case Some(server) =>
+            secondTestServerPool :+= server
+            secondPoolCluster.join(server.address)
+          case None => skip("Cannot start memcached. Skipping...")
+        }
       }
 
       // set cache pool config node data
@@ -719,7 +723,10 @@ class ClientSpec extends SpecificationWithJUnit {
       shutdownRegistry.execute()
 
       // shutdown memcached server
-      ExternalMemcached.stop()
+      firstTestServerPool foreach { _.stop() }
+      secondTestServerPool foreach { _.stop() }
+      firstTestServerPool = List()
+      secondTestServerPool = List()
     }
 
     "base replication client" in {
@@ -752,14 +759,14 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.getOne("client2-only")) mustEqual Some(stringToChannelBuffer("test"))
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.set("foo", "baz")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(()))) => true }
         Await.result(replicatedClient.getOne("foo")) mustEqual Some(stringToChannelBuffer("baz"))
 
         // all failed
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.set("foo", "baz")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
         Await.result(replicatedClient.getOne("foo")) must throwA[WriteException]
       }
@@ -793,14 +800,14 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.getAll("client2-only")) mustEqual InconsistentReplication(Seq(Return(None), Return(Some(stringToChannelBuffer("test")))))
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.set("foo", "baz")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(()))) => true }
         Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(Some(v)))) => v equals stringToChannelBuffer("baz") }
 
         // all failed
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.set("foo", "baz")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
         Await.result(replicatedClient.getAll("foo")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
       }
@@ -837,17 +844,17 @@ class ClientSpec extends SpecificationWithJUnit {
 
         // inconsistent replica state
         Await.result(client2.set("client2-only", "bar")) mustEqual ()
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.delete("client2-only")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(JBoolean.TRUE))) => true }
 
         // all failed
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.delete("client2-only")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
       }
 
-      "getsAll & cas" in {
+      if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "getsAll & cas" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
         Await.result(mycluster1.ready) // give it sometime for the cluster to get the initial set of memberships
@@ -890,14 +897,14 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.cas("foo", "bar", Seq("6", "6"))) mustEqual InconsistentReplication(Seq(Return(false), Return(true)))
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.getsAll("foo")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(Some((v, SCasUnique(_)))))) => v equals stringToChannelBuffer("bar") }
         Await.result(replicatedClient.cas("foo", "bar", Seq("7", "7"))) must beLike { case InconsistentReplication(Seq(Throw(_), Return(JBoolean.TRUE))) => true }
 
         // all failed
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.getsAll("foo")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
         Await.result(replicatedClient.cas("foo", "bar", Seq("7", "7"))) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
       }
@@ -938,14 +945,14 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.replace("client1-only", "test")) must beLike { case InconsistentReplication(Seq(Return(JBoolean.TRUE), Return(JBoolean.FALSE))) => true }
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.add("client2-only", "test")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(JBoolean.FALSE))) => true }
         Await.result(replicatedClient.replace("client1-only", "test")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(JBoolean.FALSE))) => true }
 
         // all failed
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.add("client2-only", "test")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
         Await.result(replicatedClient.replace("client1-only", "test")) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
       }
@@ -987,13 +994,13 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.incr("foo", 1)) mustEqual InconsistentReplication(Seq(Return(None), Return(Some(2L))))
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.decr("foo", 1)) must beLike { case InconsistentReplication(Seq(Throw(_), Return(Some(v)))) => v equals 1L }
 
         // all failed
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.decr("foo", 1)) must beLike { case FailedReplication(Seq(Throw(_), Throw(_))) => true }
 
       }
@@ -1031,8 +1038,8 @@ class ClientSpec extends SpecificationWithJUnit {
         }
 
         // shutdown primary pool
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
 
         (0 until count).foreach {
           n => {
@@ -1064,15 +1071,15 @@ class ClientSpec extends SpecificationWithJUnit {
           Await.result(replicatedClient.getAll("foo")) mustEqual ConsistentReplication(Some(stringToChannelBuffer("bar")))
 
           // primary pool down
-          ExternalMemcached.stop(firstPoolAddresses(0))
-          ExternalMemcached.stop(firstPoolAddresses(1))
+          firstTestServerPool(0).stop()
+          firstTestServerPool(1).stop()
 
           Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(Some(v)))) => v equals stringToChannelBuffer("bar") }
           Await.result(replicatedClient.set("foo", "baz")) must beLike { case InconsistentReplication(Seq(Throw(_), Return(()))) => true }
 
           // bring back primary pool
-          ExternalMemcached.start(firstPoolAddresses(0))
-          ExternalMemcached.start(firstPoolAddresses(1))
+          TestMemcachedServer.start(Some(firstTestServerPool(0).address))
+          TestMemcachedServer.start(Some(firstTestServerPool(1).address))
 
           Await.result(replicatedClient.getAll("foo")) must beLike { case InconsistentReplication(Seq(Return(None), Return(Some(v)))) => v equals stringToChannelBuffer("baz") }
           Await.result(replicatedClient.set("foo", "baz")) mustEqual ConsistentReplication(())
@@ -1143,18 +1150,18 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client1.get("client2-only")) mustEqual Some(stringToChannelBuffer("test-again"))
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.set("foo", "baz")) must throwA[SimpleReplicationFailure]
         Await.result(replicatedClient.get("foo")) mustNot throwA[Exception]
 
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.set("foo", "baz")) must throwA[SimpleReplicationFailure]
         Await.result(replicatedClient.get("foo")) must throwA[WriteException]
       }
 
-      "gets & cas" in {
+      if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "gets & cas" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster1 = CachePoolCluster.newZkCluster(firstPoolPath, zookeeperClient)
         Await.result(mycluster1.ready) // give it sometime for the cluster to get the initial set of memberships
@@ -1187,8 +1194,8 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.cas("foo", "baz", stringToChannelBuffer("1|1"))) mustEqual true
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.cas("foo", "baz", stringToChannelBuffer("2|3"))) must throwA[SimpleReplicationFailure]
         Await.result(replicatedClient.gets("foo")) must throwA[SimpleReplicationFailure]
       }
@@ -1233,11 +1240,11 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client2.set("client2-only", "bar")) mustEqual ()
         Await.result(client1.get("client2-only")) mustEqual None
         Await.result(client2.get("client2-only")) mustEqual Some(stringToChannelBuffer("bar"))
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.delete("client2-only")) must throwA[SimpleReplicationFailure]
-        ExternalMemcached.stop(secondPoolAddresses(0))
-        ExternalMemcached.stop(secondPoolAddresses(1))
+        secondTestServerPool(0).stop()
+        secondTestServerPool(1).stop()
         Await.result(replicatedClient.delete("client2-only")) must throwA[SimpleReplicationFailure]
       }
 
@@ -1281,8 +1288,8 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.replace("client1-only", "test")) mustEqual false
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.add("client2-only", "test")) must throwA[SimpleReplicationFailure]
         Await.result(replicatedClient.replace("client1-only", "test")) must throwA[SimpleReplicationFailure]
       }
@@ -1319,8 +1326,8 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(replicatedClient.decr("foo", 2L)) mustEqual None
 
         // inconsistent replica state
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
         Await.result(replicatedClient.incr("foo", 2L)) must throwA[SimpleReplicationFailure]
         Await.result(replicatedClient.decr("foo", 2L)) must throwA[SimpleReplicationFailure]
       }
@@ -1360,8 +1367,8 @@ class ClientSpec extends SpecificationWithJUnit {
         }
 
         // shutdown primary pool
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
 
         (0 until count).foreach {
           n => {
@@ -1395,15 +1402,15 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client2.get("foo")) mustEqual Some(stringToChannelBuffer("bar"))
 
         // primary pool down
-        ExternalMemcached.stop(firstPoolAddresses(0))
-        ExternalMemcached.stop(firstPoolAddresses(1))
+        firstTestServerPool(0).stop()
+        firstTestServerPool(1).stop()
 
         Await.result(replicatedClient.get("foo")) mustEqual Some(stringToChannelBuffer("bar"))
         Await.result(replicatedClient.set("foo", "baz")) must throwA[SimpleReplicationFailure] // set failed
 
         // bring back primary pool
-        ExternalMemcached.start(firstPoolAddresses(0))
-        ExternalMemcached.start(firstPoolAddresses(1))
+        TestMemcachedServer.start(Some(firstTestServerPool(0).address))
+        TestMemcachedServer.start(Some(firstTestServerPool(1).address))
 
         Await.result(replicatedClient.get("foo")) mustEqual Some(stringToChannelBuffer("baz"))
         Await.result(client1.get("foo")) mustEqual None
@@ -1442,7 +1449,7 @@ class ClientSpec extends SpecificationWithJUnit {
      * Note: This integration test requires a real Memcached server to run.
      */
     var shutdownRegistry = new ShutdownRegistryImpl
-    var memcachedAddress = List[Option[InetSocketAddress]]()
+    var testServers = List[TestMemcachedServer]()
 
     var zkServerSetCluster: ZookeeperServerSetCluster = null
     var zookeeperClient: ZooKeeperClient = null
@@ -1465,10 +1472,12 @@ class ClientSpec extends SpecificationWithJUnit {
 
       // start five memcached server and join the cluster
       (0 to 4) foreach { _ =>
-        val address: Option[InetSocketAddress] = ExternalMemcached.start()
-        if (address == None) skip("Cannot start memcached. Skipping...")
-        memcachedAddress ::= address
-        zkServerSetCluster.join(address.get)
+        TestMemcachedServer.start() match {
+          case Some(server) =>
+            testServers :+= server
+            zkServerSetCluster.join(server.address)
+          case None => skip("Cannot start memcached. Skipping...")
+        }
       }
 
       // set cache pool config node data
@@ -1485,12 +1494,13 @@ class ClientSpec extends SpecificationWithJUnit {
       shutdownRegistry.execute()
 
       // shutdown memcached server
-      ExternalMemcached.stop()
+      testServers foreach { _.stop() }
+      testServers = List()
     }
 
     "with static servers list" in {
       val client = MemcachedClient.newKetamaClient(
-        group = "twcache!localhost:%d,localhost:%d".format(memcachedAddress(0).get.getPort, memcachedAddress(1).get.getPort))
+        group = "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
 
       Await.result(client.delete("foo"))
       Await.result(client.get("foo")) mustEqual None

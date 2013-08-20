@@ -52,7 +52,7 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(wrappedBuffer(value, entry.value), expiry)
+              data(key) = Entry(wrappedBuffer(entry.value, value), expiry)
               Stored()
             case Some(_) =>
               data.remove(key) // expired
@@ -66,7 +66,7 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(wrappedBuffer(entry.value, value), expiry)
+              data(key) = Entry(wrappedBuffer(value, entry.value), expiry)
               Stored()
             case Some(_) =>
               data.remove(key) // expired

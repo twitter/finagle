@@ -25,13 +25,14 @@ class ProxySpec extends SpecificationWithJUnit {
     var serverPort: InetSocketAddress = null
     var proxyService: MemcacheService = null
     var proxyClient: MemcacheService = null
+    var testServer: Option[TestMemcachedServer] = None
 
     doBefore {
-      var address: Option[InetSocketAddress] = ExternalMemcached.start();
-      if (address == None) skip("Cannot start memcached. skipping...")
+      testServer = TestMemcachedServer.start()
+      if (testServer == None) skip("Cannot start memcached. skipping...")
       Thread.sleep(150) // On my box the 100ms sleep wasn't long enough
       proxyClient = ClientBuilder()
-        .hosts(Seq(address.get))
+        .hosts(Seq(testServer.get.address))
         .codec(Memcached())
         .hostConnectionLimit(1)
         .build()
@@ -53,7 +54,7 @@ class ProxySpec extends SpecificationWithJUnit {
       server.close(0.seconds)
       proxyService.close()
       proxyClient.close()
-      ExternalMemcached.stop()
+      testServer map { _.stop() }
     }
 
     "handle a basic get/set operation" in {
@@ -66,7 +67,7 @@ class ProxySpec extends SpecificationWithJUnit {
       externalClient.release()
     }
 
-    "stats is supported" in {
+    if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "stats is supported" in {
       Await.result(externalClient.delete("foo"))
       Await.result(externalClient.get("foo")) must beNone
       Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8))))
@@ -80,7 +81,7 @@ class ProxySpec extends SpecificationWithJUnit {
       externalClient.release()
     }
 
-    "stats (cachedump) is supported" in {
+    if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) "stats (cachedump) is supported" in {
       Await.result(externalClient.delete("foo"))
       Await.result(externalClient.get("foo")) must beNone
       Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(CharsetUtil.UTF_8))))
