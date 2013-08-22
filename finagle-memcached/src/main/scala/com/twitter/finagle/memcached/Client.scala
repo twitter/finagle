@@ -768,7 +768,7 @@ class KetamaClient private[finagle](
 }
 
 case class KetamaClientBuilder private[memcached] (
-  _cluster: Cluster[CacheNode],
+  _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, Duration) = (5, 30.seconds),
@@ -777,24 +777,35 @@ case class KetamaClientBuilder private[memcached] (
 ) {
 
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    // TODO: for now, we assume all the cluster created this way has equal weight.
-    copy(
-      _cluster = cluster map {
-        socketAddr =>
-          new CacheNode(socketAddr.getHostName, socketAddr.getPort, 1)
-      }
-    )
+    group(Group.fromCluster(cluster), false, 1)
+  }
+
+  def group(group: Group[CacheNode]): KetamaClientBuilder = {
+    copy(_group = group)
+  }
+
+  //Note: unresolvedAddresses won't be added even if they are able to be resolved after the node has been added
+  def group(group: Group[InetSocketAddress], useOnlyResolvedAddress: Boolean, defaultWeight: Int = 1) = {
+    // TODO: for now, we assume all nodes in group created this way has equal weight.
+    copy(_group = group collect { 
+      case socketAddr: InetSocketAddress if !socketAddr.isUnresolved => 
+        if (useOnlyResolvedAddress) {
+          new CacheNode(socketAddr.getAddress.getHostAddress, socketAddr.getPort, defaultWeight)
+        } else {
+          new CacheNode(socketAddr.getHostName, socketAddr.getPort, defaultWeight)
+        }
+    })
   }
 
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
-    copy(_cluster = cluster)
+    copy(_group = Group.fromCluster(cluster))
   }
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_cluster = CachePoolCluster.newStaticCluster(nodes map {
+    copy(_group = Group.fromCluster(CachePoolCluster.newStaticCluster(nodes map {
       case (host, port, weight) =>
         new CacheNode(host, port, weight)
-    } toSet))
+    } toSet)))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
     nodes(PartitionedClient.parseHostPortWeights(hostPortWeights))
@@ -833,7 +844,7 @@ case class KetamaClientBuilder private[memcached] (
     val statsReceiver = builder.statsReceiver.scope("memcached_client")
 
     new KetamaClient(
-      Group.fromCluster(_cluster),
+      _group,
       keyHasher,
       numReps,
       _failureAccrualParams,
@@ -858,7 +869,7 @@ case class KetamaClientBuilder private[memcached] (
 }
 
 object KetamaClientBuilder {
-  def apply(): KetamaClientBuilder = KetamaClientBuilder(new StaticCluster(Nil), Some("ketama"), None)
+  def apply(): KetamaClientBuilder = KetamaClientBuilder(Group.empty, Some("ketama"), None)
   def get() = apply()
 }
 

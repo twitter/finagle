@@ -10,6 +10,7 @@ import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
+import com.twitter.finagle.Group
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
 import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster, CachePoolConfig, Client, KetamaClientBuilder, PartitionedClient}
 import com.twitter.finagle.memcached.protocol._
@@ -204,6 +205,21 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.set("foo", "bar"))
         Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
       }
+
+      "when given Group[InetSocketAddress]" in {
+        "doesn't blow up" in {
+          val mutableGroup = Group(address1, address2)
+          val client = KetamaClientBuilder()
+            .group(mutableGroup, true)
+            .build()
+
+          Await.result(client.delete("foo"))
+          Await.result(client.get("foo")) mustEqual None
+          Await.result(client.set("foo", "bar"))
+          Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"   
+        }
+      }
+
 
       "even in future pool" in {
         lazy val client = KetamaClientBuilder()
