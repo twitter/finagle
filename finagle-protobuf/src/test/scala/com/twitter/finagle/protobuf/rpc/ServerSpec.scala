@@ -18,9 +18,13 @@ import com.twitter.finagle.builder._
 import java.util.concurrent._
 import java.util.concurrent.atomic._
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder
+
+import scala.collection.mutable._
+
 import com.twitter.finagle.protobuf.rpc.ServiceExceptionHandler
 
-object ServerProtobufSpec extends org.specs.SpecificationWithJUnit {
+object RpcProtobufSpec extends org.specs.SpecificationWithJUnit {
 
   def CLIENT_TIMEOUT_SECONDS = 1
 
@@ -30,11 +34,13 @@ object ServerProtobufSpec extends org.specs.SpecificationWithJUnit {
 
   def port = 8080
 
-  def executorService = Executors.newFixedThreadPool(4)
+  def executorService = Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("#service-dispatch#-%d").build())
 
   def factory = new RpcFactoryImpl()
 
   def serverBuilder = ServerBuilder.get().maxConcurrentRequests(10)
+
+  val handlingThreadNames =  new ListBuffer[String]()
 
   def clientBuilder = ClientBuilder
     .get()
@@ -43,11 +49,11 @@ object ServerProtobufSpec extends org.specs.SpecificationWithJUnit {
     .retries(2)
     .requestTimeout(Duration(CLIENT_TIMEOUT_SECONDS, TimeUnit.SECONDS))
 
-  "A client" should {
+  "A server" should {
 
     val totalRequests = new AtomicInteger()
 
-    val service = new SampleWeatherServiceImpl(80, null)
+    val service = new SampleWeatherServiceImpl2(80, null, handlingThreadNames)
 
     val server = factory.createServer(serverBuilder.asInstanceOf[ServerBuilder[(String, com.google.protobuf.Message),
       (String, com.google.protobuf.Message), Any, Any, Any]], port, service,
@@ -92,14 +98,17 @@ object ServerProtobufSpec extends org.specs.SpecificationWithJUnit {
     finishBarrier.await(60l, TimeUnit.SECONDS)
     server.close(Duration(1, TimeUnit.SECONDS))
 
+    var requestHandledByServiceDispatch = 0
+    handlingThreadNames.foreach((name: String) => if (name.startsWith("#service-dispatch#")) requestHandledByServiceDispatch += 1 )
+
     "receive THREAD_COUNT * REQ_PER_THREAD responses." in {
-      THREAD_COUNT * REQ_PER_THREAD mustEqual totalRequests.get()
+      THREAD_COUNT * REQ_PER_THREAD mustEqual requestHandledByServiceDispatch
     }
 
   }
 
 
-  def makeRequest(service: SampleWeatherServiceImpl, stub: WeatherService, totalRequests: AtomicInteger) {
+  def makeRequest(service: SampleWeatherServiceImpl2, stub: WeatherService, totalRequests: AtomicInteger) {
     val controller = factory.createController().asInstanceOf[RpcControllerWithOnFailureCallback]
 
     val l = new java.util.concurrent.CountDownLatch(1);
@@ -122,12 +131,13 @@ object ServerProtobufSpec extends org.specs.SpecificationWithJUnit {
 }
 
 
-private class SampleWeatherServiceImpl(val temperature: Int, val getHistoricWeather: Callable[Any]) extends WeatherService {
+private class SampleWeatherServiceImpl2(val temperature: Int, val getHistoricWeather: Callable[Any], val handlingThreadNames: ListBuffer[String]) extends WeatherService {
 
   def getTemperature() = temperature
 
   def getWeatherForecast(controller: RpcController, request: GetWeatherForecastRequest, done:
   RpcCallback[GetWeatherForecastResponse]) {
+    handlingThreadNames += Thread.currentThread().getName()
     done.run(GetWeatherForecastResponse.newBuilder().setTemp(temperature).build())
   }
 

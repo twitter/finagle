@@ -2,7 +2,7 @@ package com.twitter.finagle.protobuf.rpc.impl
 
 import com.twitter.finagle.protobuf.rpc.channel.ProtoBufCodec
 import com.twitter.finagle.protobuf.rpc.{RpcServer, Util}
-import com.twitter.util.{Future, Promise}
+import com.twitter.util._
 import com.twitter.util.Duration
 import com.twitter.util.FuturePool
 import com.twitter.finagle.builder.{Server, ServerBuilder, ServerConfig}
@@ -25,9 +25,9 @@ class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any,
   Preconditions.checkNotNull(executorService)
   Preconditions.checkNotNull(handler)
 
-  private val futurePool = FuturePool(executorService)
+  private val execFuturePool = new ExecutorServiceFuturePool(executorService)
 
-  private val server: Server = ServerBuilder.safeBuild(ServiceDispatcher(service, handler, futurePool),
+  private val server: Server = ServerBuilder.safeBuild(ServiceDispatcher(service, handler, execFuturePool),
     sb
       .codec(new ProtoBufCodec(service))
       .name(getClass().getName())
@@ -54,14 +54,14 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
     }
 
     // dispatch to the service method
-    val task = {
-      val promise = new Promise[(String, Message)]
+    val task = () => {
+      var result = (methodName, constructEmptyResponseMessage(m))
       try {
         service.callMethod(m, null, reqMessage, new RpcCallback[Message]() {
 
           def run(msg: Message) = {
             Util.log("Response", methodName, msg)
-            promise.setValue((methodName, msg))
+            result =  (methodName, msg)
           }
 
         })
@@ -69,16 +69,13 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
         case e: RuntimeException => {
           log.warning("#apply# Exception: "+e.getMessage)
           if (handler.canHandle(e)) {
-            promise.setValue((methodName, handler.handle(e, constructEmptyResponseMessage(m))))
-          } else {
-            // last-resort
-            promise.setValue((methodName, constructEmptyResponseMessage(m)))
+            result = (methodName, handler.handle(e, constructEmptyResponseMessage(m)))
           }
         }
       }
-      promise
+      result
     }
-    Future.flatten(futurePool(task))
+    futurePool(task())
   }
 
   def constructEmptyResponseMessage(m: MethodDescriptor): Message = {
