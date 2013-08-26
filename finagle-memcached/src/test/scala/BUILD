@@ -1,7 +1,14 @@
-EXTERNAL_SOURCES = ['com/twitter/finagle/memcached/integration/ExternalMemcached.scala']
+EXTERNAL_SOURCES = [
+  'com/twitter/finagle/memcached/integration/ExternalMemcached.scala',
+  'com/twitter/finagle/memcached/integration/InProcessMemcached.scala'
+]
 
 scala_library(name='external',
   dependencies=[
+    pants('3rdparty:netty'),
+    pants('finagle/finagle-core'),
+    pants('finagle/finagle-memcached'),
+    pants('util/util-collection'),
     pants('util/util-core')
   ],
   sources=EXTERNAL_SOURCES
