@@ -98,10 +98,11 @@ object RpcProtobufSpec extends org.specs.SpecificationWithJUnit {
     finishBarrier.await(60l, TimeUnit.SECONDS)
     server.close(Duration(1, TimeUnit.SECONDS))
 
+    // count how many requests were handled by the #service-dispatch# executor
     var requestHandledByServiceDispatch = 0
     handlingThreadNames.foreach((name: String) => if (name.startsWith("#service-dispatch#")) requestHandledByServiceDispatch += 1 )
 
-    "receive THREAD_COUNT * REQ_PER_THREAD responses." in {
+    "handle THREAD_COUNT * REQ_PER_THREAD responses using the #service-dispatch# executor." in {
       THREAD_COUNT * REQ_PER_THREAD mustEqual requestHandledByServiceDispatch
     }
 
