@@ -240,7 +240,7 @@ class ClientSpec extends SpecificationWithJUnit {
     /**
      * Note: This integration test requires a real Memcached server to run.
      */
-    var shutdownRegistry = new ShutdownRegistryImpl
+    var shutdownRegistry: ShutdownRegistryImpl = null
     var testServers: List[TestMemcachedServer] = List()
 
     var zkServerSetCluster: ZookeeperServerSetCluster = null
@@ -250,6 +250,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     doBefore {
       // start zookeeper server and create zookeeper client
+      shutdownRegistry = new ShutdownRegistryImpl
       zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
       zookeeperServer.startNetwork()
 
@@ -281,8 +282,6 @@ class ClientSpec extends SpecificationWithJUnit {
     }
 
     doAfter {
-      zookeeperClient.close()
-
       // shutdown zookeeper server and client
       shutdownRegistry.execute()
 
@@ -408,7 +407,7 @@ class ClientSpec extends SpecificationWithJUnit {
         }.get(10.seconds)() mustNot throwA[Exception]
       }
 
-      "using backup pools" in {
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "using backup pools" in {
         // shutdown the server before initializing our cache pool cluster
         zookeeperServer.shutdownNetwork()
 
@@ -554,7 +553,7 @@ class ClientSpec extends SpecificationWithJUnit {
         trackCacheShards.size mustBe 9
       }
 
-      "unmanaged cache pool is changing" in {
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "unmanaged cache pool is changing" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster = initializePool(5, ignoreConfigData = true)
 
@@ -681,7 +680,7 @@ class ClientSpec extends SpecificationWithJUnit {
     /**
      * Note: This integration test requires a real Memcached server to run.
      */
-    var shutdownRegistry = new ShutdownRegistryImpl
+    var shutdownRegistry: ShutdownRegistryImpl = null
     var firstTestServerPool = List[TestMemcachedServer]()
     var secondTestServerPool = List[TestMemcachedServer]()
 
@@ -692,6 +691,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     doBefore {
       // start zookeeper server and create zookeeper client
+      shutdownRegistry = new ShutdownRegistryImpl
       zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
       zookeeperServer.startNetwork()
 
@@ -733,8 +733,6 @@ class ClientSpec extends SpecificationWithJUnit {
     }
 
     doAfter {
-      zookeeperClient.close()
-
       // shutdown zookeeper server and client
       shutdownRegistry.execute()
 
@@ -1464,7 +1462,7 @@ class ClientSpec extends SpecificationWithJUnit {
     /**
      * Note: This integration test requires a real Memcached server to run.
      */
-    var shutdownRegistry = new ShutdownRegistryImpl
+    var shutdownRegistry: ShutdownRegistryImpl = null
     var testServers = List[TestMemcachedServer]()
 
     var zkServerSetCluster: ZookeeperServerSetCluster = null
@@ -1475,6 +1473,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     doBefore {
       // start zookeeper server and create zookeeper client
+      shutdownRegistry = new ShutdownRegistryImpl
       zookeeperServer = new ZooKeeperTestServer(0, shutdownRegistry)
       zookeeperServer.startNetwork()
       zookeeperServerPort = zookeeperServer.getPort()
@@ -1504,8 +1503,6 @@ class ClientSpec extends SpecificationWithJUnit {
     }
 
     doAfter {
-      zookeeperClient.close()
-
       // shutdown zookeeper server and client
       shutdownRegistry.execute()
 
