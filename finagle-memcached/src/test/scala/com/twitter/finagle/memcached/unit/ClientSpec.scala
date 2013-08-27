@@ -47,9 +47,8 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       CacheNode("10.0.1.7", 11211, 950)  -> newMock(),
       CacheNode("10.0.1.8", 11211, 100)  -> newMock()
     )
-    val mockBuilder = (k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, Duration)) => {
-      clients.get(CacheNode(k.host, k.port, k.weight)).get
-    }
+    val mockBuilder =
+      (node: CacheNode, k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, Duration)) => clients.get(node).get
     val ketamaClient = new KetamaClient(Group(clients.keys.toSeq:_*), KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
 
     "pick the correct node" in {
@@ -92,9 +91,9 @@ class ClientSpec extends SpecificationWithJUnit with Mockito {
       serviceA(any) returns Future.value(Values(Seq(value)))
 
       var broker = new Broker[NodeHealth]
-      val mockBuilder = (k: KetamaClientKey, internalBroker: Broker[NodeHealth], _: (Int, Duration)) => {
+      val mockBuilder = (node: CacheNode, k: KetamaClientKey, internalBroker: Broker[NodeHealth], _: (Int, Duration)) => {
         broker = internalBroker
-        services.get(CacheNode(k.host, k.port, k.weight)).get
+        services.get(node).get
       }
       val ketamaClient = new KetamaClient(mutableGroup, KeyHasher.KETAMA, 160, (Int.MaxValue, Duration.Zero), Some(mockBuilder))
 

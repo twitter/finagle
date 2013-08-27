@@ -595,6 +595,7 @@ trait PartitionedClient extends Client {
 }
 
 object PartitionedClient {
+  @deprecated("Use CacheNodeGroup.apply(hostPartWeights) instead", "7.0.0")
   def parseHostPortWeights(hostPortWeights: String): Seq[(String, Int, Int)] =
     hostPortWeights
       .split(Array(' ', ','))
@@ -607,8 +608,19 @@ object PartitionedClient {
       }
 }
 
-case class KetamaClientKey(host: String, port: Int, weight: Int) {
-  private[memcached] def identifier = if (port == 11211) host else host + ":" + port
+abstract class KetamaClientKey {
+  def identifier: String
+}
+object KetamaClientKey {
+  private[memcached] case class HostPortBasedKey(host: String, port: Int, weight: Int) extends KetamaClientKey {
+    val identifier = if (port == 11211) host else host + ":" + port
+  }
+  private[memcached] case class CustomKey(identifier: String) extends KetamaClientKey
+
+  def apply(host: String, port: Int, weight: Int): KetamaClientKey =
+    HostPortBasedKey(host, port, weight)
+
+  def apply(id: String) = CustomKey(id)
 }
 
 private[finagle] sealed trait NodeEvent
@@ -649,7 +661,7 @@ class KetamaClient private[finagle](
   keyHasher: KeyHasher,
   numReps: Int,
   failureAccrualParams: (Int, Duration) = (5, 30.seconds),
-  legacyFAClientBuilder: Option[(KetamaClientKey, Broker[NodeHealth], (Int, Duration)) => Service[Command, Response]],
+  legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, Duration)) => Service[Command, Response]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   oldLibMemcachedVersionComplianceMode: Boolean = false
 ) extends PartitionedClient {
@@ -665,14 +677,17 @@ class KetamaClient private[finagle](
   val nodeHealthBroker = new Broker[NodeHealth]
   val ketamaNodeGrp = initialServices.map({
     node: CacheNode =>
-      val key = KetamaClientKey(node.host, node.port, node.weight)
+      val key = node.key match {
+        case Some(id) => KetamaClientKey(id)
+        case None => KetamaClientKey(node.host, node.port, node.weight)
+      }
       val faClient: Client = legacyFAClientBuilder map { builder =>
-        TwemcacheClient(builder(key, nodeHealthBroker, failureAccrualParams))
+        TwemcacheClient(builder(node, key, nodeHealthBroker, failureAccrualParams))
       } getOrElse MemcachedFailureAccrualClient(
         key, nodeHealthBroker, failureAccrualParams
       ).newTwemcacheClient(node.host+":"+node.port)
 
-      key -> KetamaNode(key.identifier, key.weight, faClient)
+      key -> KetamaNode(key.identifier, node.weight, faClient)
   })
 
   @volatile private[this] var ketamaNodeSnap = ketamaNodeGrp()
@@ -777,7 +792,7 @@ case class KetamaClientBuilder private[memcached] (
 ) {
 
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    group(Group.fromCluster(cluster), false, 1)
+    group(Group.fromCluster(cluster))
   }
 
   def group(group: Group[CacheNode]): KetamaClientBuilder = {
@@ -785,10 +800,10 @@ case class KetamaClientBuilder private[memcached] (
   }
 
   //Note: unresolvedAddresses won't be added even if they are able to be resolved after the node has been added
-  def group(group: Group[InetSocketAddress], useOnlyResolvedAddress: Boolean, defaultWeight: Int = 1) = {
+  def group(group: Group[InetSocketAddress], useOnlyResolvedAddress: Boolean = false, defaultWeight: Int = 1) = {
     // TODO: for now, we assume all nodes in group created this way has equal weight.
-    copy(_group = group collect { 
-      case socketAddr: InetSocketAddress if !socketAddr.isUnresolved => 
+    copy(_group = group collect {
+      case socketAddr: InetSocketAddress if !socketAddr.isUnresolved =>
         if (useOnlyResolvedAddress) {
           new CacheNode(socketAddr.getAddress.getHostAddress, socketAddr.getPort, defaultWeight)
         } else {
@@ -802,13 +817,12 @@ case class KetamaClientBuilder private[memcached] (
   }
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_group = Group.fromCluster(CachePoolCluster.newStaticCluster(nodes map {
-      case (host, port, weight) =>
-        new CacheNode(host, port, weight)
-    } toSet)))
+    copy(_group = Group(nodes map {
+      case (host, port, weight) => new CacheNode(host, port, weight)
+    }:_*))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
-    nodes(PartitionedClient.parseHostPortWeights(hostPortWeights))
+    group(CacheNodeGroup(hostPortWeights))
 
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
@@ -833,9 +847,9 @@ case class KetamaClientBuilder private[memcached] (
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
     def legacyFAClientBuilder(
-      key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
+      node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
     ) = {
-      builder.hosts(new InetSocketAddress(key.host, key.port))
+      builder.hosts(new InetSocketAddress(node.host, node.port))
           .failureAccrualFactory(filter(key, broker, faParams) _)
           .build()
     }
@@ -848,7 +862,7 @@ case class KetamaClientBuilder private[memcached] (
       keyHasher,
       numReps,
       _failureAccrualParams,
-      Some(legacyFAClientBuilder(_, _, _)),
+      Some(legacyFAClientBuilder(_, _, _, _)),
       statsReceiver,
       oldLibMemcachedVersionComplianceMode
     )
@@ -905,7 +919,9 @@ case class RubyMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members map {
+      node: CacheNode => (node.host, node.port, node.weight)
+    } toSeq)
 
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): RubyMemCacheClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
@@ -949,7 +965,9 @@ case class PHPMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members map {
+      node: CacheNode => (node.host, node.port, node.weight)
+    } toSeq)
 
   def hashName(hashName: String): PHPMemCacheClientBuilder =
     copy(_hashName = Some(hashName))

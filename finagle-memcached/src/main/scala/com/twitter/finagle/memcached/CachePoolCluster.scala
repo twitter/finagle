@@ -4,7 +4,7 @@ import _root_.java.io.ByteArrayInputStream
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
-import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
+import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool.*::
 import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.conversions.time._
@@ -16,7 +16,10 @@ import com.twitter.util._
 import scala.collection.mutable
 
 // Type definition representing a cache node
-case class CacheNode(host: String, port: Int, weight: Int) extends SocketAddress
+case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None) extends SocketAddress {
+  // Use overloads to keep the same ABI
+  def this(host: String, port: Int, weight: Int) = this(host, port, weight, None)
+}
 
 /**
  * Twitter cache pool path resolver.
@@ -27,11 +30,11 @@ class TwitterCacheResolver extends Resolver {
 
   def resolve(addr: String) = {
     addr.split("!") match {
-      // twcache!host1:11211:1,host2:11211:1,host3:11211:2
+      // twcache!<host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
       case Array(hosts) =>
-        val group = Group(PartitionedClient.parseHostPortWeights(hosts) map {
-          case (host, port, weight) => new CacheNode(host, port, weight): SocketAddress
-        }:_*)
+        val group = CacheNodeGroup(hosts) map {
+          case node: CacheNode => node: SocketAddress
+        }
         Return(group)
 
       // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
@@ -50,6 +53,32 @@ class TwitterCacheResolver extends Resolver {
         Throw(new TwitterCacheResolverException("Invalid twcache format \"%s\"".format(addr)))
     }
   }
+}
+
+object CacheNodeGroup {
+  // <host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
+  def apply(hosts: String) = {
+    val hostSeq = hosts.split(Array(' ', ','))
+      .filter((_ != ""))
+      .map(_.split(":"))
+      .map {
+        case Array(host)                    => (host, 11211, 1, None)
+        case Array(host, port)              => (host, port.toInt, 1, None)
+        case Array(host, port, weight)      => (host, port.toInt, weight.toInt, None)
+        case Array(host, port, weight, key) => (host, port.toInt, weight.toInt, Some(key))
+      }
+
+    newStaticGroup(hostSeq map {
+      case (host, port, weight, key) => new CacheNode(host, port, weight, key)
+    } toSet)
+  }
+
+  def apply(group: Group[SocketAddress]) = group collect {
+    case node: CacheNode => node
+    case addr: InetSocketAddress => new CacheNode(addr.getHostName, addr.getPort, 1)
+  }
+
+  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet toSeq:_*)
 }
 
 /**

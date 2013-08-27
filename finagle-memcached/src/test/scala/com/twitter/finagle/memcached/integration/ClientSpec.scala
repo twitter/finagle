@@ -206,20 +206,28 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
       }
 
-      "when given Group[InetSocketAddress]" in {
-        "doesn't blow up" in {
-          val mutableGroup = Group(address1, address2)
-          val client = KetamaClientBuilder()
-            .group(mutableGroup, true)
-            .build()
+      "using Group[InetSocketAddress] doesn't blow up" in {
+        val mutableGroup = Group(address1, address2)
+        val client = KetamaClientBuilder()
+          .group(mutableGroup, true)
+          .build()
 
-          Await.result(client.delete("foo"))
-          Await.result(client.get("foo")) mustEqual None
-          Await.result(client.set("foo", "bar"))
-          Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"   
-        }
+        Await.result(client.delete("foo"))
+        Await.result(client.get("foo")) mustEqual None
+        Await.result(client.set("foo", "bar"))
+        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
       }
 
+      "using custom keys doesn't blow up" in {
+        val client = KetamaClientBuilder()
+            .nodes("localhost:%d:1:key1,localhost:%d:1:key2".format(address1.getPort, address2.getPort))
+            .build()
+
+        Await.result(client.delete("foo"))
+        Await.result(client.get("foo")) mustEqual None
+        Await.result(client.set("foo", "bar"))
+        Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
+      }
 
       "even in future pool" in {
         lazy val client = KetamaClientBuilder()
@@ -330,7 +338,6 @@ class ClientSpec extends SpecificationWithJUnit {
           }
         }
       }
-
     }
 
     "Cache specific cluster" in {
@@ -478,6 +485,28 @@ class ClientSpec extends SpecificationWithJUnit {
         }
       }
 
+      "use custom keys" in {
+        // create my cluster client solely based on a zk client and a path
+        val mycluster = CachePoolCluster.newZkCluster(zkPath, zookeeperClient)
+        mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
+
+        val customKey = "key-"
+        var shardId = -1
+        val myClusterWithCustomKey = mycluster map {
+          case node: CacheNode => {
+            shardId += 1
+            CacheNode(node.host, node.port, node.weight, Some(customKey + shardId.toString))
+          }
+        }
+        val client = KetamaClientBuilder()
+            .clientBuilder(ClientBuilder().hostConnectionLimit(1).codec(Memcached()).failFast(false))
+            .failureAccrualParams(Int.MaxValue, Duration.Top)
+            .cachePoolCluster(myClusterWithCustomKey)
+            .build()
+
+        trackCacheShards(client.asInstanceOf[PartitionedClient]).size mustBe 5
+      }
+
       if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "cache pool is changing" in {
         // create my cluster client solely based on a zk client and a path
         val mycluster = initializePool(5)
@@ -489,12 +518,8 @@ class ClientSpec extends SpecificationWithJUnit {
             .build()
             .asInstanceOf[PartitionedClient]
 
-        def trackCacheShards = mutable.Set.empty[Client] ++ ((0 until 100).map {
-          n => client.clientOf("foo"+n)
-        })
-
         // initially there should be 5 cache shards being used
-        trackCacheShards.size mustBe 5
+        trackCacheShards(client).size mustBe 5
 
         // add 4 more cache servers and update cache pool config data, now there should be 7 shards
         var additionalServers = List[EndpointStatus]()
@@ -506,7 +531,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // it shouldn't, hence here I don't really have a better way to wait for the client's key ring
         // redistribution to finish other than sleep for a while.
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 9
+        trackCacheShards(client).size mustBe 9
 
         // remove 2 cache servers and update cache pool config data, now there should be 7 shards
         expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
@@ -515,7 +540,7 @@ class ClientSpec extends SpecificationWithJUnit {
           updateCachePoolConfigData(7)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 7
+        trackCacheShards(client).size mustBe 7
 
         // remove another 2 cache servers and update cache pool config data, now there should be 5 shards
         expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 5, expectedAdd = 0, expectedRem = 2) {
@@ -524,7 +549,7 @@ class ClientSpec extends SpecificationWithJUnit {
           updateCachePoolConfigData(5)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 5
+        trackCacheShards(client).size mustBe 5
 
         // add 2 more cache servers and update cache pool config data, now there should be 7 shards
         expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 7, expectedAdd = 2, expectedRem = 0) {
@@ -532,7 +557,7 @@ class ClientSpec extends SpecificationWithJUnit {
           updateCachePoolConfigData(7)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 7
+        trackCacheShards(client).size mustBe 7
 
         // add another 2 more cache servers and update cache pool config data, now there should be 9 shards
         expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 0) {
@@ -540,7 +565,7 @@ class ClientSpec extends SpecificationWithJUnit {
           updateCachePoolConfigData(9)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 9
+        trackCacheShards(client).size mustBe 9
 
         // remove 2 and add 2, now there should be still 9 shards
         expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 2) {
@@ -550,7 +575,7 @@ class ClientSpec extends SpecificationWithJUnit {
           updateCachePoolConfigData(9)
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 9
+        trackCacheShards(client).size mustBe 9
       }
 
       if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "unmanaged cache pool is changing" in {
@@ -564,12 +589,8 @@ class ClientSpec extends SpecificationWithJUnit {
             .build()
             .asInstanceOf[PartitionedClient]
 
-        def trackCacheShards = mutable.Set.empty[Client] ++ ((0 until 100).map {
-          n => client.clientOf("foo"+n)
-        })
-
         // initially there should be 5 cache shards being used
-        trackCacheShards.size mustBe 5
+        trackCacheShards(client).size mustBe 5
 
         // add 4 more cache servers and update cache pool config data, now there should be 7 shards
         var additionalServers = List[EndpointStatus]()
@@ -580,7 +601,7 @@ class ClientSpec extends SpecificationWithJUnit {
         // it shouldn't, hence here I don't really have a better way to wait for the client's key ring
         // redistribution to finish other than sleep for a while.
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 9
+        trackCacheShards(client).size mustBe 9
 
         // remove 2 cache servers and update cache pool config data, now there should be 7 shards
         expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
@@ -588,7 +609,7 @@ class ClientSpec extends SpecificationWithJUnit {
           additionalServers(1).leave()
         }.get(10.seconds)() mustNot throwA[Exception]
         Thread.sleep(1000)
-        trackCacheShards.size mustBe 7
+        trackCacheShards(client).size mustBe 7
       }
     }
 
@@ -673,6 +694,10 @@ class ClientSpec extends SpecificationWithJUnit {
           retFuture
       }
     }
+
+    def trackCacheShards(client: PartitionedClient) = mutable.Set.empty[Client] ++
+        ((0 until 100).map { n => client.clientOf("foo"+n) })
+
   }
 
   "Replication client" should {
