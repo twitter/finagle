@@ -10,9 +10,6 @@ compiled_idl(name='scrooge2',
   namespace_map={
     'com.twitter.finagle.thriftmux.thrift': 'com.twitter.finagle.thriftmux.thriftscrooge2'
   },
-  generated_deps=[
-    pants('finagle/finagle-ostrich4'),
-  ],
 )
 
 compiled_idl(name='scrooge3',
@@ -23,7 +20,4 @@ compiled_idl(name='scrooge3',
   namespace_map={
     'com.twitter.finagle.thriftmux.thrift': 'com.twitter.finagle.thriftmux.thriftscrooge3'
   },
-  generated_deps=[
-    pants('finagle/finagle-ostrich4')
-  ]
 )
