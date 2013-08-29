@@ -225,9 +225,12 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
         cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
 
-    impl.getClass.getInterfaces.view.flatMap { iface =>
-      tryThriftFinagleService(iface) orElse tryScroogeFinagledService(iface)
-    }.headOption.getOrElse {
+    def tryClass(cls: Class[_]): Option[BinaryService] =
+      tryThriftFinagleService(cls) orElse tryScroogeFinagledService(cls) orElse
+        // walk the entire inheritance graph
+        (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
+
+    tryClass(impl.getClass).getOrElse {
       throw new IllegalArgumentException("argument implements no candidate ifaces")
     }
   }
