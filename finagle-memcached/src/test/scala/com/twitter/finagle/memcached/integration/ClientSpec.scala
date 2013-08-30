@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.integration
 
 import _root_.java.io.ByteArrayOutputStream
 import _root_.java.lang.{Boolean => JBoolean}
-import _root_.java.net.InetSocketAddress
+import java.net.{SocketAddress, InetSocketAddress}
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.common.zookeeper.{ZooKeeperUtils, ServerSets, ZooKeeperClient}
@@ -12,7 +12,8 @@ import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
 import com.twitter.finagle.Group
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
-import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster, CachePoolConfig, Client, KetamaClientBuilder, PartitionedClient}
+import com.twitter.finagle.memcached.{CacheNode, CacheNodeGroup, CachePoolCluster, CachePoolConfig,
+  Client, KetamaClientBuilder, PartitionedClient}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.replication._
@@ -207,9 +208,9 @@ class ClientSpec extends SpecificationWithJUnit {
       }
 
       "using Group[InetSocketAddress] doesn't blow up" in {
-        val mutableGroup = Group(address1, address2)
+        val mutableGroup = Group(address1, address2).map{_.asInstanceOf[SocketAddress]}
         val client = KetamaClientBuilder()
-          .group(mutableGroup, true)
+          .group(CacheNodeGroup(mutableGroup, true))
           .build()
 
         Await.result(client.delete("foo"))

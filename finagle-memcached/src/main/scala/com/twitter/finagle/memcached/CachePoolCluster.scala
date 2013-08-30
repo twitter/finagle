@@ -73,9 +73,14 @@ object CacheNodeGroup {
     } toSet)
   }
 
-  def apply(group: Group[SocketAddress]) = group collect {
+  def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
     case node: CacheNode => node
-    case addr: InetSocketAddress => new CacheNode(addr.getHostName, addr.getPort, 1)
+    case addr: InetSocketAddress if (useOnlyResolvedAddress && !addr.isUnresolved) =>
+      //Note: unresolvedAddresses won't be added even if they are able to be resolved after added
+      new CacheNode(addr.getHostName, addr.getPort, 1,
+        Some(addr.getAddress.getHostAddress + ":" + addr.getPort))
+    case addr: InetSocketAddress if (!useOnlyResolvedAddress) =>
+      new CacheNode(addr.getHostName, addr.getPort, 1, None)
   }
 
   def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet toSeq:_*)

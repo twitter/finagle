@@ -40,12 +40,23 @@ object Client {
   /**
    * Construct a client from a Cluster
    */
+  @deprecated("Use group instead", "7.0.0")
   def apply(cluster: Cluster[SocketAddress]) : Client = Client(
     ClientBuilder()
       .cluster(cluster)
       .hostConnectionLimit(1)
       .codec(new Memcached)
       .build())
+
+  /**
+   * Construct a client from a Group
+   */
+  def apply(group: Group[SocketAddress]) : Client = Client(
+    ClientBuilder()
+        .group(group)
+        .hostConnectionLimit(1)
+        .codec(new Memcached)
+        .build())
 
   /**
    * Construct a client from a single Service.
@@ -791,27 +802,16 @@ case class KetamaClientBuilder private[memcached] (
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
 
+  @deprecated("Use group(Group[CacheNode]) instead", "7.0.0")
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    group(Group.fromCluster(cluster))
+    group(CacheNodeGroup(Group.fromCluster(cluster).map{_.asInstanceOf[SocketAddress]}))
   }
 
   def group(group: Group[CacheNode]): KetamaClientBuilder = {
     copy(_group = group)
   }
 
-  //Note: unresolvedAddresses won't be added even if they are able to be resolved after the node has been added
-  def group(group: Group[InetSocketAddress], useOnlyResolvedAddress: Boolean = false, defaultWeight: Int = 1) = {
-    // TODO: for now, we assume all nodes in group created this way has equal weight.
-    copy(_group = group collect {
-      case socketAddr: InetSocketAddress if !socketAddr.isUnresolved =>
-        if (useOnlyResolvedAddress) {
-          new CacheNode(socketAddr.getAddress.getHostAddress, socketAddr.getPort, defaultWeight)
-        } else {
-          new CacheNode(socketAddr.getHostName, socketAddr.getPort, defaultWeight)
-        }
-    })
-  }
-
+  @deprecated("Use group(Group[CacheNode]) instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
     copy(_group = Group.fromCluster(cluster))
   }
