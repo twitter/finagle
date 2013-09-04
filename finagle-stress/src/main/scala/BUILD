@@ -1,4 +1,4 @@
-benchmark(name='scala',
+scala_library(name='scala',
   dependencies=[
     pants('3rdparty:caliper'),
     pants('3rdparty:netty'),
@@ -20,3 +20,18 @@ benchmark(name='scala',
   ],
   sources=rglobs('*.scala')
 )
+
+benchmark(name='bench',
+  dependencies=[
+    pants(":scala")
+  ]
+)
+
+jvm_binary(name='stress',
+  main='com.twitter.finagle.stress.LoadBalancerTest',
+  dependencies=[
+    pants(':scala')
+  ]
+)
+
+
