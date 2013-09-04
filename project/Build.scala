@@ -303,6 +303,9 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
+      "com.fasterxml.jackson.core" % "jackson-core" % "2.2.2",
+      "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.2",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.2",
       "com.google.guava" % "guava" % "13.0",
       "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
     )
