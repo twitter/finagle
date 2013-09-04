@@ -1,0 +1,928 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.memcached.migration.MigrationClient</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
+      <div id="definition">
+        <a title="Go to companion" href="MigrationClient$.html"><img src="../../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.memcached" class="extype" href="../package.html">memcached</a>.<a name="com.twitter.finagle.memcached.migration" class="extype" href="package.html">migration</a></p>
+        <h1><a title="Go to companion" href="MigrationClient$.html">MigrationClient</a></h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MigrationClient</span><span class="result"> extends <a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> with <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Migration client. This client manages a two cache clients representing source and
+destination cache pool. Depending on the migration state, this client may send dark traffic
+to destination pool to warm up the cache, or send light traffic to destination pool and fall
+back to original pool for cache misses. The state transitioning is controlled by opeartor
+by setting corresponding metadata in zookeeper.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a>, <a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a>, <a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a>, <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+            </div>
+        <div id="ancestors">
+              <span class="filtertype">Inherited</span>
+              <ol><li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.memcached.migration.MigrationClient" class="in"><span>MigrationClient</span></li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="in"><span>ZookeeperStateMonitor</span></li><li name="com.twitter.finagle.memcached.ProxyClient" class="in"><span>ProxyClient</span></li><li name="com.twitter.finagle.memcached.Client" class="in"><span>Client</span></li><li name="com.twitter.finagle.memcached.BaseClient" class="in"><span>BaseClient</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+            </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.migration.MigrationClient#this" data-isabs="false">
+      <a id="this:MigrationClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MigrationClient</span><span class="params">(<span name="oldClient">oldClient: <a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a></span>, <span name="newClient">newClient: <a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a></span>, <span name="zkPath">zkPath: String</span>, <span name="zkClient">zkClient: <span name="com.twitter.common.zookeeper.ZooKeeperClient" class="extype">ZooKeeperClient</span></span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.migration.MigrationClient.FrontendClient" data-isabs="false">
+      <a id="FrontendClient:FrontendClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MigrationClient$FrontendClient.html"><span class="name">FrontendClient</span></a><span class="result"> extends ProxyClient</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.Client#adapt" data-isabs="false">
+      <a id="adapt[T](Bijection[ChannelBuffer, T]):BaseClient[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">adapt</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="bijection">bijection: <span name="com.twitter.util.Bijection" class="extype">Bijection</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, T]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a>[T]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#add" data-isabs="false">
+      <a id="add(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">add</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#add" data-isabs="false">
+      <a id="add(String,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">add</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#append" data-isabs="false">
+      <a id="append(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">append</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Append bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append bytes to the end of an existing key. If the key doesn't exist, the
+operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#append" data-isabs="false">
+      <a id="append(String,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">append</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Append a set of bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append a set of bytes to the end of an existing key. If the key doesn't
+exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.migration.MigrationClient#applyZKData" data-isabs="false">
+      <a id="applyZKData(Array[Byte]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applyZKData</span><span class="params">(<span name="data">data: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Load the zookeeper node data as well as attaching another data watcher, then invoke the
+applyZKData implementation to process the data string.</p><div class="fullcomment"><div class="comment cmt"><p>Load the zookeeper node data as well as attaching another data watcher, then invoke the
+applyZKData implementation to process the data string.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.migration.MigrationClient" class="extype" href="">MigrationClient</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#cas" data-isabs="false">
+      <a id="cas(String,Int,Time,ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cas</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="casUnique">casUnique: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
+opaquely, but in reality it is a string-encoded u64.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#cas" data-isabs="false">
+      <a id="cas(String,ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cas</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="casUnique">casUnique: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
+opaquely, but in reality it is a string-encoded u64.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.Client#channelBufferToType" data-isabs="false">
+      <a id="channelBufferToType(ChannelBuffer):ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelBufferToType</span><span class="params">(<span name="v">v: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#decr" data-isabs="false">
+      <a id="decr(String,Long):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decr</span><span class="params">(<span name="key">key: String</span>, <span name="delta">delta: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Decrement a key.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement a key. Interpret the value as an JLong if it is parsable.
+This operation has no effect if there is no value there already.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#decr" data-isabs="false">
+      <a id="decr(String):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decr</span><span class="params">(<span name="key">key: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#delete" data-isabs="false">
+      <a id="delete(String):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delete</span><span class="params">(<span name="key">key: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Remove a key.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a key.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if deleted, false if not found
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../../../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#get" data-isabs="false">
+      <a id="get(Iterable[String]):Future[Map[String, ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="keys">keys: Iterable[String]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Map[String, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, T] of all of the keys that the server had.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#get" data-isabs="false">
+      <a id="get(String):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="key">key: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a key from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a key from the server.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#getResult" data-isabs="false">
+      <a id="getResult(Iterable[String]):Future[GetResult]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getResult</span><span class="params">(<span name="keys">keys: Iterable[String]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.memcached.GetResult" class="extype" href="../GetResult.html">GetResult</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server. Returns a Future[GetResult] that
+encapsulates hits, misses and failures.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#gets" data-isabs="false">
+      <a id="gets(Iterable[String]):Future[Map[String, (ChannelBuffer, ChannelBuffer)]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gets</span><span class="params">(<span name="keys">keys: Iterable[String]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Map[String, (<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>)]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a set of keys from the server, together with a &quot;cas unique&quot;
+token.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server, together with a &quot;cas unique&quot;
+token.  The token is treated opaquely by the memcache client but
+is in reality a string-encoded u64.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, (T, ChannelBuffer)] of all the
+keys the server had, together with their &quot;cas unique&quot; token
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#gets" data-isabs="false">
+      <a id="gets(String):Future[Option[(ChannelBuffer, ChannelBuffer)]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">gets</span><span class="params">(<span name="key">key: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[(<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>, <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>)]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a key from the server, with a &quot;cas unique&quot; token.</p><div class="fullcomment"><div class="comment cmt"><p>Get a key from the server, with a &quot;cas unique&quot; token.  The token
+is treated opaquely by the memcache client but is in reality a
+string-encoded u64.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#getsResult" data-isabs="false">
+      <a id="getsResult(Iterable[String]):Future[GetsResult]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getsResult</span><span class="params">(<span name="keys">keys: Iterable[String]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.memcached.GetsResult" class="extype" href="../GetsResult.html">GetsResult</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server. Returns a Future[GetsResult] that
+encapsulates hits, misses and failures. This variant includes the casToken
+from memcached.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#incr" data-isabs="false">
+      <a id="incr(String,Long):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incr</span><span class="params">(<span name="key">key: String</span>, <span name="delta">delta: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Increment a key.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a key. Interpret the value as an Long if it is parsable.
+This operation has no effect if there is no value there already.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#incr" data-isabs="false">
+      <a id="incr(String):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incr</span><span class="params">(<span name="key">key: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Option" class="extype">Option</span>[<span name="java.lang.Long" class="extype">Long</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#loadZKData" data-isabs="false">
+      <a id="loadZKData:() ⇒ Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadZKData</span><span class="result">: () ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#prepend" data-isabs="false">
+      <a id="prepend(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">prepend</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Prepend bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend bytes to the beginning of an existing key. If the key doesn't
+exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#prepend" data-isabs="false">
+      <a id="prepend(String,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">prepend</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Prepend a set of bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a set of bytes to the beginning of an existing key. If the key
+doesn't exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.migration.MigrationClient#proxyClient" data-isabs="false">
+      <a id="proxyClient:FrontendClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">proxyClient</span><span class="result">: <a name="com.twitter.finagle.memcached.migration.MigrationClient.FrontendClient" class="extype" href="MigrationClient$FrontendClient.html">FrontendClient</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.migration.MigrationClient" class="extype" href="">MigrationClient</a> → <a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#quit" data-isabs="false">
+      <a id="quit():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quit</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a quit command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a quit command to the server. Alternative to release, for
+protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>none
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#reconnectZK" data-isabs="false">
+      <a id="reconnectZK:() ⇒ Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reconnectZK</span><span class="result">: () ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reconnect to the zookeeper, this maybe invoked when zookeeper connection expired and the
+node data watcher previously registered got dropped, hence re-attache the data wather here.</p><div class="fullcomment"><div class="comment cmt"><p>Reconnect to the zookeeper, this maybe invoked when zookeeper connection expired and the
+node data watcher previously registered got dropped, hence re-attache the data wather here.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#release" data-isabs="false">
+      <a id="release():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">release</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">release the underlying service(s)
+</p><div class="fullcomment"><div class="comment cmt"><p>release the underlying service(s)
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#replace" data-isabs="false">
+      <a id="replace(String,Int,Time,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">replace</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
+operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#replace" data-isabs="false">
+      <a id="replace(String,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">replace</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Replace an item if it exists.</p><div class="fullcomment"><div class="comment cmt"><p>Replace an item if it exists. If it doesn't exist, the operation has no
+effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#set" data-isabs="false">
+      <a id="set(String,Int,Time,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set</span><span class="params">(<span name="key">key: String</span>, <span name="flags">flags: <span name="scala.Int" class="extype">Int</span></span>, <span name="expiry">expiry: <span name="com.twitter.util.Time" class="extype">Time</span></span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#set" data-isabs="false">
+      <a id="set(String,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set</span><span class="params">(<span name="key">key: String</span>, <span name="value">value: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing values.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient#stats" data-isabs="false">
+      <a id="stats(Option[String]):Future[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stats</span><span class="params">(<span name="args">args: <span name="scala.Option" class="extype">Option</span>[String]</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[String]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send a stats command with optional arguments to the server</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with optional arguments to the server</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a> → <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#stats" data-isabs="false">
+      <a id="stats():Future[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stats</span><span class="params">()</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[String]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.BaseClient#stats" data-isabs="false">
+      <a id="stats(String):Future[Seq[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stats</span><span class="params">(<span name="args">args: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[String]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.migration.MigrationClient#statsReceiver" data-isabs="false">
+      <a id="statsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">statsReceiver</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../../stats/StatsReceiver.html">StatsReceiver</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.migration.MigrationClient" class="extype" href="">MigrationClient</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.Client#withBytes" data-isabs="false">
+      <a id="withBytes:BaseClient[Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withBytes</span><span class="result">: <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Adaptor to use Array[Byte] as values</p><div class="fullcomment"><div class="comment cmt"><p>Adaptor to use Array[Byte] as values</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.Client#withStrings" data-isabs="false">
+      <a id="withStrings:BaseClient[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStrings</span><span class="result">: <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a>[String]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Adaptor to use String as values</p><div class="fullcomment"><div class="comment cmt"><p>Adaptor to use String as values</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.migration.MigrationClient#zkClient" data-isabs="false">
+      <a id="zkClient:ZooKeeperClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zkClient</span><span class="result">: <span name="com.twitter.common.zookeeper.ZooKeeperClient" class="extype">ZooKeeperClient</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.migration.MigrationClient" class="extype" href="">MigrationClient</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.migration.MigrationClient#zkPath" data-isabs="false">
+      <a id="zkPath:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zkPath</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.migration.MigrationClient" class="extype" href="">MigrationClient</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="../ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></h3>
+            </div><div name="com.twitter.finagle.memcached.ProxyClient" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.memcached.ProxyClient" class="extype" href="../ProxyClient.html">ProxyClient</a></h3>
+            </div><div name="com.twitter.finagle.memcached.Client" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.memcached.Client" class="extype" href="../Client.html">Client</a></h3>
+            </div><div name="com.twitter.finagle.memcached.BaseClient" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.memcached.BaseClient" class="extype" href="../BaseClient.html">BaseClient</a>[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]</h3>
+            </div><div name="scala.AnyRef" class="parent">
+              <h3>Inherited from AnyRef</h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

@@ -32,9 +32,11 @@
       <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A service that dispatches incoming requests to registered handlers.
 In order to choose which handler to dispatch the request to, we take the path of the request and match it with
 the patterns of the pre-registered handlers. The pattern matching follows these rules:</p><ul><li>Patterns ending with &quot;/&quot; use prefix matching. Eg: the pattern &quot;foo/bar/&quot; matches these paths:
-           &quot;foo/bar&quot;, &quot;foo/bar/&quot;, &quot;foo/bar/baz&quot;, etc.</li><li>Patterns not ending with &quot;/&quot; use exact matching. Eg: the pattern &quot;foo/bar&quot; ONLY matches these two paths:
-           &quot;foo/bar&quot; and &quot;foo/bar/&quot;</li><li>Exact matching overrides prefix matching.</li><li>When multiple prefix matches exist, the longest pattern wins.
-</li></ul></div><div class="toggleContainer block">
+           &quot;foo/bar&quot;, &quot;foo/bar/&quot;, &quot;foo/bar/baz&quot;, etc.
+   Similarly, the pattern &quot;/&quot; matches all paths</li><li>Patterns not ending with &quot;/&quot; use exact matching. Eg: the pattern &quot;foo/bar&quot; ONLY matches this path:
+           &quot;foo/bar&quot;</li><li>Special case:
+     The pattern &quot;&quot; matches only &quot;/&quot; and &quot;&quot;</li></ul><p> NOTE: When multiple pattern matches exist, the longest pattern wins.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="org.jboss.netty.handler.codec.http.HttpResponse" class="extype">HttpResponse</span>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>

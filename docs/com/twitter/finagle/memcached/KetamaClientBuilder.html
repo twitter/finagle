@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">KetamaClientBuilder</span><span class="params">(<span name="_cluster">_cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>, <span name="_hashName">_hashName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>, <span name="_failureAccrualParams">_failureAccrualParams: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>, <span name="oldLibMemcachedVersionComplianceMode">oldLibMemcachedVersionComplianceMode: <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="numReps">numReps: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">KetamaClientBuilder</span><span class="params">(<span name="_group">_group: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>, <span name="_hashName">_hashName: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="_clientBuilder">_clientBuilder: <span name="scala.Option" class="extype">Option</span>[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>, <span name="_failureAccrualParams">_failureAccrualParams: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>, <span name="oldLibMemcachedVersionComplianceMode">oldLibMemcachedVersionComplianceMode: <span name="scala.Boolean" class="extype">Boolean</span></span>, <span name="numReps">numReps: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -135,18 +135,6 @@
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_cluster" data-isabs="false">
-      <a id="_cluster:Cluster[CacheNode]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_cluster</span><span class="result">: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_failureAccrualParams" data-isabs="false">
       <a id="_failureAccrualParams:(Int, Duration)"></a>
       <h4 class="signature">
@@ -156,6 +144,18 @@
       </span>
       <span class="symbol">
         <span class="name">_failureAccrualParams</span><span class="result">: (<span name="scala.Int" class="extype">Int</span>, <span name="com.twitter.util.Duration" class="extype">Duration</span>)</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#_group" data-isabs="false">
+      <a id="_group:Group[CacheNode]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_group</span><span class="result">: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>
       </span>
       </h4>
       
@@ -192,18 +192,6 @@
       </span>
       <span class="symbol">
         <span class="name">build</span><span class="params">()</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#cachePoolCluster" data-isabs="false">
-      <a id="cachePoolCluster(Cluster[CacheNode]):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">cachePoolCluster</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
       </span>
       </h4>
       
@@ -246,18 +234,6 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#cluster" data-isabs="false">
-      <a id="cluster(Cluster[InetSocketAddress]):KetamaClientBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">cluster</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#enableOldLibMemcachedVersionComplianceMode" data-isabs="false">
       <a id="enableOldLibMemcachedVersionComplianceMode():KetamaClientBuilder"></a>
       <h4 class="signature">
@@ -333,6 +309,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#group" data-isabs="false">
+      <a id="group(Group[CacheNode]):KetamaClientBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">group</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -599,7 +587,37 @@
 
         <div class="values members" id="values">
               <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#cachePoolCluster" data-isabs="false">
+      <a id="cachePoolCluster(Cluster[CacheNode]):KetamaClientBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use group(Group[CacheNode]) instead">cachePoolCluster</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use group(Group[CacheNode]) instead</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientBuilder#cluster" data-isabs="false">
+      <a id="cluster(Cluster[InetSocketAddress]):KetamaClientBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use group(Group[CacheNode]) instead">cluster</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.InetSocketAddress" class="extype">InetSocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.KetamaClientBuilder" class="extype" href="">KetamaClientBuilder</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use group(Group[CacheNode]) instead</p></dd></dl></div>
+    </li><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
       <a id="productElements:Iterator[Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">

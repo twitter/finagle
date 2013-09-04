@@ -68,7 +68,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: String</span>, <span name="port">port: Int</span>, <span name="weight">weight: Int</span>)</span><span class="result"> extends SocketAddress with Product with Serializable</span>
+        <a href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: String</span>, <span name="port">port: Int</span>, <span name="weight">weight: Int</span>, <span name="key">key: Option[String]</span>)</span><span class="result"> extends SocketAddress with Product with Serializable</span>
       </span>
       </h4>
       
@@ -215,19 +215,19 @@ we need for now.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder.html"><span class="name">KetamaClientBuilder</span></a><span class="params">(<span name="_cluster">_cluster: Cluster[CacheNode]</span>, <span name="_hashName">_hashName: Option[String]</span>, <span name="_clientBuilder">_clientBuilder: Option[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>, <span name="_failureAccrualParams">_failureAccrualParams: (Int, Duration)</span>, <span name="oldLibMemcachedVersionComplianceMode">oldLibMemcachedVersionComplianceMode: Boolean</span>, <span name="numReps">numReps: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="KetamaClientBuilder.html"><span class="name">KetamaClientBuilder</span></a><span class="params">(<span name="_group">_group: Group[CacheNode]</span>, <span name="_hashName">_hashName: Option[String]</span>, <span name="_clientBuilder">_clientBuilder: Option[com.twitter.finagle.builder.ClientBuilder[_, _, _, _, com.twitter.finagle.builder.ClientConfig.Yes]]</span>, <span name="_failureAccrualParams">_failureAccrualParams: (Int, Duration)</span>, <span name="oldLibMemcachedVersionComplianceMode">oldLibMemcachedVersionComplianceMode: Boolean</span>, <span name="numReps">numReps: Int</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientKey" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientKey" data-isabs="true">
       <a id="KetamaClientKey:KetamaClientKey"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="params">(<span name="host">host: String</span>, <span name="port">port: Int</span>, <span name="weight">weight: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -306,6 +306,18 @@ the key value.</p>
       </span>
       </h4>
       <p class="comment cmt">This class is designed to support replicated memcached setups.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ProxyClient" data-isabs="true">
+      <a id="ProxyClient:ProxyClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ProxyClient.html"><span class="name">ProxyClient</span></a><span class="result"> extends Client</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.RubyMemCacheClient" data-isabs="false">
       <a id="RubyMemCacheClient:RubyMemCacheClient"></a>
       <h4 class="signature">
@@ -330,18 +342,6 @@ the key value.</p>
       </span>
       </h4>
       <p class="comment cmt">Builder for memcache-client (MemCache) compatible client.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.memcached.Server" data-isabs="false">
-      <a id="Server:Server"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Server.html"><span class="name">Server</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">An in-process memcached server.</p>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.StaticCachePoolCluster" data-isabs="false">
       <a id="StaticCachePoolCluster:StaticCachePoolCluster"></a>
       <h4 class="signature">
@@ -422,10 +422,35 @@ the key value.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ZookeeperCachePoolCluster.html"><span class="name">ZookeeperCachePoolCluster</span></a><span class="result"> extends CachePoolCluster</span>
+        <a href="ZookeeperCachePoolCluster.html"><span class="name">ZookeeperCachePoolCluster</span></a><span class="result"> extends CachePoolCluster with ZookeeperStateMonitor</span>
       </span>
       </h4>
       <p class="comment cmt">Zookeeper based cache pool cluster with a serverset as the underlying pool.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor" data-isabs="true">
+      <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ZookeeperStateMonitor.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A zk monitor trait that assists with monitoring a given zk path for any node data change,
+in which the provided zk data handling implementation will be invoked.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.Server" data-isabs="false">
+      <a id="Server:Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An in-process memcached server.</p>
     </li></ol>
             </div>
 
@@ -433,7 +458,19 @@ the key value.</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.memcached.CachePoolCluster" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.CacheNodeGroup" data-isabs="false">
+      <a id="CacheNodeGroup:CacheNodeGroup"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CacheNodeGroup$.html"><span class="name">CacheNodeGroup</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.CachePoolCluster" data-isabs="false">
       <a id="CachePoolCluster:CachePoolCluster"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -506,6 +543,18 @@ the key value.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.KetamaClientKey" data-isabs="false">
+      <a id="KetamaClientKey:KetamaClientKey"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="KetamaClientKey$.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.PHPMemCacheClientBuilder" data-isabs="false">
       <a id="PHPMemCacheClientBuilder:PHPMemCacheClientBuilder"></a>
       <h4 class="signature">
@@ -555,6 +604,18 @@ the key value.</p>
       </h4>
       <p class="comment cmt">ZooKeeper based cache pool cluster companion object
 </p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor" data-isabs="false">
+      <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ZookeeperStateMonitor$.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.memcached.java" data-isabs="false">
       <a id="java:java"></a>
       <h4 class="signature">
@@ -564,6 +625,18 @@ the key value.</p>
       </span>
       <span class="symbol">
         <a href="java/package.html"><span class="name">java</span></a>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.migration" data-isabs="false">
+      <a id="migration:migration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="migration/package.html"><span class="name">migration</span></a>
       </span>
       </h4>
       

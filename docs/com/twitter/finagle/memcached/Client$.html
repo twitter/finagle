@@ -136,17 +136,17 @@
       </h4>
       <p class="shortcomment cmt">Construct a client from a single Service.</p>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.Client#apply" data-isabs="false">
-      <a id="apply(Cluster[SocketAddress]):Client"></a>
+      <a id="apply(Group[SocketAddress]):Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a></span>
+        <span class="name">apply</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="../Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Construct a client from a Cluster
+      <p class="shortcomment cmt">Construct a client from a Group
 </p>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.Client#apply" data-isabs="false">
       <a id="apply(String):Client"></a>
@@ -372,7 +372,27 @@
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.memcached.Client#apply" data-isabs="false">
+      <a id="apply(Cluster[SocketAddress]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use group instead">apply</span><span class="params">(<span name="cluster">cluster: <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.memcached.Client" class="extype" href="Client.html">Client</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Construct a client from a Cluster
+</p><div class="fullcomment"><div class="comment cmt"><p>Construct a client from a Cluster
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use group instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

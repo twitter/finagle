@@ -25,7 +25,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ZookeeperCachePoolCluster</span><span class="result"> extends <a name="com.twitter.finagle.memcached.CachePoolCluster" class="extype" href="CachePoolCluster.html">CachePoolCluster</a></span>
+        <span class="name">ZookeeperCachePoolCluster</span><span class="result"> extends <a name="com.twitter.finagle.memcached.CachePoolCluster" class="extype" href="CachePoolCluster.html">CachePoolCluster</a> with <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></span>
       </span>
       </h4>
       
@@ -35,7 +35,7 @@ It will also monitor the serverset parent node for cache pool config data, cache
 update will be triggered whenever cache config data change event happens.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.memcached.CachePoolCluster" class="extype" href="CachePoolCluster.html">CachePoolCluster</a>, <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a>, <a name="com.twitter.finagle.memcached.CachePoolCluster" class="extype" href="CachePoolCluster.html">CachePoolCluster</a>, <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -49,7 +49,7 @@ update will be triggered whenever cache config data change event happens.
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="in"><span>ZookeeperCachePoolCluster</span></li><li name="com.twitter.finagle.memcached.CachePoolCluster" class="in"><span>CachePoolCluster</span></li><li name="com.twitter.finagle.builder.Cluster" class="in"><span>Cluster</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="in"><span>ZookeeperCachePoolCluster</span></li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="in"><span>ZookeeperStateMonitor</span></li><li name="com.twitter.finagle.memcached.CachePoolCluster" class="in"><span>CachePoolCluster</span></li><li name="com.twitter.finagle.builder.Cluster" class="in"><span>Cluster</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -127,6 +127,21 @@ update will be triggered whenever cache config data change event happens.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster#applyZKData" data-isabs="false">
+      <a id="applyZKData(Array[Byte]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applyZKData</span><span class="params">(<span name="data">data: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Load the zookeeper node data as well as attaching another data watcher, then invoke the
+applyZKData implementation to process the data string.</p><div class="fullcomment"><div class="comment cmt"><p>Load the zookeeper node data as well as attaching another data watcher, then invoke the
+applyZKData implementation to process the data string.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="extype" href="">ZookeeperCachePoolCluster</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -229,6 +244,18 @@ update will be triggered whenever cache config data change event happens.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#loadZKData" data-isabs="false">
+      <a id="loadZKData:() ⇒ Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadZKData</span><span class="result">: () ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.builder.Cluster#map" data-isabs="false">
       <a id="map[U]((CacheNode) ⇒ U):Cluster[U]"></a>
       <h4 class="signature">
@@ -292,6 +319,21 @@ update will be triggered whenever cache config data change event happens.
       <p class="shortcomment cmt">A Future object that is defined when the cluster is initialized.</p><div class="fullcomment"><div class="comment cmt"><p>A Future object that is defined when the cluster is initialized.
 Cluster users can subscribe to this Future object to check or get notified of the availability of the cluster.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the Future object
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#reconnectZK" data-isabs="false">
+      <a id="reconnectZK:() ⇒ Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reconnectZK</span><span class="result">: () ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reconnect to the zookeeper, this maybe invoked when zookeeper connection expired and the
+node data watcher previously registered got dropped, hence re-attache the data wather here.</p><div class="fullcomment"><div class="comment cmt"><p>Reconnect to the zookeeper, this maybe invoked when zookeeper connection expired and the
+node data watcher previously registered got dropped, hence re-attache the data wather here.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.CachePoolCluster#snap" data-isabs="false">
       <a id="snap:(Seq[CacheNode], Future[Spool[Change[CacheNode]]])"></a>
       <h4 class="signature">
@@ -306,6 +348,20 @@ Cluster users can subscribe to this Future object to check or get notified of th
       <p class="shortcomment cmt">Takes a snapshot of the collection; returns the current elements and a Spool of future updates
 </p><div class="fullcomment"><div class="comment cmt"><p>Takes a snapshot of the collection; returns the current elements and a Spool of future updates
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.CachePoolCluster" class="extype" href="CachePoolCluster.html">CachePoolCluster</a> → <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster#statsReceiver" data-isabs="false">
+      <a id="statsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">statsReceiver</span><span class="result">: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Optional, the destination to report the stats to
+</p><div class="fullcomment"><div class="comment cmt"><p>Optional, the destination to report the stats to
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="extype" href="">ZookeeperCachePoolCluster</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -393,6 +449,30 @@ the updating pool is still done one by one.
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster#zkClient" data-isabs="false">
+      <a id="zkClient:ZooKeeperClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zkClient</span><span class="result">: <span name="com.twitter.common.zookeeper.ZooKeeperClient" class="extype">ZooKeeperClient</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">zookeeper client talking to the zookeeper, it will only be used to read zookeeper</p><div class="fullcomment"><div class="comment cmt"><p>zookeeper client talking to the zookeeper, it will only be used to read zookeeper</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="extype" href="">ZookeeperCachePoolCluster</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster#zkPath" data-isabs="false">
+      <a id="zkPath:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zkPath</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">the zookeeper path representing the cache pool</p><div class="fullcomment"><div class="comment cmt"><p>the zookeeper path representing the cache pool</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="extype" href="">ZookeeperCachePoolCluster</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -400,7 +480,9 @@ the updating pool is still done one by one.
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.finagle.memcached.CachePoolCluster" class="parent">
+        <div name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></h3>
+            </div><div name="com.twitter.finagle.memcached.CachePoolCluster" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.memcached.CachePoolCluster" class="extype" href="CachePoolCluster.html">CachePoolCluster</a></h3>
             </div><div name="com.twitter.finagle.builder.Cluster" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.builder.Cluster" class="extype" href="../builder/Cluster.html">Cluster</a>[<a name="com.twitter.finagle.memcached.CacheNode" class="extype" href="CacheNode.html">CacheNode</a>]</h3>

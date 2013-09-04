@@ -31,7 +31,7 @@
       
       <div class="fullcommenttop" id="comment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a>, <a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a>, <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a>, <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a>, <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a>, <a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a>, <span name="scala.Proxy" class="extype">Proxy</span>, <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span>, <a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a>, <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.http.Request.MockRequest" class="in"><span>MockRequest</span></li><li name="com.twitter.finagle.http.Request" class="in"><span>Request</span></li><li name="com.twitter.finagle.http.netty.HttpRequestProxy" class="in"><span>HttpRequestProxy</span></li><li name="com.twitter.finagle.http.netty.HttpMessageProxy" class="in"><span>HttpMessageProxy</span></li><li name="org.jboss.netty.handler.codec.http.HttpRequest" class="in"><span>HttpRequest</span></li><li name="com.twitter.finagle.http.Message" class="in"><span>Message</span></li><li name="org.jboss.netty.handler.codec.http.HttpMessage" class="in"><span>HttpMessage</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.http.Request.MockRequest" class="in"><span>MockRequest</span></li><li name="com.twitter.finagle.http.Request" class="in"><span>Request</span></li><li name="com.twitter.finagle.http.netty.HttpRequestProxy" class="in"><span>HttpRequestProxy</span></li><li name="com.twitter.finagle.http.netty.HttpMessageProxy" class="in"><span>HttpMessageProxy</span></li><li name="scala.Proxy" class="in"><span>Proxy</span></li><li name="org.jboss.netty.handler.codec.http.HttpRequest" class="in"><span>HttpRequest</span></li><li name="com.twitter.finagle.http.Message" class="in"><span>Message</span></li><li name="org.jboss.netty.handler.codec.http.HttpMessage" class="in"><span>HttpMessage</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -588,7 +588,7 @@ In a response, it uses the Set-Cookie headers.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li visbl="pub" name="scala.Proxy#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -596,10 +596,10 @@ In a response, it uses the Set-Cookie headers.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="that">that: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#expires" data-isabs="false">
       <a id="expires:Option[String]"></a>
       <h4 class="signature">
@@ -1040,7 +1040,7 @@ users should use withInputStream.)
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a> → HttpRequest</dd></dl></div>
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="scala.Proxy#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1051,7 +1051,7 @@ users should use withInputStream.)
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#headers" data-isabs="false">
       <a id="headers:HeaderMap"></a>
       <h4 class="signature">
@@ -1527,6 +1527,18 @@ preserved, though may not be appropriate for the new media type.
       </span>
       </h4>
       <p class="shortcomment cmt">Set Retry-After header</p><div class="fullcomment"><div class="comment cmt"><p>Set Retry-After header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Message" class="extype" href="Message.html">Message</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.http.netty.HttpMessageProxy#self" data-isabs="false">
+      <a id="self:HttpMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">self</span><span class="result">: <span name="org.jboss.netty.handler.codec.http.HttpMessage" class="extype">HttpMessage</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a> → Proxy</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Message#server" data-isabs="false">
       <a id="server:Option[String]"></a>
       <h4 class="signature">
@@ -1694,7 +1706,7 @@ preserved, though may not be appropriate for the new media type.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.http.Request" class="extype" href="Request.html">Request</a> → Proxy → AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.http.Request#uri" data-isabs="false">
       <a id="uri:String"></a>
       <h4 class="signature">
@@ -2022,6 +2034,8 @@ and then call setContent() with the underlying buffer.)
               <h3>Inherited from <a name="com.twitter.finagle.http.netty.HttpRequestProxy" class="extype" href="netty/HttpRequestProxy.html">HttpRequestProxy</a></h3>
             </div><div name="com.twitter.finagle.http.netty.HttpMessageProxy" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.http.netty.HttpMessageProxy" class="extype" href="netty/HttpMessageProxy.html">HttpMessageProxy</a></h3>
+            </div><div name="scala.Proxy" class="parent">
+              <h3>Inherited from <span name="scala.Proxy" class="extype">Proxy</span></h3>
             </div><div name="org.jboss.netty.handler.codec.http.HttpRequest" class="parent">
               <h3>Inherited from <span name="org.jboss.netty.handler.codec.http.HttpRequest" class="extype">HttpRequest</span></h3>
             </div><div name="com.twitter.finagle.http.Message" class="parent">
