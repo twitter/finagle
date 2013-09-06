@@ -190,17 +190,18 @@ object Group {
    * are deprecated, so this constructor acts as a temporary
    * bridge.
    */
-  def fromCluster[T](underlying: Cluster[T]): Group[T] = new Group[T] {
+  def fromCluster[T](underlying: Cluster[T]): Group[T] = {
     val (snap, edits) = underlying.snap
-    @volatile var current: Set[T] = snap.toSet
-    edits foreach { spool =>
-      spool foreach {
-        case Cluster.Add(t) => current += t
-        case Cluster.Rem(t) => current -= t
+    new Group[T] {
+      @volatile var current: Set[T] = snap.toSet
+      edits foreach { spool =>
+        spool foreach {
+          case Cluster.Add(t) => current += t
+          case Cluster.Rem(t) => current -= t
+        }
       }
+
+      def members = current
     }
-
-    def members = current
   }
-
 }
