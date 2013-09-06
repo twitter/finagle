@@ -20,7 +20,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class MigrationClientSpec extends FunSuite with BeforeAndAfterEach with BeforeAndAfter {
+class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfter {
   /**
    * Note: This integration test requires a real Memcached server to run.
    */
