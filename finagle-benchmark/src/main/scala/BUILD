@@ -6,6 +6,13 @@ benchmark(name='scala',
     pants('finagle/finagle-ostrich4'),
     pants('finagle/finagle-stats'),
     pants('finagle/finagle-zipkin'),
+    pants('finagle/finagle-swift'),
+    compiled_idl(
+      idl_deps=pants('finagle/finagle-benchmark/src/main/thrift'),
+      compiler='scrooge-legacy',
+      language='scala',
+      rpc_style='finagle'
+    )
   ],
   sources=rglobs('*.scala')
 )

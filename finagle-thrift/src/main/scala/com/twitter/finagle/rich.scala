@@ -2,19 +2,22 @@ package com.twitter.finagle
 
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.util.Future
-import java.lang.reflect.Constructor
+import com.twitter.util.{Future, NonFatal}
+import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.buffer.ChannelBuffer
 
 private object ThriftUtil {
-  def findClass[A](name: String): Option[Class[A]] =
-    try {
-      Some(Class.forName(name).asInstanceOf[Class[A]])
-    } catch {
+  def findClass1(name: String): Option[Class[_]] =
+    try Some(Class.forName(name)) catch {
       case _: ClassNotFoundException => None
     }
+
+  def findClass[A](name: String): Option[Class[A]] =
+    for {
+      cls <- findClass1(name)
+    } yield cls.asInstanceOf[Class[A]]
 
   def findConstructor[A](clz: Class[A], paramTypes: Class[_]*): Option[Constructor[A]] =
     try {
@@ -22,9 +25,31 @@ private object ThriftUtil {
     } catch {
       case _: NoSuchMethodException => None
     }
+    
+  def findMethod(clz: Class[_], name: String, params: Class[_]*): Option[Method] =
+    try Some(clz.getMethod(name, params:_*)) catch {
+      case _: NoSuchMethodException => None
+    }
 
   def findRootWithSuffix(str: String, suffix: String): Option[String] =
     if (str.endsWith(suffix)) Some(str.dropRight(suffix.length)) else None
+
+  lazy val findSwiftClass: Class[_] => Option[Class[_]] = {
+    val f = for {
+      serviceSym <- findClass1("com.twitter.finagle.exp.swift.ServiceSym")
+      meth <- findMethod(serviceSym, "isService", classOf[Class[_]])
+    } yield {
+      k: Class[_] =>
+        try {
+          if (meth.invoke(null, k).asInstanceOf[Boolean]) Some(k)
+          else None
+        } catch {
+          case NonFatal(_) => None
+        }
+    }
+    
+    f getOrElse Function.const(None)
+  }
 }
 
 /**
@@ -172,12 +197,25 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
         clientCls  <- findClass[Iface](baseName + "$FinagledClient")
         cons       <- findConstructor(clientCls, scrooge2FinagleClientParamTypes: _*)
       } yield cons.newInstance(underlying, protocolFactory, None, stats)
+      
+    def trySwiftClient: Option[Iface] =
+      for {
+        swiftClass <- findSwiftClass(cls)
+        proxy <- findClass1("com.twitter.finagle.exp.swift.SwiftProxy")
+        meth <- findMethod(proxy, "newClient", 
+          classOf[Service[_, _]], classOf[ClassManifest[_]])
+      } yield {
+        val manifest = ClassManifest.fromClass(swiftClass)
+          .asInstanceOf[ClassManifest[Iface]]
+        meth.invoke(null, underlying, manifest).asInstanceOf[Iface]
+      }
 
     val iface =
       tryThriftFinagleClient orElse
       tryScrooge3FinagleClient orElse
       tryScrooge3FinagledClient orElse
-      tryScrooge2Client
+      tryScrooge2Client orElse
+      trySwiftClient
 
     iface getOrElse {
       throw new IllegalArgumentException("Iface %s is not a valid thrift iface".format(clsName))
@@ -224,14 +262,23 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
                       findClass[BinaryService](baseName + "$FinagledService")
         cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
+    
+    def trySwiftService(iface: Class[_]): Option[BinaryService] =
+      for {
+        _ <- findSwiftClass(iface)
+        swiftServiceCls <- findClass1("com.twitter.finagle.exp.swift.SwiftService")
+        const <- findConstructor(swiftServiceCls, classOf[Object])
+      } yield const.newInstance(impl).asInstanceOf[BinaryService]
 
     def tryClass(cls: Class[_]): Option[BinaryService] =
-      tryThriftFinagleService(cls) orElse tryScroogeFinagledService(cls) orElse
-        // walk the entire inheritance graph
-        (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
+      tryThriftFinagleService(cls) orElse
+      tryScroogeFinagledService(cls) orElse
+      trySwiftService(cls) orElse
+      (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
 
     tryClass(impl.getClass).getOrElse {
-      throw new IllegalArgumentException("argument implements no candidate ifaces")
+      throw new IllegalArgumentException(
+        "argument implements no candidate ifaces")
     }
   }
 

@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter</groupId>
-  <artifactId>finagle-benchmark</artifactId>
+  <artifactId>finagle-swift</artifactId>
   <packaging>jar</packaging>
   <version>6.5.3-SNAPSHOT</version>
   <parent>
@@ -17,41 +17,49 @@
   <dependencies>
     <!-- library dependencies -->
     <dependency>
-      <groupId>com.google.caliper</groupId>
-      <artifactId>caliper</artifactId>
-      <version>0.5-rc1</version>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>0.5.0</version>
       <exclusions>
-        <!-- a more modern guava is provided through swift -->
         <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.6.1</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.twitter.com.facebook.swift</groupId>
+      <artifactId>swift-codec</artifactId>
+      <version>0.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-stats</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-ostrich4</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-zipkin</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-swift</artifactId>
       <version>6.5.3-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -61,21 +69,9 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>scrooge-runtime</artifactId>
-      <version>3.7.1-SNAPSHOT</version>
+      <artifactId>finagle-test</artifactId>
+      <scope>test</scope>
+      <version>6.5.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>com.twitter</groupId>
-        <artifactId>maven-finagle-thrift-plugin</artifactId>
-        <configuration>
-          <thriftGenerators>
-            <thriftGenerator>scrooge</thriftGenerator>
-          </thriftGenerators>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

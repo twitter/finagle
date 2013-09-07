@@ -38,6 +38,7 @@
     <module>finagle-stats</module>
     <module>finagle-stream</module>
     <module>finagle-stress</module>
+    <module>finagle-swift</module>
     <module>finagle-test</module>
     <module>finagle-thrift</module>
     <module>finagle-thriftmux</module>
