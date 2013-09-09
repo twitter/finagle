@@ -9,9 +9,14 @@ object Finagle extends Build {
   val libVersion = "6.5.2"
   val zkVersion = "3.3.4"
   val utilVersion = "6.4.0"
+  val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.6.6.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % "9.1.2"
-  val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
+  val jacksonLibs = Seq(
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+  )
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
@@ -180,8 +185,8 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.9",
-      jacksonLib)
+      "com.twitter.common" % "metrics" % "0.0.9"
+    ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
@@ -205,9 +210,8 @@ object Finagle extends Build {
     name := "finagle-exception",
     libraryDependencies ++= Seq(
       util("codec"),
-      jacksonLib,
       "com.twitter" % "streamyj" % "0.4.1" % "test"
-    ) ++ scroogeLibs
+    ) ++ scroogeLibs ++ jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -303,12 +307,9 @@ object Finagle extends Build {
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
-      "com.fasterxml.jackson.core" % "jackson-core" % "2.2.2",
-      "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.2",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.2",
       "com.google.guava" % "guava" % "13.0",
       "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
-    )
+    ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
   lazy val finagleKestrel = Project(
