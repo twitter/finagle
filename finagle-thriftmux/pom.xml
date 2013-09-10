@@ -63,7 +63,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime</artifactId>
-      <version>3.7.1-SNAPSHOT</version>
+      <version>3.8.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
