@@ -9,12 +9,11 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, SimpleFilter, tracing}
 import com.twitter.util.{Time, Await, Base64StringEncoder, Future}
-import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
 import org.apache.thrift.protocol.TBinaryProtocol
-import org.apache.thrift.transport.TIOStreamTransport
+import org.apache.thrift.transport.TMemoryBuffer
 import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
 
 object RawZipkinTracer {
@@ -97,35 +96,29 @@ private[thrift] class RawZipkinTracer(
   def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
 
   /**
-   * Serialize the spans, base64 encode and shove it all in a list.
+   * Serialize the span, base64 encode and shove it all in a list.
    */
-  private def createLogEntries(span: Span): ArrayBuffer[LogEntry] = {
-    var msgs = new ArrayBuffer[LogEntry]()
-
-    try {
-      val s = span.toThrift
-      val baos = new ByteArrayOutputStream
-      s.write(protocolFactory.getProtocol(new TIOStreamTransport(baos)))
-      val serializedBase64Span = Base64StringEncoder.encode(baos.toByteArray) + '\n'
-      msgs = msgs :+ new LogEntry(category = TraceCategory, message = serializedBase64Span)
-    } catch {
-      case e: Throwable => statsReceiver.counter("create_log_entries", "error", e.getClass.getName).incr()
-    }
-
-    msgs
+  private def createLogEntries(span: Span): Future[Seq[LogEntry]] = Future {
+    val buffer = new TMemoryBuffer(512) // 512 bytes fits small spans, but it can grow for bigger spans
+    span.toThrift.write(protocolFactory.getProtocol(buffer))
+    val thriftBytes = buffer.getArray.take(buffer.length)
+    val serializedBase64Span = Base64StringEncoder.encode(thriftBytes) + '\n'
+    Seq(new LogEntry(category = TraceCategory, message = serializedBase64Span))
   }
 
   /**
    * Log the span data via Scribe.
    */
-  def logSpan(span: Span): Future[Unit] =
-    client.log(createLogEntries(span)) onSuccess {
+  def logSpan(span: Span): Future[Unit] = {
+    val logEntries = createLogEntries(span)
+    logEntries.flatMap(client.log) onSuccess {
       case ResultCode.Ok => statsReceiver.scope("log_span").counter("ok").incr()
       case ResultCode.TryLater => statsReceiver.scope("log_span").counter("try_later").incr()
       case _ => () /* ignore */
     } onFailure {
       case e: Throwable => statsReceiver.counter("log_span", "error", e.getClass.getName).incr()
     } map(_ => ())
+  }
 
   /**
    * Mutate the Span with whatever new info we have.

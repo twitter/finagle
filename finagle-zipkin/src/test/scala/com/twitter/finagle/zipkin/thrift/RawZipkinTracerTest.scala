@@ -19,6 +19,46 @@ class RawZipkinTracerTest extends FunSuite with MockitoSugar {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
+  test("formulate scribe log message correctly") {
+    val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
+      override val client = mock[scribe.FinagledClient]
+    }
+
+    val localEndpoint = Endpoint(2323, 23)
+    val remoteEndpoint = Endpoint(333, 22)
+
+    val annotations = Seq(
+      ZipkinAnnotation(Time.fromSeconds(123), "cs", localEndpoint, None),
+      ZipkinAnnotation(Time.fromSeconds(126), "cr", localEndpoint, None),
+      ZipkinAnnotation(Time.fromSeconds(123), "ss", remoteEndpoint, None),
+      ZipkinAnnotation(Time.fromSeconds(124), "sr", remoteEndpoint, None),
+      ZipkinAnnotation(Time.fromSeconds(123), "llamas", localEndpoint, None)
+    )
+
+    val span = Span(
+      traceId = traceId,
+      annotations = annotations,
+      _serviceName = Some("hickupquail"),
+      _name=Some("foo"),
+      bAnnotations = Seq.empty[BinaryAnnotation],
+      endpoint = localEndpoint)
+
+    val expected = new LogEntry(
+      category = "zipkin",
+      message = "CgABAAAAAAAAAHsLAAMAAAADZm9vCgAEAAAAAAAAAHsKAAUAAAAAAAAAe" +
+        "w8ABgwAAAAFCgABAAAAAAdU1MALAAIAAAACY3MMAAMIAAEAAAkTBgACABcLAAMAAA" +
+        "ALaGlja3VwcXVhaWwAAAoAAQAAAAAHgpuACwACAAAAAmNyDAADCAABAAAJEwYAAgA" +
+        "XCwADAAAAC2hpY2t1cHF1YWlsAAAKAAEAAAAAB1TUwAsAAgAAAAJzcwwAAwgAAQAA" +
+        "AU0GAAIAFgsAAwAAAAtoaWNrdXBxdWFpbAAACgABAAAAAAdkFwALAAIAAAACc3IMA" +
+        "AMIAAEAAAFNBgACABYLAAMAAAALaGlja3VwcXVhaWwAAAoAAQAAAAAHVNTACwACAA" +
+        "AABmxsYW1hcwwAAwgAAQAACRMGAAIAFwsAAwAAAAtoaWNrdXBxdWFpbAAAAgAJAQA=\n")
+
+    when(tracer.client.log(any[Seq[LogEntry]])).thenReturn(Future(ResultCode.Ok))
+    tracer.logSpan(span)
+
+    verify(tracer.client).log(Seq(expected))
+  }
+
   test("send all traces to scribe") {
     val tracer = new RawZipkinTracer("localhost", 1463, NullStatsReceiver) {
       override val client = mock[scribe.FinagledClient]
