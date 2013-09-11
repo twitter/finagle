@@ -6,6 +6,40 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.6.0
+~~~~~
+
+- `finagle-core`: Add a RetryPolicy constant for retrying on ChannelClosedExceptions.
+- `finagle-core`: ChannelSnooper: Print exceptions via Logger
+- `finagle-core`: Finagle client/server APIs: s/target/addr/g
+- `finagle-core`: Introduce swappable schedulers, ThreadPool scheduler.
+- `finagle-core`: Replacing ostrich-specific Stats with StatsReceiver interface
+- `finagle-core`: Tests for BroadcastStatsReceiver
+- `finagle-core`: adding service name to a service exception
+- `finagle-core`: fix file mispelling for StabilizingGroup.scala
+- `finagle-core`: fix memory leak in Group#fromCluster
+- `finagle-core`: refactor use of InetSocketAddress group and deprecate use of cluster in cache client
+- `finagle-http`: Add Access-Control-Expose-Headers to Finagle CORSFilter
+- `finagle-http`: Fix Path comments, improve sbt definition
+- `finagle-http`: Http connection manager: close synchronously
+- `finagle-http`: Make behavior of HttpMuxer match its javadoc
+- `finagle-http`: Mix in Proxy with HttpMessageProxy
+- `finagle-http`: bump request/response sizes to 5 megs
+- `finagle-memcached`: Memcached Ketama Client Builder:  Add group support that is compatible with oldlibmemcached , creates CacheNodes with ipAddress instead of hostname.
+- `finagle-memcached`: Update jackson to 2.2.2
+- `finagle-memcached`: allow custom key in ketama client
+- `finagle-memcached`: better exception messages for invalid keys
+- `finagle-memcached`: migration client
+- `finagle-ostrich4`: improve perf of Counter and Stat
+- `finagle-swift`: experimental swift-based thrift server and client An experimental annotation based proxy and dispatcher for thrift, using Facebook???s swift for serialization.
+- `finagle-thrift`: breaking out finagle, higher-kinded-type interface
+- `finagle-thrift`: fix finagle-thrift rich to work with scrooge 3.6.0
+- `finagle-thrift`: move scrooge-runtime to scrooge
+- `finagle-thrift`: remove use of deprecated generated ostrich ThriftServer
+- `finagle-zipkin`: Add newlines to scribe message
+- `finagle-zipkin`: Use better metric names for error stats
+- `finagle-zipkin`: optimize scribe logging to not need slf4j
+
 6.5.2
 ~~~~~
 
