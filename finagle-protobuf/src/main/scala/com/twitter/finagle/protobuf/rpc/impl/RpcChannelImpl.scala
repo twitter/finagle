@@ -52,10 +52,10 @@ class RpcChannelImpl(cb: ClientBuilder[(String, Message), (String, Message), Any
         })
     } onFailure {
       e =>
-        //log.warning("#callMethod# Failed. "+ e.getMessage)
+        log.warning("#callMethod# Failed. "+ e.getMessage)
         e match {
           case cc: ChannelClosedException => if (retries > 1) {
-            //log.warning("#callMethod# Retrying.")
+            log.warning("#callMethod# Retrying.")
             callMethod(m, controller, request, responsePrototype, done, retries - 1);
           } else {
             controller.asInstanceOf[RpcControllerWithOnFailureCallback].setFailed(e)
