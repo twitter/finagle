@@ -143,7 +143,9 @@ object Finagle extends Build {
     finagleMux, finagleThriftMux, finagleMySQL,
 
     // Use and integration
-    finagleStress, finagleExample, finagleBenchmark
+    // removing benchmark because swift can't build outside of twitter for now
+    //    finagleStress, finagleExample, finagleBenchmark
+        finagleStress, finagleExample
   )
 
   lazy val finagleTest = Project(
@@ -464,6 +466,20 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
   ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
+
+  /*
+  lazy val finagleSwift = Project(
+    id = "finagle-swift",
+    base = file("finagle-swift"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-swift",
+    libraryDependencies ++= Seq(
+      "com.twitter.com.facebook.swift" % "swift-codec" % "0.6.0"
+    )
+  ).dependsOn(finagleCore, finagleThrift)
+   */
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",
