@@ -97,8 +97,9 @@ private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
               case _ =>
           }
         case _  =>
+      } ensure {
+        Trace.record(Annotation.ClientRecv())
       }
-      Trace.record(Annotation.ClientRecv())
     }
     response
   }
