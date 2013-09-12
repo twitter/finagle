@@ -26,7 +26,7 @@ trait Hashes { self: BaseClient =>
    */
   def hExists(key: ChannelBuffer, field: ChannelBuffer): Future[JBoolean] =
     doRequest(HExists(key, field)) {
-      case IntegerReply(n) => Future.value((n == 1))
+      case IntegerReply(n) => Future.value(n == 1)
     }
 
   /**
