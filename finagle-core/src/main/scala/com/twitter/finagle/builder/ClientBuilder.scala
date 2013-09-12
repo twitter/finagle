@@ -51,7 +51,7 @@ import com.twitter.finagle.netty3.ChannelSnooper
 import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
   RetryPolicy, RetryingFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{Engine, Ssl}
-import com.twitter.finagle.stats.{GlobalStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
@@ -679,8 +679,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // that we can unittest independently.
     import com.twitter.finagle.client._
     import com.twitter.finagle.netty3.{Netty3Transporter, Netty3TransporterTLSConfig}
-
-    GlobalStatsReceiver.register(statsReceiver.scope("finagle"))
 
     val tracer = config.tracer
     val timer = DefaultTimer.twitter
