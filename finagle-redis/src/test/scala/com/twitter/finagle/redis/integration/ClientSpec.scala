@@ -273,6 +273,12 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.hGet(bar, baz)) mustEqual None
       }
 
+      "hash and field exists" in {
+        Await.result(client.hSet(foo, bar, baz))
+        Await.result(client.hExists(foo, bar)) mustEqual true
+        Await.result(client.hExists(foo, baz)) mustEqual false
+      }
+
       "delete a single field" in {
         Await.result(client.hSet(foo, bar, baz))
         Await.result(client.hDel(foo, Seq(bar))) mustEqual 1
