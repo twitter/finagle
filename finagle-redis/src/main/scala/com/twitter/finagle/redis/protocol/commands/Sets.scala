@@ -83,10 +83,13 @@ object SPop {
   def apply(args: Seq[Array[Byte]]): SPop = SPop(GetMonadArg(args, CommandBytes.SPOP))
 }
 
-case class SRandMember(key: ChannelBuffer, count:Int = 1) extends StrictKeyCommand {
+case class SRandMember(key: ChannelBuffer, count:Option[Int] = None) extends StrictKeyCommand {
   val command = Commands.SRANDMEMBER
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.SRANDMEMBER, key, StringToChannelBuffer(count.toString)))
+  override def toChannelBuffer = {
+    val commands = Seq(CommandBytes.SRANDMEMBER, key) ++
+      count.map(c => StringToChannelBuffer(c.toString))
+    RedisCodec.toUnifiedFormat(commands)
+  }
 }
 
 object SRandMember {

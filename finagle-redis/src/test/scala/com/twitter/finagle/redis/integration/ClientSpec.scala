@@ -618,6 +618,9 @@ class ClientSpec extends SpecificationWithJUnit {
         val key = StringToChannelBuffer("members")
         val allMembers = Seq(bar, baz)
 
+        val empty = Await.result(client.sRandMember(key))
+        empty must have size(0)
+
         Await.result(client.sAdd(key, List(bar))) mustEqual 1
         Await.result(client.sAdd(key, List(baz))) mustEqual 1
 
