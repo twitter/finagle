@@ -83,7 +83,7 @@ object SPop {
   def apply(args: Seq[Array[Byte]]): SPop = SPop(GetMonadArg(args, CommandBytes.SPOP))
 }
 
-case class SRandMember(key: ChannelBuffer, count:Option[Int] = None) extends StrictKeyCommand {
+case class SRandMember(key: ChannelBuffer, count: Option[Int] = None) extends StrictKeyCommand {
   val command = Commands.SRANDMEMBER
   override def toChannelBuffer = {
     val commands = Seq(CommandBytes.SRANDMEMBER, key) ++
