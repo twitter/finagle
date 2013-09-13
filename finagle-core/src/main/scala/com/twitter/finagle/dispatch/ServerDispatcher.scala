@@ -2,15 +2,15 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
-import com.twitter.util.Closable
-import com.twitter.util.{Future, Return, Time}
+import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
 object SerialServerDispatcher {
   private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
-  private val Idle = Future.never
-  private val Draining = Future.never
-  private val Closed = Future.never
+  // We don't use Future.never here, because object equality is important here
+  private val Idle = new NoFuture
+  private val Draining = new NoFuture
+  private val Closed = new NoFuture
 }
 
 /**
