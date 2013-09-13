@@ -11,7 +11,7 @@ object Finagle extends Build {
   val utilVersion = "6.5.0"
   val jacksonVersion = "2.2.2"
   val nettyLib = "io.netty" % "netty" % "3.6.6.Final"
-  val ostrichLib = "com.twitter" %% "ostrich" % "9.1.2"
+  val ostrichVersion = "com.twitter" %% "ostrich" % "9.1.2"
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -176,7 +176,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-ostrich4",
-    libraryDependencies ++= Seq(ostrichLib)
+    libraryDependencies ++= Seq(ostrichVersion)
   ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleStats = Project(
@@ -421,7 +421,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-stress",
-    libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
+    libraryDependencies ++= Seq(ostrichVersion, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
   ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
 
