@@ -47,6 +47,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.filter.ExceptionSourceFilter
+import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
 import com.twitter.finagle.netty3.ChannelSnooper
 import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
   RetryPolicy, RetryingFilter, TimeoutFilter}
@@ -156,6 +157,7 @@ private[builder] final case class ClientTimeoutConfig(
  */
 private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
   private val _group                     : Option[Group[SocketAddress]]        = None,
+  private val _loadBalancer              : Option[LoadBalancerFactory]   = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _keepAlive                 : Option[Boolean]               = None,
   private val _statsReceiverConfig       : StatsReceiverConfig           = StatsReceiverConfig(),
@@ -184,6 +186,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
    * underscores.
    */
   val group                     = _group
+  val loadBalancer              = _loadBalancer
   val codecFactory              = _codecFactory
   val statsReceiver             = _statsReceiverConfig.statsReceiver
   val hostStatsReceiver         = _statsReceiverConfig.hostStatsReceiver
@@ -220,6 +223,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
 
   def toMap = Map(
     "group"                     -> _group,
+    "loadBalancer"              -> _loadBalancer,
     "codecFactory"              -> _codecFactory,
     "tcpConnectTimeout"         -> Some(_timeoutConfig.tcpConnectTimeout),
     "requestTimeout"            -> Some(_timeoutConfig.requestTimeout),
@@ -350,6 +354,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     withConfig(_.copy(_group = Some(group)))
+
+  /**
+   * Specify a load balancer.  The load balancer implements
+   * a strategy for choosing one from a set of hosts to service a request
+   */
+  def loadBalancer(loadBalancer: LoadBalancerFactory): This =
+    withConfig(_.copy(_loadBalancer = Some(loadBalancer)))
 
   /**
    * Specify the codec. The codec implements the network protocol
@@ -767,7 +778,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       hostStatsReceiver = hostStatsReceiver,
       tracer = tracer,
       monitor = monitor,
-      reporter = NullReporterFactory
+      reporter = NullReporterFactory,
+      loadBalancerFactory = config.loadBalancer getOrElse HeapBalancerFactory
     )
 
     // Note the direct use of newStack here. This is because we want

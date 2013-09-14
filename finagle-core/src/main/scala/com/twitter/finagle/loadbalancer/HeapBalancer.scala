@@ -1,19 +1,26 @@
 package com.twitter.finagle.loadbalancer
 
-import collection.mutable.HashMap
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{
-  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory, 
-  ServiceProxy}
+  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory, ServiceProxy}
 import com.twitter.util._
 import scala.annotation.tailrec
-import util.Random
+import scala.util.Random
 
 object HeapBalancer {
   val Penalty = Int.MaxValue
   val Zero = Int.MinValue + 1
 }
+
+object HeapBalancerFactory extends LoadBalancerFactory {
+  def newLoadBalancer[Req, Rep](
+      group: Group[ServiceFactory[Req, Rep]],
+      statsReceiver: StatsReceiver,
+      emptyException: NoBrokersAvailableException) =
+    new HeapBalancer[Req,Rep](group, statsReceiver, emptyException)
+}
+
 
 /**
  * An efficient load balancer that operates on Groups.
@@ -37,7 +44,7 @@ class HeapBalancer[Req, Rep](
     var index: Int,
     var downq: Node = null
   )
-  
+
   // Linked list of downed nodes.
   private[this] var downq: Node = null
 
