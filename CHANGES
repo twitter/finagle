@@ -6,6 +6,16 @@ as it is included in Finagle's user's guide.
 6.x
 -----
 
+6.6.2
+~~~~~
+
+- `finagle-core`: Configurable loadBalancer for ClientConfig
+- `finagle-core`: Fix the memory leak due to the GlobalStatsReceiver
+- `finagle-core`: Inet util, bind to all if no host is provided
+- `finagle-core`: Make Future.never a val instead of a def
+- `finagle-memcached`: Fix tracing ClientRecv timestamp
+- `finagle`: New ostrich version
+
 6.6.0
 ~~~~~
 
@@ -25,7 +35,7 @@ as it is included in Finagle's user's guide.
 - `finagle-http`: Make behavior of HttpMuxer match its javadoc
 - `finagle-http`: Mix in Proxy with HttpMessageProxy
 - `finagle-http`: bump request/response sizes to 5 megs
-- `finagle-memcached`: Memcached Ketama Client Builder:  Add group support that is compatible with oldlibmemcached , creates CacheNodes with ipAddress instead of hostname.
+- `finagle-memcached`: Memcached Ketama Client Builder: Add group support that is compatible with oldlibmemcached , creates CacheNodes with ipAddress instead of hostname.
 - `finagle-memcached`: Update jackson to 2.2.2
 - `finagle-memcached`: allow custom key in ketama client
 - `finagle-memcached`: better exception messages for invalid keys
