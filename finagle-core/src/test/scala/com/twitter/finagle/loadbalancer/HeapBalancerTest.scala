@@ -3,11 +3,13 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Time}
-
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.util.Random
+
 
 @RunWith(classOf[JUnitRunner])
 class HeapBalancerTest extends FunSuite with MockitoSugar {
@@ -15,7 +17,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     var load = 0
     var _isAvailable = true
     var _closed = false
-    
+
     def setAvailable(x: Boolean) { _isAvailable = x }
 
     def apply(conn: ClientConnection) = Future.value {
@@ -34,14 +36,18 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     }
     override def toString = "LoadedFactory<%s>".format(which)
   }
-  
+
   class Ctx {
     val N = 10
     val statsReceiver = new InMemoryStatsReceiver
     val half1, half2 = 0 until N/2 map { i => new LoadedFactory(i.toString) }
     val factories = half1 ++ half2
     val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](factories:_*)
-    val b = new HeapBalancer[Unit, LoadedFactory](group, statsReceiver)
+    val nonRng = new Random {
+      private[this] val i = new AtomicInteger(0)
+      override def nextInt(n: Int) = i.incrementAndGet() % n
+    }
+    val b = new HeapBalancer[Unit, LoadedFactory](group, statsReceiver, rng = nonRng)
     val newFactory = new LoadedFactory("new")
 
     def assertGauge(name: String, value: Int) =
@@ -58,7 +64,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     for (f <- factories) assert(f.load === 1)
     val made2 = Seq.fill(N) { Await.result(b()) }
     for (f <- factories) assert(f.load === 2)
-    
+
     val s = made(0)
     val f = Await.result(s(()))
     assert(f.load === 2)
@@ -77,7 +83,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     for (_ <- 0 until N) b()
     factories(0).setAvailable(false)
     factories(1).setAvailable(false)
-    
+
     for (_ <- 0 until 2*(N-2)) b()
 
     assert(factories(0).load === 1)
@@ -94,7 +100,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     val made = Seq.fill(N*2) { Await.result(b()) }
     for (f <- factories) assert(f.load === 2)
 
-    // add newFactory to the heap balancer. Initially it has 
+    // add newFactory to the heap balancer. Initially it has
     // load 0, so the next two make()() should both pick
     // newFactory
     group() += newFactory
@@ -103,8 +109,8 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     Await.result(b())
     assert(newFactory.load === 2)
 
-    // remove newFactory from the heap balancer. 
-    // Further calls to make()() should not affect the 
+    // remove newFactory from the heap balancer.
+    // Further calls to make()() should not affect the
     // load on newFactory
     group() -= newFactory
     val made2 = Seq.fill(N) { Await.result(b()) }
@@ -129,7 +135,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
   test("close a factory when removed") {
     val ctx = new Ctx
     import ctx._
-    
+
     val made = Seq.fill(N) { Await.result(b()) }
     group() --= half1
     Await.result(b()).close()
@@ -171,7 +177,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
   test("return NoBrokersAvailableException when empty") {
     val ctx = new Ctx
     import ctx._
-    
+
     val b = new HeapBalancer(Group.empty[ServiceFactory[Unit, LoadedFactory]])
     intercept[NoBrokersAvailableException] { Await.result(b()) }
     val heapBalancerEmptyGroup = "HeapBalancerEmptyGroup"
@@ -183,7 +189,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     val exc = intercept[NoBrokersAvailableException] { Await.result(c()) }
     assert(exc.getMessage.contains(heapBalancerEmptyGroup))
   }
-  
+
   test("balance evenly between nonhealthy services") {
     val ctx = new Ctx
     import ctx._
@@ -195,7 +201,31 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     for (f <- factories)
       assert(f.load === 101)
   }
-  
+
+  test("balance somewhat evenly between two non-loaded hosts") {
+    val ctx = new Ctx
+    import ctx._
+    // Use 2 nodes for this test
+    factories.drop(2).foreach(n => group() -= n)
+
+    // Sequentially issue requests to the 2 nodes.
+    // Requests should end up getting serviced by more than just one
+    // of the nodes.
+    val results = (0 until N).foldLeft(Map.empty[LoadedFactory, Int]) { case (map, i) =>
+      val sequentialRequest = Await.result(b())
+      val chosenNode = factories.filter(_.load == 1).head
+      sequentialRequest.close()
+      map + (chosenNode -> (map.getOrElse(chosenNode, 0) + 1))
+    }
+
+    // Assert that all two nodes were chosen
+    assert(results.keys.size === 2)
+    val calls = results.values.toArray
+    // ensure the distribution is fair (because the rng is deterministic)
+    assert(calls(0) === calls(1))
+    assert(calls.sum === N)
+  }
+
   test("recover nonhealthy services when they become available again") {
     val ctx = new Ctx
     import ctx._
@@ -211,7 +241,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     assert(f0.load === 201)
     for (f <- factories drop 1) assert(f.load === 101)
   }
-  
+
   test("properly remove a nonhealthy service") {
     val ctx = new Ctx
     import ctx._
@@ -228,7 +258,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     assert(factories(1).load === 1)
   }
 
-  test("disable/enable multiple ServiceFactories") {  
+  test("disable/enable multiple ServiceFactories") {
     val ctx = new Ctx
     import ctx._
 
