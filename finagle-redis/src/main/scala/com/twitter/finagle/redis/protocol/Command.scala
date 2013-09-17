@@ -90,6 +90,7 @@ object Commands {
 
   // Hash Sets
   val HDEL              = "HDEL"
+  val HEXISTS           = "HEXISTS"
   val HGET              = "HGET"
   val HGETALL           = "HGETALL"
   val HINCRBY           = "HINCRBY"
@@ -206,6 +207,7 @@ object Commands {
 
     // hash sets
     HDEL              -> {HDel(_)},
+    HEXISTS           -> {HExists(_)},
     HGET              -> {HGet(_)},
     HGETALL           -> {HGetAll(_)},
     HINCRBY           -> {HIncrBy(_)},
@@ -338,6 +340,7 @@ object CommandBytes {
 
   // Hash Sets
   val HDEL              = StringToChannelBuffer("HDEL")
+  val HEXISTS           = StringToChannelBuffer("HEXISTS")
   val HGET              = StringToChannelBuffer("HGET")
   val HGETALL           = StringToChannelBuffer("HGETALL")
   val HINCRBY           = StringToChannelBuffer("HINCRBY")

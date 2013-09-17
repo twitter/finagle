@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Long => JLong}
+import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
@@ -17,6 +17,16 @@ trait Hashes { self: BaseClient =>
   def hDel(key: ChannelBuffer, fields: Seq[ChannelBuffer]): Future[JLong] =
     doRequest(HDel(key, fields)) {
       case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
+   * Determine if a hash field exists
+   * @param hash key, field
+   * @return true if key field exists, false otherwise
+   */
+  def hExists(key: ChannelBuffer, field: ChannelBuffer): Future[JBoolean] =
+    doRequest(HExists(key, field)) {
+      case IntegerReply(n) => Future.value(n == 1)
     }
 
   /**
