@@ -18,6 +18,17 @@ case class HDel(key: ChannelBuffer, fields: Seq[ChannelBuffer]) extends StrictKe
   def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.HDEL, key) ++ fields)
 }
 
+object HExists {
+  def apply(args: Seq[Array[Byte]]) = {
+    val list = trimList(args, 2, "HEXISTS")
+    new HExists(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
+  }
+}
+case class HExists(key: ChannelBuffer, field: ChannelBuffer) extends StrictKeyCommand {
+  def command = Commands.HEXISTS
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.HEXISTS, key, field))
+}
+
 object HGet {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "HGET")
