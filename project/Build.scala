@@ -480,6 +480,20 @@ object Finagle extends Build {
     )
   ).dependsOn(finagleCore, finagleThrift)
    */
+  
+  lazy val finagleDual = Project(
+    id = "finagle-dual",
+    base = file("finagle-dual"),
+    settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings ++  // TODO: needed in test mode only
+      sharedSettings
+  ).settings(
+    name := "finagle-dual",
+    libraryDependencies ++= Seq(
+      nettyLib,
+      "org.scalaj" %% "scalaj-collection" % "1.5"
+    ) ++ thriftLibs ++ scroogeLibs  // TODO: needed in test mode only
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",
