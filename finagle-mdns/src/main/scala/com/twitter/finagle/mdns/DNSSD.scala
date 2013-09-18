@@ -2,6 +2,7 @@ package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcement, Announcer, Group, Resolver}
 import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try}
+import com.twitter.util.exp.Var
 import java.lang.reflect.{InvocationHandler, Method, Proxy}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
@@ -121,9 +122,7 @@ private class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
   extends Group[MdnsRecord]
 {
   private[this] val services = new mutable.HashMap[String, MdnsRecord]()
-  @volatile private[this] var current = Set[MdnsRecord]()
-
-  def members = current
+  protected val _set = Var(Set[MdnsRecord]())
 
   private[this] def mkRecord(args: Array[Object]) =
     Record(
@@ -145,7 +144,7 @@ private class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
 
         synchronized {
           services.put(record.serviceName, mdnsRecord)
-          current = services.values.toSet
+          _set() = services.values.toSet
         }
       }
 
@@ -153,7 +152,7 @@ private class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
       val record = mkRecord(args)
       synchronized {
         if (services.remove(record.serviceName).isDefined)
-          current = services.values.toSet
+          _set() = services.values.toSet
       }
   }
 

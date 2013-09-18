@@ -1,13 +1,14 @@
 package com.twitter.finagle
 
 import com.twitter.util.Return
+import com.twitter.util.exp.Var
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 case class TestGroup(addr: String) extends Group[SocketAddress] {
-  def members = Set()
+  protected val _set = Var(Set[SocketAddress]())
 }
 
 class TestResolver extends Resolver {

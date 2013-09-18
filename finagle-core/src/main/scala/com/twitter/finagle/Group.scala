@@ -5,6 +5,8 @@ import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Closable, Future, Duration, Timer}
+import com.twitter.util.exp.Var
+import java.net.SocketAddress
 
 /**
  * A group is a dynamic set of `T`-typed values. It is used to
@@ -26,6 +28,23 @@ import com.twitter.util.{Closable, Future, Duration, Timer}
  * consistent.
  */
 trait Group[T] { outer =>
+  // Group is needlessly complex due to it transitioning to
+  // deprecation. In order to provide reasonable compatibility with
+  // forthcoming structrures, we base the group implementation on Var
+  // while retaining its two key semantics:
+  //
+  //   (1) unchanged objects retain identity;
+  //   (2) collect & map are idempotent.
+  //
+  // The following are semi-internal, to be accessed only by Finagle
+  // itself.
+
+  // Note: only use this is you really know what you are doing.
+  protected val _set: Var[Set[T]]
+  // We memoize 'set' to provide Group semantics: this guarantees
+  // that object identity changes only when the underlying value does.
+  final protected[finagle] lazy val set = _set.memo()
+
   /**
    * Create a new group by mapping each element of this group
    * with `f`. `f` is guaranteed to be invoked exactly once for each
@@ -39,42 +58,29 @@ trait Group[T] { outer =>
    * element of the group, even for dynamic groups.
    */
   def collect[U](f: PartialFunction[T, U]): Group[U] = new Group[U] {
-    @volatile var snap = Set[T]()
-    @volatile var current = Set[U]()
     var mapped = Map[T, U]()
-
-    def update() = synchronized {
-      val old = snap
-      snap = outer.members
-
-      mapped ++= (snap &~ old) collect {
-        case e if f.isDefinedAt(e) => e -> f(e)
-      }
-      mapped --= old &~ snap
-
-      current = Set() ++ mapped.values
-    }
-
-    update()
-
-    def members = {
-      if (outer.members ne snap) synchronized {
-        if (outer.members ne snap)
-          update()
+    var last = Set[T]()
+    protected val _set = outer.set map { set =>
+      synchronized {
+        mapped ++= (set &~ last) collect {
+          case el if f.isDefinedAt(el) => el -> f(el)
+        }
+        mapped --= last &~ set
+        last = set
       }
 
-      current
+      mapped.values.toSet
     }
   }
 
   /**
    * The current members of this group. If the group has not
-   * changed, the same object (ie. object identity holds) is returned.
+   * changed, the same object is returned. This allows a simple
+   * object identity check to be performed to see if the Group has
+   * been updated.
    */
-  def members: Set[T]
-
-  /** Synonymous to `members` */
-  def apply(): Set[T] = members
+  final def members: Set[T] = set()
+  final def apply(): Set[T] = members
 
   /**
    * Name the group `n`.
@@ -87,36 +93,15 @@ trait Group[T] { outer =>
       with NamedGroup
     {
       val self = outer
-      def members = self.members
+      val _set = self.set
       val name = n
     }
 
   def +(other: Group[T]): Group[T] = new Group[T] {
-    @volatile private[this] var current = Set.empty[T]
-    @volatile private[this] var outerMembers = Set.empty[T]
-    @volatile private[this] var otherMembers = Set.empty[T]
-
-    private[this] def update() = synchronized {
-      outerMembers = outer.members
-      otherMembers = other.members
-      current = outerMembers ++ otherMembers
-    }
-    update()
-
-    private[this] def hasChanged =
-      ((outerMembers ne outer.members) || (otherMembers ne other.members))
-
-    def members = {
-      if (hasChanged) synchronized {
-        if (hasChanged)
-          update()
-      }
-
-      current
-    }
+    protected val _set = for { a <- outer.set; b <- other.set } yield a++b
   }
 
-  override def toString = "Group(%s)".format(members mkString ", ")
+  override def toString = "Group(%s)".format(this() mkString ", ")
 }
 
 trait MutableGroup[T] extends Group[T] {
@@ -139,33 +124,13 @@ object NamedGroup {
 }
 
 object Group {
-  val timer = DefaultTimer.twitter
-  val defaultBackoff = (Backoff.linear(100.milliseconds, 100.milliseconds) take 5) ++ Backoff.const(1.second)
-
-  /**
-   * Returns a Future that is satisfied when the
-   * predicate is affirmed. The group is polled
-   * with the given backoff strategy.
-   */
-  def pollUntilTrue[T](
-    group: Group[T],
-    p: Group[T] => Boolean,
-    backoff: Stream[Duration] = defaultBackoff
-  ): Future[Unit] = {
-    def poll(ds: Stream[Duration]): Future[Unit] = {
-      if (p(group)) Future.Done
-      else timer.doLater(ds.head)(()) flatMap { _ => poll(ds.tail) }
-    }
-    poll(backoff)
-  }
-
   /**
    * Construct a `T`-typed static group from the given elements.
    *
    * @param staticMembers the members of the returned static group
    */
   def apply[T](staticMembers: T*): Group[T] = new Group[T] {
-    val members = Set(staticMembers:_*)
+    protected val _set = Var(Set(staticMembers:_*))
   }
 
   /**
@@ -179,9 +144,8 @@ object Group {
    * @param initial the initial elements of the group
    */
   def mutable[T](initial: T*): MutableGroup[T] = new MutableGroup[T] {
-    @volatile private[this] var current: Set[T] = Set(initial:_*)
-    def members = current
-    def update(newMembers: Set[T]) { current = newMembers }
+    protected val _set = Var(Set(initial:_*))
+    def update(newMembers: Set[T]) { _set() = newMembers }
   }
 
   /**
@@ -193,15 +157,14 @@ object Group {
   def fromCluster[T](underlying: Cluster[T]): Group[T] = {
     val (snap, edits) = underlying.snap
     new Group[T] {
-      @volatile var current: Set[T] = snap.toSet
+      protected val _set = Var(snap.toSet)
+
       edits foreach { spool =>
         spool foreach {
-          case Cluster.Add(t) => current += t
-          case Cluster.Rem(t) => current -= t
+          case Cluster.Add(t) => _set() += t
+          case Cluster.Rem(t) => _set() -= t
         }
       }
-
-      def members = current
     }
   }
 }

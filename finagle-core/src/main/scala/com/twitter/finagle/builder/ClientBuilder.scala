@@ -56,7 +56,8 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Duration, Future, Monitor, NullMonitor, Time, Timer, Try}
+import com.twitter.util.{Duration, Future, Monitor, 
+  NullMonitor, Time, Timer, Try, Promise, Return}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
@@ -821,8 +822,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val underlying: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
     val service = config.group match {
       case Some(group) if group.members.isEmpty =>
-        new ProxyService(Group.pollUntilTrue[SocketAddress](group, !_.members.isEmpty) map Function.const(underlying),
-          config.hostConnectionMaxWaiters getOrElse Int.MaxValue)
+        val p = new Promise[Service[Req, Rep]]
+        val sub = group.set observe { s =>
+          if (s.nonEmpty)
+            p.updateIfEmpty(Return(underlying))
+        }
+        p ensure { sub.close() }
+        new ProxyService(p, config.hostConnectionMaxWaiters getOrElse Int.MaxValue)
       case _ => underlying
     }
 

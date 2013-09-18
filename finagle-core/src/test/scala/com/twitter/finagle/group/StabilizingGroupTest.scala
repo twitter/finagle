@@ -2,7 +2,7 @@ package com.twitter.finagle.group
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.Group
+import com.twitter.finagle.{Group, MockTimer}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Duration, Time, Timer, TimerTask}
@@ -25,19 +25,13 @@ class Context {
   val grace = 150.milliseconds
   val statsRecv = new InMemoryStatsReceiver
   def limboSize: Int = statsRecv.gauges(Seq("testGroup", "limbo"))().toInt
-  val pollSpan = 100.milliseconds
+  val timer = new MockTimer
   val stableGroup = StabilizingGroup(
     sourceGroup,
     healthStatus.pulse.recv,
     grace,
     statsRecv.scope("testGroup"),
-    pollSpan)
-
-  // configure scala-test eventually method
-  def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
-  implicit val patienceConfig = PatienceConfig(
-    timeout = toSpan(500.milliseconds),
-    interval = toSpan(grace))
+    timer)
 }
 
 @RunWith(classOf[JUnitRunner])
@@ -52,17 +46,15 @@ class StabilizingGroupTest extends FunSuite {
 
         sourceGroup.update(sourceGroup() - 10)
         assert(limboSize === 1)
-        eventually {
-          tc.advance(grace)
-          assert(stableGroup() === sourceGroup())
-        }
+        tc.advance(grace)
+        timer.tick()
+        assert(stableGroup() === sourceGroup())
 
         sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
         assert(limboSize === 4)
-        eventually {
-          tc.advance(grace)
-          assert(stableGroup() === sourceGroup())
-        }
+        tc.advance(grace)
+        timer.tick()
+        assert(stableGroup() === sourceGroup())
       }
     }
 
@@ -85,10 +77,9 @@ class StabilizingGroupTest extends FunSuite {
         assert(limboSize === 5)
 
         healthStatus.mkHealthy()
-        eventually {
-          tc.advance(grace)
-          assert(stableGroup() === sourceGroup())
-        }
+        tc.advance(grace)
+        timer.tick()
+        assert(stableGroup() === sourceGroup())
       }
     }
 
@@ -102,21 +93,32 @@ class StabilizingGroupTest extends FunSuite {
         healthStatus.mkUnhealthy()
         sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
 
-        eventually {
-          tc.advance(grace)
-          assert(stableGroup() === (1 to 10).toSet)
-        }
+        tc.advance(grace)
+        timer.tick()
+        assert(stableGroup() === (1 to 10).toSet)
 
         healthStatus.mkHealthy()
-        eventually {
-          tc.advance(pollSpan)
-          sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
-        }
+        sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
 
-        eventually {
-          tc.advance(grace)
-          assert(stableGroup() === Set(1,2,3,4))
-        }
+        tc.advance(grace)
+        timer.tick()
+        assert(stableGroup() === Set(1,2,3,4))
+      }
+    }
+    
+    test("don't skip interim adds") {
+      Time.withCurrentTimeFrozen { tc =>
+        val ctx = new Context
+        import ctx._
+
+        healthStatus.mkHealthy()
+  
+        sourceGroup() --= (1 to 10).toSet
+        tc.advance(grace/2)
+        sourceGroup() += 5
+        tc.advance(grace)
+        timer.tick()
+        assert(stableGroup() === Set(5))
       }
     }
   }

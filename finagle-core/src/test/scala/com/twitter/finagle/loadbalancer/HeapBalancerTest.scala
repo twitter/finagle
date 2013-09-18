@@ -164,13 +164,13 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     Await.result(b())
     assertGauge("available", 11)
     assertGauge("size", 11)
-    assertCounter("adds", 1)
+    assertCounter("adds", 11)
 
     group() -= newFactory
     Await.result(b())
     assertGauge("available", 10)
     assertGauge("size", 10)
-    assertCounter("adds", 1)
+    assertCounter("adds", 11)
     assertCounter("removes", 1)
   }
 

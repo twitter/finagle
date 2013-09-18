@@ -2,6 +2,7 @@ package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcer, Announcement, Group, Resolver}
 import com.twitter.util.{Future, FuturePool, Return, Throw, Try}
+import com.twitter.util.exp.Var
 import java.net.{InetSocketAddress, SocketAddress}
 import javax.jmdns._
 import scala.collection.mutable
@@ -51,8 +52,7 @@ private class JmDNSResolver extends MDNSResolverIface {
 
 private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
   private[this] val services = new mutable.HashMap[String, MdnsRecord]()
-  @volatile private[this] var current = Set[MdnsRecord]()
-  def members = current
+  protected val _set = Var(Set[MdnsRecord]())
 
   DNS.addServiceListener(regType, new ServiceListener {
     def serviceResolved(event: ServiceEvent) {}
@@ -68,7 +68,7 @@ private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
 
         synchronized {
           services.put(info.getName, mdnsRecord)
-          current = services.values.toSet
+          _set() = services.values.toSet
         }
       }
     }
@@ -76,7 +76,7 @@ private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
     def serviceRemoved(event: ServiceEvent) {
       synchronized {
         if (services.remove(event.getName).isDefined)
-          current = services.values.toSet
+          _set() = services.values.toSet
       }
     }
   })

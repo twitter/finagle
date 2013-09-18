@@ -140,7 +140,7 @@ object Resolver {
         val addrs = delex(stripped) :: lastAddrs
         val name = groupName
         val self = group
-        def members = self.members
+        protected val _set = self.set
       }
 
       synchronized {

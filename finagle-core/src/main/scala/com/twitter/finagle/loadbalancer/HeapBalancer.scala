@@ -34,6 +34,10 @@ class HeapBalancer[Req, Rep](
 
   import HeapBalancer._
 
+  private[this] val sizeGauge = statsReceiver.addGauge("size") { synchronized { size } }
+  private[this] val adds = statsReceiver.counter("adds")
+  private[this] val removes = statsReceiver.counter("removes")
+
   // Every underlying ServiceFactory is represented in the
   // heap by a Node. If a node's index is < 0, it is discarded.
   // Load begins at Int.MinValue; loads greater than or equal
@@ -59,22 +63,21 @@ class HeapBalancer[Req, Rep](
   )
   import HeapOps._
 
-  private[this] var snap = group()
-  private[this] var size = snap.size
-  // Build initial heap
+  // Build an initial, empty heap.
   // Our heap is 1-indexed. We make heap[0] a dummy node
   // Invariants:
   //   1. heap[i].index == i
   //   2. heap.size == size + 1
+  private[this] var size = 0
   private[this] var heap = {
-    val heap = new Array[Node](size + 1)
+    val heap = new Array[Node](1)
     val failExc = new Exception("Invalid heap operation on index 0")
     heap(0) = Node(new FailingFactory(failExc), Zero, 0)
-    val nodes = (snap.toSeq zipWithIndex) map {
-      case (f, i) => Node(f, Zero, i + 1)
-    }
-    nodes.copyToArray(heap, 1, nodes.size)
     heap
+  }
+  private[this] var snap = Set[ServiceFactory[Req, Rep]]()
+  group.set observe { newSet =>
+    updateGroup(newSet)
   }
 
   private[this] val availableGauge = statsReceiver.addGauge("available") {
@@ -92,10 +95,6 @@ class HeapBalancer[Req, Rep](
 
     loads.sum
   }
-
-  private[this] val sizeGauge = statsReceiver.addGauge("size") { synchronized { size } }
-  private[this] val adds = statsReceiver.counter("adds")
-  private[this] val removes = statsReceiver.counter("removes")
 
   private[this] def addNode(serviceFactory: ServiceFactory[Req, Rep]) {
     size += 1
@@ -186,17 +185,15 @@ class HeapBalancer[Req, Rep](
       }
   }
 
-  private[this] def updateGroup(newSnap: Set[ServiceFactory[Req, Rep]]): Unit = synchronized {
-    for (n <- snap &~ newSnap) remNode(n)
-    for (n <- newSnap &~ snap) addNode(n)
-    snap = newSnap
-  }
+  private[this] def updateGroup(newSnap: Set[ServiceFactory[Req, Rep]]): Unit = 
+    synchronized {
+      for (n <- snap &~ newSnap) remNode(n)
+      for (n <- newSnap &~ snap) addNode(n)
+      snap = newSnap
+    }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     val node = synchronized {
-      val curSnap = group()
-      if (curSnap ne snap)
-        updateGroup(curSnap)
       if (size == 0)
         return Future.exception(emptyException)
       val n = get()

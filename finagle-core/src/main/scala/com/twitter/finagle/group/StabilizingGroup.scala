@@ -5,7 +5,8 @@ import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.Group
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Time, Duration}
+import com.twitter.util.exp.Var
+import com.twitter.util.{Future, Time, Timer, Duration}
 import scala.collection.immutable.Queue
 
 object StabilizingGroup {
@@ -19,9 +20,9 @@ object StabilizingGroup {
     pulse: Offer[State.Health],
     grace: Duration,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    pollSpan: Duration = Duration.fromMilliseconds(100)
+    timer: Timer = DefaultTimer.twitter
   ): Group[T] = {
-    new StabilizingGroup(underlying, pulse, grace, statsReceiver, pollSpan)
+    new StabilizingGroup(underlying, pulse, grace, statsReceiver, timer)
   }
 
   /**
@@ -31,8 +32,6 @@ object StabilizingGroup {
    * for at least `grace` period.
    *
    * @param underlying The source group to poll for group updates.
-   * @param pollSpan The duration that must elapse in between polls
-   *        to the underlying group.
    * @param pulse An offer for communicating group health.
    * @param grace The duration that must elapse before an element
    *        is removed from the group.
@@ -42,15 +41,15 @@ object StabilizingGroup {
     pulse: Offer[State.Health],
     grace: Duration,
     statsReceiver: StatsReceiver,
-    pollSpan: Duration
+    implicit val timer: Timer
   ) extends Group[T] {
-    @volatile private[this] var current = underlying.members
-    private[this] val adds = new Broker[T]()
-    private[this] val removes = new Broker[T]()
-    private[this] val timer = DefaultTimer.twitter
-    private[this] val limbo = statsReceiver.addGauge("limbo") { current.size - underlying.members.size }
+    private[this] val newSet = new Broker[Set[T]]()
+    private[this] val limbo = statsReceiver.addGauge("limbo") { 
+      members.size - underlying.members.size
+    }
 
-    def members = current
+    underlying.set observe { newSet ! _ }
+    protected val _set = Var(underlying.members)
 
     import State._
     /**
@@ -59,44 +58,47 @@ object StabilizingGroup {
      * Removes are delayed for grace period and each health
      * transition resets the grace period.
      */
-    private[this] def loop(remq: Queue[(T, Time)], h: Health, nextPoll: Time): Future[Unit] = Offer.select(
-      adds.recv map { elem =>
-        current += elem
-        // ensure the added elem is not queued for removal.
-        val newq = remq filter { case(e, _) =>  e != elem }
-        loop(newq, h, nextPoll)
-      },
-      removes.recv map { elem =>
-        val until = Time.now + grace
-        loop(remq enqueue (elem, until), h, nextPoll)
-      },
+    private[this] def loop(remq: Queue[(T, Time)], h: Health): Future[Unit] = Offer.select(
       pulse map {
         // if our health transitions into healthy,
         // reset removal times foreach elem in remq.
         case newh if h == newh =>
-          loop(remq, newh, nextPoll)
+          loop(remq, newh)
         case Healthy =>
-          loop(remq map { case (elem, _) => (elem, Time.now + grace) }, Healthy, nextPoll)
+          // Transitioned to healthy: push back
+          val newTime = Time.now + grace
+          val newq = remq map { case (elem, _) => (elem, newTime) }
+          loop(newq, Healthy)
         case newh =>
-          loop(remq, newh, nextPoll)
+          loop(remq, newh)
       },
-      Offer.timeout(nextPoll - Time.now)(timer) map { _ =>
-        val snap = underlying.members
-        for (add <- snap &~ current) adds ! add
-        def isQueued(elem: T) = remq exists { case (e, _) => e == elem }
-        for (rem <- current &~ snap if !isQueued(rem)) removes ! rem
-        loop(remq, h, Time.now + pollSpan)
+      newSet.recv map { newSet =>
+        val snap  = set()
+        var q = remq
+
+        // Remove pending removes that are present
+        // in this update.
+        q = q filter { case (e, _) => !(newSet contains e) }
+        _set() ++= newSet &~ snap
+
+        def inQ(elem: T) = q exists { case (e, _) => e == elem }
+        for (el <- snap &~ newSet if !inQ(el)) {
+          val until = Time.now + grace
+          q = q enqueue (el, until)
+        }
+
+        loop(q, h)
       },
       if (h != Healthy || remq.isEmpty) Offer.never
       else {
         val ((elem, until), nextq) = remq.dequeue
-        Offer.timeout(until - Time.now)(timer) map { _ =>
-          current -= elem
-          loop(nextq, h, nextPoll)
+        Offer.timeout(until - Time.now) map { _ =>
+          _set() -= elem
+          loop(nextq, h)
         }
       }
     )
-    loop(Queue(), Healthy, Time.now)
-  }
 
+    loop(Queue.empty, Healthy)
+  }
 }

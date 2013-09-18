@@ -10,6 +10,7 @@ import com.twitter.finagle.{Group, Resolver, InetResolver}
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.util.exp.Var
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
 
@@ -22,13 +23,12 @@ private class ZkGroup(serverSet: ServerSet, path: String)
   setDaemon(true)
   start()
 
-  @volatile private[this] var current: Set[ServiceInstance] = Set()
-  def members = current
+  protected val _set = Var(Set[ServiceInstance]())
 
   override def run() {
     serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
       def onChange(newSet: ImmutableSet[ServiceInstance]) = synchronized {
-        current = Set() ++ newSet.asScala
+        _set() = newSet.asScala.toSet
       }
     })
   }

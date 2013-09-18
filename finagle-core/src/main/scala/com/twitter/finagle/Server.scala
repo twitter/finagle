@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.util.{Awaitable, Closable, CloseAwaitably, Future, Time}
+import com.twitter.util.exp.Var
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**
@@ -19,7 +20,7 @@ trait ListeningServer
    */
   def boundAddress: SocketAddress
 
-  lazy val members = Set(boundAddress)
+  protected lazy val _set = Var(Set(boundAddress))
 
   protected def closeServer(deadline: Time): Future[Unit]
 
