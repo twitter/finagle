@@ -19,13 +19,17 @@ if [ "${sbtjar_md5}" != 9d832c4cfdb889103bd37a8bda3faa0e ]; then
   exit 1
 fi
 
+if [ -z "$TRAVIS_CI" ]; then
+  JAVA_OPTS=" -Djava.net.preferIPv4Stack=true "$JAVA_OPTS
+else
+  echo "Travis-ci: Not specifying the ip stack version"
+fi
 
 test -f ~/.sbtconfig && . ~/.sbtconfig
 
 java -ea                          \
   $SBT_OPTS                       \
   $JAVA_OPTS                      \
-  -Djava.net.preferIPv4Stack=true \
   -XX:+AggressiveOpts             \
   -XX:+UseParNewGC                \
   -XX:+UseConcMarkSweepGC         \
@@ -37,6 +41,6 @@ java -ea                          \
   -XX:ReservedCodeCacheSize=128m  \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx1G                          \
+  -Xmx1536M                       \
   -server                         \
   -jar $sbtjar "$@"

@@ -1,4 +1,4 @@
-package com.twitter.finagle.core.util
+package com.twitter.finagle.util
 
 import org.specs.SpecificationWithJUnit
 

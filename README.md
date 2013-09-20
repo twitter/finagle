@@ -1,3 +1,6 @@
+
+[![Build Status](https://secure.travis-ci.org/twitter/finagle.png)](http://travis-ci.org/twitter/finagle)
+
 Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a bootstrap script to ensure the correct version of sbt is used. To build:
 
 	$ ./sbt test
