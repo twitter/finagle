@@ -94,7 +94,7 @@ class AuthenticationProxy(delegate: ServiceFactory[PgRequest, PgResponse], user:
   private[this] def verifyResponse(response: PgResponse): Future[Unit] = {
     response match {
       case AuthenticatedResponse(statuses, processId, secretKey) =>
-        logger.ifInfo("Authenticated " + processId + " " + secretKey + "\n" + statuses)
+        logger.ifDebug("Authenticated " + processId + " " + secretKey + "\n" + statuses)
         Future(Unit)
     }
   }

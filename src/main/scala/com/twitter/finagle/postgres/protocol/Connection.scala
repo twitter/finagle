@@ -145,13 +145,13 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
 
   transition {
     case (NoticeResponse(details), s) =>
-      logger.ifInfo("Notice from server " + details)
+      logger.ifDebug("Notice from server " + details)
       (None, s)
     case (notification: NotificationResponse, s) =>
-      logger.ifInfo("Notification from server " + notification)
+      logger.ifDebug("Notification from server " + notification)
       (None, s)
     case (ParameterStatus(name, value), s) =>
-      logger.ifInfo("Params changed " + name + " " + value)
+      logger.ifDebug("Params changed " + name + " " + value)
       (None, s)
 
   }
