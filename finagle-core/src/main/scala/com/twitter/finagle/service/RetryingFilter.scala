@@ -15,14 +15,14 @@ import scala.collection.JavaConversions._
 /**
  * A function defining retry behavior for a given value type `A`.
  */
-trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
+abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
 /**
  * A retry policy abstract class. This is convenient to use for Java programmers. Simply implement
  * the two abstract methods `shouldRetry` and `backoffAt` and you're good to go!
  */
-abstract class SimpleRetryPolicy[A](i: Int)
-  extends Function[A, Option[(Duration, RetryPolicy[A])]] with RetryPolicy[A]
+abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
+  with (A => Option[(Duration, RetryPolicy[A])])
 {
   def this() = this(0)
 
@@ -41,6 +41,10 @@ abstract class SimpleRetryPolicy[A](i: Int)
       None
     }
   }
+
+  override def andThen[B](that: Function1[Option[(Duration, RetryPolicy[A])], B]): A => B = that.compose(this)
+
+  override def compose[B](that: Function1[B, A]): B => Option[(Duration, RetryPolicy[A])] = that.andThen(this)
 
   /**
    * Given a value, decide whether it is retryable. Typically the value is an exception.
