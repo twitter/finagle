@@ -41,6 +41,6 @@ java -ea                          \
   -XX:ReservedCodeCacheSize=128m  \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx1G                          \
+  -Xmx1536M                       \
   -server                         \
   -jar $sbtjar "$@"
