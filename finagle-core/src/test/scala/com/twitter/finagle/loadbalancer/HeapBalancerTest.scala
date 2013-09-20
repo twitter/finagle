@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import util.Random
 
 @RunWith(classOf[JUnitRunner])
 class HeapBalancerTest extends FunSuite with MockitoSugar {
@@ -41,7 +42,8 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     val half1, half2 = 0 until N/2 map { i => new LoadedFactory(i.toString) }
     val factories = half1 ++ half2
     val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](factories:_*)
-    val b = new HeapBalancer[Unit, LoadedFactory](group, statsReceiver)
+    val seededRng = new Random(0)
+    val b = new HeapBalancer[Unit, LoadedFactory](group, statsReceiver, rng = seededRng)
     val newFactory = new LoadedFactory("new")
 
     def assertGauge(name: String, value: Int) =
@@ -194,6 +196,26 @@ class HeapBalancerTest extends FunSuite with MockitoSugar {
     for (_ <- 0 until 100*N) b()
     for (f <- factories)
       assert(f.load === 101)
+  }
+
+  test("balance somewhat evenly between two non-loaded hosts") {
+    val ctx = new Ctx
+    import ctx._
+    // Use 2 nodes for this test
+    factories.drop(2).foreach(n => group() -= n)
+
+    // Sequentially issue requests to the 2 nodes.
+    // Requests should end up getting serviced by more than just one
+    // of the nodes.
+    val results = (0 until N).map(_ => {
+      val sequentialRequest = Await.result(b())
+      val chosenNode = factories.filter(_.load == 1).head
+      sequentialRequest.close()
+      chosenNode -> 1
+    }).groupBy(_._1).mapValues(_.map(_._2).sum)
+    // Assert that all two nodes were chosen
+    assert(results.keys.size === 2)
+    assert(results.values.sum === N)
   }
   
   test("recover nonhealthy services when they become available again") {
