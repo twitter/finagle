@@ -1,4 +1,4 @@
 language: scala
 scala:
   - 2.9.2
-script: "./sbt +test"
+script: "TRAVIS_CI=1 ./sbt +test"
