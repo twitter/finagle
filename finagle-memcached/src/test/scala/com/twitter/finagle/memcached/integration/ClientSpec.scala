@@ -769,6 +769,9 @@ class ClientSpec extends SpecificationWithJUnit {
       val client = MemcachedClient.newKetamaClient(
         group = "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
+      // Wait for group to contain members
+      Thread.sleep(5000)
+
       client.delete("foo")()
       client.get("foo")() mustEqual None
       client.set("foo", "bar")()

@@ -9,6 +9,8 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, JavaTimer, FuturePool}
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, Watcher}
+import scala.collection.JavaConversions._
+
 
 object ZookeeperStateMonitor {
   val DefaultZkConnectionRetryBackoff =
@@ -43,42 +45,35 @@ trait ZookeeperStateMonitor {
   private[this] val zkWorkFailedCounter = statsReceiver.counter("zkWork.failed")
   private[this] val zkWorkSucceededCounter = statsReceiver.counter("zkWork.succeeded")
   private[this] val loadZKDataCounter = statsReceiver.counter("loadZKData")
+  private[this] val loadZKChildrenCounter = statsReceiver.counter("loadZKChildren")
   private[this] val reconnectZKCounter = statsReceiver.counter("reconnectZK")
 
   private[this] val zookeeperWorkQueue = new Broker[() => Unit]
 
-  // zk connection watcher
-  private[this] val zkConnectionWatcher: Watcher = new Watcher() {
+  // zk watcher for connection, data, children event
+  private[this] val zkWatcher: Watcher = new Watcher() {
     // NOTE: Ensure that the processing of events is not a blocking operation.
     override def process(event: WatchedEvent) = {
-      if (event.getType == Watcher.Event.EventType.None) {
-        statsReceiver.counter("zkConnectionEvent." + event.getState).incr()
-        event.getState match {
-          // actively trying to re-establish the zk connection (hence re-register the zk path
-          // data watcher) whenever an zookeeper connection expired or disconnected. We could also
-          // only do this when SyncConnected happens, but that would be assuming other components
-          // sharing the zk client (e.g. ZookeeperServerSetCluster) will always actively attempts
-          // to re-establish the zk connection. For now, I'm making it actively re-establishing
-          // the connection itself here.
-          case KeeperState.Disconnected | KeeperState.Expired =>
-            zookeeperWorkQueue ! reconnectZK
-          case _ =>
-        }
-      }
-    }
-  }
-
-  // zk path data watcher
-  private[this] val zkDataWatcher: Watcher = new Watcher() {
-    // NOTE: Ensure that the processing of events is not a blocking operation.
-    override def process(event: WatchedEvent) = {
-      if (event.getState == KeeperState.SyncConnected) {
-        statsReceiver.counter("zkNodeChangeEvent." + event.getType).incr()
-        event.getType match {
-          case Watcher.Event.EventType.NodeDataChanged =>
-            zookeeperWorkQueue ! loadZKData
-          case _ =>
-        }
+      event.getState match {
+        // actively trying to re-establish the zk connection (hence re-register the zk path
+        // data watcher) whenever an zookeeper connection expired or disconnected. We could also
+        // only do this when SyncConnected happens, but that would be assuming other components
+        // sharing the zk client (e.g. ZookeeperServerSetCluster) will always actively attempts
+        // to re-establish the zk connection. For now, I'm making it actively re-establishing
+        // the connection itself here.
+        case (KeeperState.Disconnected | KeeperState.Expired) if event.getType == Watcher.Event.EventType.None =>
+          statsReceiver.counter("zkConnectionEvent." + event.getState).incr()
+          zookeeperWorkQueue ! reconnectZK
+        case KeeperState.SyncConnected =>
+          statsReceiver.counter("zkNodeChangeEvent." + event.getType).incr()
+          event.getType match {
+            case Watcher.Event.EventType.NodeDataChanged =>
+              zookeeperWorkQueue ! loadZKData
+            case Watcher.Event.EventType.NodeChildrenChanged =>
+              zookeeperWorkQueue ! loadZKChildren
+            case _ =>
+          }
+        case _ =>
       }
     }
   }
@@ -120,19 +115,35 @@ trait ZookeeperStateMonitor {
   }
 
   /**
-   * Load the zookeeper node data as well as attaching another data watcher, then invoke the
+   * Load the zookeeper node data as well as leaving a data watch, then invoke the
    * applyZKData implementation to process the data string.
    */
   def applyZKData(data: Array[Byte]): Unit
   def loadZKData = () => synchronized {
     loadZKDataCounter.incr()
 
-    // read cache pool config data and attach the node data change watcher
+    // read cache pool config data and leave a node data watch
     val data = zkClient
         .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
-        .getData(zkPath, zkDataWatcher, null)
+        .getData(zkPath, true, null)
 
-    if(data != null) applyZKData(data)
+    applyZKData(data)
+  }
+
+  /**
+   * Load the zookeeper node children as well as leaving a children watch, then invoke the
+   * applyZKChildren implementation to process the children list.
+   */
+  def applyZKChildren(children: List[String]): Unit = {} // no-op by default
+  def loadZKChildren = () => synchronized {
+    loadZKChildrenCounter.incr()
+
+    // get children list and leave a node children watch
+    val children = zkClient
+        .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
+        .getChildren(zkPath, true, null)
+
+    applyZKChildren(children.toList)
   }
 
   /**
@@ -142,19 +153,22 @@ trait ZookeeperStateMonitor {
   def reconnectZK = () => synchronized {
     reconnectZKCounter.incr()
 
-    // read cache pool config data and attach the node data change watcher
+    // reset watch for node data and children
     val data = zkClient
         .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
-        .getData(zkPath, zkDataWatcher, null)
+        .getData(zkPath, true, null)
+    val children = zkClient
+        .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
+        .getChildren(zkPath, true, null)
   }
 
   // Register top-level connection watcher to monitor zk change.
   // This watcher will live across different zk connection
-  zkClient.register(zkConnectionWatcher)
+  zkClient.register(zkWatcher)
 
-  // Read the config data and attach a data change event watcher to the zk client
-  // for the first time during constructing
+  // attach data/children change event watcher to the zk client for the first time during constructing
   zookeeperWorkQueue ! loadZKData
+  zookeeperWorkQueue ! loadZKChildren
 
   // Kick off the loop to process zookeeper work queue
   loopZookeeperWork

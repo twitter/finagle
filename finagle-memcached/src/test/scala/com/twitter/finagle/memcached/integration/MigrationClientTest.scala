@@ -11,16 +11,16 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util._
 import java.io.ByteArrayOutputStream
-import java.net.InetSocketAddress
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.apache.zookeeper.server.{NIOServerCnxn, ZooKeeperServer}
 import org.jboss.netty.util.CharsetUtil
 import org.junit.runner.RunWith
+import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfter {
+class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfter with Eventually with IntegrationPatience {
   /**
    * Note: This integration test requires a real Memcached server to run.
    */
@@ -119,6 +119,8 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
+    eventually { Await.result(migrationClient.get("test")) }
+
     assert(Await.result(migrationClient.get("foo")) == None)
     Await.result(migrationClient.set("foo", "bar"))
     assert(Await.result(migrationClient.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
@@ -139,6 +141,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
+    eventually { Await.result(migrationClient.get("test")) }
 
     assert(Await.result(migrationClient.get("foo")) == None)
     Await.result(migrationClient.set("foo", "bar"))
@@ -159,6 +162,8 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
+
+    eventually { Await.result(migrationClient.get("test")) }
 
     Await.result(client1.set("foo", "bar"))
     assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
@@ -182,6 +187,8 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
+    eventually { Await.result(migrationClient.get("test")) }
+
     Await.result(client1.set("foo", "bar"))
     assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")
     assert(Await.result(client2.get("foo")) == None)
@@ -203,6 +210,8 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
+
+    eventually { Await.result(migrationClient.get("test")) }
 
     Await.result(client1.set("foo", "bar"))
     assert(Await.result(client1.get("foo")).get.toString(CharsetUtil.UTF_8) == "bar")

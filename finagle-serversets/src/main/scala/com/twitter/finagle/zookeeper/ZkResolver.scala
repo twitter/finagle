@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 
 class ZkResolverException(msg: String) extends Exception(msg)
 
-private class ZkGroup(serverSet: ServerSet, path: String)
+private[finagle] class ZkGroup(serverSet: ServerSet, path: String)
     extends Thread("ZkGroup(%s)".format(path))
     with Group[ServiceInstance]
 {
