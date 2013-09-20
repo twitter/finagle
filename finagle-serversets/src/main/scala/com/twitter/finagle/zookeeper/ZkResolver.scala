@@ -9,8 +9,7 @@ import com.twitter.finagle.group.StabilizingGroup
 import com.twitter.finagle.{Group, Resolver, InetResolver}
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
-import com.twitter.util.{Future, Return, Throw, Try}
-import com.twitter.util.exp.Var
+import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
 

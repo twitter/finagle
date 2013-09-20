@@ -4,8 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Closable, Future, Duration, Timer}
-import com.twitter.util.exp.Var
+import com.twitter.util.{Closable, Future, Duration, Timer, Var}
 import java.net.SocketAddress
 
 /**

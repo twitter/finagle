@@ -1,8 +1,8 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.util.{Awaitable, Closable, CloseAwaitably, Future, Time}
-import com.twitter.util.exp.Var
+import com.twitter.util.{
+  Awaitable, Closable, CloseAwaitably, Future, Time, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**

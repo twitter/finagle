@@ -15,7 +15,6 @@ import com.twitter.finagle.{Group, Resolver}
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
-import com.twitter.util.exp.Var
 import scala.collection.mutable
 
 // Type definition representing a cache node

@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.Return
-import com.twitter.util.exp.Var
+import com.twitter.util.{Return, Var}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

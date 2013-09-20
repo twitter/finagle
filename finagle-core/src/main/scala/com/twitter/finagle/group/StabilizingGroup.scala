@@ -5,8 +5,7 @@ import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.Group
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.exp.Var
-import com.twitter.util.{Future, Time, Timer, Duration}
+import com.twitter.util.{Future, Time, Timer, Duration, Var}
 import scala.collection.immutable.Queue
 
 object StabilizingGroup {
