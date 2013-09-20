@@ -48,7 +48,6 @@ object StabilizingGroup {
       members.size - underlying.members.size
     }
 
-    underlying.set observe { newSet ! _ }
     protected val _set = Var(underlying.members)
 
     import State._
@@ -100,5 +99,11 @@ object StabilizingGroup {
     )
 
     loop(Queue.empty, Healthy)
+
+    underlying.set observe { set =>
+      // We can synchronize here because we know loop
+      // is eager, and doesn't itself synchronize.
+      newSet !! set
+    }
   }
 }

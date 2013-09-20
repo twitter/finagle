@@ -2,7 +2,7 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.common.quantity.{Amount, Time => CommonTime}
 import com.twitter.common.zookeeper.{ZooKeeperClient, ZooKeeperUtils}
-import com.twitter.concurrent.{Offer, Broker}
+import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
 import com.twitter.conversions.common._
 import com.twitter.conversions.common.quantity._
 import com.twitter.finagle.group.StabilizingGroup.State._
@@ -15,12 +15,16 @@ import scala.collection.JavaConverters._
 import scala.collection._
 
 private[finagle] class ZooKeeperHealthHandler extends Watcher {
+  private[this] val mu = new AsyncMutex
   val pulse = new Broker[Health]()
 
-  def process(evt: WatchedEvent) = evt.getState match {
-    case KeeperState.SyncConnected => pulse ! Healthy
-    case _ => pulse ! Unhealthy
-  }
+  def process(evt: WatchedEvent) = for {
+    permit <- mu.acquire()
+    () <- evt.getState match {
+      case KeeperState.SyncConnected => pulse ! Healthy
+      case _ => pulse ! Unhealthy
+    }
+  } permit.release()
 }
 
 private[finagle] object DefaultZkClientFactory
