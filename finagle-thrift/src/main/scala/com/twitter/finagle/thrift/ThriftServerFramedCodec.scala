@@ -4,14 +4,16 @@ import com.twitter.finagle._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.Future
+import com.twitter.io.Buf
 import java.net.InetSocketAddress
-import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory, TBinaryProtocol}
+import java.util.Arrays
+import org.apache.thrift.protocol.{
+  TMessage, TMessageType, TProtocolFactory, TBinaryProtocol}
 import org.apache.thrift.{TApplicationException, TException}
-import org.jboss.netty.channel.{
-  ChannelHandlerContext,
-  SimpleChannelDownstreamHandler, MessageEvent, Channels,
-  ChannelPipelineFactory}
 import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.{
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, 
+  SimpleChannelDownstreamHandler}
 
 object ThriftServerFramedCodec {
   def apply() = new ThriftServerFramedCodecFactory
@@ -148,19 +150,37 @@ private[thrift] class ThriftServerTracingFilter(
     if (isUpgraded) {
       val header = new thrift.RequestHeader
       val request_ = InputBuffer.peelMessage(request, header, protocolFactory)
+      
+      var didTrace = false
+
+      // If we are given a request context, interpret that. We assume that
+      // if we get any request context, we'll get a trace context.
+      if (header.contexts != null) {
+        val iter = header.contexts.iterator()
+        while (iter.hasNext) {
+          val c = iter.next()
+          didTrace ||= Arrays.equals(c.getKey(), TraceContext.KeyBytes)
+          Context.handle(Buf.ByteArray(c.getKey()), Buf.ByteArray(c.getValue()))
+        }
+      }
+
+      if (!didTrace) {
+        val sampled = if (header.isSetSampled) Some(header.isSampled) else None
+        // if true, we trace this request. if None client does not trace, we get to decide
+  
+        val traceId = TraceId(
+          if (header.isSetTrace_id) 
+            Some(SpanId(header.getTrace_id)) else None,
+          if (header.isSetParent_span_id) 
+            Some(SpanId(header.getParent_span_id)) else None,
+          SpanId(header.getSpan_id),
+          sampled,
+          if (header.isSetFlags) Flags(header.getFlags) else Flags())
+  
+        Trace.setId(traceId)
+      }
 
       val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
-      val sampled = if (header.isSetSampled) Some(header.isSampled) else None
-      // if true, we trace this request. if None client does not trace, we get to decide
-
-      val traceId = TraceId(
-        if (header.isSetTrace_id) Some(SpanId(header.getTrace_id)) else None,
-        if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
-        SpanId(header.getSpan_id),
-        sampled,
-        if (header.isSetFlags) Flags(header.getFlags) else Flags())
-
-      Trace.setId(traceId)
       Trace.recordRpcname(serviceName, msg.name)
       Trace.record(Annotation.ServerRecv())
 

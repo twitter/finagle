@@ -41,6 +41,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   private static final TField SAMPLED_FIELD_DESC = new TField("sampled", TType.BOOL, (short)5);
   private static final TField CLIENT_ID_FIELD_DESC = new TField("client_id", TType.STRUCT, (short)6);
   private static final TField FLAGS_FIELD_DESC = new TField("flags", TType.I64, (short)7);
+  private static final TField CONTEXTS_FIELD_DESC = new TField("contexts", TType.LIST, (short)8);
 
   public long trace_id;
   public long span_id;
@@ -48,6 +49,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   public boolean sampled;
   public ClientId client_id;
   public long flags;
+  public List<RequestContext> contexts;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
@@ -56,7 +58,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     PARENT_SPAN_ID((short)3, "parent_span_id"),
     SAMPLED((short)5, "sampled"),
     CLIENT_ID((short)6, "client_id"),
-    FLAGS((short)7, "flags");
+    FLAGS((short)7, "flags"),
+    CONTEXTS((short)8, "contexts");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -83,6 +86,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           return CLIENT_ID;
         case 7: // FLAGS
           return FLAGS;
+        case 8: // CONTEXTS
+          return CONTEXTS;
         default:
           return null;
       }
@@ -145,6 +150,9 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
         new StructMetaData(TType.STRUCT, ClientId.class)));
     tmpMap.put(_Fields.FLAGS, new FieldMetaData("flags", TFieldRequirementType.OPTIONAL, 
         new FieldValueMetaData(TType.I64)));
+    tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new StructMetaData(TType.STRUCT, RequestContext.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(RequestHeader.class, metaDataMap);
   }
@@ -154,13 +162,15 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
 
   public RequestHeader(
     long trace_id,
-    long span_id)
+    long span_id,
+    List<RequestContext> contexts)
   {
     this();
     this.trace_id = trace_id;
     setTrace_idIsSet(true);
     this.span_id = span_id;
     setSpan_idIsSet(true);
+    this.contexts = contexts;
   }
 
   /**
@@ -177,6 +187,13 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       this.client_id = new ClientId(other.client_id);
     }
     this.flags = other.flags;
+    if (other.isSetContexts()) {
+      List<RequestContext> __this__contexts = new ArrayList<RequestContext>();
+      for (RequestContext other_element : other.contexts) {
+        __this__contexts.add(new RequestContext(other_element));
+      }
+      this.contexts = __this__contexts;
+    }
   }
 
   public RequestHeader deepCopy() {
@@ -196,6 +213,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     this.client_id = null;
     setFlagsIsSet(false);
     this.flags = 0;
+    this.contexts = null;
   }
 
   public long getTrace_id() {
@@ -337,6 +355,45 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     __isset_bit_vector.set(__FLAGS_ISSET_ID, value);
   }
 
+  public int getContextsSize() {
+    return (this.contexts == null) ? 0 : this.contexts.size();
+  }
+
+  public java.util.Iterator<RequestContext> getContextsIterator() {
+    return (this.contexts == null) ? null : this.contexts.iterator();
+  }
+
+  public void addToContexts(RequestContext elem) {
+    if (this.contexts == null) {
+      this.contexts = new ArrayList<RequestContext>();
+    }
+    this.contexts.add(elem);
+  }
+
+  public List<RequestContext> getContexts() {
+    return this.contexts;
+  }
+
+  public RequestHeader setContexts(List<RequestContext> contexts) {
+    this.contexts = contexts;
+    return this;
+  }
+
+  public void unsetContexts() {
+    this.contexts = null;
+  }
+
+  /** Returns true if field contexts is set (has been asigned a value) and false otherwise */
+  public boolean isSetContexts() {
+    return this.contexts != null;
+  }
+
+  public void setContextsIsSet(boolean value) {
+    if (!value) {
+      this.contexts = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case TRACE_ID:
@@ -387,6 +444,14 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       }
       break;
 
+    case CONTEXTS:
+      if (value == null) {
+        unsetContexts();
+      } else {
+        setContexts((List<RequestContext>)value);
+      }
+      break;
+
     }
   }
 
@@ -409,6 +474,9 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
 
     case FLAGS:
       return new Long(getFlags());
+
+    case CONTEXTS:
+      return getContexts();
 
     }
     throw new IllegalStateException();
@@ -433,6 +501,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       return isSetClient_id();
     case FLAGS:
       return isSetFlags();
+    case CONTEXTS:
+      return isSetContexts();
     }
     throw new IllegalStateException();
   }
@@ -501,6 +571,15 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (!(this_present_flags && that_present_flags))
         return false;
       if (this.flags != that.flags)
+        return false;
+    }
+
+    boolean this_present_contexts = true && this.isSetContexts();
+    boolean that_present_contexts = true && that.isSetContexts();
+    if (this_present_contexts || that_present_contexts) {
+      if (!(this_present_contexts && that_present_contexts))
+        return false;
+      if (!this.contexts.equals(that.contexts))
         return false;
     }
 
@@ -580,6 +659,16 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetContexts()).compareTo(typedOther.isSetContexts());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetContexts()) {
+      lastComparison = TBaseHelper.compareTo(this.contexts, typedOther.contexts);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -645,6 +734,24 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
+        case 8: // CONTEXTS
+          if (field.type == TType.LIST) {
+            {
+              TList _list8 = iprot.readListBegin();
+              this.contexts = new ArrayList<RequestContext>(_list8.size);
+              for (int _i9 = 0; _i9 < _list8.size; ++_i9)
+              {
+                RequestContext _elem10;
+                _elem10 = new RequestContext();
+                _elem10.read(iprot);
+                this.contexts.add(_elem10);
+              }
+              iprot.readListEnd();
+            }
+          } else { 
+            TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, field.type);
       }
@@ -686,6 +793,18 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     if (isSetFlags()) {
       oprot.writeFieldBegin(FLAGS_FIELD_DESC);
       oprot.writeI64(this.flags);
+      oprot.writeFieldEnd();
+    }
+    if (this.contexts != null) {
+      oprot.writeFieldBegin(CONTEXTS_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.STRUCT, this.contexts.size()));
+        for (RequestContext _iter11 : this.contexts)
+        {
+          _iter11.write(oprot);
+        }
+        oprot.writeListEnd();
+      }
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -732,6 +851,14 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       sb.append(this.flags);
       first = false;
     }
+    if (!first) sb.append(", ");
+    sb.append("contexts:");
+    if (this.contexts == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.contexts);
+    }
+    first = false;
     sb.append(")");
     return sb.toString();
   }

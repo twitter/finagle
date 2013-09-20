@@ -1,9 +1,11 @@
 package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.Service
-import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
+import com.twitter.finagle.tracing.{
+  Annotation, BufferingTracer, Flags, Record, SpanId, Trace, TraceId}
 import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.{Service, ContextHandler}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -17,46 +19,37 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
-class ClientServerTest extends FunSuite with OneInstancePerTest with MockitoSugar {
+object MuxContext {
+  var handled = Seq[Buf]()
+  var buf: Buf = Buf.Empty
+}
+
+class MuxContext extends ContextHandler {
+  import MuxContext._
+
+  val key = Buf.Utf8("com.twitter.finagle.mux.MuxContext")
+
+  def handle(body: Buf) {
+    handled :+= body
+  }
+  def emit(): Option[Buf] = Some(MuxContext.buf)
+}
+
+class ClientServerTest(canDispatch: Boolean) 
+    extends FunSuite with OneInstancePerTest with MockitoSugar {
   def buf(b: Byte*) = ChannelBuffers.wrappedBuffer(Array[Byte](b:_*))
 
   val tracer = new BufferingTracer
   Trace.pushTracer(tracer)
   val clientToServer = new AsyncQueue[ChannelBuffer]
   val serverToClient = new AsyncQueue[ChannelBuffer]
-  val serverTransport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
-  val clientTransport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
+  val serverTransport = 
+    new QueueTransport(writeq=serverToClient, readq=clientToServer)
+  val clientTransport = 
+    new QueueTransport(writeq=clientToServer, readq=serverToClient)
   val service = mock[Service[ChannelBuffer, ChannelBuffer]]
   val client = new ClientDispatcher(clientTransport)
-  val server = new ServerDispatcher(serverTransport, service)
-
-  test("end-to-end with tracing: client-to-service") {
-    val p = new Promise[ChannelBuffer]
-    when(service(buf(1))).thenReturn(p)
-
-    verify(service, never())(any[ChannelBuffer])
-    val id = TraceId(Some(SpanId(1)), Some(SpanId(2)), SpanId(3), None)
-    val f = Trace.unwind {
-      Trace.setId(id)
-      client(buf(1))
-    }
-    verify(service)(buf(1))
-    assert(f.poll === None)
-    p.setValue(buf(2))
-    assert(f.poll === Some(Return(buf(2))))
-
-    val ia = new InetSocketAddress(0)
-    val recs = tracer.toSeq.sortBy(_.timestamp)
-    assert(recs match {
-      case Seq(
-        Record(`id`, _, Annotation.ClientSend(), None),
-        Record(`id`, _, Annotation.ServerRecv(), None),
-        Record(`id`, _, Annotation.ServerSend(), None),
-        Record(`id`, _, Annotation.ClientRecv(), None)) => true
-      case _ => false
-    })
-  }
+  val server = new ServerDispatcher(serverTransport, service, canDispatch)
 
   test("handle concurrent requests, handling out of order replies") {
     val p1, p2, p3 = new Promise[ChannelBuffer]
@@ -128,15 +121,43 @@ class ClientServerTest extends FunSuite with OneInstancePerTest with MockitoSuga
     assert(f.poll === Some(Throw(exc)))
   }
 
-  test("propagate trace ids") {
-    when(service(any[ChannelBuffer])).thenAnswer(new Answer[Future[ChannelBuffer]]() {
-      def answer(invocation: InvocationOnMock) = {
-        val traceId = ChannelBuffers.wrappedBuffer(
-          Trace.id.toString.getBytes(CharsetUtil.UTF_8))
-        Future.value(traceId)
-      }
-    })
+  test("end-to-end with tracing: client-to-service") {
+    val p = new Promise[ChannelBuffer]
+    when(service(buf(1))).thenReturn(p)
 
+    verify(service, never())(any[ChannelBuffer])
+    val id = TraceId(Some(SpanId(1)), Some(SpanId(2)), SpanId(3), None)
+    val f = Trace.unwind {
+      Trace.setId(id)
+      client(buf(1))
+    }
+    verify(service)(buf(1))
+    assert(f.poll === None)
+    p.setValue(buf(2))
+    assert(f.poll === Some(Return(buf(2))))
+
+    val ia = new InetSocketAddress(0)
+    val recs = tracer.toSeq.sortBy(_.timestamp)
+    assert(recs match {
+      case Seq(
+        Record(`id`, _, Annotation.ClientSend(), None),
+        Record(`id`, _, Annotation.ServerRecv(), None),
+        Record(`id`, _, Annotation.ServerSend(), None),
+        Record(`id`, _, Annotation.ClientRecv(), None)) => true
+      case _ => false
+    })
+  }
+
+  test("propagate trace ids") {
+    when(service(any[ChannelBuffer])).thenAnswer(
+      new Answer[Future[ChannelBuffer]]() {
+        def answer(invocation: InvocationOnMock) = {
+          val traceId = ChannelBuffers.wrappedBuffer(
+            Trace.id.toString.getBytes(CharsetUtil.UTF_8))
+          Future.value(traceId)
+        }
+      }
+    )
 
     val id = Trace.nextId
     val resp = Trace.unwind {
@@ -152,13 +173,15 @@ class ClientServerTest extends FunSuite with OneInstancePerTest with MockitoSuga
   }
 
   test("propagate trace flags") {
-    when(service(any[ChannelBuffer])).thenAnswer(new Answer[Future[ChannelBuffer]] {
-      def answer(invocation: InvocationOnMock) = {
-        val buf = ChannelBuffers.directBuffer(8)
-        buf.writeLong(Trace.id.flags.toLong)
-        Future.value(buf)
+    when(service(any[ChannelBuffer])).thenAnswer(
+      new Answer[Future[ChannelBuffer]] {
+        def answer(invocation: InvocationOnMock) = {
+          val buf = ChannelBuffers.directBuffer(8)
+          buf.writeLong(Trace.id.flags.toLong)
+          Future.value(buf)
+        }
       }
-    })
+    )
 
     val flags = Flags().setDebug
     val id = Trace.nextId.copy(flags=flags)
@@ -171,5 +194,35 @@ class ClientServerTest extends FunSuite with OneInstancePerTest with MockitoSuga
     assert(Await.result(resp).readableBytes === 8)
     val respFlags = Flags(Await.result(resp).readLong)
     assert(respFlags === flags)
+  }
+}
+
+@RunWith(classOf[JUnitRunner])
+class ClientServerTestNoDispatch extends ClientServerTest(false)
+
+@RunWith(classOf[JUnitRunner])
+class ClientServerTestDispatch extends ClientServerTest(true) {
+  // Note: We test trace propagation here, too, 
+  // since it's a default request context.
+
+  test("Transmits request contexts") {
+    when(service(any[ChannelBuffer])).thenReturn(
+      Future.value(ChannelBuffers.EMPTY_BUFFER))
+
+    MuxContext.handled = Seq.empty
+    MuxContext.buf = Buf.ByteArray(1,2,3,4)
+
+    var f = client(ChannelBuffers.EMPTY_BUFFER)
+    assert(f.isDefined)
+    Await.result(f)
+    assert(MuxContext.handled === Seq(Buf.ByteArray(1,2,3,4)))
+
+    MuxContext.buf = Buf.ByteArray(9,8,7,6)
+    f = client(ChannelBuffers.EMPTY_BUFFER)
+    assert(f.isDefined)
+    Await.result(f)
+
+    assert(MuxContext.handled === Seq(
+      Buf.ByteArray(1,2,3,4), Buf.ByteArray(9,8,7,6)))
   }
 }

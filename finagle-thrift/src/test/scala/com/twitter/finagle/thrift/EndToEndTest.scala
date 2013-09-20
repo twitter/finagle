@@ -52,6 +52,37 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       assert(idSet1 != idSet2)
     }
   }
+  
+  test("JSON is broken (before we upgrade)") {
+    // We test for the presence of a JSON encoding 
+    // bug in thrift 0.5.0[1]. See THRIFT-1375.
+    //  When we upgrade, this test will fail and helpfully
+    // remind us to add JSON back.
+    import org.apache.thrift.protocol._
+    import org.apache.thrift.transport._
+    import java.nio.ByteBuffer
+    
+    val bytes = Array[Byte](102, 100, 125, -96, 57, -55, -72, 18, 
+      -21, 15, -91, -36, 104, 111, 111, -127, -21, 15, -91, -36, 
+      104, 111, 111, -127, 0, 0, 0, 0, 0, 0, 0, 0)
+    val pf = new TJSONProtocol.Factory()
+
+    val json = {
+      val buf = new TMemoryBuffer(512)
+      pf.getProtocol(buf).writeBinary(ByteBuffer.wrap(bytes))
+      java.util.Arrays.copyOfRange(buf.getArray(), 0, buf.length())
+    }
+    
+    val decoded = {
+      val trans = new TMemoryInputTransport(json)
+      val bin = pf.getProtocol(trans).readBinary()
+      val bytes = new Array[Byte](bin.remaining())
+      bin.get(bytes, 0, bin.remaining())
+      bytes
+    }
+
+    assert(bytes.toSeq != decoded.toSeq, "Add JSON support back")
+  }
 
   // TODO(John Sirois): Address and un-skip: https://jira.twitter.biz/browse/CSL-549
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
@@ -102,3 +133,38 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
 
   runThriftTests()
 }
+
+/*
+
+[1]
+% diff -u /Users/marius/src/thrift-0.5.0-finagle/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java /Users/marius/pkg/thrift/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java
+--- /Users/marius/src/thrift-0.5.0-finagle/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java	2013-09-16 12:17:53.000000000 -0700
++++ /Users/marius/pkg/thrift/lib/java/src/org/apache/thrift/protocol/TJSONProtocol.java	2013-09-05 20:20:07.000000000 -0700
+@@ -313,7 +313,7 @@
+   // Temporary buffer used by several methods
+   private byte[] tmpbuf_ = new byte[4];
+ 
+-  // Read a byte that must match b[0]; otherwise an excpetion is thrown.
++  // Read a byte that must match b[0]; otherwise an exception is thrown.
+   // Marked protected to avoid synthetic accessor in JSONListContext.read
+   // and JSONPairContext.read
+   protected void readJSONSyntaxChar(byte[] b) throws TException {
+@@ -331,7 +331,7 @@
+       return (byte)((char)ch - '0');
+     }
+     else if ((ch >= 'a') && (ch <= 'f')) {
+-      return (byte)((char)ch - 'a');
++      return (byte)((char)ch - 'a' + 10);
+     }
+     else {
+       throw new TProtocolException(TProtocolException.INVALID_DATA,
+@@ -346,7 +346,7 @@
+       return (byte)((char)val + '0');
+     }
+     else {
+-      return (byte)((char)val + 'a');
++      return (byte)((char)(val - 10) + 'a');
+     }
+   }
+
+*/

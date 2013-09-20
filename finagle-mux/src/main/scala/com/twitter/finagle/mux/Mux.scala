@@ -20,7 +20,7 @@ object MuxClient extends DefaultClient[ChannelBuffer, ChannelBuffer](
 
 object MuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer]("mux", mux.PipelineFactory)
 object MuxServer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-  "mux", MuxListener, new mux.ServerDispatcher(_, _)
+  "mux", MuxListener, new mux.ServerDispatcher(_, _, true)
 )
 
 /**

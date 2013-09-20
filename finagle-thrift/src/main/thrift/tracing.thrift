@@ -1,4 +1,13 @@
-/* CHANGING THIS FILE REQUIRES MANUAL REGENERATION */
+/* 
+		CHANGING THIS FILE REQUIRES MANUAL REGENERATION 
+		
+E.g.:
+
+thrift --gen java tracing.thrift
+cd gen-java
+find . -type f -print0 | cpio -pmud0 ../../java
+
+*/
 
 /**
  * Define thrift structs for thrift request tracing.
@@ -65,6 +74,15 @@ struct ClientId {
 }
 
 /**
+ * This struct serializes com.twitter.finagle.Context
+ */
+struct RequestContext {
+  1: binary key,
+  2: binary value
+}
+
+
+/**
  * The following are for finagle-thrift specific tracing headers &
  * negotiation.
  */
@@ -80,6 +98,7 @@ struct RequestHeader {
   5: optional bool sampled // if true we should trace the request, if not set we have not decided.
   6: optional ClientId client_id
   7: optional i64 flags // contains various flags such as debug mode on/off
+  8: list<RequestContext> contexts
 }
 
 /**
@@ -89,6 +108,7 @@ struct RequestHeader {
  */
 struct ResponseHeader {
   1: list<Span> spans
+  2: list<RequestContext> contexts
 }
 
 /**
