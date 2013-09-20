@@ -755,21 +755,6 @@ class ClientSpec extends SpecificationWithJUnit {
       testServers = List()
     }
 
-    "with static servers list" in {
-      val client = MemcachedClient.newKetamaClient(
-        group = "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
-
-      Await.result(client.delete("foo"))
-      Await.result(client.get("foo")) mustEqual None
-      Await.result(client.set("foo", "bar"))
-      Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
-    }
-
-    /*  This test had to be marked as flaky, but because the "should" block requires an instance of
-     *  org.specs.specification.Example as a return value, this test had to be moved before
-     *  "with managed cache pool" -- other alternatives include returning a null instance of
-     *  org.specs.specification.Example, or adding the "if" statement *inside* of the "in" block.
-     */
     if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
       "with unmanaged regular zk serverset" in {
         val client = MemcachedClient.newKetamaClient(
@@ -794,7 +779,7 @@ class ClientSpec extends SpecificationWithJUnit {
       }
     }
 
-    "with managed cache pool" in {
+    if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "with managed cache pool" in {
       val client = MemcachedClient.newKetamaClient(
         group = "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
@@ -819,6 +804,16 @@ class ClientSpec extends SpecificationWithJUnit {
           c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
         }
       }
+    }
+
+    "with static servers list" in {
+      val client = MemcachedClient.newKetamaClient(
+        group = "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
+
+      Await.result(client.delete("foo"))
+      Await.result(client.get("foo")) mustEqual None
+      Await.result(client.set("foo", "bar"))
+      Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
     }
   }
 }
