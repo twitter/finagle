@@ -6,13 +6,13 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-case class TestGroup(target: String) extends Group[SocketAddress] {
+case class TestGroup(addr: String) extends Group[SocketAddress] {
   def members = Set()
 }
 
 class TestResolver extends Resolver {
   val scheme = "test"
-  def resolve(target: String) = Return(TestGroup(target))
+  def resolve(addr: String) = Return(TestGroup(addr))
 }
 
 @RunWith(classOf[JUnitRunner])

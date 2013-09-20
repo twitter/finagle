@@ -1,5 +1,6 @@
 scala_library(name='scala',
   dependencies=[
+    pants('3rdparty:jackson-databind'),
     pants('3rdparty:jackson-module-scala'),
     pants('3rdparty:thrift-0.5.0'),
     pants('finagle/finagle-core'),

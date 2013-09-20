@@ -37,7 +37,7 @@ trait MemcachedKetamaClient {
     ejectFailedHost: Boolean
   ): memcached.Client = {
     new KetamaClient(
-      cacheNodesGrp(group),
+      CacheNodeGroup(group),
       keyHasher,
       KetamaClient.DefaultNumReps,
       faParams(ejectFailedHost),
@@ -58,18 +58,13 @@ trait MemcachedKetamaClient {
     ejectFailedHost: Boolean
   ): memcached.TwemcacheClient = {
     new KetamaClient(
-      cacheNodesGrp(group),
+      CacheNodeGroup(group),
       keyHasher,
       KetamaClient.DefaultNumReps,
       faParams(ejectFailedHost),
       None,
       ClientStatsReceiver.scope("twemcache_client")
     ) with TwemcachePartitionedClient
-  }
-
-  private def cacheNodesGrp(group: Group[SocketAddress]) = group collect {
-    case node: CacheNode => node
-    case addr: InetSocketAddress => new CacheNode(addr.getHostName, addr.getPort, 1)
   }
 
   private def faParams(ejectFailedHost: Boolean) = {

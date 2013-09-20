@@ -7,7 +7,7 @@ import com.twitter.finagle.builder.{  ClientBuilder, Cluster, ServerBuilder, Sta
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
 import com.twitter.finagle.tracing.ConsoleTracer
-import com.twitter.finagle.{Group, ThriftMux, Http}
+import com.twitter.finagle.{Resolver, ThriftMux, Http}
 import com.twitter.logging.{Level, Logger, LoggerFactory, ConsoleHandler}
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Await, Future, Duration, Stopwatch, StorageUnit}
@@ -16,6 +16,8 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import scala.util.Random
+import com.twitter.app.App
+import com.twitter.logging.Logging
 
 class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(Duration, StorageUnit)])
   extends Service[HttpRequest, HttpResponse]
@@ -44,45 +46,40 @@ class AppService(clients: Seq[thrift.Backend.FutureIface], responseSample: Seq[(
   }
 }
 
-object Appserver {
-  private[this] lazy val log = Logger(getClass)
+object Appserver extends App with Logging {
+  val useThriftmux = flag("thriftmux", true, "Use thriftmux")
+  val basePort = flag("baseport", 3000, "Base port")
+  val responseSample = flag("responsesample", 
+    Seq((0.millisecond, 0.bytes)), "Response sample")
+  val clientAddrs = flag("clients", Seq(":2000", ":2020"), "clients")
 
-  private[this] def usage() {
-    System.err.println("Server basePort responseSample n*hostport [k*hostport..]")
-    System.exit(1)
-  }
-
-  def main(args: Array[String]) = {
-    LoggerFactory(
-      node = "",
-      level = Some(Level.INFO),
-      handlers = ConsoleHandler() :: Nil
-    ).apply()
-
-    if (args.size < 3)
-      usage()
-
-    val basePort = args(0).toInt
-    // eg. generate with jot -r 160 1000 10000 | rs  0 2 | awk '{print 100*$1 ":" int($2/100)}' | tr '\n' ','
-
-    val responseSample = for {
-      sample <- args(1) split ","
-      Array(size, latency) = sample split ":"
-    } yield (latency.toInt.milliseconds, size.toInt.bytes)
-
+  def main() {
     val clients = for {
-      (spec, i) <- (args drop 2).zipWithIndex
-      Array(n, hostport) = spec split "\\*"
-      Array(host, port) = hostport split ":"
-      addr = new InetSocketAddress(host, port.toInt)
-    } yield ThriftMux.newIface[thrift.Backend.FutureIface](
-      Group[SocketAddress](Seq.fill(n.toInt)(addr):_*).named("mux%d".format(i)))
+      (a, i) <- clientAddrs().zipWithIndex
+      g = Resolver.resolve(a)
+      if g.isReturn
+    } yield {
+      if (useThriftmux())
+        ThriftMux.newIface[thrift.Backend.FutureIface](g().named("mux%d".format(i)))
+      else {
+        // Note: Assumes static groups.
+        val cluster = StaticCluster(g().members.toSeq)
+        val transport = ClientBuilder()
+          .cluster(cluster)
+          .name("mux%d".format(i))
+          .codec(ThriftClientFramedCodec())
+          .hostConnectionLimit(1000)
+          .build()
+        new thrift.Backend.FinagledClient(transport)
+      }
+    }
 
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
-    val adminService = new AdminHttpService(basePort+1, 100/*backlog*/, runtime)
+    val adminService = new AdminHttpService(basePort()+1, 100/*backlog*/, runtime)
     adminService.start()
 
-    val server = Http.serve(":"+args(0), new AppService(clients.toSeq, responseSample))
+    val server = Http.serve(":"+basePort(), 
+      new AppService(clients.toSeq, responseSample()))
     Await.ready(server)
   }
 }

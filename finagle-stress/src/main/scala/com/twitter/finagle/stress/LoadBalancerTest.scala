@@ -19,6 +19,7 @@ import scala.collection.mutable.ArrayBuffer
 object LoadBalancerTest extends App {
   val nreqsFlag = flag("n", 100000, "Number of reqs sent from each client")
   val latencyFlag = flag("l", 0.seconds, "req latency forced at the server")
+  val tpschedFlag = flag("tpsched", false, "use threadpool scheduler")
 
   val totalRequests = new AtomicInteger(0)
   val clientBuilder = ClientBuilder()
@@ -26,6 +27,11 @@ object LoadBalancerTest extends App {
     .retries(10)
 
   def main() {
+    if (tpschedFlag()) {
+      import com.twitter.concurrent.{Scheduler, ThreadPoolScheduler}
+      println("Using threadpool scheduler")
+      Scheduler.setUnsafe(new ThreadPoolScheduler("FINAGLE"))
+    }
     runSuite()
   }
 

@@ -423,7 +423,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       name = config.name,
       pipelineFactory = codec.pipelineFactory,
       channelSnooper =
-        if (config.logChannelActivity) Some(ChannelSnooper(config.name)(logger.info))
+        if (config.logChannelActivity) Some(ChannelSnooper(config.name)(logger.log(Level.INFO, _, _)))
         else None,
       channelFactory = config.channelFactory,
       bootstrapOptions = {

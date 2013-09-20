@@ -40,12 +40,23 @@ object Client {
   /**
    * Construct a client from a Cluster
    */
+  @deprecated("Use group instead", "7.0.0")
   def apply(cluster: Cluster[SocketAddress]) : Client = Client(
     ClientBuilder()
       .cluster(cluster)
       .hostConnectionLimit(1)
       .codec(new Memcached)
       .build())
+
+  /**
+   * Construct a client from a Group
+   */
+  def apply(group: Group[SocketAddress]) : Client = Client(
+    ClientBuilder()
+        .group(group)
+        .hostConnectionLimit(1)
+        .codec(new Memcached)
+        .build())
 
   /**
    * Construct a client from a single Service.
@@ -327,6 +338,36 @@ trait Client extends BaseClient[ChannelBuffer] {
   )
 }
 
+trait ProxyClient extends Client {
+  protected def proxyClient: Client
+
+  def getResult(keys: Iterable[String]) = proxyClient.getResult(keys)
+
+  def getsResult(keys: Iterable[String]) = proxyClient.getsResult(keys)
+
+  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.set(key, flags, expiry, value)
+
+  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.add(key, flags, expiry, value)
+
+  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.replace(key, flags, expiry, value)
+
+  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.append(key, flags, expiry, value)
+
+  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.prepend(key, flags, expiry, value)
+
+  def incr(key: String, delta: Long) = proxyClient.incr(key, delta)
+
+  def decr(key: String, delta: Long) = proxyClient.decr(key, delta)
+
+  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = proxyClient.cas(key, flags, expiry, value, casUnique)
+
+  def delete(key: String) = proxyClient.delete(key)
+
+  def stats(args: Option[String]) = proxyClient.stats(args)
+
+  def release() { proxyClient.release() }
+}
+
 /**
  * A Client connected to an individual Memcached server.
  *
@@ -565,6 +606,7 @@ trait PartitionedClient extends Client {
 }
 
 object PartitionedClient {
+  @deprecated("Use CacheNodeGroup.apply(hostPartWeights) instead", "7.0.0")
   def parseHostPortWeights(hostPortWeights: String): Seq[(String, Int, Int)] =
     hostPortWeights
       .split(Array(' ', ','))
@@ -577,8 +619,19 @@ object PartitionedClient {
       }
 }
 
-case class KetamaClientKey(host: String, port: Int, weight: Int) {
-  private[memcached] def identifier = if (port == 11211) host else host + ":" + port
+abstract class KetamaClientKey {
+  def identifier: String
+}
+object KetamaClientKey {
+  private[memcached] case class HostPortBasedKey(host: String, port: Int, weight: Int) extends KetamaClientKey {
+    val identifier = if (port == 11211) host else host + ":" + port
+  }
+  private[memcached] case class CustomKey(identifier: String) extends KetamaClientKey
+
+  def apply(host: String, port: Int, weight: Int): KetamaClientKey =
+    HostPortBasedKey(host, port, weight)
+
+  def apply(id: String) = CustomKey(id)
 }
 
 private[finagle] sealed trait NodeEvent
@@ -619,7 +672,7 @@ class KetamaClient private[finagle](
   keyHasher: KeyHasher,
   numReps: Int,
   failureAccrualParams: (Int, Duration) = (5, 30.seconds),
-  legacyFAClientBuilder: Option[(KetamaClientKey, Broker[NodeHealth], (Int, Duration)) => Service[Command, Response]],
+  legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, Duration)) => Service[Command, Response]],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   oldLibMemcachedVersionComplianceMode: Boolean = false
 ) extends PartitionedClient {
@@ -635,14 +688,17 @@ class KetamaClient private[finagle](
   val nodeHealthBroker = new Broker[NodeHealth]
   val ketamaNodeGrp = initialServices.map({
     node: CacheNode =>
-      val key = KetamaClientKey(node.host, node.port, node.weight)
+      val key = node.key match {
+        case Some(id) => KetamaClientKey(id)
+        case None => KetamaClientKey(node.host, node.port, node.weight)
+      }
       val faClient: Client = legacyFAClientBuilder map { builder =>
-        TwemcacheClient(builder(key, nodeHealthBroker, failureAccrualParams))
+        TwemcacheClient(builder(node, key, nodeHealthBroker, failureAccrualParams))
       } getOrElse MemcachedFailureAccrualClient(
         key, nodeHealthBroker, failureAccrualParams
       ).newTwemcacheClient(node.host+":"+node.port)
 
-      key -> KetamaNode(key.identifier, key.weight, faClient)
+      key -> KetamaNode(key.identifier, node.weight, faClient)
   })
 
   @volatile private[this] var ketamaNodeSnap = ketamaNodeGrp()
@@ -738,7 +794,7 @@ class KetamaClient private[finagle](
 }
 
 case class KetamaClientBuilder private[memcached] (
-  _cluster: Cluster[CacheNode],
+  _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, Duration) = (5, 30.seconds),
@@ -746,28 +802,27 @@ case class KetamaClientBuilder private[memcached] (
   numReps: Int = KetamaClient.DefaultNumReps
 ) {
 
+  @deprecated("Use group(Group[CacheNode]) instead", "7.0.0")
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    // TODO: for now, we assume all the cluster created this way has equal weight.
-    copy(
-      _cluster = cluster map {
-        socketAddr =>
-          new CacheNode(socketAddr.getHostName, socketAddr.getPort, 1)
-      }
-    )
+    group(CacheNodeGroup(Group.fromCluster(cluster).map{_.asInstanceOf[SocketAddress]}))
   }
 
+  def group(group: Group[CacheNode]): KetamaClientBuilder = {
+    copy(_group = group)
+  }
+
+  @deprecated("Use group(Group[CacheNode]) instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
-    copy(_cluster = cluster)
+    copy(_group = Group.fromCluster(cluster))
   }
 
   def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_cluster = CachePoolCluster.newStaticCluster(nodes map {
-      case (host, port, weight) =>
-        new CacheNode(host, port, weight)
-    } toSet))
+    copy(_group = Group(nodes map {
+      case (host, port, weight) => new CacheNode(host, port, weight)
+    }:_*))
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
-    nodes(PartitionedClient.parseHostPortWeights(hostPortWeights))
+    group(CacheNodeGroup(hostPortWeights))
 
   def hashName(hashName: String): KetamaClientBuilder =
     copy(_hashName = Some(hashName))
@@ -792,9 +847,9 @@ case class KetamaClientBuilder private[memcached] (
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1)).codec(Memcached())
 
     def legacyFAClientBuilder(
-      key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
+      node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, Duration)
     ) = {
-      builder.hosts(new InetSocketAddress(key.host, key.port))
+      builder.hosts(new InetSocketAddress(node.host, node.port))
           .failureAccrualFactory(filter(key, broker, faParams) _)
           .build()
     }
@@ -803,11 +858,11 @@ case class KetamaClientBuilder private[memcached] (
     val statsReceiver = builder.statsReceiver.scope("memcached_client")
 
     new KetamaClient(
-      Group.fromCluster(_cluster),
+      _group,
       keyHasher,
       numReps,
       _failureAccrualParams,
-      Some(legacyFAClientBuilder(_, _, _)),
+      Some(legacyFAClientBuilder(_, _, _, _)),
       statsReceiver,
       oldLibMemcachedVersionComplianceMode
     )
@@ -828,7 +883,7 @@ case class KetamaClientBuilder private[memcached] (
 }
 
 object KetamaClientBuilder {
-  def apply(): KetamaClientBuilder = KetamaClientBuilder(new StaticCluster(Nil), Some("ketama"), None)
+  def apply(): KetamaClientBuilder = KetamaClientBuilder(Group.empty, Some("ketama"), None)
   def get() = apply()
 }
 
@@ -864,7 +919,9 @@ case class RubyMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members map {
+      node: CacheNode => (node.host, node.port, node.weight)
+    } toSeq)
 
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): RubyMemCacheClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
@@ -908,7 +965,9 @@ case class PHPMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = PartitionedClient.parseHostPortWeights(hostPortWeights))
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members map {
+      node: CacheNode => (node.host, node.port, node.weight)
+    } toSeq)
 
   def hashName(hashName: String): PHPMemCacheClientBuilder =
     copy(_hashName = Some(hashName))

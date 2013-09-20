@@ -1,11 +1,11 @@
 scala_library(name='scala',
   dependencies=[
-    pants('3rdparty:commons-codec'),
     pants('3rdparty/com/twitter/common:service-thrift'),
     pants('3rdparty/com/twitter/common/zookeeper:client'),
     pants('3rdparty/com/twitter/common/zookeeper:server-set'),
     pants('finagle/finagle-core'),
-    pants('util/util-core')
+    pants('util/util-core'),
+    pants('util/util-zk-common')
   ],
   sources=rglobs('*.scala'),
   resources=[

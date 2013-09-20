@@ -1,7 +1,10 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.{Closable, Future, Duration, Timer}
 
 /**
  * A group is a dynamic set of `T`-typed values. It is used to
@@ -136,6 +139,26 @@ object NamedGroup {
 }
 
 object Group {
+  val timer = DefaultTimer.twitter
+  val defaultBackoff = (Backoff.linear(100.milliseconds, 100.milliseconds) take 5) ++ Backoff.const(1.second)
+
+  /**
+   * Returns a Future that is satisfied when the
+   * predicate is affirmed. The group is polled
+   * with the given backoff strategy.
+   */
+  def pollUntilTrue[T](
+    group: Group[T],
+    p: Group[T] => Boolean,
+    backoff: Stream[Duration] = defaultBackoff
+  ): Future[Unit] = {
+    def poll(ds: Stream[Duration]): Future[Unit] = {
+      if (p(group)) Future.Done
+      else timer.doLater(ds.head)(()) flatMap { _ => poll(ds.tail) }
+    }
+    poll(backoff)
+  }
+
   /**
    * Construct a `T`-typed static group from the given elements.
    *
@@ -167,17 +190,18 @@ object Group {
    * are deprecated, so this constructor acts as a temporary
    * bridge.
    */
-  def fromCluster[T](underlying: Cluster[T]): Group[T] = new Group[T] {
+  def fromCluster[T](underlying: Cluster[T]): Group[T] = {
     val (snap, edits) = underlying.snap
-    @volatile var current: Set[T] = snap.toSet
-    edits foreach { spool =>
-      spool foreach {
-        case Cluster.Add(t) => current += t
-        case Cluster.Rem(t) => current -= t
+    new Group[T] {
+      @volatile var current: Set[T] = snap.toSet
+      edits foreach { spool =>
+        spool foreach {
+          case Cluster.Add(t) => current += t
+          case Cluster.Rem(t) => current -= t
+        }
       }
+
+      def members = current
     }
-
-    def members = current
   }
-
 }

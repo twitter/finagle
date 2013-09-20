@@ -83,8 +83,8 @@ private[this] class CheckHttpRequestFilter extends CheckRequestFilter[HttpReques
 
 case class Http(
     _compressionLevel: Int = 0,
-    _maxRequestSize: StorageUnit = 1.megabyte,
-    _maxResponseSize: StorageUnit = 1.megabyte,
+    _maxRequestSize: StorageUnit = 5.megabytes,
+    _maxResponseSize: StorageUnit = 5.megabytes,
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
     _annotateCipherHeader: Option[String] = None,
@@ -101,6 +101,8 @@ case class Http(
     copy(_channelBufferUsageTracker = Some(usageTracker))
   def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
   def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
+  def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
+  def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
 
   def client = { config =>
     new Codec[HttpRequest, HttpResponse] {

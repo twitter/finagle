@@ -4,13 +4,17 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{
-  CancelledRequestException, Service, SimpleFilter, TimeoutException, WriteException
+  CancelledRequestException, ChannelClosedException, Service,
+  SimpleFilter, TimeoutException, WriteException
 }
 import com.twitter.util._
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConversions._
 
+/**
+ * A function defining retry behavior for a given value type `A`.
+ */
 trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
 /**
@@ -72,6 +76,10 @@ object RetryPolicy extends JavaSingleton {
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
     case Throw(_: TimeoutException) => true
+  }
+
+  val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(_: ChannelClosedException) => true
   }
 
   def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)

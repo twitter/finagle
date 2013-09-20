@@ -1,28 +1,41 @@
 package com.twitter.finagle.zookeeper
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.{Announcer, Resolver}
 import com.twitter.util.Await
+import com.twitter.util.Duration
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.time._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
-  val inst = new ZkInstance
-  import inst._
-  before(start())
-  after {
-    ZkClient.clear()
-    stop()
+  val zkTimeout = 100.milliseconds
+  var inst: ZkInstance = _
+  val factory = new ZkClientFactory(zkTimeout)
+
+  implicit val patienceConfig = PatienceConfig(
+    timeout = toSpan(zkTimeout*3),
+    interval = toSpan(zkTimeout))
+
+  before {
+    inst = new ZkInstance
+    inst.start()
   }
 
-  def hostPath = "localhost:%d!/foo/bar/baz".format(zookeeperAddress.getPort)
+  after {
+    inst.stop()
+  }
+
+  def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
+  def hostPath = "localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort)
 
   test("announce a primary endpoint") {
-    val ann = new ZkAnnouncer
-    val res = new ZkResolver
+    val ann = new ZkAnnouncer(factory)
+    val res = new ZkResolver(factory)
     val addr = new InetSocketAddress(8080)
     Await.result(ann.announce(addr, "%s!0".format(hostPath)))
 
@@ -33,8 +46,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   }
 
   test("only announce additional endpoints if a primary endpoint is present") {
-    val ann = new ZkAnnouncer
-    val res = new ZkResolver
+    val ann = new ZkAnnouncer(factory)
+    val res = new ZkResolver(factory)
     val addr1 = new InetSocketAddress(8080)
     val addr2 = new InetSocketAddress(8081)
 
@@ -54,8 +67,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   }
 
   test("unannounce additional endpionts, but not primary endpoints") {
-    val ann = new ZkAnnouncer
-    val res = new ZkResolver
+    val ann = new ZkAnnouncer(factory)
+    val res = new ZkResolver(factory)
     val addr1 = new InetSocketAddress(8080)
     val addr2 = new InetSocketAddress(8081)
 
@@ -75,8 +88,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   }
 
   test("unannounce primary endpoints and additional endpoints") {
-    val ann = new ZkAnnouncer
-    val res = new ZkResolver
+    val ann = new ZkAnnouncer(factory)
+    val res = new ZkResolver(factory)
     val addr1 = new InetSocketAddress(8080)
     val addr2 = new InetSocketAddress(8081)
 

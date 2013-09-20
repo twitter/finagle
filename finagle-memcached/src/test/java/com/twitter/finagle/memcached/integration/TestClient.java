@@ -22,12 +22,12 @@ import com.twitter.util.Await;
 import static org.junit.Assert.assertEquals;
 
 public class TestClient {
-  private Option<InetSocketAddress> address;
+  private Option<TestMemcachedServer> server;
 
   @Before
   public void setUp() {
-    address = ExternalMemcached.start();
-    Assume.assumeTrue(address.isDefined());
+    server = TestMemcachedServer$.MODULE$.start();
+    Assume.assumeTrue(server.isDefined());
   }
 
   @Test
@@ -36,7 +36,7 @@ public class TestClient {
       ClientBuilder.safeBuild(
         ClientBuilder
           .get()
-          .hosts(address.get())
+          .hosts(server.get().address())
           .codec(new Memcached())
           .hostConnectionLimit(1));
 

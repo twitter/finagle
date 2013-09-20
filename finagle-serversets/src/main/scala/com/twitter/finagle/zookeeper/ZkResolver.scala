@@ -1,15 +1,17 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.finagle.{Group, Resolver, InetResolver}
-import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient, ZooKeeperUtils}
+import com.google.common.collect.ImmutableSet
+import com.twitter.common.net.pool.DynamicHostSet
 import com.twitter.common.zookeeper.ServerSet
+import com.twitter.common.zookeeper.ServerSetImpl
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.group.StabilizingGroup
+import com.twitter.finagle.{Group, Resolver, InetResolver}
+import com.twitter.thrift.ServiceInstance
+import com.twitter.thrift.Status.ALIVE
 import com.twitter.util.{Future, Return, Throw, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
-import com.twitter.common.net.pool.DynamicHostSet
-import com.google.common.collect.ImmutableSet
-import com.twitter.thrift.ServiceInstance
-import com.twitter.thrift.Status.ALIVE
 
 class ZkResolverException(msg: String) extends Exception(msg)
 
@@ -32,30 +34,37 @@ private class ZkGroup(serverSet: ServerSet, path: String)
   }
 }
 
-class ZkResolver extends Resolver {
+class ZkResolver(factory: ZkClientFactory) extends Resolver {
   val scheme = "zk"
 
-  def resolve(zkHosts: Set[InetSocketAddress], path: String, endpoint: Option[String]) = {
-    val group = endpoint match {
+  def this() = this(DefaultZkClientFactory)
+
+  def resolve(zkHosts: Set[InetSocketAddress], path: String, endpoint: Option[String]): Try[Group[SocketAddress]] = {
+    val (zkClient, zkHealthHandler) = factory.get(zkHosts)
+    val zkGroup = endpoint match {
       case Some(endpoint) =>
-        (new ZkGroup(new ServerSetImpl(ZkClient.get(zkHosts), path), path)) collect {
+        (new ZkGroup(new ServerSetImpl(zkClient, path), path)) collect {
           case inst if inst.getStatus == ALIVE && inst.getAdditionalEndpoints.containsKey(endpoint) =>
             val ep = inst.getAdditionalEndpoints.get(endpoint)
             new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
         }
 
       case None =>
-        (new ZkGroup(new ServerSetImpl(ZkClient.get(zkHosts), path), path)) collect {
+        (new ZkGroup(new ServerSetImpl(zkClient, path), path)) collect {
           case inst if inst.getStatus == ALIVE =>
             val ep = inst.getServiceEndpoint
             new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
         }
     }
-    Return(group)
+    Return(StabilizingGroup(
+      zkGroup,
+      zkHealthHandler,
+      factory.sessionTimeout,
+      DefaultStatsReceiver.scope("zkGroup")))
   }
 
   private[this] def zkHosts(hosts: String) = {
-    val zkHosts = ZkClient.hostSet(hosts)
+    val zkHosts = factory.hostSet(hosts)
     if (zkHosts.isEmpty)
       throw new ZkResolverException("ZK client address \"%s\" resolves to nothing".format(hosts))
     zkHosts

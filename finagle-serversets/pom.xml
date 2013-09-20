@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-serversets</artifactId>
   <packaging>jar</packaging>
-  <version>6.5.2-SNAPSHOT</version>
+  <version>6.6.3-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -61,11 +61,6 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.5</version>
-    </dependency>
-    <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_2.9.2</artifactId>
       <version>1.9.1</version>
@@ -75,7 +70,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.6.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-zk-common</artifactId>
+      <version>6.5.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

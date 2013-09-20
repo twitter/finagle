@@ -11,7 +11,7 @@ trait ResolvedGroup extends Group[SocketAddress]
   with Proxy
   with NamedGroup
 {
-  val targets: List[String]
+  val addrs: List[String]
 }
 
 trait Resolver {
@@ -31,8 +31,8 @@ object InetResolver extends Resolver {
 class ResolverNotFoundException(scheme: String)
   extends Exception("Resolver not found for scheme \"%s\"".format(scheme))
 
-class ResolverTargetInvalid(target: String)
-  extends Exception("Resolver target \"%s\" is not valid".format(target))
+class ResolverAddressInvalid(addr: String)
+  extends Exception("Resolver address \"%s\" is not valid".format(addr))
 
 class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
   extends NoStacktrace
@@ -87,7 +87,7 @@ object Resolver {
   def resolutions = synchronized { _resolutions.toSet }
 
   /**
-   * Resolve a group from a target name, a string. Resolve uses
+   * Resolve a group from an address, a string. Resolve uses
    * `Resolver`s to do this. These are loaded via the Java
    * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
    * mechanism. The default resolver is "inet", resolving DNS
@@ -101,24 +101,24 @@ object Resolver {
    *
    * Names resolved by this mechanism are also a
    * [[com.twitter.finagle.NamedGroup]]. By default, this name is
-   * simply the `target` string, but it can be overriden by prefixing
-   * a name separated by an equals sign from the rest of the target.
-   * For example, the target "www=inet!google.com:80" resolves
+   * simply the `addr` string, but it can be overriden by prefixing
+   * a name separated by an equals sign from the rest of the addr.
+   * For example, the addr "www=inet!google.com:80" resolves
    * "google.com:80" with the inet resolver, but the returned group's
    * [[com.twitter.finagle.NamedGroup]] name is "www".
    */
-  def resolve(target: String): Try[Group[SocketAddress]] = {
-    val lexed = lex(target)
+  def resolve(addr: String): Try[Group[SocketAddress]] = {
+    val lexed = lex(addr)
 
     val (groupName, stripped) = lexed match {
       case El(n) :: Eq :: rest => (n, rest)
       case Eq :: rest => ("", rest)
-      case rest => (target, rest)
+      case rest => (addr, rest)
     }
 
     val resolved = stripped match {
       case (Eq :: _) | (Bang :: _) =>
-        Throw(new ResolverTargetInvalid(target))
+        Throw(new ResolverAddressInvalid(addr))
 
       case El(scheme) :: Bang :: addr =>
         resolvers.find(_.scheme == scheme) match {
@@ -131,21 +131,21 @@ object Resolver {
     }
 
     resolved map { group =>
-      val lastTargets = group match {
-        case g: ResolvedGroup => g.targets
+      val lastAddrs = group match {
+        case g: ResolvedGroup => g.addrs
         case g => Nil
       }
 
       val resolvedGroup = new ResolvedGroup {
-        val targets = delex(stripped) :: lastTargets
+        val addrs = delex(stripped) :: lastAddrs
         val name = groupName
         val self = group
         def members = self.members
       }
 
       synchronized {
-        _resolutions -= lastTargets
-        _resolutions += resolvedGroup.targets
+        _resolutions -= lastAddrs
+        _resolutions += resolvedGroup.addrs
       }
 
       resolvedGroup
@@ -157,10 +157,10 @@ private object ServerRegistry {
   private val addrNames = new WeakHashMap[SocketAddress, String]
 
   // This is a terrible hack until we have a better
-  // way of naming targets.
+  // way of naming addresses.
 
-  def register(target: String): SocketAddress =
-    target.split("=", 2) match {
+  def register(addr: String): SocketAddress =
+    addr.split("=", 2) match {
       case Array(addr) =>
         val Seq(ia) = InetSocketAddressUtil.parseHosts(addr)
         ia

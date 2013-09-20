@@ -1,15 +1,43 @@
 package com.twitter.finagle.memcached.integration
 
+import collection.JavaConversions._
+import com.twitter.conversions.time._
+import com.twitter.util.{Stopwatch, Duration, RandomSocket}
 import java.lang.ProcessBuilder
 import java.net.{BindException, ServerSocket, InetSocketAddress}
-import com.twitter.util.{Try, Stopwatch, Duration, RandomSocket}
-import com.twitter.conversions.time._
-import collection.JavaConversions._
 import scala.collection._
 
-object ExternalMemcached { self =>
+object TestMemcachedServer {
+  def start(): Option[TestMemcachedServer] = start(None)
+
+  def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
+    if (!Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) InternalMemcached.start(address)
+    else ExternalMemcached.start(address)
+  }
+}
+
+trait TestMemcachedServer {
+  val address: InetSocketAddress
+  def stop(): Unit
+}
+
+private[memcached] object InternalMemcached {
+  def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
+    try {
+      val server = new InProcessMemcached(address.getOrElse(new InetSocketAddress(0)))
+      Some(new TestMemcachedServer {
+        val address = server.start().localAddress.asInstanceOf[InetSocketAddress]
+        def stop() { server.stop(true) }
+      })
+    } catch {
+      case _ => None
+    }
+  }
+}
+
+private[memcached] object ExternalMemcached { self =>
   class MemcachedBinaryNotFound extends Exception
-  private[this] var processes: Map[InetSocketAddress, Process] = mutable.Map()
+  private[this] var processes: List[Process] = List()
   private[this] val forbiddenPorts = 11000.until(11900)
   private[this] var takenPorts: Set[Int] = Set[Int]()
   // prevent us from taking a port that is anything close to a real memcached port.
@@ -34,21 +62,29 @@ object ExternalMemcached { self =>
 
   // Use overloads instead of default args to support java integration tests
 
-  def start(): Option[InetSocketAddress] = start(None)
+  def start(): Option[TestMemcachedServer] = start(None)
 
-  def start(address: Option[InetSocketAddress]): Option[InetSocketAddress] = {
-    def exec(address: InetSocketAddress) {
+  def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
+    def exec(address: InetSocketAddress): Process = {
       val cmd = Seq("memcached", "-l", address.getHostName,
         "-p", address.getPort.toString)
       val builder = new ProcessBuilder(cmd.toList)
-      processes += (address -> builder.start())
+      builder.start()
     }
 
     (address orElse findAddress()) flatMap { addr =>
       try {
-        exec(addr)
+        val proc = exec(addr)
+        processes :+= proc
+
         if (waitForPort(addr.getPort))
-          Some(addr)
+          Some(new TestMemcachedServer {
+            val address = addr
+            def stop() {
+              proc.destroy()
+              proc.waitFor()
+            }
+          })
         else
           None
       } catch {
@@ -89,28 +125,13 @@ object ExternalMemcached { self =>
     result
   }
 
-  def stop(addr: Option[InetSocketAddress] = None) {
-    if (!addr.isDefined) {
-      processes.values foreach {
-        p =>
-          p.destroy()
-          p.waitFor()
-      }
-    } else {
-      processes(addr.get).destroy()
-      processes(addr.get).waitFor()
-    }
-  }
-
-  def restart() {
-    stop()
-    start()
-  }
-
   // Make sure the process is always killed eventually
   Runtime.getRuntime().addShutdownHook(new Thread {
     override def run() {
-      self.stop()
+      processes foreach { p =>
+        p.destroy()
+        p.waitFor()
+      }
     }
   })
 }

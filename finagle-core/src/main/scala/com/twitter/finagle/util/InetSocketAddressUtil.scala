@@ -19,7 +19,10 @@ object InetSocketAddressUtil {
     hostPorts map { hp =>
       require(hp.size == 2, "You must specify host and port")
 
-      new InetSocketAddress(hp(0), hp(1).toInt)
+      if (hp(0) == "")
+        new InetSocketAddress(hp(1).toInt)
+      else
+        new InetSocketAddress(hp(0), hp(1).toInt)
     } toList
   }
 }

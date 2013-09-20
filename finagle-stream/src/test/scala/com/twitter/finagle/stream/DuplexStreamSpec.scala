@@ -54,7 +54,7 @@ class DuplexStreamSpec extends SpecificationWithJUnit {
       val handle = Await.result(client(outbound.recv))
       val inbound = handle.messages
 
-      "receive and reverse" in {
+      if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "receive and reverse" in {
         service.input.isDefined mustEqual true
         val input = Await.result(service.input)
         input.sync() foreach { str =>

@@ -22,6 +22,9 @@ class ZkInstance {
     zookeeperClient = new ZooKeeperClient(
       Amount.of(10, Time.MILLISECONDS),
       zookeeperAddress)
+
+    // Disable noise from zookeeper logger
+    java.util.logging.LogManager.getLogManager().reset();
   }
 
   def stop() {

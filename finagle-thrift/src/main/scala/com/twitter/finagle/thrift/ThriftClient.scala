@@ -73,12 +73,13 @@ class ThriftClient(
     transporter: (SocketAddress, StatsReceiver) => 
       Future[Transport[ThriftClientRequest, Array[Byte]]],
     protocolFactory: TProtocolFactory,
-    serviceName: String = "unknown"
+    serviceName: String = "unknown",
+    clientId: Option[ClientId] = None
 ) extends DefaultClient[ThriftClientRequest, Array[Byte]](
     name = "thrift",
     endpointer = {
       // The preparer performs the protocol upgrade.
-      val preparer = ThriftClientPreparer(protocolFactory, serviceName)
+      val preparer = ThriftClientPreparer(protocolFactory, serviceName, clientId)
       val bridged = Bridge[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]](
         transporter, new SerialClientDispatcher(_))
       (sa, sr) => preparer.prepare(bridged(sa, sr))
@@ -90,7 +91,7 @@ class ThriftClient(
 
   override def newClient(group: Group[SocketAddress]) = group match {
     case NamedGroup(groupName) =>
-      new ThriftClient(transporter, protocolFactory, groupName).superNewClient(group)
+      new ThriftClient(transporter, protocolFactory, groupName, clientId).superNewClient(group)
     case g => superNewClient(g)
   }
 }

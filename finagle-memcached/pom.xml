@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-memcached</artifactId>
   <packaging>jar</packaging>
-  <version>6.5.2-SNAPSHOT</version>
+  <version>6.6.3-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -20,22 +20,28 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.6.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-serversets</artifactId>
-      <version>6.5.2-SNAPSHOT</version>
+      <version>6.6.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-hashing</artifactId>
-      <version>6.3.8-SNAPSHOT</version>
+      <version>6.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter.common</groupId>
       <artifactId>zookeeper-testing</artifactId>
       <version>0.0.34</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -47,6 +53,21 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>13.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-scala_2.9.2</artifactId>
+      <version>2.2.2</version>
     </dependency>
   </dependencies>
   <build>

@@ -28,10 +28,10 @@ trait Client[Req, Rep] {
   }
 
   /**
-   * Create a new servie connected to `target`.
+   * Create a new servie connected to `addr`.
    */
-  final def newService(target: String): Service[Req, Rep] =
-    newService(Resolver.resolve(target)())
+  final def newService(addr: String): Service[Req, Rep] =
+    newService(Resolver.resolve(addr)())
 
   /**
    * Create a new client, a `ServiceFactory` that is connected to `group`.
@@ -40,8 +40,8 @@ trait Client[Req, Rep] {
 
   /**
    * Create a new client, a `ServiceFactory` that is connected to the
-   * group resolved by `target`.
+   * group resolved by `addr`.
    */
-  final def newClient(target: String): ServiceFactory[Req, Rep] =
-    newClient(Resolver.resolve(target)())
+  final def newClient(addr: String): ServiceFactory[Req, Rep] =
+    newClient(Resolver.resolve(addr)())
 }
