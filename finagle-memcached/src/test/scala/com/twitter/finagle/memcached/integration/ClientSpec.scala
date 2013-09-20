@@ -765,6 +765,35 @@ class ClientSpec extends SpecificationWithJUnit {
       Await.result(client.get("foo")).get.toString(CharsetUtil.UTF_8) mustEqual "bar"
     }
 
+    /*  This test had to be marked as flaky, but because the "should" block requires an instance of
+     *  org.specs.specification.Example as a return value, this test had to be moved before
+     *  "with managed cache pool" -- other alternatives include returning a null instance of
+     *  org.specs.specification.Example, or adding the "if" statement *inside* of the "in" block.
+     */
+    if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+      "with unmanaged regular zk serverset" in {
+        val client = MemcachedClient.newKetamaClient(
+          group = "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+
+        // Wait for group to contain members
+        Thread.sleep(5000)
+
+        val count = 100
+        (0 until count).foreach{
+          n => {
+            client.set("foo"+n, "bar"+n)()
+          }
+        }
+
+        (0 until count).foreach {
+          n => {
+            val c = client.clientOf("foo"+n)
+            c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
+          }
+        }
+      }
+    }
+
     "with managed cache pool" in {
       val client = MemcachedClient.newKetamaClient(
         group = "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
@@ -776,28 +805,6 @@ class ClientSpec extends SpecificationWithJUnit {
       client.get("foo")() mustEqual None
       client.set("foo", "bar")()
       client.get("foo")().get.toString(CharsetUtil.UTF_8) mustEqual "bar"
-
-      val count = 100
-      (0 until count).foreach{
-        n => {
-          client.set("foo"+n, "bar"+n)()
-        }
-      }
-
-      (0 until count).foreach {
-        n => {
-          val c = client.clientOf("foo"+n)
-          c.get("foo"+n)().get.toString(CharsetUtil.UTF_8) mustEqual "bar"+n
-        }
-      }
-    }
-
-    "with unmanaged regular zk serverset" in {
-      val client = MemcachedClient.newKetamaClient(
-        group = "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
-
-      // Wait for group to contain members
-      Thread.sleep(5000)
 
       val count = 100
       (0 until count).foreach{
