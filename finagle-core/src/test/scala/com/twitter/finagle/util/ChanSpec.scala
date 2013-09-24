@@ -34,5 +34,10 @@ class ChanSpec extends SpecificationWithJUnit {
 
       threads.toSeq mustEqual Seq(t0, t1)
     }
+
+    "swallow exceptions" in {
+      val p = Proc[Int] { _ => throw new RuntimeException }
+      (p ! 4) mustEqual ()
+    }
   }
 }
