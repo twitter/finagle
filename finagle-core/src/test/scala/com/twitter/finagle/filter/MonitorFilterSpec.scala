@@ -53,7 +53,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
 
   "MonitorFilter" should {
     val inner = new MockSourcedException("FakeService1")
-    val outer = new MockSourcedException(inner, "FakeService2")
+    val outer = new MockSourcedException(inner, "unspecified")
 
     val mockLogger = spy(Logger.getLogger("MockServer"))
     // add handler to redirect and mute output, so that it doesn't show up in the console during a test run.
@@ -67,7 +67,7 @@ class MonitorFilterSpec extends SpecificationWithJUnit with IntegrationBase with
       service.close(any) returns Future.Done
       val server = ServerBuilder()
         .codec(StringCodec)
-        .name("MockServer")
+        .name("FakeService2")
         .bindTo(address)
         .monitor((_, _) => monitor)
         .logger(mockLogger)

@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.{RefcountedFactory, StatsFactoryWrapper,   TimeoutFactory}
-import com.twitter.finagle.filter.MonitorFilter
+import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
@@ -99,6 +99,10 @@ case class DefaultClient[Req, Rep](
       }
     }
 
+    val exceptionSourceFilter: Transformer[Req, Rep] = { factory =>
+      new ExceptionSourceFilter[Req, Rep](name) andThen factory
+    }
+
     val timeBounded: Transformer[Req, Rep] = {
       if (requestTimeout == Duration.Top) identity else {
         val exception = new IndividualRequestTimeoutException(requestTimeout)
@@ -125,7 +129,8 @@ case class DefaultClient[Req, Rep](
       factory => filter andThen factory
     }
 
-    val newStack: SocketAddress => ServiceFactory[Req, Rep] = monitored compose
+    val newStack: SocketAddress => ServiceFactory[Req, Rep] = exceptionSourceFilter compose
+      monitored compose
       traceDest compose
       observed compose
       failureAccrual compose
