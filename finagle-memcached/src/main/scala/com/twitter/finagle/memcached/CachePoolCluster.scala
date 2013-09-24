@@ -197,7 +197,7 @@ object CachePoolConfig {
  * we need for now. In the future this can be extended for other config attributes like cache
  * pool migrating state, backup cache servers list, or replication role, etc
  */
-case class CachePoolConfig(cachePoolSize: Int)
+case class CachePoolConfig(cachePoolSize: Int, detectKeyRemapping: Boolean = false)
 
 /**
  *  Cache pool based on a static list
@@ -331,17 +331,17 @@ class ZookeeperCachePoolCluster private[memcached](
  *
  * @param zkPath the zookeeper path representing the cache pool
  * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
- * @param detectKeyRemapping if enabled, group will reflect any cache node key remapping immediately
  * @param statsReceiver Optional, the destination to report the stats to
  */
 class ZookeeperCacheNodeGroup(
   protected val zkPath: String,
   protected val zkClient: ZooKeeperClient,
-  detectKeyRemapping: Boolean = false,
   protected val statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends Group[CacheNode] with ZookeeperStateMonitor {
 
   protected val _set = Var(Set[CacheNode]())
+
+  @volatile private var detectKeyRemapping = false
 
   private val zkGroup =
     new ZkGroup(new ServerSetImpl(zkClient, zkPath), zkPath) collect {
@@ -358,6 +358,8 @@ class ZookeeperCacheNodeGroup(
   def applyZKData(data: Array[Byte]) {
     if(data != null) {
       val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
+
+      detectKeyRemapping = cachePoolConfig.detectKeyRemapping
 
       // apply the cache pool config to the cluster
       val expectedGroupSize = cachePoolConfig.cachePoolSize
