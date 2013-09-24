@@ -5,7 +5,7 @@ package com.twitter.finagle.channel
  * shared as to keep statistics across a number of channels.
  */
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Future, Stopwatch}
+import com.twitter.util.{Duration, Future, Stopwatch, Time}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.Logger
 import org.jboss.netty.buffer.ChannelBuffer
@@ -25,6 +25,12 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
   private[this] val closeChans = statsReceiver.counter("closechans")
+  private[this] val writableDurationGauge = statsReceiver.addGauge("writableDuration") {
+    writableDuration().inMillis
+  }
+  private[this] val unwritableDurationGauge = statsReceiver.addGauge("unwritableDuration") {
+    unwritableDuration().inMillis
+  }
 
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
@@ -92,5 +98,22 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
     val m = if (e.getCause != null) e.getCause.getClass.getName else "unknown"
     statsReceiver.scope("exn").counter(m).incr()
     super.exceptionCaught(ctx, e)
+  }
+
+  private[this] var hasBeenWritable = true //netty channels start in writable state
+  private[this] var since = Time.now
+
+  private[finagle] def writableDuration(): Duration =
+    if (!hasBeenWritable) Duration.Zero else Time.now - since
+  private[finagle] def unwritableDuration(): Duration =
+    if (hasBeenWritable) Duration.Zero else Time.now - since
+
+  override def channelInterestChanged(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    super.channelInterestChanged(ctx, e)
+    val writable = ctx.getChannel.isWritable()
+    if (writable != hasBeenWritable) {
+      hasBeenWritable = writable
+      since = Time.now
+    }
   }
 }
