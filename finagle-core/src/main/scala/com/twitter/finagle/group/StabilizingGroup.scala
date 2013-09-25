@@ -11,7 +11,11 @@ import scala.collection.immutable.Queue
 object StabilizingGroup {
   object State extends Enumeration {
     type Health = Value
-    val Healthy, Unhealthy, Unknown = Value
+    // explicitly define intuitive ids as they
+    // are exported for stats.
+    val Healthy = Value(1)
+    val Unknown = Value(0)
+    val Unhealthy = Value(-1)
   }
 
   def apply[T](
@@ -32,6 +36,8 @@ object StabilizingGroup {
    *
    * @param underlying The source group to poll for group updates.
    * @param pulse An offer for communicating group health.
+   *        Invariant: The offer should communicate Health in FIFO order
+   *        with respect to time.
    * @param grace The duration that must elapse before an element
    *        is removed from the group.
    */
@@ -42,14 +48,19 @@ object StabilizingGroup {
     statsReceiver: StatsReceiver,
     implicit val timer: Timer
   ) extends Group[T] {
+    import State._
+
     private[this] val newSet = new Broker[Set[T]]()
-    private[this] val limbo = statsReceiver.addGauge("limbo") { 
+
+    @volatile private[this] var healthStat = Healthy.id
+    private[this] val health = statsReceiver.addGauge("health") { healthStat }
+
+    private[this] val limbo = statsReceiver.addGauge("limbo") {
       members.size - underlying.members.size
     }
 
     protected val _set = Var(underlying.members)
 
-    import State._
     /**
      * Exclusively maintains the elements in current
      * based on adds, removes, and health transitions.
@@ -57,18 +68,22 @@ object StabilizingGroup {
      * transition resets the grace period.
      */
     private[this] def loop(remq: Queue[(T, Time)], h: Health): Future[Unit] = Offer.select(
-      pulse map {
+      pulse map { newh =>
+        healthStat = newh.id
+
         // if our health transitions into healthy,
         // reset removal times foreach elem in remq.
-        case newh if h == newh =>
-          loop(remq, newh)
-        case Healthy =>
-          // Transitioned to healthy: push back
-          val newTime = Time.now + grace
-          val newq = remq map { case (elem, _) => (elem, newTime) }
-          loop(newq, Healthy)
-        case newh =>
-          loop(remq, newh)
+        newh match {
+          case newh if h == newh =>
+            loop(remq, newh)
+          case Healthy =>
+            // Transitioned to healthy: push back
+            val newTime = Time.now + grace
+            val newq = remq map { case (elem, _) => (elem, newTime) }
+            loop(newq, Healthy)
+          case newh =>
+            loop(remq, newh)
+        }
       },
       newSet.recv map { newSet =>
         val snap  = set()

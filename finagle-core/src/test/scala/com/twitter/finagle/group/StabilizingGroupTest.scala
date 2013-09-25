@@ -11,9 +11,9 @@ import org.scalatest.concurrent.Eventually._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
+import StabilizingGroup.State._
 
 class MockHealth {
-  import StabilizingGroup.State._
   val pulse = new Broker[Health]()
   def mkHealthy() { pulse ! Healthy }
   def mkUnhealthy() { pulse ! Unhealthy }
@@ -25,6 +25,7 @@ class Context {
   val grace = 150.milliseconds
   val statsRecv = new InMemoryStatsReceiver
   def limboSize: Int = statsRecv.gauges(Seq("testGroup", "limbo"))().toInt
+  def healthStat: Int = statsRecv.gauges(Seq("testGroup", "health"))().toInt
   val timer = new MockTimer
   val stableGroup = StabilizingGroup(
     sourceGroup,
@@ -88,9 +89,11 @@ class StabilizingGroupTest extends FunSuite {
       import ctx._
       Time.withCurrentTimeFrozen { tc =>
         healthStatus.mkHealthy()
+        assert(healthStat === Healthy.id)
         assert(stableGroup() === sourceGroup())
 
         healthStatus.mkUnhealthy()
+        assert(healthStat === Unhealthy.id)
         sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
 
         tc.advance(grace)
@@ -98,6 +101,7 @@ class StabilizingGroupTest extends FunSuite {
         assert(stableGroup() === (1 to 10).toSet)
 
         healthStatus.mkHealthy()
+        assert(healthStat === Healthy.id)
         sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
 
         tc.advance(grace)
@@ -105,14 +109,14 @@ class StabilizingGroupTest extends FunSuite {
         assert(stableGroup() === Set(1,2,3,4))
       }
     }
-    
+
     test("don't skip interim adds") {
       Time.withCurrentTimeFrozen { tc =>
         val ctx = new Context
         import ctx._
 
         healthStatus.mkHealthy()
-  
+
         sourceGroup() --= (1 to 10).toSet
         tc.advance(grace/2)
         sourceGroup() += 5
