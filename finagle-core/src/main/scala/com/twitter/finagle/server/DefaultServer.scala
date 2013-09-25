@@ -41,9 +41,8 @@ object DefaultServer {
  * @param maxConcurrentRequests The maximum number of concurrent
  * requests the server is willing to handle.
  *
- * @param cancelOnHangup The maximum amount of time the server is
- * allowed to handle a request. If the timeout expires, the server
- * will cancel the future and terminate the client connection.
+ * @param cancelOnHangup Enabled by default. If disabled,
+ * exceptions on the transport do not propagate to the transport.
  *
  * @param prepare Prepare the given `ServiceFactory` before use.
  */
