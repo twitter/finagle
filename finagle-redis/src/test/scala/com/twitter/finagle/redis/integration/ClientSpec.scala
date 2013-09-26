@@ -620,6 +620,31 @@ class ClientSpec extends SpecificationWithJUnit {
         Await.result(client.sRem(key, List(baz))) mustEqual 0
       }
 
+      "add members to a set, and return random." in {
+        val key = StringToChannelBuffer("members")
+        val allMembers = Seq(bar, baz)
+
+        val empty = Await.result(client.sRandMember(key))
+        empty must have size(0)
+
+        Await.result(client.sAdd(key, List(bar))) mustEqual 1
+        Await.result(client.sAdd(key, List(baz))) mustEqual 1
+
+        val membersOne = Await.result(client.sRandMember(key))
+        membersOne must have size(1)
+        membersOne must exist(m => allMembers.contains(m))
+
+        val membersTwo = Await.result(client.sRandMember(key, count = Some(2)))
+        membersTwo must have size(2)
+        membersTwo must haveTheSameElementsAs(allMembers)
+
+        val membersSet = Await.result(client.sRandMember(key, count = Some(5)))
+        membersSet must have size(2)
+        membersSet must haveTheSameElementsAs(allMembers)
+
+        val membersNeg = Await.result(client.sRandMember(key, count = Some(-4)))
+        membersNeg must have size(4)
+      }
     }
 
     "perform commands as a transaction" in {

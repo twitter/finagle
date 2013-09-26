@@ -123,6 +123,7 @@ object Commands {
   val SCARD             = "SCARD"
   val SREM              = "SREM"
   val SPOP              = "SPOP"
+  val SRANDMEMBER       = "SRANDMEMBER"
 
   // Transactions
   val DISCARD           = "DISCARD"
@@ -239,6 +240,7 @@ object Commands {
     SCARD             -> {SCard(_)},
     SREM              -> {SRem(_)},
     SPOP              -> {SPop(_)},
+    SRANDMEMBER       -> {SRandMember(_)},
 
     // transactions
     DISCARD           -> {_ => Discard},
@@ -372,6 +374,7 @@ object CommandBytes {
   val SCARD             = StringToChannelBuffer("SCARD")
   val SREM              = StringToChannelBuffer("SREM")
   val SPOP              = StringToChannelBuffer("SPOP")
+  val SRANDMEMBER       = StringToChannelBuffer("SRANDMEMBER")
 
   // Transactions
   val DISCARD           = StringToChannelBuffer("DISCARD")

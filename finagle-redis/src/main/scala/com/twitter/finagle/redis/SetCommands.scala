@@ -78,4 +78,19 @@ trait Sets { self: BaseClient =>
       case BulkReply(message) => Future.value(Some(message))
       case EmptyBulkReply() => Future.value(None)
     }
+
+  /**
+    * Returns a list of random entries from the set. If the count is
+    * positive, a set is returned, otherwise a list that may contain
+    * duplicates is returned.
+    * @param key, count
+    * @return a sequence with count random entries from the set
+    */
+  def sRandMember(key: ChannelBuffer, count: Option[Int] = None): Future[Seq[ChannelBuffer]] =
+    doRequest(SRandMember(key, count)) {
+      case BulkReply(message) => Future.value(Seq(message))
+      case EmptyBulkReply() => Future.Nil
+      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
+      case EmptyMBulkReply() => Future.Nil
+    }
 }
