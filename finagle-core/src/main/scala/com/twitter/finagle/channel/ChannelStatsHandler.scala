@@ -12,11 +12,12 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
   ExceptionEvent, MessageEvent, SimpleChannelHandler}
 
-class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicLong)
+class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
   with ConnectionLifecycleHandler
 {
   private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val connectionCount: AtomicLong = new AtomicLong()
 
   private[this] val connects                = statsReceiver.counter("connects")
   private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
@@ -24,15 +25,18 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver, connectionCount: AtomicL
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val closeChans = statsReceiver.counter("closechans")
-  private[this] val writableDurationGauge = statsReceiver.addGauge("writableDuration") {
+  private[this] val closeChans              = statsReceiver.counter("closechans")
+  private[this] val writableDurationGauge   = statsReceiver.addGauge("writableDuration") {
     writableDuration().inMillis
   }
   private[this] val unwritableDurationGauge = statsReceiver.addGauge("unwritableDuration") {
     unwritableDuration().inMillis
   }
+  private[this] val connections             = statsReceiver.addGauge("connections") {
+    connectionCount.get()
+  }
 
-  protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
+  protected[channel] def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
     connects.incr()
     connectionCount.incrementAndGet()
