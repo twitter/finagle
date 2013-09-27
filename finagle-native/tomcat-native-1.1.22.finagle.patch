@@ -356,7 +356,7 @@ index 0000000..413ac51
 +}
 diff --git a/jni/java/org/apache/tomcat/jni/ssl/OpenSSLEngine.java b/jni/java/org/apache/tomcat/jni/ssl/OpenSSLEngine.java
 new file mode 100644
-index 0000000..e3d0171
+index 0000000..186bd2f
 --- /dev/null
 +++ b/jni/java/org/apache/tomcat/jni/ssl/OpenSSLEngine.java
 @@ -0,0 +1,742 @@
@@ -462,7 +462,7 @@ index 0000000..e3d0171
 +                    int lim = src.limit();
 +                    src.limit(len);
 +                    buffer.put(src);
-+                    src.position(pos).limit(lim);
++                    src.limit(lim).position(pos);
 +                }
 +                int sslWrote = SSL.writeToSSL(ssl, address, len);
 +                if (sslWrote > 0) {
@@ -495,7 +495,7 @@ index 0000000..e3d0171
 +                    int lim = src.limit();
 +                    src.limit(len);
 +                    buffer.put(src);
-+                    src.position(pos).limit(lim);
++                    src.limit(lim).position(pos);
 +                }
 +                int netWrote = SSL.writeToBIO(networkBIO, address, len);
 +                if (netWrote > -1) {
