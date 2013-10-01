@@ -17,6 +17,7 @@ import com.google.protobuf.DynamicMessage
 import com.google.protobuf.DynamicMessage.Builder
 import com.google.protobuf._
 import com.google.protobuf.Descriptors._
+import com.twitter.util.Promise
 
 class RpcServerImpl(sb: ServerBuilder[(String, Message), (String, Message), Any, Any, Any], port: Int, service: Service, handler: ServiceExceptionHandler[Message], executorService: ExecutorService) extends RpcServer {
 
@@ -53,15 +54,16 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
       throw new java.lang.AssertionError("Should never happen, we already decoded " + methodName)
     }
 
+    val promise = new Promise[(String, Message)]()
+
     // dispatch to the service method
     val task = () => {
-      var result = (methodName, constructEmptyResponseMessage(m))
       try {
         service.callMethod(m, null, reqMessage, new RpcCallback[Message]() {
 
           def run(msg: Message) = {
             Util.log("Response", methodName, msg)
-            result =  (methodName, msg)
+            promise.setValue((methodName, msg))
           }
 
         })
@@ -69,13 +71,13 @@ class ServiceDispatcher(service: com.google.protobuf.Service, handler: ServiceEx
         case e: RuntimeException => {
           log.warning("#apply# Exception: "+e.getMessage)
           if (handler.canHandle(e)) {
-            result = (methodName, handler.handle(e, constructEmptyResponseMessage(m)))
+            promise.setValue((methodName, handler.handle(e, constructEmptyResponseMessage(m))))
           }
         }
       }
-      result
     }
     futurePool(task())
+    promise
   }
 
   def constructEmptyResponseMessage(m: MethodDescriptor): Message = {

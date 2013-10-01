@@ -112,7 +112,8 @@ object ServerProtobufSpec extends org.specs.SpecificationWithJUnit {
     }), request, new RpcCallback[GetWeatherForecastResponse]() {
 
       def run(resp: GetWeatherForecastResponse) {
-        totalRequests.incrementAndGet()
+        if (resp.getTemp() == 80)
+          totalRequests.incrementAndGet()
         l.countDown()
       }
     });
@@ -128,7 +129,11 @@ private class SampleWeatherServiceImpl(val temperature: Int, val getHistoricWeat
 
   def getWeatherForecast(controller: RpcController, request: GetWeatherForecastRequest, done:
   RpcCallback[GetWeatherForecastResponse]) {
-    done.run(GetWeatherForecastResponse.newBuilder().setTemp(temperature).build())
+    new Thread(new Runnable(){
+      def run(){
+        done.run(GetWeatherForecastResponse.newBuilder().setTemp(temperature).build())
+      }
+    }).start()
   }
 
   def getHistoricWeather(controller: RpcController, request: GetHistoricWeatherRequest,
