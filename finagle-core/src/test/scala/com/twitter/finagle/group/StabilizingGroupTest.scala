@@ -37,93 +37,94 @@ class Context {
 
 @RunWith(classOf[JUnitRunner])
 class StabilizingGroupTest extends FunSuite {
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
-    test("delay removals while healthy") {
+  test("delay removals while healthy") {
+    Time.withCurrentTimeFrozen { tc =>
       val ctx = new Context
       import ctx._
-      Time.withCurrentTimeFrozen { tc =>
-        healthStatus.mkHealthy()
-        assert(stableGroup() === sourceGroup())
 
-        sourceGroup.update(sourceGroup() - 10)
-        assert(limboSize === 1)
-        tc.advance(grace)
-        timer.tick()
-        assert(stableGroup() === sourceGroup())
+      healthStatus.mkHealthy()
+      assert(stableGroup() === sourceGroup())
 
-        sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
-        assert(limboSize === 4)
-        tc.advance(grace)
-        timer.tick()
-        assert(stableGroup() === sourceGroup())
-      }
+      sourceGroup.update(sourceGroup() - 10)
+      assert(limboSize === 1)
+      tc.advance(grace)
+      timer.tick()
+      assert(stableGroup() === sourceGroup())
+
+      sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
+      assert(limboSize === 4)
+      tc.advance(grace)
+      timer.tick()
+      assert(stableGroup() === sourceGroup())
     }
+  }
 
-    test("queue removals while unstable") {
+  test("queue removals while unstable") {
+    Time.withCurrentTimeFrozen { tc =>
       val ctx = new Context
       import ctx._
-      Time.withCurrentTimeFrozen { tc =>
-        healthStatus.mkHealthy()
-        assert(stableGroup() === sourceGroup())
 
-        healthStatus.mkUnhealthy()
-        assert(stableGroup() === sourceGroup())
-        sourceGroup.update(sourceGroup() - 10)
-        assert(stableGroup() != sourceGroup())
-        assert(stableGroup() === (1 to 10).toSet)
-        assert(limboSize === 1)
-        sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
-        assert(stableGroup() != sourceGroup())
-        assert(stableGroup() === (1 to 10).toSet)
-        assert(limboSize === 5)
+      healthStatus.mkHealthy()
+      assert(stableGroup() === sourceGroup())
 
-        healthStatus.mkHealthy()
-        tc.advance(grace)
-        timer.tick()
-        assert(stableGroup() === sourceGroup())
-      }
+      healthStatus.mkUnhealthy()
+      assert(stableGroup() === sourceGroup())
+      sourceGroup.update(sourceGroup() - 10)
+      assert(stableGroup() != sourceGroup())
+      assert(stableGroup() === (1 to 10).toSet)
+      assert(limboSize === 1)
+      sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
+      assert(stableGroup() != sourceGroup())
+      assert(stableGroup() === (1 to 10).toSet)
+      assert(limboSize === 5)
+
+      healthStatus.mkHealthy()
+      tc.advance(grace)
+      timer.tick()
+      assert(stableGroup() === sourceGroup())
     }
+  }
 
-    test("be aware of adds while unstable") {
+  test("be aware of adds while unstable") {
+    Time.withCurrentTimeFrozen { tc =>
       val ctx = new Context
       import ctx._
-      Time.withCurrentTimeFrozen { tc =>
-        healthStatus.mkHealthy()
-        assert(healthStat === Healthy.id)
-        assert(stableGroup() === sourceGroup())
 
-        healthStatus.mkUnhealthy()
-        assert(healthStat === Unhealthy.id)
-        sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
+      healthStatus.mkHealthy()
+      assert(healthStat === Healthy.id)
+      assert(stableGroup() === sourceGroup())
 
-        tc.advance(grace)
-        timer.tick()
-        assert(stableGroup() === (1 to 10).toSet)
+      healthStatus.mkUnhealthy()
+      assert(healthStat === Unhealthy.id)
+      sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
 
-        healthStatus.mkHealthy()
-        assert(healthStat === Healthy.id)
-        sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
+      tc.advance(grace)
+      timer.tick()
+      assert(stableGroup() === (1 to 10).toSet)
 
-        tc.advance(grace)
-        timer.tick()
-        assert(stableGroup() === Set(1,2,3,4))
-      }
+      healthStatus.mkHealthy()
+      assert(healthStat === Healthy.id)
+      sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
+
+      tc.advance(grace)
+      timer.tick()
+      assert(stableGroup() === Set(1,2,3,4))
     }
+  }
 
-    test("don't skip interim adds") {
-      Time.withCurrentTimeFrozen { tc =>
-        val ctx = new Context
-        import ctx._
+  test("don't skip interim adds") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = new Context
+      import ctx._
 
-        healthStatus.mkHealthy()
+      healthStatus.mkHealthy()
 
-        sourceGroup() --= (1 to 10).toSet
-        tc.advance(grace/2)
-        sourceGroup() += 5
-        tc.advance(grace)
-        timer.tick()
-        assert(stableGroup() === Set(5))
-      }
+      sourceGroup() --= (1 to 10).toSet
+      tc.advance(grace/2)
+      sourceGroup() += 5
+      tc.advance(grace)
+      timer.tick()
+      assert(stableGroup() === Set(5))
     }
   }
 }

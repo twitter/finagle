@@ -84,50 +84,51 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
     assert(bytes.toSeq != decoded.toSeq, "Add JSON support back")
   }
 
-  // TODO(John Sirois): Address and un-skip: https://jira.twitter.biz/browse/CSL-549
-  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
-    testThrift("end-to-end tracing potpourri") { (client, tracer) =>
-      Time.withCurrentTimeFrozen { tc =>
-        Trace.unwind {
-          Trace.setId(Trace.nextId)  // set an ID so we don't use the default one
-          assert(Await.result(client.multiply(10, 30)) === 300)
-          assert(!tracer.isEmpty)
-          val idSet = (tracer map(_.traceId)).toSet
-          assert(idSet.size === 1)
-          val theId = idSet.head
-          assert(theId.parentId === Trace.id.spanId)
-          assert(theId.traceId === Trace.id.traceId)
+  testThrift("end-to-end tracing potpourri") { (client, tracer) =>
+    Trace.unwind {
+      Trace.setId(Trace.nextId)  // set an ID so we don't use the default one
+      assert(Await.result(client.multiply(10, 30)) === 300)
+      assert(!tracer.isEmpty)
+      val idSet = (tracer map(_.traceId)).toSet
+      assert(idSet.size === 1)
+      val theId = idSet.head
+      assert(theId.parentId === Trace.id.spanId)
+      assert(theId.traceId === Trace.id.traceId)
 
-          // verify the traces.
-          def rec(annot: Annotation) = Record(theId, Time.now, annot)
-          val trace = tracer.toSeq
-          val Seq(clientAddr1, clientAddr2) =
-            trace collect { case Record(_, _, Annotation.ClientAddr(addr), _) => addr }
-          val Seq(serverAddr1, serverAddr2) =
-            trace collect { case Record(_, _, Annotation.ServerAddr(addr), _) => addr }
-
-          assert(trace.size === 11)
-          assert(trace(0) === rec(Annotation.Rpcname("thriftclient", "multiply")))
-          assert(trace(1) === rec(Annotation.ClientSend()))
-          assert(trace(2) === rec(Annotation.ServerAddr(serverAddr1)))
-          assert(trace(3) === rec(Annotation.ClientAddr(clientAddr1)))
-          assert(trace(4) === rec(Annotation.Rpcname("thriftserver", "multiply")))
-          assert(trace(5) === rec(Annotation.ServerRecv()))
-          assert(trace(6) === rec(Annotation.LocalAddr(serverAddr2)))
-          assert(trace(7) === rec(Annotation.ServerAddr(serverAddr2)))
-          assert(trace(8) === rec(Annotation.ClientAddr(clientAddr2)))
-          assert(trace(9) === rec(Annotation.ServerSend()))
-          assert(trace(10) === rec(Annotation.ClientRecv()))
-
-          assert(Await.result(client.complex_return("a string")).arg_two
-            === "%s".format(Trace.id.spanId.toString))
-
-          intercept[AnException] { Await.result(client.add(1, 2)) }
-          Await.result(client.add_one(1, 2))     // don't block!
-
-          assert(Await.result(client.someway()) === null)  // don't block!
-        }
+      // Compare two annotation records, ignoring time.
+      // This is simpler than trying to freeze time in the listening threads of
+      // the various servers we are constructing.
+      def annotationMatches(rec: Record, ann: Annotation): Boolean = {
+        rec.traceId == theId && rec.annotation == ann
       }
+
+      val trace = tracer.toSeq
+      val Seq(clientAddr1, clientAddr2) =
+        trace collect { case Record(_, _, Annotation.ClientAddr(addr), _) => addr }
+      val Seq(serverAddr1, serverAddr2) =
+        trace collect { case Record(_, _, Annotation.ServerAddr(addr), _) => addr }
+
+      // verify the count and ordering of the annotations
+      assert(trace.size === 11)
+      assert(annotationMatches(trace(0), Annotation.Rpcname("thriftclient", "multiply")))
+      assert(annotationMatches(trace(1), Annotation.ClientSend()))
+      assert(annotationMatches(trace(2), Annotation.ServerAddr(serverAddr1)))
+      assert(annotationMatches(trace(3), Annotation.ClientAddr(clientAddr1)))
+      assert(annotationMatches(trace(4), Annotation.Rpcname("thriftserver", "multiply")))
+      assert(annotationMatches(trace(5), Annotation.ServerRecv()))
+      assert(annotationMatches(trace(6), Annotation.LocalAddr(serverAddr2)))
+      assert(annotationMatches(trace(7), Annotation.ServerAddr(serverAddr2)))
+      assert(annotationMatches(trace(8), Annotation.ClientAddr(clientAddr2)))
+      assert(annotationMatches(trace(9), Annotation.ServerSend()))
+      assert(annotationMatches(trace(10), Annotation.ClientRecv()))
+
+      assert(Await.result(client.complex_return("a string")).arg_two
+        === "%s".format(Trace.id.spanId.toString))
+
+      intercept[AnException] { Await.result(client.add(1, 2)) }
+      Await.result(client.add_one(1, 2))     // don't block!
+
+      assert(Await.result(client.someway()) === null)  // don't block!
     }
   }
 
