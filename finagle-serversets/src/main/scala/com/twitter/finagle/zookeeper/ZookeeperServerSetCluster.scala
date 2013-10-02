@@ -21,6 +21,7 @@ import scala.collection.mutable.HashSet
  * A Cluster of SocketAddresses that provide a certain service. Cluster
  * membership is indicated by children Zookeeper node.
  */
+@deprecated("Get a Group[SocketAddress] from ZkResolver instead", "6.7.1")
 class ZookeeperServerSetCluster(serverSet: ServerSet, endpointName: Option[String])
 extends Cluster[SocketAddress] {
 
