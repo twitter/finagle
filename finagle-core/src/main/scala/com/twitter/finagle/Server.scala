@@ -1,8 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.util.{
-  Awaitable, Closable, CloseAwaitably, Future, Time, Var}
+import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**
@@ -24,17 +23,29 @@ trait ListeningServer
 
   protected def closeServer(deadline: Time): Future[Unit]
 
-  private[this] var announcements = List[Announcement]()
+  private[this] var isClosed = false
+  private[this] var announcements = List.empty[Future[Announcement]]
 
-  def announce(addr: String) {
-    val bound = boundAddress.asInstanceOf[InetSocketAddress]
-    Announcer.announce(bound, addr) foreach { announcement =>
-      synchronized { announcements ::= announcement }
+  /**
+   * Announce the given address and return a future to the announcement
+   */
+  def announce(addr: String): Future[Announcement] = synchronized {
+    val public = InetSocketAddressUtil.toPublic(boundAddress.asInstanceOf[InetSocketAddress])
+    if (isClosed)
+      Future.exception(new Exception("Cannot announce on a closed server"))
+    else {
+      val ann = Announcer.announce(public, addr)
+      announcements ::= ann
+      ann
     }
   }
 
   final def close(deadline: Time): Future[Unit] = synchronized {
-    Closable.all(announcements: _*).close(deadline) flatMap { _ => closeServer(deadline) }
+    isClosed = true
+    val collected = Future.collect(announcements)
+    collected flatMap { list =>
+      Closable.all(list:_*).close(deadline) map { _ => closeServer(deadline) }
+    }
   }
 }
 
