@@ -13,8 +13,7 @@ import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
-  trait TimeUnwritableInterestChangedTest {
-    val handler = new ChannelStatsHandler(NullStatsReceiver)
+  trait SocketTest {
     val e = mock[ChannelStateEvent]
     val chanWritable = mock[Channel]
     val chanUnwritable = mock[Channel]
@@ -25,8 +24,13 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
     when(ctxWritable.getChannel()).thenReturn(chanWritable)
     when(ctxUnwritable.getChannel()).thenReturn(chanUnwritable)
   }
-  describe("ChannelStatsHandler") {
 
+  trait InMemoryStatsTest extends SocketTest {
+    val sr = new InMemoryStatsReceiver()
+    val handler = new ChannelStatsHandler(sr)
+  }
+
+  describe("ChannelStatsHandler") {
     it("should count connections") {
       val sr = new InMemoryStatsReceiver()
 
@@ -50,42 +54,18 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
       connectionsIs(0)
     }
 
-    it("should detect how long the channel has been writable") {
+    it("should check the counters are collected correctly") {
       val time = Time.now
       Time.withTimeFunction(time) { control =>
-        new TimeUnwritableInterestChangedTest {
-          control.advance(1.minute)
-          handler.channelInterestChanged(ctxWritable, e)
-          assert(handler.writableDuration === 1.minute)
-          assert(handler.unwritableDuration === Duration.Zero)
-        }
-      }
-    }
-
-    it("should detect how long the channel has been unwritable") {
-      val time = Time.now
-      Time.withTimeFunction(time) { control =>
-        new TimeUnwritableInterestChangedTest {
-          control.advance(1.minute)
+        new InMemoryStatsTest {
+          control.advance(5.minutes)
           handler.channelInterestChanged(ctxUnwritable, e)
-          control.advance(1.minute)
-          assert(handler.writableDuration === Duration.Zero)
-          assert(handler.unwritableDuration === 1.minute)
-        }
-      }
-    }
-
-    it("should detect how long the channel has been writable after having switched back") {
-      val time = Time.now
-      Time.withTimeFunction(time) { control =>
-        new TimeUnwritableInterestChangedTest {
-          control.advance(1.minute)
-          handler.channelInterestChanged(ctxUnwritable, e)
-          control.advance(1.minute)
+          control.advance(10.minutes)
           handler.channelInterestChanged(ctxWritable, e)
-          control.advance(1.minute)
-          assert(handler.writableDuration === 1.minute)
-          assert(handler.unwritableDuration === Duration.Zero)
+          control.advance(20.minutes)
+          handler.channelInterestChanged(ctxUnwritable, e)
+          assert(sr.counters(Seq("socket_writable_ms")) === 25.minutes.inMillis)
+          assert(sr.counters(Seq("socket_unwritable_ms")) === 10.minutes.inMillis)
         }
       }
     }

@@ -26,12 +26,8 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
   private[this] val closeChans              = statsReceiver.counter("closechans")
-  private[this] val writableDurationGauge   = statsReceiver.addGauge("writableDuration") {
-    writableDuration().inMillis
-  }
-  private[this] val unwritableDurationGauge = statsReceiver.addGauge("unwritableDuration") {
-    unwritableDuration().inMillis
-  }
+  private[this] val writable                = statsReceiver.counter("socket_writable_ms")
+  private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
   private[this] val connections             = statsReceiver.addGauge("connections") {
     connectionCount.get()
   }
@@ -107,17 +103,18 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] var hasBeenWritable = true //netty channels start in writable state
   private[this] var since = Time.now
 
-  private[finagle] def writableDuration(): Duration =
-    if (!hasBeenWritable) Duration.Zero else Time.now - since
-  private[finagle] def unwritableDuration(): Duration =
-    if (hasBeenWritable) Duration.Zero else Time.now - since
+  private[this] def socketDuration(now: Time): Duration = now - since
 
   override def channelInterestChanged(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    val now = Time.now
     super.channelInterestChanged(ctx, e)
-    val writable = ctx.getChannel.isWritable()
-    if (writable != hasBeenWritable) {
-      hasBeenWritable = writable
-      since = Time.now
+    val isWritable = ctx.getChannel.isWritable()
+    if (isWritable != hasBeenWritable) {
+      val stat = if (hasBeenWritable) writable else unwritable
+      stat.incr(socketDuration(now).inMillis.toInt)
+
+      hasBeenWritable = isWritable
+      since = now
     }
   }
 }
