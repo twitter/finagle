@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.2</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -32,6 +32,18 @@
       <artifactId>slf4j-nop</artifactId>
       <version>1.6.1</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.2</artifactId>
+      <version>1.9.1</version>
+      <scope>test</scope>
     </dependency>
     <!-- project dependencies -->
     <dependency>
@@ -66,19 +78,12 @@
       <version>3.9.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.9.2</artifactId>
-      <version>1.9.1</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
-        <version>3.6.0</version>
         <configuration>
           <thriftNamespaceMappings>
             <thriftNamespaceMapping>
@@ -86,28 +91,8 @@
               <to>com.twitter.finagle.thriftmux.thriftscrooge3</to>
             </thriftNamespaceMapping>
           </thriftNamespaceMappings>
-          <thriftOpts>
-            <!-- add other Scrooge command line options using thriftOpts -->
-            <thriftOpt>--finagle</thriftOpt>
-          </thriftOpts>
           <outputDirectory>target/generated-test-sources</outputDirectory>
         </configuration>
-        <executions>
-          <execution>
-            <id>thrift-sources</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>thrift-test-sources</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>com.twitter</groupId>
