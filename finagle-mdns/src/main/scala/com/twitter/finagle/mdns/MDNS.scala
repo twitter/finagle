@@ -1,7 +1,7 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Announcement, Group, Resolver}
-import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.finagle.{Announcer, Announcement, Resolver, Addr}
+import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.lang.management.ManagementFactory
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
@@ -14,6 +14,7 @@ private case class MdnsRecord(
   regType: String,
   domain: String,
   addr: InetSocketAddress)
+extends SocketAddress
 
 private trait MDNSAnnouncerIface {
   def announce(
@@ -24,7 +25,7 @@ private trait MDNSAnnouncerIface {
 }
 
 private trait MDNSResolverIface {
-  def resolve(regType: String, domain: String): Try[Group[MdnsRecord]]
+  def resolve(regType: String, domain: String): Var[Addr]
 }
 
 private object MDNS {
@@ -85,12 +86,16 @@ class MDNSResolver extends Resolver {
    * The address must be in the style of `[name]._[group]._tcp.local.`
    * (e.g. "myservice._twitter._tcp.local.").
    */
-  def resolve(addr: String): Try[Group[SocketAddress]] = {
-    val (name, regType, domain) = parse(addr)
-    resolver.resolve(regType, domain) map { group =>
-      group collect {
-        case record if record.name.startsWith(name) => record.addr
-      }
+  def bind(arg: String): Var[Addr] = {
+    val (name, regType, domain) = parse(arg)
+    resolver.resolve(regType, domain) map {
+      case Addr.Bound(sockaddrs) =>
+        val filtered = sockaddrs collect {
+          case MdnsRecord(n, _, _, a) if n startsWith name => 
+            a: SocketAddress
+        }
+        Addr.Bound(filtered)
+      case a => a
     }
   }
 }

@@ -6,6 +6,7 @@ import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
 import com.twitter.conversions.common._
 import com.twitter.conversions.common.quantity._
 import com.twitter.finagle.group.StabilizingGroup.State._
+import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.finagle.InetResolver
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
@@ -35,10 +36,7 @@ private[finagle] object DefaultZkClientFactory
 private[finagle] class ZkClientFactory(val sessionTimeout: Duration) {
   private[this] val zkClients: mutable.Map[Set[InetSocketAddress], ZooKeeperClient] = mutable.Map()
 
-  def hostSet(hosts: String) = {
-    val zkGroup = InetResolver.resolve(hosts)() collect { case ia: InetSocketAddress => ia }
-    zkGroup()
-  }
+  def hostSet(hosts: String) = InetSocketAddressUtil.parseHosts(hosts).toSet
 
   def get(zkHosts: Set[InetSocketAddress]): (ZooKeeperClient, Offer[Health]) = synchronized {
     val client = zkClients.getOrElseUpdate(zkHosts, new ZooKeeperClient(

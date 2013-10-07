@@ -2,7 +2,7 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
-import com.twitter.finagle.Resolver
+import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.thrift.Status._
 import com.twitter.util.Await
 import com.twitter.util.Duration
@@ -67,38 +67,36 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
 if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
   test("resolve ALIVE endpoints") {
     val res = new ZkResolver(factory)
-    val clust = res.resolve("localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort))()
-    assert(clust().isEmpty)
+    val va = res.bind("localhost:%d!/foo/bar/baz".format(
+      inst.zookeeperAddress.getPort))
+    eventually { va() === Addr.Bound() }
+
+/*
     val inetClust = clust collect { case ia: InetSocketAddress => ia }
     assert(inetClust() === inetClust())
+*/
+
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
     val addr = new InetSocketAddress("127.0.0.1", 8080)
     val blahAddr = new InetSocketAddress("10.0.0.1", 80)
     val status8080 = serverSet.join(
       addr,
       Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-    eventually { assert(inetClust().size == 1) }
-    assert {
-      val Seq(addr1) = inetClust().toSeq
-      addr == addr1
-    }
+    eventually { assert(va() === Addr.Bound(addr)) }
     status8080.leave()
-    eventually { assert(inetClust().isEmpty) }
+    eventually { assert(va() === Addr.Bound()) }
     serverSet.join(
       addr,
       Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-    eventually { assert(inetClust().size == 1) }
+    eventually { assert(va() === Addr.Bound(addr)) }
 
-    val blahClust = res.resolve("localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort))()
-    eventually { assert(blahClust().size == 1) }
-    assert(blahClust() === blahClust())
-    assert {
-      val Seq(addr1) = blahClust().toSeq
-      addr1 == blahAddr
-    }
+    val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(
+      inst.zookeeperAddress.getPort))
+    eventually { assert(blahVa() === Addr.Bound(blahAddr)) }
   }
 
   test("resolves from the main resolver") {
-    assert(Resolver.resolve("zk!localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort)).isReturn)
+    Resolver.eval("zk!localhost:%d!/foo/bar/baz!blah".format(
+      inst.zookeeperAddress.getPort))
   }
 }

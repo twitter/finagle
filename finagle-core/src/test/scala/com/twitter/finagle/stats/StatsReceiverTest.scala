@@ -3,17 +3,14 @@ package com.twitter.finagle.stats
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.integration.StringCodec
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, WriteException, IndividualRequestTimeoutException}
 import com.twitter.util.{Await, Future, Promise}
-
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
-
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
-
+import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])
@@ -23,15 +20,15 @@ class StatsReceiverTest extends FunSuite {
     val receiver = new RollupStatsReceiver(mem)
 
     receiver.counter("toto", "titi", "tata").incr()
-    assert(mem.counters(Seq("toto")) == 1)
-    assert(mem.counters(Seq("toto", "titi")) == 1)
-    assert(mem.counters(Seq("toto", "titi", "tata")) == 1)
+    assert(mem.counters(Seq("toto")) === 1)
+    assert(mem.counters(Seq("toto", "titi")) === 1)
+    assert(mem.counters(Seq("toto", "titi", "tata")) === 1)
 
     receiver.counter("toto", "titi", "tutu").incr()
-    assert(mem.counters(Seq("toto")) == 2)
-    assert(mem.counters(Seq("toto", "titi")) == 2)
-    assert(mem.counters(Seq("toto", "titi", "tata")) == 1)
-    assert(mem.counters(Seq("toto", "titi", "tutu")) == 1)
+    assert(mem.counters(Seq("toto")) === 2)
+    assert(mem.counters(Seq("toto", "titi")) === 2)
+    assert(mem.counters(Seq("toto", "titi", "tata")) === 1)
+    assert(mem.counters(Seq("toto", "titi", "tutu")) === 1)
   }
 
   test("Broadcast Counter/Stat") {
@@ -42,12 +39,12 @@ class StatsReceiverTest extends FunSuite {
     val c1 = new MemCounter
     val c2 = new MemCounter
     val broadcastCounter = BroadcastCounter(Seq(c1, c2))
-    assert(c1.c == 0)
-    assert(c2.c == 0)
+    assert(c1.c === 0)
+    assert(c2.c === 0)
 
     broadcastCounter.incr()
-    assert(c1.c == 1)
-    assert(c2.c == 1)
+    assert(c1.c === 1)
+    assert(c2.c === 1)
 
     class MemStat extends Stat {
       var values: Seq[Float] = ArrayBuffer.empty[Float]
@@ -98,7 +95,7 @@ class StatsReceiverTest extends FunSuite {
 
   test("Scoped equality") {
     val sr = new InMemoryStatsReceiver
-    assert(sr == sr)
+    assert(sr === sr)
     assert(sr.scope("foo") != sr.scope("bar"))
   }
 
@@ -130,9 +127,9 @@ class StatsReceiverTest extends FunSuite {
       csr.counter("req").incr()
       ssr.counter("req").incr()
 
-      assert(mem.counters(Seq("req")) == 1)
-      assert(mem.counters(Seq("clnt", "req")) == 1)
-      assert(mem.counters(Seq("srv", "req")) == 1)
+      assert(mem.counters(Seq("req")) === 1)
+      assert(mem.counters(Seq("clnt", "req")) === 1)
+      assert(mem.counters(Seq("srv", "req")) === 1)
     } finally {
       LoadedStatsReceiver.self = prev
     }
@@ -161,11 +158,11 @@ class StatsReceiverTest extends FunSuite {
       .build()
 
     // generate com.twitter.finagle.IndividualRequestTimeoutException
-    Await.ready(client("hi"))
+    intercept[IndividualRequestTimeoutException] { Await.result(client("hi")) }
     Await.ready(server.close())
     // generate com.twitter.finagle.WriteException$$anon$1
-    Await.ready(client("hi"))
-
+    intercept[WriteException] { Await.result(client("hi")) }
+    
     val aggregatedFailures = mem.counters(Seq("client", "failures"))
     val otherFailuresSum = {
       val failures = mem.counters filter { case (names, _) =>
@@ -173,7 +170,8 @@ class StatsReceiverTest extends FunSuite {
       }
       failures.values.sum - aggregatedFailures
     }
-    assert(aggregatedFailures == otherFailuresSum)
-    assert(aggregatedFailures == 2)
+    
+    assert(aggregatedFailures === otherFailuresSum)
+    assert(aggregatedFailures === 2)
   }
 }

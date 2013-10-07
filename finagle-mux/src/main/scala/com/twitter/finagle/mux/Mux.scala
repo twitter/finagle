@@ -27,8 +27,8 @@ object MuxServer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuff
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[ChannelBuffer, ChannelBuffer] with Server[ChannelBuffer, ChannelBuffer] {
-  def newClient(group: Group[SocketAddress]): ServiceFactory[ChannelBuffer, ChannelBuffer] =
-    MuxClient.newClient(group)
+  def newClient(dest: Name, label: String): ServiceFactory[ChannelBuffer, ChannelBuffer] =
+    MuxClient.newClient(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[ChannelBuffer, ChannelBuffer]): ListeningServer =
     MuxServer.serve(addr, service)

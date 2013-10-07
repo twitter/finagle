@@ -758,7 +758,7 @@ class ClientSpec extends SpecificationWithJUnit {
     if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
       "with unmanaged regular zk serverset" in {
         val client = MemcachedClient.newKetamaClient(
-          group = "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+          "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
         // Wait for group to contain members
         Thread.sleep(5000)
@@ -781,7 +781,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) "with managed cache pool" in {
       val client = MemcachedClient.newKetamaClient(
-        group = "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
+        "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
       // Wait for group to contain members
       Thread.sleep(5000)
@@ -808,7 +808,7 @@ class ClientSpec extends SpecificationWithJUnit {
 
     "with static servers list" in {
       val client = MemcachedClient.newKetamaClient(
-        group = "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
+        "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
 
       Await.result(client.delete("foo"))
       Await.result(client.get("foo")) mustEqual None

@@ -8,6 +8,7 @@ import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Group, Resolver, Addr}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
@@ -30,14 +31,14 @@ class TwitterCacheResolverException(msg: String) extends Exception(msg)
 class TwitterCacheResolver extends Resolver {
   val scheme = "twcache"
 
-  def resolve(addr: String) = {
-    addr.split("!") match {
+  def bind(arg: String) = {
+    arg.split("!") match {
       // twcache!<host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
       case Array(hosts) =>
         val group = CacheNodeGroup(hosts) map {
           case node: CacheNode => node: SocketAddress
         }
-        Return(group)
+        group.set map { newSet => Addr.Bound(newSet) }
 
       // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
       case Array(zkHosts, path) =>
@@ -45,10 +46,11 @@ class TwitterCacheResolver extends Resolver {
         val group = CacheNodeGroup.newZkCacheNodeGroup(
           path, zkClient, ClientStatsReceiver.scope(scheme).scope(path)
         ) map { case c: CacheNode => c: SocketAddress }
-        Return(group)
+        group.set map { newSet => Addr.Bound(newSet) }
 
       case _ =>
-        Throw(new TwitterCacheResolverException("Invalid twcache format \"%s\"".format(addr)))
+        throw new TwitterCacheResolverException(
+          "Invalid twcache format \"%s\"".format(arg))
     }
   }
 }

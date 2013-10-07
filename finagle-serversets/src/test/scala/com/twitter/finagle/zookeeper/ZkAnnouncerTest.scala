@@ -1,7 +1,7 @@
 package com.twitter.finagle.zookeeper
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Announcer, Resolver}
+import com.twitter.finagle.{Announcer, Resolver, Addr}
 import com.twitter.util.Await
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
@@ -39,10 +39,14 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     val addr = new InetSocketAddress(8080)
     Await.result(ann.announce(addr, "%s!0".format(hostPath)))
 
-    val group = res.resolve(hostPath)() collect { case ia: InetSocketAddress => ia }
-
-    eventually { assert(group().size == 1) }
-    assert(Seq(addr) == group().toSeq)
+    val va = res.bind(hostPath)
+    eventually {
+      va() match {
+        case Addr.Bound(sockaddrs) =>
+          assert(sockaddrs === Set(addr))
+        case _ => fail()
+      }
+    }
   }
 
   test("only announce additional endpoints if a primary endpoint is present") {
@@ -52,18 +56,16 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     val addr2 = new InetSocketAddress(8081)
 
     Await.ready(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
-    val addr2Group = res.resolve("%s!addr2".format(hostPath))() collect { case ia: InetSocketAddress => ia }
-
-    assert(addr2Group().size == 0)
+    val va2 = res.bind("%s!addr2".format(hostPath))
+    eventually { assert(va2() != Addr.Pending) }
+    assert(va2() === Addr.Bound())
 
     Await.ready(ann.announce(addr1, "%s!0".format(hostPath)))
-    val addr1Group = res.resolve(hostPath)() collect { case ia: InetSocketAddress => ia }
 
-    eventually { assert(addr2Group().size == 1) }
-    assert(Seq(addr2) == addr2Group().toSeq)
-
-    eventually { assert(addr1Group().size == 1) }
-    assert(Seq(addr1) == addr1Group().toSeq)
+    val va1 = res.bind(hostPath)
+    
+    eventually { assert(va2() === Addr.Bound(addr2)) }
+    eventually { assert(va1() === Addr.Bound(addr1)) }
   }
 
   test("unannounce additional endpionts, but not primary endpoints") {
@@ -74,17 +76,16 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
 
     val anm1 = Await.result(ann.announce(addr1, "%s!0".format(hostPath)))
     val anm2 = Await.result(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
-    val addr1Group = res.resolve(hostPath)() collect { case ia: InetSocketAddress => ia }
-    val addr2Group = res.resolve("%s!addr2".format(hostPath))() collect { case ia: InetSocketAddress => ia }
+    val va1 = res.bind(hostPath)
+    val va2 = res.bind("%s!addr2".format(hostPath))
 
-    eventually { assert(addr1Group().size == 1) }
-    eventually { assert(addr2Group().size == 1) }
+    eventually { assert(va1() === Addr.Bound(addr1)) }
+    eventually { assert(va2() === Addr.Bound(addr2)) }
 
-    Await.ready(anm2.unannounce())
+    Await.result(anm2.unannounce())
 
-    eventually { assert(addr2Group().size == 0) }
-    eventually { assert(addr1Group().size == 1) }
-    assert(Seq(addr1) == addr1Group().toSeq)
+    eventually { assert(va2() === Addr.Bound()) }
+    assert(va1() === Addr.Bound(addr1))
   }
 
   test("unannounce primary endpoints and additional endpoints") {
@@ -95,16 +96,16 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
 
     val anm1 = Await.result(ann.announce(addr1, "%s!0".format(hostPath)))
     val anm2 = Await.result(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
-    val addr1Group = res.resolve(hostPath)() collect { case ia: InetSocketAddress => ia }
-    val addr2Group = res.resolve("%s!addr2".format(hostPath))() collect { case ia: InetSocketAddress => ia }
+    val va1 = res.bind(hostPath)
+    val va2 = res.bind("%s!addr2".format(hostPath))
 
-    eventually { assert(addr1Group().size == 1) }
-    eventually { assert(addr2Group().size == 1) }
+    eventually { assert(va1() === Addr.Bound(addr1)) }
+    eventually { assert(va2() === Addr.Bound(addr2)) }
 
     Await.ready(anm1.unannounce())
 
-    eventually { assert(addr2Group().size == 0) }
-    eventually { assert(addr1Group().size == 0) }
+    eventually { assert(va1() === Addr.Bound()) }
+    eventually { assert(va2() === Addr.Bound()) }
   }
 
   test("announces from the main announcer") {

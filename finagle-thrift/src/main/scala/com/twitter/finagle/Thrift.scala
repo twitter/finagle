@@ -61,8 +61,8 @@ case class ThriftImpl private[finagle](
     protocolFactory)
 
   def newClient(
-    group: Group[SocketAddress]
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(group)
+    dest: Name, label: String
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
 
   def serve(
     addr: SocketAddress, 
@@ -131,8 +131,8 @@ object Thrift
   private[this] val thrift = ThriftImpl(protocolFactory)
 
   def newClient(
-    group: Group[SocketAddress]
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = thrift.newClient(group)
+    dest: Name, label: String
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = thrift.newClient(dest, label)
 
   def serve(
     addr: SocketAddress, service: ServiceFactory[Array[Byte], Array[Byte]]

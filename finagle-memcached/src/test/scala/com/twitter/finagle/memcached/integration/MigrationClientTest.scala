@@ -113,9 +113,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
   test("not migrating yet") {
     val client1 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
     val client2 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
@@ -135,9 +135,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
     val client1 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
     val client2 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
@@ -157,9 +157,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
     val client1 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
     val client2 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
@@ -181,9 +181,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
     val client1 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
     val client2 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
@@ -205,9 +205,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
     val client1 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
     val client2 = MemcachedClient.newKetamaClient(
-      group = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
+      dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 

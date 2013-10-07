@@ -26,6 +26,7 @@ import java.net.SocketAddress
  * unfortunate, but it's better to keep things simpler and
  * consistent.
  */
+@deprecated("Var[Addr], Name", "6.7.x")
 trait Group[T] { outer =>
   // Group is needlessly complex due to it transitioning to
   // deprecation. In order to provide reasonable compatibility with
@@ -130,6 +131,13 @@ object Group {
    */
   def apply[T](staticMembers: T*): Group[T] = new Group[T] {
     protected val _set = Var(Set(staticMembers:_*))
+  }
+  
+  def fromVarAddr(va: Var[Addr]): Group[SocketAddress] = new Group[SocketAddress] {
+    protected val _set = va map {
+      case Addr.Bound(sockaddrs) => sockaddrs
+      case _ => Set[SocketAddress]()
+    }
   }
 
   /**

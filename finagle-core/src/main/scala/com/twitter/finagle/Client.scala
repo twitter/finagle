@@ -4,8 +4,8 @@ import java.net.SocketAddress
 
 /**
  * RPC clients with `Req`-typed requests and `Rep` typed replies.
- * Clients connect to [[com.twitter.finagle.Group]]s of endpoints.
- * These may be resolved dynamically through the group resolver.
+ * RPC destinations are represented by names. Names are bound
+ * for each request.
  *
  * Clients are implemented by the various protocol packages in
  * finagle, for example [[com.twitter.finagle.Http]]:
@@ -16,32 +16,60 @@ import java.net.SocketAddress
  * val service: Service[HttpRequest, HttpResponse] =
  *   Http.newService("google.com:80")
  * }}}
+ *
+ * @define newService
+ *
+ * Create a new service which dispatches requests to `dest`.
+ *
+ * @define newClient
+ *
+ * Create a new client connected to `dest`.
+ *
+ * @define label
+ * 
+ * Argument `label` is used to assign a label to this client.
+ * The label is used to display stats, etc.
  */
 trait Client[Req, Rep] {
 
-  /**
-   * Create a new Service connected to `group`.
-   */
-  final def newService(group: Group[SocketAddress]): Service[Req, Rep] = {
-    val client = newClient(group)
+  /** $newService $label */
+  final def newService(dest: Name, label: String): Service[Req, Rep] = {
+    val client = newClient(dest, label)
     new FactoryToService[Req, Rep](client)
   }
+  
+  @deprecated("Use destination names", "6.7.x")
+  /** $newService */
+  final def newService(dest: Group[SocketAddress]): Service[Req, Rep] = 
+    dest match {
+      case NamedGroup(label) => newService(Name.fromGroup(dest), label)
+      case _ => newService(Name.fromGroup(dest), "")
+     }
 
-  /**
-   * Create a new servie connected to `addr`.
-   */
-  final def newService(addr: String): Service[Req, Rep] =
-    newService(Resolver.resolve(addr)())
+  /** $newService */
+  final def newService(dest: String): Service[Req, Rep] = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    newService(n, l)
+  }
+  
+  /** $newClient */
+  final def newClient(dest: String): ServiceFactory[Req, Rep] = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    newClient(n, l)
+  }
 
-  /**
-   * Create a new client, a `ServiceFactory` that is connected to `group`.
-   */
-  def newClient(group: Group[SocketAddress]): ServiceFactory[Req, Rep]
+  /** $newClient $label */
+  final def newClient(dest: String, label: String): ServiceFactory[Req, Rep] =
+    newClient(Resolver.eval(dest), label)
 
-  /**
-   * Create a new client, a `ServiceFactory` that is connected to the
-   * group resolved by `addr`.
-   */
-  final def newClient(addr: String): ServiceFactory[Req, Rep] =
-    newClient(Resolver.resolve(addr)())
+  /** $newClient $label */
+  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep]
+
+  @deprecated("Use destination names", "6.7.x")
+  /** $newClient */
+  final def newClient(dest: Group[SocketAddress]): ServiceFactory[Req, Rep] = 
+    dest match {
+      case NamedGroup(label) => newClient(Name.fromGroup(dest), label)
+      case _ => newClient(Name.fromGroup(dest), "")
+    }
 }

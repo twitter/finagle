@@ -142,18 +142,39 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $clientUse
    */
-  def newIface[Iface](addr: String, cls: Class[_]): Iface =
-    newIface(Resolver.resolve(addr)(), cls)
+  def newIface[Iface](dest: String, cls: Class[_]): Iface = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    newIface(n, l, cls)
+  }
 
   /**
    * $clientUse
    */
-  def newIface[Iface: ClassManifest](addr: String): Iface =
-    newIface[Iface](Resolver.resolve(addr)())
+  def newIface[Iface](dest: String, label: String, cls: Class[_]): Iface =
+    newIface(Resolver.eval(dest), label, cls)
 
   /**
    * $clientUse
    */
+  def newIface[Iface: ClassManifest](dest: String): Iface = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    newIface[Iface](n, l)
+  }
+
+  def newIface[Iface: ClassManifest](dest: String, label: String): Iface = {
+    val cls = implicitly[ClassManifest[Iface]].erasure
+    newIface[Iface](Resolver.eval(dest), label, cls)
+  }
+
+  def newIface[Iface: ClassManifest](dest: Name, label: String): Iface = {
+    val cls = implicitly[ClassManifest[Iface]].erasure
+    newIface[Iface](dest, label, cls)
+  }
+
+  /**
+   * $clientUse
+   */
+  @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
   def newIface[Iface: ClassManifest](group: Group[SocketAddress]): Iface = {
     val cls = implicitly[ClassManifest[Iface]].erasure
     newIface[Iface](group, cls)
@@ -162,14 +183,21 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $clientUse
    */
-  def newIface[Iface](group: Group[SocketAddress], cls: Class[_]): Iface = {
+  @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
+  def newIface[Iface](group: Group[SocketAddress], cls: Class[_]): Iface = group match {
+    case NamedGroup(label) => newIface(Name.fromGroup(group), label, cls)
+    case _ => newIface(Name.fromGroup(group), "", cls)
+  }
+
+  /**
+   * $clientUse
+   */
+  def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
     val clsName = cls.getName
-    lazy val underlying = newClient(group).toService
+    lazy val underlying = newClient(name, label).toService
     lazy val stats =
-      group match {
-        case NamedGroup(name) => ClientStatsReceiver.scope(name)
-        case _ => ClientStatsReceiver.scope(defaultClientName)
-      }
+      if (label.nonEmpty) ClientStatsReceiver.scope(label) 
+      else ClientStatsReceiver.scope(defaultClientName)
 
     def tryThriftFinagleClient: Option[Iface] =
       for {

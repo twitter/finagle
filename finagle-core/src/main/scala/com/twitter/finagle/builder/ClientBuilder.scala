@@ -57,7 +57,7 @@ import com.twitter.finagle.tracing.{NullTracer, Tracer}
 import com.twitter.finagle.util._
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Duration, Future, Monitor, 
-  NullMonitor, Time, Timer, Try, Promise, Return}
+  NullMonitor, Time, Timer, Try, Promise, Return, Throw, Var}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.{Logger, Level}
@@ -157,7 +157,7 @@ private[builder] final case class ClientTimeoutConfig(
  * are accessed by the end-user.
  */
 private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit](
-  private val _group                     : Option[Group[SocketAddress]]        = None,
+  private val _dest                      : Option[Name]                  = None,
   private val _loadBalancer              : Option[LoadBalancerFactory]   = None,
   private val _codecFactory              : Option[CodecFactory[Req, Rep]#Client] = None,
   private val _keepAlive                 : Option[Boolean]               = None,
@@ -186,7 +186,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
    * Nevertheless, we want a friendly public API so we create delegators without
    * underscores.
    */
-  val group                     = _group
+  val dest                      = _dest
   val loadBalancer              = _loadBalancer
   val codecFactory              = _codecFactory
   val statsReceiver             = _statsReceiverConfig.statsReceiver
@@ -223,7 +223,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   val daemon                    = _daemon
 
   def toMap = Map(
-    "group"                     -> _group,
+    "dest"                      -> _dest,
     "loadBalancer"              -> _loadBalancer,
     "codecFactory"              -> _codecFactory,
     "tcpConnectTimeout"         -> Some(_timeoutConfig.tcpConnectTimeout),
@@ -269,7 +269,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   }
 
   def validated: ClientConfig[Req, Rep, Yes, Yes, Yes] = {
-    group        getOrElse { throw new IncompleteSpecification("No hosts were specified") }
+    dest         getOrElse { throw new IncompleteSpecification("No destination was specified") }
     codecFactory getOrElse { throw new IncompleteSpecification("No codec was specified") }
     hostConnectionLimit getOrElse {
       throw new IncompleteSpecification("No host connection limit was specified")
@@ -327,9 +327,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * [[java.net.SocketAddress]] instead.
    */
   def hosts(
-    addresses: Seq[SocketAddress]
+    addrs: Seq[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    cluster(new StaticCluster[SocketAddress](addresses))
+    dest(Name.bound(addrs:_*))
 
   /**
    * A convenience method for specifying a one-host
@@ -341,6 +341,30 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     hosts(Seq(address))
 
   /**
+   * The logical destination of requests dispatched through this
+   * client, as evaluated by a resolver. If the name evaluates a
+   * label, this replaces the builder's current name.
+   */
+  def dest(
+    name: String
+  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] = {
+    Resolver.evalLabeled(name) match {
+      case (n, "") => withConfig(_.copy(_dest = Some(n)))
+      case (n, l) => this.name(l).withConfig(_.copy(_dest = Some(n)))
+    }
+  }
+
+
+  /**
+   * The logical destination of requests dispatched through this
+   * client.
+   */
+  def dest(
+    name: Name
+  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
+    withConfig(_.copy(_dest = Some(name)))
+
+  /**
    * Specify a cluster directly.  A
    * [[com.twitter.finagle.builder.Cluster]] defines a dynamic
    * mechanism for specifying a set of endpoints to which this client
@@ -349,12 +373,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def cluster(
     cluster: Cluster[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    withConfig(_.copy(_group = Some(Group.fromCluster(cluster))))
+    group(Group.fromCluster(cluster))
 
   def group(
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    withConfig(_.copy(_group = Some(group)))
+    dest(new Name {
+      def bind() = group.set map { newSet => Addr.Bound(newSet) }
+    })
 
   /**
    * Specify a load balancer.  The load balancer implements
@@ -783,10 +809,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       loadBalancerFactory = config.loadBalancer getOrElse HeapBalancerFactory
     )
 
-    // Note the direct use of newStack here. This is because we want
-    // to control how stats receivers are scoped.
+    // Note that we use newStack directly here in order to
+    // control how stats receivers are scoped.
     val factory = codec.prepareServiceFactory(
-      client.newStack(config.group.get))
+      client.newStack(config.dest.get))
 
     if (!config.daemon) ExitGuard.guard()
     new ServiceFactoryProxy[Req, Rep](factory) {
@@ -820,16 +846,25 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = {
     val underlying: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
-    val service = config.group match {
-      case Some(group) if group.members.isEmpty =>
+    // TODO: should really be operating off of the binding in
+    // buildFactory.
+    val service = config.dest.get.bind() match {
+      case Var(Addr.Bound(sockaddrs)) if sockaddrs.nonEmpty =>
+        underlying
+      case v =>
         val p = new Promise[Service[Req, Rep]]
-        val sub = group.set observe { s =>
-          if (s.nonEmpty)
+        val sub = v observe {
+          case Addr.Bound(sockaddrs) if sockaddrs.nonEmpty =>
             p.updateIfEmpty(Return(underlying))
+          case Addr.Failed(exc) =>
+            // TODO: wrap?
+            p.updateIfEmpty(Throw(exc))
+          case bad => 
+            val log = config.logger getOrElse Logger.getLogger(config.name)
+            log.warning("Unsupported address "+bad)
         }
         p ensure { sub.close() }
         new ProxyService(p, config.hostConnectionMaxWaiters getOrElse Int.MaxValue)
-      case _ => underlying
     }
 
     val timer = DefaultTimer.twitter

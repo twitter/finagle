@@ -1,8 +1,7 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcement, Announcer, Group, Resolver}
-import com.twitter.util.{
-  Closable, Future, Promise, Return, Throw, Time, Try, Var}
+import com.twitter.finagle.{Announcement, Announcer, Addr, Resolver}
+import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try, Var}
 import java.lang.reflect.{InvocationHandler, Method, Proxy}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
@@ -118,54 +117,65 @@ private class DNSSD {
   }
 }
 
-private class DNSSDGroup(dnssd: DNSSD, regType: String, domain: String)
-  extends Group[MdnsRecord]
-{
-  private[this] val services = new mutable.HashMap[String, MdnsRecord]()
-  protected val _set = Var(Set[MdnsRecord]())
-
-  private[this] def mkRecord(args: Array[Object]) =
-    Record(
-      flags = args(1).asInstanceOf[Int],
-      ifIndex = args(2).asInstanceOf[Int],
-      serviceName = args(3).asInstanceOf[String],
-      regType = args(4).asInstanceOf[String],
-      domain = args(5).asInstanceOf[String])
-
-  private[this] val proxy = dnssd.newProxy(dnssd.BrowseListenerClass) {
-    case ("serviceFound", args)  =>
-      val record = mkRecord(args)
-      dnssd.resolve(record) foreach { resolved =>
-        val mdnsRecord = MdnsRecord(
-          record.serviceName,
-          record.regType,
-          record.domain,
-          new InetSocketAddress(resolved.hostName, resolved.port))
-
-        synchronized {
-          services.put(record.serviceName, mdnsRecord)
-          _set() = services.values.toSet
-        }
-      }
-
-    case ("serviceLost", args) =>
-      val record = mkRecord(args)
-      synchronized {
-        if (services.remove(record.serviceName).isDefined)
-          _set() = services.values.toSet
-      }
-  }
-
-  dnssd.browseMethod.invoke(dnssd.DNSSDClass,
-    dnssd.UNIQUE.asInstanceOf[Object], dnssd.LOCALHOST_ONLY.asInstanceOf[Object],
-    regType.asInstanceOf[String], domain.asInstanceOf[String], proxy)
-}
-
 private object DNSSD {
   lazy val instance = new DNSSD
+
+  def check() {
+    // Throws ClassNotFoundException when 
+    // DNSSD is not present
+    instance
+  }
+
+  def resolve(regType: String, domain: String): Var[Addr] = {
+    val services = new mutable.HashMap[String, MdnsRecord]()
+    val v = Var[Addr](Addr.Pending)
+
+    def mkRecord(args: Array[Object]) = {
+      assert(args.size > 5)
+      Record(
+        flags = args(1).asInstanceOf[Int],
+        ifIndex = args(2).asInstanceOf[Int],
+        serviceName = args(3).asInstanceOf[String],
+        regType = args(4).asInstanceOf[String],
+        domain = args(5).asInstanceOf[String])
+    }
+  
+    val proxy = instance.newProxy(instance.BrowseListenerClass) {
+      case ("serviceFound", args)  =>
+        val record = mkRecord(args)
+        instance.resolve(record) foreach { resolved =>
+          val mdnsRecord = MdnsRecord(
+            record.serviceName,
+            record.regType,
+            record.domain,
+            new InetSocketAddress(resolved.hostName, resolved.port))
+  
+          synchronized {
+            services.put(record.serviceName, mdnsRecord)
+            v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
+          }
+        }
+  
+      case ("serviceLost", args) =>
+        val record = mkRecord(args)
+        synchronized {
+          if (services.remove(record.serviceName).isDefined)
+            v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
+        }
+    }
+  
+    instance.browseMethod.invoke(instance.DNSSDClass,
+      instance.UNIQUE.asInstanceOf[Object], 
+      instance.LOCALHOST_ONLY.asInstanceOf[Object],
+      regType.asInstanceOf[String], domain.asInstanceOf[String], proxy)
+    
+    v
+  }
 }
 
 private class DNSSDAnnouncer extends MDNSAnnouncerIface {
+  DNSSD.check()
+
   private[this] val dnssd = DNSSD.instance
 
   def announce(addr: InetSocketAddress, name: String, regType: String, domain: String) =
@@ -173,8 +183,8 @@ private class DNSSDAnnouncer extends MDNSAnnouncerIface {
 }
 
 private class DNSSDResolver extends MDNSResolverIface {
-  private[this] val dnssd = DNSSD.instance
+  DNSSD.check()
 
   def resolve(regType: String, domain: String) =
-    Return(new DNSSDGroup(dnssd, regType, domain))
+    DNSSD.resolve(regType, domain)
 }

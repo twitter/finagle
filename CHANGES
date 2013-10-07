@@ -1,10 +1,11 @@
 .. Author notes: this file is formatted with restructured text
+   (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+   as it is included in Finagle's user's guide.
 
-(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-as it is included in Finagle's user's guide.
-
-6.x
+6.7.0
 -----
+
+- `finagle-core`: Introduce staged names
 
 6.6.2
 ~~~~~

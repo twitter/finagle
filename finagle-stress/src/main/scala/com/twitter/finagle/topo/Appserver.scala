@@ -55,17 +55,14 @@ object Appserver extends App with Logging {
 
   def main() {
     val clients = for {
-      (a, i) <- clientAddrs().zipWithIndex
-      g = Resolver.resolve(a)
-      if g.isReturn
+      (d, i) <- clientAddrs().zipWithIndex
+      dest = Resolver.eval(d)
     } yield {
       if (useThriftmux())
-        ThriftMux.newIface[thrift.Backend.FutureIface](g().named("mux%d".format(i)))
+        ThriftMux.newIface[thrift.Backend.FutureIface](dest, "mux%d".format(i))
       else {
-        // Note: Assumes static groups.
-        val cluster = StaticCluster(g().members.toSeq)
         val transport = ClientBuilder()
-          .cluster(cluster)
+          .dest(dest)
           .name("mux%d".format(i))
           .codec(ThriftClientFramedCodec())
           .hostConnectionLimit(1000)

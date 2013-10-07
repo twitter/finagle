@@ -52,8 +52,8 @@ object HttpServer extends DefaultServer[HttpRequest, HttpResponse, HttpResponse,
 object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
     with Server[HttpRequest, HttpResponse]
 {
-  def newClient(group: Group[SocketAddress]): ServiceFactory[HttpRequest, HttpResponse] =
-    HttpClient.newClient(group)
+  def newClient(name: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] =
+    HttpClient.newClient(name, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[HttpRequest, HttpResponse]): ListeningServer =
     HttpServer.serve(addr, service)
