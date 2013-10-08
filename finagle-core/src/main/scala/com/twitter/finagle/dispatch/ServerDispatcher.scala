@@ -26,9 +26,10 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
   import SerialServerDispatcher._
 
   private[this] val state = new AtomicReference[Future[_]](Idle)
+  private[this] val cancelled = new CancelledRequestException
 
   trans.onClose ensure {
-    state.getAndSet(Closed).raise(new CancelledRequestException)
+    state.getAndSet(Closed).raise(cancelled)
     service.close()
   }
 
@@ -37,9 +38,10 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
     trans.read() flatMap { req =>
       val f = service(req)
       if (state.compareAndSet(Idle, f)) f else {
-        f.raise(new CancelledRequestException)
+        f.raise(cancelled)
         Eof
       }
+
     } flatMap { rep =>
       trans.write(rep)
     } respond {
