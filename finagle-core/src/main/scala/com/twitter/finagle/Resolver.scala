@@ -132,23 +132,24 @@ object Resolver {
    * on failure to scheme lookup. Since names are late bound, 
    * binding failures are deferred.
    */
-  def eval(name: String): Name = new Name {
-    val (resolver, arg) = lex(name) match {
-      case (Eq :: _) | (Bang :: _) =>
-        throw new ResolverAddressInvalid(name)
-
-      case El(scheme) :: Bang :: name =>
-        resolvers.find(_.scheme == scheme) match {
-          case Some(resolver) =>  (resolver, delex(name))
-          case None => throw new ResolverNotFoundException(scheme)
-        }
-
-      case ts => (InetResolver, delex(ts))
-    }
-
-    def bind() = resolver.bind(arg)
-  }
+  def eval(name: String): Name =
+    if (name startsWith "/") Name(name) 
+    else new Name {
+      val (resolver, arg) = lex(name) match {
+        case (Eq :: _) | (Bang :: _) =>
+          throw new ResolverAddressInvalid(name)
   
+        case El(scheme) :: Bang :: name =>
+          resolvers.find(_.scheme == scheme) match {
+            case Some(resolver) =>  (resolver, delex(name))
+            case None => throw new ResolverNotFoundException(scheme)
+          }
+  
+        case ts => (InetResolver, delex(ts))
+      }
+  
+      def bind() = resolver.bind(arg)
+    }
 
   private[finagle] def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {

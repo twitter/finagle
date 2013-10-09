@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.factory.{RefcountedFactory, StatsFactoryWrapper,   TimeoutFactory}
+import com.twitter.finagle.factory._
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactory}
 import com.twitter.finagle.service._
@@ -145,7 +145,8 @@ case class DefaultClient[Req, Rep](
     newStack(sa)
   }
 
-  val newStack: Name => ServiceFactory[Req, Rep] = {
+
+  val newStack0: Name => ServiceFactory[Req, Rep] = {
     val refcounted: Transformer[Req, Rep] = new RefcountedFactory(_)
 
     val timeLimited: Transformer[Req, Rep] = factory =>
@@ -164,7 +165,7 @@ case class DefaultClient[Req, Rep](
       // TODO: load balancer consumes Var[Addr] directly., 
       // or at least Var[SocketAddress]
       val g = Group.mutable[SocketAddress]()
-      dest.bind() observe { 
+      dest.bind() observe {
         case Addr.Bound(sockaddrs) =>
           g() = sockaddrs
         case Addr.Failed(e) =>
@@ -174,7 +175,11 @@ case class DefaultClient[Req, Rep](
           log.log(Level.WARNING, 
             "Name was delegated to %s, but delegation is not supported".format(where))
           g() = Set()
-        case Addr.Pending | Addr.Neg =>
+        case Addr.Pending =>
+          log.log(Level.WARNING, "Name resolution is pending")
+          g() = Set()
+        case Addr.Neg =>
+          log.log(Level.WARNING, "Name resolution is negative")
           g() = Set()
       }
 
@@ -189,6 +194,9 @@ case class DefaultClient[Req, Rep](
       refcounted compose
       balanced
   }
+
+  val newStack: Name => ServiceFactory[Req, Rep] =
+    dest => new Refinery(dest, newStack0)
 
   def newClient(dest: Name, label: String) = copy(
     statsReceiver = statsReceiver.scope(label),

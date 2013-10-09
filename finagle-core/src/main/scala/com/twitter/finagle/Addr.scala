@@ -31,7 +31,7 @@ object Addr {
   /** 
    * Binding was delegated to `where`.
    */
-  case class Delegated(where: Name) extends Addr
+  case class Delegated(where: String) extends Addr
 
   /**
    * The binding action is still pending.
@@ -46,6 +46,10 @@ object Addr {
   object Bound {
     def apply(addrs: SocketAddress*): Bound =
       Bound(immutable.Set(addrs:_*))
+  }
+  
+  object Failed {
+    def apply(why: String): Failed = Failed(new Exception(why))
   }
 }
 
