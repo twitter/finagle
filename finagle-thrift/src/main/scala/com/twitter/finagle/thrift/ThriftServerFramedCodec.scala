@@ -12,7 +12,7 @@ import org.apache.thrift.protocol.{
 import org.apache.thrift.{TApplicationException, TException}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, 
+  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelDownstreamHandler}
 
 object ThriftServerFramedCodec {
@@ -59,11 +59,11 @@ class ThriftServerFramedCodec(
 }
 
 private case class ThriftServerPreparer(
-  protocolFactory: TProtocolFactory, 
-  serviceName: String, 
+  protocolFactory: TProtocolFactory,
+  serviceName: String,
   boundAddress: InetSocketAddress) {
 
-  private[this] val uncaughtExceptionsFilter = 
+  private[this] val uncaughtExceptionsFilter =
     new HandleUncaughtApplicationExceptions(protocolFactory)
 
   def prepare(
@@ -150,16 +150,16 @@ private[thrift] class ThriftServerTracingFilter(
     if (isUpgraded) {
       val header = new thrift.RequestHeader
       val request_ = InputBuffer.peelMessage(request, header, protocolFactory)
-      
-      var didTrace = false
 
-      // If we are given a request context, interpret that. We assume that
-      // if we get any request context, we'll get a trace context.
+      var didTrace = false
+      var didSetClientId = false
+
       if (header.contexts != null) {
         val iter = header.contexts.iterator()
         while (iter.hasNext) {
           val c = iter.next()
           didTrace ||= Arrays.equals(c.getKey(), TraceContext.KeyBytes)
+          didSetClientId ||= Arrays.equals(c.getKey(), ClientIdContext.KeyBytes)
           Context.handle(Buf.ByteArray(c.getKey()), Buf.ByteArray(c.getValue()))
         }
       }
@@ -167,16 +167,16 @@ private[thrift] class ThriftServerTracingFilter(
       if (!didTrace) {
         val sampled = if (header.isSetSampled) Some(header.isSampled) else None
         // if true, we trace this request. if None client does not trace, we get to decide
-  
+
         val traceId = TraceId(
-          if (header.isSetTrace_id) 
+          if (header.isSetTrace_id)
             Some(SpanId(header.getTrace_id)) else None,
-          if (header.isSetParent_span_id) 
+          if (header.isSetParent_span_id)
             Some(SpanId(header.getParent_span_id)) else None,
           SpanId(header.getSpan_id),
           sampled,
           if (header.isSetFlags) Flags(header.getFlags) else Flags())
-  
+
         Trace.setId(traceId)
       }
 
@@ -184,8 +184,10 @@ private[thrift] class ThriftServerTracingFilter(
       Trace.recordRpcname(serviceName, msg.name)
       Trace.record(Annotation.ServerRecv())
 
-      try {
+      if (!didSetClientId)
         ClientId.set(extractClientId(header))
+
+      try {
         service(request_) map {
           case response if response.isEmpty => response
           case response =>
@@ -196,7 +198,6 @@ private[thrift] class ThriftServerTracingFilter(
       } finally {
         ClientId.clear()
       }
-
     } else {
       val buffer = new InputBuffer(request, protocolFactory)
       val msg = buffer().readMessageBegin()
@@ -231,4 +232,3 @@ private[thrift] class ThriftServerTracingFilter(
     Option(header.client_id) map { clientId => ClientId(clientId.name) }
   }
 }
-

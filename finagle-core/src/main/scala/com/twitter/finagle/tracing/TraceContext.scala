@@ -1,26 +1,22 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.ContextHandler
+import com.twitter.finagle.{Context, ContextHandler}
 import com.twitter.io.Buf
 
 private[finagle] object TraceContext {
   val Key = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
-  val KeyBytes = {
-    val bytes = new Array[Byte](Key.length)
-    Key.write(bytes, 0)
-    bytes
-  }
+  val KeyBytes = Context.keyBytes(Key)
 }
 
 /**
  * A context handler for Trace IDs.
  *
  * The wire format is (big-endian):
- * 	spanId:8 parentId:8 traceId:8 flags:8 sampled:1
+ *     ''spanId:8 parentId:8 traceId:8 flags:8''
  */
 private[finagle] class TraceContext extends ContextHandler {
   val key = TraceContext.Key
-  
+
   private[this] val local = new ThreadLocal[Array[Byte]] {
     override def initialValue() = new Array[Byte](32)
   }
@@ -87,7 +83,7 @@ private[finagle] class TraceContext extends ContextHandler {
     val bytes = new Array[Byte](32)
     put64(bytes, 0, Trace.id.spanId.toLong)
     put64(bytes, 8, Trace.id.parentId.toLong)
-    put64(bytes, 16, Trace.id.traceId.toLong) 
+    put64(bytes, 16, Trace.id.traceId.toLong)
     put64(bytes, 24, flags.toLong)
     Some(Buf.ByteArray(bytes))
   }

@@ -17,13 +17,13 @@ import java.nio.charset.Charset
  * registered handlers are assigned a pass-thru handler: they are
  * uninterpreted, but are propagated across requests.
  *
- * Context handlers implement ContextHandler and are loaded via 
+ * Context handlers implement ContextHandler and are loaded via
  * the Java service loader mechanism.
  */
 object Context {
   private val log = util.DefaultLogger
 
-  private val loadedHandlers = LoadService[ContextHandler]()  
+  private val loadedHandlers = LoadService[ContextHandler]()
   private val predefHandlers = Seq(new TraceContext)
 
   @volatile private var handlers: Array[ContextHandler] =
@@ -33,7 +33,13 @@ object Context {
     val Buf.Utf8(key) = h.key
     log.info("Context: added handler "+key)
   }
-  
+
+  private[finagle] def keyBytes(key: Buf): Array[Byte] = {
+    val bytes = new Array[Byte](key.length)
+    key.write(bytes, 0)
+    bytes
+  }
+
   private def getOrAddHandler(key: Buf): ContextHandler = synchronized {
     handlers.find(_.key == key) match {
       case Some(h) => h
@@ -63,7 +69,7 @@ object Context {
   def handle(key: Buf, buf: Buf) {
     try handlerOf(key).handle(buf) catch {
       case NonFatal(exc) =>
-        log.log(Level.WARNING, 
+        log.log(Level.WARNING,
           "Exception while handling request context", exc)
     }
   }
@@ -84,18 +90,18 @@ object Context {
  * protocol implementations.
  */
 trait ContextHandler {
-  /** 
+  /**
    * The key of the context handled by this context handler. It is
    * typically a Utf-8 encoded, fully-qualified class name.
    */
   val key: Buf
 
   /**
-   * Handle is called by protocol implementations to hand off 
+   * Handle is called by protocol implementations to hand off
    * a request context.
    */
   def handle(body: Buf)
-  
+
   /**
    * Emit the current, serialized value of this context.
    */
