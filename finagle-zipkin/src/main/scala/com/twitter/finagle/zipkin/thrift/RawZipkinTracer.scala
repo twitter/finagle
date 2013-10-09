@@ -83,7 +83,7 @@ private[thrift] class RawZipkinTracer(
       .daemon(true)
       .build()
 
-    new scribe.FinagledClient(
+    new Scribe.FinagledClient(
       new TracelessFilter andThen transport,
       new TBinaryProtocol.Factory())
   }
@@ -103,7 +103,7 @@ private[thrift] class RawZipkinTracer(
     span.toThrift.write(protocolFactory.getProtocol(buffer))
     val thriftBytes = buffer.getArray.take(buffer.length)
     val serializedBase64Span = Base64StringEncoder.encode(thriftBytes) + '\n'
-    Seq(new LogEntry(category = TraceCategory, message = serializedBase64Span))
+    Seq(LogEntry(category = TraceCategory, message = serializedBase64Span))
   }
 
   /**

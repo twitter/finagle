@@ -9,7 +9,7 @@ benchmark(name='scala',
     pants('finagle/finagle-swift'),
     compiled_idl(
       idl_deps=pants('finagle/finagle-benchmark/src/main/thrift'),
-      compiler='scrooge-legacy',
+      compiler='scrooge',
       language='scala',
       rpc_style='finagle'
     )

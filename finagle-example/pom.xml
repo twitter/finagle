@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.2</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -132,7 +132,7 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>scrooge-runtime</artifactId>
+      <artifactId>scrooge-core</artifactId>
       <version>3.9.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
@@ -140,13 +140,7 @@
     <plugins>
       <plugin>
         <groupId>com.twitter</groupId>
-        <artifactId>maven-finagle-thrift-plugin</artifactId>
-        <configuration>
-          <thriftGenerators>
-            <thriftGenerator>scrooge</thriftGenerator>
-          </thriftGenerators>
-        </configuration>
-        <version>0.0.13</version>
+        <artifactId>scrooge-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

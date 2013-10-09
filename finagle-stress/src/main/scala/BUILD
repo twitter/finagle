@@ -13,7 +13,7 @@ scala_library(name='scala',
     pants('util/util-logging'),
     compiled_idl(
       idl_deps=pants('finagle/finagle-stress/src/main/thrift'),
-      compiler='scrooge-legacy',
+      compiler='scrooge',
       language='scala',
       rpc_style='finagle'
     )

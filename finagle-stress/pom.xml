@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-292</artifactId>
-    <version>0.0.10</version>
+    <version>0.1.2</version>
     <relativePath>../../parents/service-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -84,13 +84,7 @@
     <plugins>
       <plugin>
         <groupId>com.twitter</groupId>
-        <artifactId>maven-finagle-thrift-plugin</artifactId>
-        <configuration>
-          <thriftGenerators>
-            <thriftGenerator>scrooge</thriftGenerator>
-          </thriftGenerators>
-        </configuration>
-        <version>0.0.13</version>
+        <artifactId>scrooge-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
