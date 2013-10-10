@@ -9,6 +9,7 @@ import com.twitter.util.StateMachine.InvalidStateTransition
 import com.twitter.util.Time
 import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.specs.SpecificationWithJUnit
 
 class InterpreterSpec extends SpecificationWithJUnit {
@@ -79,6 +80,31 @@ class InterpreterSpec extends SpecificationWithJUnit {
       interpreter(Set("name", Time.now, "rawr"))
       interpreter(FlushAll())
       interpreter(Get("name")) mustEqual Values(Seq.empty)
+    }
+  }
+
+  "Decoding to command" should {
+    val dtc = new DecodingToCommand
+    def getCmdSeq(subCmd: String) = {
+      dtc.parseNonStorageCommand(
+        Seq(copiedBuffer("get".getBytes),
+            copiedBuffer(subCmd.getBytes)))
+    }
+
+    "parse get with timeout" in {
+      getCmdSeq("foo/t=123") mustEqual Get(copiedBuffer("foo".getBytes), Some(123.milliseconds))
+    }
+
+    "parse close/open with timeout" in {
+      getCmdSeq("foo/close/open/t=123") mustEqual CloseAndOpen(copiedBuffer("foo".getBytes), Some(123.milliseconds))
+    }
+
+    "parse close/open with timeout in between" in {
+      getCmdSeq("foo/t=123/close/open") mustEqual CloseAndOpen(copiedBuffer("foo".getBytes), Some(123.milliseconds))
+    }
+
+    "parse without timeout" in {
+      getCmdSeq("foo") mustEqual Get(copiedBuffer("foo".getBytes), None)
     }
   }
 }
