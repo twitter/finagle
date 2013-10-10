@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-stress</artifactId>
   <packaging>jar</packaging>
-  <version>6.6.3-SNAPSHOT</version>
+  <version>6.7.2-SNAPSHOT</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>service-292</artifactId>
@@ -37,27 +37,27 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.7.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.7.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.7.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thriftmux</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.7.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.6.3-SNAPSHOT</version>
+      <version>6.7.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>

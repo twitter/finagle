@@ -2,10 +2,47 @@
    (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
    as it is included in Finagle's user's guide.
 
-6.7.0
------
+6.7.1
+~~~~~
 
+- `finagle-*`: Tagging various tests as flaky
+- `finagle-*`: Fix and reenable some formerly-flaky tests Now that Time.withXXXX is threadsafe
+- `finagle-*`: Move Var to util
+- `finagle-*`: Provide generic request contexts
+- `finagle-*`: Use scrooge3 and up-to-date scrooge-maven-plugin settings
+- `finagle-*`: upgrade Netty to 3.7.0.Final
+- `finagle-core`: Add UnwritableChannel stat to ChannelStatsHandler
+- `finagle-core`: Add a test for Proc exception-swallowing
+- `finagle-core`: Better interface for RetryPolicy
+- `finagle-core`: Ensure FIFO ordering when delivering updates to StabilizingGroup
+- `finagle-core`: Export a health stat in StabilizingGroup
+- `finagle-core`: Fix a race condition in ListeningSever.announce and don't announce 0.0.0.0
+- `finagle-core`: Fix sourcing for SourcedExceptions
+- `finagle-core`: Group: communicate via Var[Set[T]]
+- `finagle-core`: Improve HeapBalancer req distribution when N=2
 - `finagle-core`: Introduce staged names
+- `finagle-core`: Let the number of cores be specified on the command line
+- `finagle-core`: Make socket writable duration stats more useful
+- `finagle-core`: Migrate RetryingFilter tests from specs to scalatest
+- `finagle-core`: Move the connections gauge into ChannelStatsHandler for GC
+- `finagle-core`: Reuse a single exception instance in ServerDispatcher
+- `finagle-core`: Update com.twitter.finagle package documentation
+- `finagle-doc`: Add Client/Server Anatomy to docs
+- `finagle-doc`: Link to "Your Server as a Function"
+- `finagle-http`: Proper CORS implementation on Finagle
+- `finagle-http`: SPNEGO http auth (for Kerberos) with an example implementation for internal services
+- `finagle-memcached`: Exclude CancelledRequestException and CancelledConectionException or cache client failure accrual
+- `finagle-memcached`: Read key remapping config from ZooKeeper
+- `finagle-memcached`: ZK based cache node group implementation
+- `finagle-redis`: SRandMember, send command without count when None
+- `finagle-serversets`: Mark ZookeeperServerSetCluster as deprecated
+- `finagle-thrift`: Add a request context for ClientId
+- `finagle-thrift`: Set the client id in thriftmux
+
+6.7.0
+~~~~~
+
+Release process failed. Rolled forward to 6.7.1.
 
 6.6.2
 ~~~~~
