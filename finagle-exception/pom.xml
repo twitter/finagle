@@ -4,7 +4,7 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-exception</artifactId>
   <packaging>jar</packaging>
-  <version>6.7.1-SNAPSHOT</version>
+  <version>6.7.1</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>streamyj</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>0.5.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -70,22 +70,22 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.7.1-SNAPSHOT</version>
+      <version>6.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-thrift</artifactId>
-      <version>6.7.1-SNAPSHOT</version>
+      <version>6.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-codec</artifactId>
-      <version>6.6.1-SNAPSHOT</version>
+      <version>6.6.0</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>scrooge-runtime</artifactId>
-      <version>3.9.2-SNAPSHOT</version>
+      <version>3.9.1</version>
     </dependency>
   </dependencies>
   <build>
