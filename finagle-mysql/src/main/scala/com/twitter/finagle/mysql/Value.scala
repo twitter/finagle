@@ -1,13 +1,13 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.exp.mysql.protocol.{BufferReader, BufferWriter, SQLZeroDate, SQLZeroTimestamp, Type}
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Calendar
 import java.nio.charset.{Charset => JCharset}
+import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter}
 
 /**
  * Defines a Value ADT that represents values
- * returned from MySQL.
+ * contained in a mysql Row.
  */
 sealed trait Value
 case class StringValue(s: String) extends Value
@@ -35,6 +35,11 @@ case class RawBinaryValue(bytes: Array[Byte]) extends Value
 case object EmptyValue extends Value
 case object NullValue extends Value
 
+/**
+ * Defines convenient methods for decoding bytes
+ * based on type and wrapping them in their appropriate Value.
+ * [[http://dev.mysql.com/doc/internals/en/binary-protocol-value.html]]
+ */
 object Value {
   /**
    * Creates a Value given a MySQL type code

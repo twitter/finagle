@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql.transport
 
-import com.twitter.finagle.exp.mysql.ClientError
+import com.twitter.finagle.exp.mysql.Charset
 import java.nio.ByteOrder
 import java.nio.charset.{Charset => JCharset}
 import org.jboss.netty.buffer.ChannelBuffer
@@ -8,25 +8,15 @@ import org.jboss.netty.buffer.ChannelBuffers._
 import scala.collection.mutable.{Buffer => SBuffer}
 
 /**
- * The BufferReader and BufferWriter interfaces provide methods for
- * reading/writing primitive data types exchanged between the client/server.
- * This includes all primitive numeric types and strings.
- * All Buffer methods are side-effecting. That is, each call to a read* or write*
- * method will increase the current offset.
- *
- * These interfaces are useful for reading from and writing to a MySQL
- * packet. They provide protocol specific methods and assure that
- * buffers are read/written in little endian byte order, which conforms to
- * the MySQL protocol.
+ * The Buffer interfaces provide convenience methods for reading/writing
+ * a logical packet exchanged between a mysql client and server.
+ * Additionally, a buffer is guaranteed to be read from and written to
+ * in little endian byte order, which conforms to the mysql spec.
  */
-
 object Buffer {
-  val NULL_LENGTH = -1 // denotes a SQL NULL value when reading a length coded binary.
-  val EMPTY_STRING = new String
-  val EMPTY_BYTE_ARRAY = new Array[Byte](0)
-
-  case object CorruptBufferException
-    extends Exception("Corrupt data or client/server are out of sync.")
+  val NullLength = -1 // denotes a SQL NULL value when reading a length coded binary.
+  val EmptyString = new String
+  val EmptyByteArray = new Array[Byte](0)
 
   /**
    * Calculates the size required to store a length
@@ -36,34 +26,41 @@ object Buffer {
   def sizeOfLen(l: Long) =
     if (l < 251) 1 else if (l < 65536) 3 else if (l < 16777216) 4 else 9
 
-  /**
-   * Wraps the arrays into a ChannelBuffer with the
-   * appropriate MySQL protocol byte order. A wrappedBuffer
-   * avoids copying the underlying arrays.
-   */
-  def toChannelBuffer(bytes: Array[Byte]*) =
-    wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes: _*)
+  def apply(bytes: Array[Byte]): Buffer = new Buffer {
+    // a wrappedBuffer should avoid copying the arrays.
+    val underlying = wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes)
+  }
+
+  def apply(bufs: Buffer*): Buffer = {
+    val underlying = wrappedBuffer(bufs.map(_.underlying): _*)
+    fromChannelBuffer(underlying)
+  }
+
+  def fromChannelBuffer(cb: ChannelBuffer): Buffer = {
+    require(cb != null)
+    require(cb.order == ByteOrder.LITTLE_ENDIAN, "Invalid ChannelBuffer ByteOrder")
+    new Buffer { val underlying = cb }
+  }
 }
 
-trait BufferReader {
-  /**
-   * Buffer capacity.
-   */
-  def capacity: Int = array.size
+sealed trait Buffer {
+  val underlying: ChannelBuffer
+  def headOption: Option[Byte] = if (capacity >= 1) Some(underlying.getByte(0)) else None
+  def capacity: Int = underlying.capacity
+}
 
-  /**
-   * Current offset in the buffer.
-   */
+/**
+ * Provides convenient methods for reading
+ * data in a packet body. All data is decoded
+ * in little endian byte order in accordance with
+ * the mysql protocol. Operations are side-effecting,
+ * that is, all operations increase the offset
+ * into the underlying buffer.
+ */
+trait BufferReader extends Buffer {
+
+  /** Current reader offset in the buffer. */
   def offset: Int
-
-  /**
-   * Access the underlying array. Note, this
-   * is not always a safe operation because the
-   * the buffer could contain a composition of
-   * arrays, in which case this will throw an
-   * exception.
-   */
-  def array: Array[Byte]
 
   /**
    * Denotes if the buffer is readable upto the given width
@@ -116,7 +113,7 @@ trait BufferReader {
       firstByte
     else
       firstByte match {
-        case 251 => Buffer.NULL_LENGTH
+        case 251 => Buffer.NullLength
         case 252 => readUnsignedShort()
         case 253 => readUnsignedInt24()
 
@@ -124,11 +121,11 @@ trait BufferReader {
         // The current implementation does not support
         // this.
         case 254 =>
-          throw new ClientError("BufferReader: LONG_BLOB is not supported!")
+          throw new UnsupportedOperationException("LONG_BLOB is not supported!")
           // readLong()
 
         case _ =>
-          throw Buffer.CorruptBufferException
+          throw new IllegalStateException("Invalid length byte")
       }
   }
 
@@ -169,10 +166,10 @@ trait BufferReader {
    */
   def readLengthCodedString(charset: JCharset = Charset.defaultCharset): String = {
     val length = readLengthCodedBinary()
-    if (length == Buffer.NULL_LENGTH)
+    if (length == Buffer.NullLength)
        null
     else if (length == 0)
-      Buffer.EMPTY_STRING
+      Buffer.EmptyString
     else {
       val start = offset
       skip(length)
@@ -189,10 +186,10 @@ trait BufferReader {
    */
   def readLengthCodedBytes(): Array[Byte] = {
     val len = readLengthCodedBinary()
-    if (len == Buffer.NULL_LENGTH)
+    if (len == Buffer.NullLength)
       null
     else if (len == 0)
-      Buffer.EMPTY_BYTE_ARRAY
+      Buffer.EmptyByteArray
     else
       take(len)
   }
@@ -201,49 +198,26 @@ trait BufferReader {
    * Returns the bytes from start to start+length
    * into a string using the given java.nio.charset.Charset.
    */
-  def toString(start: Int, length: Int, charset: JCharset) =
-    new String(array, start, length, charset)
-
-  /**
-   * Returns a Netty ChannelBuffer representing
-   * the underlying array. The ChannelBuffer
-   * is guaranteed ByteOrder.LITTLE_ENDIAN.
-   */
-  def toChannelBuffer: ChannelBuffer
+  def toString(start: Int, length: Int, charset: JCharset): String
 }
 
 object BufferReader {
-  /**
-   * Creates a BufferReader from an Array[Byte].
-   * @param bytes Byte array to read from.
-   * @param startOffset initial offset.
-   */
-  def apply(bytes: Array[Byte], startOffset: Int = 0): BufferReader = {
-    require(bytes != null)
-    require(startOffset >= 0)
 
-    val underlying = Buffer.toChannelBuffer(bytes)
-    underlying.readerIndex(startOffset)
-    new BufferReaderImpl(underlying)
+  def apply(buf: Buffer, offset: Int = 0): BufferReader = {
+    require(offset >= 0, "Invalid reader offset")
+    buf.underlying.readerIndex(offset)
+    new Netty3BufferReader(buf.underlying)
   }
 
-  /**
-   * Creates a BufferReader from a Netty ChannelBuffer.
-   * The ChannelBuffer must have ByteOrder.LITTLE_ENDIAN.
-   */
-  def apply(underlying: ChannelBuffer): BufferReader = {
-    require(underlying.order == ByteOrder.LITTLE_ENDIAN)
-    new BufferReaderImpl(underlying)
-  }
+  def apply(bytes: Array[Byte]): BufferReader =
+    apply(Buffer(bytes), 0)
 
   /**
    * BufferReader implementation backed by a Netty ChannelBuffer.
    */
-  private[this] class BufferReaderImpl(underlying: ChannelBuffer) extends BufferReader {
-    override def capacity = underlying.capacity
+  private[this] class Netty3BufferReader(val underlying: ChannelBuffer)
+    extends BufferReader with Buffer {
     def offset = underlying.readerIndex
-    def array = underlying.array
-
     def readable(width: Int) = underlying.readableBytes >= width
 
     def readByte(): Byte = underlying.readByte()
@@ -266,36 +240,25 @@ object BufferReader {
       res
     }
 
-    /**
-     * Forward to ChannelBuffer in case underlying is a composition of
-     * arrays.
-     */
-    override def toString(start: Int, length: Int, charset: JCharset) =
+    def toString(start: Int, length: Int, charset: JCharset) =
       underlying.toString(start, length, charset)
-
-    def toChannelBuffer = underlying
   }
 }
 
-trait BufferWriter {
-  /**
-   * Buffer capacity.
-   */
-   def capacity: Int = array.size
+/**
+ * Provides convenient methods for writing the
+ * data in a mysql packet body. All data is encoded
+ * in little endian byte order in accordance with
+ * the mysql protocol. Operations are side-effecting,
+ * that is, all operations increase the offset
+ * into the underlying buffer.
+ */
+trait BufferWriter extends Buffer {
 
   /**
    * Current writer offset.
    */
   def offset: Int
-
-  /**
-   * Access the underlying array. Note, this
-   * is not always a safe operation because the
-   * the buffer could contain a composition of
-   * arrays, in which case this will throw an
-   * exception.
-   */
-  def array: Array[Byte]
 
   /**
    * Denotes if the buffer is writable upto the given width
@@ -391,46 +354,25 @@ trait BufferWriter {
     writeBytes(bytes)
     this
    }
-
-  /**
-   * Returns a Netty ChannelBuffer representing
-   * the underlying buffer. The ChannelBuffer
-   * is guaranteed ByteOrder.LITTLE_ENDIAN.
-   */
-  def toChannelBuffer: ChannelBuffer
 }
 
 object BufferWriter {
-  /**
-   * Creates a BufferWriter from an Array[Byte].
-   * @param bytes Byte array to read from.
-   * @param startOffset initial offset.
-   */
-  def apply(bytes: Array[Byte], startOffset: Int = 0): BufferWriter = {
-    require(bytes != null)
-    require(startOffset >= 0)
 
-    // Note, a wrappedBuffer avoids copying the the array.
-    val underlying = Buffer.toChannelBuffer(bytes)
-    underlying.writerIndex(startOffset)
-    new BufferWriterImpl(underlying)
+  def apply(buf: Buffer, offset: Int = 0): BufferWriter = {
+    require(offset >= 0, "Inavlid writer offset.")
+    buf.underlying.writerIndex(offset)
+    new Netty3BufferWriter(buf.underlying)
   }
 
-  /**
-   * Creates a BufferWriter from a Netty ChannelBuffer.
-   */
-  def apply(underlying: ChannelBuffer): BufferWriter = {
-    require(underlying.order == ByteOrder.LITTLE_ENDIAN)
-    new BufferWriterImpl(underlying)
-  }
+  def apply(bytes: Array[Byte]): BufferWriter =
+    apply(Buffer(bytes), 0)
 
   /**
    * BufferWriter implementation backed by a Netty ChannelBuffer.
    */
-  private[this] class BufferWriterImpl(underlying: ChannelBuffer) extends BufferWriter {
-    override def capacity = underlying.capacity
+  private[this] class Netty3BufferWriter(val underlying: ChannelBuffer)
+    extends BufferWriter with Buffer {
     def offset = underlying.writerIndex
-    def array = underlying.array
     def writable(width: Int = 1): Boolean = underlying.writableBytes >= width
 
     def writeBoolean(b: Boolean): BufferWriter = if(b) writeByte(1) else writeByte(0)
@@ -479,7 +421,5 @@ object BufferWriter {
       underlying.writeBytes(bytes)
       this
     }
-
-    def toChannelBuffer = underlying
   }
 }

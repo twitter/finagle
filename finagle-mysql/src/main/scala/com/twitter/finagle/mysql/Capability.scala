@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
 
 object Capability {
   val LongPassword     = 0x0001 // new more secure passwords
@@ -37,6 +37,22 @@ object Capability {
     "CLIENT_SECURE_CONNECTION" -> SecureConnection,
     "CLIENT_MULTI_STATEMENTS"  -> MultiStatements,
     "CLIENT_MULTI_RESULTS"     -> MultiResults
+  )
+
+  /**
+   * Encapsulates this client's base
+   * capability.
+   */
+  val baseCap = Capability(
+    Capability.LongFlag,
+    Capability.Transactions,
+    Capability.Protocol41,
+    Capability.FoundRows,
+    Capability.Interactive,
+    Capability.LongPassword,
+    Capability.ConnectWithDB,
+    Capability.SecureConnection,
+    Capability.LocalFiles
   )
 
   def apply(flags: Int*): Capability = {

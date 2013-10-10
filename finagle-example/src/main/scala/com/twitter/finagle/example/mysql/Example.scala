@@ -1,7 +1,8 @@
 package com.twitter.finagle.example.mysql
 
 import com.twitter.app.App
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
+import com.twitter.finagle.exp.Mysql
 import com.twitter.finagle.exp.mysql._
 import java.net.InetSocketAddress
 import java.sql.Date
@@ -42,14 +43,18 @@ object SwimmingRecord {
   )
 }
 
-object MySQLClient extends App {
+object Example extends App {
   val host = flag("server", new InetSocketAddress("localhost", 3306), "mysql server address")
   val username = flag("username", "<user>", "mysql username")
   val password = flag("password", "<password>", "mysql password")
   val dbname = flag("database", "test", "default database to connect to")
 
   def main() {
-    val client = Client(host().getHostName+":"+host().getPort, username(), password(), dbname(), Level.OFF)
+    val client = Mysql
+      .withCredentials(username(), password())
+      .withDatabase(dbname())
+      .newRichClient(host().getHostName+":"+host().getPort)
+
     val resultFuture = for {
       _ <- createTable(client)
       _ <- insertValues(client)
@@ -63,6 +68,8 @@ object MySQLClient extends App {
     } ensure {
       client.close()
     }
+
+    Await.ready(resultFuture)
   }
 
   def createTable(client: Client): Future[Result] = {

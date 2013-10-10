@@ -1,7 +1,6 @@
 package com.twitter.finagle.exp.mysql.integration
 
 import com.twitter.finagle.exp.mysql._
-import com.twitter.finagle.exp.mysql.protocol._
 import com.twitter.util.{Await, NonFatal}
 import java.io.{File, FileInputStream}
 import java.net.{ServerSocket, BindException}

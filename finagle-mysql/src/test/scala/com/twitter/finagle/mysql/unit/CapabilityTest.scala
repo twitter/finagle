@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

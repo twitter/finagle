@@ -1,23 +1,24 @@
-package com.twitter.finagle.exp.mysql.protocol
+package com.twitter.finagle.exp.mysql
 
 import java.nio.charset.{Charset => JCharset}
 
 object Charset {
-
-  /**
-    * Converts from mysql charset to java charset.
-    */
-  def apply(charset: Short): JCharset = if (isUtf8(charset) || isBinary(charset))
-    JCharset.forName("UTF-8")
-  else if (isLatin1(charset))
-    JCharset.forName("ISO-8859-1")
-  else
-    throw new IllegalArgumentException("Charset %d is not supported.".format(charset))
-
   /**
    * Default Charset to use when decoding strings.
    */
   val defaultCharset = JCharset.forName("UTF-8")
+
+  /**
+   * Converts from mysql charset to java charset.
+   */
+  def apply(charset: Short): JCharset =
+    if (isUtf8(charset) || isBinary(charset)) {
+      JCharset.forName("UTF-8")
+    } else if (isLatin1(charset)) {
+      JCharset.forName("ISO-8859-1")
+    } else {
+      throw new IllegalArgumentException("Charset %d is not supported.".format(charset))
+    }
 
   /**
    * MySQL UTF-8 Collations.
@@ -90,7 +91,6 @@ object Charset {
   )
 
   private[this] val Binary = 63.toShort
-
   private[this] val CompatibleSet = Latin1Set ++ Utf8Set
 
   def isCompatible(code: Short): Boolean = CompatibleSet(code)
