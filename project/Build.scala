@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-runtime" % "3.1.5")
+    "com.twitter" %% "scrooge-runtime" % "3.9.1")
 
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
@@ -196,7 +196,7 @@ object Finagle extends Build {
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
@@ -207,7 +207,7 @@ object Finagle extends Build {
     id = "finagle-exception",
     base = file("finagle-exception"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-exception",
@@ -418,7 +418,7 @@ object Finagle extends Build {
     id = "finagle-stress",
     base = file("finagle-stress"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-stress",
@@ -458,7 +458,7 @@ object Finagle extends Build {
     id = "finagle-benchmark",
     base = file("finagle-benchmark"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
