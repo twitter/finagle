@@ -16,7 +16,7 @@ class DtabTestResolver extends Resolver {
   def bind(arg: String) = {
     val v = Var[Addr](Addr.Neg)
     v() = Addr.Bound(DtabAddr(arg, v))
-    v.memo
+    v
   }
 }
 

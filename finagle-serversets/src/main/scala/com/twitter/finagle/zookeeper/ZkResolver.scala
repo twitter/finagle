@@ -22,12 +22,12 @@ private[finagle] class ZkGroup(serverSet: ServerSet, path: String)
   setDaemon(true)
   start()
 
-  protected val _set = Var(Set[ServiceInstance]())
+  protected[finagle] val set = Var(Set[ServiceInstance]())
 
   override def run() {
     serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
       def onChange(newSet: ImmutableSet[ServiceInstance]) = synchronized {
-        _set() = newSet.asScala.toSet
+        set() = newSet.asScala.toSet
       }
     })
   }

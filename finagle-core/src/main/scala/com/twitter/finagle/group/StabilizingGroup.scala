@@ -59,7 +59,7 @@ object StabilizingGroup {
       members.size - underlying.members.size
     }
 
-    protected val _set = Var(underlying.members)
+    protected[finagle] val set = Var(underlying.members)
 
     /**
      * Exclusively maintains the elements in current
@@ -92,7 +92,7 @@ object StabilizingGroup {
         // Remove pending removes that are present
         // in this update.
         q = q filter { case (e, _) => !(newSet contains e) }
-        _set() ++= newSet &~ snap
+        set() ++= newSet &~ snap
 
         def inQ(elem: T) = q exists { case (e, _) => e == elem }
         for (el <- snap &~ newSet if !inQ(el)) {
@@ -106,7 +106,7 @@ object StabilizingGroup {
       else {
         val ((elem, until), nextq) = remq.dequeue
         Offer.timeout(until - Time.now) map { _ =>
-          _set() -= elem
+          set() -= elem
           loop(nextq, h)
         }
       }

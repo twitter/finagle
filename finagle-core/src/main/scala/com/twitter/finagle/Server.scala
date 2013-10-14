@@ -19,7 +19,7 @@ trait ListeningServer
    */
   def boundAddress: SocketAddress
 
-  protected lazy val _set = Var(Set(boundAddress))
+  protected[finagle] lazy val set = Var.value(Set(boundAddress))
 
   protected def closeServer(deadline: Time): Future[Unit]
 

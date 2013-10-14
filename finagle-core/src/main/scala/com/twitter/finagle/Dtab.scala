@@ -178,7 +178,7 @@ private case class RefinedName(parent: Name, dtab: Dtab, suffix: String)
 
   def bind() = parent.bind() flatMap {
     case Addr.Delegated(path) => 
-      dtab.bind(Path.join(path, suffix)).memo()
+      dtab.bind(Path.join(path, suffix))
     case a@Addr.Bound(_) if suffix.isEmpty => Var.value(a)
     case Addr.Bound(sockaddrs) =>
       val partial: Set[SocketAddress] =

@@ -341,7 +341,7 @@ class ZookeeperCacheNodeGroup(
   protected val statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends Group[CacheNode] with ZookeeperStateMonitor {
 
-  protected val _set = Var(Set[CacheNode]())
+  protected[finagle] val set = Var(Set[CacheNode]())
 
   @volatile private var detectKeyRemapping = false
 
@@ -368,7 +368,7 @@ class ZookeeperCacheNodeGroup(
       if (expectedGroupSize != zkGroup.members.size)
         throw new IllegalStateException("Underlying group size not equal to expected size")
 
-      _set() = zkGroup.members
+      set() = zkGroup.members
     }
   }
 
@@ -386,7 +386,7 @@ class ZookeeperCacheNodeGroup(
       // e.g. certain cache node key is re-assigned to another host
       if (removed.forall(_.key.isDefined) && added.forall(_.key.isDefined) &&
           removed.size == added.size && removed.map(_.key.get) == added.map(_.key.get)) {
-        _set() = newMembers
+        set() = newMembers
       }
     }
   }
