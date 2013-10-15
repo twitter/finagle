@@ -156,6 +156,7 @@ object LoadService {
     val mappings = for {
       ClassPath.Info(_, iface, clss) <- ClassPath.browse(loader)
       cls <- clss
+      if cls.nonEmpty
     } yield (iface -> cls)
     
     mappings.foldLeft(Map[String, Set[String]]()) {
