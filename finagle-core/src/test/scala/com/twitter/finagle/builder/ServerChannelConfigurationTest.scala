@@ -76,7 +76,7 @@ class ServerChannelConfigurationTest extends FunSuite {
     // Issue a request which is NOT newline-delimited. Server should close connection
     // after waiting for 2 seconds for a new line
     intercept[ChannelClosedException] {
-      Await.result(client("123"))
+      Await.result(client("123"), 5.seconds)
     }
     server.close()
   }
@@ -100,7 +100,7 @@ class ServerChannelConfigurationTest extends FunSuite {
     // Issue a request which is NOT newline-delimited. Server should close connection
     // after waiting for 2 seconds for a new line
     intercept[ChannelClosedException] {
-      Await.result(client("123"))
+      Await.result(client("123"), 5.seconds)
     }
     server.close()
   }
