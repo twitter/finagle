@@ -6,7 +6,7 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
-  val libVersion = "6.7.2"
+  val libVersion = "6.7.3"
   val zkVersion = "3.3.4"
   val utilVersion = "6.6.0"
   val ostrichVersion = "9.1.3"
@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-runtime" % "3.9.1")
+    "com.twitter" %% "scrooge-runtime" % "3.9.2")
 
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
