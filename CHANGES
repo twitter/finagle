@@ -1,6 +1,6 @@
 .. Author notes: this file is formatted with restructured text
-(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-as it is included in Finagle's user's guide.
+  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+  as it is included in Finagle's user's guide.
 
 6.x
 -----
@@ -12,7 +12,6 @@ as it is included in Finagle's user's guide.
 - `finagle-core`: Improve GC profile of Var and Group
 - `finagle-core`: added a simple defaultpool test to show how it works + more docs
 - `finagle-core`: removes commented out casting filter
-- use scrooge3 to compile finagle-exception and finagle-zipkin with sbt
 - `finagle-mysql`: move protocol into a dispatcher and port to new style apis.
 
 6.7.1

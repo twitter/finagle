@@ -485,7 +485,7 @@ object Finagle extends Build {
   lazy val finagleDoc = Project(
     id = "finagle-doc",
     base = file("doc"),
-    settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() /*++ site.includeScaladoc() */ ++ Seq(
+    settings = Project.defaultSettings ++ site.settings ++ site.sphinxSupport() ++ sharedSettings ++ Seq(
       scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Finagle", "-doc-version", v)),
       includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt"),
 
