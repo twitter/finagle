@@ -48,15 +48,15 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry" data-isabs="true">
       <a id="LogEntry:LogEntry"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="LogEntry.html"><span class="name">LogEntry</span></a><span class="params">(<span name="category">category: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends ThriftStruct with Product with Serializable</span>
+        <a href="LogEntry.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStruct with Product2[String, String] with Serializable</span>
       </span>
       </h4>
       
@@ -64,14 +64,62 @@
       <a id="ResultCode:ResultCode"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ResultCode.html"><span class="name">ResultCode</span></a><span class="result"> extends ThriftEnum with Serializable</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.Scribe" data-isabs="true">
+      <a id="Scribe:Scribe[MM]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Scribe.html"><span class="name">Scribe</span></a><span class="tparams">[<span name="MM">+MM<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends ThriftService</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.Scribe$FinagleClient" data-isabs="false">
+      <a id="Scribe$FinagleClient:Scribe$FinagleClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ResultCode.html"><span class="name">ResultCode</span></a><span class="result"> extends TEnum</span>
+        <a href="Scribe$FinagleClient.html"><span class="name">Scribe$FinagleClient</span></a><span class="result"> extends Scribe[Future]</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.Scribe$FinagleService" data-isabs="false">
+      <a id="Scribe$FinagleService:Scribe$FinagleService"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Scribe$FinagleService.html"><span class="name">Scribe$FinagleService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li></ol>
             </div>
 
@@ -87,7 +135,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="LogEntry$.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStructCodec[LogEntry] with Serializable</span>
+        <a href="LogEntry$.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStructCodec3[LogEntry] with Serializable</span>
       </span>
       </h4>
       
@@ -99,19 +147,22 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ResultCode$.html"><span class="name">ResultCode</span></a><span class="result"> extends AnyRef</span>
+        <a href="ResultCode$.html"><span class="name">ResultCode</span></a><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.scribe" data-isabs="false">
-      <a id="scribe:scribe"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.Scribe" data-isabs="false">
+      <a id="Scribe:Scribe"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="scribe$.html"><span class="name">scribe</span></a><span class="result"> extends AnyRef</span>
+        <a href="Scribe$.html"><span class="name">Scribe</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

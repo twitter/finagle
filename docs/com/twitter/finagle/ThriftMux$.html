@@ -278,18 +278,31 @@ factories may be supplied by instantiating new clients or servers.</p></div><div
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftMux#newClient" data-isabs="false">
-      <a id="newClient(Group[SocketAddress]):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
+      <a id="newClient(Name,String):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to <code>group</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to <code>group</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMux" class="extype" href="">ThriftMux</a> → <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftMux" class="extype" href="">ThriftMux</a> → <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
+      <a id="newClient(String,String):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newClient</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
       <a id="newClient(String):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
       <h4 class="signature">
@@ -298,22 +311,20 @@ factories may be supplied by instantiating new clients or servers.</p></div><div
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newClient</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>addr</code>.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
-      <a id="newIface[Iface](Group[SocketAddress],Class[_]):Iface"></a>
+      <a id="newIface[Iface](Name,String,Class[_]):Iface"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="name">name: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -322,21 +333,29 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
 by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
-      <a id="newIface[Iface](Group[SocketAddress])(ClassManifest[Iface]):Iface"></a>
+      <a id="newIface[Iface](Name,String)(ClassManifest[Iface]):Iface"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](String,String)(ClassManifest[Iface]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
       <a id="newIface[Iface](String)(ClassManifest[Iface]):Iface"></a>
       <h4 class="signature">
@@ -345,7 +364,23 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](String,String,Class[_]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -361,7 +396,7 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="addr">addr: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -377,24 +412,24 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newService</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new servie connected to <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new servie connected to <code>addr</code>.
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
-      <a id="newService(Group[SocketAddress]):Service[ThriftClientRequest, Array[Byte]]"></a>
+      <a id="newService(Name,String):Service[ThriftClientRequest, Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+        <span class="name">newService</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new Service connected to <code>group</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new Service connected to <code>group</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
@@ -635,7 +670,78 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
+      <a id="newClient(Group[SocketAddress]):ServiceFactory[ThriftClientRequest, Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](Group[SocketAddress],Class[_]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newIface(String) or newIface(Name)">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newIface(String) or newIface(Name)</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](Group[SocketAddress])(ClassManifest[Iface]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newIface(String) or newIface(Name)">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ThriftRichClient" class="extype" href="ThriftRichClient.html">ThriftRichClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newIface(String) or newIface(Name)</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
+      <a id="newService(Group[SocketAddress]):Service[ThriftClientRequest, Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.thrift.ThriftClientRequest" class="extype" href="thrift/ThriftClientRequest.html">ThriftClientRequest</a>, <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

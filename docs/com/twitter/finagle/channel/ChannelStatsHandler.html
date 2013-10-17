@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelStatsHandler</span><span class="params">(<span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="connectionCount">connectionCount: <span name="java.util.concurrent.atomic.AtomicLong" class="extype">AtomicLong</span></span>)</span>
+        <span class="name">ChannelStatsHandler</span><span class="params">(<span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>)</span>
       </span>
       </h4>
       
@@ -251,7 +251,7 @@
         <span class="name">channelConnected</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="onClose">onClose: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Unit" class="extype">Unit</span>]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.ChannelStatsHandler" class="extype" href="">ChannelStatsHandler</a> → ConnectionLifecycleHandler</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle.channel" class="extype" href="package.html">channel</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.ChannelStatsHandler" class="extype" href="">ChannelStatsHandler</a> → ConnectionLifecycleHandler</dd></dl></div>
     </li><li visbl="pub" name="org.jboss.netty.channel.SimpleChannelHandler#channelConnected" data-isabs="false">
       <a id="channelConnected(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
@@ -282,7 +282,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="org.jboss.netty.channel.SimpleChannelHandler#channelInterestChanged" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.channel.ChannelStatsHandler#channelInterestChanged" data-isabs="false">
       <a id="channelInterestChanged(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -290,13 +290,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelInterestChanged</span><span class="params">(<span name="arg0">arg0: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">channelInterestChanged</span><span class="params">(<span name="ctx">ctx: <span name="org.jboss.netty.channel.ChannelHandlerContext" class="extype">ChannelHandlerContext</span></span>, <span name="e">e: <span name="org.jboss.netty.channel.ChannelStateEvent" class="extype">ChannelStateEvent</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
-              
-        </dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.channel.ChannelStatsHandler" class="extype" href="">ChannelStatsHandler</a> → SimpleChannelHandler</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.channel.ConnectionLifecycleHandler#channelOpen" data-isabs="false">
       <a id="channelOpen(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">

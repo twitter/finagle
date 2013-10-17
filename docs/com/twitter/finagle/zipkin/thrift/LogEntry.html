@@ -14,7 +14,7 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="LogEntry$.html"><img src="../../../../../lib/class_to_object_big.png" /></a>
+        <a title="Go to companion" href="LogEntry$.html"><img src="../../../../../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.zipkin" class="extype" href="../package.html">zipkin</a>.<a name="com.twitter.finagle.zipkin.thrift" class="extype" href="package.html">thrift</a></p>
         <h1><a title="Go to companion" href="LogEntry$.html">LogEntry</a></h1>
       </div>
@@ -22,16 +22,19 @@
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">LogEntry</span><span class="params">(<span name="category">category: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">LogEntry</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span> with <span name="scala.Product2" class="extype">Product2</span>[String, String] with <span name="java.io.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product2" class="extype">Product2</span>[String, String], <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.zipkin.thrift.LogEntry.Immutable" class="extype" href="LogEntry$$Immutable.html">Immutable</a>, <a name="com.twitter.finagle.zipkin.thrift.LogEntry.Proxy" class="extype" href="LogEntry$$Proxy.html">Proxy</a></div>
         </div></div>
     
 
@@ -45,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.zipkin.thrift.LogEntry" class="in"><span>LogEntry</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.scrooge.ThriftStruct" class="in"><span>ThriftStruct</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.zipkin.thrift.LogEntry" class="in"><span>LogEntry</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product2" class="in"><span>Product2</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.scrooge.ThriftStruct" class="in"><span>ThriftStruct</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -55,29 +58,41 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
-              <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#this" data-isabs="false">
-      <a id="this:LogEntry"></a>
+        
+
+        
+
+        <div class="values members" id="values">
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#category" data-isabs="true">
+      <a id="category:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">LogEntry</span><span class="params">(<span name="category">category: String</span>, <span name="message">message: String</span>)</span>
+        <span class="name">category</span><span class="result">: String</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#message" data-isabs="true">
+      <a id="message:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">message</span><span class="result">: String</span>
       </span>
       </h4>
       
     </li></ol>
             </div>
 
-        
-
-        
-
         <div class="values members" id="values">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -138,6 +153,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#_1" data-isabs="false">
+      <a id="_1:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_1</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product2</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#_2" data-isabs="false">
+      <a id="_2:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_2</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product2</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -158,22 +197,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">canEqual</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">canEqual</span><span class="params">(<span name="other">other: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Equals</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#category" data-isabs="false">
-      <a id="category:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">category</span><span class="result">: String</span>
-      </span>
-      </h4>
-      
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -189,6 +216,18 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#copy" data-isabs="false">
+      <a id="copy(String,String):LogEntry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copy</span><span class="params">(<span name="category">category: String = <span class="symbol"><span class="name"><a href="#category:String">this.category</a></span></span></span>, <span name="message">message: String = <span class="symbol"><span class="name"><a href="#message:String">this.message</a></span></span></span>)</span><span class="result">: <a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -209,7 +248,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="name">equals</span><span class="params">(<span name="other">other: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Equals → AnyRef → Any</dd></dl></div>
@@ -264,18 +303,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#message" data-isabs="false">
-      <a id="message:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">message</span><span class="result">: String</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -323,7 +350,7 @@
         <span class="name">productArity</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product2 → Product</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#productElement" data-isabs="false">
       <a id="productElement(Int):Any"></a>
       <h4 class="signature">
@@ -332,10 +359,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">productElement</span><span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
+        <span class="name">productElement</span><span class="params">(<span name="n">n: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product2 → Product</dd></dl></div>
     </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
       <a id="productIterator:Iterator[Any]"></a>
       <h4 class="signature">
@@ -356,7 +383,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">productPrefix</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+        <span class="name">productPrefix</span><span class="result">: String</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → Product</dd></dl></div>
@@ -384,18 +411,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a> → AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#validate" data-isabs="false">
-      <a id="validate():Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">validate</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -441,6 +456,30 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#withPassthroughs" data-isabs="false">
+      <a id="withPassthroughs(TraversableOnce[(TField, TTransport)]):LogEntry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withPassthroughs</span><span class="params">(<span name="pts">pts: TraversableOnce[(<span name="org.apache.thrift.protocol.TField" class="extype">TField</span>, <span name="org.apache.thrift.transport.TTransport" class="extype">TTransport</span>)]</span>)</span><span class="result">: <a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#withoutPassthroughs" data-isabs="false">
+      <a id="withoutPassthroughs((TField) ⇒ Boolean):LogEntry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withoutPassthroughs</span><span class="params">(<span name="f">f: (<span name="org.apache.thrift.protocol.TField" class="extype">TField</span>) ⇒ <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <a name="com.twitter.finagle.zipkin.thrift.LogEntry" class="extype" href="">LogEntry</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry#write" data-isabs="false">
       <a id="write(TProtocol):Unit"></a>
       <h4 class="signature">
@@ -478,10 +517,10 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.Serializable" class="parent">
-              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
-            </div><div name="java.io.Serializable" class="parent">
+        <div name="java.io.Serializable" class="parent">
               <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="scala.Product2" class="parent">
+              <h3>Inherited from <span name="scala.Product2" class="extype">Product2</span>[String, String]</h3>
             </div><div name="scala.Product" class="parent">
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">

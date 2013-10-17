@@ -92,7 +92,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: FutureIface</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="sourceAddress">sourceAddress: Option[String]</span>, <span name="clientAddress">clientAddress: Option[String]</span>)</span><span class="result"> extends Monitor with Product with Serializable</span>
+        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: Scribe[Future]</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: StatsReceiver</span>, <span name="sourceAddress">sourceAddress: Option[String]</span>, <span name="clientAddress">clientAddress: Option[String]</span>)</span><span class="result"> extends Monitor with Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">An implementation of ExceptionReceiver custom to the chickadee reporting service.</p>

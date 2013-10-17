@@ -85,15 +85,15 @@
       </h4>
       <p class="comment cmt">Endpoints describe a TCP endpoint that terminates RPC
 communication.</p>
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.LogEntry" data-isabs="true">
       <a id="LogEntry:LogEntry"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="LogEntry.html"><span class="name">LogEntry</span></a><span class="params">(<span name="category">category: String</span>, <span name="message">message: String</span>)</span><span class="result"> extends ThriftStruct with Product with Serializable</span>
+        <a href="LogEntry.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStruct with Product2[String, String] with Serializable</span>
       </span>
       </h4>
       
@@ -101,14 +101,17 @@ communication.</p>
       <a id="ResultCode:ResultCode"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ResultCode.html"><span class="name">ResultCode</span></a><span class="result"> extends TEnum</span>
+        <a href="ResultCode.html"><span class="name">ResultCode</span></a><span class="result"> extends ThriftEnum with Serializable</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Sampler" data-isabs="false">
       <a id="Sampler:Sampler"></a>
       <h4 class="signature">
@@ -133,6 +136,51 @@ communication.</p>
       </span>
       </h4>
       <p class="comment cmt">Tracer that supports sampling.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe" data-isabs="true">
+      <a id="Scribe:Scribe[MM]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Scribe.html"><span class="name">Scribe</span></a><span class="tparams">[<span name="MM">+MM<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends ThriftService</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe$FinagleClient" data-isabs="false">
+      <a id="Scribe$FinagleClient:Scribe$FinagleClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Scribe$FinagleClient.html"><span class="name">Scribe$FinagleClient</span></a><span class="result"> extends Scribe[Future]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe$FinagleService" data-isabs="false">
+      <a id="Scribe$FinagleService:Scribe$FinagleService"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Scribe$FinagleService.html"><span class="name">Scribe$FinagleService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Span" data-isabs="false">
       <a id="Span:Span"></a>
       <h4 class="signature">
@@ -196,7 +244,7 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="LogEntry$.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStructCodec[LogEntry] with Serializable</span>
+        <a href="LogEntry$.html"><span class="name">LogEntry</span></a><span class="result"> extends ThriftStructCodec3[LogEntry] with Serializable</span>
       </span>
       </h4>
       
@@ -220,10 +268,13 @@ communication.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ResultCode$.html"><span class="name">ResultCode</span></a><span class="result"> extends AnyRef</span>
+        <a href="ResultCode$.html"><span class="name">ResultCode</span></a><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Sampler" data-isabs="false">
       <a id="Sampler:Sampler"></a>
       <h4 class="signature">
@@ -233,6 +284,18 @@ communication.</p>
       </span>
       <span class="symbol">
         <a href="Sampler$.html"><span class="name">Sampler</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.Scribe" data-isabs="false">
+      <a id="Scribe:Scribe"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Scribe$.html"><span class="name">Scribe</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -257,18 +320,6 @@ communication.</p>
       </span>
       <span class="symbol">
         <a href="ZipkinTracer$.html"><span class="name">ZipkinTracer</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.zipkin.thrift.scribe" data-isabs="false">
-      <a id="scribe:scribe"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="scribe$.html"><span class="name">scribe</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

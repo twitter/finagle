@@ -268,33 +268,43 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
-      <a id="newIface[Iface](Group[SocketAddress],Class[_]):Iface"></a>
+      <a id="newIface[Iface](Name,String,Class[_]):Iface"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="name">name: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
 by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
-      <a id="newIface[Iface](Group[SocketAddress])(ClassManifest[Iface]):Iface"></a>
+      <a id="newIface[Iface](Name,String)(ClassManifest[Iface]):Iface"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](String,String)(ClassManifest[Iface]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
       <a id="newIface[Iface](String)(ClassManifest[Iface]):Iface"></a>
       <h4 class="signature">
@@ -303,7 +313,21 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](String,String,Class[_]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -317,7 +341,7 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="addr">addr: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+        <span class="name">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="dest">dest: String</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
@@ -419,7 +443,48 @@ by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](Group[SocketAddress],Class[_]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newIface(String) or newIface(Name)">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>, <span name="cls">cls: Class[_]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newIface(String) or newIface(Name)</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.ThriftRichClient#newIface" data-isabs="false">
+      <a id="newIface[Iface](Group[SocketAddress])(ClassManifest[Iface]):Iface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newIface(String) or newIface(Name)">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[Iface]</span>)</span><span class="result">: Iface</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newIface(String) or newIface(Name)</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

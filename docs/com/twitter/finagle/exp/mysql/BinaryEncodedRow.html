@@ -29,7 +29,10 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Defines a Row where the data is presumed to be encoded with the
+mysql binary protocol.
+<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html">http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html</a>
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="com.twitter.finagle.exp.mysql.Row" class="extype" href="Row.html">Row</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -65,7 +68,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BinaryEncodedRow</span><span class="params">(<span name="row">row: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>, <span name="fields">fields: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="indexMap">indexMap: Map[String, <span name="scala.Int" class="extype">Int</span>]</span>)</span>
+        <span class="name">BinaryEncodedRow</span><span class="params">(<span name="rawRow">rawRow: <a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="transport/Buffer.html">Buffer</a></span>, <span name="fields">fields: Seq[<a name="com.twitter.finagle.exp.mysql.Field" class="extype" href="Field.html">Field</a>]</span>, <span name="indexMap">indexMap: Map[String, <span name="scala.Int" class="extype">Int</span>]</span>)</span>
       </span>
       </h4>
       
@@ -186,7 +189,7 @@ exists with the given name. Otherwise, None.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">buffer</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.protocol.BufferReader" class="extype" href="protocol/BufferReader.html">BufferReader</a></span>
+        <span class="name">buffer</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.BufferReader" class="extype" href="transport/BufferReader.html">BufferReader</a></span>
       </span>
       </h4>
       

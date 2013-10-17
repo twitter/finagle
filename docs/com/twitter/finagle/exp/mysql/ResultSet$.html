@@ -14,7 +14,7 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <a title="Go to companion" href="ResultSet.html"><img src="../../../../../lib/object_to_trait_big.png" /></a>
+        <a title="Go to companion" href="ResultSet.html"><img src="../../../../../lib/object_to_class_big.png" /></a>
         <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../package.html">exp</a>.<a name="com.twitter.finagle.exp.mysql" class="extype" href="package.html">mysql</a></p>
         <h1><a title="Go to companion" href="ResultSet.html">ResultSet</a></h1>
       </div>
@@ -25,13 +25,18 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">ResultSet</span><span class="result"> extends AnyRef</span>
+        <span class="name">ResultSet</span><span class="result"> extends <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Resultset returned from the server containing field definitions and
+rows. The rows can be binary encoded (for prepared statements)
+or text encoded (for regular queries).
+<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset</a>
+<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html">http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html</a>
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +50,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.ResultSet" class="in"><span>ResultSet</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.ResultSet" class="in"><span>ResultSet</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -123,6 +128,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ResultSet#apply" data-isabs="false">
+      <a id="apply(Boolean)(Packet,Seq[Packet],Seq[Packet]):Try[ResultSet]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="isBinaryEncoded">isBinaryEncoded: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="params">(<span name="header">header: <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a></span>, <span name="fieldPackets">fieldPackets: Seq[<a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</span>, <span name="rowPackets">rowPackets: Seq[<a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</span>)</span><span class="result">: <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.exp.mysql.ResultSet" class="extype" href="ResultSet.html">ResultSet</a>]</span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -151,14 +168,14 @@
               
         </dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.ResultSet#decode" data-isabs="false">
-      <a id="decode(Boolean)(Packet,Seq[Packet],Seq[Packet]):SimpleResultSet"></a>
+      <a id="decode(Boolean)(Packet,Seq[Packet],Seq[Packet]):ResultSet"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decode</span><span class="params">(<span name="isBinaryEncoded">isBinaryEncoded: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="params">(<span name="header">header: <a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="protocol/Packet.html">Packet</a></span>, <span name="fieldPackets">fieldPackets: Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="protocol/Packet.html">Packet</a>]</span>, <span name="rowPackets">rowPackets: Seq[<a name="com.twitter.finagle.exp.mysql.protocol.Packet" class="extype" href="protocol/Packet.html">Packet</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.SimpleResultSet" class="extype" href="SimpleResultSet.html">SimpleResultSet</a></span>
+        <span class="name">decode</span><span class="params">(<span name="isBinaryEncoded">isBinaryEncoded: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="params">(<span name="header">header: <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a></span>, <span name="fieldPackets">fieldPackets: Seq[<a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</span>, <span name="rowPackets">rowPackets: Seq[<a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.ResultSet" class="extype" href="ResultSet.html">ResultSet</a></span>
       </span>
       </h4>
       
@@ -273,6 +290,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.exp.mysql.ResultSet#readResolve" data-isabs="false">
+      <a id="readResolve():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readResolve</span><span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -349,7 +378,11 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="scala.AnyRef" class="parent">
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>

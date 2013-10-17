@@ -175,8 +175,8 @@ yielded through a Future.</p>
       <a id="RetryPolicy:RetryPolicy[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
         <a href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (A) ⇒ Option[(Duration, RetryPolicy[A])]</span>
@@ -215,7 +215,7 @@ yielded through a Future.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends Function[A, Option[(Duration, RetryPolicy[A])]] with RetryPolicy[A]</span>
+        <a href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends RetryPolicy[A] with (A) ⇒ Option[(Duration, RetryPolicy[A])]</span>
       </span>
       </h4>
       <p class="comment cmt">A retry policy abstract class.</p>

@@ -14,24 +14,27 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="ResultCode$.html"><img src="../../../../../lib/class_to_object_big.png" /></a>
+        <a title="Go to companion" href="ResultCode$.html"><img src="../../../../../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exception" class="extype" href="../package.html">exception</a>.<a name="com.twitter.finagle.exception.thrift" class="extype" href="package.html">thrift</a></p>
         <h1><a title="Go to companion" href="ResultCode$.html">ResultCode</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">ResultCode</span><span class="result"> extends <span name="org.apache.thrift.TEnum" class="extype">TEnum</span></span>
+        <span class="name">ResultCode</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftEnum" class="extype">ThriftEnum</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Generated</span><span class="args">()</span>
+              
+        </dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="org.apache.thrift.TEnum" class="extype">TEnum</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="com.twitter.scrooge.ThriftEnum" class="extype">ThriftEnum</span>, <span name="org.apache.thrift.TEnum" class="extype">TEnum</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
           <div class="subClasses hiddenContent"><a name="com.twitter.finagle.exception.thrift.ResultCode.Ok" class="extype" href="ResultCode$$Ok$.html">Ok</a>, <a name="com.twitter.finagle.exception.thrift.ResultCode.TryLater" class="extype" href="ResultCode$$TryLater$.html">TryLater</a></div>
@@ -48,7 +51,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exception.thrift.ResultCode" class="in"><span>ResultCode</span></li><li name="org.apache.thrift.TEnum" class="in"><span>TEnum</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.exception.thrift.ResultCode" class="in"><span>ResultCode</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.scrooge.ThriftEnum" class="in"><span>ThriftEnum</span></li><li name="org.apache.thrift.TEnum" class="in"><span>TEnum</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -58,29 +61,41 @@
 
       <div id="template">
         <div id="allMembers">
-        <div class="members" id="constructors">
-              <h3>Instance Constructors</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.exception.thrift.ResultCode#this" data-isabs="false">
-      <a id="this:ResultCode"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ResultCode</span><span class="params">(<span name="value">value: <span name="scala.Int" class="extype">Int</span></span>, <span name="name">name: String</span>)</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
-
         
 
         
 
         <div class="values members" id="values">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.scrooge.ThriftEnum#name" data-isabs="true">
+      <a id="name:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftEnum</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.scrooge.ThriftEnum#value" data-isabs="true">
+      <a id="value:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">value</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftEnum</dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Concrete Value Members</h3>
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -219,7 +234,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.ResultCode#getValue" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.scrooge.ThriftEnum#getValue" data-isabs="false">
       <a id="getValue():Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -230,7 +245,7 @@
         <span class="name">getValue</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.ResultCode" class="extype" href="">ResultCode</a> → TEnum</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftEnum → TEnum</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -255,18 +270,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.ResultCode#name" data-isabs="false">
-      <a id="name:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">name</span><span class="result">: String</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -327,18 +330,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.ResultCode#value" data-isabs="false">
-      <a id="value:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">value</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -391,7 +382,13 @@
         </div>
 
         <div id="inheritedMembers">
-        <div name="org.apache.thrift.TEnum" class="parent">
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="com.twitter.scrooge.ThriftEnum" class="parent">
+              <h3>Inherited from <span name="com.twitter.scrooge.ThriftEnum" class="extype">ThriftEnum</span></h3>
+            </div><div name="org.apache.thrift.TEnum" class="parent">
               <h3>Inherited from <span name="org.apache.thrift.TEnum" class="extype">TEnum</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>

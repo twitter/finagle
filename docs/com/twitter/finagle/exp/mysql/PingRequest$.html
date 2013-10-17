@@ -29,7 +29,9 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A request to check if the server is alive.
+<a href="http://dev.mysql.com/doc/internals/en/com-ping.html">http://dev.mysql.com/doc/internals/en/com-ping.html</a>
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" class="extype" href="SimpleCommandRequest.html">SimpleCommandRequest</a>, <a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a>, <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -135,6 +137,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest#buf" data-isabs="false">
+      <a id="buf:Buffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">buf</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.Buffer" class="extype" href="transport/Buffer.html">Buffer</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" class="extype" href="SimpleCommandRequest.html">SimpleCommandRequest</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PingRequest#canEqual" data-isabs="false">
       <a id="canEqual(Any):Boolean"></a>
       <h4 class="signature">
@@ -173,25 +187,7 @@
         <span class="name">cmd</span><span class="result">: <span name="scala.Byte" class="extype">Byte</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest#data" data-isabs="false">
-      <a id="data:ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">data</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Request data translates to the body of the MySQL
-Packet sent to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Request data translates to the body of the MySQL
-Packet sent to the server. This field becomes
-part of a compisition of ChannelBuffers. To ensure
-that it has the correct byte order use Buffer.toChannelBuffer(...)
-to create the ChannelBuffer.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" class="extype" href="SimpleCommandRequest.html">SimpleCommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -363,6 +359,18 @@ to create the ChannelBuffer.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CommandRequest#seq" data-isabs="false">
+      <a id="seq:Short"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">seq</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -375,18 +383,18 @@ to create the ChannelBuffer.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Request#toChannelBuffer" data-isabs="false">
-      <a id="toChannelBuffer:ChannelBuffer"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest#toPacket" data-isabs="false">
+      <a id="toPacket:Packet"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">toChannelBuffer</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+        <span class="name">toPacket</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" class="extype" href="SimpleCommandRequest.html">SimpleCommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PingRequest#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">

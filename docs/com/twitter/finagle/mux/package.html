@@ -33,19 +33,18 @@
 Mux is itself encoding independent, so it is meant to use as the
 transport for other RPC systems (eg. thrift). In OSI terminology, it
 is a pure session layer.</p><p>In the below description, all numeric values are unsigned and in
-big-endian byte order. The schema [4]size[10]body defines the field
-size to be 4 bytes, followed by 10 of the field body. When symbols are
-used to specify size, they refer to a previously defined field, eg.
-<i>[4]size[size-4]body</i> means 4 bytes of size specified by size-4
-bytes of body, where size is interpreted as a 32-bit big-endian
-integer. Constructions in parentheses followed by a <i>*</i> indicate
-repeated values. If the <i>*</i> is followed by a name, the parenthesized
-construct is repeated exactly this number of times. <i>[s]foo</i> is
-shorthand for <i>[4]size[size-4]foo</i> where <i>foo</i> is a string. All
-strings are Utf-8 encoded.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
+big-endian byte order. The schema <i>size:4 body:10</i> defines the
+field size to be 4 bytes, followed by 10 bytes of the field body. The
+schema <i>key~4</i> defines the field key to be defined by 4 bytes
+intepreted as the size of the field, followed by that many bytes
+comprising the field itself--it is shorthand for <i>keysize:4 key:keysize</i>.
+Groups are denoted by parenthesis; <i>*</i> denotes reptition of the
+previous schema 0 or more times, while <code>{n}</code> indicates repetition
+exactly <i>n</i> times. Unspecified sizes consume the rest of the frame:
+they may be specified only as the last field in the message.</p><p>All strings  in Mux are Utf-8 encoded, and are never null-terminated.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
 followed by 1 byte describing the message type and a 3-byte tag; or,
-diagrammatically: <i>[4]size[1]type[3]tag</i>. The remainder of the frame
-(rem=size-4 bytes) contains the body. Its format depends on the
+diagrammatically: <i>size:4 type:1 tag:3</i>. The remainder of the frame
+(size-4 bytes) contains the body. Its format depends on the
 message type, documented below.</p><p>The tag's MSB is reserved for future use, making its current namespace
 23 bits. Tag 0 designates a &quot;marker&quot; T message that expects no reply.
 The tag is otherwise arbitrary, and is chosen by the sender of the T
@@ -60,33 +59,39 @@ and is assigned a free tag by the sender. A reply is either an R
 message of the same type (Rx replies to Tx for some x), or an Rerr,
 indicating a session layer error. R messages are matched to their T
 messages by tag, and the reply concludes the exchange and frees the
-tag for future use. Implementations should reuse small tag numbers.</p><h3>Messages</h3><p><i>[4]size[1]Tinit[3]tag[2]version([s]key[s]value)*</i> reinitializes a
+tag for future use. Implementations should reuse small tag numbers.</p><h3>Messages</h3><p><i>size:4 Tinit:1 tag:3 version:2 (key~4 value~4)*</i> reinitializes a
 session. Clients typically send this at the beginning of the session.
 When doing so, the sender may issue no more T messages until the
-corresponding <i>[4]size[1]Rinit[2]version([s]key[s]value)</i> has been
+corresponding <i>size:4 Rinit:1 version:2 (key~4 value~4)*</i> has been
 received. After the Rinit was received, all connection state has been
 reset (outstanding tags are invalidated) and the stream is resumed
 according to the newly negotiated parameters. Prior to the first
 Tinit, the session operates at version 1. Rinit's version field is the
 accepted version of the session (which may be lower than the one
-requested by Tinit).</p><p><i>[4]size[1]Treq[3]tag[1]nkeys([1]key[1]vsize[vsize]value)*nkeys[rem]body</i>
-initiates the request described by its body. The request body is
-delivered to the application. The request header contains a number of
-key-value pairs that describe request metadata. Keys are:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
+requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</i> initiates the
+request described by its body. The request body is delivered to the
+application. The request header contains a number of key-value pairs
+that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
 <a href="http://research.google.com/archive/papers/dapper-2010-1.pdf">Dapper</a> trace id
-assigned by the client. The value's format is <i>[8]spanid[8]parentid[8]traceid</i>.</li><li><i>traceflag</i>: a bitmask describing trace flags. Currently, the
+assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
 only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
-server to force trace sampling.</li></ol><p><i>[4]size[1]Rreq[1]status[size-6]body</i> replies to a request. Status
+server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nc:2 (ckey~2 cval~2){nc} dst~2 nd:2
+(from~2 to~2){nd} body:</i> implements <i>destination dispatch</i>.
+Tdispatch messages carry a set of keyed request contexts, followed by
+a logical destination encoded as a UTF-8 string. A delegation table
+follows describing rewrite rules that apply to this request.</p><p><i>size:4 Rreq:1 status:1 body:</i> replies to a request. Status
 codes are as follows: 0=OK; the body contains the reply. 1=ERROR; the
 body contains a string describing the error. 2=NACK; a negative
-acknowledgment, the body contains a string describing the reason.</p><p><i>[4]size[1]Rerr[n]why</i> indicates that the corresponding T message
+acknowledgment, the body contains a string describing the reason.</p><p><i>size:4 Rdispatch:1 status:1 nctx:2 (key~2 value~2){nctx} body:</i> replies
+to a Tdispatch request. Status codes are as in Rreq. Replies can include
+request contexts.</p><p><i>size:4 Rerr:1 why:</i> indicates that the corresponding T message
 produced an error. Rerr is specifically for server errors: the server
 failed to interpret or act on the message. The body carries a string
-describing the error.</p><p><i>[4]size[1]Tdrain[3]tag</i> is a request sent by the server telling the
+describing the error.</p><p><i>size:4 Tdrain:1 tag:3</i> is a request sent by the server telling the
 client to stop sending new requests. A client acknowledges this with
-an Rdrain message.</p><p><i>[4]size[1]Tping</i> is sent by either party to check the liveness of
+an Rdrain message.</p><p><i>size:4 Tping:1</i> is sent by either party to check the liveness of
 its peer; these should be responded to immediately with a Rping
-message.</p><p><i>[4]size[1]Tdiscarded[3]tag[size-8]why</i> is a marker message
+message.</p><p><i>size:4 Tdiscarded:1 tag:3 why:</i> is a marker message
 indicating that the Treq with the given tag has been discarded by the
 client. This can be used as a hint for early termination. Why is a
 string describing why the request was discarded. Note that it does

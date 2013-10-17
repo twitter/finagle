@@ -141,29 +141,31 @@ example:</p><pre>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.ListeningServer#announce" data-isabs="false">
-      <a id="announce(String):Unit"></a>
+      <a id="announce(String):Future[Announcement]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">announce</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">announce</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.Announcement" class="extype" href="Announcement.html">Announcement</a>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></dd></dl></div>
+      <p class="shortcomment cmt">Announce the given address and return a future to the announcement
+</p><div class="fullcomment"><div class="comment cmt"><p>Announce the given address and return a future to the announcement
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Group#apply" data-isabs="false">
       <a id="apply():Set[SocketAddress]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">apply</span><span class="params">()</span><span class="result">: Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Synonymous to <code>members</code></p><div class="fullcomment"><div class="comment cmt"><p>Synonymous to <code>members</code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -359,18 +361,22 @@ with <code>f</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Cre
 with <code>f</code>. <code>f</code> is guaranteed to be invoked exactly once for each
 element of the groups, even for dynamic groups.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.ListeningServer#members" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.Group#members" data-isabs="false">
       <a id="members:Set[SocketAddress]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">members</span><span class="result">: <span name="scala.collection.immutable.Set" class="extype">Set</span>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
+        <span class="name">members</span><span class="result">: Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a> → <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
+      <p class="shortcomment cmt">The current members of this group.</p><div class="fullcomment"><div class="comment cmt"><p>The current members of this group. If the group has not
+changed, the same object is returned. This allows a simple
+object identity check to be performed to see if the Group has
+been updated.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Group#named" data-isabs="false">
       <a id="named(String):Group[SocketAddress]"></a>
       <h4 class="signature">
@@ -433,6 +439,18 @@ element of the groups, even for dynamic groups.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.Group#ref" data-isabs="false">
+      <a id="ref:AtomicReference[Set[SocketAddress]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ref</span><span class="result">: <span name="java.util.concurrent.atomic.AtomicReference" class="extype">AtomicReference</span>[Set[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.util.CloseAwaitably#result" data-isabs="false">
       <a id="result(Duration)(CanAwait):Unit"></a>
       <h4 class="signature">
@@ -445,6 +463,18 @@ element of the groups, even for dynamic groups.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.ListeningServer#set" data-isabs="false">
+      <a id="set:Var[Set[SocketAddress]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[<span name="scala.collection.immutable.Set" class="extype">Set</span>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>] </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a> → <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

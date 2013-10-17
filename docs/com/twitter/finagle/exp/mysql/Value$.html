@@ -29,7 +29,10 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Defines convenient methods for decoding bytes
+based on type and wrapping them in their appropriate Value.
+<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-value.html">http://dev.mysql.com/doc/internals/en/binary-protocol-value.html</a>
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -131,7 +134,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="typeCode">typeCode: <span name="scala.Int" class="extype">Int</span></span>, <span name="buffer">buffer: <a name="com.twitter.finagle.exp.mysql.protocol.BufferReader" class="extype" href="protocol/BufferReader.html">BufferReader</a></span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Value" class="extype" href="Value.html">Value</a></span>
+        <span class="name">apply</span><span class="params">(<span name="typeCode">typeCode: <span name="scala.Int" class="extype">Int</span></span>, <span name="buffer">buffer: <a name="com.twitter.finagle.exp.mysql.transport.BufferReader" class="extype" href="transport/BufferReader.html">BufferReader</a></span>, <span name="charset">charset: <span name="java.nio.charset.Charset" class="extype">Charset</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.Value" class="extype" href="Value.html">Value</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a Value given a MySQL type code

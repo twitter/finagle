@@ -127,6 +127,21 @@ update will be triggered whenever cache config data change event happens.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#applyZKChildren" data-isabs="false">
+      <a id="applyZKChildren(List[String]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applyZKChildren</span><span class="params">(<span name="children">children: List[String]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Load the zookeeper node children as well as leaving a children watch, then invoke the
+applyZKChildren implementation to process the children list.</p><div class="fullcomment"><div class="comment cmt"><p>Load the zookeeper node children as well as leaving a children watch, then invoke the
+applyZKChildren implementation to process the children list.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster#applyZKData" data-isabs="false">
       <a id="applyZKData(Array[Byte]):Unit"></a>
       <h4 class="signature">
@@ -138,8 +153,8 @@ update will be triggered whenever cache config data change event happens.
         <span class="name">applyZKData</span><span class="params">(<span name="data">data: <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Load the zookeeper node data as well as attaching another data watcher, then invoke the
-applyZKData implementation to process the data string.</p><div class="fullcomment"><div class="comment cmt"><p>Load the zookeeper node data as well as attaching another data watcher, then invoke the
+      <p class="shortcomment cmt">Load the zookeeper node data as well as leaving a data watch, then invoke the
+applyZKData implementation to process the data string.</p><div class="fullcomment"><div class="comment cmt"><p>Load the zookeeper node data as well as leaving a data watch, then invoke the
 applyZKData implementation to process the data string.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" class="extype" href="">ZookeeperCachePoolCluster</a> → <a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
@@ -244,6 +259,18 @@ applyZKData implementation to process the data string.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#loadZKChildren" data-isabs="false">
+      <a id="loadZKChildren:() ⇒ Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadZKChildren</span><span class="result">: () ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.memcached.ZookeeperStateMonitor" class="extype" href="ZookeeperStateMonitor.html">ZookeeperStateMonitor</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperStateMonitor#loadZKData" data-isabs="false">
       <a id="loadZKData:() ⇒ Unit"></a>
       <h4 class="signature">

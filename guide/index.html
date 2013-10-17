@@ -80,6 +80,7 @@ abstractions used to represent clients and servers and modify
 their behavior.</p>
 <p>Other useful resources include:</p>
 <ul class="simple">
+<li>“<a class="reference external" href="http://monkey.org/~marius/funsrv.pdf">Your Server as a Function</a>” a paper motivating the core abstractions behind finagle (<a class="reference external" href="http://sigops.org/sosp/sosp13/plos.html">PLOS’13</a>).</li>
 <li><a class="reference external" href="http://engineering.twitter.com/2011/08/finagle-protocol-agnostic-rpc-system.html">Twitter engineering blog entry introducing Finagle</a></li>
 <li><a class="reference external" href="http://days2011.scala-lang.org/node/138/286">ScalaDays 2011 presentation on Finagle</a></li>
 <li>Twitter&#8217;s <a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a> has a section <a class="reference external" href="http://twitter.github.com/scala_school/finagle.html">introducing Finagle</a> and another <a class="reference external" href="http://twitter.github.com/scala_school/searchbird.html">constructing a distributed search engine using Finagle</a></li>
@@ -109,8 +110,34 @@ their behavior.</p>
 <li class="toctree-l2"><a class="reference internal" href="ServicesAndFilters.html#composing-filters-and-services">Composing filters and services</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="ServerAnatomy.html">Anatomy of a Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#transport-layer">Transport Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#server-protocol">Server Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#listener">Listener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#server-dispatcher">Server Dispatcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ServerAnatomy.html#default-server">Default Server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ClientAnatomy.html">Anatomy of a Client</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#client-protocol">Client Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#transporter">Transporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#request-dispatcher">Request Dispatcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#a-basic-client">A Basic Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#a-robust-client">A Robust Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientAnatomy.html#the-default-client">The Default Client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ClientStack.html">Client Stack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#load-balancing">Load Balancing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#connection-pooling">Connection Pooling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#fail-fast">Fail Fast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#timeouts">Timeouts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ClientStack.html#retries">Retries</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Metrics.html">Metrics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Metrics.html#pool-counts">Pool Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#connection-pool-stats">Connection Pool Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Metrics.html#load-balancer-stats">Load Balancer Stats</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a><ul>
@@ -126,11 +153,11 @@ their behavior.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Finagle changelog</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#x">6.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id18">5.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id37">4.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id39">3.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id41">2.x</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id44">1.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id23">5.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id42">4.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id44">3.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id46">2.x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id49">1.x</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>

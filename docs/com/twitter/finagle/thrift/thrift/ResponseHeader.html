@@ -77,7 +77,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ResponseHeader</span><span class="params">(<span name="spans">spans: <span name="java.util.List" class="extype">List</span>[<a name="com.twitter.finagle.thrift.thrift.Span" class="extype" href="Span.html">Span</a>]</span>)</span>
+        <span class="name">ResponseHeader</span><span class="params">(<span name="spans">spans: <span name="java.util.List" class="extype">List</span>[<a name="com.twitter.finagle.thrift.thrift.Span" class="extype" href="Span.html">Span</a>]</span>, <span name="contexts">contexts: <span name="java.util.List" class="extype">List</span>[<a name="com.twitter.finagle.thrift.thrift.RequestContext" class="extype" href="RequestContext.html">RequestContext</a>]</span>)</span>
       </span>
       </h4>
       
@@ -162,6 +162,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#addToContexts" data-isabs="false">
+      <a id="addToContexts(RequestContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addToContexts</span><span class="params">(<span name="elem">elem: <a name="com.twitter.finagle.thrift.thrift.RequestContext" class="extype" href="RequestContext.html">RequestContext</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#addToSpans" data-isabs="false">
       <a id="addToSpans(Span):Unit"></a>
       <h4 class="signature">
@@ -312,6 +324,42 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#getContexts" data-isabs="false">
+      <a id="getContexts():List[RequestContext]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getContexts</span><span class="params">()</span><span class="result">: <span name="java.util.List" class="extype">List</span>[<a name="com.twitter.finagle.thrift.thrift.RequestContext" class="extype" href="RequestContext.html">RequestContext</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#getContextsIterator" data-isabs="false">
+      <a id="getContextsIterator():Iterator[RequestContext]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getContextsIterator</span><span class="params">()</span><span class="result">: <span name="java.util.Iterator" class="extype">Iterator</span>[<a name="com.twitter.finagle.thrift.thrift.RequestContext" class="extype" href="RequestContext.html">RequestContext</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#getContextsSize" data-isabs="false">
+      <a id="getContextsSize():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getContextsSize</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#getFieldValue" data-isabs="false">
       <a id="getFieldValue(_Fields):AnyRef"></a>
       <h4 class="signature">
@@ -396,6 +444,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.thrift.thrift.ResponseHeader" class="extype" href="">ResponseHeader</a> → TBase</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#isSetContexts" data-isabs="false">
+      <a id="isSetContexts():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isSetContexts</span><span class="params">()</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#isSetSpans" data-isabs="false">
       <a id="isSetSpans():Boolean"></a>
       <h4 class="signature">
@@ -456,6 +516,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.thrift.thrift.ResponseHeader" class="extype" href="">ResponseHeader</a> → TBase</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#setContexts" data-isabs="false">
+      <a id="setContexts(List[RequestContext]):ResponseHeader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setContexts</span><span class="params">(<span name="contexts">contexts: <span name="java.util.List" class="extype">List</span>[<a name="com.twitter.finagle.thrift.thrift.RequestContext" class="extype" href="RequestContext.html">RequestContext</a>]</span>)</span><span class="result">: <a name="com.twitter.finagle.thrift.thrift.ResponseHeader" class="extype" href="">ResponseHeader</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#setContextsIsSet" data-isabs="false">
+      <a id="setContextsIsSet(Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setContextsIsSet</span><span class="params">(<span name="value">value: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#setFieldValue" data-isabs="false">
       <a id="setFieldValue(_Fields,Any):Unit"></a>
       <h4 class="signature">
@@ -516,6 +600,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.thrift.thrift.ResponseHeader" class="extype" href="">ResponseHeader</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#unsetContexts" data-isabs="false">
+      <a id="unsetContexts():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsetContexts</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="com.twitter.finagle.thrift.thrift.ResponseHeader#unsetSpans" data-isabs="false">
       <a id="unsetSpans():Unit"></a>
       <h4 class="signature">

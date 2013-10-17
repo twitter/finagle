@@ -92,7 +92,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CachePoolConfig.html"><span class="name">CachePoolConfig</span></a><span class="params">(<span name="cachePoolSize">cachePoolSize: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+        <a href="CachePoolConfig.html"><span class="name">CachePoolConfig</span></a><span class="params">(<span name="cachePoolSize">cachePoolSize: Int</span>, <span name="detectKeyRemapping">detectKeyRemapping: Boolean</span>)</span><span class="result"> extends Product with Serializable</span>
       </span>
       </h4>
       <p class="comment cmt">Cache pool config data format
@@ -414,6 +414,18 @@ the key value.</p>
       </span>
       </h4>
       <p class="comment cmt">Twitter cache pool path resolver.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperCacheNodeGroup" data-isabs="false">
+      <a id="ZookeeperCacheNodeGroup:ZookeeperCacheNodeGroup"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ZookeeperCacheNodeGroup.html"><span class="name">ZookeeperCacheNodeGroup</span></a><span class="result"> extends Group[CacheNode] with ZookeeperStateMonitor</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Zookeeper based cache node group with a serverset as the underlying pool.</p>
     </li><li visbl="pub" name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" data-isabs="false">
       <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>
       <h4 class="signature">

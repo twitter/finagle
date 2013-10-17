@@ -25,7 +25,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SimpleRetryPolicy</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span name="com.twitter.util.Function" class="extype">Function</span>[A, <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]] with <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</span>
+        <span class="name">SimpleRetryPolicy</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A] with (A) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]</span>
       </span>
       </h4>
       
@@ -33,7 +33,7 @@
 the two abstract methods <code>shouldRetry</code> and <code>backoffAt</code> and you're good to go!
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A], <span name="com.twitter.util.Function" class="extype">Function</span>[A, <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]], <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]], (A) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A], (A) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -47,7 +47,7 @@ the two abstract methods <code>shouldRetry</code> and <code>backoffAt</code> and
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.service.SimpleRetryPolicy" class="in"><span>SimpleRetryPolicy</span></li><li name="com.twitter.finagle.service.RetryPolicy" class="in"><span>RetryPolicy</span></li><li name="com.twitter.util.Function" class="in"><span>Function</span></li><li name="scala.PartialFunction" class="in"><span>PartialFunction</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.service.SimpleRetryPolicy" class="in"><span>SimpleRetryPolicy</span></li><li name="com.twitter.finagle.service.RetryPolicy" class="in"><span>RetryPolicy</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -183,18 +183,18 @@ zero-indexed. To implement a finite number of retries, implement a method like:
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Function#andThen" data-isabs="false">
-      <a id="andThen[A]((Option[(Duration, RetryPolicy[A])]) ⇒ A):PartialFunction[A, A]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.service.SimpleRetryPolicy#andThen" data-isabs="false">
+      <a id="andThen[B]((Option[(Duration, RetryPolicy[A])]) ⇒ B):(A) ⇒ B"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]) ⇒ A</span>)</span><span class="result">: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, A]</span>
+        <span class="name">andThen</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: (<span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]) ⇒ B</span>)</span><span class="result">: (A) ⇒ B</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function → PartialFunction → Function1</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.service.SimpleRetryPolicy" class="extype" href="">SimpleRetryPolicy</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.service.SimpleRetryPolicy#apply" data-isabs="false">
       <a id="apply(A):Option[(Duration, RetryPolicy[A])]"></a>
       <h4 class="signature">
@@ -234,18 +234,18 @@ zero-indexed. To implement a finite number of retries, implement a method like:
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Function#compose" data-isabs="false">
-      <a id="compose[A]((A) ⇒ A):(A) ⇒ Option[(Duration, RetryPolicy[A])]"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.service.SimpleRetryPolicy#compose" data-isabs="false">
+      <a id="compose[B]((B) ⇒ A):(B) ⇒ Option[(Duration, RetryPolicy[A])]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (A) ⇒ A</span>)</span><span class="result">: (A) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: (B) ⇒ A</span>)</span><span class="result">: (B) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function → Function1</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.service.SimpleRetryPolicy" class="extype" href="">SimpleRetryPolicy</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -309,18 +309,6 @@ zero-indexed. To implement a finite number of retries, implement a method like:
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.util.Function#isDefinedAt" data-isabs="false">
-      <a id="isDefinedAt(A):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isDefinedAt</span><span class="params">(<span name="x">x: A</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function → PartialFunction</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
@@ -333,18 +321,6 @@ zero-indexed. To implement a finite number of retries, implement a method like:
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="scala.PartialFunction#lift" data-isabs="false">
-      <a id="lift:(A) ⇒ Option[Option[(Duration, RetryPolicy[A])]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">lift</span><span class="result">: (A) ⇒ <span name="scala.Option" class="extype">Option</span>[<span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -395,18 +371,6 @@ signals no-further-retries.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="scala.PartialFunction#orElse" data-isabs="false">
-      <a id="orElse[A1&lt;:A, B1&gt;:Option[(Duration, RetryPolicy[A])]](PartialFunction[A1, B1]):PartialFunction[A1, B1]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">orElse</span><span class="tparams">[<span name="A1">A1 &lt;: A</span>, <span name="B1">B1 &gt;: <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]</span>]</span><span class="params">(<span name="that">that: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A1, B1]</span>)</span><span class="result">: <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A1, B1]</span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -485,10 +449,6 @@ signals no-further-retries.
         <div id="inheritedMembers">
         <div name="com.twitter.finagle.service.RetryPolicy" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A]</h3>
-            </div><div name="com.twitter.util.Function" class="parent">
-              <h3>Inherited from <span name="com.twitter.util.Function" class="extype">Function</span>[A, <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]]</h3>
-            </div><div name="scala.PartialFunction" class="parent">
-              <h3>Inherited from <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]]</h3>
             </div><div name="scala.Function1" class="parent">
               <h3>Inherited from (A) ⇒ <span name="scala.Option" class="extype">Option</span>[(<span name="com.twitter.util.Duration" class="extype">Duration</span>, <a name="com.twitter.finagle.service.RetryPolicy" class="extype" href="RetryPolicy.html">RetryPolicy</a>[A])]</h3>
             </div><div name="scala.AnyRef" class="parent">

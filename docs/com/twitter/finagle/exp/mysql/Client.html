@@ -201,7 +201,7 @@
         <span class="name">closeStatement</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Close a prepared statement on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Close a prepared statement on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>OK result.
+      <p class="shortcomment cmt">Close a prepared statement on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Close a prepared statement on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Future with an OK value if successful.
 </p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
@@ -353,7 +353,10 @@ for queries that return rows.
         <span class="name">ping</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Checks if the server is alive.</p><div class="fullcomment"><div class="comment cmt"><p>Checks if the server is alive.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Future with an OK value if the
+server is alive.
+</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#prepare" data-isabs="false">
       <a id="prepare(String):Future[PreparedStatement]"></a>
       <h4 class="signature">
@@ -404,10 +407,8 @@ for queries that return rows.
         <span class="name">query</span><span class="params">(<span name="sql">sql: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Sends a query to the server without using
-prepared statements.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a query to the server without using
-prepared statements.</p></div><dl class="paramcmts block"><dt class="param">sql</dt><dd class="cmt"><p>A sql statement to be sent to the server.</p></dd><dt>returns</dt><dd class="cmt"><p>a Future containing an OK Result or a ResultSet
-for queries that return rows.
+      <p class="shortcomment cmt">Sends a query without using prepared statements.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a query without using prepared statements.
+</p></div><dl class="paramcmts block"><dt class="param">sql</dt><dd class="cmt"><p>the sql string to be sent to the server</p></dd><dt>returns</dt><dd class="cmt"><p>a Future containing the Result object from the query.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#select" data-isabs="false">
       <a id="select[T](PreparedStatement)((Row) ⇒ T):Future[Seq[T]]"></a>
@@ -436,10 +437,10 @@ query is passed in, an empty Seq is returned.</p></div><dl class="paramcmts bloc
         <span class="name">select</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="sql">sql: String</span>)</span><span class="params">(<span name="f">f: (<a name="com.twitter.finagle.exp.mysql.Row" class="extype" href="Row.html">Row</a>) ⇒ T</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[T]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Send a query that presumably returns a ResultSet.</p><div class="fullcomment"><div class="comment cmt"><p>Send a query that presumably returns a ResultSet. For each row
-in the ResultSet, call f on the row and return the Seq of results.
-If the query result does not contain a ResultSet, the query is executed
-and an empty Seq is returned.</p></div><dl class="paramcmts block"><dt class="param">sql</dt><dd class="cmt"><p>A sql statement that returns a result set.</p></dd><dt class="param">f</dt><dd class="cmt"><p>A function from Row to any type T.</p></dd><dt>returns</dt><dd class="cmt"><p>a Future of Seq[T] that contains rows.map(f)
+      <p class="shortcomment cmt">Sends a query that presumably returns a ResultSet.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a query that presumably returns a ResultSet.
+Each row is mapped to f, a function from Row =&gt; T.
+</p></div><dl class="paramcmts block"><dt class="param">sql</dt><dd class="cmt"><p>A sql statement that returns a result set.</p></dd><dt class="param">f</dt><dd class="cmt"><p>A function from Row to any type T.</p></dd><dt>returns</dt><dd class="cmt"><p>a Future of Seq[T] that contains the result
+of f applied to each row.
 </p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Client#selectDB" data-isabs="false">
       <a id="selectDB(String):Future[Result]"></a>
@@ -452,7 +453,9 @@ and an empty Seq is returned.</p></div><dl class="paramcmts block"><dt class="pa
         <span class="name">selectDB</span><span class="params">(<span name="schema">schema: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Changes the default schema.</p><div class="fullcomment"><div class="comment cmt"><p>Changes the default schema.
+</p></div><dl class="paramcmts block"><dt class="param">schema</dt><dd class="cmt"><p>The new schema to use.</p></dd><dt>returns</dt><dd class="cmt"><p>a Future with an OK value if successful.
+</p></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

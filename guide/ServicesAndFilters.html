@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
-    <link rel="next" title="Metrics" href="Metrics.html" />
+    <link rel="next" title="Anatomy of a Server" href="ServerAnatomy.html" />
     <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
    
   
@@ -42,7 +42,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="Metrics.html" title="Metrics"
+          <a href="ServerAnatomy.html" title="Anatomy of a Server"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Futures.html" title="Concurrent Programming with Futures"
@@ -63,7 +63,7 @@ clients and servers are constructed with the Finagle network library.
 They are very simple, but also quite versatile. Most of Finagle&#8217;s
 internals are structured around Services and Filters.</p>
 <div class="section" id="services">
-<h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
 <p>A service, at its heart, is a simple function:</p>
 <div class="highlight-text"><div class="highlight"><pre>trait Service[Req, Rep] extends (Req =&gt; Future[Rep])
 </pre></div>
@@ -131,7 +131,7 @@ timeout, failing the future with a timeout exception should it fail
 to complete within the given deadline.</p>
 </div>
 <div class="section" id="composing-filters-and-services">
-<h2>Composing filters and services<a class="headerlink" href="#composing-filters-and-services" title="Permalink to this headline">¶</a></h2>
+<span id="composing-services-filters"></span><h2>Composing filters and services<a class="headerlink" href="#composing-filters-and-services" title="Permalink to this headline">¶</a></h2>
 <p>Filters and services compose with the <cite>andThen</cite> method. For example
 to furnish a service with timeout behavior:</p>
 <div class="highlight-text"><div class="highlight"><pre>val service: Service[HttpRequest, HttpResponse] = ...
@@ -187,7 +187,7 @@ then <cite>timeoutFilter</cite>.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Futures.html" title="previous chapter">Concurrent Programming with Futures</a></li>
-      <li>Next: <a href="Metrics.html" title="next chapter">Metrics</a></li>
+      <li>Next: <a href="ServerAnatomy.html" title="next chapter">Anatomy of a Server</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

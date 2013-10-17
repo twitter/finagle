@@ -309,6 +309,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#loadBalancerFactory" data-isabs="false">
+      <a id="loadBalancerFactory:LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadBalancerFactory</span><span class="result">: <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="loadbalancer/LoadBalancerFactory.html">LoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="client/DefaultClient.html">DefaultClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#maxIdletime" data-isabs="false">
       <a id="maxIdletime:Duration"></a>
       <h4 class="signature">
@@ -370,18 +382,31 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#newClient" data-isabs="false">
-      <a id="newClient(Group[SocketAddress]):ServiceFactory[Command, Reply]"></a>
+      <a id="newClient(Name,String):ServiceFactory[Command, Reply]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+        <span class="name">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to <code>group</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to <code>group</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="client/DefaultClient.html">DefaultClient</a> → <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="client/DefaultClient.html">DefaultClient</a> → <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
+      <a id="newClient(String,String):ServiceFactory[Command, Reply]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newClient</span><span class="params">(<span name="dest">dest: String</span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
       <a id="newClient(String):ServiceFactory[Command, Reply]"></a>
       <h4 class="signature">
@@ -390,13 +415,23 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newClient</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+        <span class="name">newClient</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client, a <code>ServiceFactory</code> that is connected to the
-group resolved by <code>addr</code>.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.RedisRichClient#newRichClient" data-isabs="false">
+      <a id="newRichClient(Name,String):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.Client" class="extype" href="redis/Client.html">Client</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.RedisRichClient" class="extype" href="RedisRichClient.html">RedisRichClient</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.RedisRichClient#newRichClient" data-isabs="false">
       <a id="newRichClient(String):Client"></a>
       <h4 class="signature">
@@ -405,19 +440,7 @@ group resolved by <code>addr</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="group">group: String</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.Client" class="extype" href="redis/Client.html">Client</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.RedisRichClient" class="extype" href="RedisRichClient.html">RedisRichClient</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.RedisRichClient#newRichClient" data-isabs="false">
-      <a id="newRichClient(Group[SocketAddress]):Client"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.Client" class="extype" href="redis/Client.html">Client</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.Client" class="extype" href="redis/Client.html">Client</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.RedisRichClient" class="extype" href="RedisRichClient.html">RedisRichClient</a></dd></dl></div>
@@ -429,33 +452,45 @@ group resolved by <code>addr</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+        <span class="name">newService</span><span class="params">(<span name="dest">dest: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new servie connected to <code>addr</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new servie connected to <code>addr</code>.
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
-      <a id="newService(Group[SocketAddress]):Service[Command, Reply]"></a>
+      <a id="newService(Name,String):Service[Command, Reply]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newService</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+        <span class="name">newService</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>, <span name="label">label: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Create a new Service connected to <code>group</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new Service connected to <code>group</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#newStack" data-isabs="false">
-      <a id="newStack:(Group[SocketAddress]) ⇒ ServiceFactory[Command, Reply]"></a>
+      <a id="newStack:(Name) ⇒ ServiceFactory[Command, Reply]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">newStack</span><span class="result">: (<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]) ⇒ <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+        <span class="name">newStack</span><span class="result">: (<a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a>) ⇒ <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="client/DefaultClient.html">DefaultClient</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.client.DefaultClient#newStack0" data-isabs="false">
+      <a id="newStack0:(Name) ⇒ ServiceFactory[Command, Reply]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newStack0</span><span class="result">: (<a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a>) ⇒ <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.client.DefaultClient" class="extype" href="client/DefaultClient.html">DefaultClient</a></dd></dl></div>
@@ -701,7 +736,52 @@ group resolved by <code>addr</code>.
 
         <div class="values members" id="values">
               <h3>Deprecated Value Members</h3>
-              <ol><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.Client#newClient" data-isabs="false">
+      <a id="newClient(Group[SocketAddress]):ServiceFactory[Command, Reply]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.ServiceFactory" class="extype" href="ServiceFactory.html">ServiceFactory</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.RedisRichClient#newRichClient" data-isabs="false">
+      <a id="newRichClient(Group[SocketAddress]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newRichClient(String) or newRichClinet(Name)">newRichClient</span><span class="params">(<span name="group">group: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.redis.Client" class="extype" href="redis/Client.html">Client</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.RedisRichClient" class="extype" href="RedisRichClient.html">RedisRichClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newRichClient(String) or newRichClinet(Name)</p></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Client#newService" data-isabs="false">
+      <a id="newService(Group[SocketAddress]):Service[Command, Reply]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>[<a name="com.twitter.finagle.redis.protocol.Command" class="extype" href="redis/protocol/Command.html">Command</a>, <a name="com.twitter.finagle.redis.protocol.Reply" class="extype" href="redis/protocol/Reply.html">Reply</a>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
+    </li><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
       <a id="productElements:Iterator[Any]"></a>
       <h4 class="signature">
       <span class="modifier_kind">

@@ -25,7 +25,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Group</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Var[Addr], Name">Group</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       
@@ -40,12 +40,15 @@ derived groups are effectively eventually consistent.</p><p><b>Note:</b> <code>T
 the case of sets, this is an implementation artifact, and is
 unfortunate, but it's better to keep things simpler and
 consistent.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="">Group</a>[T]</dd></dl><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a name="com.twitter.finagle.Group" class="extype" href="">Group</a>[T]</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Var[Addr], Name</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent">AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a>, <a name="com.twitter.finagle.MutableGroup" class="extype" href="MutableGroup.html">MutableGroup</a>, <a name="com.twitter.finagle.NullServer" class="extype" href="NullServer$.html">NullServer</a>, <a name="com.twitter.finagle.ResolvedGroup" class="extype" href="ResolvedGroup.html">ResolvedGroup</a></div>
+          <div class="subClasses hiddenContent"><a name="com.twitter.finagle.ListeningServer" class="extype" href="ListeningServer.html">ListeningServer</a>, <a name="com.twitter.finagle.MutableGroup" class="extype" href="MutableGroup.html">MutableGroup</a>, <a name="com.twitter.finagle.NullServer" class="extype" href="NullServer$.html">NullServer</a>, <a name="com.twitter.finagle.memcached.ZookeeperCacheNodeGroup" class="extype" href="memcached/ZookeeperCacheNodeGroup.html">ZookeeperCacheNodeGroup</a></div>
         </div></div>
     
 
@@ -75,20 +78,18 @@ consistent.
 
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Group#members" data-isabs="true">
-      <a id="members:Set[T]"></a>
+              <ol><li visbl="prt" name="com.twitter.finagle.Group#set" data-isabs="true">
+      <a id="set:Var[Set[T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">members</span><span class="result">: Set[T]</span>
+        <span class="name">set</span><span class="result">: <span name="com.twitter.util.Var" class="extype">Var</span>[Set[T]]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The current members of this group.</p><div class="fullcomment"><div class="comment cmt"><p>The current members of this group. If the group has not
-changed, the same object (ie. object identity holds) is returned.
-</p></div></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>] </dd></dl></div>
     </li></ol>
             </div>
 
@@ -170,14 +171,14 @@ changed, the same object (ie. object identity holds) is returned.
       <a id="apply():Set[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">apply</span><span class="params">()</span><span class="result">: Set[T]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Synonymous to <code>members</code></p>
+      
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -312,6 +313,22 @@ with <code>f</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Cre
 with <code>f</code>. <code>f</code> is guaranteed to be invoked exactly once for each
 element of the groups, even for dynamic groups.
 </p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Group#members" data-isabs="false">
+      <a id="members:Set[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">members</span><span class="result">: Set[T]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The current members of this group.</p><div class="fullcomment"><div class="comment cmt"><p>The current members of this group. If the group has not
+changed, the same object is returned. This allows a simple
+object identity check to be performed to see if the Group has
+been updated.
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.Group#named" data-isabs="false">
       <a id="named(String):Group[T]"></a>
       <h4 class="signature">
@@ -362,6 +379,18 @@ element of the groups, even for dynamic groups.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.Group#ref" data-isabs="false">
+      <a id="ref:AtomicReference[Set[T]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ref</span><span class="result">: <span name="java.util.concurrent.atomic.AtomicReference" class="extype">AtomicReference</span>[Set[T]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="com.twitter.finagle" class="extype" href="package.html">finagle</a>] </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">

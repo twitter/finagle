@@ -174,6 +174,26 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.Resolver#eval" data-isabs="false">
+      <a id="eval(String):Name"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eval</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <a name="com.twitter.finagle.Name" class="extype" href="Name.html">Name</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Parse and evaluate the argument into a Name.</p><div class="fullcomment"><div class="comment cmt"><p>Parse and evaluate the argument into a Name. Eval parses
+a simple grammar: a scheme is followed by a bang, followed
+by an argument:
+	name := scheme ! arg
+The scheme is looked up from registered Resolvers, and the
+argument is passed in.</p><p>Eval throws exceptions upon failure to parse the name, or
+on failure to scheme lookup. Since names are late bound,
+binding failures are deferred.
+</p></div></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -273,45 +293,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.Resolver#resolutions" data-isabs="false">
-      <a id="resolutions:Set[List[String]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">resolutions</span><span class="result">: <span name="scala.collection.immutable.Set" class="extype">Set</span>[List[String]]</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.Resolver#resolve" data-isabs="false">
-      <a id="resolve(String):Try[Group[SocketAddress]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">resolve</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Resolve a group from an address, a string.</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a group from an address, a string. Resolve uses
-<code>Resolver</code>s to do this. These are loaded via the Java
-<a href="http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>
-mechanism. The default resolver is &quot;inet&quot;, resolving DNS
-name/port pairs.</p><p>Target names have a simple grammar: The name of the resolver
-precedes the name of the address to be resolved, separated by
-an exclamation mark (&quot;bang&quot;). For example: inet!twitter.com:80
-resolves the name &quot;twitter.com:80&quot; using the &quot;inet&quot; resolver. If no
-resolver name is present, the inet resolver is used.</p><p>Names resolved by this mechanism are also a
-<a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a>. By default, this name is
-simply the <code>addr</code> string, but it can be overriden by prefixing
-a name separated by an equals sign from the rest of the addr.
-For example, the addr &quot;www=inet!google.com:80&quot; resolves
-&quot;google.com:80&quot; with the inet resolver, but the returned group's
-<a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a> name is &quot;www&quot;.
-</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -384,7 +365,40 @@ For example, the addr &quot;www=inet!google.com:80&quot; resolves
     </li></ol>
             </div>
 
-        
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.Resolver#resolve" data-isabs="false">
+      <a id="resolve(String):Try[Group[SocketAddress]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use Resolver.eval">resolve</span><span class="params">(<span name="addr">addr: String</span>)</span><span class="result">: <span name="com.twitter.util.Try" class="extype">Try</span>[<a name="com.twitter.finagle.Group" class="extype" href="Group.html">Group</a>[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Resolve a group from an address, a string.</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a group from an address, a string. Resolve uses
+<code>Resolver</code>s to do this. These are loaded via the Java
+<a href="http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>
+mechanism. The default resolver is &quot;inet&quot;, resolving DNS
+name/port pairs.</p><p>Target names have a simple grammar: The name of the resolver
+precedes the name of the address to be resolved, separated by
+an exclamation mark (&quot;bang&quot;). For example: inet!twitter.com:80
+resolves the name &quot;twitter.com:80&quot; using the &quot;inet&quot; resolver. If no
+resolver name is present, the inet resolver is used.</p><p>Names resolved by this mechanism are also a
+<a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a>. By default, this name is
+simply the <code>addr</code> string, but it can be overriden by prefixing
+a name separated by an equals sign from the rest of the addr.
+For example, the addr &quot;www=inet!google.com:80&quot; resolves
+&quot;google.com:80&quot; with the inet resolver, but the returned group's
+<a name="com.twitter.finagle.NamedGroup" class="extype" href="NamedGroup.html">NamedGroup</a> name is &quot;www&quot;.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use Resolver.eval</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

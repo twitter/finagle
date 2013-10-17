@@ -335,6 +335,35 @@ as well as physical connection time.  Futures returned from
 process can exit only when all remaining clients are daemonized.
 False by default.
 </p></div></div>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#dest" data-isabs="false">
+      <a id="dest(Name):ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dest</span><span class="params">(<span name="name">name: <a name="com.twitter.finagle.Name" class="extype" href="../Name.html">Name</a></span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The logical destination of requests dispatched through this
+client.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#dest" data-isabs="false">
+      <a id="dest(String):ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dest</span><span class="params">(<span name="name">name: String</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The logical destination of requests dispatched through this
+client, as evaluated by a resolver.</p><div class="fullcomment"><div class="comment cmt"><p>The logical destination of requests dispatched through this
+client, as evaluated by a resolver. If the name evaluates a
+label, this replaces the builder's current name.
+</p></div></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -582,7 +611,7 @@ java.net.SocketAddress client.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hosts</span><span class="params">(<span name="addresses">addresses: Seq[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
+        <span class="name">hosts</span><span class="params">(<span name="addrs">addrs: Seq[<span name="java.net.SocketAddress" class="extype">SocketAddress</span>]</span>)</span><span class="result">: <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="">ClientBuilder</a>[Req, Rep, <a name="com.twitter.finagle.builder.ClientConfig.Yes" class="extype" href="ClientConfig$$Yes.html">Yes</a>, HasCodec, HasHostConnectionLimit]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">A variant of {{hosts}} that takes a sequence of
@@ -641,6 +670,20 @@ If this is defined concurrently with socksProxy, the order in which they are app
       </span>
       </h4>
       <p class="shortcomment cmt">Apply TCP keepAlive ({{SO_KEEPALIVE}} socket option).</p>
+    </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" data-isabs="false">
+      <a id="loadBalancer(LoadBalancerFactory):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadBalancer</span><span class="params">(<span name="loadBalancer">loadBalancer: <a name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extype" href="../loadbalancer/LoadBalancerFactory.html">LoadBalancerFactory</a></span>)</span><span class="result">: This</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
+a strategy for choosing one from a set of hosts to service a request
+</p></div></div>
     </li><li visbl="pub" name="com.twitter.finagle.builder.ClientBuilder#logger" data-isabs="false">
       <a id="logger(Logger):This"></a>
       <h4 class="signature">

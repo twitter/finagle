@@ -25,13 +25,16 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">FinagledService</span><span class="result"> extends <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]] with <span name="com.twitter.scrooge.FinagleThriftService" class="extype">FinagleThriftService</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Tracing3$FinagleService">FinagledService</span><span class="result"> extends <a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Tracing3$FinagleService</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="com.twitter.scrooge.FinagleThriftService" class="extype">FinagleThriftService</span>, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a>, <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], <span name="com.twitter.util.Closable" class="extype">Closable</span>, (<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +48,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.demo.Tracing3.FinagledService" class="in"><span>FinagledService</span></li><li name="com.twitter.scrooge.FinagleThriftService" class="in"><span>FinagleThriftService</span></li><li name="com.twitter.finagle.Service" class="in"><span>Service</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.demo.Tracing3.FinagledService" class="in"><span>FinagledService</span></li><li name="com.twitter.finagle.demo.Tracing3$FinagleService" class="in"><span>Tracing3$FinagleService</span></li><li name="com.twitter.finagle.Service" class="in"><span>Service</span></li><li name="com.twitter.util.Closable" class="in"><span>Closable</span></li><li name="scala.Function1" class="in"><span>Function1</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -138,6 +141,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="prt" name="com.twitter.finagle.demo.Tracing3$FinagleService#addFunction" data-isabs="false">
+      <a id="addFunction(String,(TProtocol, Int) ⇒ Future[Array[Byte]]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addFunction</span><span class="params">(<span name="name">name: String</span>, <span name="f">f: (<span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>, <span name="scala.Int" class="extype">Int</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a></dd></dl></div>
     </li><li visbl="pub" name="scala.Function1#andThen" data-isabs="false">
       <a id="andThen[A]((Future[Array[Byte]]) ⇒ A):(Array[Byte]) ⇒ A"></a>
       <h4 class="signature">
@@ -150,11 +165,11 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.FinagleThriftService#apply" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3$FinagleService#apply" data-isabs="false">
       <a id="apply(Array[Byte]):Future[Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -162,7 +177,7 @@
       </span>
       </h4>
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FinagleThriftService → <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Function1</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a> → <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a> → Function1</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -250,7 +265,7 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.FinagleThriftService#exception" data-isabs="false">
+    </li><li visbl="prt" name="com.twitter.finagle.demo.Tracing3$FinagleService#exception" data-isabs="false">
       <a id="exception(String,Int,Int,String):Future[Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -261,7 +276,7 @@
         <span class="name">exception</span><span class="params">(<span name="name">name: String</span>, <span name="seqid">seqid: <span name="scala.Int" class="extype">Int</span></span>, <span name="code">code: <span name="scala.Int" class="extype">Int</span></span>, <span name="message">message: String</span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FinagleThriftService</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a></dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -277,7 +292,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="prt" name="com.twitter.scrooge.FinagleThriftService#functionMap" data-isabs="false">
+    </li><li visbl="prt" name="com.twitter.finagle.demo.Tracing3$FinagleService#functionMap" data-isabs="false">
       <a id="functionMap:HashMap[String, (TProtocol, Int) ⇒ Future[Array[Byte]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -288,7 +303,7 @@
         <span class="name">functionMap</span><span class="result">: <span name="scala.collection.mutable.HashMap" class="extype">HashMap</span>[String, (<span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>, <span name="scala.Int" class="extype">Int</span>) ⇒ <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FinagleThriftService</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
@@ -388,19 +403,7 @@ with a reasonable likelihood of success).
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing3.FinagledService#protocolFactory" data-isabs="false">
-      <a id="protocolFactory:TProtocolFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">protocolFactory</span><span class="result">: <span name="org.apache.thrift.protocol.TProtocolFactory" class="extype">TProtocolFactory</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3.FinagledService" class="extype" href="">FinagledService</a> → FinagleThriftService</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.FinagleThriftService#reply" data-isabs="false">
+    </li><li visbl="prt" name="com.twitter.finagle.demo.Tracing3$FinagleService#reply" data-isabs="false">
       <a id="reply(String,Int,ThriftStruct):Future[Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -411,7 +414,7 @@ with a reasonable likelihood of success).
         <span class="name">reply</span><span class="params">(<span name="name">name: String</span>, <span name="seqid">seqid: <span name="scala.Int" class="extype">Int</span></span>, <span name="result">result: <span name="com.twitter.scrooge.ThriftStruct" class="extype">ThriftStruct</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FinagleThriftService</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
@@ -508,8 +511,8 @@ undefined if apply() is called after resources are relinquished.
         </div>
 
         <div id="inheritedMembers">
-        <div name="com.twitter.scrooge.FinagleThriftService" class="parent">
-              <h3>Inherited from <span name="com.twitter.scrooge.FinagleThriftService" class="extype">FinagleThriftService</span></h3>
+        <div name="com.twitter.finagle.demo.Tracing3$FinagleService" class="parent">
+              <h3>Inherited from <a name="com.twitter.finagle.demo.Tracing3$FinagleService" class="extype" href="Tracing3$FinagleService.html">Tracing3$FinagleService</a></h3>
             </div><div name="com.twitter.finagle.Service" class="parent">
               <h3>Inherited from <a name="com.twitter.finagle.Service" class="extype" href="../Service.html">Service</a>[<span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>], <span name="scala.Array" class="extype">Array</span>[<span name="scala.Byte" class="extype">Byte</span>]]</h3>
             </div><div name="com.twitter.util.Closable" class="parent">

@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Finagle 0.1-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
-    <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+    <link rel="prev" title="Client Stack" href="ClientStack.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -45,7 +45,7 @@
           <a href="FAQ.html" title="FAQ"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+          <a href="ClientStack.html" title="Client Stack"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
@@ -75,7 +75,7 @@ out connections are closed. By default an idle connection times out in
 </tr>
 <tr class="row-even"><td>connection_duration</td>
 <td>S</td>
-<td>A stats (an Histogram) representing the distribution of the duration
+<td>A stat representing the distribution of the duration
 of a connection. closechan` and <cite>connection_duration.count</cite> must be
 equal.</td>
 </tr>
@@ -114,32 +114,21 @@ received</td>
 </tr>
 </tbody>
 </table>
-<div class="section" id="pool-counts">
-<h2>Pool Counts<a class="headerlink" href="#pool-counts" title="Permalink to this headline">¶</a></h2>
-<p>The pool is a collection of tcp connections to a single host.</p>
-<dl class="docutils">
-<dt>pool_cached</dt>
-<dd>finagle&#8217;s default connection pool is called a &#8220;watermark&#8221; pool because it has a lower-bound and
-upper-bound (high and low water marks). The WaterMarkPool keeps persistent connections up the
-lower-bound. It will keep making connections up to upper-bound if you checkout more than
-lower-bound connections, but when you release those connections above the lower-bound, it
-immediately tries to close them. This creates a lot of connection churn if you keep needing more
-than lower-bound connections. As a result, there is a separate facility for caching for a few
-seconds (with some TTL) those connections above the lower bound and not closing them and
-re-opening them after every request. It caches REGARDLESS of whether there are more than
-lower-bound open connections; it&#8217;s always caching UP TO (upper-bound - lower-bound)
-connections. The cache reaches its peak value when you reach your peak concurrency (i.e., &#8220;load&#8221;),
-and then slowly decays, based on the TTL. (The default TTL is 5 seconds).</dd>
-<dt>pool_size</dt>
-<dd><p class="first">represents the number of connections open to the host, as seen by the connection pool. It should
-be between the min and max of your client builder spec.</p>
-<p class="last">If you can see that &#8220;pool_waiters&#8221; is exactly zero, then there is no queueing waiting to get a
-connection from the pool. This means your pool is not under-sized under the current
-workload. That&#8217;s a good thing.</p>
-</dd>
-<dt>pool_waiters</dt>
-<dd>the number of requests that are queued while waiting for a connection.</dd>
-</dl>
+<div class="section" id="connection-pool-stats">
+<h2>Connection Pool Stats<a class="headerlink" href="#connection-pool-stats" title="Permalink to this headline">¶</a></h2>
+<p id="pool-counts">A finagle client pools tcp connections via a <a class="reference internal" href="ClientStack.html#watermark-pool"><em>WatermarkPool</em></a>
+and <a class="reference internal" href="ClientStack.html#caching-pool"><em>CachingPool</em></a>. The following metrics expose the state
+of the pools in your application.</p>
+<p><strong>pool_cached</strong> - represents the number of cached tcp connections to a particular host. This caching behavior is helpful to eliminate unnecessary connection churn as exposed by the default behavior of the watermark pool.</p>
+<p><strong>pool_size</strong> - represents the number of connections open to the host. It should be between the lower and upper bounds of your client&#8217;s watermark pool configuration.</p>
+<p><strong>pool_waiters</strong> - the number of requests that are queued while waiting for a connection. Note, if you observe that &#8220;pool_waiters&#8221; is exactly zero, then there is no queueing waiting to get a connection from the pool. This means your pool is not under-sized with respect to the current workload. That&#8217;s a good thing!</p>
+</div>
+<div class="section" id="load-balancer-stats">
+<h2>Load Balancer Stats<a class="headerlink" href="#load-balancer-stats" title="Permalink to this headline">¶</a></h2>
+<p id="load-balancer-counts">A finagle client connected to multiple hosts load balances requests via a <a class="reference internal" href="ClientStack.html#heap-balancer"><em>HeapBalancer</em></a>. The following metrics expose the state of the heap balancer.</p>
+<p><strong>size</strong> - represents the current number of nodes used by the balancer.</p>
+<p><strong>adds</strong> - the cumulative node additions over the life time of the client.</p>
+<p><strong>removes</strong> - the cumulative node removals over the life time of the client.</p>
 </div>
 </div>
 
@@ -163,14 +152,15 @@ workload. That&#8217;s a good thing.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Metrics</a><ul>
-<li><a class="reference internal" href="#pool-counts">Pool Counts</a></li>
+<li><a class="reference internal" href="#connection-pool-stats">Connection Pool Stats</a></li>
+<li><a class="reference internal" href="#load-balancer-stats">Load Balancer Stats</a></li>
 </ul>
 </li>
 </ul>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="ServicesAndFilters.html" title="previous chapter">Services &amp; Filters</a></li>
+      <li>Previous: <a href="ClientStack.html" title="previous chapter">Client Stack</a></li>
       <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
   </ul></li>
 </ul>

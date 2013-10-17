@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <img src="../../../../lib/object_big.png" />
+        <a title="Go to companion" href="Tracing1.html"><img src="../../../../lib/object_to_trait_big.png" /></a>
         <p id="owner"><a name="com" class="extype" href="../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../package.html">finagle</a>.<a name="com.twitter.finagle.demo" class="extype" href="package.html">demo</a></p>
-        <h1>Tracing1</h1>
+        <h1><a title="Go to companion" href="Tracing1.html">Tracing1</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -59,7 +59,31 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.FinagledClient" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args" data-isabs="true">
+      <a id="computeSomething$args:computeSomething$args"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Tracing1$$computeSomething$args.html"><span class="name">computeSomething$args</span></a><span class="result"> extends ThriftStruct with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$result" data-isabs="true">
+      <a id="computeSomething$result:computeSomething$result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Tracing1$$computeSomething$result.html"><span class="name">computeSomething$result</span></a><span class="result"> extends ThriftStruct with Product1[Option[String]] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.FinagledClient" data-isabs="false">
       <a id="FinagledClient:FinagledClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -67,10 +91,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Tracing1$$FinagledClient.html"><span class="name">FinagledClient</span></a><span class="result"> extends FinagleThriftClient with FutureIface</span>
+        <a href="Tracing1$$FinagledClient.html"><span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Tracing1$FinagleClient">FinagledClient</span></a><span class="result"> extends Tracing1$FinagleClient with FutureIface</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Tracing1$FinagleClient</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.FinagledService" data-isabs="false">
       <a id="FinagledService:FinagledService"></a>
       <h4 class="signature">
@@ -79,10 +106,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Tracing1$$FinagledService.html"><span class="name">FinagledService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]] with FinagleThriftService</span>
+        <a href="Tracing1$$FinagledService.html"><span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Tracing1$FinagleService">FinagledService</span></a><span class="result"> extends Tracing1$FinagleService</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Tracing1$FinagleService</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.FutureIface" data-isabs="true">
       <a id="FutureIface:FutureIface"></a>
       <h4 class="signature">
@@ -91,46 +121,13 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Tracing1$$FutureIface.html"><span class="name">FutureIface</span></a><span class="result"> extends AnyRef</span>
+        <a href="Tracing1$$FutureIface.html"><span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Tracing1[Future]">FutureIface</span></a><span class="result"> extends Tracing1[Future]</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.Iface" data-isabs="true">
-      <a id="Iface:Iface"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1$$Iface.html"><span class="name">Iface</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething_args" data-isabs="false">
-      <a id="computeSomething_args:computeSomething_args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1$$computeSomething_args.html"><span class="name">computeSomething_args</span></a><span class="params">()</span><span class="result"> extends ThriftStruct with Product with Serializable</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething_result" data-isabs="false">
-      <a id="computeSomething_result:computeSomething_result"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Tracing1$$computeSomething_result.html"><span class="name">computeSomething_result</span></a><span class="params">(<span name="success">success: Option[String]</span>)</span><span class="result"> extends ThriftStruct with Product with Serializable</span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Tracing1[Future]</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -225,27 +222,27 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething_args" data-isabs="false">
-      <a id="computeSomething_args:computeSomething_args"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$args" data-isabs="false">
+      <a id="computeSomething$args:computeSomething$args"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracing1$$computeSomething_args$.html"><span class="name">computeSomething_args</span></a><span class="result"> extends ThriftStructCodec[computeSomething_args] with Serializable</span>
+        <a href="Tracing1$$computeSomething$args$.html"><span class="name">computeSomething$args</span></a><span class="result"> extends ThriftStructCodec3[computeSomething$args] with Serializable</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething_result" data-isabs="false">
-      <a id="computeSomething_result:computeSomething_result"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.demo.Tracing1.computeSomething$result" data-isabs="false">
+      <a id="computeSomething$result:computeSomething$result"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracing1$$computeSomething_result$.html"><span class="name">computeSomething_result</span></a><span class="result"> extends ThriftStructCodec[computeSomething_result] with Serializable</span>
+        <a href="Tracing1$$computeSomething$result$.html"><span class="name">computeSomething$result</span></a><span class="result"> extends ThriftStructCodec3[computeSomething$result] with Serializable</span>
       </span>
       </h4>
       

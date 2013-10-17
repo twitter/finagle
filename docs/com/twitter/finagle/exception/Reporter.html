@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="com.twitter.finagle.exception.thrift.scribe.FutureIface" class="extype" href="thrift/scribe$$FutureIface.html">FutureIface</a></span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String]</span>)</span><span class="result"> extends <span name="com.twitter.util.Monitor" class="extype">Monitor</span> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="com.twitter.finagle.exception.thrift.Scribe" class="extype" href="thrift/Scribe.html">Scribe</a>[<span name="com.twitter.util.Future" class="extype">Future</span>]</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String]</span>)</span><span class="result"> extends <span name="com.twitter.util.Monitor" class="extype">Monitor</span> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -70,7 +70,7 @@ is very wrong!
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="com.twitter.finagle.exception.thrift.scribe.FutureIface" class="extype" href="thrift/scribe$$FutureIface.html">FutureIface</a></span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span name="new Some[java.lang.String](java.net.InetAddress.getLocalHost().getHostName())" class="defval">...</span></span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>)</span>
+        <span class="name">Reporter</span><span class="params">(<span name="client">client: <a name="com.twitter.finagle.exception.thrift.Scribe" class="extype" href="thrift/Scribe.html">Scribe</a>[<span name="com.twitter.util.Future" class="extype">Future</span>]</span>, <span name="serviceName">serviceName: String</span>, <span name="statsReceiver">statsReceiver: <a name="com.twitter.finagle.stats.StatsReceiver" class="extype" href="../stats/StatsReceiver.html">StatsReceiver</a> = <span name="com.twitter.finagle.stats.NullStatsReceiver" class="defval">...</span></span>, <span name="sourceAddress">sourceAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span name="new Some[java.lang.String](java.net.InetAddress.getLocalHost().getHostName())" class="defval">...</span></span>, <span name="clientAddress">clientAddress: <span name="scala.Option" class="extype">Option</span>[String] = <span class="symbol">scala.None</span></span>)</span>
       </span>
       </h4>
       
@@ -192,14 +192,14 @@ is very wrong!
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.Reporter" class="extype" href="">Reporter</a> → Equals</dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exception.Reporter#client" data-isabs="false">
-      <a id="client:FutureIface"></a>
+      <a id="client:Scribe[Future]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">client</span><span class="result">: <a name="com.twitter.finagle.exception.thrift.scribe.FutureIface" class="extype" href="thrift/scribe$$FutureIface.html">FutureIface</a></span>
+        <span class="name">client</span><span class="result">: <a name="com.twitter.finagle.exception.thrift.Scribe" class="extype" href="thrift/Scribe.html">Scribe</a>[<span name="com.twitter.util.Future" class="extype">Future</span>]</span>
       </span>
       </h4>
       

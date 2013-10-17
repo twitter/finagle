@@ -25,11 +25,14 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">CloseRequest</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">CloseRequest</span><span class="params">(<span name="stmtId">stmtId: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>A CloseRequest deallocates a prepared statement on the server.
+No response is sent back to the client.
+<a href="http://dev.mysql.com/doc/internals/en/com-stmt-close.html">http://dev.mysql.com/doc/internals/en/com-stmt-close.html</a>
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a>, <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
@@ -65,7 +68,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">CloseRequest</span><span class="params">(<span name="ps">ps: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>)</span>
+        <span class="name">CloseRequest</span><span class="params">(<span name="stmtId">stmtId: <span name="scala.Int" class="extype">Int</span></span>)</span>
       </span>
       </h4>
       
@@ -188,25 +191,7 @@
         <span class="name">cmd</span><span class="result">: <span name="scala.Byte" class="extype">Byte</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a></dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest#data" data-isabs="false">
-      <a id="data:ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">data</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Request data translates to the body of the MySQL
-Packet sent to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Request data translates to the body of the MySQL
-Packet sent to the server. This field becomes
-part of a compisition of ChannelBuffers. To ensure
-that it has the correct byte order use Buffer.toChannelBuffer(...)
-to create the ChannelBuffer.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CloseRequest" class="extype" href="">CloseRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -366,15 +351,27 @@ to create the ChannelBuffer.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CloseRequest" class="extype" href="">CloseRequest</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest#ps" data-isabs="false">
-      <a id="ps:PreparedStatement"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CommandRequest#seq" data-isabs="false">
+      <a id="seq:Short"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">ps</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="PreparedStatement.html">PreparedStatement</a></span>
+        <span class="name">seq</span><span class="result">: <span name="scala.Short" class="extype">Short</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CommandRequest" class="extype" href="CommandRequest.html">CommandRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest#stmtId" data-isabs="false">
+      <a id="stmtId:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stmtId</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -390,18 +387,18 @@ to create the ChannelBuffer.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.Request#toChannelBuffer" data-isabs="false">
-      <a id="toChannelBuffer:ChannelBuffer"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest#toPacket" data-isabs="false">
+      <a id="toPacket:Packet"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">toChannelBuffer</span><span class="result">: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>
+        <span class="name">toPacket</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.transport.Packet" class="extype" href="transport/Packet.html">Packet</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.CloseRequest" class="extype" href="">CloseRequest</a> → <a name="com.twitter.finagle.exp.mysql.Request" class="extype" href="Request.html">Request</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.CloseRequest#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">

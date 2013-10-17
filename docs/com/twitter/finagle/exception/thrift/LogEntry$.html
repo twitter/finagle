@@ -14,7 +14,7 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <a title="Go to companion" href="LogEntry.html"><img src="../../../../../lib/object_to_class_big.png" /></a>
+        <a title="Go to companion" href="LogEntry.html"><img src="../../../../../lib/object_to_trait_big.png" /></a>
         <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exception" class="extype" href="../package.html">exception</a>.<a name="com.twitter.finagle.exception.thrift" class="extype" href="package.html">thrift</a></p>
         <h1><a title="Go to companion" href="LogEntry.html">LogEntry</a></h1>
       </div>
@@ -25,13 +25,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">LogEntry</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>] with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">LogEntry</span><span class="result"> extends <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>] with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>], <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exception.thrift.LogEntry" class="in"><span>LogEntry</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.scrooge.ThriftStructCodec" class="in"><span>ThriftStructCodec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.exception.thrift.LogEntry" class="in"><span>LogEntry</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="com.twitter.scrooge.ThriftStructCodec3" class="in"><span>ThriftStructCodec3</span></li><li name="com.twitter.scrooge.ThriftStructCodec" class="in"><span>ThriftStructCodec</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -57,7 +57,36 @@
         <div id="allMembers">
         
 
-        
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry.Immutable" data-isabs="false">
+      <a id="Immutable:Immutable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="LogEntry$$Immutable.html"><span class="name">Immutable</span></a><span class="result"> extends LogEntry</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The default read-only implementation of LogEntry.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry.Proxy" data-isabs="true">
+      <a id="Proxy:Proxy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="LogEntry$$Proxy.html"><span class="name">Proxy</span></a><span class="result"> extends LogEntry</span>
+      </span>
+      </h4>
+      <p class="comment cmt">This Proxy trait allows you to extend the LogEntry trait with additional state or
+behavior and implement the read-only methods from LogEntry using an underlying
+instance.</p>
+    </li></ol>
+            </div>
 
         
 
@@ -123,39 +152,63 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#CATEGORY_FIELD_DESC" data-isabs="false">
-      <a id="CATEGORY_FIELD_DESC:TField"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#CategoryField" data-isabs="false">
+      <a id="CategoryField:TField"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">CATEGORY_FIELD_DESC</span><span class="result">: <span name="org.apache.thrift.protocol.TField" class="extype">TField</span></span>
+        <span class="name">CategoryField</span><span class="result">: <span name="org.apache.thrift.protocol.TField" class="extype">TField</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#MESSAGE_FIELD_DESC" data-isabs="false">
-      <a id="MESSAGE_FIELD_DESC:TField"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry.Immutable" data-isabs="false">
+      <a id="Immutable:Immutable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">MESSAGE_FIELD_DESC</span><span class="result">: <span name="org.apache.thrift.protocol.TField" class="extype">TField</span></span>
+        <a href="LogEntry$$Immutable$.html"><span class="name">Immutable</span></a><span class="result"> extends ThriftStructCodec3[LogEntry] with Serializable</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#STRUCT_DESC" data-isabs="false">
-      <a id="STRUCT_DESC:TStruct"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#MessageField" data-isabs="false">
+      <a id="MessageField:TField"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">STRUCT_DESC</span><span class="result">: <span name="org.apache.thrift.protocol.TStruct" class="extype">TStruct</span></span>
+        <span class="name">MessageField</span><span class="result">: <span name="org.apache.thrift.protocol.TField" class="extype">TField</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#Struct" data-isabs="false">
+      <a id="Struct:TStruct"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Struct</span><span class="result">: <span name="org.apache.thrift.protocol.TStruct" class="extype">TStruct</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#apply" data-isabs="false">
+      <a id="apply(String,String):LogEntry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="category">category: String</span>, <span name="message">message: String</span>)</span><span class="result">: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>
       </span>
       </h4>
       
@@ -186,7 +239,7 @@
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec#decode" data-isabs="false">
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#decode" data-isabs="false">
       <a id="decode(TProtocol):LogEntry"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -194,14 +247,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decode</span><span class="params">(<span name="iprot">iprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>
+        <span class="name">decode</span><span class="params">(<span name="_iprot">_iprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#decoder" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="">LogEntry</a> → ThriftStructCodec</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#decoder" data-isabs="false">
       <a id="decoder:(TProtocol) ⇒ LogEntry"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -212,8 +262,8 @@
         <span class="name">decoder</span><span class="result">: (<span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="">LogEntry</a> → ThriftStructCodec</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec#encode" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#encode" data-isabs="false">
       <a id="encode(LogEntry,TProtocol):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -221,14 +271,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">encode</span><span class="params">(<span name="t">t: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>, <span name="oprot">oprot: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="name">encode</span><span class="params">(<span name="_item">_item: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>, <span name="_oproto">_oproto: <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#encoder" data-isabs="false">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="">LogEntry</a> → ThriftStructCodec</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.scrooge.ThriftStructCodec3#encoder" data-isabs="false">
       <a id="encoder:(LogEntry, TProtocol) ⇒ Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -239,7 +286,7 @@
         <span class="name">encoder</span><span class="result">: (<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>, <span name="org.apache.thrift.protocol.TProtocol" class="extype">TProtocol</span>) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="">LogEntry</a> → ThriftStructCodec</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ThriftStructCodec3 → ThriftStructCodec</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -399,6 +446,30 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#unapply" data-isabs="false">
+      <a id="unapply(LogEntry):Option[Product2[String, String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unapply</span><span class="params">(<span name="_item">_item: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>)</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Product2" class="extype">Product2</span>[String, String]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exception.thrift.LogEntry#validate" data-isabs="false">
+      <a id="validate(LogEntry):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">validate</span><span class="params">(<span name="_item">_item: <a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Checks that all required fields are non-null.</p>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
@@ -455,6 +526,8 @@
               <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
             </div><div name="java.io.Serializable" class="parent">
               <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="com.twitter.scrooge.ThriftStructCodec3" class="parent">
+              <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec3" class="extype">ThriftStructCodec3</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>]</h3>
             </div><div name="com.twitter.scrooge.ThriftStructCodec" class="parent">
               <h3>Inherited from <span name="com.twitter.scrooge.ThriftStructCodec" class="extype">ThriftStructCodec</span>[<a name="com.twitter.finagle.exception.thrift.LogEntry" class="extype" href="LogEntry.html">LogEntry</a>]</h3>
             </div><div name="scala.AnyRef" class="parent">

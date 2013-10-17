@@ -29,32 +29,60 @@
       </span>
       </h4>
       
-      <div class="fullcommenttop" id="comment"><div class="comment cmt"><h3>Finagle Introduction</h3><p>Start with <a name="com.twitter.finagle" class="extype" href="">finagle</a>. Both clients and and servers are services <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>, which are typically created with the ClientBuilder <a name="com.twitter.finagle.builder.ClientBuilder" class="extype" href="builder/ClientBuilder.html">ClientBuilder</a> and ServerBuilder <a name="com.twitter.finagle.builder.ServerBuilder" class="extype" href="builder/ServerBuilder.html">ServerBuilder</a> class, respectively.</p><p>The following example shows how to build a simple HTTP server:</p><pre>
-<span class="kw">val</span> service: Service[HttpRequest, HttpResponse] = <span class="kw">new</span> Service[HttpRequest, HttpResponse] {
-  <span class="kw">def</span> apply(request: HttpRequest) = Future(<span class="kw">new</span> DefaultHttpResponse(HTTP_1_1, OK))
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Finagle is an extensible RPC system.</p><p>Services are represented by class <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a>.
+Clients make use of <a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a> objects while
+servers implement them.</p><p>Finagle contains a number of protocol implementations; each of these
+implement <a name="com.twitter.finagle.Client" class="extype" href="Client.html">Client</a> and/or
+<a name="com.twitter.finagle.Server" class="extype" href="Server.html">Server</a>. For example, finagle's HTTP implementation,
+com.twitter.finagle.Http (in package <code>finagle-http</code>), exposes both.</p><p>Thus a simple HTTP server is built like this:</p><pre>
+<span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="kw">import</span> org.jboss.netty.handler.codec.http.{
+  HttpRequest, HttpResponse, DefaultHttpResponse}
+<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpVersion._
+<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpResponseStatus._
+<span class="kw">import</span> com.twitter.util.{Future, Await}
+
+<span class="kw">val</span> service = <span class="kw">new</span> Service[HttpRequest, HttpResponse] {
+  <span class="kw">def</span> apply(req: HttpRequest) =
+    Future.value(<span class="kw">new</span> DefaultHttpResponse(HTTP_1_1, OK))
 }
+<span class="kw">val</span> server = Http.serve(<span class="lit">":8080"</span>, service)
+Await.ready(server)
+</pre><p>We first define a service to which requests are dispatched. In this case,
+the service returns immediately with a HTTP 200 OK response, and with
+no content.</p><p>This service is then served via the Http protocol on TCP port 8080. Finally
+we wait for the server to stop serving.</p><p>We can now query our web server:</p><p><pre>
+% curl -D - localhost:8080
+HTTP/1.1 200 OK
 
-<span class="kw">val</span> address: SocketAddress = <span class="kw">new</span> InetSocketAddress(<span class="num">10000</span>)
+%
+</pre></p><p>Building an HTTP client is also simple. (Note that type annotations are
+added for illustration.)</p><pre>
+<span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="kw">import</span> org.jboss.netty.handler.codec.http.{
+  HttpRequest, HttpResponse, DefaultHttpRequest}
+<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpVersion._
+<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpMethod._
+<span class="kw">import</span> com.twitter.util.{Future, Await, Future, Return, Throw}
 
-<span class="kw">val</span> server: Server[HttpRequest, HttpResponse] = ServerBuilder()
-  .codec(Http)         <span class="cmt">// HTTP codec, defined in Netty</span>
-  .bindTo(address)     <span class="cmt">// one or more hosts; localhost:10000 in this example</span>
-  .name(<span class="lit">"HttpServer"</span>)  <span class="cmt">// name of your service</span>
-  .build(service)      <span class="cmt">// build the server</span>
-</pre><p>The following example shows how to build a simple HTTP client, which handles asynchronous responses:</p><pre>
-<span class="kw">val</span> client: Service[HttpRequest, HttpResponse] = ClientBuilder()
-   .codec(Http)             <span class="cmt">// HTTP codec, defined in Netty</span>
-   .hosts(address)          <span class="cmt">// one or more hosts; localhost:10000 in this example</span>
-   .hostConnectionLimit(<span class="num">1</span>)  <span class="cmt">// 1 connection per host</span>
-   .build()                 <span class="cmt">// build the client</span>
-
-<span class="cmt">// Issue a request, get a response:</span>
-<span class="kw">val</span> request: HttpRequest = <span class="kw">new</span> DefaultHttpRequest(HTTP_1_1, GET, <span class="lit">"/"</span>)
-<span class="kw">val</span> responseFuture: Future[HttpResponse] = client(request)           <span class="cmt">// response to request is a Future, which enables async execution</span>
-  onSuccess { response <span class="kw">=&gt;</span> println(<span class="lit">"Received response: "</span> + response)  <span class="cmt">// Finagle calls onSuccess when the response becomes available</span>
-                                                                     <span class="cmt">// onFailure could be defined to catch exceptions</span>
+<span class="kw">val</span> client: Service[HttpRequest, HttpResponse] =
+  Http.newService(<span class="lit">"localhost:8080"</span>)
+<span class="kw">val</span> f: Future[HttpResponse] =
+  client(<span class="kw">new</span> DefaultHttpRequest(HTTP_1_1, GET, <span class="lit">"/"</span>))
+f respond {
+  <span class="kw">case</span> Return(res) <span class="kw">=&gt;</span>
+    printf(<span class="lit">"Got HTTP response %s\n"</span>, res)
+  <span class="kw">case</span> Throw(exc) <span class="kw">=&gt;</span>
+    printf(<span class="lit">"Got error %s\n"</span>, exc)
 }
-</pre><p>For information about the Future class, which is essential for most RPC applications, see the <a href="http://twitter.github.com/util/util-core/target/site/doc/main/api/">scaladoc for Util</a>.</p><p>For exceptions you can catch, see <a name="com.twitter.finagle.RequestException" class="extype" href="RequestException.html">RequestException</a> and <a name="com.twitter.finagle.ApiException" class="extype" href="ApiException.html">ApiException</a>.</p><p>For imports and more ideas of how to use Finagle, see the <a href="https://github.com/twitter/finagle/tree/master/finagle-example/src/main/scala/com/twitter/finagle/example">examples</a>.</p></div></div>
+</pre><p><code>Http.newService(&quot;localhost:8080&quot;)</code> constructs a new
+<a name="com.twitter.finagle.Service" class="extype" href="Service.html">Service</a> instance connected to
+localhost TCP port 8080. We then issue a HTTP/1.1 GET
+request to URI &quot;/&quot;. The service returns a com.twitter.util.Future
+representing the result of the operation. We listen to
+this future, printing an appropriate message when the
+response arrives.</p><p>The <a href="http://twitter.github.io/finagle/">Finagle homepage</a> contains
+useful documentation and resources for using Finagle.</p></div></div>
     
 
       <div id="mbrsel">
@@ -85,6 +113,19 @@
       </span>
       </h4>
       <p class="comment cmt">An abstract class version of the above for java compatibility.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.Addr" data-isabs="true">
+      <a id="Addr:Addr"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Addr.html"><span class="name">Addr</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An address identifies the location of an object--it is a bound
+name.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Announcement" data-isabs="true">
       <a id="Announcement:Announcement"></a>
       <h4 class="signature">
@@ -352,6 +393,18 @@ factories in one (when available).</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.ContextHandler" data-isabs="true">
+      <a id="ContextHandler:ContextHandler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ContextHandler.html"><span class="name">ContextHandler</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A ContextHandler is responsible for maintaining a context.</p>
     </li><li visbl="pub" name="com.twitter.finagle.FactoryToService" data-isabs="false">
       <a id="FactoryToService:FactoryToService[Req, Rep]"></a>
       <h4 class="signature">
@@ -412,18 +465,6 @@ factories in one (when available).</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.Group" data-isabs="true">
-      <a id="Group:Group[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Group.html"><span class="name">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A group is a dynamic set of <code>T</code>-typed values.</p>
     </li><li visbl="pub" name="com.twitter.finagle.HttpRichClient" data-isabs="true">
       <a id="HttpRichClient:HttpRichClient"></a>
       <h4 class="signature">
@@ -557,6 +598,18 @@ server.</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Name" data-isabs="true">
+      <a id="Name:Name"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Name.html"><span class="name">Name</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A name identifies an object.</p>
     </li><li visbl="pub" name="com.twitter.finagle.NamedGroup" data-isabs="true">
       <a id="NamedGroup:NamedGroup"></a>
       <h4 class="signature">
@@ -713,18 +766,6 @@ server.</p>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.ResolvedGroup" data-isabs="true">
-      <a id="ResolvedGroup:ResolvedGroup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ResolvedGroup.html"><span class="name">ResolvedGroup</span></a><span class="result"> extends Group[SocketAddress] with Proxy with NamedGroup</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.Resolver" data-isabs="true">
       <a id="Resolver:Resolver"></a>
       <h4 class="signature">
@@ -736,7 +777,8 @@ server.</p>
         <a href="Resolver.html"><span class="name">Resolver</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A resolver binds a name, represented by a string, to a
+variable address.</p>
     </li><li visbl="pub" name="com.twitter.finagle.ResolverAddressInvalid" data-isabs="false">
       <a id="ResolverAddressInvalid:ResolverAddressInvalid"></a>
       <h4 class="signature">
@@ -1149,6 +1191,18 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Group" data-isabs="true">
+      <a id="Group:Group[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Var[Addr], Name">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A group is a dynamic set of <code>T</code>-typed values.</p>
     </li></ol>
             </div>
 
@@ -1156,7 +1210,19 @@ into <code>serveIface</code>:</p>
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.Announcer" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.Addr" data-isabs="false">
+      <a id="Addr:Addr"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Addr$.html"><span class="name">Addr</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.Announcer" data-isabs="false">
       <a id="Announcer:Announcer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1216,6 +1282,19 @@ into <code>serveIface</code>:</p>
       </span>
       </h4>
       
+    </li><li visbl="pub" name="com.twitter.finagle.Context" data-isabs="false">
+      <a id="Context:Context"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Context$.html"><span class="name">Context</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A context is a piece of serializable metadata managed by a
+registered handler.</p>
     </li><li visbl="pub" name="com.twitter.finagle.Filter" data-isabs="false">
       <a id="Filter:Filter"></a>
       <h4 class="signature">
@@ -1429,6 +1508,18 @@ into <code>serveIface</code>:</p>
       </span>
       <span class="symbol">
         <a href="MuxTransporter$.html"><span class="name">MuxTransporter</span></a><span class="result"> extends Netty3Transporter[ChannelBuffer, ChannelBuffer]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.Name" data-isabs="false">
+      <a id="Name:Name"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Name$.html"><span class="name">Name</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       

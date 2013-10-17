@@ -1,0 +1,227 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.twitter.finagle.exp.mysql.transport</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
+      <div id="definition">
+        <img src="../../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../../package.html">exp</a>.<a name="com.twitter.finagle.exp.mysql" class="extype" href="../package.html">mysql</a></p>
+        <h1>transport</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transport</span>
+      </span>
+      </h4>
+      
+      <div class="fullcommenttop" id="comment"></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Buffer" data-isabs="true">
+      <a id="Buffer:Buffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Buffer.html"><span class="name">Buffer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferReader" data-isabs="true">
+      <a id="BufferReader:BufferReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferReader.html"><span class="name">BufferReader</span></a><span class="result"> extends Buffer</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Provides convenient methods for reading
+data in a packet body.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter" data-isabs="true">
+      <a id="BufferWriter:BufferWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferWriter.html"><span class="name">BufferWriter</span></a><span class="result"> extends Buffer</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Provides convenient methods for writing the
+data in a mysql packet body.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Packet" data-isabs="true">
+      <a id="Packet:Packet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Packet.html"><span class="name">Packet</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A logical packet exchanged between the mysql
+server and client.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.PacketEncoder" data-isabs="false">
+      <a id="PacketEncoder:PacketEncoder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PacketEncoder.html"><span class="name">PacketEncoder</span></a><span class="result"> extends SimpleChannelDownstreamHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.PacketFrameDecoder" data-isabs="false">
+      <a id="PacketFrameDecoder:PacketFrameDecoder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PacketFrameDecoder.html"><span class="name">PacketFrameDecoder</span></a><span class="result"> extends FrameDecoder</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Decodes logical MySQL packets that could be fragmented across
+frames.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Buffer" data-isabs="false">
+      <a id="Buffer:Buffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Buffer$.html"><span class="name">Buffer</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The Buffer interfaces provide convenience methods for reading/writing
+a logical packet exchanged between a mysql client and server.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferReader" data-isabs="false">
+      <a id="BufferReader:BufferReader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferReader$.html"><span class="name">BufferReader</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.BufferWriter" data-isabs="false">
+      <a id="BufferWriter:BufferWriter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferWriter$.html"><span class="name">BufferWriter</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.MysqlClientPipelineFactory" data-isabs="false">
+      <a id="MysqlClientPipelineFactory:MysqlClientPipelineFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MysqlClientPipelineFactory$.html"><span class="name">MysqlClientPipelineFactory</span></a><span class="result"> extends ChannelPipelineFactory</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A Netty3 pipeline that is responsible for framing network
+traffic in terms of mysql logical packets.</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.MysqlTransporter" data-isabs="false">
+      <a id="MysqlTransporter:MysqlTransporter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MysqlTransporter$.html"><span class="name">MysqlTransporter</span></a><span class="result"> extends Netty3Transporter[Packet, Packet]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Responsible for the transport layer plumbing required to produce
+a Transport[Packet, Packet].</p>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.transport.Packet" data-isabs="false">
+      <a id="Packet:Packet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Packet$.html"><span class="name">Packet</span></a><span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

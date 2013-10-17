@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
-        <a title="Go to companion" href="PreparedStatement$.html"><img src="../../../../../lib/class_to_object_big.png" /></a>
+        <img src="../../../../../lib/class_big.png" />
         <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.exp" class="extype" href="../package.html">exp</a>.<a name="com.twitter.finagle.exp.mysql" class="extype" href="package.html">mysql</a></p>
-        <h1><a title="Go to companion" href="PreparedStatement$.html">PreparedStatement</a></h1>
+        <h1>PreparedStatement</h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -25,13 +25,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">PreparedStatement</span><span class="params">(<span name="statementId">statementId: <span name="scala.Int" class="extype">Int</span></span>, <span name="numberOfParams">numberOfParams: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">PreparedStatement</span><span class="params">(<span name="metadata">metadata: <a name="com.twitter.finagle.exp.mysql.PrepareOK" class="extype" href="PrepareOK.html">PrepareOK</a></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
       <div class="fullcommenttop" id="comment"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
     
 
@@ -45,7 +45,7 @@
               <span class="filtertype">Inherited</span>
               <ol><li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li></ol>
-              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.PreparedStatement" class="in"><span>PreparedStatement</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="com.twitter.finagle.exp.mysql.Result" class="in"><span>Result</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              <ol id="linearization"><li name="com.twitter.finagle.exp.mysql.PreparedStatement" class="in"><span>PreparedStatement</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
             </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -65,7 +65,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">PreparedStatement</span><span class="params">(<span name="statementId">statementId: <span name="scala.Int" class="extype">Int</span></span>, <span name="numberOfParams">numberOfParams: <span name="scala.Int" class="extype">Int</span></span>)</span>
+        <span class="name">PreparedStatement</span><span class="params">(<span name="metadata">metadata: <a name="com.twitter.finagle.exp.mysql.PrepareOK" class="extype" href="PrepareOK.html">PrepareOK</a></span>)</span>
       </span>
       </h4>
       
@@ -276,6 +276,18 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement#metadata" data-isabs="false">
+      <a id="metadata:PrepareOK"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">metadata</span><span class="result">: <a name="com.twitter.finagle.exp.mysql.PrepareOK" class="extype" href="PrepareOK.html">PrepareOK</a></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
@@ -396,18 +408,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.exp.mysql.PreparedStatement" class="extype" href="">PreparedStatement</a> → Product</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement#statement" data-isabs="false">
-      <a id="statement:Promise[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">statement</span><span class="result">: <span name="com.twitter.util.Promise" class="extype">Promise</span>[String]</span>
-      </span>
-      </h4>
-      
     </li><li visbl="pub" name="com.twitter.finagle.exp.mysql.PreparedStatement#statementId" data-isabs="false">
       <a id="statementId:Int"></a>
       <h4 class="signature">
@@ -534,8 +534,6 @@
               <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
             </div><div name="scala.Equals" class="parent">
               <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
-            </div><div name="com.twitter.finagle.exp.mysql.Result" class="parent">
-              <h3>Inherited from <a name="com.twitter.finagle.exp.mysql.Result" class="extype" href="Result.html">Result</a></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">

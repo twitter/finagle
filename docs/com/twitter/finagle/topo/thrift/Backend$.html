@@ -14,9 +14,9 @@
         </head>
         <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
-        <img src="../../../../../lib/object_big.png" />
+        <a title="Go to companion" href="Backend.html"><img src="../../../../../lib/object_to_trait_big.png" /></a>
         <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.twitter" class="extype" href="../../../package.html">twitter</a>.<a name="com.twitter.finagle" class="extype" href="../../package.html">finagle</a>.<a name="com.twitter.finagle.topo" class="extype" href="../package.html">topo</a>.<a name="com.twitter.finagle.topo.thrift" class="extype" href="package.html">thrift</a></p>
-        <h1>Backend</h1>
+        <h1><a title="Go to companion" href="Backend.html">Backend</a></h1>
       </div>
 
       <h4 class="signature" id="signature">
@@ -59,7 +59,31 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.FinagledClient" data-isabs="false">
+              <ol><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request$args" data-isabs="true">
+      <a id="request$args:request$args"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Backend$$request$args.html"><span class="name">request$args</span></a><span class="result"> extends ThriftStruct with Product2[Int, Int] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request$result" data-isabs="true">
+      <a id="request$result:request$result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Backend$$request$result.html"><span class="name">request$result</span></a><span class="result"> extends ThriftStruct with Product1[Option[String]] with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.FinagledClient" data-isabs="false">
       <a id="FinagledClient:FinagledClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -67,10 +91,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Backend$$FinagledClient.html"><span class="name">FinagledClient</span></a><span class="result"> extends FinagleThriftClient with FutureIface</span>
+        <a href="Backend$$FinagledClient.html"><span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Backend$FinagleClient">FinagledClient</span></a><span class="result"> extends Backend$FinagleClient with FutureIface</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Backend$FinagleClient</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.FinagledService" data-isabs="false">
       <a id="FinagledService:FinagledService"></a>
       <h4 class="signature">
@@ -79,10 +106,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Backend$$FinagledService.html"><span class="name">FinagledService</span></a><span class="result"> extends Service[Array[Byte], Array[Byte]] with FinagleThriftService</span>
+        <a href="Backend$$FinagledService.html"><span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Backend$FinagleService">FinagledService</span></a><span class="result"> extends Backend$FinagleService</span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Backend$FinagleService</p></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.FutureIface" data-isabs="true">
       <a id="FutureIface:FutureIface"></a>
       <h4 class="signature">
@@ -91,46 +121,13 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Backend$$FutureIface.html"><span class="name">FutureIface</span></a><span class="result"> extends AnyRef</span>
+        <a href="Backend$$FutureIface.html"><span class="name deprecated" title="Deprecated: (Since version 3.4.0) use Backend[Future]">FutureIface</span></a><span class="result"> extends Backend[Future]</span>
       </span>
       </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.Iface" data-isabs="true">
-      <a id="Iface:Iface"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="Backend$$Iface.html"><span class="name">Iface</span></a><span class="result"> extends AnyRef</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request_args" data-isabs="false">
-      <a id="request_args:request_args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Backend$$request_args.html"><span class="name">request_args</span></a><span class="params">(<span name="responseSize">responseSize: Int</span>, <span name="responseLatencyMs">responseLatencyMs: Int</span>)</span><span class="result"> extends ThriftStruct with Product with Serializable</span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request_result" data-isabs="false">
-      <a id="request_result:request_result"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Backend$$request_result.html"><span class="name">request_result</span></a><span class="params">(<span name="success">success: Option[String]</span>)</span><span class="result"> extends ThriftStruct with Product with Serializable</span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 3.4.0)</i> use Backend[Future]</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -336,27 +333,27 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request_args" data-isabs="false">
-      <a id="request_args:request_args"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request$args" data-isabs="false">
+      <a id="request$args:request$args"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Backend$$request_args$.html"><span class="name">request_args</span></a><span class="result"> extends ThriftStructCodec[request_args] with Serializable</span>
+        <a href="Backend$$request$args$.html"><span class="name">request$args</span></a><span class="result"> extends ThriftStructCodec3[request$args] with Serializable</span>
       </span>
       </h4>
       
-    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request_result" data-isabs="false">
-      <a id="request_result:request_result"></a>
+    </li><li visbl="pub" name="com.twitter.finagle.topo.thrift.Backend.request$result" data-isabs="false">
+      <a id="request$result:request$result"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Backend$$request_result$.html"><span class="name">request_result</span></a><span class="result"> extends ThriftStructCodec[request_result] with Serializable</span>
+        <a href="Backend$$request$result$.html"><span class="name">request$result</span></a><span class="result"> extends ThriftStructCodec3[request$result] with Serializable</span>
       </span>
       </h4>
       

@@ -508,6 +508,19 @@ Returns an error when key exists but does not hold a string value.
       </h4>
       <p class="shortcomment cmt">Deletes fields from given hash</p><div class="fullcomment"><div class="comment cmt"><p>Deletes fields from given hash</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Number of fields deleted
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hExists" data-isabs="false">
+      <a id="hExists(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hExists</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="field">field: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[<span name="java.lang.Boolean" class="extype">Boolean</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Determine if a hash field exists</p><div class="fullcomment"><div class="comment cmt"><p>Determine if a hash field exists</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if key field exists, false otherwise
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Hashes" class="extype" href="Hashes.html">Hashes</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Hashes#hGet" data-isabs="false">
       <a id="hGet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
       <h4 class="signature">
@@ -1131,6 +1144,21 @@ Throws an exception if the key does not refer to a set.</p></div><dl class="para
       </h4>
       <p class="shortcomment cmt">Removes an element randomly from the set, and returns it.</p><div class="fullcomment"><div class="comment cmt"><p>Removes an element randomly from the set, and returns it.
 Throws an exception if the key does not refer to a set.</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"></dd><dt>returns</dt><dd class="cmt"><p>the member, or nothing if the set is empty.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sRandMember" data-isabs="false">
+      <a id="sRandMember(ChannelBuffer,Option[Int]):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sRandMember</span><span class="params">(<span name="key">key: <span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span></span>, <span name="count">count: <span name="scala.Option" class="extype">Option</span>[<span name="scala.Int" class="extype">Int</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/package.html">None</a></span></span></span>)</span><span class="result">: <span name="com.twitter.util.Future" class="extype">Future</span>[Seq[<span name="org.jboss.netty.buffer.ChannelBuffer" class="extype">ChannelBuffer</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Returns a list of random entries from the set.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a list of random entries from the set. If the count is
+positive, a set is returned, otherwise a list that may contain
+duplicates is returned.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence with count random entries from the set
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="com.twitter.finagle.redis.Sets" class="extype" href="Sets.html">Sets</a></dd></dl></div>
     </li><li visbl="pub" name="com.twitter.finagle.redis.Sets#sRem" data-isabs="false">
       <a id="sRem(ChannelBuffer,List[ChannelBuffer]):Future[Long]"></a>

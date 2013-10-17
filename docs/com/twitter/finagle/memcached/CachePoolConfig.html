@@ -25,7 +25,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">CachePoolConfig</span><span class="params">(<span name="cachePoolSize">cachePoolSize: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+        <span class="name">CachePoolConfig</span><span class="params">(<span name="cachePoolSize">cachePoolSize: <span name="scala.Int" class="extype">Int</span></span>, <span name="detectKeyRemapping">detectKeyRemapping: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result"> extends <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
@@ -70,7 +70,7 @@ pool migrating state, backup cache servers list, or replication role, etc
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">CachePoolConfig</span><span class="params">(<span name="cachePoolSize">cachePoolSize: <span name="scala.Int" class="extype">Int</span></span>)</span>
+        <span class="name">CachePoolConfig</span><span class="params">(<span name="cachePoolSize">cachePoolSize: <span name="scala.Int" class="extype">Int</span></span>, <span name="detectKeyRemapping">detectKeyRemapping: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>)</span>
       </span>
       </h4>
       
@@ -194,6 +194,18 @@ pool migrating state, backup cache servers list, or replication role, etc
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li visbl="pub" name="com.twitter.finagle.memcached.CachePoolConfig#detectKeyRemapping" data-isabs="false">
+      <a id="detectKeyRemapping:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">detectKeyRemapping</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
