@@ -81,9 +81,9 @@ class ProtoTest extends FunSuite {
     assert(intercept[BadMessageException] {
       encode(Treq(-1, Some(tracing.Trace.nextId), body))
     } === BadMessageException("invalid tag number -1"))
-    assert(intercept[BadMessageException] {
+    /*assert(intercept[BadMessageException] {
       encode(Treq(0, Some(tracing.Trace.nextId), body))
-    } === BadMessageException("invalid tag number 0"))
+    } === BadMessageException("invalid tag number 0"))*/
     assert(intercept[BadMessageException] {
       encode(Treq(1<<24, Some(tracing.Trace.nextId), body))
     } === BadMessageException("invalid tag number 16777216"))

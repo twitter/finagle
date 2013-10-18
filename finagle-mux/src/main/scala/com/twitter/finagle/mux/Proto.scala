@@ -371,8 +371,7 @@ private[finagle] object Message {
   }
 
   def encode(m: Message): ChannelBuffer = {
-    if (m.tag < MarkerTag || m.tag > MaxTag || (m.tag == MarkerTag
-        && !m.isInstanceOf[MarkerMessage]))
+    if (m.tag < MarkerTag || m.tag > MaxTag)
       throw new BadMessageException("invalid tag number %d".format(m.tag))
 
     val head = Array[Byte](
