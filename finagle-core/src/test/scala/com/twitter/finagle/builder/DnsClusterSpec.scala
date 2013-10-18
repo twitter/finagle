@@ -61,7 +61,7 @@ class DnsClusterSpec extends FunSpec with MustMatchers {
 
         cluster.ready.isDefined must be(true)
 
-        Await.result(response, 1.second) must be("olleh")
+        Await.result(response, 5.seconds) must be("olleh")
       }
     }
 

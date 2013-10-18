@@ -1,11 +1,10 @@
 package com.twitter.finagle.builder
 
-import com.google.common.collect.HashMultiset
-import com.twitter.concurrent.Spool
+import com.twitter.concurrent.{Spool, SpoolSource}
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Future, FutureCancelledException, FuturePool, Promise, Return, Timer}
+import com.twitter.util.{Duration, Future, FutureCancelledException, FuturePool, Timer}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
 import java.security.Security
 import scala.collection._
@@ -22,11 +21,12 @@ import scala.collection.JavaConverters._
 class DnsCluster(host: String, port: Int, ttl: Duration,
                  timer: Timer = DefaultTimer.twitter)
   extends Cluster[SocketAddress] {
+  import Cluster._
 
   private[this] val log = Logger(this.getClass)
 
   private[this] var underlyingSet = Set.empty[SocketAddress]
-  private[this] var changes = new Promise[Spool[Cluster.Change[SocketAddress]]]
+  private[this] var changes = new SpoolSource[Cluster.Change[SocketAddress]]
 
   // exposed for testing
   protected[builder] def blockingDnsCall: Set[SocketAddress] = {
@@ -39,18 +39,12 @@ class DnsCluster(host: String, port: Int, ttl: Duration,
   protected[builder] def resolveHost: Future[Set[SocketAddress]] =
     FuturePool.unboundedPool(blockingDnsCall) handle {
       case ex: UnknownHostException =>
-        log.error("DNS request failed for host %s", host)
+        log.error("DNS could not resolve host %s", host)
         Set.empty[SocketAddress]
       case ex =>
-        log.error(ex, "failed to update %s", host)
+        log.error(ex, "failed to update host %s", host)
         underlyingSet
     }
-
-  private[this] def appendUpdate(update: Cluster.Change[SocketAddress]) = {
-    val newTail = new Promise[Spool[Cluster.Change[SocketAddress]]]
-    changes() = Return(update *:: newTail)
-    changes = newTail
-  }
 
   private[this] def updateAddresses(newSet: Set[SocketAddress]): Unit = synchronized {
     if (newSet != underlyingSet) {
@@ -58,11 +52,11 @@ class DnsCluster(host: String, port: Int, ttl: Duration,
       val removed = underlyingSet &~ newSet
 
       added foreach { address =>
-        appendUpdate(Cluster.Add(address))
+        changes.offer(Add(address))
       }
 
       removed foreach { address =>
-        appendUpdate(Cluster.Rem(address))
+        changes.offer(Rem(address))
       }
 
       underlyingSet = newSet
@@ -90,9 +84,9 @@ class DnsCluster(host: String, port: Int, ttl: Duration,
 
   def stop(): Unit = loopyFuture.raise(new FutureCancelledException)
 
-  def snap: (Seq[SocketAddress], Future[Spool[Cluster.Change[SocketAddress]]]) =
+  def snap: (Seq[SocketAddress], Future[Spool[Change[SocketAddress]]]) =
     synchronized {
-      (underlyingSet.toSeq, changes)
+      (underlyingSet.toSeq, changes())
     }
 }
 
