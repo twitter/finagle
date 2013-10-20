@@ -5,6 +5,13 @@
 6.x
 -----
 
+6.7.4
+~~~~~
+
+finagle-core: Fail ChannelTransport read queue before closing the connection
+finagle-mux: Add session for mux message passing and bidirectional RPC
+finagle-zipkin: Depend on scrooge-core instead of scrooge-runtime
+
 6.7.2
 ~~~~~
 
