@@ -39,6 +39,8 @@ class ThriftClientFramedCodecFactory(
 {
   def this(clientId: Option[ClientId]) = this(clientId, false, new TBinaryProtocol.Factory())
 
+  def this(clientId: ClientId) = this(Some(clientId))
+
   // Fix this after the API/ABI freeze (use case class builder)
   def useCallerSeqIds(x: Boolean): ThriftClientFramedCodecFactory =
     new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory)
