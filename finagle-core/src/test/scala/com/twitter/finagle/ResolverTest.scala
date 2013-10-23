@@ -33,7 +33,7 @@ class ResolverTest extends FunSuite {
 
   test("resolve ServiceLoaded resolvers") {
     val binding = Resolver.eval("test!xyz").bind()
-    binding() match {
+    Var.sample(binding) match {
       case Addr.Bound(addrs) if addrs.size == 1 =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()
@@ -43,7 +43,7 @@ class ResolverTest extends FunSuite {
   test("get a resolver instance") {
     val Some(resolver) = Resolver.get(classOf[TestResolver])
     val binding = resolver.bind("xyz")
-    binding() match {
+    Var.sample(binding) match {
       case Addr.Bound(addrs) if addrs.size == 1 =>
         assert(addrs.head === TestAddr("xyz"))
       case _ => fail()

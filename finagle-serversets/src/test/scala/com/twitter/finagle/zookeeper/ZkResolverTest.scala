@@ -4,8 +4,7 @@ import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.thrift.Status._
-import com.twitter.util.Await
-import com.twitter.util.Duration
+import com.twitter.util.{Await, Duration, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
@@ -69,7 +68,7 @@ if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
     val res = new ZkResolver(factory)
     val va = res.bind("localhost:%d!/foo/bar/baz".format(
       inst.zookeeperAddress.getPort))
-    eventually { va() === Addr.Bound() }
+    eventually { Var.sample(va) === Addr.Bound() }
 
 /*
     val inetClust = clust collect { case ia: InetSocketAddress => ia }
@@ -82,17 +81,17 @@ if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
     val status8080 = serverSet.join(
       addr,
       Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-    eventually { assert(va() === Addr.Bound(addr)) }
+    eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
     status8080.leave()
-    eventually { assert(va() === Addr.Bound()) }
+    eventually { assert(Var.sample(va) === Addr.Bound()) }
     serverSet.join(
       addr,
       Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-    eventually { assert(va() === Addr.Bound(addr)) }
+    eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
 
     val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(
       inst.zookeeperAddress.getPort))
-    eventually { assert(blahVa() === Addr.Bound(blahAddr)) }
+    eventually { assert(Var.sample(blahVa) === Addr.Bound(blahAddr)) }
   }
 
   test("resolves from the main resolver") {

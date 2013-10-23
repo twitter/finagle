@@ -112,15 +112,15 @@ class DtabTest extends FunSuite {
       .delegated("/bar", "/foo")
 
     val va = d.bind("/foo")
-    val Addr.Failed(exc) = va()
+    val Addr.Failed(exc) = Var.sample(va)
     assert(exc.getMessage() === "Resolution reached maximum depth")
   }
   
   test("Handles unknown") {
     val d = Dtab.empty
       .delegated("/foo", "/bar")
-    
-    assert(d.bind("/blah").apply() === Addr.Neg)
+
+    assert(Var.sample(d.bind("/blah")) === Addr.Neg)
   }
 
   test("Dtab.bind nonexistent") {
@@ -129,7 +129,7 @@ class DtabTest extends FunSuite {
       
     
     d.bind("/blah") match {
-      case Var(Addr.Neg) =>
+      case Var.Sampled(Addr.Neg) =>
       case _ => fail()
     }
   }
@@ -144,13 +144,13 @@ class DtabTest extends FunSuite {
       .delegated("/bar", "inet!:9090")
 
     (d1 delegated d2).bind("/foo") match {
-      case Var(Addr.Bound(s)) if s.size == 1 =>
+      case Var.Sampled(Addr.Bound(s)) if s.size == 1 =>
         assert(s.head === new InetSocketAddress(8080))
       case _ => fail()
     }
     
     (d2 delegated d1).bind("/foo") match {
-      case Var(Addr.Bound(s)) if s.size == 1 =>
+      case Var.Sampled(Addr.Bound(s)) if s.size == 1 =>
         assert(s.head === new InetSocketAddress(9090))
       case _ => fail()
     }

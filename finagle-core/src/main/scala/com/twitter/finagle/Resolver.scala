@@ -20,7 +20,7 @@ trait Resolver {
   @deprecated("Use Resolver.bind", "6.7.x")
   final def resolve(name: String): Try[Group[SocketAddress]] =
     bind(name) match {
-      case Var(Addr.Failed(e)) => Throw(e)
+      case Var.Sampled(Addr.Failed(e)) => Throw(e)
       case va => Return(Group.fromVarAddr(va))
     }
 }
@@ -115,7 +115,7 @@ object Resolver {
   def resolve(addr: String): Try[Group[SocketAddress]] =
     Try { eval(addr) } flatMap { n =>
       n.bind() match {
-        case Var(Addr.Failed(e)) => Throw(e)
+        case Var.Sampled(Addr.Failed(e)) => Throw(e)
         case va => Return(Group.fromVarAddr(va))
       }
     }

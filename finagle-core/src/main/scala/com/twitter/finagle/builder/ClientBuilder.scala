@@ -849,7 +849,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     // TODO: should really be operating off of the binding in
     // buildFactory.
     val service = config.dest.get.bind() match {
-      case Var(Addr.Bound(sockaddrs)) if sockaddrs.nonEmpty =>
+      case Var.Sampled(Addr.Bound(sockaddrs)) if sockaddrs.nonEmpty =>
         underlying
       case v =>
         val p = new Promise[Service[Req, Rep]]

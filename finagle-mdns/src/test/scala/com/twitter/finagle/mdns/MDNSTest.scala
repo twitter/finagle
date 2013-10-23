@@ -1,7 +1,7 @@
 package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcer, Resolver, Addr}
-import com.twitter.util.{Await, RandomSocket}
+import com.twitter.util.{Await, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
@@ -23,7 +23,7 @@ class MdnsTest extends FunSuite with BeforeAndAfter {
       val addr = resolver.bind(dest)
 
       eventually(timeout(5 seconds)) {
-        addr() match {
+        Var.sample(addr) match {
           case Addr.Bound(sockaddrs) =>
             assert(sockaddrs exists {
               case ia1: InetSocketAddress => ia1.getPort == ia.getPort
