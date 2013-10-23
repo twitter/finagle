@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.{DefaultClient, Bridge}
 import com.twitter.finagle.dispatch.{PipeliningDispatcher, SerialClientDispatcher}
 import com.twitter.finagle.server.DefaultServer
-import com.twitter.finagle.thrift.{ClientId, ThriftFramedTransporter, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ThriftFramedTransporter, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.thriftscrooge3.TestService
 import com.twitter.finagle.tracing.Annotation.{ServerRecv, ClientSend}
 import com.twitter.finagle.tracing._
@@ -17,12 +17,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
-  trait ThriftMuxTestServer {
-    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
-      def query(x: String) = Future.value(x+x)
-    })
-  }
-
   test("end-to-end Scrooge2") {
     val server = ThriftMux.serveIface(":*", new thriftscrooge2.TestService.FutureIface {
       def query(x: String) = Future.value(x+x)
@@ -30,6 +24,12 @@ class EndToEndTest extends FunSuite {
 
     val client = ThriftMux.newIface[thriftscrooge2.TestService.FutureIface](server)
     assert(Await.result(client.query("ok")) == "okok")
+  }
+
+  trait ThriftMuxTestServer {
+    val server = ThriftMux.serveIface(":*", new TestService.FutureIface {
+      def query(x: String) = Future.value(x+x)
+    })
   }
 
   test("end-to-end Scrooge3") {
@@ -99,21 +99,6 @@ class EndToEndTest extends FunSuite {
     (srvTraceId, cltTraceId) match {
       case (Some(id1), Some(id2)) => assert(id1 === id2)
       case _ => assert(false, "the trace ids sent by client and received by server do not match")
-    }
-  }
-
-  test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
-    val server =ThriftMux.serveIface(":*", new TestService.FutureIface {
-      def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
-    })
-
-    val clientId = "test.service"
-    val client = Thrift
-      .withClientId(ClientId(clientId))
-      .newIface[TestService.FutureIface](server)
-
-    1 to 5 foreach { _ =>
-      assert(Await.result(client.query("ok")) == clientId)
     }
   }
 

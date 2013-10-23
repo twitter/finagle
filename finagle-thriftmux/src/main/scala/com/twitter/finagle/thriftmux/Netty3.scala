@@ -2,10 +2,9 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.thrift.thrift.{ResponseHeader, RequestHeader, UpgradeReply}
-import com.twitter.finagle.thrift.{ClientId, ClientIdContext, OutputBuffer, ThriftTracing, InputBuffer}
-import com.twitter.finagle.tracing.{Flags, SpanId, TraceContext, TraceId}
+import com.twitter.finagle.thrift.{ClientId, OutputBuffer, ThriftTracing, InputBuffer}
+import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{mux, ThriftMuxUtil}
-import com.twitter.io.Buf
 import com.twitter.util.NonFatal
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger
@@ -26,7 +25,7 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
   private class TTwitterToMux extends SimpleChannelHandler {
     import TTwitterToMux._
 
-    private[this] def thriftToMux(req: ChannelBuffer): Message.Tdispatch = {
+    private[this] def thriftToTreq(req: ChannelBuffer): Message.Treq = {
       val header = new RequestHeader
       val request_ = InputBuffer.peelMessage(ThriftMuxUtil.bufferToArray(req), header, protocolFactory)
       val sampled = if (header.isSetSampled) Some(header.isSampled) else None
@@ -35,36 +34,34 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
         if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
         SpanId(header.getSpan_id),
         sampled,
-        if (header.isSetFlags) Flags(header.getFlags) else Flags()
-      )
+        if (header.isSetFlags) Flags(header.getFlags) else Flags())
 
-      val clientIdOpt = Option(header.client_id) map { _.name }
-      val contexts = Seq(TraceContext.newKVTuple(traceId), ClientIdContext.newKVTuple(clientIdOpt))
-
-      Message.Tdispatch(Message.MinTag, contexts, ChannelBuffers.wrappedBuffer(request_))
+      // If this handler is in place requests are being serialized. This should be safe.
+      ClientId.set(Option(header.client_id) map { clientId => ClientId(clientId.name) })
+      Message.Treq(Message.MinTag, Some(traceId), ChannelBuffers.wrappedBuffer(request_))
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent)  {
       val buf = e.getMessage.asInstanceOf[ChannelBuffer]
-      super.messageReceived(ctx, new UpstreamMessageEvent(
-        e.getChannel, Message.encode(thriftToMux(buf)), e.getRemoteAddress))
+      super.messageReceived(ctx,
+        new UpstreamMessageEvent(e.getChannel, Message.encode(thriftToTreq(buf)), e.getRemoteAddress))
     }
 
     override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+      // If this handler is in place requests are being serialized. This should be safe.
+      ClientId.clear()
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
-        case Message.RdispatchOk(_, _, rep) =>
+        case Message.RreqOk(_, rep) =>
           super.writeRequested(ctx,
             new DownstreamMessageEvent(e.getChannel, e.getFuture,
               ChannelBuffers.wrappedBuffer(responseHeader, rep), e.getRemoteAddress))
-
-        case Message.RdispatchError(_, _, error) =>
+        case Message.RreqError(_, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
           throw UnexpectedRequestException(error)
-
-        case unexpected =>
-          throw UnexpectedRequestException(
-            "Unexpected request type %s".format(unexpected.getClass.getName))
+        case _ =>
+          // Since only a RreqOK or RreqError is expected from the earlier
+          // request, simply drop all other mux messages.
       }
     }
   }
@@ -75,24 +72,22 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
       super.messageReceived(ctx,
         new UpstreamMessageEvent(
           e.getChannel,
-          Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, buf)),
+          Message.encode(Message.Treq(Message.MinTag, None, buf)),
           e.getRemoteAddress))
     }
 
     override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
       Message.decode(e.getMessage.asInstanceOf[ChannelBuffer]) match {
-        case Message.RdispatchOk(_, _, rep) =>
+        case Message.RreqOk(_, rep) =>
           super.writeRequested(ctx,
             new DownstreamMessageEvent(e.getChannel, e.getFuture, rep, e.getRemoteAddress))
-
-        case Message.RdispatchError(_, _, error) =>
+        case Message.RreqError(_, error) =>
           // OK to throw an exception here as ServerBridge take cares it
           // by logging the error and then closing the channel.
           throw UnexpectedRequestException(error)
-
-        case unexpected =>
-          throw UnexpectedRequestException(
-            "Unexpected request type %s".format(unexpected.getClass.getName))
+        case _ =>
+          // Since only a RreqOK or RreqError is expected from the earlier
+          // request, simply drop all other mux messages.
       }
     }
   }
@@ -165,7 +160,7 @@ private[finagle] class PipelineFactory(protocolFactory: TProtocolFactory)
             super.messageReceived(ctx,
               new UpstreamMessageEvent(
                 e.getChannel,
-                Message.encode(Message.Tdispatch(Message.MinTag, Seq.empty, buf)),
+                Message.encode(Message.Treq(Message.MinTag, None, buf)),
                 e.getRemoteAddress))
           }
       }

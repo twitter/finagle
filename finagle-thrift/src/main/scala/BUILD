@@ -7,7 +7,4 @@ scala_library(name='scala',
     pants('util/util-core')
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    pants('finagle/finagle-thrift/src/main/resources')
-  ],
 )
