@@ -2,24 +2,12 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.{Context, ContextHandler}
 import com.twitter.io.Buf
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 private[finagle] object TraceContext {
   val Key = Buf.Utf8("com.twitter.finagle.tracing.TraceContext")
   val KeyBytes = Context.keyBytes(Key)
-}
-
-/**
- * A context handler for Trace IDs.
- *
- * The wire format is (big-endian):
- *     ''spanId:8 parentId:8 traceId:8 flags:8''
- */
-private[finagle] class TraceContext extends ContextHandler {
-  val key = TraceContext.Key
-
-  private[this] val local = new ThreadLocal[Array[Byte]] {
-    override def initialValue() = new Array[Byte](32)
-  }
+  val KeyBytesChannelBuffer = ChannelBuffers.wrappedBuffer(KeyBytes)
 
   private def put64(bytes: Array[Byte], i: Int, l: Long) {
     bytes(i) = (l>>56 & 0xff).toByte
@@ -41,6 +29,49 @@ private[finagle] class TraceContext extends ContextHandler {
     ((bytes(i+5) & 0xff).toLong << 16) |
     ((bytes(i+6) & 0xff).toLong << 8) |
     (bytes(i+7) & 0xff).toLong
+  }
+
+  private def serializeTraceId(traceId: TraceId): Array[Byte] = {
+    val flags = traceId._sampled match {
+      case None =>
+        traceId.flags
+      case Some(true) =>
+        traceId.flags.setFlag(Flags.SamplingKnown | Flags.Sampled)
+      case Some(false) =>
+        traceId.flags.setFlag(Flags.SamplingKnown)
+    }
+
+    val bytes = new Array[Byte](32)
+    put64(bytes, 0, traceId.spanId.toLong)
+    put64(bytes, 8, traceId.parentId.toLong)
+    put64(bytes, 16, traceId.traceId.toLong)
+    put64(bytes, 24, flags.toLong)
+    bytes
+  }
+
+  /**
+   * Serialize a TraceId into a tuple of key->value ChannelBuffers. Useful for
+   * piecing together context pairs to give to the construct of `Tdispatch`.
+   */
+  def newKVTuple(traceId: TraceId): (ChannelBuffer, ChannelBuffer) = {
+    val bytes = serializeTraceId(traceId)
+    KeyBytesChannelBuffer.duplicate() -> ChannelBuffers.wrappedBuffer(bytes)
+  }
+}
+
+/**
+ * A context handler for Trace IDs.
+ *
+ * The wire format is (big-endian):
+ *     ''spanId:8 parentId:8 traceId:8 flags:8''
+ */
+private[finagle] class TraceContext extends ContextHandler {
+  import TraceContext._
+
+  val key = Key
+
+  private[this] val local = new ThreadLocal[Array[Byte]] {
+    override def initialValue() = new Array[Byte](32)
   }
 
   def handle(body: Buf) {
@@ -70,21 +101,6 @@ private[finagle] class TraceContext extends ContextHandler {
     Trace.setId(traceId)
   }
 
-  def emit(): Option[Buf] = {
-    val flags = Trace.id._sampled match {
-      case None =>
-        Trace.id.flags
-      case Some(true) =>
-        Trace.id.flags.setFlag(Flags.SamplingKnown | Flags.Sampled)
-      case Some(false) =>
-        Trace.id.flags.setFlag(Flags.SamplingKnown)
-    }
-
-    val bytes = new Array[Byte](32)
-    put64(bytes, 0, Trace.id.spanId.toLong)
-    put64(bytes, 8, Trace.id.parentId.toLong)
-    put64(bytes, 16, Trace.id.traceId.toLong)
-    put64(bytes, 24, flags.toLong)
-    Some(Buf.ByteArray(bytes))
-  }
+  def emit(): Option[Buf] =
+    Some(Buf.ByteArray(serializeTraceId(Trace.id)))
 }
