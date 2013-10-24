@@ -20,12 +20,24 @@ private[finagle] case class Error(cause: Throwable) extends State
 
 private[finagle] class CancelledException extends Exception
 
+object RichChannelFuture {
+
+  private def state(channelFuture: ChannelFuture): State = {
+    if (channelFuture.isSuccess)
+      Ok(channelFuture.getChannel)
+    else if (channelFuture.isCancelled)
+      Cancelled
+    else
+      Error(channelFuture.getCause)
+  }
+}
+
 // TODO: decide what to do about cancellation here.
 private[finagle] class RichChannelFuture(val self: ChannelFuture) {
   def apply(f: State => Unit) {
     self.addListener(new ChannelFutureListener {
       def operationComplete(future: ChannelFuture) {
-        f(new RichChannelFuture(future).state)
+        f(RichChannelFuture.state(future))
       }
     })
   }
@@ -38,13 +50,7 @@ private[finagle] class RichChannelFuture(val self: ChannelFuture) {
     }
   }
 
-  def state: State =
-    if (self.isSuccess)
-      Ok(self.getChannel)
-    else if (self.isCancelled)
-      Cancelled
-    else
-      Error(self.getCause)
+  def state: State = RichChannelFuture.state(self)
 
   def proxyTo(other: ChannelFuture) {
     this {
