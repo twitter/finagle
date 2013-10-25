@@ -5,7 +5,7 @@ import com.twitter.finagle.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler
 }
 import com.twitter.finagle.httpproxy.HttpConnectHandler
-import com.twitter.finagle.socks.SocksConnectHandler
+import com.twitter.finagle.socks.{SocksConnectHandler, SocksProxyFlags}
 import com.twitter.finagle.ssl.{Engine, SslConnectHandler}
 import com.twitter.finagle.stats.{ClientStatsReceiver,   StatsReceiver}
 import com.twitter.finagle.transport.{ChannelTransport,   Transport}
@@ -127,7 +127,7 @@ case class Netty3Transporter[In, Out](
   newTransport: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   httpProxy: Option[SocketAddress] = None,
-  socksProxy: Option[SocketAddress] = None,
+  socksProxy: Option[SocketAddress] = SocksProxyFlags.socksProxy,
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,

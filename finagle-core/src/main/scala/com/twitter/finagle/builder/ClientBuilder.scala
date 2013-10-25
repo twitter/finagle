@@ -51,6 +51,7 @@ import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, HeapBalancerFactor
 import com.twitter.finagle.netty3.ChannelSnooper
 import com.twitter.finagle.service.{FailureAccrualFactory, ProxyService,
   RetryPolicy, RetryingFilter, TimeoutFilter}
+import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Tracer}
@@ -171,7 +172,7 @@ private[builder] final case class ClientConfig[Req, Rep, HasCluster, HasCodec, H
   private val _channelFactory            : Option[ChannelFactory]        = None,
   private val _tls                       : Option[(() => Engine, Option[String])] = None,
   private val _httpProxy                 : Option[SocketAddress]          = None,
-  private val _socksProxy                : Option[SocketAddress]          = None,
+  private val _socksProxy                : Option[SocketAddress]          = SocksProxyFlags.socksProxy,
   private val _failureAccrual            : Option[Timer => ServiceFactoryWrapper] = Some(FailureAccrualFactory.wrapper(5, 5.seconds)),
   private val _tracer                    : Tracer                        = NullTracer,
   private val _hostConfig                : ClientHostConfig              = new ClientHostConfig,
