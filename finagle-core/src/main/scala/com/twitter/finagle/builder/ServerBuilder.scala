@@ -412,8 +412,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     val statsReceiver = config.statsReceiver map(_.scope(config.name)) getOrElse NullStatsReceiver
     val logger = config.logger getOrElse Logger.getLogger(config.name)
 
-    val serverAddr = new InetSocketAddress(InetAddress.getLocalHost, 0) //don't care about multi-homed, or port
-    val monitor = config.monitor map(_( config.name, serverAddr)) getOrElse NullMonitor
+    val monitor = config.monitor map(_( config.name, InetSocketAddressUtil.toPublic(config.bindTo))) getOrElse NullMonitor
 
     val tracer = config.tracer
     val timer = DefaultTimer.twitter
