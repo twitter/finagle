@@ -12,7 +12,7 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.{
   DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
-import com.twitter.util.{Timer, Duration, Monitor}
+import com.twitter.util.{Duration, Future, Monitor, Return, Timer, Throw, Var}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger}
 
@@ -165,7 +165,8 @@ case class DefaultClient[Req, Rep](
       // TODO: load balancer consumes Var[Addr] directly., 
       // or at least Var[SocketAddress]
       val g = Group.mutable[SocketAddress]()
-      dest.bind() observe {
+      val v = dest.bind()
+      v observe {
         case Addr.Bound(sockaddrs) =>
           g() = sockaddrs
         case Addr.Failed(e) =>
@@ -184,8 +185,23 @@ case class DefaultClient[Req, Rep](
       }
 
       val endpoints = g map { bindStack(_) }
-      loadBalancerFactory.newLoadBalancer(
-        endpoints, statsReceiver.scope("loadbalancer"), noBrokersException)
+      val balanced = loadBalancerFactory.newLoadBalancer(
+        endpoints,
+        statsReceiver.scope("loadbalancer"),
+        noBrokersException
+      )
+
+      // observeUntil throws exceptions on interrupts, but onReady should not interruptible
+      val ready = v.observeUntil(_ != Addr.Pending).masked
+      val f = ready map (_ => balanced)
+
+      // using ServiceFactoryRef here means we have one fewer closure allocation later
+      val ref = new ServiceFactoryRef(new DelayedFactory(f))
+      f respond {
+        case Throw(exc) => ref() = new FailingFactory(exc)
+        case Return(_) => ref() = balanced
+      }
+      ref
     }
 
     traced compose

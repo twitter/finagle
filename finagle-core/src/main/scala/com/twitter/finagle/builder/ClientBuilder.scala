@@ -379,7 +379,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     dest(new Name {
-      def bind() = group.set map { newSet => Addr.Bound(newSet) }
+      // Group doesn't support the abstraction of "not yet bound" so
+      // this is a bit of a hack
+      @volatile var first = true
+
+      def bind() = group.set map {
+        case newSet if first && newSet.isEmpty => Addr.Pending
+        case newSet =>
+          first = false
+          Addr.Bound(newSet)
+      }
     })
 
   /**
@@ -845,27 +854,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
       ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
   ): Service[Req, Rep] = {
-    val underlying: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
-    // TODO: should really be operating off of the binding in
-    // buildFactory.
-    val service = config.dest.get.bind() match {
-      case Var.Sampled(Addr.Bound(sockaddrs)) if sockaddrs.nonEmpty =>
-        underlying
-      case v =>
-        val p = new Promise[Service[Req, Rep]]
-        val sub = v observe {
-          case Addr.Bound(sockaddrs) if sockaddrs.nonEmpty =>
-            p.updateIfEmpty(Return(underlying))
-          case Addr.Failed(exc) =>
-            // TODO: wrap?
-            p.updateIfEmpty(Throw(exc))
-          case bad => 
-            val log = config.logger getOrElse Logger.getLogger(config.name)
-            log.warning("Unsupported address "+bad)
-        }
-        p ensure { sub.close() }
-        new ProxyService(p, config.hostConnectionMaxWaiters getOrElse Int.MaxValue)
-    }
+    val service: Service[Req, Rep] = new FactoryToService[Req, Rep](buildFactory())
 
     val timer = DefaultTimer.twitter
 
