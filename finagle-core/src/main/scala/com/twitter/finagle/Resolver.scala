@@ -149,6 +149,8 @@ object Resolver {
       }
   
       def bind() = resolver.bind(arg)
+      
+      val reified = name
     }
 
   private[finagle] def evalLabeled(addr: String): (Name, String) = {

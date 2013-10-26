@@ -373,14 +373,14 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
         case 1: // SPANS
           if (field.type == TType.LIST) {
             {
-              TList _list12 = iprot.readListBegin();
-              this.spans = new ArrayList<Span>(_list12.size);
-              for (int _i13 = 0; _i13 < _list12.size; ++_i13)
+              TList _list16 = iprot.readListBegin();
+              this.spans = new ArrayList<Span>(_list16.size);
+              for (int _i17 = 0; _i17 < _list16.size; ++_i17)
               {
-                Span _elem14;
-                _elem14 = new Span();
-                _elem14.read(iprot);
-                this.spans.add(_elem14);
+                Span _elem18;
+                _elem18 = new Span();
+                _elem18.read(iprot);
+                this.spans.add(_elem18);
               }
               iprot.readListEnd();
             }
@@ -391,14 +391,14 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
         case 2: // CONTEXTS
           if (field.type == TType.LIST) {
             {
-              TList _list15 = iprot.readListBegin();
-              this.contexts = new ArrayList<RequestContext>(_list15.size);
-              for (int _i16 = 0; _i16 < _list15.size; ++_i16)
+              TList _list19 = iprot.readListBegin();
+              this.contexts = new ArrayList<RequestContext>(_list19.size);
+              for (int _i20 = 0; _i20 < _list19.size; ++_i20)
               {
-                RequestContext _elem17;
-                _elem17 = new RequestContext();
-                _elem17.read(iprot);
-                this.contexts.add(_elem17);
+                RequestContext _elem21;
+                _elem21 = new RequestContext();
+                _elem21.read(iprot);
+                this.contexts.add(_elem21);
               }
               iprot.readListEnd();
             }
@@ -425,9 +425,9 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       oprot.writeFieldBegin(SPANS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.spans.size()));
-        for (Span _iter18 : this.spans)
+        for (Span _iter22 : this.spans)
         {
-          _iter18.write(oprot);
+          _iter22.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -437,9 +437,9 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       oprot.writeFieldBegin(CONTEXTS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.contexts.size()));
-        for (RequestContext _iter19 : this.contexts)
+        for (RequestContext _iter23 : this.contexts)
         {
-          _iter19.write(oprot);
+          _iter23.write(oprot);
         }
         oprot.writeListEnd();
       }

@@ -390,6 +390,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
           first = false
           Addr.Bound(newSet)
       }
+      
+      val reified = "fail!"
     })
 
   /**

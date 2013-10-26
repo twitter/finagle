@@ -3,6 +3,7 @@ package com.twitter.finagle.mux
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.util.CharsetUtil
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
+import com.twitter.finagle.{Dtab, Dentry}
 
 case class BadMessageException(why: String) extends Exception(why)
 
@@ -103,6 +104,8 @@ private[finagle] object Message {
   case class Tdispatch(
       tag: Int, 
       contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      dst: String,
+      dtab: Dtab,
       req: ChannelBuffer
   ) extends Message {
     val typ = Types.Tdispatch
@@ -114,9 +117,15 @@ private[finagle] object Message {
         n += 2+k.readableBytes + 2+v.readableBytes
         seq = seq.tail
       }
-      n += 2+2
+      n += 2+dst.size
+      n += 2
+      var delegations = dtab.iterator
+      while (delegations.hasNext) {
+        val Dentry(src, dst) = delegations.next()
+        n += src.size+2 + dst.reified.size+2
+      }
 
-      val hd = ChannelBuffers.buffer(n)
+      val hd = ChannelBuffers.dynamicBuffer(n)
       hd.writeShort(contexts.length)
       seq = contexts
       while (seq.nonEmpty) {
@@ -124,16 +133,27 @@ private[finagle] object Message {
         // to do zero-copy here.
         val (k, v) = seq.head
         hd.writeShort(k.readableBytes)
-        hd.writeBytes(k.duplicate())
+        hd.writeBytes(k.slice())
         hd.writeShort(v.readableBytes)
-        hd.writeBytes(v.duplicate())
+        hd.writeBytes(v.slice())
         seq = seq.tail
       }
 
-      // No destination yet.
-      hd.writeShort(0)
-      // No delegation table yet.
-      hd.writeShort(0)
+      val dstbytes = dst.getBytes(CharsetUtil.UTF_8)
+      hd.writeShort(dstbytes.size)
+      hd.writeBytes(dstbytes)
+
+      hd.writeShort(dtab.size)
+      delegations = dtab.iterator
+      while (delegations.hasNext) {
+        val Dentry(src, dst) = delegations.next()
+        val srcbytes = src.getBytes(CharsetUtil.UTF_8)
+        hd.writeShort(srcbytes.size)
+        hd.writeBytes(srcbytes)
+        val dstbytes = dst.reified.getBytes(CharsetUtil.UTF_8)
+        hd.writeShort(dstbytes.size)
+        hd.writeBytes(dstbytes)
+      }
 
       ChannelBuffers.wrappedBuffer(hd, req)
     }
@@ -161,9 +181,9 @@ private[finagle] object Message {
       while (seq.nonEmpty) {
         val (k, v) = seq.head
         hd.writeShort(k.readableBytes)
-        hd.writeBytes(k.duplicate())
+        hd.writeBytes(k.slice())
         hd.writeShort(v.readableBytes)
-        hd.writeBytes(v.duplicate())
+        hd.writeBytes(v.slice())
         seq = seq.tail
       }
       
@@ -216,8 +236,10 @@ private[finagle] object Message {
       else None
   }
 
-  def decodeString(buf: ChannelBuffer) = {
-    val n = buf.readableBytes
+  def decodeUtf8(buf: ChannelBuffer): String = 
+    decodeUtf8(buf, buf.readableBytes)
+
+  def decodeUtf8(buf: ChannelBuffer, n: Int): String = {
     val arr = new Array[Byte](n)
     buf.readBytes(arr)
     new String(arr, CharsetUtil.UTF_8)
@@ -282,7 +304,7 @@ private[finagle] object Message {
       TraceId(Some(traceId), Some(parentId), spanId, None, Flags(traceFlags))
     }
 
-    Treq(tag, id, buf.duplicate())
+    Treq(tag, id, buf.slice())
   }
   
   private def decodeContexts(buf: ChannelBuffer): Seq[(ChannelBuffer, ChannelBuffer)] = {
@@ -306,26 +328,31 @@ private[finagle] object Message {
   private def decodeTdispatch(tag: Int, buf: ChannelBuffer) = {
     val contexts = decodeContexts(buf)
 
-    // Skip destination
-    buf.skipBytes(buf.readUnsignedShort())
+    val dstbuf = buf.readSlice(buf.readUnsignedShort())
+    val dst = decodeUtf8(dstbuf)
 
-    // Skip delegation table
     val nd = buf.readUnsignedShort()
-    var i = 0
-    while (i < nd) {
-      buf.skipBytes(buf.readUnsignedShort())
-      buf.skipBytes(buf.readUnsignedShort())
-    }
+    val dtab = if (nd == 0) Dtab.empty else {
+      var i = 0
+      var delegations = new Array[Dentry](nd)
+      while (i < nd) {
+        val src = decodeUtf8(buf, buf.readUnsignedShort())
+        val dst = decodeUtf8(buf, buf.readUnsignedShort())
+        delegations(i) = Dentry(src, dst)
+        i += 1
+      }
+      Dtab(delegations)
+   }
 
-    Tdispatch(tag, contexts, buf.duplicate())
+    Tdispatch(tag, contexts, dst, dtab, buf.slice())
   }
 
   private def decodeRdispatch(tag: Int, buf: ChannelBuffer) = {
     val status = buf.readByte()
     val contexts = decodeContexts(buf)
     status match {
-      case 0 => RdispatchOk(tag, contexts, buf.duplicate())
-      case 1 => RdispatchError(tag, contexts, decodeString(buf))
+      case 0 => RdispatchOk(tag, contexts, buf.slice())
+      case 1 => RdispatchError(tag, contexts, decodeUtf8(buf))
       case 2 => RdispatchNack(tag, contexts)
       case _ => throw BadMessageException("invalid Rdispatch status")
     }
@@ -335,8 +362,8 @@ private[finagle] object Message {
     if (buf.readableBytes < 1)
       throw BadMessageException("short Rreq")
     buf.readByte() match {
-      case 0 => RreqOk(tag, buf.duplicate())
-      case 1 => RreqError(tag, decodeString(buf))
+      case 0 => RreqOk(tag, buf.slice())
+      case 1 => RreqError(tag, decodeUtf8(buf))
       case 2 => RreqNack(tag)
       case _ => throw BadMessageException("invalid Rreq status")
     }
@@ -346,7 +373,7 @@ private[finagle] object Message {
     if (buf.readableBytes < 3)
       throw BadMessageException("short Tdiscarded message")
     val which = ((buf.readByte() & 0xff)<<16) | ((buf.readByte() & 0xff)<<8) | (buf.readByte() & 0xff)
-    Tdiscarded(which, decodeString(buf))
+    Tdiscarded(which, decodeUtf8(buf))
   }
 
   def decode(buf: ChannelBuffer): Message = {
@@ -364,7 +391,7 @@ private[finagle] object Message {
       case Types.Rdrain => Rdrain(tag)
       case Types.Tping => Tping(tag)
       case Types.Rping => Rping(tag)
-      case Types.Rerr => Rerr(tag, decodeString(buf))
+      case Types.Rerr => Rerr(tag, decodeUtf8(buf))
       case Types.Tdiscarded => decodeTdiscarded(buf)
       case bad => throw BadMessageException("bad message type: %d [tag=%d]".format(bad, tag))
     }

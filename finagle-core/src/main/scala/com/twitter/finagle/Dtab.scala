@@ -2,8 +2,12 @@ package com.twitter.finagle
 
 import com.twitter.finagle.util.Path
 import com.twitter.util.{Local, Var}
+import java.io.PrintWriter
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
+import scala.collection.generic.CanBuildFrom
+import scala.collection.immutable.VectorBuilder
+import scala.collection.mutable.Builder
 
 /*
 
@@ -17,7 +21,6 @@ tokenized throughout.
 
 */
 
-
 /**
  * A Dtab--short for delegation table--comprises a sequence
  * of delegation rules. Together, these describe how to bind a
@@ -30,8 +33,12 @@ tokenized throughout.
  * Construct a new Dtab with the given delegation
  * entry appended.
  */
-private[twitter] case class Dtab private(dentries0: Seq[Dentry]) {
-  private[this] val dentries = dentries0.reverse
+private[twitter] case class Dtab(dentries0: IndexedSeq[Dentry]) 
+    extends IndexedSeq[Dentry] {
+  private[this] lazy val dentries = dentries0.reverse
+
+  def apply(i: Int): Dentry = dentries0(i)
+  def length = dentries0.length
 
   /**
    * Bind a path in the context of this Dtab. Returns a
@@ -92,6 +99,43 @@ private[twitter] case class Dtab private(dentries0: Seq[Dentry]) {
    */
   def delegated(dtab: Dtab): Dtab =
     Dtab(dentries0 ++ dtab.dentries0)
+
+  override def toString = {
+    val ds = for (Dentry(prefix, dest) <- this) yield prefix+"->"+dest.reified
+    "Dtab("+(ds mkString ",")+")"
+  }
+
+  /**
+   * Efficiently removes prefix `prefix` from `dtab`.
+   */
+  def stripPrefix(prefix: Dtab): Dtab = {
+    if (this eq prefix) return Dtab.empty
+    if (isEmpty) return this
+    if (size < prefix.size) return this
+
+    var i = 0
+    while (i < prefix.size) {
+      val d1 = this(i)
+      val d2 = prefix(i)
+      if (!Dentry.equiv(d1, d2))
+        return this
+      i += 1
+    }
+
+    if (i == size)
+      Dtab.empty
+    else
+      Dtab(this drop prefix.size)
+  }
+
+  /**
+   * Print a pretty representation of this Dtab.
+   */
+  def print(printer: PrintWriter) {
+    printer.println("Dtab("+size+")")
+    for (Dentry(prefix, dst) <- this)
+      printer.println("	"+prefix+" -> "+dst.reified)
+  }
 }
 
 /**
@@ -109,16 +153,32 @@ private[twitter] object Dentry {
   def apply(prefix: String, dst: String): Dentry =
     if (dst.startsWith("/")) Dentry(prefix, Name(dst))
     else Dentry(prefix, Resolver.eval(dst))
+
+  /**
+   * Computes functional equivalence (not necessarily 
+   * object equivalence) of `d1` and `d2`.
+   */
+  def equiv(d1: Dentry, d2: Dentry): Boolean =
+    d1.prefix == d2.prefix && d1.dst.reified == d2.dst.reified
 }
 
 private[twitter] object Dtab {
+  /** Scala collection plumbing required to build new dtabs */
+  def newBuilder: DtabBuilder = new DtabBuilder
+
+  implicit val canBuildFrom: CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] =
+    new CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] {
+      def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
+      def apply(): DtabBuilder = newBuilder
+    }
+
   private[this] val baseDtab = new AtomicReference[Dtab](null)
 
   /**
    * Set the base Dtab. This may only be called once, and
    * then only before the first use of Dtab.base.
    */
-  def setBase(dtab: Dtab) {
+  def setBase(dtab: Dtab) { 
     if (!baseDtab.compareAndSet(null, dtab))
       throw new IllegalStateException("dtab is already set")
   }
@@ -135,6 +195,17 @@ private[twitter] object Dtab {
    * Set the local dtab.
    */
   def update(dtab: Dtab) { l() = dtab }
+  
+  /**
+   * Clear the local dtab.
+   */
+  def clear() { l.clear() }
+  
+  /**
+   * Retrieve the difference between the base dtab
+   * and the current local dtab.
+   */
+  def baseDiff(): Dtab = Dtab().stripPrefix(base)
 
   /**
    * Refine the given name vis-à-vis the current Dtab. The
@@ -164,11 +235,36 @@ private[twitter] object Dtab {
   def delegate(dentry: Dentry) {
     this() = this() delegated dentry
   }
+  
+  def delegate(dtab: Dtab) {
+    this() = this() delegated dtab
+  }
 
-  def unwind(f: => Unit) {
+  def unwind[T](f: => T): T = {
     val save = l()
     try f finally l.set(save)
   }
+
+  /**
+   * Computes functional equivalence (not necessarily 
+   * object equivalence) of `d1` and `d2`.
+   */
+  def equiv(d1: Dtab, d2: Dtab): Boolean =
+    if (d1.size != d2.size) false
+    else (d1 zip d2) forall { case (e1, e2) => Dentry.equiv(e1, e2) }
+}
+
+final class DtabBuilder extends Builder[Dentry, Dtab] {
+  private var builder = new VectorBuilder[Dentry]
+
+  def +=(d: Dentry): this.type = {
+    builder += d
+    this
+  }
+
+  def clear() = builder.clear()
+
+  def result(): Dtab = Dtab(builder.result)
 }
 
 private case class RefinedName(parent: Name, dtab: Dtab, suffix: String)
@@ -186,4 +282,6 @@ private case class RefinedName(parent: Name, dtab: Dtab, suffix: String)
       Var.value(Addr.Bound(partial))
     case a => Var.value(a)
   }
+  
+  val reified = "fail!"
 }

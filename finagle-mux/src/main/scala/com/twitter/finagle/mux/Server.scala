@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.{Service, Context}
+import com.twitter.finagle.{Dtab, Service, Context}
 import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.netty3.ChannelBufferBuf
@@ -33,7 +33,7 @@ private[finagle] class ServerDispatcher(
   // TODO: rewrite Treqs into Tdispatches?
 
   @volatile private[this] var receive: Message => Unit = { 
-    case Tdispatch(tag, contexts, req) =>
+    case Tdispatch(tag, contexts, /*ignore*/_dst, dtab, req) =>
       if (!canDispatch) {
         // There seems to be a bug in the Scala pattern matcher:
         // 	case Tdispatch(..) if canDispatch => ..
@@ -48,6 +48,7 @@ private[finagle] class ServerDispatcher(
           for ((k, v) <- contexts)
             Context.handle(ChannelBufferBuf(k), ChannelBufferBuf(v))
           Trace.record(Annotation.ServerRecv())
+          Dtab.delegate(dtab)
           val f = service(req)
           pending.put(tag, f)
           f respond {
@@ -127,7 +128,7 @@ private[finagle] class ServerDispatcher(
     receive = {
       case Treq(tag, _, _) =>
         trans.write(encode(RreqNack(tag)))
-      case Tdispatch(tag, _, _) =>
+      case Tdispatch(tag, _, _, _, _) =>
         trans.write(encode(RdispatchNack(tag, Seq.empty)))
       case _ =>
         // Drop everything else. Is this OK?

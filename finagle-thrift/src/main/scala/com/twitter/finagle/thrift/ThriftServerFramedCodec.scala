@@ -179,6 +179,17 @@ private[thrift] class ThriftServerTracingFilter(
 
         Trace.setId(traceId)
       }
+      
+      // Destination is ignored for now, 
+      // as it really requires a dispatcher.
+      if (header.getDelegationsSize() > 0) {
+        val ds = header.getDelegationsIterator()
+        while (ds.hasNext()) {
+          val d = ds.next()
+          if (d.src != null && d.dst != null)
+            Dtab.delegate(d.src, d.dst)
+        }
+      }
 
       val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
       Trace.recordRpcname(serviceName, msg.name)
@@ -193,10 +204,13 @@ private[thrift] class ThriftServerTracingFilter(
           case response =>
             Trace.record(Annotation.ServerSend())
             val responseHeader = new thrift.ResponseHeader
-            ByteArrays.concat(OutputBuffer.messageToArray(responseHeader, protocolFactory), response)
+            ByteArrays.concat(
+              OutputBuffer.messageToArray(responseHeader, protocolFactory), 
+              response)
         }
       } finally {
         ClientId.clear()
+        Dtab.clear()
       }
     } else {
       val buffer = new InputBuffer(request, protocolFactory)

@@ -15,9 +15,9 @@ import java.net.SocketAddress
 private[finagle] class Refinery[Req, Rep](
   dest: Name, 
   newFactory: Name => ServiceFactory[Req, Rep],
-  baseDtab: Dtab = Dtab.base
+  baseDtab: => Dtab = Dtab.base
 ) extends ServiceFactory[Req, Rep] {
-  private[this] val self = newFactory(baseDtab.refine(dest))
+  private[this] lazy val self = newFactory(baseDtab.refine(dest))
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (Dtab() == baseDtab) {

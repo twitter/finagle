@@ -6,10 +6,11 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Span, Millis, Seconds}
-import com.twitter.finagle.Service
+import com.twitter.finagle._
 import com.twitter.finagle.tracing.{Record, Trace, Annotation}
 import com.twitter.test._
 import org.apache.thrift.protocol.TProtocolFactory
+import java.io.{StringWriter, PrintWriter}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with Eventually {
@@ -25,6 +26,12 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       new SomeStruct(123, Trace.id.parentId.toString)
     }
     def someway() = Future.Void
+    def show_me_your_dtab() = Future {
+      val stringer = new StringWriter
+      val printer = new PrintWriter(stringer)
+      Dtab.baseDiff().print(printer)
+      stringer.toString
+    }
   }
 
   val ifaceToService = new B.Service(_, _)
@@ -50,6 +57,15 @@ class EndToEndTest extends FunSuite with ThriftTest with Eventually {
       val idSet2 = (tracer map(_.traceId.traceId)).toSet
 
       assert(idSet1 != idSet2)
+    }
+  }
+  
+  testThrift("propagate Dtab") { (client, tracer) =>
+    Dtab.unwind {
+      Dtab.delegate("/a", "/b")
+      Dtab.delegate("/b", "inet!google.com:80")
+      val clientDtab = Await.result(client.show_me_your_dtab())
+      assert(clientDtab === "Dtab(2)\n\t/a -> /b\n\t/b -> inet!google.com:80\n")
     }
   }
   

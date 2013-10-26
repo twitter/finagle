@@ -168,7 +168,8 @@ case class DefaultServer[Req, Rep, In, Out](
         // TODO: it would be cleaner to fully represent the draining
         // states: accepting no further connections (requests) then
         // fully drained, then closed.
-        val closable = Closable.sequence(underlying, Closable.all(connections.asScala.toSeq:_*))
+        val closable = Closable.sequence(
+          underlying, Closable.all(connections.asScala.toSeq:_*))
         connections.clear()
         closable.close(deadline)
       }

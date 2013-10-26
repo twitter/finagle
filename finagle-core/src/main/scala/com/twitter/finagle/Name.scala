@@ -27,6 +27,13 @@ trait Name {
    */
   def enter(path: String): Name = 
     if (path.isEmpty) this else PartialName(this, path)
+
+  /**
+   * The reified version of the Name -- a resolvable string.
+   */
+  def reified: String
+  
+  override def toString = "Name("+reified+")"
 }
 
 object Name {
@@ -35,6 +42,7 @@ object Name {
    */
   def bound(addrs: SocketAddress*): Name = new Name {
     def bind() = Var.value(Addr.Bound(addrs:_*))
+    val reified = "inet!"+(addrs mkString ",")
   }
 
   /**
@@ -47,6 +55,7 @@ object Name {
    */
   def fromGroup(g: Group[SocketAddress]): Name = new Name {
     def bind() = g.set map { newSet => Addr.Bound(newSet) }
+    val reified = "fail!"
   }
 
   /**
@@ -56,6 +65,7 @@ object Name {
     def bind() = Var.value(Addr.Delegated(path))
     override def enter(suffix: String) =
       Name(Path.join(path, suffix))
+    val reified = path
   }
 }
 
@@ -86,4 +96,6 @@ private case class PartialName(
 
   override def enter(path: String): Name = 
     PartialName(parent, Path.join(this.path, path))
+  
+  val reified = "fail!"
 }

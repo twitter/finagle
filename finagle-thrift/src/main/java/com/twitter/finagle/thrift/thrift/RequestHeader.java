@@ -42,6 +42,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   private static final TField CLIENT_ID_FIELD_DESC = new TField("client_id", TType.STRUCT, (short)6);
   private static final TField FLAGS_FIELD_DESC = new TField("flags", TType.I64, (short)7);
   private static final TField CONTEXTS_FIELD_DESC = new TField("contexts", TType.LIST, (short)8);
+  private static final TField DEST_FIELD_DESC = new TField("dest", TType.STRING, (short)9);
+  private static final TField DELEGATIONS_FIELD_DESC = new TField("delegations", TType.LIST, (short)10);
 
   public long trace_id;
   public long span_id;
@@ -50,6 +52,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   public ClientId client_id;
   public long flags;
   public List<RequestContext> contexts;
+  public String dest;
+  public List<Delegation> delegations;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
@@ -59,7 +63,9 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     SAMPLED((short)5, "sampled"),
     CLIENT_ID((short)6, "client_id"),
     FLAGS((short)7, "flags"),
-    CONTEXTS((short)8, "contexts");
+    CONTEXTS((short)8, "contexts"),
+    DEST((short)9, "dest"),
+    DELEGATIONS((short)10, "delegations");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -88,6 +94,10 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           return FLAGS;
         case 8: // CONTEXTS
           return CONTEXTS;
+        case 9: // DEST
+          return DEST;
+        case 10: // DELEGATIONS
+          return DELEGATIONS;
         default:
           return null;
       }
@@ -153,6 +163,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT, 
         new ListMetaData(TType.LIST, 
             new StructMetaData(TType.STRUCT, RequestContext.class))));
+    tmpMap.put(_Fields.DEST, new FieldMetaData("dest", TFieldRequirementType.OPTIONAL, 
+        new FieldValueMetaData(TType.STRING)));
+    tmpMap.put(_Fields.DELEGATIONS, new FieldMetaData("delegations", TFieldRequirementType.OPTIONAL, 
+        new ListMetaData(TType.LIST, 
+            new StructMetaData(TType.STRUCT, Delegation.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(RequestHeader.class, metaDataMap);
   }
@@ -194,6 +209,16 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       }
       this.contexts = __this__contexts;
     }
+    if (other.isSetDest()) {
+      this.dest = other.dest;
+    }
+    if (other.isSetDelegations()) {
+      List<Delegation> __this__delegations = new ArrayList<Delegation>();
+      for (Delegation other_element : other.delegations) {
+        __this__delegations.add(new Delegation(other_element));
+      }
+      this.delegations = __this__delegations;
+    }
   }
 
   public RequestHeader deepCopy() {
@@ -214,6 +239,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     setFlagsIsSet(false);
     this.flags = 0;
     this.contexts = null;
+    this.dest = null;
+    this.delegations = null;
   }
 
   public long getTrace_id() {
@@ -394,6 +421,69 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     }
   }
 
+  public String getDest() {
+    return this.dest;
+  }
+
+  public RequestHeader setDest(String dest) {
+    this.dest = dest;
+    return this;
+  }
+
+  public void unsetDest() {
+    this.dest = null;
+  }
+
+  /** Returns true if field dest is set (has been asigned a value) and false otherwise */
+  public boolean isSetDest() {
+    return this.dest != null;
+  }
+
+  public void setDestIsSet(boolean value) {
+    if (!value) {
+      this.dest = null;
+    }
+  }
+
+  public int getDelegationsSize() {
+    return (this.delegations == null) ? 0 : this.delegations.size();
+  }
+
+  public java.util.Iterator<Delegation> getDelegationsIterator() {
+    return (this.delegations == null) ? null : this.delegations.iterator();
+  }
+
+  public void addToDelegations(Delegation elem) {
+    if (this.delegations == null) {
+      this.delegations = new ArrayList<Delegation>();
+    }
+    this.delegations.add(elem);
+  }
+
+  public List<Delegation> getDelegations() {
+    return this.delegations;
+  }
+
+  public RequestHeader setDelegations(List<Delegation> delegations) {
+    this.delegations = delegations;
+    return this;
+  }
+
+  public void unsetDelegations() {
+    this.delegations = null;
+  }
+
+  /** Returns true if field delegations is set (has been asigned a value) and false otherwise */
+  public boolean isSetDelegations() {
+    return this.delegations != null;
+  }
+
+  public void setDelegationsIsSet(boolean value) {
+    if (!value) {
+      this.delegations = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case TRACE_ID:
@@ -452,6 +542,22 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       }
       break;
 
+    case DEST:
+      if (value == null) {
+        unsetDest();
+      } else {
+        setDest((String)value);
+      }
+      break;
+
+    case DELEGATIONS:
+      if (value == null) {
+        unsetDelegations();
+      } else {
+        setDelegations((List<Delegation>)value);
+      }
+      break;
+
     }
   }
 
@@ -478,6 +584,12 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     case CONTEXTS:
       return getContexts();
 
+    case DEST:
+      return getDest();
+
+    case DELEGATIONS:
+      return getDelegations();
+
     }
     throw new IllegalStateException();
   }
@@ -503,6 +615,10 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       return isSetFlags();
     case CONTEXTS:
       return isSetContexts();
+    case DEST:
+      return isSetDest();
+    case DELEGATIONS:
+      return isSetDelegations();
     }
     throw new IllegalStateException();
   }
@@ -580,6 +696,24 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (!(this_present_contexts && that_present_contexts))
         return false;
       if (!this.contexts.equals(that.contexts))
+        return false;
+    }
+
+    boolean this_present_dest = true && this.isSetDest();
+    boolean that_present_dest = true && that.isSetDest();
+    if (this_present_dest || that_present_dest) {
+      if (!(this_present_dest && that_present_dest))
+        return false;
+      if (!this.dest.equals(that.dest))
+        return false;
+    }
+
+    boolean this_present_delegations = true && this.isSetDelegations();
+    boolean that_present_delegations = true && that.isSetDelegations();
+    if (this_present_delegations || that_present_delegations) {
+      if (!(this_present_delegations && that_present_delegations))
+        return false;
+      if (!this.delegations.equals(that.delegations))
         return false;
     }
 
@@ -669,6 +803,26 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetDest()).compareTo(typedOther.isSetDest());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetDest()) {
+      lastComparison = TBaseHelper.compareTo(this.dest, typedOther.dest);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetDelegations()).compareTo(typedOther.isSetDelegations());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetDelegations()) {
+      lastComparison = TBaseHelper.compareTo(this.delegations, typedOther.delegations);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -752,6 +906,31 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
+        case 9: // DEST
+          if (field.type == TType.STRING) {
+            this.dest = iprot.readString();
+          } else { 
+            TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
+        case 10: // DELEGATIONS
+          if (field.type == TType.LIST) {
+            {
+              TList _list11 = iprot.readListBegin();
+              this.delegations = new ArrayList<Delegation>(_list11.size);
+              for (int _i12 = 0; _i12 < _list11.size; ++_i12)
+              {
+                Delegation _elem13;
+                _elem13 = new Delegation();
+                _elem13.read(iprot);
+                this.delegations.add(_elem13);
+              }
+              iprot.readListEnd();
+            }
+          } else { 
+            TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, field.type);
       }
@@ -799,13 +978,34 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       oprot.writeFieldBegin(CONTEXTS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.contexts.size()));
-        for (RequestContext _iter11 : this.contexts)
+        for (RequestContext _iter14 : this.contexts)
         {
-          _iter11.write(oprot);
+          _iter14.write(oprot);
         }
         oprot.writeListEnd();
       }
       oprot.writeFieldEnd();
+    }
+    if (this.dest != null) {
+      if (isSetDest()) {
+        oprot.writeFieldBegin(DEST_FIELD_DESC);
+        oprot.writeString(this.dest);
+        oprot.writeFieldEnd();
+      }
+    }
+    if (this.delegations != null) {
+      if (isSetDelegations()) {
+        oprot.writeFieldBegin(DELEGATIONS_FIELD_DESC);
+        {
+          oprot.writeListBegin(new TList(TType.STRUCT, this.delegations.size()));
+          for (Delegation _iter15 : this.delegations)
+          {
+            _iter15.write(oprot);
+          }
+          oprot.writeListEnd();
+        }
+        oprot.writeFieldEnd();
+      }
     }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
@@ -859,6 +1059,26 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       sb.append(this.contexts);
     }
     first = false;
+    if (isSetDest()) {
+      if (!first) sb.append(", ");
+      sb.append("dest:");
+      if (this.dest == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.dest);
+      }
+      first = false;
+    }
+    if (isSetDelegations()) {
+      if (!first) sb.append(", ");
+      sb.append("delegations:");
+      if (this.delegations == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.delegations);
+      }
+      first = false;
+    }
     sb.append(")");
     return sb.toString();
   }

@@ -8,6 +8,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.http.codec._
+import com.twitter.finagle.http.filter.DtabFilter
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Try, StorageUnit, Future}
@@ -178,15 +179,22 @@ case class Http(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
       ): ServiceFactory[HttpRequest, HttpResponse] = {
         val checkRequest = new CheckHttpRequestFilter
-        if (_enableTracing) {
+        val dtab = new DtabFilter[HttpRequest, HttpResponse]
+
+        val tracing = if (_enableTracing) {
           val tracingFilter = new HttpServerTracingFilter[HttpRequest, HttpResponse](
             config.serviceName,
             config.boundInetSocketAddress
           )
-          tracingFilter andThen checkRequest andThen underlying
+          tracingFilter
         } else {
-          checkRequest andThen underlying
+          Filter.identity[HttpRequest, HttpResponse]
         }
+
+        tracing andThen 
+          dtab andThen 
+          checkRequest andThen 
+          underlying
       }
     }
   }

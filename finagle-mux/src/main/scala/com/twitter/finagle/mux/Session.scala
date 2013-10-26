@@ -48,6 +48,11 @@ private sealed trait DrainState
 private case object Active extends DrainState
 private case object Draining extends DrainState
 
+/*
+ * TODO: figure out what kind of Dtab semantics make sense for
+ * message passing.
+ */
+
 class SenderSession private[finagle](
   trans: Transport[ChannelBuffer, ChannelBuffer]
 ) extends Session with Closable {
@@ -73,7 +78,7 @@ class SenderSession private[finagle](
     val couldDispatch = canDispatch
     val msg = if (couldDispatch == Cap.No) Treq(tag, Some(Trace.id), req) else {
       val contexts = Context.emit() map { case (k, v) => (ToCB(k), ToCB(v)) }
-      Tdispatch(tag, contexts.toSeq, req)
+      Tdispatch(tag, contexts.toSeq, "", Dtab.empty, req)
     }
 
     if (traceWrite)
@@ -212,7 +217,7 @@ class SessionDispatcher private[finagle](
       case Treq(0, None, buf) =>
         receiver.message(ChannelBufferBuf(buf))
 
-      case Tdispatch(tag, contexts, req) =>
+      case Tdispatch(tag, contexts, _dst, _dtab, req) =>
         if (sender.drainState() == Draining) {
           trans.write(encode(RdispatchNack(tag, Seq.empty)))
           return

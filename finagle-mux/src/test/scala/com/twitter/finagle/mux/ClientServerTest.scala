@@ -211,7 +211,6 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
 
     MuxContext.handled = Seq.empty
     MuxContext.buf = Buf.ByteArray(1,2,3,4)
-
     var f = client(ChannelBuffers.EMPTY_BUFFER)
     assert(f.isDefined)
     Await.result(f)

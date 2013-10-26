@@ -81,6 +81,13 @@ struct RequestContext {
   2: binary value
 }
 
+/**
+ * Serializes an individual delegation.
+ */
+struct Delegation {
+  1: string src
+  2: string dst
+}
 
 /**
  * The following are for finagle-thrift specific tracing headers &
@@ -99,6 +106,10 @@ struct RequestHeader {
   6: optional ClientId client_id
   7: optional i64 flags // contains various flags such as debug mode on/off
   8: list<RequestContext> contexts
+
+  // Support for destination (partially resolved names) and delegation tables.
+  9: optional string dest
+  10: optional list<Delegation> delegations
 }
 
 /**
