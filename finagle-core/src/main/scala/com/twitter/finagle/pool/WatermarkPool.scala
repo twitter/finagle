@@ -31,6 +31,7 @@ class WatermarkPool[Req, Rep](
   private[this] var numServices = 0
   @volatile private[this] var isOpen      = true
 
+  private[this] val numWaiters = statsReceiver.counter("pool_num_waited")
   private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { synchronized { waiters.size } }
   private[this] val sizeStat = statsReceiver.addGauge("pool_size") { synchronized { numServices } }
 
@@ -110,6 +111,7 @@ class WatermarkPool[Req, Rep](
           return Future.exception(new TooManyWaitersException)
         case None =>
           val p = new Promise[Service[Req, Rep]]
+          numWaiters.incr()
           waiters.addLast(p)
           p.setInterruptHandler { case _cause =>
             // TODO: use cause
