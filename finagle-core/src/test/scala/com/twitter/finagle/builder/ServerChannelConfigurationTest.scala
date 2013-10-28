@@ -57,7 +57,7 @@ class ServerChannelConfigurationTest extends FunSuite {
     def apply(request: String) = Future.value(request)
   }
 
-  test("close connection after max life time duration") {
+  if (!sys.props.contains("SKIP_FLAKY")) test("close connection after max life time duration") {
     // create a server builder which will close connections in 2 seconds
     val address = new InetSocketAddress(0)
     val server = ServerBuilder()
