@@ -10,12 +10,12 @@ import org.specs.mock.Mockito
 class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
   "a failing service" should {
     val underlyingService = mock[Service[Int, Int]]
-    underlyingService.close(any) returns Future.Done
+    underlyingService.close(any[Time]) returns Future.Done
     underlyingService.isAvailable returns true
     underlyingService(Matchers.anyInt) returns Future.exception(new Exception)
 
     val underlying = mock[ServiceFactory[Int, Int]]
-    underlying.close(any) returns Future.Done
+    underlying.close(any[Time]) returns Future.Done
     underlying.isAvailable returns true
     underlying() returns Future.value(underlyingService)
 
@@ -105,12 +105,12 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
 
   "a healthy service" should {
     val underlyingService = mock[Service[Int, Int]]
-    underlyingService.close(any) returns Future.Done
+    underlyingService.close(any[Time]) returns Future.Done
     underlyingService.isAvailable returns true
     underlyingService(Matchers.anyInt) returns Future.value(321)
 
     val underlying = mock[ServiceFactory[Int, Int]]
-    underlying.close(any) returns Future.Done
+    underlying.close(any[Time]) returns Future.Done
     underlying.isAvailable returns true
     underlying() returns Future.value(underlyingService)
 
@@ -138,7 +138,7 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
 
   "a broken factory" should {
     val underlying = mock[ServiceFactory[Int, Int]]
-    underlying.close(any) returns Future.Done
+    underlying.close(any[Time]) returns Future.Done
     underlying.isAvailable returns true
     val exc = new Exception("i broked :-(")
     underlying() returns Future.exception(exc)
@@ -174,12 +174,12 @@ class FailureAccrualFactorySpec extends SpecificationWithJUnit with Mockito {
     }
 
     val underlyingService = mock[Service[Int, Int]]
-    underlyingService.close(any) returns Future.Done
+    underlyingService.close(any[Time]) returns Future.Done
     underlyingService.isAvailable returns true
     underlyingService(Matchers.anyInt) returns Future.value(321)
 
     val underlying = mock[ServiceFactory[Int, Int]]
-    underlying.close(any) returns Future.Done
+    underlying.close(any[Time]) returns Future.Done
     underlying.isAvailable returns true
     underlying() returns Future.value(underlyingService)
 

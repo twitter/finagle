@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Promise, Return, Future}
+import com.twitter.util.{Promise, Return, Future, Time}
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
@@ -42,7 +42,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
 
   "HttpClientDispatcher" should {
     val trans = mock[Transport[HttpRequest, HttpResponse]]
-    trans.close(any) returns Future.Done
+    trans.close(any[Time]) returns Future.Done
     trans.close() returns Future.Done
     val disp = new HttpClientDispatcher(trans)
 

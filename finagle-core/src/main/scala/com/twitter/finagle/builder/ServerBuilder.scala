@@ -24,14 +24,6 @@ import scala.collection.mutable
  */
 trait Server extends Closable {
   /**
-   * Close the underlying server gracefully with the given grace
-   * period. close() will drain the current channels, waiting up to
-   * ``timeout'', after which channels are forcibly closed.
-   */
-  def close(timeout: Duration = Duration.Top): Future[Unit] =
-    close(timeout.fromNow)
-
-  /**
    * When a server is bound to an ephemeral port, gets back the address
    * with concrete listening port picked.
    */
