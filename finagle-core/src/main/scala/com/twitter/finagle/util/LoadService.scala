@@ -151,23 +151,24 @@ private object ClassPath {
  * packaging configurations than ServiceLoader.
  */
 object LoadService {
-  private val classesOfIface = {
-    val loader = ClassLoader.getSystemClassLoader()
-    val mappings = for {
-      ClassPath.Info(_, iface, clss) <- ClassPath.browse(loader)
-      cls <- clss
-      if cls.nonEmpty
-    } yield (iface -> cls)
-    
-    mappings.foldLeft(Map[String, Set[String]]()) {
-      case (m, (iface, cls)) =>
-        m + (iface -> (m.getOrElse(iface, Set()) + cls))
-    }
-  }
 
   def apply[T: ClassManifest](): Seq[T] = {
     val iface = implicitly[ClassManifest[T]].erasure.asInstanceOf[Class[T]]
+
+    val classesOfIface = {
+      val loader = iface.getClassLoader()
+      val mappings = for {
+        ClassPath.Info(_, iface, clss) <- ClassPath.browse(loader)
+        cls <- clss
+        if cls.nonEmpty
+      } yield (iface -> cls)
     
+      mappings.foldLeft(Map[String, Set[String]]()) {
+        case (m, (iface, cls)) =>
+          m + (iface -> (m.getOrElse(iface, Set()) + cls))
+      }
+    }
+
     if (!(classesOfIface contains iface.getName))
       return Seq.empty
 
