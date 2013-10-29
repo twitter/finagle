@@ -151,7 +151,8 @@ case class DefaultClient[Req, Rep](
 
     val timeLimited: Transformer[Req, Rep] = factory =>
       if (serviceTimeout == Duration.Top) factory else {
-        val exception = new ServiceTimeoutException(serviceTimeout) { serviceName = name }
+        val exception = new ServiceTimeoutException(serviceTimeout)
+        exception.serviceName = name
         new TimeoutFactory(factory, serviceTimeout, exception, timer)
       }
 
