@@ -4,7 +4,7 @@ Finagle is built using [sbt](https://github.com/sbt/sbt). We've included a boots
 
 Finagle and its dependencies are published to maven central with crosspath versions. It is published with the most current Scala 2.9.x version. Use with sbt is simple:
 
-	libraryDependencies += "com.twitter" %% "finagle-core" % "6.0.5"
+	libraryDependencies += "com.twitter" %% "finagle-core" % "6.7.1"
 
 ---
 
