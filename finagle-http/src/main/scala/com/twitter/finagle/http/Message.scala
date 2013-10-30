@@ -1,6 +1,8 @@
 package com.twitter.finagle.http
 
-import com.twitter.util.Duration
+import com.twitter.io.{Buf, Reader => BufReader, Writer => BufWriter}
+import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.util.{Await, Duration}
 import java.io.{InputStream, InputStreamReader, OutputStream, OutputStreamWriter, Reader, Writer}
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
@@ -21,6 +23,20 @@ import scala.collection.JavaConverters._
  * methods, though only one set of methods should be used.
  */
 abstract class Message extends HttpMessage {
+
+  private[this] val readerWriter = BufReader.writable()
+
+  /**
+   * A read-only handle to the internal stream of bytes, representing the
+   * message body. See [[com.twitter.util.Reader]] for more information.
+   **/
+  def reader: BufReader = readerWriter
+
+  /**
+   * A write-only handle to the internal stream of bytes, representing the
+   * message body. See [[com.twitter.util.Writer]] for more information.
+   **/
+  def writer: BufWriter = readerWriter
 
   def isRequest: Boolean
   def isResponse = !isRequest
@@ -340,13 +356,24 @@ abstract class Message extends HttpMessage {
     }
   }
 
-  /** Append ChannelBuffer to content. */
+  /** Append ChannelBuffer to content.
+   *
+   * If `isChunked` then multiple writes must be composed using `writer` and
+   * `flatMap` to have the appropriate backpressure semantics.
+   *
+   * Attempting to `write` after calling `close` will result in a thrown
+   * [[com.twitter.util.Reader.ReaderDiscarded]].
+   */
+  @throws(classOf[BufReader.ReaderDiscarded])
+  @throws(classOf[IllegalStateException])
   def write(buffer: ChannelBuffer) {
-    getContent match {
-      case ChannelBuffers.EMPTY_BUFFER =>
-        setContent(buffer)
-      case content =>
-        setContent(ChannelBuffers.wrappedBuffer(content, buffer))
+    if (isChunked) writeChunk(buffer) else {
+      getContent match {
+        case ChannelBuffers.EMPTY_BUFFER =>
+          setContent(buffer)
+        case content =>
+          setContent(ChannelBuffers.wrappedBuffer(content, buffer))
+      }
     }
   }
 
@@ -379,6 +406,17 @@ abstract class Message extends HttpMessage {
   /** Clear content (set to ""). */
   def clearContent() {
     setContent(ChannelBuffers.EMPTY_BUFFER)
+  }
+
+  /** End the response stream. */
+  def close() = writer.write(Buf.Eof)
+
+  private[this] def writeChunk(buf: ChannelBuffer) {
+    if (buf.readable) {
+      val future = writer.write(new ChannelBufferBuf(buf))
+      // Unwraps the future in the Return case, or throws exception in the Throw case.
+      if (future.isDefined) Await.result(future)
+    }
   }
 }
 

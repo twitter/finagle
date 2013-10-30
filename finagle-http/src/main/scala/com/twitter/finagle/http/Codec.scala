@@ -347,6 +347,12 @@ case class RichHttp[REQUEST <: Request](
         }
       }
 
+      override def prepareServiceFactory(
+        underlying: ServiceFactory[REQUEST, Response]
+      ): ServiceFactory[REQUEST, Response] =
+        underlying map(new DelayedReleaseService(_))
+
+
       override def prepareConnFactory(
         underlying: ServiceFactory[REQUEST, Response]
       ): ServiceFactory[REQUEST, Response] =
