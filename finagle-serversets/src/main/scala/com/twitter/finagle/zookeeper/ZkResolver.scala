@@ -7,7 +7,7 @@ import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.group.StabilizingGroup
 import com.twitter.finagle.{Group, Resolver, InetResolver, Addr}
-import com.twitter.thrift.ServiceInstance
+import com.twitter.thrift.{Endpoint, ServiceInstance}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -39,25 +39,43 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
   def this() = this(DefaultZkClientFactory)
 
   def resolve(zkHosts: Set[InetSocketAddress], 
-      path: String, endpoint: Option[String]): Var[Addr] = {
+      path: String, endpoint: Option[String] = None, shardId: Option[Int] = None): Var[Addr] = {
     val (zkClient, zkHealthHandler) = factory.get(zkHosts)
-    val zkGroup = endpoint match {
-      case Some(endpoint) =>
-        (new ZkGroup(new ServerSetImpl(zkClient, path), path)) collect {
-          case inst if inst.getStatus == ALIVE && inst.getAdditionalEndpoints.containsKey(endpoint) =>
-            val ep = inst.getAdditionalEndpoints.get(endpoint)
-            new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
+    // prepare a filter appropriate to match ServiceInstances for the given Options
+    val instanceFilter: ServiceInstance => Boolean = {
+      val shardIdFilter: ServiceInstance => Boolean =
+        shardId match {
+          case Some(shardId) =>
+            si => si.isSetShard && si.shard == shardId
+          case None =>
+            _ => true
         }
-
-      case None =>
-        (new ZkGroup(new ServerSetImpl(zkClient, path), path)) collect {
-          case inst if inst.getStatus == ALIVE =>
-            val ep = inst.getServiceEndpoint
-            new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
+      val endpointFilter: ServiceInstance => Boolean =
+        endpoint match {
+          case Some(endpoint) =>
+            si => si.getAdditionalEndpoints.containsKey(endpoint)
+          case None =>
+            _ => true
         }
+      si => shardIdFilter(si) && endpointFilter(si)
     }
-    
-    // TODO: get rid of groups underneath.
+    // and an extractor for the appropriate endpoint on the ServiceInstance
+    val endpointExtractor: ServiceInstance => Endpoint =
+      endpoint match {
+        case Some(endpoint) =>
+          si => si.getAdditionalEndpoints.get(endpoint)
+        case None =>
+          si => si.getServiceEndpoint
+      }
+
+    // then use the filter and extractor to define a Group, and wrap it in a Var
+    // TODO: get rid of Groups underneath.
+    val zkGroup =
+      (new ZkGroup(new ServerSetImpl(zkClient, path), path)) collect {
+        case inst if inst.getStatus == ALIVE && instanceFilter(inst) =>
+          val ep = endpointExtractor(inst)
+          new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
+      }
     val g = StabilizingGroup(
       zkGroup,
       zkHealthHandler,
