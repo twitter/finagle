@@ -13,8 +13,8 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
  * In order to choose which handler to dispatch the request to, we take the path of the request and match it with
  * the patterns of the pre-registered handlers. The pattern matching follows these rules:
  *
- *  - Patterns ending with "/" use prefix matching. Eg: the pattern "foo/bar/" matches these paths:
- *            "foo/bar", "foo/bar/", "foo/bar/baz", etc.
+ *  - Patterns ending with "/" use exclusive prefix matching. Eg: the pattern "foo/bar/" matches these paths:
+ *            "foo/bar/", "foo/bar/baz", etc but NOT "foo/bar"
  *    Similarly, the pattern "/" matches all paths
  *
  *  - Patterns not ending with "/" use exact matching. Eg: the pattern "foo/bar" ONLY matches this path:
@@ -61,7 +61,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
       if (pattern == "")
         path == "/" || path == "" // special cases
       else if (pattern.endsWith("/"))
-        path.startsWith(pattern) || path == pattern.dropRight(1) // prefix match
+        path.startsWith(pattern) // prefix match
       else
         path == pattern // exact match
     }
