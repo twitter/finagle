@@ -4,14 +4,14 @@ package com.twitter
 
 Finagle is an extensible RPC system.
 
-Services are represented by class [[com.twitter.finagle.Service Service]].
-Clients make use of [[com.twitter.finagle.Service Service]] objects while
+Services are represented by class [[com.twitter.finagle.Service]].
+Clients make use of [[com.twitter.finagle.Service]] objects while
 servers implement them.
 
 Finagle contains a number of protocol implementations; each of these
-implement [[com.twitter.finagle.Client Client]] and/or 
-[[com.twitter.finagle.Server Server]]. For example, finagle's HTTP implementation,
-[[com.twitter.finagle.Http Http]] (in package `finagle-http`), exposes both.
+implement [[com.twitter.finagle.Client Client]] and/or
+[[com.twitter.finagle.Server]]. For example, finagle's HTTP implementation,
+[[com.twitter.finagle.Http]] (in package `finagle-http`), exposes both.
 
 Thus a simple HTTP server is built like this:
 
@@ -58,9 +58,9 @@ import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.jboss.netty.handler.codec.http.HttpMethod._
 import com.twitter.util.{Future, Await, Future, Return, Throw}
 
-val client: Service[HttpRequest, HttpResponse] = 
+val client: Service[HttpRequest, HttpResponse] =
   Http.newService("localhost:8080")
-val f: Future[HttpResponse] = 
+val f: Future[HttpResponse] =
   client(new DefaultHttpRequest(HTTP_1_1, GET, "/"))
 f respond {
   case Return(res) =>
@@ -70,12 +70,12 @@ f respond {
 }
 }}}
 
-`Http.newService("localhost:8080")` constructs a new 
-[[com.twitter.finagle.Service Service]] instance connected to 
-localhost TCP port 8080. We then issue a HTTP/1.1 GET 
+`Http.newService("localhost:8080")` constructs a new
+[[com.twitter.finagle.Service]] instance connected to
+localhost TCP port 8080. We then issue a HTTP/1.1 GET
 request to URI "/". The service returns a [[com.twitter.util.Future]]
-representing the result of the operation. We listen to 
-this future, printing an appropriate message when the 
+representing the result of the operation. We listen to
+this future, printing an appropriate message when the
 response arrives.
 
 The [[http://twitter.github.io/finagle/ Finagle homepage]] contains

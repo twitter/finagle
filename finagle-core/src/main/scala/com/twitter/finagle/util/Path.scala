@@ -1,6 +1,8 @@
 package com.twitter.finagle.util
 
-/** @bug inefficient */
+/**
+ * @note this is inefficient.
+ */
 object Path {
   def split(path: String): Seq[String] =
     path.split('/').filter(_.nonEmpty)

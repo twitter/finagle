@@ -20,7 +20,7 @@ object AllHandlesDiedException extends Exception
  * the first message to arrive.
  *
  * Cluster example:
- * <code>
+ * {{{
  *   Cluster[SocketAddress] cluster = ... // e.g. ZookeeperServerSetCluster
  *   val readHandle =
  *     MultiReader(cluster, "the-queue")
@@ -32,7 +32,7 @@ object AllHandlesDiedException extends Exception
  *           .hostConnectionLimit(1) /* etc... but do not set hosts or build */)
  *       .retryBackoffs(/* Stream[Duration], Timer; optional */)
  *       .build()
- * </code>
+ * }}}
  */
 object MultiReader {
   def apply(cluster: Cluster[SocketAddress], queueName: String): ClusterMultiReaderBuilder = {

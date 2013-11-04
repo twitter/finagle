@@ -25,7 +25,7 @@ private object ThriftUtil {
     } catch {
       case _: NoSuchMethodException => None
     }
-    
+
   def findMethod(clz: Class[_], name: String, params: Class[_]*): Option[Method] =
     try Some(clz.getMethod(name, params:_*)) catch {
       case _: NoSuchMethodException => None
@@ -47,7 +47,7 @@ private object ThriftUtil {
           case NonFatal(_) => None
         }
     }
-    
+
     f getOrElse Function.const(None)
   }
 }
@@ -196,7 +196,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     val clsName = cls.getName
     lazy val underlying = newClient(name, label).toService
     lazy val stats =
-      if (label.nonEmpty) ClientStatsReceiver.scope(label) 
+      if (label.nonEmpty) ClientStatsReceiver.scope(label)
       else ClientStatsReceiver.scope(defaultClientName)
 
     def tryThriftFinagleClient: Option[Iface] =
@@ -225,12 +225,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
         clientCls  <- findClass[Iface](baseName + "$FinagledClient")
         cons       <- findConstructor(clientCls, scrooge2FinagleClientParamTypes: _*)
       } yield cons.newInstance(underlying, protocolFactory, None, stats)
-      
+
     def trySwiftClient: Option[Iface] =
       for {
         swiftClass <- findSwiftClass(cls)
         proxy <- findClass1("com.twitter.finagle.exp.swift.SwiftProxy")
-        meth <- findMethod(proxy, "newClient", 
+        meth <- findMethod(proxy, "newClient",
           classOf[Service[_, _]], classOf[ClassManifest[_]])
       } yield {
         val manifest = ClassManifest.fromClass(swiftClass)
@@ -253,6 +253,28 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 
 /**
  * A mixin trait to provide a rich Thrift server API.
+ *
+ * @define serveIface
+ *
+ * Serve the interface implementation `iface`, which must be generated
+ * by either [[https://github.com/twitter/scrooge Scrooge]] or
+ * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
+ *
+ * Given the IDL:
+ *
+ * {{{
+ * service TestService {
+ *   string query(1: string x)
+ * }
+ * }}}
+ *
+ * Scrooge will generate an interface, `TestService.FutureIface`,
+ * implementing the above IDL.
+ *
+ * $serverExample
+ *
+ * Note that this interface is discovered by reflection. Passing an
+ * invalid interface implementation will result in a runtime error.
  *
  * @define serverExample
  *
@@ -290,7 +312,7 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
                       findClass[BinaryService](baseName + "$FinagledService")
         cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
-    
+
     def trySwiftService(iface: Class[_]): Option[BinaryService] =
       for {
         _ <- findSwiftClass(iface)
@@ -311,32 +333,14 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   }
 
   /**
-   * @define serveIface
-   *
-   * Serve the interface implementation `iface`, which must be generated
-   * by either [[https://github.com/twitter/scrooge Scrooge]] or
-   * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
-   *
-   * Given the IDL:
-   *
-   * {{{
-   * service TestService {
-   *   string query(1: string x)
-   * }
-   * }}}
-   *
-   * Scrooge will generate an interface, `TestService.FutureIface`,
-   * implementing the above IDL.
-   *
-   * $serverExample
-   *
-   * Note that this interface is discovered by reflection. Passing an
-   * invalid interface implementation will result in a runtime error.
+   * $serveIface
    */
   def serveIface(addr: String, iface: AnyRef): ListeningServer =
     serve(addr, serverFromIface(iface))
 
-  /** $serveIface */
+  /**
+   * $serveIface
+   */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
     serve(addr, serverFromIface(iface))
 }
