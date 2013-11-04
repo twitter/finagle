@@ -11,7 +11,7 @@ import org.scalatest.time.SpanSugar._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class MdnsTest extends FunSuite with BeforeAndAfter {
+class MdnsTest extends FunSuite {
   test("bind locally") {
     val ia = RandomSocket()
     val resolver = new MDNSResolver
@@ -54,5 +54,12 @@ class MdnsTest extends FunSuite with BeforeAndAfter {
     val ia = new InetSocketAddress(0)
     intercept[MDNSAddressException] { ann.announce(ia, "invalidname") }
     intercept[MDNSAddressException] { res.bind("invalidname") }
+  }
+
+  test("name parser") {
+    val (name, regType, domain) = MDNS.parse("dots.in.the.name._finagle._tcp.local.")
+    assert(name === "dots.in.the.name")
+    assert(regType === "_finagle._tcp")
+    assert(domain === "local")
   }
 }
