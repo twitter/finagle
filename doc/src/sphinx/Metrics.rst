@@ -1,64 +1,92 @@
 Metrics
+=====
+
+This section aims to be a comprehensive list of all of the stats that finagle
+exposes.  The stats are organized by layer and then by class.
+
+Some of the stats are only for clients, some only for servers, and some are for both.
+Some stats are only visible when certain optional classes are used.
+
+NB: Finagle uses RollupStatsReceiver internally, which will take stats like
+"failures/twitter/TimeoutException" and roll them up, aggregating into "failures/twitter"
+and also "failures".  For example, if there are 3 "failures/twitter/TimeoutException" counted,
+and 4 "failures/twitter/ConnectTimeoutException", then it will cound 7 "failures/twitter".
+
+Public
+------
+
+.. _public_stats:
+
+These stats come from the public interface, and are the ones that you should look at first
+to figure out whether a client is abusing you, or you are misusing a downstream service.
+They are also useful in diagnosing what contributes to request latency.
+
+.. include:: metrics/Public.rst
+
+Construction
+------------
+
+.. _construction_stats:
+
+These stats are about setting up services in finagle, and expose whether you are
+having trouble making services.
+
+.. include:: metrics/Construction.rst
+
+Load Balancing
+--------------
+
+.. _loadbalancer_stats:
+
+These client stats expose the innards of what's going on with load balancing, and the management
+of equivalent groups of hosts.
+
+.. include:: metrics/LoadBalancing.rst
+
+Fail Fast
+----------
+
+.. _fail_fast_stats:
+
+These client stats give insight into how finagle handles services where it can't make a connection.
+
+.. include:: metrics/FailFast.rst
+
+Idle Apoptosis
+--------------
+
+.. _idle_apoptosis_stats:
+
+These client stats keep track of how frequently services--thin wrappers around connections--
+die from being idle for too long.
+
+.. include:: metrics/IdleApoptosis.rst
+
+Rate Limiting
+-------------
+
+.. _rate_limiting_stats:
+
+These client stats show how much you're hitting your rate limit if you're using rate limiting.
+
+.. include:: metrics/RateLimiting.rst
+
+Pooling
 -------
 
-Here are some of the metrics reported by finagle. All times are in milliseconds. A metric is either
-a count (C) or a statistic (S).
+.. _pool_stats:
 
-+-------------------------+-+----------------------------------------------------------------------+
-|closechan                |C|This counter is incremented every time a connection is closed. Timed  |
-|                         | |out connections are closed. By default an idle connection times out in|
-|                         | |5 seconds (hostConnectionIdleTime).                                   |
-+-------------------------+-+----------------------------------------------------------------------+
-|connection_duration      |S|A stat representing the distribution of the duration                  |
-|                         | |of a connection. closechan` and `connection_duration.count` must be   |
-|                         | |equal.                                                                |
-+-------------------------+-+----------------------------------------------------------------------+
-|connection_received_bytes|S|bytes received per connection                                         |
-+-------------------------+-+----------------------------------------------------------------------+
-|connection_requests      |S|Number of requests per connection, observed after it closes.          |
-+-------------------------+-+----------------------------------------------------------------------+
-|connection_sent_bytes    |S|Bytes sent per connection                                             |
-+-------------------------+-+----------------------------------------------------------------------+
-|connections              |C|The current number of connections between client and server.          |
-+-------------------------+-+----------------------------------------------------------------------+
-|handletime_us            |S|The walltime elapsed while handling a request.                        |
-+-------------------------+-+----------------------------------------------------------------------+
-|requests                 |S|The number of requests dispatched.                                    |
-+-------------------------+-+----------------------------------------------------------------------+
-|pending                  |C|Number of pending requests (i.e. requests without responses).         |
-+-------------------------+-+----------------------------------------------------------------------+
-|request_latency_ms       |S|The time from the beginning of a request until the response is        |
-|                         | |received                                                              |
-+-------------------------+-+----------------------------------------------------------------------+
+These client stats help you keep track of connection churn.
 
+.. include:: metrics/Pooling.rst
 
-Connection Pool Stats
-^^^^^^^^^^^^^^^^^^^^^
+Transport
+---------
 
-.. _pool_counts:
+.. _transport_stats:
 
-A finagle client pools tcp connections via a :ref:`WatermarkPool <watermark_pool>`
-and :ref:`CachingPool <caching_pool>`. The following metrics expose the state
-of the pools in your application.
+These metrics pertain to where the finagle abstraction ends and the bytes are sent over the wire.
+Understanding these stats often requires deep knowledge of the protocol, or individual transport
+(e.g. Netty) internals.
 
-**pool_cached** - represents the number of cached tcp connections to a particular host. This caching behavior is helpful to eliminate unnecessary connection churn as exposed by the default behavior of the watermark pool.
-
-**pool_size** - represents the number of connections open to the host. It should be between the lower and upper bounds of your client's watermark pool configuration.
-
-**pool_waiters** - the number of requests that are queued while waiting for a connection. Note, if you observe that "pool_waiters" is exactly zero, then there is no queueing waiting to get a connection from the pool. This means your pool is not under-sized with respect to the current workload. That's a good thing!
-
-Load Balancer Stats
-^^^^^^^^^^^^^^^^^^^
-
-.. _load_balancer_counts:
-
-A finagle client connected to multiple hosts load balances requests via a :ref:`HeapBalancer <heap_balancer>`. The following metrics expose the state of the heap balancer.
-
-**size** - represents the current number of nodes used by the balancer.
-
-**adds** - the cumulative node additions over the life time of the client.
-
-**removes** - the cumulative node removals over the life time of the client.
-
-
-
+.. include:: metrics/Transport.rst
