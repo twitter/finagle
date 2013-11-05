@@ -76,7 +76,7 @@ class EndToEndTest extends FunSuite {
     }
   }
 
-  go("Client/Server") { service =>
+  if (!sys.props.contains("SKIP_FLAKY")) go("Client/Server") { service =>
     import com.twitter.finagle.Http
     val server = Http.serve(":*", service)
     val client = Http.newService(server)
