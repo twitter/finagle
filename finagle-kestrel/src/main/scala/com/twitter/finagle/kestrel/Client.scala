@@ -23,7 +23,8 @@ object OutOfRetriesException extends Exception
  * A message that has been read: consists of the message itself, and
  * an offer to acknowledge.
  */
-case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit])
+
+case class ReadMessage(bytes: ChannelBuffer, ack: Offer[Unit], abort: Offer[Unit] = Offer.const(Unit))
 
 /**
  * An ongoing transactional read (from {{read}}).
@@ -316,10 +317,11 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     val error = new Broker[Throwable]  // this is sort of like a latch …
     val messages = new Broker[ReadMessage]  // todo: buffer?
     val close = new Broker[Unit]
+    val abort = new Broker[Unit]
 
     val open = Open(queueName, Some(Duration.Top))
     val closeAndOpen = CloseAndOpen(queueName, Some(Duration.Top))
-    val abort = Abort(queueName)
+    val abortMessage = Abort(queueName)
 
     def recv(service: Service[Command, Response], command: GetCommand) {
       val reply = service(command)
@@ -327,11 +329,12 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
         reply.toOffer {
           case Return(Values(Seq(Value(_, item)))) =>
             val ack = new Broker[Unit]
-            messages ! ReadMessage(item, ack.send(()))
+            messages ! ReadMessage(item, ack.send(()), abort.send(()))
 
             Offer.select(
               ack.recv { _ => recv(service, closeAndOpen) },
-              close.recv { t => service.close(); error ! ReadClosedException }
+              close.recv { t => service.close(); error ! ReadClosedException },
+              abort.recv { _ => recv(service, abortMessage) }
             )
 
           case Return(Values(Seq())) =>
