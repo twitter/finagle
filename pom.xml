@@ -40,6 +40,7 @@
     <module>finagle-stress</module>
     <module>finagle-swift</module>
     <module>finagle-test</module>
+    <module>finagle-testers</module>
     <module>finagle-thrift</module>
     <module>finagle-thriftmux</module>
     <module>finagle-zipkin</module>
