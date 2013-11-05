@@ -3,11 +3,11 @@ package com.twitter.finagle.exception
 import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 
 import org.apache.thrift.protocol.TBinaryProtocol
-import com.twitter.finagle.exception.thrift.{LogEntry, ResultCode, scribe}
+import com.twitter.finagle.exception.thrift.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
 
 import com.twitter.app.GlobalFlag
 import com.twitter.util.GZIPStringEncoder
-import com.twitter.util.{Time, Monitor, NullMonitor}
+import com.twitter.util.{Future, Time, Monitor, NullMonitor}
 
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
@@ -99,7 +99,7 @@ object Reporter {
       .hostConnectionLimit(5)
       .build()
 
-    new scribe.FinagledClient(service, new TBinaryProtocol.Factory())
+    new Scribe$FinagleClient(service, new TBinaryProtocol.Factory())
   }
 }
 
@@ -115,7 +115,7 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-  client: scribe.FutureIface,
+  client: Scribe[Future],
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = Some(InetAddress.getLocalHost.getHostName),
@@ -152,7 +152,7 @@ sealed case class Reporter(
     sourceAddress foreach { sa => se = se withSource sa }
     clientAddress foreach { ca => se = se withClient ca }
 
-    new LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
+    LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
   }
 
   /**

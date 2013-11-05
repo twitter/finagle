@@ -7,9 +7,10 @@ import java.util.{List => JList, Map => JMap, Set => JSet}
 
 
 /** Proxy for HttpMessage.  Used by Request and Response. */
-trait HttpMessageProxy extends HttpMessage {
+trait HttpMessageProxy extends HttpMessage with Proxy {
   def httpMessage: HttpMessage
   def getHttpMessage(): HttpMessage = httpMessage
+  def self = httpMessage
 
   def getHeader(name: String): String                 = httpMessage.getHeader(name)
   def getHeaders(name: String): JList[String]         = httpMessage.getHeaders(name)

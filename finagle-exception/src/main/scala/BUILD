@@ -1,5 +1,6 @@
 scala_library(name='scala',
   dependencies=[
+    pants('3rdparty:jackson-databind'),
     pants('3rdparty:jackson-module-scala'),
     pants('3rdparty:thrift-0.5.0'),
     pants('finagle/finagle-core'),
@@ -9,7 +10,7 @@ scala_library(name='scala',
     pants('util/util-core'),
     compiled_idl(
       idl_deps=pants('finagle/finagle-exception/src/main/thrift'),
-      compiler='scrooge-legacy',
+      compiler='scrooge',
       language='scala',
       rpc_style='finagle',
     )

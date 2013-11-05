@@ -11,25 +11,25 @@ class OstrichStatsReceiver(
   // To avoid breaking the Java API:
   def this(repr: StatsCollection) = this(repr, "/")
 
-  protected[this] def registerGauge(name: Seq[String], f: => Float) {
+  override protected[this] def registerGauge(name: Seq[String], f: => Float) {
     repr.addGauge(variableName(name)) { f.toDouble }
   }
 
-  protected[this] def deregisterGauge(name: Seq[String]) {
+  override protected[this] def deregisterGauge(name: Seq[String]) {
     repr.clearGauge(variableName(name))
   }
 
-  def counter(name: String*) = new Counter {
-    private[this] val name_ = variableName(name)
+  override def counter(name: String*) = new Counter {
+    private[this] val counter = repr.getCounter(variableName(name))
 
-    def incr(delta: Int) { repr.incr(name_, delta) }
+    override def incr(delta: Int) { counter.incr(delta) }
   }
 
-  def stat(name: String*) = new Stat {
-    private[this] val name_ = variableName(name)
+  override def stat(name: String*) = new Stat {
+    private[this] val metric = repr.getMetric(variableName(name))
 
-    def add(value: Float) {
-      repr.addMetric(name_, value.toInt)
+    override def add(value: Float) {
+      metric.add(value.toInt)
     }
   }
 

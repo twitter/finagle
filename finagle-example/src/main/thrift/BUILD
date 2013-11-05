@@ -4,7 +4,7 @@ thrift_library(name='thrift',
 
 compiled_idl(name='compiled',
   idl_deps=pants(':thrift'),
-  compiler='scrooge-legacy',
+  compiler='scrooge',
   language='scala',
   rpc_style='finagle'
 )

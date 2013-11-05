@@ -37,12 +37,15 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
   private static final TStruct STRUCT_DESC = new TStruct("ResponseHeader");
 
   private static final TField SPANS_FIELD_DESC = new TField("spans", TType.LIST, (short)1);
+  private static final TField CONTEXTS_FIELD_DESC = new TField("contexts", TType.LIST, (short)2);
 
   public List<Span> spans;
+  public List<RequestContext> contexts;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
-    SPANS((short)1, "spans");
+    SPANS((short)1, "spans"),
+    CONTEXTS((short)2, "contexts");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -59,6 +62,8 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       switch(fieldId) {
         case 1: // SPANS
           return SPANS;
+        case 2: // CONTEXTS
+          return CONTEXTS;
         default:
           return null;
       }
@@ -106,6 +111,9 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     tmpMap.put(_Fields.SPANS, new FieldMetaData("spans", TFieldRequirementType.DEFAULT, 
         new ListMetaData(TType.LIST, 
             new StructMetaData(TType.STRUCT, Span.class))));
+    tmpMap.put(_Fields.CONTEXTS, new FieldMetaData("contexts", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new StructMetaData(TType.STRUCT, RequestContext.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(ResponseHeader.class, metaDataMap);
   }
@@ -114,10 +122,12 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
   }
 
   public ResponseHeader(
-    List<Span> spans)
+    List<Span> spans,
+    List<RequestContext> contexts)
   {
     this();
     this.spans = spans;
+    this.contexts = contexts;
   }
 
   /**
@@ -131,6 +141,13 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       }
       this.spans = __this__spans;
     }
+    if (other.isSetContexts()) {
+      List<RequestContext> __this__contexts = new ArrayList<RequestContext>();
+      for (RequestContext other_element : other.contexts) {
+        __this__contexts.add(new RequestContext(other_element));
+      }
+      this.contexts = __this__contexts;
+    }
   }
 
   public ResponseHeader deepCopy() {
@@ -140,6 +157,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
   @Override
   public void clear() {
     this.spans = null;
+    this.contexts = null;
   }
 
   public int getSpansSize() {
@@ -181,6 +199,45 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     }
   }
 
+  public int getContextsSize() {
+    return (this.contexts == null) ? 0 : this.contexts.size();
+  }
+
+  public java.util.Iterator<RequestContext> getContextsIterator() {
+    return (this.contexts == null) ? null : this.contexts.iterator();
+  }
+
+  public void addToContexts(RequestContext elem) {
+    if (this.contexts == null) {
+      this.contexts = new ArrayList<RequestContext>();
+    }
+    this.contexts.add(elem);
+  }
+
+  public List<RequestContext> getContexts() {
+    return this.contexts;
+  }
+
+  public ResponseHeader setContexts(List<RequestContext> contexts) {
+    this.contexts = contexts;
+    return this;
+  }
+
+  public void unsetContexts() {
+    this.contexts = null;
+  }
+
+  /** Returns true if field contexts is set (has been asigned a value) and false otherwise */
+  public boolean isSetContexts() {
+    return this.contexts != null;
+  }
+
+  public void setContextsIsSet(boolean value) {
+    if (!value) {
+      this.contexts = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case SPANS:
@@ -191,6 +248,14 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       }
       break;
 
+    case CONTEXTS:
+      if (value == null) {
+        unsetContexts();
+      } else {
+        setContexts((List<RequestContext>)value);
+      }
+      break;
+
     }
   }
 
@@ -198,6 +263,9 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     switch (field) {
     case SPANS:
       return getSpans();
+
+    case CONTEXTS:
+      return getContexts();
 
     }
     throw new IllegalStateException();
@@ -212,6 +280,8 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     switch (field) {
     case SPANS:
       return isSetSpans();
+    case CONTEXTS:
+      return isSetContexts();
     }
     throw new IllegalStateException();
   }
@@ -235,6 +305,15 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       if (!(this_present_spans && that_present_spans))
         return false;
       if (!this.spans.equals(that.spans))
+        return false;
+    }
+
+    boolean this_present_contexts = true && this.isSetContexts();
+    boolean that_present_contexts = true && that.isSetContexts();
+    if (this_present_contexts || that_present_contexts) {
+      if (!(this_present_contexts && that_present_contexts))
+        return false;
+      if (!this.contexts.equals(that.contexts))
         return false;
     }
 
@@ -264,6 +343,16 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetContexts()).compareTo(typedOther.isSetContexts());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetContexts()) {
+      lastComparison = TBaseHelper.compareTo(this.contexts, typedOther.contexts);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -284,14 +373,32 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
         case 1: // SPANS
           if (field.type == TType.LIST) {
             {
-              TList _list8 = iprot.readListBegin();
-              this.spans = new ArrayList<Span>(_list8.size);
-              for (int _i9 = 0; _i9 < _list8.size; ++_i9)
+              TList _list12 = iprot.readListBegin();
+              this.spans = new ArrayList<Span>(_list12.size);
+              for (int _i13 = 0; _i13 < _list12.size; ++_i13)
               {
-                Span _elem10;
-                _elem10 = new Span();
-                _elem10.read(iprot);
-                this.spans.add(_elem10);
+                Span _elem14;
+                _elem14 = new Span();
+                _elem14.read(iprot);
+                this.spans.add(_elem14);
+              }
+              iprot.readListEnd();
+            }
+          } else { 
+            TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
+        case 2: // CONTEXTS
+          if (field.type == TType.LIST) {
+            {
+              TList _list15 = iprot.readListBegin();
+              this.contexts = new ArrayList<RequestContext>(_list15.size);
+              for (int _i16 = 0; _i16 < _list15.size; ++_i16)
+              {
+                RequestContext _elem17;
+                _elem17 = new RequestContext();
+                _elem17.read(iprot);
+                this.contexts.add(_elem17);
               }
               iprot.readListEnd();
             }
@@ -318,9 +425,21 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       oprot.writeFieldBegin(SPANS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.spans.size()));
-        for (Span _iter11 : this.spans)
+        for (Span _iter18 : this.spans)
         {
-          _iter11.write(oprot);
+          _iter18.write(oprot);
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.contexts != null) {
+      oprot.writeFieldBegin(CONTEXTS_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.STRUCT, this.contexts.size()));
+        for (RequestContext _iter19 : this.contexts)
+        {
+          _iter19.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -340,6 +459,14 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
       sb.append("null");
     } else {
       sb.append(this.spans);
+    }
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("contexts:");
+    if (this.contexts == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.contexts);
     }
     first = false;
     sb.append(")");

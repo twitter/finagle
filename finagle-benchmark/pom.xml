@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-benchmark</artifactId>
   <packaging>jar</packaging>
-  <version>6.5.3-SNAPSHOT</version>
+  <version>6.7.1</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.2</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -20,27 +20,57 @@
       <groupId>com.google.caliper</groupId>
       <artifactId>caliper</artifactId>
       <version>0.5-rc1</version>
+      <exclusions>
+        <!-- a more modern guava is provided through swift -->
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- project dependencies -->
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-stats</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-ostrich4</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-zipkin</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-swift</artifactId>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-thrift</artifactId>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scrooge-runtime</artifactId>
+      <version>3.9.1</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.twitter</groupId>
+        <artifactId>scrooge-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

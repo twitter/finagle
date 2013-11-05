@@ -25,10 +25,15 @@ trait MemcachedRichClient { self: Client[Command, Response] =>
 }
 
 trait MemcachedKetamaClient {
+  // TODO: make everything use varaddrs directly.
+
   def newKetamaClient(
-    group: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
+    dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
   ): memcached.Client = {
-    newKetamaClient(Resolver.resolve(group)(), keyHasher, ejectFailedHost)
+    val name = Resolver.eval(dest)
+    val va = name.bind()
+    val g = Group.fromVarAddr(va)
+    newKetamaClient(g, keyHasher, ejectFailedHost)
   }
 
   def newKetamaClient(
@@ -37,7 +42,7 @@ trait MemcachedKetamaClient {
     ejectFailedHost: Boolean
   ): memcached.Client = {
     new KetamaClient(
-      cacheNodesGrp(group),
+      CacheNodeGroup(group),
       keyHasher,
       KetamaClient.DefaultNumReps,
       faParams(ejectFailedHost),
@@ -47,9 +52,12 @@ trait MemcachedKetamaClient {
   }
 
   def newTwemcacheKetamaClient(
-    group: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
+    dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
   ): memcached.TwemcacheClient = {
-    newTwemcacheKetamaClient(Resolver.resolve(group)(), keyHasher, ejectFailedHost)
+    val n = Resolver.eval(dest)
+    val va = n.bind()
+    val g = Group.fromVarAddr(va)
+    newTwemcacheKetamaClient(g, keyHasher, ejectFailedHost)
   }
 
   def newTwemcacheKetamaClient(
@@ -58,18 +66,13 @@ trait MemcachedKetamaClient {
     ejectFailedHost: Boolean
   ): memcached.TwemcacheClient = {
     new KetamaClient(
-      cacheNodesGrp(group),
+      CacheNodeGroup(group),
       keyHasher,
       KetamaClient.DefaultNumReps,
       faParams(ejectFailedHost),
       None,
       ClientStatsReceiver.scope("twemcache_client")
     ) with TwemcachePartitionedClient
-  }
-
-  private def cacheNodesGrp(group: Group[SocketAddress]) = group collect {
-    case node: CacheNode => node
-    case addr: InetSocketAddress => new CacheNode(addr.getHostName, addr.getPort, 1)
   }
 
   private def faParams(ejectFailedHost: Boolean) = {
@@ -124,8 +127,8 @@ object MemcachedServer extends DefaultServer[Command, Response, Response, Comman
 )
 
 object Memcached extends Client[Command, Response] with MemcachedRichClient with MemcachedKetamaClient with Server[Command, Response] {
-  def newClient(group: Group[SocketAddress]): ServiceFactory[Command, Response] =
-    MemcachedClient.newClient(group)
+  def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
+    MemcachedClient.newClient(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     MemcachedServer.serve(addr, service)

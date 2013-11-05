@@ -21,6 +21,9 @@ private[finagle] object Message {
     val Treq = 1: Byte
     val Rreq = -1: Byte
 
+    val Tdispatch = 2: Byte
+    val Rdispatch = -2: Byte
+
     // Control messages:
     val Tdrain = 64: Byte
     val Rdrain = -64: Byte
@@ -36,11 +39,12 @@ private[finagle] object Message {
   val MarkerTag = 0
   val MinTag = 1
   val MaxTag = (1<<23)-1
+  
+  private def mkByte(b: Byte) =
+    ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array(b)))
 
   private val bufOfChar = Array[ChannelBuffer](
-    ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array[Byte](0))),
-    ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array[Byte](1))),
-    ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array[Byte](2))))
+    mkByte(0), mkByte(1), mkByte(2))
 
   abstract class EmptyMessage(val typ: Byte) extends Message {
     val buf = ChannelBuffers.EMPTY_BUFFER
@@ -95,6 +99,94 @@ private[finagle] object Message {
   case class RreqOk(tag: Int, reply: ChannelBuffer) extends Rreq(0, reply)
   case class RreqError(tag: Int, error: String) extends Rreq(1, encodeString(error))
   case class RreqNack(tag: Int) extends Rreq(2, ChannelBuffers.EMPTY_BUFFER)
+  
+  case class Tdispatch(
+      tag: Int, 
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      req: ChannelBuffer
+  ) extends Message {
+    val typ = Types.Tdispatch
+    lazy val buf = {
+      var n = 2
+      var seq = contexts
+      while (seq.nonEmpty) {
+        val (k, v) = seq.head
+        n += 2+k.readableBytes + 2+v.readableBytes
+        seq = seq.tail
+      }
+      n += 2+2
+
+      val hd = ChannelBuffers.buffer(n)
+      hd.writeShort(contexts.length)
+      seq = contexts
+      while (seq.nonEmpty) {
+        // TODO: it may or may not make sense 
+        // to do zero-copy here.
+        val (k, v) = seq.head
+        hd.writeShort(k.readableBytes)
+        hd.writeBytes(k.duplicate())
+        hd.writeShort(v.readableBytes)
+        hd.writeBytes(v.duplicate())
+        seq = seq.tail
+      }
+
+      // No destination yet.
+      hd.writeShort(0)
+      // No delegation table yet.
+      hd.writeShort(0)
+
+      ChannelBuffers.wrappedBuffer(hd, req)
+    }
+  }
+
+  abstract class Rdispatch(
+      status: Byte, 
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      body: ChannelBuffer
+  ) extends Message {
+    val typ = Types.Rdispatch
+    lazy val buf = {
+      var n = 1+2
+      var seq = contexts
+      while (seq.nonEmpty) {
+        val (k, v) = seq.head
+        n += 2+k.readableBytes+2+v.readableBytes
+        seq = seq.tail
+      }
+
+      val hd = ChannelBuffers.buffer(n)
+      hd.writeByte(status)
+      hd.writeShort(contexts.length)
+      seq = contexts
+      while (seq.nonEmpty) {
+        val (k, v) = seq.head
+        hd.writeShort(k.readableBytes)
+        hd.writeBytes(k.duplicate())
+        hd.writeShort(v.readableBytes)
+        hd.writeBytes(v.duplicate())
+        seq = seq.tail
+      }
+      
+      ChannelBuffers.wrappedBuffer(hd, body)
+    }
+  }
+  
+  case class RdispatchOk(
+      tag: Int, 
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      reply: ChannelBuffer
+  ) extends Rdispatch(0, contexts, reply)
+
+  case class RdispatchError(
+      tag: Int, 
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)], 
+      error: String
+  ) extends Rdispatch(1, contexts, encodeString(error))
+
+  case class RdispatchNack(
+      tag: Int, 
+      contexts: Seq[(ChannelBuffer, ChannelBuffer)]
+  ) extends Rdispatch(2, contexts, ChannelBuffers.EMPTY_BUFFER)
 
   case class Tdrain(tag: Int) extends EmptyMessage(Types.Tdrain)
   case class Rdrain(tag: Int) extends EmptyMessage(Types.Rdrain)
@@ -192,6 +284,52 @@ private[finagle] object Message {
 
     Treq(tag, id, buf.duplicate())
   }
+  
+  private def decodeContexts(buf: ChannelBuffer): Seq[(ChannelBuffer, ChannelBuffer)] = {
+    val n = buf.readUnsignedShort()
+    if (n == 0)
+      return Seq.empty
+
+    val contexts = new Array[(ChannelBuffer, ChannelBuffer)](n)
+    var i = 0
+    while (i < n) {
+      val nk = buf.readUnsignedShort()
+      val k = buf.readSlice(nk)
+      val nv = buf.readUnsignedShort()
+      val v = buf.readSlice(nv)
+      contexts(i) = (k, v)
+      i += 1
+    }
+    contexts
+  }
+
+  private def decodeTdispatch(tag: Int, buf: ChannelBuffer) = {
+    val contexts = decodeContexts(buf)
+
+    // Skip destination
+    buf.skipBytes(buf.readUnsignedShort())
+
+    // Skip delegation table
+    val nd = buf.readUnsignedShort()
+    var i = 0
+    while (i < nd) {
+      buf.skipBytes(buf.readUnsignedShort())
+      buf.skipBytes(buf.readUnsignedShort())
+    }
+
+    Tdispatch(tag, contexts, buf.duplicate())
+  }
+
+  private def decodeRdispatch(tag: Int, buf: ChannelBuffer) = {
+    val status = buf.readByte()
+    val contexts = decodeContexts(buf)
+    status match {
+      case 0 => RdispatchOk(tag, contexts, buf.duplicate())
+      case 1 => RdispatchError(tag, contexts, decodeString(buf))
+      case 2 => RdispatchNack(tag, contexts)
+      case _ => throw BadMessageException("invalid Rdispatch status")
+    }
+  }
 
   private def decodeRreq(tag: Int, buf: ChannelBuffer) = {
     if (buf.readableBytes < 1)
@@ -220,6 +358,8 @@ private[finagle] object Message {
     typ match {
       case Types.Treq => decodeTreq(tag, buf)
       case Types.Rreq => decodeRreq(tag, buf)
+      case Types.Tdispatch => decodeTdispatch(tag, buf)
+      case Types.Rdispatch => decodeRdispatch(tag, buf)
       case Types.Tdrain => Tdrain(tag)
       case Types.Rdrain => Rdrain(tag)
       case Types.Tping => Tping(tag)

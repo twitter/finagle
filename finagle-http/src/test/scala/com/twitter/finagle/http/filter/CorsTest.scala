@@ -1,0 +1,103 @@
+package com.twitter.finagle.http.filter
+
+import com.twitter.finagle.Service
+import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.util.{Await, Future}
+import org.jboss.netty.handler.codec.http.HttpMethod
+import org.junit.runner.RunWith
+import org.scalatest.FlatSpec
+import org.scalatest.junit.{JUnitRunner, MustMatchersForJUnit => MustMatchers}
+
+@RunWith(classOf[JUnitRunner])
+class CorsTest extends FlatSpec with MustMatchers {
+  val TRAP = new HttpMethod("TRAP")
+  val underlying = Service.mk[Request, Response] { request =>
+    val response = request.response
+    if (request.method == TRAP) {
+      response.contentString = "#guwop"
+    } else {
+      response.status = Status.MethodNotAllowed
+    }
+    Future value response
+  }
+
+  val policy = Cors.Policy(
+    allowsOrigin = {
+      case origin if origin.startsWith("juug") => Some(origin)
+      case origin if origin.endsWith("street") => Some(origin)
+      case _ => None
+    },
+    allowsMethods = { method  => Some(method :: "TRAP" :: Nil) },
+    allowsHeaders = { headers => Some(headers) },
+    exposedHeaders = "Icey" :: Nil,
+    supportsCredentials = true)
+
+  val corsFilter = new Cors.HttpFilter(policy)
+  val service = corsFilter andThen underlying
+
+  "Cors.HttpFilter" should "handle preflight requests" in {
+    val request = Request()
+    request.method = HttpMethod.OPTIONS
+    request.setHeader("Origin", "thestreet")
+    request.setHeader("Access-Control-Request-Method", "BRR")
+
+    val response = Await result service(request)
+    response.headers.get("Access-Control-Allow-Origin") must be(Some("thestreet"))
+    response.headers.get("Access-Control-Allow-Credentials") must be(Some("true"))
+    response.headers.get("Access-Control-Allow-Methods") must be(Some("BRR, TRAP"))
+    response.headers.get("Vary") must be(Some("Origin"))
+    response.contentString must be("")
+  }
+
+  it should "respond to invalid preflight requests without CORS headers" in {
+    val request = Request()
+    request.method = HttpMethod.OPTIONS
+    
+    val response = Await result service(request)
+    response.status must be(Status.Ok)
+    response.headers.get("Access-Control-Allow-Origin") must be(None)
+    response.headers.get("Access-Control-Allow-Credentials") must be(None)
+    response.headers.get("Access-Control-Allow-Methods") must be(None)
+    response.headers.get("Vary") must be(Some("Origin"))
+    response.contentString must be("")
+  }
+
+  it should "respond to unacceptable cross-origin requests without CORS headers" in {
+    val request = Request()
+    request.method = HttpMethod.OPTIONS
+    request.setHeader("Origin", "theclub")
+    
+    val response = Await result service(request)
+    response.status must be(Status.Ok)
+    response.headers.get("Access-Control-Allow-Origin") must be(None)
+    response.headers.get("Access-Control-Allow-Credentials") must be(None)
+    response.headers.get("Access-Control-Allow-Methods") must be(None)
+    response.headers.get("Vary") must be(Some("Origin"))
+    response.contentString must be("")
+  }
+
+  it should "handle simple requests" in {
+    val request = Request()
+    request.method = TRAP
+    request.headers += ("Origin" -> "juughaus")
+    
+    val response = Await result service(request)
+    response.headers.get("Access-Control-Allow-Origin") must be(Some("juughaus"))
+    response.headers.get("Access-Control-Allow-Credentials") must be(Some("true"))
+    response.headers.get("Access-Control-Expose-Headers") must be(Some("Icey"))
+    response.headers.get("Vary") must be(Some("Origin"))
+    response.contentString must be("#guwop")
+  }
+
+  it should "not add response headers to simple requests if request headers aren't present" in {
+    val request = Request()
+    request.method = TRAP
+    
+    val response = Await result service(request)
+    response.headers.get("Access-Control-Allow-Origin") must be(None)
+    response.headers.get("Access-Control-Allow-Credentials") must be(None)
+    response.headers.get("Access-Control-Expose-Headers") must be(None)
+    response.headers.get("Vary") must be(Some("Origin"))
+    response.contentString must be("#guwop")
+  }
+}

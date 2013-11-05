@@ -6,6 +6,8 @@ clients and servers are constructed with the Finagle network library.
 They are very simple, but also quite versatile. Most of Finagle's
 internals are structured around Services and Filters.
 
+.. _services:
+
 Services
 --------
 
@@ -14,7 +16,7 @@ A service, at its heart, is a simple function:
 ::
 
 	trait Service[Req, Rep] extends (Req => Future[Rep])
-	
+
 Put another way, a service takes some request of type `Req` and returns
 to you a :doc:`Future <Futures>` representing the eventual result (or failure)
 of type `Rep`.
@@ -27,11 +29,11 @@ To use an HTTP client:
 ::
 
 	val httpService: Service[HttpRequest, HttpResponse] = ...
-	
+
 	httpService(new DefaultHttpRequest(...)) onSuccess { res =>
 	  println("received response "+res)
 	}
-	
+
 or to provide an HTTP server:
 
 ::
@@ -47,7 +49,7 @@ application's external API.
 Filters
 -------
 
-It is often useful to define *application-agnostic* behavior as well. 
+It is often useful to define *application-agnostic* behavior as well.
 A common example of this is to implement timeouts: if a request
 fails to complete within a certain time, the timeout mechanism fails
 it with a timeout exception.
@@ -66,8 +68,8 @@ request or reply types; visualized:
 
 .. xxx
   .. image:: _static/filter.png
-  
-.. image:: _static/filter2.png 
+
+.. image:: _static/filter2.png
 
 In most common cases, `ReqIn` is equal to `ReqOut`, and `RepIn` is
 equal to `RepOut` — this is in fact sufficiently common to warrant its
@@ -82,7 +84,7 @@ This, then, is a complete definition of a timeout filter:
 ::
 
 	class TimeoutFilter[Req, Rep](timeout: Duration, timer: Timer)
-	    extends SimpleFilter[Req, Rep] 
+	    extends SimpleFilter[Req, Rep]
 	{
 	  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
 	    val res = service(request)
@@ -96,6 +98,8 @@ It then dispatches this request, applying a timeout on the returned
 timeout, failing the future with a timeout exception should it fail
 to complete within the given deadline.
 
+.. _composing_services_filters:
+
 Composing filters and services
 ------------------------------
 
@@ -106,8 +110,8 @@ to furnish a service with timeout behavior:
 
 	val service: Service[HttpRequest, HttpResponse] = ...
 	val timeoutFilter = new TimeoutFilter[HttpRequest, HttpResponse](...)
-	
-	val serviceWithTimeout: Service[HttRequest, HttpResponse] = 
+
+	val serviceWithTimeout: Service[HttRequest, HttpResponse] =
 	  timeoutFilter andThen service
 
 Applying a filter to a `Service` produces a new `Service` whose requests
@@ -120,9 +124,9 @@ so that
 
 	val timeoutFilter = new TimeoutFilter[..](..)
 	val retryFilter = new RetryFilter[..](..)
-	
+
 	val retryWithTimeoutFilter: Filter[..] =
 	  retryFilter andThen timeoutFilter
-	  
+
 creates a filter that dispatches requests first through `retryFilter` and
 then `timeoutFilter`.

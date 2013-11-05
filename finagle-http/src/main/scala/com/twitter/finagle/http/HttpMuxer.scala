@@ -1,23 +1,29 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.{Filter, Service}
 import com.twitter.finagle.util.LoadService
+import com.twitter.finagle.{Filter, Service}
 import com.twitter.util.Future
 import java.net.URI
+import java.util.logging.Logger
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
   HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
-import java.util.logging.Logger
 
 /**
  * A service that dispatches incoming requests to registered handlers.
  * In order to choose which handler to dispatch the request to, we take the path of the request and match it with
  * the patterns of the pre-registered handlers. The pattern matching follows these rules:
+ *
  *  - Patterns ending with "/" use prefix matching. Eg: the pattern "foo/bar/" matches these paths:
  *            "foo/bar", "foo/bar/", "foo/bar/baz", etc.
- *  - Patterns not ending with "/" use exact matching. Eg: the pattern "foo/bar" ONLY matches these two paths:
- *            "foo/bar" and "foo/bar/"
- *  - Exact matching overrides prefix matching.
- *  - When multiple prefix matches exist, the longest pattern wins.
+ *    Similarly, the pattern "/" matches all paths
+ *
+ *  - Patterns not ending with "/" use exact matching. Eg: the pattern "foo/bar" ONLY matches this path:
+ *            "foo/bar"
+ *
+ *  - Special case:
+ *      The pattern "" matches only "/" and ""
+ *
+ *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
 class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, HttpResponse])])
   extends Service[HttpRequest, HttpResponse] {
@@ -50,10 +56,14 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
     }
     val path = normalize(new URI(uri).getPath)
 
-    // find the longest prefix of path; patterns are already sorted by length in descending order.
+    // find the longest pattern that matches (the patterns are already sorted)
     val matching = sorted.find { case (pattern, _) =>
-      (pattern.endsWith("/") && path.startsWith(pattern)) || // prefix
-      (!pattern.endsWith("/") && path == pattern) // exact match
+      if (pattern == "")
+        path == "/" || path == "" // special cases
+      else if (pattern.endsWith("/"))
+        path.startsWith(pattern) || path == pattern.dropRight(1) // prefix match
+      else
+        path == pattern // exact match
     }
 
     matching match {
@@ -68,11 +78,13 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
   /**
    * - ensure path starts with "/"
    * - get rid of excessive "/"s. For example "/a//b///c/" => "/a/b/c/"
+   * - return "" if path is ""
+   * - return "/" if path is "/" or "///" etc
    */
   private[this] def normalize(path: String) = {
     val suffix = if (path.endsWith("/")) "/" else ""
     val p = path.split("/") filterNot(_.isEmpty) mkString "/"
-    "/" + p + suffix
+    if (p == "") suffix else "/" + p + suffix
   }
 }
 

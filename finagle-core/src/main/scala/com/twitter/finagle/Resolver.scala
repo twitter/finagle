@@ -1,38 +1,45 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.{InetSocketAddressUtil, LoadService}
-import com.twitter.util.{Closable, Return, Throw, Time, Try}
+import com.twitter.util.{Closable, Return, Throw, Time, Try, Var}
 import java.net.SocketAddress
 import java.util.WeakHashMap
 import java.util.logging.Logger
 import scala.collection.mutable
 
-trait ResolvedGroup extends Group[SocketAddress]
-  with Proxy
-  with NamedGroup
-{
-  val targets: List[String]
-}
-
+/**
+ * A resolver binds a name, represented by a string, to a
+ * variable address. Resolvers have an associated scheme
+ * which is used for lookup so that names may be resolved
+ * in a global context.
+ */
 trait Resolver {
   val scheme: String
-  def resolve(name: String): Try[Group[SocketAddress]]
+  def bind(arg: String): Var[Addr]
+
+  @deprecated("Use Resolver.bind", "6.7.x")
+  final def resolve(name: String): Try[Group[SocketAddress]] =
+    bind(name) match {
+      case Var(Addr.Failed(e)) => Throw(e)
+      case va => Return(Group.fromVarAddr(va))
+    }
 }
 
 object InetResolver extends Resolver {
   val scheme = "inet"
 
-  def resolve(addr: String) = {
-    val expanded = InetSocketAddressUtil.parseHosts(addr)
-    Return(Group[SocketAddress](expanded:_*))
+  def bind(arg: String) = {
+    val sockaddrs = InetSocketAddressUtil.parseHosts(arg)
+    val addr = Addr.Bound(sockaddrs:_*)
+    Var.value(addr)
   }
 }
 
 class ResolverNotFoundException(scheme: String)
   extends Exception("Resolver not found for scheme \"%s\"".format(scheme))
 
-class ResolverTargetInvalid(target: String)
-  extends Exception("Resolver target \"%s\" is not valid".format(target))
+class ResolverAddressInvalid(addr: String)
+  extends Exception("Resolver address \"%s\" is not valid".format(addr))
 
 class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
   extends NoStacktrace
@@ -83,11 +90,8 @@ object Resolver {
     }
   }.reverse
 
-  private[this] val _resolutions = mutable.Set.empty[List[String]]
-  def resolutions = synchronized { _resolutions.toSet }
-
   /**
-   * Resolve a group from a target name, a string. Resolve uses
+   * Resolve a group from an address, a string. Resolve uses
    * `Resolver`s to do this. These are loaded via the Java
    * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
    * mechanism. The default resolver is "inet", resolving DNS
@@ -101,55 +105,60 @@ object Resolver {
    *
    * Names resolved by this mechanism are also a
    * [[com.twitter.finagle.NamedGroup]]. By default, this name is
-   * simply the `target` string, but it can be overriden by prefixing
-   * a name separated by an equals sign from the rest of the target.
-   * For example, the target "www=inet!google.com:80" resolves
+   * simply the `addr` string, but it can be overriden by prefixing
+   * a name separated by an equals sign from the rest of the addr.
+   * For example, the addr "www=inet!google.com:80" resolves
    * "google.com:80" with the inet resolver, but the returned group's
    * [[com.twitter.finagle.NamedGroup]] name is "www".
    */
-  def resolve(target: String): Try[Group[SocketAddress]] = {
-    val lexed = lex(target)
+  @deprecated("Use Resolver.eval", "6.7.x")
+  def resolve(addr: String): Try[Group[SocketAddress]] =
+    Try { eval(addr) } flatMap { n =>
+      n.bind() match {
+        case Var(Addr.Failed(e)) => Throw(e)
+        case va => Return(Group.fromVarAddr(va))
+      }
+    }
+  
+  /**
+   * Parse and evaluate the argument into a Name. Eval parses
+   * a simple grammar: a scheme is followed by a bang, followed 
+   * by an argument:
+   * 	name := scheme ! arg
+   * The scheme is looked up from registered Resolvers, and the
+   * argument is passed in.
+   *
+   * Eval throws exceptions upon failure to parse the name, or 
+   * on failure to scheme lookup. Since names are late bound, 
+   * binding failures are deferred.
+   */
+  def eval(name: String): Name =
+    if (name startsWith "/") Name(name) 
+    else new Name {
+      val (resolver, arg) = lex(name) match {
+        case (Eq :: _) | (Bang :: _) =>
+          throw new ResolverAddressInvalid(name)
+  
+        case El(scheme) :: Bang :: name =>
+          resolvers.find(_.scheme == scheme) match {
+            case Some(resolver) =>  (resolver, delex(name))
+            case None => throw new ResolverNotFoundException(scheme)
+          }
+  
+        case ts => (InetResolver, delex(ts))
+      }
+  
+      def bind() = resolver.bind(arg)
+    }
 
-    val (groupName, stripped) = lexed match {
+  private[finagle] def evalLabeled(addr: String): (Name, String) = {
+    val (label, rest) = lex(addr) match {
       case El(n) :: Eq :: rest => (n, rest)
       case Eq :: rest => ("", rest)
-      case rest => (target, rest)
+      case rest => (addr, rest)
     }
-
-    val resolved = stripped match {
-      case (Eq :: _) | (Bang :: _) =>
-        Throw(new ResolverTargetInvalid(target))
-
-      case El(scheme) :: Bang :: addr =>
-        resolvers.find(_.scheme == scheme) match {
-          case Some(resolver) => resolver.resolve(delex(addr))
-          case None => Throw(new ResolverNotFoundException(scheme))
-        }
-
-      case ts =>
-        InetResolver.resolve(delex(ts))
-    }
-
-    resolved map { group =>
-      val lastTargets = group match {
-        case g: ResolvedGroup => g.targets
-        case g => Nil
-      }
-
-      val resolvedGroup = new ResolvedGroup {
-        val targets = delex(stripped) :: lastTargets
-        val name = groupName
-        val self = group
-        def members = self.members
-      }
-
-      synchronized {
-        _resolutions -= lastTargets
-        _resolutions += resolvedGroup.targets
-      }
-
-      resolvedGroup
-    }
+    
+    (eval(delex(rest)), label)
   }
 }
 
@@ -157,10 +166,10 @@ private object ServerRegistry {
   private val addrNames = new WeakHashMap[SocketAddress, String]
 
   // This is a terrible hack until we have a better
-  // way of naming targets.
+  // way of labelling addresses.
 
-  def register(target: String): SocketAddress =
-    target.split("=", 2) match {
+  def register(addr: String): SocketAddress =
+    addr.split("=", 2) match {
       case Array(addr) =>
         val Seq(ia) = InetSocketAddressUtil.parseHosts(addr)
         ia

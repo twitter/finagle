@@ -19,8 +19,8 @@ case class ThriftMuxClientImpl(
 ) extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient {
   protected val defaultClientName = "mux"
 
-  def newClient(group: Group[SocketAddress]): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-    muxer.newClient(group) map { service =>
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    muxer.newClient(dest, label) map { service =>
       new Service[ThriftClientRequest, Array[Byte]] {
         def apply(req: ThriftClientRequest): Future[Array[Byte]] = {
           if (req.oneway) return Future.exception(

@@ -17,18 +17,37 @@ trait KeyValidation {
 
   {
     // Validating keys
-    if (keys==null || keys.exists(badKey(_)))
-      throw new IllegalArgumentException(
-        "Invalid keys: key cannot be empty, having whitespace or control characters" +
-            ", or longer than " + MAXKEYLENGTH + " bytes.")
+    if (keys == null)
+      throw new IllegalArgumentException("Invalid keys: cannot have null for keys")
+
+    keys foreach { key =>
+      if (key == null)
+        throw new IllegalArgumentException("Invalid keys: key cannot be null")
+
+      if (tooLong(key))
+        throw new IllegalArgumentException(
+          "Invalid keys: key cannot be longer than %d bytes (%d)".format(MAXKEYLENGTH, key.readableBytes))
+
+      val index = invalidByteIndex(key)
+      if (index != -1)
+        throw new IllegalArgumentException(
+          "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(key.getByte(index)))
+    }
+  }
+
+  private[this] def tooLong(key: ChannelBuffer): Boolean = key.readableBytes > MAXKEYLENGTH
+
+  /** Return -1 if no invalid bytes */
+  private[this] def invalidByteIndex(key: ChannelBuffer): Int = {
+    key.indexOf(key.readerIndex(), key.writerIndex(), ChannelBufferUtils.FIND_INVALID_KEY_CHARACTER)
   }
 
   def badKey(key: ChannelBuffer): Boolean = {
-    if(key == null) true else {
-      key.readableBytes > MAXKEYLENGTH ||
-          key.indexOf(key.readerIndex(), key.writerIndex(), ChannelBufferUtils.FIND_INVALID_KEY_CHARACTER) != -1
+    if (key == null) true else {
+      tooLong(key) || invalidByteIndex(key) != -1
     }
   }
+
 }
 
 sealed abstract class Command(val name: String)

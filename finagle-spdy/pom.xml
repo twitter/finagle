@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-spdy</artifactId>
   <packaging>jar</packaging>
-  <version>6.5.3-SNAPSHOT</version>
+  <version>6.7.1</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.2</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6.7.1</version>
     </dependency>
   </dependencies>
 </project>

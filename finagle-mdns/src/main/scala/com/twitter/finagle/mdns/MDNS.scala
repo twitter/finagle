@@ -1,19 +1,20 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Announcement, Group, Resolver}
-import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.finagle.{Announcer, Announcement, Resolver, Addr}
+import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.lang.management.ManagementFactory
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
 
-class MDNSTargetException(target: String)
-  extends Exception("Invalid MDNS target \"%s\"".format(target))
+class MDNSAddressException(addr: String)
+  extends Exception("Invalid MDNS address \"%s\"".format(addr))
 
 private case class MdnsRecord(
   name: String,
   regType: String,
   domain: String,
   addr: InetSocketAddress)
+extends SocketAddress
 
 private trait MDNSAnnouncerIface {
   def announce(
@@ -24,7 +25,7 @@ private trait MDNSAnnouncerIface {
 }
 
 private trait MDNSResolverIface {
-  def resolve(regType: String, domain: String): Try[Group[MdnsRecord]]
+  def resolve(regType: String, domain: String): Var[Addr]
 }
 
 private object MDNS {
@@ -35,9 +36,9 @@ private object MDNS {
 
   def mkName(ps: Any*) = ps.mkString("/")
 
-  def parse(target: String) = target.split("\\.") match {
+  def parse(addr: String) = addr.split("\\.") match {
     case Array(name, app, prot, domain) => (name, app + "." + prot, domain)
-    case _ => throw new MDNSTargetException(target)
+    case _ => throw new MDNSAddressException(addr)
   }
 }
 
@@ -56,14 +57,14 @@ class MDNSAnnouncer extends Announcer {
   /**
    * Announce an address via MDNS.
    *
-   * The target must be in the style of `[name]._[group]._tcp.local.`
+   * The addr must be in the style of `[name]._[group]._tcp.local.`
    * (e.g. myservice._twitter._tcp.local.). In order to ensure uniqueness
    * the final name will be [name]/[port]/[pid].
    */
-  def announce(addr: InetSocketAddress, target: String): Future[Announcement] = {
-    val (name, regType, domain) = parse(target)
-    val serviceName = mkName(name, addr.getPort, pid)
-    announcer.announce(addr, serviceName, regType, domain)
+  def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
+    val (name, regType, domain) = parse(addr)
+    val serviceName = mkName(name, ia.getPort, pid)
+    announcer.announce(ia, serviceName, regType, domain)
   }
 }
 
@@ -82,15 +83,19 @@ class MDNSResolver extends Resolver {
   /**
    * Resolve a service via mdns
    *
-   * The target must be in the style of `[name]._[group]._tcp.local.`
+   * The address must be in the style of `[name]._[group]._tcp.local.`
    * (e.g. "myservice._twitter._tcp.local.").
    */
-  def resolve(target: String): Try[Group[SocketAddress]] = {
-    val (name, regType, domain) = parse(target)
-    resolver.resolve(regType, domain) map { group =>
-      group collect {
-        case record if record.name.startsWith(name) => record.addr
-      }
+  def bind(arg: String): Var[Addr] = {
+    val (name, regType, domain) = parse(arg)
+    resolver.resolve(regType, domain) map {
+      case Addr.Bound(sockaddrs) =>
+        val filtered = sockaddrs collect {
+          case MdnsRecord(n, _, _, a) if n startsWith name => 
+            a: SocketAddress
+        }
+        Addr.Bound(filtered)
+      case a => a
     }
   }
 }

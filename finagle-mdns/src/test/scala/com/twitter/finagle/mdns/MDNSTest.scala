@@ -1,6 +1,6 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Resolver}
+import com.twitter.finagle.{Announcer, Resolver, Addr}
 import com.twitter.util.{Await, RandomSocket}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
@@ -13,36 +13,46 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 @RunWith(classOf[JUnitRunner])
 class MdnsTest extends FunSuite with BeforeAndAfter {
   test("bind locally") {
-    val addr = RandomSocket()
+    val ia = RandomSocket()
     val resolver = new MDNSResolver
     val announcer = new MDNSAnnouncer
-    val target = "my-service._finagle._tcp.local."
+    val dest = "my-service._finagle._tcp.local."
 
-    val announcement = Await.result(announcer.announce(addr, target))
+    val announcement = Await.result(announcer.announce(ia, dest))
     try {
-      val group = resolver.resolve(target).get() map { _.asInstanceOf[InetSocketAddress].getPort }
-      eventually(timeout(5 seconds)) { assert(group().contains(addr.getPort)) }
+      val addr = resolver.bind(dest)
+
+      eventually(timeout(5 seconds)) {
+        addr() match {
+          case Addr.Bound(sockaddrs) =>
+            assert(sockaddrs exists {
+              case ia1: InetSocketAddress => ia1.getPort == ia.getPort
+            })
+          case _ => fail()
+        }
+      }
     } finally {
       Await.ready(announcement.close())
     }
   }
 
   test("resolve via the main resolver") {
-    assert(Resolver.resolve("mdns!foo._bar._tcp.local.").isReturn)
-    assert(Resolver.resolve("local!foo").isReturn)
+    // (No exceptions)
+    Resolver.eval("mdns!foo._bar._tcp.local.")
+    Resolver.eval("local!foo")
   }
 
   test("announce via the main announcer") {
     val sock = RandomSocket()
-    assert(Await.ready(Announcer.announce(sock, "local!foo")).isReturn)
-    assert(Await.ready(Announcer.announce(sock, "mdns!foo._bar._tcp.local.")).isReturn)
+    Await.result(Announcer.announce(sock, "local!foo"))
+    Await.result(Announcer.announce(sock, "mdns!foo._bar._tcp.local."))
   }
 
   test("throws an exception on an imporperly formatted name") {
     val res = new MDNSResolver
     val ann = new MDNSAnnouncer
-    val addr = new InetSocketAddress(0)
-    intercept[MDNSTargetException] { ann.announce(addr, "invalidname") }
-    intercept[MDNSTargetException] { res.resolve("invalidname") }
+    val ia = new InetSocketAddress(0)
+    intercept[MDNSAddressException] { ann.announce(ia, "invalidname") }
+    intercept[MDNSAddressException] { res.bind("invalidname") }
   }
 }

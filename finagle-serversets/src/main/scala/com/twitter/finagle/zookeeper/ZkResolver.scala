@@ -6,29 +6,28 @@ import com.twitter.common.zookeeper.ServerSet
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.group.StabilizingGroup
-import com.twitter.finagle.{Group, Resolver, InetResolver}
+import com.twitter.finagle.{Group, Resolver, InetResolver, Addr}
 import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
-import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.JavaConverters._
 
 class ZkResolverException(msg: String) extends Exception(msg)
 
-private class ZkGroup(serverSet: ServerSet, path: String)
+private[finagle] class ZkGroup(serverSet: ServerSet, path: String)
     extends Thread("ZkGroup(%s)".format(path))
     with Group[ServiceInstance]
 {
   setDaemon(true)
   start()
 
-  @volatile private[this] var current: Set[ServiceInstance] = Set()
-  def members = current
+  protected val _set = Var(Set[ServiceInstance]())
 
   override def run() {
     serverSet.monitor(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
       def onChange(newSet: ImmutableSet[ServiceInstance]) = synchronized {
-        current = Set() ++ newSet.asScala
+        _set() = newSet.asScala.toSet
       }
     })
   }
@@ -39,7 +38,8 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
 
   def this() = this(DefaultZkClientFactory)
 
-  def resolve(zkHosts: Set[InetSocketAddress], path: String, endpoint: Option[String]): Try[Group[SocketAddress]] = {
+  def resolve(zkHosts: Set[InetSocketAddress], 
+      path: String, endpoint: Option[String]): Var[Addr] = {
     val (zkClient, zkHealthHandler) = factory.get(zkHosts)
     val zkGroup = endpoint match {
       case Some(endpoint) =>
@@ -56,11 +56,15 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
             new InetSocketAddress(ep.getHost, ep.getPort): SocketAddress
         }
     }
-    Return(StabilizingGroup(
+    
+    // TODO: get rid of groups underneath.
+    val g = StabilizingGroup(
       zkGroup,
       zkHealthHandler,
       factory.sessionTimeout,
-      DefaultStatsReceiver.scope("zkGroup")))
+      DefaultStatsReceiver.scope("zkGroup"))
+
+    g.set map { newSet => Addr.Bound(newSet) }
   }
 
   private[this] def zkHosts(hosts: String) = {
@@ -70,7 +74,7 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
     zkHosts
   }
 
-  def resolve(addr: String) = addr.split("!") match {
+  def bind(arg: String) = arg.split("!") match {
     // zk!host:2181!/path
     case Array(hosts, path) =>
       resolve(zkHosts(hosts), path, None)
@@ -80,6 +84,6 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
       resolve(zkHosts(hosts), path, Some(endpoint))
 
     case _ =>
-      Throw(new ZkResolverException("Invalid address \"%s\"".format(addr)))
+      throw new ZkResolverException("Invalid address \"%s\"".format(arg))
   }
 }

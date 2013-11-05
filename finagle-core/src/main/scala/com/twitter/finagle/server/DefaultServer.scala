@@ -3,9 +3,7 @@ package com.twitter.finagle.server
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle._
 import com.twitter.finagle.builder.SourceTrackingMonitor
-import com.twitter.finagle.filter.{
-  HandletimeFilter, MaskCancelFilter, MkJvmFilter, MonitorFilter, RequestSemaphoreFilter
-}
+import com.twitter.finagle.filter._
 import com.twitter.finagle.service.{TimeoutFilter, StatsFilter}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
@@ -43,9 +41,8 @@ object DefaultServer {
  * @param maxConcurrentRequests The maximum number of concurrent
  * requests the server is willing to handle.
  *
- * @param cancelOnHangup The maximum amount of time the server is
- * allowed to handle a request. If the timeout expires, the server
- * will cancel the future and terminate the client connection.
+ * @param cancelOnHangup Enabled by default. If disabled,
+ * exceptions on the transport do not propagate to the transport.
  *
  * @param prepare Prepare the given `ServiceFactory` before use.
  */
@@ -86,6 +83,8 @@ case class DefaultServer[Req, Rep, In, Out](
     }
 
     val inner: Transformer[Req, Rep] = {
+      val exceptionSourceFilter = new ExceptionSourceFilter[Req, Rep](name)
+
       val maskCancelFilter: SimpleFilter[Req, Rep] =
         if (cancelOnHangup) Filter.identity
         else new MaskCancelFilter
@@ -114,7 +113,8 @@ case class DefaultServer[Req, Rep, In, Out](
           }
         }
 
-      val filter = maskCancelFilter andThen
+      val filter = exceptionSourceFilter andThen
+        maskCancelFilter andThen
         requestSemaphoreFilter andThen
         statsFilter andThen
         timeoutFilter

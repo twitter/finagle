@@ -9,7 +9,7 @@ a count (C) or a statistic (S).
 |                         | |out connections are closed. By default an idle connection times out in|
 |                         | |5 seconds (hostConnectionIdleTime).                                   |
 +-------------------------+-+----------------------------------------------------------------------+
-|connection_duration      |S|A stats (an Histogram) representing the distribution of the duration  |
+|connection_duration      |S|A stat representing the distribution of the duration                  |
 |                         | |of a connection. closechan` and `connection_duration.count` must be   |
 |                         | |equal.                                                                |
 +-------------------------+-+----------------------------------------------------------------------+
@@ -30,32 +30,35 @@ a count (C) or a statistic (S).
 |request_latency_ms       |S|The time from the beginning of a request until the response is        |
 |                         | |received                                                              |
 +-------------------------+-+----------------------------------------------------------------------+
-					
-Pool Counts
-^^^^^^^^^^^
 
-The pool is a collection of tcp connections to a single host.
 
-pool_cached
-  finagle's default connection pool is called a "watermark" pool because it has a lower-bound and
-  upper-bound (high and low water marks). The WaterMarkPool keeps persistent connections up the
-  lower-bound. It will keep making connections up to upper-bound if you checkout more than
-  lower-bound connections, but when you release those connections above the lower-bound, it
-  immediately tries to close them. This creates a lot of connection churn if you keep needing more
-  than lower-bound connections. As a result, there is a separate facility for caching for a few
-  seconds (with some TTL) those connections above the lower bound and not closing them and
-  re-opening them after every request. It caches REGARDLESS of whether there are more than
-  lower-bound open connections; it's always caching UP TO (upper-bound - lower-bound)
-  connections. The cache reaches its peak value when you reach your peak concurrency (i.e., "load"),
-  and then slowly decays, based on the TTL. (The default TTL is 5 seconds).
+Connection Pool Stats
+^^^^^^^^^^^^^^^^^^^^^
 
-pool_size
-  represents the number of connections open to the host, as seen by the connection pool. It should
-  be between the min and max of your client builder spec.
+.. _pool_counts:
 
-  If you can see that "pool_waiters" is exactly zero, then there is no queueing waiting to get a
-  connection from the pool. This means your pool is not under-sized under the current
-  workload. That's a good thing.
+A finagle client pools tcp connections via a :ref:`WatermarkPool <watermark_pool>`
+and :ref:`CachingPool <caching_pool>`. The following metrics expose the state
+of the pools in your application.
 
-pool_waiters
-  the number of requests that are queued while waiting for a connection.
+**pool_cached** - represents the number of cached tcp connections to a particular host. This caching behavior is helpful to eliminate unnecessary connection churn as exposed by the default behavior of the watermark pool.
+
+**pool_size** - represents the number of connections open to the host. It should be between the lower and upper bounds of your client's watermark pool configuration.
+
+**pool_waiters** - the number of requests that are queued while waiting for a connection. Note, if you observe that "pool_waiters" is exactly zero, then there is no queueing waiting to get a connection from the pool. This means your pool is not under-sized with respect to the current workload. That's a good thing!
+
+Load Balancer Stats
+^^^^^^^^^^^^^^^^^^^
+
+.. _load_balancer_counts:
+
+A finagle client connected to multiple hosts load balances requests via a :ref:`HeapBalancer <heap_balancer>`. The following metrics expose the state of the heap balancer.
+
+**size** - represents the current number of nodes used by the balancer.
+
+**adds** - the cumulative node additions over the life time of the client.
+
+**removes** - the cumulative node removals over the life time of the client.
+
+
+

@@ -1,4 +1,4 @@
-benchmark(name='scala',
+scala_library(name='scala',
   dependencies=[
     pants('3rdparty:caliper'),
     pants('3rdparty:netty'),
@@ -13,10 +13,25 @@ benchmark(name='scala',
     pants('util/util-logging'),
     compiled_idl(
       idl_deps=pants('finagle/finagle-stress/src/main/thrift'),
-      compiler='scrooge-legacy',
+      compiler='scrooge',
       language='scala',
       rpc_style='finagle'
     )
   ],
   sources=rglobs('*.scala')
 )
+
+benchmark(name='bench',
+  dependencies=[
+    pants(":scala")
+  ]
+)
+
+jvm_binary(name='stress',
+  main='com.twitter.finagle.stress.LoadBalancerTest',
+  dependencies=[
+    pants(':scala')
+  ]
+)
+
+

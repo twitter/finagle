@@ -86,8 +86,10 @@ trait ThriftTest { self: FunSuite =>
 
   private val protocols = Map(
     "binary" -> new TBinaryProtocol.Factory(),
-    "compact" -> new TCompactProtocol.Factory(),
-    "json" -> new TJSONProtocol.Factory()
+    "compact" -> new TCompactProtocol.Factory()
+// Unsupported. Add back when we upgrade Thrift.
+// (There's a test that will fail when we do.)
+//    "json" -> new TJSONProtocol.Factory()
   )
 
   // For some reason, the compiler needs some help here.

@@ -5,6 +5,7 @@ import com.twitter.finagle.tracing.{Trace, Annotation}
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
 import com.twitter.finagle.util.ByteArrays
+import com.twitter.io.Buf
 import org.apache.thrift.protocol.{
   TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
@@ -12,6 +13,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
   ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelDownstreamHandler}
+import java.util.ArrayList
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -175,7 +177,22 @@ private[thrift] class ThriftClientTracingFilter(
         case None => header.unsetSampled()
       }
       header.setFlags(Trace.id.flags.toLong)
+      
+      val contexts = Context.emit().iterator
+      if (contexts.hasNext) {
+        val ctxs = new ArrayList[thrift.RequestContext]()
+        var i = 0
+        while (contexts.hasNext) {
+          val (k, buf) = contexts.next()
+          val c = new thrift.RequestContext(
+            Buf.toByteBuffer(k), Buf.toByteBuffer(buf))
+          ctxs.add(i, c)
+          i += 1
+        }
 
+        header.setContexts(ctxs)
+      }
+      
       new ThriftClientRequest(
         ByteArrays.concat(OutputBuffer.messageToArray(header, protocolFactory), request.message),
         request.oneway)

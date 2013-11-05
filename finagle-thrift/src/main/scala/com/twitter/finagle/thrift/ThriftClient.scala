@@ -5,7 +5,7 @@ import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Group, NamedGroup}
+import com.twitter.finagle.{Group, NamedGroup, Name}
 import com.twitter.util.Future
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
@@ -86,12 +86,12 @@ class ThriftClient(
     },
     pool = DefaultPool[ThriftClientRequest, Array[Byte]]()
 ) {
-  protected def superNewClient(group: Group[SocketAddress]) =
-    super.newClient(group)
 
-  override def newClient(group: Group[SocketAddress]) = group match {
-    case NamedGroup(groupName) =>
-      new ThriftClient(transporter, protocolFactory, groupName, clientId).superNewClient(group)
-    case g => superNewClient(g)
-  }
+  protected def superNewClient(dest: Name, label: String) = super.newClient(dest, label)
+
+  override def newClient(dest: Name, label: String) =
+    if (label.nonEmpty)
+      new ThriftClient(transporter, protocolFactory, label, clientId).superNewClient(dest, label)
+    else
+      superNewClient(dest, label)
 }

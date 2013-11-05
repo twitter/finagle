@@ -6,7 +6,7 @@ import org.specs.mock.Mockito
 import com.twitter.finagle.tracing._
 import com.twitter.util.Time
 
-object SamplerSpec extends Specification with Mockito {
+class SamplerSpec extends Specification with Mockito {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
   val traceIdSampled = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))

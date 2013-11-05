@@ -4,11 +4,11 @@
   <groupId>com.twitter</groupId>
   <artifactId>finagle-thriftmux</artifactId>
   <packaging>jar</packaging>
-  <version>6.5.3-SNAPSHOT</version>
+  <version>6.7.1</version>
   <parent>
     <groupId>com.twitter</groupId>
     <artifactId>scala-parent-292</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.2</version>
     <relativePath>../../parents/scala-parent-292/pom.xml</relativePath>
   </parent>
   <properties>
@@ -33,37 +33,10 @@
       <version>1.6.1</version>
       <scope>provided</scope>
     </dependency>
-    <!-- project dependencies -->
     <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-core</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-mux</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-thrift</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-ostrich4</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-test</artifactId>
-      <scope>test</scope>
-      <version>6.5.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>scrooge-runtime</artifactId>
-      <version>3.3.1-SNAPSHOT</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -72,13 +45,45 @@
       <version>1.9.1</version>
       <scope>test</scope>
     </dependency>
+    <!-- project dependencies -->
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-core</artifactId>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-mux</artifactId>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-thrift</artifactId>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-ostrich4</artifactId>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-test</artifactId>
+      <scope>test</scope>
+      <version>6.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scrooge-runtime</artifactId>
+      <version>3.9.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>com.twitter</groupId>
         <artifactId>scrooge-maven-plugin</artifactId>
-        <version>3.3.1</version>
         <configuration>
           <thriftNamespaceMappings>
             <thriftNamespaceMapping>
@@ -86,29 +91,8 @@
               <to>com.twitter.finagle.thriftmux.thriftscrooge3</to>
             </thriftNamespaceMapping>
           </thriftNamespaceMappings>
-          <thriftOpts>
-            <!-- add other Scrooge command line options using thriftOpts -->
-            <thriftOpt>--finagle</thriftOpt>
-            <thriftOpt>--ostrich</thriftOpt>
-          </thriftOpts>
           <outputDirectory>target/generated-test-sources</outputDirectory>
         </configuration>
-        <executions>
-          <execution>
-            <id>thrift-sources</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>thrift-test-sources</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>com.twitter</groupId>
@@ -126,10 +110,9 @@
           </thriftNamespaceMappings>
           <thriftOpts>
             <thriftOpt>--finagle</thriftOpt>
-            <thriftOpt>--ostrich</thriftOpt>
           </thriftOpts>
         </configuration>
-        <version>0.0.12</version>
+        <version>0.0.13</version>
       </plugin>
     </plugins>
   </build>

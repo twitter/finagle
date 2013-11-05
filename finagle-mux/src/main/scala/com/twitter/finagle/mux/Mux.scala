@@ -20,15 +20,15 @@ object MuxClient extends DefaultClient[ChannelBuffer, ChannelBuffer](
 
 object MuxListener extends Netty3Listener[ChannelBuffer, ChannelBuffer]("mux", mux.PipelineFactory)
 object MuxServer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-  "mux", MuxListener, new mux.ServerDispatcher(_, _)
+  "mux", MuxListener, new mux.ServerDispatcher(_, _, true)
 )
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[ChannelBuffer, ChannelBuffer] with Server[ChannelBuffer, ChannelBuffer] {
-  def newClient(group: Group[SocketAddress]): ServiceFactory[ChannelBuffer, ChannelBuffer] =
-    MuxClient.newClient(group)
+  def newClient(dest: Name, label: String): ServiceFactory[ChannelBuffer, ChannelBuffer] =
+    MuxClient.newClient(dest, label)
 
   def serve(addr: SocketAddress, service: ServiceFactory[ChannelBuffer, ChannelBuffer]): ListeningServer =
     MuxServer.serve(addr, service)

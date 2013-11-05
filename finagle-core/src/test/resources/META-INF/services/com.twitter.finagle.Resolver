@@ -1,1 +1,2 @@
 com.twitter.finagle.TestResolver
+com.twitter.finagle.DtabTestResolver

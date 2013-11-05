@@ -6,24 +6,32 @@ import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 
 object Finagle extends Build {
+  val libVersion = "6.7.1"
   val zkVersion = "3.3.4"
-  val utilVersion = "6.3.8"
-  val nettyLib = "io.netty" % "netty" % "3.6.6.Final"
-  val ostrichLib = "com.twitter" %% "ostrich" % "9.1.2"
-  val jacksonLib = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.1.3"
+  val utilVersion = "6.6.0"
+  val ostrichVersion = "9.1.3"
+  val jacksonVersion = "2.2.2"
+  val nettyLib = "io.netty" % "netty" % "3.7.0.Final"
+  val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
+  val jacksonLibs = Seq(
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+  )
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-runtime" % "3.1.5")
+    "com.twitter" %% "scrooge-runtime" % "3.9.1")
 
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
   val sharedSettings = Seq(
-    version := "6.5.2",
+    version := libVersion,
     organization := "com.twitter",
     crossScalaVersions := Seq("2.9.2", "2.10.0"),
+    scalaVersion := "2.9.2",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" %"1.9.1" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test" withSources() cross CrossVersion.binaryMapped {
@@ -136,7 +144,9 @@ object Finagle extends Build {
     finagleMux, finagleThriftMux, finagleMySQL,
 
     // Use and integration
-    finagleStress, finagleExample, finagleBenchmark
+    // removing benchmark because swift can't build outside of twitter for now
+    //    finagleStress, finagleExample, finagleBenchmark
+        finagleStress, finagleExample
   )
 
   lazy val finagleTest = Project(
@@ -178,15 +188,15 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.9",
-      jacksonLib)
+      "com.twitter.common" % "metrics" % "0.0.9"
+    ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
@@ -197,15 +207,14 @@ object Finagle extends Build {
     id = "finagle-exception",
     base = file("finagle-exception"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-exception",
     libraryDependencies ++= Seq(
       util("codec"),
-      jacksonLib,
       "com.twitter" % "streamyj" % "0.4.1" % "test"
-    ) ++ scroogeLibs
+    ) ++ scroogeLibs ++ jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -303,7 +312,7 @@ object Finagle extends Build {
       util("hashing"),
       "com.google.guava" % "guava" % "13.0",
       "com.twitter.common" % "zookeeper-testing" % "0.0.34" % "test"
-    )
+    ) ++ jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
 
   lazy val finagleKestrel = Project(
@@ -409,7 +418,7 @@ object Finagle extends Build {
     id = "finagle-stress",
     base = file("finagle-stress"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-stress",
@@ -449,7 +458,7 @@ object Finagle extends Build {
     id = "finagle-benchmark",
     base = file("finagle-benchmark"),
     settings = Project.defaultSettings ++
-      Scrooge.newSettings ++
+      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-benchmark",
@@ -458,6 +467,20 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
   ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
+
+  /*
+  lazy val finagleSwift = Project(
+    id = "finagle-swift",
+    base = file("finagle-swift"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-swift",
+    libraryDependencies ++= Seq(
+      "com.twitter.com.facebook.swift" % "swift-codec" % "0.6.0"
+    )
+  ).dependsOn(finagleCore, finagleThrift)
+   */
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",

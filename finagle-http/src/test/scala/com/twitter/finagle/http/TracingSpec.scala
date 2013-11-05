@@ -15,23 +15,25 @@ class TracingSpec extends SpecificationWithJUnit {
 
   "TracingFilters" should {
     "set header" in {
-      Trace.setId(traceId)
+      Trace.unwind {
+        Trace.setId(traceId)
 
-      val dummyService = new Service[HttpRequest, HttpResponse] {
-        def apply(request: HttpRequest) = {
-          request.getHeader(Header.TraceId) mustEqual traceId.traceId.toString
-          request.getHeader(Header.SpanId) mustEqual traceId.spanId.toString
-          request.containsHeader(Header.ParentSpanId) mustEqual false
-          request.getHeader(Header.Sampled).toBoolean mustEqual traceId.sampled.get
-          request.getHeader(Header.Flags).toLong mustEqual traceId.flags.toLong
+        val dummyService = new Service[HttpRequest, HttpResponse] {
+          def apply(request: HttpRequest) = {
+            request.getHeader(Header.TraceId) mustEqual traceId.traceId.toString
+            request.getHeader(Header.SpanId) mustEqual traceId.spanId.toString
+            request.containsHeader(Header.ParentSpanId) mustEqual false
+            request.getHeader(Header.Sampled).toBoolean mustEqual traceId.sampled.get
+            request.getHeader(Header.Flags).toLong mustEqual traceId.flags.toLong
 
-          Future.value(Response())
+            Future.value(Response())
+          }
         }
-      }
 
-      val filter = new HttpClientTracingFilter[HttpRequest, HttpResponse]("testservice")
-      val req = Request("/test.json")
-      filter(req, dummyService)
+        val filter = new HttpClientTracingFilter[HttpRequest, HttpResponse]("testservice")
+        val req = Request("/test.json")
+        filter(req, dummyService)
+      }
     }
 
     "record only path of url" in {

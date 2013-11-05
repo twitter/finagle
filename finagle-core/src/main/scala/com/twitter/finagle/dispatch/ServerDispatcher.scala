@@ -2,15 +2,15 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
-import com.twitter.util.Closable
-import com.twitter.util.{Future, Return, Time}
+import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
 object SerialServerDispatcher {
   private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
-  private val Idle = Future.never
-  private val Draining = Future.never
-  private val Closed = Future.never
+  // We don't use Future.never here, because object equality is important here
+  private val Idle = new NoFuture
+  private val Draining = new NoFuture
+  private val Closed = new NoFuture
 }
 
 /**
@@ -26,9 +26,10 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
   import SerialServerDispatcher._
 
   private[this] val state = new AtomicReference[Future[_]](Idle)
+  private[this] val cancelled = new CancelledRequestException
 
   trans.onClose ensure {
-    state.getAndSet(Closed).raise(new CancelledRequestException)
+    state.getAndSet(Closed).raise(cancelled)
     service.close()
   }
 
@@ -37,9 +38,10 @@ class SerialServerDispatcher[Req, Rep](trans: Transport[Rep, Req], service: Serv
     trans.read() flatMap { req =>
       val f = service(req)
       if (state.compareAndSet(Idle, f)) f else {
-        f.raise(new CancelledRequestException)
+        f.raise(cancelled)
         Eof
       }
+
     } flatMap { rep =>
       trans.write(rep)
     } respond {

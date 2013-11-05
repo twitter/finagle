@@ -1,8 +1,19 @@
 package com.twitter.finagle.util
 
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 
 object InetSocketAddressUtil {
+
+  val InaddrAny = InetAddress.getByAddress(Array[Byte](0,0,0,0))
+
+  /** converts 0.0.0.0 -> public ip in bound ip */
+  def toPublic(bound: InetSocketAddress): InetSocketAddress = {
+    if (bound.getAddress() == InaddrAny)
+      new InetSocketAddress(InetAddress.getLocalHost(), bound.getPort())
+    else
+      bound
+  }
+
   /**
    * Parses a comma or space-delimited string of hostname and port pairs. For example,
    *
@@ -19,7 +30,10 @@ object InetSocketAddressUtil {
     hostPorts map { hp =>
       require(hp.size == 2, "You must specify host and port")
 
-      new InetSocketAddress(hp(0), hp(1).toInt)
+      if (hp(0) == "")
+        new InetSocketAddress(hp(1).toInt)
+      else
+        new InetSocketAddress(hp(0), hp(1).toInt)
     } toList
   }
 }

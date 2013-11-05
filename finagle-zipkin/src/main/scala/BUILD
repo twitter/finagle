@@ -4,10 +4,11 @@ scala_library(name='scala',
     pants('finagle/finagle-core'),
     pants('finagle/finagle-thrift'),
     pants('util/util-app'),
+    pants('util/util-codec'),
     pants('util/util-core'),
     compiled_idl(
       idl_deps=pants('finagle/finagle-zipkin/src/main/thrift'),
-      compiler='scrooge-legacy',
+      compiler='scrooge',
       language='scala',
       rpc_style='finagle'
     )

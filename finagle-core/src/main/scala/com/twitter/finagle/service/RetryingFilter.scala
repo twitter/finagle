@@ -4,21 +4,25 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{
-  CancelledRequestException, Service, SimpleFilter, TimeoutException, WriteException
+  CancelledRequestException, ChannelClosedException, Service,
+  SimpleFilter, TimeoutException, WriteException
 }
 import com.twitter.util._
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConversions._
 
-trait RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
+/**
+ * A function defining retry behavior for a given value type `A`.
+ */
+abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
 
 /**
  * A retry policy abstract class. This is convenient to use for Java programmers. Simply implement
  * the two abstract methods `shouldRetry` and `backoffAt` and you're good to go!
  */
-abstract class SimpleRetryPolicy[A](i: Int)
-  extends Function[A, Option[(Duration, RetryPolicy[A])]] with RetryPolicy[A]
+abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
+  with (A => Option[(Duration, RetryPolicy[A])])
 {
   def this() = this(0)
 
@@ -37,6 +41,10 @@ abstract class SimpleRetryPolicy[A](i: Int)
       None
     }
   }
+
+  override def andThen[B](that: Function1[Option[(Duration, RetryPolicy[A])], B]): A => B = that.compose(this)
+
+  override def compose[B](that: Function1[B, A]): B => Option[(Duration, RetryPolicy[A])] = that.andThen(this)
 
   /**
    * Given a value, decide whether it is retryable. Typically the value is an exception.
@@ -72,6 +80,10 @@ object RetryPolicy extends JavaSingleton {
 
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
     case Throw(_: TimeoutException) => true
+  }
+
+  val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
+    case Throw(_: ChannelClosedException) => true
   }
 
   def tries(numTries: Int): RetryPolicy[Try[Nothing]] = tries(numTries, WriteExceptionsOnly)

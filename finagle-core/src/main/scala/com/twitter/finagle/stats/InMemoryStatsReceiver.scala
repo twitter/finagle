@@ -13,23 +13,23 @@ class InMemoryStatsReceiver extends StatsReceiver {
   val gauges   = new mutable.WeakHashMap[Seq[String], () => Float]
                    with mutable.SynchronizedMap[Seq[String], () => Float]
 
-  def counter(name: String*): Counter = {
-    new Counter {
+  def counter(name: String*): ReadableCounter = 
+    new ReadableCounter {
       def incr(delta: Int) {
-        val oldValue = counters.get(name).getOrElse(0)
+        val oldValue = apply
         counters(name) = oldValue + delta
       }
+      def apply(): Int = counters.get(name).getOrElse(0)
     }
-  }
 
-  def stat(name: String*): Stat = {
-    new Stat {
+  def stat(name: String*): ReadableStat =
+    new ReadableStat {
       def add(value: Float) {
-        val oldValue = stats.get(name).getOrElse(Seq.empty)
+        val oldValue = apply
         stats(name) = oldValue :+ value
       }
+      def apply(): Seq[Float] = stats.get(name).getOrElse(Seq.empty)
     }
-  }
 
   def addGauge(name: String*)(f: => Float): Gauge = {
     val gauge = new Gauge {
@@ -40,4 +40,12 @@ class InMemoryStatsReceiver extends StatsReceiver {
     gauges += name -> (() => f)
     gauge
   }
+}
+
+trait ReadableCounter extends Counter {
+  def apply(): Int
+}
+
+trait ReadableStat extends Stat {
+  def apply(): Seq[Float]
 }

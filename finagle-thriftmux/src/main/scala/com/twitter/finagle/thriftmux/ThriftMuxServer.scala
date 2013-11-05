@@ -40,7 +40,7 @@ object ThriftMuxListener
   extends Netty3Listener[ChannelBuffer, ChannelBuffer]("thriftmux", thriftmux.PipelineFactory)
 
 object ThriftMuxer extends DefaultServer[ChannelBuffer, ChannelBuffer, ChannelBuffer, ChannelBuffer](
-  "mux", ThriftMuxListener, new mux.ServerDispatcher(_, _)
+  "mux", ThriftMuxListener, new mux.ServerDispatcher(_, _, true)
 )
 
 /**
