@@ -107,7 +107,7 @@ trait BufferReader extends Buffer {
    * @return a numeric value representing the number of
    * bytes expected to follow.
    */
-  def readLengthCodedBinary(): Int = {
+  def readLengthCodedBinary(): Long = {
     val firstByte = readUnsignedByte()
     if (firstByte < 251)
       firstByte
@@ -116,14 +116,7 @@ trait BufferReader extends Buffer {
         case 251 => Buffer.NullLength
         case 252 => readUnsignedShort()
         case 253 => readUnsignedInt24()
-
-        // 254 Indicates a set of bytes with length >= 2^24.
-        // The current implementation does not support
-        // this.
-        case 254 =>
-          throw new UnsupportedOperationException("LONG_BLOB is not supported!")
-          // readLong()
-
+        case 254 => readLong()
         case _ =>
           throw new IllegalStateException("Invalid length byte")
       }
@@ -165,7 +158,7 @@ trait BufferReader extends Buffer {
    * offset.
    */
   def readLengthCodedString(charset: JCharset = Charset.defaultCharset): String = {
-    val length = readLengthCodedBinary()
+    val length = readLengthCodedBinary().toInt
     if (length == Buffer.NullLength)
        null
     else if (length == 0)
@@ -185,7 +178,7 @@ trait BufferReader extends Buffer {
    * bytes starting at offset.
    */
   def readLengthCodedBytes(): Array[Byte] = {
-    val len = readLengthCodedBinary()
+    val len = readLengthCodedBinary().toInt
     if (len == Buffer.NullLength)
       null
     else if (len == 0)

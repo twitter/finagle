@@ -11,8 +11,8 @@ case class ServerError(code: Short, sqlState: String, message: String)
   extends Exception(message)
 
 case class LostSyncException(underlying: Throwable)
-  extends Exception(underlying) {
-    override def getMessage = "Corrupt data or client/server are out of sync"
+  extends RuntimeException(underlying) {
+    override def getMessage = underlying.getMessage
     override def getStackTrace = underlying.getStackTrace
   }
 
@@ -164,7 +164,7 @@ class ClientDispatcher(
       val isBinaryEncoded = cmd != Command.COM_QUERY
       val numCols = Try {
         val br = BufferReader(packet.body)
-        br.readLengthCodedBinary()
+        br.readLengthCodedBinary().toInt
       }
 
       val result = for {

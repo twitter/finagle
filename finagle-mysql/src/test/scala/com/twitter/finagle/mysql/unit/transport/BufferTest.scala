@@ -130,10 +130,8 @@ class BufferTest extends FunSuite {
   test("large length coded binary") {
     val ctx = writerCtx()
     import ctx._
-    bw.writeLengthCodedBinary(16777217)
-    intercept[UnsupportedOperationException] {
-      br.readLengthCodedBinary()
-    }
+    bw.writeLengthCodedBinary(16777217L)
+    assert(br.readLengthCodedBinary() === 16777217L)
   }
 
   test("null terminated string") {
