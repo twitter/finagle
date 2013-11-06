@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, MockTimer, BackupRequestLost}
-import com.twitter.util.{Future, Promise, Time, Return, TimeControl, Duration, Stopwatch}
+import com.twitter.util.{Future, Promise, Time, Return, TimeControl, Duration}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -15,13 +15,6 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 class BackupRequestFilterTest extends FunSuite with MockitoSugar {
-  object TimeStopwatch extends Stopwatch {
-    def start() = {
-      val begin = Time.now
-      () => Time.now - begin
-    }
-  }
-
   def quantile(ds: Seq[Duration], which: Int) = {
     val sorted = ds.sorted
     sorted(which*sorted.size/100)
@@ -34,7 +27,7 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     val underlying = mock[Service[String, String]]
     when(underlying.close(anyObject())) thenReturn Future.Done
     val filter = new BackupRequestFilter[String, String](
-      95, range, timer, statsReceiver, 10.seconds, TimeStopwatch)
+      95, range, timer, statsReceiver, Duration.Top)
     val service = filter andThen underlying
     val cutoffGauge = statsReceiver.gauges(Seq("cutoff_ms"))
     def cutoff() = Duration.fromMilliseconds(cutoffGauge().toInt)

@@ -47,8 +47,7 @@ class BackupRequestFilter[Req, Rep](
     range: Duration, 
     timer: Timer, 
     statsReceiver: StatsReceiver,
-    history: Duration,
-    stopwatch: Stopwatch = Stopwatch
+    history: Duration
 ) extends SimpleFilter[Req, Rep] {
   require(quantile > 0 && quantile < 100)
   require(range < 1.hour)
@@ -65,7 +64,7 @@ class BackupRequestFilter[Req, Rep](
     statsReceiver.addGauge("cutoff_ms") { cutoff().inMilliseconds.toFloat }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val elapsed = stopwatch.start()
+    val elapsed = Stopwatch.start()
     val howlong = cutoff()
     val backup = if (howlong == Duration.Zero) Future.never else {
       timer.doLater(howlong) {
