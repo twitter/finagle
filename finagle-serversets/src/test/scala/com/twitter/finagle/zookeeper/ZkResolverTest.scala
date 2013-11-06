@@ -63,65 +63,66 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  test("filter by shardid") {
-    val path = "/bar/foo/baz"
-    val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
-    val clust = new ZkGroup(serverSet, path)
-    assert(clust().isEmpty)
+  if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
+    test("filter by shardid") {
+      val path = "/bar/foo/baz"
+      val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
+      val clust = new ZkGroup(serverSet, path)
+      assert(clust().isEmpty)
 
-    // assert that 3 hosts show up in an unfiltered cluster
-    Seq(8080, 8081, 8082).foreach { id =>
-      serverSet.join(
-        new InetSocketAddress(id),
-        Map[String, InetSocketAddress]().asJava, id
-      ).update(ALIVE)
-    }
-    eventually { assert(clust().size == 3) }
+      // assert that 3 hosts show up in an unfiltered cluster
+      Seq(8080, 8081, 8082).foreach { id =>
+        serverSet.join(
+          new InetSocketAddress(id),
+          Map[String, InetSocketAddress]().asJava, id
+        ).update(ALIVE)
+      }
+      eventually { assert(clust().size == 3) }
 
-    // and 1 in a cluster filtered by shardid (== to the port in this case)
-    val filteredAddr =
-      new ZkResolver(factory).resolve(
-        Set(inst.zookeeperAddress),
-        path,
-        shardId = Some(8081)
-      )
-    eventually {
-      Var.sample(filteredAddr) match {
-        case Addr.Bound(addrs) if addrs.size == 1 => true
-        case _ => fail()
+      // and 1 in a cluster filtered by shardid (== to the port in this case)
+      val filteredAddr =
+        new ZkResolver(factory).resolve(
+          Set(inst.zookeeperAddress),
+          path,
+          shardId = Some(8081)
+        )
+      eventually {
+        Var.sample(filteredAddr) match {
+          case Addr.Bound(addrs) if addrs.size == 1 => true
+          case _ => fail()
+        }
       }
     }
-  }
 
-if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
-  test("resolve ALIVE endpoints") {
-    val res = new ZkResolver(factory)
-    val va = res.bind("localhost:%d!/foo/bar/baz".format(
-      inst.zookeeperAddress.getPort))
-    eventually { Var.sample(va) === Addr.Bound() }
+    test("resolve ALIVE endpoints") {
+      val res = new ZkResolver(factory)
+      val va = res.bind("localhost:%d!/foo/bar/baz".format(
+        inst.zookeeperAddress.getPort))
+      eventually { Var.sample(va) === Addr.Bound() }
 
-/*
-    val inetClust = clust collect { case ia: InetSocketAddress => ia }
-    assert(inetClust() === inetClust())
-*/
+      /*
+       val inetClust = clust collect { case ia: InetSocketAddress => ia }
+       assert(inetClust() === inetClust())
+       */
 
-    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
-    val addr = new InetSocketAddress("127.0.0.1", 8080)
-    val blahAddr = new InetSocketAddress("10.0.0.1", 80)
-    val status8080 = serverSet.join(
-      addr,
-      Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-    eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
-    status8080.leave()
-    eventually { assert(Var.sample(va) === Addr.Bound()) }
-    serverSet.join(
-      addr,
-      Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-    eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
+      val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
+      val addr = new InetSocketAddress("127.0.0.1", 8080)
+      val blahAddr = new InetSocketAddress("10.0.0.1", 80)
+      val status8080 = serverSet.join(
+        addr,
+        Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
+      eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
+      status8080.leave()
+      eventually { assert(Var.sample(va) === Addr.Bound()) }
+      serverSet.join(
+        addr,
+        Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
+      eventually { assert(Var.sample(va) === Addr.Bound(addr)) }
 
-    val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(
-      inst.zookeeperAddress.getPort))
-    eventually { assert(Var.sample(blahVa) === Addr.Bound(blahAddr)) }
+      val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(
+        inst.zookeeperAddress.getPort))
+      eventually { assert(Var.sample(blahVa) === Addr.Bound(blahAddr)) }
+    }
   }
 
   test("resolves from the main resolver") {
