@@ -230,17 +230,17 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
     Header.All foreach { request.removeHeader(_) }
 
-    request.addHeader(Header.TraceId, Trace.id.traceId.toString)
-    request.addHeader(Header.SpanId, Trace.id.spanId.toString)
+    HttpHeaders.addHeader(request, Header.TraceId, Trace.id.traceId.toString)
+    HttpHeaders.addHeader(request, Header.SpanId, Trace.id.spanId.toString)
     // no parent id set means this is the root span
     Trace.id._parentId foreach { id =>
-      request.addHeader(Header.ParentSpanId, id.toString)
+      HttpHeaders.addHeader(request, Header.ParentSpanId, id.toString)
     }
     // three states of sampled, yes, no or none (let the server decide)
     Trace.id.sampled foreach { sampled =>
-      request.addHeader(Header.Sampled, sampled.toString)
+      HttpHeaders.addHeader(request, Header.Sampled, sampled.toString)
     }
-    request.addHeader(Header.Flags, Trace.id.flags.toLong)
+    HttpHeaders.addHeader(request, Header.Flags, Trace.id.flags.toLong)
 
     if (Trace.isActivelyTracing) {
       Trace.recordRpcname(serviceName, request.getMethod.getName)
