@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.netty
 
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.handler.codec.http.{HttpMessage, HttpVersion}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage, HttpVersion}
 import java.lang.{Iterable => JIterable}
 import java.util.{List => JList, Map => JMap, Set => JSet}
 
@@ -30,13 +30,13 @@ trait HttpMessageProxy extends HttpMessage with Proxy {
   def setContent(content: ChannelBuffer) { httpMessage.setContent(content) }
 
   @deprecated("deprecated in netty", "6.1.5")
-  def getContentLength(): Long                   = httpMessage.getContentLength()
+  def getContentLength(): Long                   = HttpHeaders.getContentLength(httpMessage)
   @deprecated("deprecated in netty", "6.1.5")
-  def getContentLength(defaultValue: Long): Long = httpMessage.getContentLength(defaultValue)
+  def getContentLength(defaultValue: Long): Long = HttpHeaders.getContentLength(httpMessage, defaultValue)
 
   def isChunked: Boolean           = httpMessage.isChunked()
   def setChunked(chunked: Boolean) { httpMessage.setChunked(chunked) }
 
   @deprecated("deprecated in netty", "6.1.5")
-  def isKeepAlive: Boolean = httpMessage.isKeepAlive()
+  def isKeepAlive: Boolean = HttpHeaders.isKeepAlive(httpMessage)
 }
