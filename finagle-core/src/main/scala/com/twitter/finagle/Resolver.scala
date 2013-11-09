@@ -119,47 +119,52 @@ object Resolver {
         case va => Return(Group.fromVarAddr(va))
       }
     }
-  
+
   /**
    * Parse and evaluate the argument into a Name. Eval parses
-   * a simple grammar: a scheme is followed by a bang, followed 
+   * a simple grammar: a scheme is followed by a bang, followed
    * by an argument:
    * 	name := scheme ! arg
    * The scheme is looked up from registered Resolvers, and the
    * argument is passed in.
    *
-   * Eval throws exceptions upon failure to parse the name, or 
-   * on failure to scheme lookup. Since names are late bound, 
+   * Eval throws exceptions upon failure to parse the name, or
+   * on failure to scheme lookup. Since names are late bound,
    * binding failures are deferred.
    */
   def eval(name: String): Name =
-    if (name startsWith "/") Name(name) 
+    if (name startsWith "/") Name(name)
     else new Name {
       val (resolver, arg) = lex(name) match {
         case (Eq :: _) | (Bang :: _) =>
           throw new ResolverAddressInvalid(name)
-  
+
         case El(scheme) :: Bang :: name =>
           resolvers.find(_.scheme == scheme) match {
             case Some(resolver) =>  (resolver, delex(name))
             case None => throw new ResolverNotFoundException(scheme)
           }
-  
+
         case ts => (InetResolver, delex(ts))
       }
-  
+
       def bind() = resolver.bind(arg)
-      
+
       val reified = name
     }
 
-  private[finagle] def evalLabeled(addr: String): (Name, String) = {
+  /**
+   * Parse and evaluate the argument into a (Name, label: String) tuple.
+   * Arguments are parsed with the same grammar as in `eval`. If a label is not
+   * provided (i.e. no "label=<address>"), then the empty string is returned.
+   */
+   def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
       case El(n) :: Eq :: rest => (n, rest)
       case Eq :: rest => ("", rest)
       case rest => (addr, rest)
     }
-    
+
     (eval(delex(rest)), label)
   }
 }
