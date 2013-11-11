@@ -44,10 +44,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
           }
           "EXPIRE" >> {
             codec(wrap("EXPIRE foo 100\r\n")) mustEqual List(Expire("foo", 100))
-            codec(wrap("EXPIRE foo -1\r\n")) must throwA[ClientError]
+            codec(wrap("EXPIRE foo -1\r\n")) mustEqual List(Expire("foo", -1))
           }
           "EXPIREAT" >> {
-            codec(wrap("EXPIREAT foo 100\r\n")) must throwA[ClientError]
+            codec(wrap("EXPIREAT foo 100\r\n")) mustEqual
+              List(ExpireAt("foo", Time.fromMilliseconds(100*1000)))
             val time = Time.now + 10.seconds
             val foo = s2cb("foo")
             unwrap(codec(wrap("EXPIREAT foo %d\r\n".format(time.inSeconds)))) {
@@ -64,10 +65,11 @@ class NaggatiSpec extends SpecificationWithJUnit {
           }
           "PEXPIRE" >> {
             codec(wrap("PEXPIRE foo 100000\r\n")) mustEqual List(PExpire("foo", 100000L))
-            codec(wrap("PEXPIRE foo -1\r\n")) must throwA[ClientError]
+            codec(wrap("PEXPIRE foo -1\r\n")) mustEqual List(PExpire("foo", -1L))
           }
           "PEXPIREAT" >> {
-            codec(wrap("PEXPIREAT foo 100000\r\n")) must throwA[ClientError]
+            codec(wrap("PEXPIREAT foo 100000\r\n")) mustEqual
+              List(PExpireAt("foo", Time.fromMilliseconds(100000)))
             val time = Time.now + 10.seconds
             val foo = s2cb("foo")
             unwrap(codec(wrap("PEXPIREAT foo %d\r\n".format(time.inMilliseconds)))) {
@@ -270,22 +272,22 @@ class NaggatiSpec extends SpecificationWithJUnit {
                 verify("myset", 0, -1, Some(WithScores))
               }
             }
-            
+
             // Ensure that, after encoding, the bytes we threw in are the bytes we get back
             def testZRangeBytes(key: Array[Byte]) = {
               val zrange = ZRange.get(org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer(key), 0, 1, None)
-              val keyBack = zrange match { 
+              val keyBack = zrange match {
                 case ZRange(key, start, stop, withScores) => key
               }
               val bytesBack = keyBack.toByteBuffer.array
               key.toSeq mustEqual bytesBack.toSeq
             }
-            
+
             val goodKey = Array[Byte](58, 49, 127)
             val nonAsciiKey = Array[Byte](58, 49, -128)
             testZRangeBytes(goodKey)
             testZRangeBytes(nonAsciiKey)
-            
+
           } // ZRANGE
 
           "ZRANGEBYSCORE/ZREVRANGEBYSCORE" >> {
