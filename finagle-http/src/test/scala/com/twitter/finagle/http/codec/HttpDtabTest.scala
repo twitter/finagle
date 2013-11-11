@@ -33,45 +33,45 @@ class HttpDtabTest extends FunSuite {
   
   test("Invalid: no shared prefix") {
     val m = newMsg()
-    m.setHeader("X-Dtab-01-A", "a")
-    m.setHeader("X-Dtab-02-B", "a")
+    m.headers.set("X-Dtab-01-A", "a")
+    m.headers.set("X-Dtab-02-B", "a")
     assert(HttpDtab.read(m) === Dtab.empty)
   }
   
   test("Invalid: missing entry") {
     val m = newMsg()
-    m.setHeader("X-Dtab-01-A", "a")
-    m.setHeader("X-Dtab-01-B", "a")
-    m.setHeader("X-Dtab-02-B", "a")
+    m.headers.set("X-Dtab-01-A", "a")
+    m.headers.set("X-Dtab-01-B", "a")
+    m.headers.set("X-Dtab-02-B", "a")
     assert(HttpDtab.read(m) === Dtab.empty)
   }
   
   test("Invalid: non-ASCII encoding") {
     val m = newMsg()
-    m.setHeader("X-Dtab-01-A", "☺")
-    m.setHeader("X-Dtab-01-B", "☹")
+    m.headers.set("X-Dtab-01-A", "☺")
+    m.headers.set("X-Dtab-01-B", "☹")
     assert(HttpDtab.read(m) == Dtab.empty)
   }  
   
   test("clear()") {
     val m = newMsg()
     HttpDtab.write(Dtab.empty.delegated("/a", "/b").delegated("/a", "/c"), m)
-    m.setHeader("onetwothree", "123")
+    m.headers.set("onetwothree", "123")
     
     val headers = Seq(
       "X-Dtab-00-A", "X-Dtab-00-B", 
       "X-Dtab-01-A", "X-Dtab-01-B")
       
     for (h <- headers)
-      assert(m.containsHeader(h))
+      assert(m.headers.contains(h))
     
-    assert(m.containsHeader("onetwothree"))
+    assert(m.headers.contains("onetwothree"))
     
     HttpDtab.clear(m)
     
-    assert(m.containsHeader("onetwothree"))
+    assert(m.headers.contains("onetwothree"))
     for (h <- headers)
-      assert(!m.containsHeader(h))
+      assert(!m.headers.contains(h))
   }
 
 

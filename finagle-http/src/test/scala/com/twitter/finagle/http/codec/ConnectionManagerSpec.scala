@@ -24,7 +24,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
   def makeRequest(version: HttpVersion, headers: (String, String)*) = {
     val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
     headers foreach { case (k, v) =>
-      request.setHeader(k, v)
+      request.headers.set(k, v)
     }
 
     request
@@ -33,7 +33,7 @@ class ConnectionManagerSpec extends SpecificationWithJUnit with Mockito {
   def makeResponse(version: HttpVersion, headers: (String, String)*) = {
     val response = new DefaultHttpResponse(version, HttpResponseStatus.OK)
     headers foreach { case (k, v) =>
-      response.setHeader(k, v)
+      response.headers.set(k, v)
     }
 
     response

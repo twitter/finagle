@@ -42,7 +42,7 @@ class MessageSpec extends SpecificationWithJUnit with DataTables {
       ";;;;;;"           ! null       |
       { (header: String, expected: String) =>
         val request = Request()
-        request.headers("Content-Type") = header
+        request.headers.set("Content-Type", header)
         request.charset must_== Option(expected)
       }
     }
@@ -59,9 +59,9 @@ class MessageSpec extends SpecificationWithJUnit with DataTables {
       ""                  ! "b"        ! ";charset=b"             |
       { (header: String, charset: String, expected: String) =>
         val request = Request()
-        request.headers("Content-Type") = header
+        request.headers.set("Content-Type", header)
         request.charset = charset
-        request.headers.get("Content-Type") must_== Option(expected)
+        request.headers.get("Content-Type") must_== expected
       }
     }
 
@@ -77,7 +77,7 @@ class MessageSpec extends SpecificationWithJUnit with DataTables {
       "APPLICATION/JSON"                       ! "application/json" |
       { (header: String, expected: String) =>
         val request = Request()
-        request.headers("Content-Type") = header
+        request.headers.set("Content-Type", header)
         if (!expected.isEmpty) // do this because None doesn't work in DataTables
           request.mediaType must_== Some(expected)
         else
@@ -98,9 +98,9 @@ class MessageSpec extends SpecificationWithJUnit with DataTables {
       ""                  ! "y"         ! "y"            |
       { (header: String, mediaType: String, expected: String) =>
         val request = Request()
-        request.headers("Content-Type") = header
+        request.headers.set("Content-Type", header)
         request.mediaType = mediaType
-        request.headers.get("Content-Type") must_== Option(expected)
+        request.headers.get("Content-Type") must_== expected
       }
     }
 

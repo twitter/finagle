@@ -64,7 +64,7 @@ class RequestSpec extends SpecificationWithJUnit with DataTables {
 
     "toHttpString" in {
       val request = Request("/search.json", "q" -> "twitter")
-      request.headers("Host") = "search.twitter.com"
+      request.headers.set("Host", "search.twitter.com")
 
       val expected = "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n"
 
@@ -75,9 +75,9 @@ class RequestSpec extends SpecificationWithJUnit with DataTables {
     "decode" in {
       val request = Request.decodeString(
         "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n")
-      request.path            must_== "/search.json"
-      request.params("q")     must_== "twitter"
-      request.headers("Host") must_== "search.twitter.com"
+      request.path                must_== "/search.json"
+      request.params("q")         must_== "twitter"
+      request.headers.get("Host") must_== "search.twitter.com"
     }
 
     "decodeBytes" in {

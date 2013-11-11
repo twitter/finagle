@@ -41,11 +41,11 @@ private[http] object HttpDtab {
   }
 
   def clear(msg: HttpMessage) {
-    val names = msg.getHeaderNames().iterator()
+    val names = msg.headers.names.iterator()
     while (names.hasNext()) {
       val n = names.next()
       if (n startsWith Prefix)
-        msg.removeHeader(n)
+        msg.headers.remove(n)
     }
   }
 
@@ -59,15 +59,15 @@ private[http] object HttpDtab {
     }
 
     for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
-      msg.setHeader(Prefix+indexstr(i)+"-A", encodeValue(prefix))
-      msg.setHeader(Prefix+indexstr(i)+"-B".format(i), encodeValue(dst.reified))
+      msg.headers.set(Prefix+indexstr(i)+"-A", encodeValue(prefix))
+      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), encodeValue(dst.reified))
     }
   }
 
   def read(msg: HttpMessage): Dtab = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
-    val names = msg.getHeaderNames().iterator()
+    val names = msg.headers.names.iterator()
     while (names.hasNext()) {
       val key = names.next()
       if (key startsWith Prefix) {
@@ -101,8 +101,8 @@ private[http] object HttpDtab {
 
       dentries(i) = 
         try Dentry(
-          decodeValue(msg.getHeader(prefix)),
-          decodeValue(msg.getHeader(dest)))
+          decodeValue(msg.headers.get(prefix)),
+          decodeValue(msg.headers.get(dest)))
         catch {
           case _: IllegalArgumentException =>
             return Dtab.empty

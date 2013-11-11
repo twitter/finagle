@@ -70,7 +70,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
       case Some((_, service)) => service(request)
       case None =>
         val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND)
-        response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, 0.toString)
+        response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 0.toString)
         Future.value(response)
     }
   }

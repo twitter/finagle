@@ -60,13 +60,13 @@ object SpnegoAuthenticator {
     loginContext, principal, oid, manager, pool) {
 
     protected[this] def getNegotiation(req: HttpRequest): Option[Array[Byte]] =
-      Option(req getHeader HttpHeaders.Names.AUTHORIZATION) flatMap {
+      Option(req.headers.get(HttpHeaders.Names.AUTHORIZATION)) flatMap {
         case AuthHeader(token) => token map { Base64StringEncoder.decode(_) }
         case _ => None
       }
 
     protected[this] def setWwwAuthenticate(rsp: HttpResponse, auth: String): HttpResponse = {
-      rsp.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, auth)
+      rsp.headers.set(HttpHeaders.Names.WWW_AUTHENTICATE, auth)
       rsp
     }
     

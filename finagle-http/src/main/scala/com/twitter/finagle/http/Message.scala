@@ -47,8 +47,8 @@ abstract class Message extends HttpMessage {
   def version: HttpVersion = getProtocolVersion()
   def version_=(version: HttpVersion) { setProtocolVersion(version) }
 
-  lazy val headers: HeaderMap = new MessageHeaderMap(this)
-  // Java users: use Netty HttpMessage interface for headers
+  lazy val headerMap: HeaderMap = new MessageHeaderMap(this)
+  // Java users: use Netty HttpHeaders interface for headers
 
   /**
    * Cookies. In a request, this uses the Cookie headers.
@@ -72,12 +72,12 @@ abstract class Message extends HttpMessage {
 
   /** Accept header */
   def accept: Seq[String] =
-    Option(getHeader(HttpHeaders.Names.ACCEPT)) match {
+    Option(headers.get(HttpHeaders.Names.ACCEPT)) match {
       case Some(s) => s.split(",").map(_.trim).filter(_.nonEmpty)
       case None    => Seq()
     }
   /** Set Accept header */
-  def accept_=(value: String) { setHeader(HttpHeaders.Names.ACCEPT, value) }
+  def accept_=(value: String) { headers.set(HttpHeaders.Names.ACCEPT, value) }
   /** Set Accept header with list of values */
   def accept_=(values: Iterable[String]) { accept = values.mkString(", ") }
 
@@ -90,21 +90,21 @@ abstract class Message extends HttpMessage {
     }.flatten
 
   /** Allow header */
-  def allow: Option[String] = Option(getHeader(HttpHeaders.Names.ALLOW))
+  def allow: Option[String] = Option(headers.get(HttpHeaders.Names.ALLOW))
   /** Set Authorization header */
-  def allow_=(value: String) { setHeader(HttpHeaders.Names.ALLOW, value) }
+  def allow_=(value: String) { headers.set(HttpHeaders.Names.ALLOW, value) }
   /** Set Authorization header */
   def allow_=(values: Iterable[HttpMethod]) { allow = values.mkString(",") }
 
   /** Get Authorization header */
-  def authorization: Option[String] = Option(getHeader(HttpHeaders.Names.AUTHORIZATION))
+  def authorization: Option[String] = Option(headers.get(HttpHeaders.Names.AUTHORIZATION))
   /** Set Authorization header */
-  def authorization_=(value: String) { setHeader(HttpHeaders.Names.AUTHORIZATION, value) }
+  def authorization_=(value: String) { headers.set(HttpHeaders.Names.AUTHORIZATION, value) }
 
   /** Get Cache-Control header */
-  def cacheControl: Option[String] = Option(getHeader(HttpHeaders.Names.CACHE_CONTROL))
+  def cacheControl: Option[String] = Option(headers.get(HttpHeaders.Names.CACHE_CONTROL))
   /** Set Cache-Control header */
-  def cacheControl_=(value: String) { setHeader(HttpHeaders.Names.CACHE_CONTROL, value) }
+  def cacheControl_=(value: String) { headers.set(HttpHeaders.Names.CACHE_CONTROL, value) }
   /** Set Cache-Control header with a max-age (and must-revalidate). */
   def cacheControl_=(maxAge: Duration) {
     cacheControl = "max-age=" + maxAge.inSeconds.toString + ", must-revalidate"
@@ -162,54 +162,54 @@ abstract class Message extends HttpMessage {
 
   /** Get Content-Length header.  Use length to get the length of actual content. */
   def contentLength: Option[Long] =
-    Option(getHeader(HttpHeaders.Names.CONTENT_LENGTH)).map { _.toLong }
+    Option(headers.get(HttpHeaders.Names.CONTENT_LENGTH)).map { _.toLong }
   /** Set Content-Length header.  Normally, this is automatically set by the
     * Codec, but this method allows you to override that. */
   def contentLength_=(value: Long) {
-    setHeader(HttpHeaders.Names.CONTENT_LENGTH, value.toString)
+    headers.set(HttpHeaders.Names.CONTENT_LENGTH, value.toString)
   }
 
   /** Get Content-Type header */
-  def contentType: Option[String] = Option(getHeader(HttpHeaders.Names.CONTENT_TYPE))
+  def contentType: Option[String] = Option(headers.get(HttpHeaders.Names.CONTENT_TYPE))
   /** Set Content-Type header */
-  def contentType_=(value: String) { setHeader(HttpHeaders.Names.CONTENT_TYPE, value) }
+  def contentType_=(value: String) { headers.set(HttpHeaders.Names.CONTENT_TYPE, value) }
   /** Set Content-Type header by media-type and charset */
   def setContentType(mediaType: String, charset: String = "utf-8") {
-    setHeader(HttpHeaders.Names.CONTENT_TYPE, mediaType + ";charset=" + charset)
+    headers.set(HttpHeaders.Names.CONTENT_TYPE, mediaType + ";charset=" + charset)
   }
   /** Set Content-Type header to application/json;charset=utf-8 */
-  def setContentTypeJson() { setHeader(HttpHeaders.Names.CONTENT_TYPE, Message.ContentTypeJson) }
+  def setContentTypeJson() { headers.set(HttpHeaders.Names.CONTENT_TYPE, Message.ContentTypeJson) }
 
   /** Get Date header */
-  def date: Option[String] = Option(getHeader(HttpHeaders.Names.DATE))
+  def date: Option[String] = Option(headers.get(HttpHeaders.Names.DATE))
   /** Set Date header */
-  def date_=(value: String) { setHeader(HttpHeaders.Names.DATE, value) }
+  def date_=(value: String) { headers.set(HttpHeaders.Names.DATE, value) }
   /** Set Date header by Date */
   def date_=(value: Date) { date = Message.httpDateFormat(value) }
 
   /** Get Expires header */
-  def expires: Option[String] = Option(getHeader(HttpHeaders.Names.EXPIRES))
+  def expires: Option[String] = Option(headers.get(HttpHeaders.Names.EXPIRES))
   /** Set Expires header */
-  def expires_=(value: String) { setHeader(HttpHeaders.Names.EXPIRES, value) }
+  def expires_=(value: String) { headers.set(HttpHeaders.Names.EXPIRES, value) }
   /** Set Expires header by Date */
   def expires_=(value: Date) { expires = Message.httpDateFormat(value) }
 
   /** Get Host header */
-  def host: Option[String] =  Option(getHeader(HttpHeaders.Names.HOST))
+  def host: Option[String] =  Option(headers.get(HttpHeaders.Names.HOST))
   /** Set Host header */
-  def host_=(value: String) { setHeader(HttpHeaders.Names.HOST, value) }
+  def host_=(value: String) { headers.set(HttpHeaders.Names.HOST, value) }
 
   /** Get Last-Modified header */
-  def lastModified: Option[String] = Option(getHeader(HttpHeaders.Names.LAST_MODIFIED))
+  def lastModified: Option[String] = Option(headers.get(HttpHeaders.Names.LAST_MODIFIED))
   /** Set Last-Modified header */
-  def lastModified_=(value: String) { setHeader(HttpHeaders.Names.LAST_MODIFIED, value) }
+  def lastModified_=(value: String) { headers.set(HttpHeaders.Names.LAST_MODIFIED, value) }
   /** Set Last-Modified header by Date */
   def lastModified_=(value: Date) { lastModified = Message.httpDateFormat(value) }
 
   /** Get Location header */
-  def location: Option[String] = Option(getHeader(HttpHeaders.Names.LOCATION))
+  def location: Option[String] = Option(headers.get(HttpHeaders.Names.LOCATION))
   /** Set Location header */
-  def location_=(value: String) { setHeader(HttpHeaders.Names.LOCATION, value) }
+  def location_=(value: String) { headers.set(HttpHeaders.Names.LOCATION, value) }
 
   /** Get media-type from Content-Type header */
   def mediaType: Option[String] =
@@ -244,36 +244,36 @@ abstract class Message extends HttpMessage {
   }
 
   /** Get Referer [sic] header */
-  def referer: Option[String] = Option(getHeader(HttpHeaders.Names.REFERER))
+  def referer: Option[String] = Option(headers.get(HttpHeaders.Names.REFERER))
   /** Set Referer [sic] header */
-  def referer_=(value: String) { setHeader(HttpHeaders.Names.REFERER, value) }
+  def referer_=(value: String) { headers.set(HttpHeaders.Names.REFERER, value) }
 
   /** Get Retry-After header */
-  def retryAfter: Option[String] = Option(getHeader(HttpHeaders.Names.RETRY_AFTER))
+  def retryAfter: Option[String] = Option(headers.get(HttpHeaders.Names.RETRY_AFTER))
   /** Set Retry-After header */
-  def retryAfter_=(value: String) { setHeader(HttpHeaders.Names.RETRY_AFTER, value) }
+  def retryAfter_=(value: String) { headers.set(HttpHeaders.Names.RETRY_AFTER, value) }
   /** Set Retry-After header by seconds */
   def retryAfter_=(value: Long) { retryAfter = value.toString }
 
   /** Get Server header */
-  def server: Option[String] = Option(getHeader(HttpHeaders.Names.SERVER))
+  def server: Option[String] = Option(headers.get(HttpHeaders.Names.SERVER))
   /** Set Server header */
-  def server_=(value: String) { setHeader(HttpHeaders.Names.SERVER, value) }
+  def server_=(value: String) { headers.set(HttpHeaders.Names.SERVER, value) }
 
   /** Get User-Agent header */
-  def userAgent: Option[String] = Option(getHeader(HttpHeaders.Names.USER_AGENT))
+  def userAgent: Option[String] = Option(headers.get(HttpHeaders.Names.USER_AGENT))
   /** Set User-Agent header */
-  def userAgent_=(value: String) { setHeader(HttpHeaders.Names.USER_AGENT, value) }
+  def userAgent_=(value: String) { headers.set(HttpHeaders.Names.USER_AGENT, value) }
 
   /** Get WWW-Authenticate header */
-  def wwwAuthenticate: Option[String] = Option(getHeader(HttpHeaders.Names.WWW_AUTHENTICATE))
+  def wwwAuthenticate: Option[String] = Option(headers.get(HttpHeaders.Names.WWW_AUTHENTICATE))
   /** Set WWW-Authenticate header */
-  def wwwAuthenticate_=(value: String) { setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, value) }
+  def wwwAuthenticate_=(value: String) { headers.set(HttpHeaders.Names.WWW_AUTHENTICATE, value) }
 
   /** Get X-Forwarded-For header */
-  def xForwardedFor: Option[String] = Option(getHeader("X-Forwarded-For"))
+  def xForwardedFor: Option[String] = Option(headers.get("X-Forwarded-For"))
   /** Set X-Forwarded-For header */
-  def xForwardedFor_=(value: String) { setHeader("X-Forwarded-For", value) }
+  def xForwardedFor_=(value: String) { headers.set("X-Forwarded-For", value) }
 
   /**
    * Check if X-Requested-With contains XMLHttpRequest, usually signalling a
@@ -282,7 +282,7 @@ abstract class Message extends HttpMessage {
    * instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
    */
   def isXmlHttpRequest = {
-    Option(getHeader("X-Requested-With")) exists { _.toLowerCase.contains("xmlhttprequest") }
+    Option(headers.get("X-Requested-With")) exists { _.toLowerCase.contains("xmlhttprequest") }
   }
 
   /** Get length of content. */

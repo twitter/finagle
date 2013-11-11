@@ -76,7 +76,7 @@ class ResponseEncoder extends SimpleChannelDownstreamHandler {
           writeResponse(ctx, e.getFuture(), response, e.getRemoteAddress())
         } else {
           // Ensure Content-Length is set if not chunked
-          if (!response.containsHeader(HttpHeaders.Names.CONTENT_LENGTH)) {
+          if (!response.headers.contains(HttpHeaders.Names.CONTENT_LENGTH)) {
             response.contentLength = response.getContent().readableBytes
           }
           super.writeRequested(ctx, e)

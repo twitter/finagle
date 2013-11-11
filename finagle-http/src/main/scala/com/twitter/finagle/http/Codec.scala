@@ -236,19 +236,19 @@ class HttpClientTracingFilter[Req <: HttpRequest, Res](serviceName: String)
   import HttpTracing._
 
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
-    Header.All foreach { request.removeHeader(_) }
+    Header.All foreach { request.headers.remove(_) }
 
-    request.addHeader(Header.TraceId, Trace.id.traceId.toString)
-    request.addHeader(Header.SpanId, Trace.id.spanId.toString)
+    request.headers.add(Header.TraceId, Trace.id.traceId.toString)
+    request.headers.add(Header.SpanId, Trace.id.spanId.toString)
     // no parent id set means this is the root span
     Trace.id._parentId foreach { id =>
-      request.addHeader(Header.ParentSpanId, id.toString)
+      request.headers.add(Header.ParentSpanId, id.toString)
     }
     // three states of sampled, yes, no or none (let the server decide)
     Trace.id.sampled foreach { sampled =>
-      request.addHeader(Header.Sampled, sampled.toString)
+      request.headers.add(Header.Sampled, sampled.toString)
     }
-    request.addHeader(Header.Flags, Trace.id.flags.toLong)
+    request.headers.add(Header.Flags, Trace.id.flags.toLong)
 
     if (Trace.isActivelyTracing) {
       Trace.recordRpcname(serviceName, request.getMethod.getName)
@@ -276,21 +276,21 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
 
   def apply(request: Req, service: Service[Req, Res]) = Trace.unwind {
 
-    if (Header.Required.forall { request.containsHeader(_) }) {
-      val spanId = SpanId.fromString(request.getHeader(Header.SpanId))
+    if (Header.Required.forall { request.headers.contains(_) }) {
+      val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
 
       spanId foreach { sid =>
-        val traceId = SpanId.fromString(request.getHeader(Header.TraceId))
-        val parentSpanId = SpanId.fromString(request.getHeader(Header.ParentSpanId))
+        val traceId = SpanId.fromString(request.headers.get(Header.TraceId))
+        val parentSpanId = SpanId.fromString(request.headers.get(Header.ParentSpanId))
 
-        val sampled = Option(request.getHeader(Header.Sampled)) flatMap { sampled =>
+        val sampled = Option(request.headers.get(Header.Sampled)) flatMap { sampled =>
           Try(sampled.toBoolean).toOption
         }
 
         val flags = getFlags(request)
         Trace.setId(TraceId(traceId, parentSpanId, sid, sampled, flags))
       }
-    } else if (request.containsHeader(Header.Flags)) {
+    } else if (request.headers.contains(Header.Flags)) {
       // even if there are no id headers we want to get the debug flag
       // this is to allow developers to just set the debug flag to ensure their
       // trace is collected
@@ -298,7 +298,7 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
     }
 
     // remove so the header is not visible to users
-    Header.All foreach { request.removeHeader(_) }
+    Header.All foreach { request.headers.remove(_) }
 
     // even if no trace id was passed from the client we log the annotations
     // with a locally generated id
@@ -321,7 +321,7 @@ class HttpServerTracingFilter[Req <: HttpRequest, Res](serviceName: String, boun
    */
   def getFlags(request: Req): Flags = {
     try {
-      Flags(Option(request.getHeader(Header.Flags)).map(_.toLong).getOrElse(0L))
+      Flags(Option(request.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
     } catch {
       case _ => Flags()
     }

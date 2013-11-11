@@ -14,9 +14,9 @@ import com.twitter.util.{Closable, StorageUnit}
 
 class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
   def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
-    val streamId = request.getHeader(SpdyHttpHeaders.Names.STREAM_ID)
+    val streamId = request.headers.get(SpdyHttpHeaders.Names.STREAM_ID)
     service(request) map { response =>
-      response.setHeader(SpdyHttpHeaders.Names.STREAM_ID, streamId)
+      response.headers.set(SpdyHttpHeaders.Names.STREAM_ID, streamId)
       response
     }
   }
@@ -35,14 +35,14 @@ class GenerateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
 }
 
 case class Spdy(
-    _version: Int = 3,
+    _version: SpdyVersion = SpdyVersion.SPDY_3,
     _compressionLevel: Int = 6,
     _maxHeaderSize: StorageUnit = 16384.bytes,
     _maxRequestSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes)
   extends CodecFactory[HttpRequest, HttpResponse]
 {
-  def version(version: Int) = copy(_version = version)
+  def version(version: SpdyVersion) = copy(_version = version)
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
   def maxRequestSize(size: StorageUnit) = copy(_maxRequestSize = size)

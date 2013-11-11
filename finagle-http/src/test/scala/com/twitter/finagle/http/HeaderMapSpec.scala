@@ -7,72 +7,72 @@ class HeaderMapSpec extends SpecificationWithJUnit {
   "MessageHeaderMap" should {
     "get" in {
       val request = Request()
-      request.addHeader("Host", "api.twitter.com")
+      request.headers.add("Host", "api.twitter.com")
 
-      request.headers.get("Host")    must_== Some("api.twitter.com")
-      request.headers.get("HOST")    must_== Some("api.twitter.com")
-      request.headers.get("missing") must_== None
+      request.headerMap.get("Host")    must_== Some("api.twitter.com")
+      request.headerMap.get("HOST")    must_== Some("api.twitter.com")
+      request.headerMap.get("missing") must_== None
     }
 
     "getAll" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
-      request.addHeader("Cookie", "2")
+      request.headers.add("Cookie", "1")
+      request.headers.add("Cookie", "2")
 
-      request.headers.getAll("Cookie").toList.sorted must_== "1" :: "2" :: Nil
-      request.headers.getAll("COOKIE").toList.sorted must_== "1" :: "2" :: Nil
-      request.headers.getAll("missing").toList       must_== Nil
+      request.headerMap.getAll("Cookie").toList.sorted must_== "1" :: "2" :: Nil
+      request.headerMap.getAll("COOKIE").toList.sorted must_== "1" :: "2" :: Nil
+      request.headerMap.getAll("missing").toList       must_== Nil
     }
 
     "iterator" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
-      request.addHeader("Cookie", "2")
+      request.headers.add("Cookie", "1")
+      request.headers.add("Cookie", "2")
 
-      request.headers.iterator.toList.sorted must_== ("Cookie", "1") :: ("Cookie", "2") :: Nil
+      request.headerMap.iterator.toList.sorted must_== ("Cookie", "1") :: ("Cookie", "2") :: Nil
     }
 
     "keys" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
-      request.addHeader("Cookie", "2")
+      request.headers.add("Cookie", "1")
+      request.headers.add("Cookie", "2")
 
-      request.headers.keys.toList must_== "Cookie" :: Nil
-      request.headers.keySet.toList must_== "Cookie" :: Nil
-      request.headers.keysIterator.toList must_== "Cookie" :: Nil
+      request.headerMap.keys.toList must_== "Cookie" :: Nil
+      request.headerMap.keySet.toList must_== "Cookie" :: Nil
+      request.headerMap.keysIterator.toList must_== "Cookie" :: Nil
     }
 
     "contains" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
+      request.headers.add("Cookie", "1")
 
-      request.headers.contains("Cookie")  must beTrue
-      request.headers.contains("COOKIE")  must beTrue
-      request.headers.contains("missing") must beFalse
+      request.headerMap.contains("Cookie")  must beTrue
+      request.headerMap.contains("COOKIE")  must beTrue
+      request.headerMap.contains("missing") must beFalse
     }
 
     "add" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
+      request.headers.add("Cookie", "1")
 
-      request.headers.add("Cookie", "2")
-      request.headers.getAll("Cookie").toList.sorted must_== "1" :: "2" :: Nil
+      request.headerMap.add("Cookie", "2")
+      request.headerMap.getAll("Cookie").toList.sorted must_== "1" :: "2" :: Nil
     }
 
     "+=" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
+      request.headers.add("Cookie", "1")
 
-      request.headers += "Cookie" -> "2"
-      request.headers.getAll("Cookie").toList.sorted must_== "2" :: Nil
+      request.headerMap += "Cookie" -> "2"
+      request.headerMap.getAll("Cookie").toList.sorted must_== "2" :: Nil
     }
 
     "-=" in {
       val request = Request()
-      request.addHeader("Cookie", "1")
+      request.headers.add("Cookie", "1")
 
-      request.headers -= "Cookie"
-      request.headers.contains("Cookie") must beFalse
+      request.headerMap -= "Cookie"
+      request.headerMap.contains("Cookie") must beFalse
     }
   }
 

@@ -51,11 +51,11 @@ v3
       val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
       val expected = "www.google.com:77"
-      get.getHeader(HttpHeaders.Names.HOST) must_== expected
-      head.getHeader(HttpHeaders.Names.HOST) must_== expected
-      delete.getHeader(HttpHeaders.Names.HOST) must_== expected
-      put.getHeader(HttpHeaders.Names.HOST) must_== expected
-      post.getHeader(HttpHeaders.Names.HOST) must_== expected
+      get.headers.get(HttpHeaders.Names.HOST) must_== expected
+      head.headers.get(HttpHeaders.Names.HOST) must_== expected
+      delete.headers.get(HttpHeaders.Names.HOST) must_== expected
+      put.headers.get(HttpHeaders.Names.HOST) must_== expected
+      post.headers.get(HttpHeaders.Names.HOST) must_== expected
     }
 
     "set the Authorization header when userInfo is present" in {
@@ -63,24 +63,24 @@ v3
       val req1 = RequestBuilder().url(URL1).buildGet
       val req2 = RequestBuilder().url(URL0).buildHead
       val req3 = RequestBuilder().url(URL1).buildHead
-      val req8 = RequestBuilder().url(URL0).buildDelete
-      val req9 = RequestBuilder().url(URL1).buildDelete
-      val req4 = RequestBuilder().url(URL0).buildPut(BODY0)
-      val req5 = RequestBuilder().url(URL1).buildPut(BODY0)
-      val req6 = RequestBuilder().url(URL0).buildPost(BODY0)
-      val req7 = RequestBuilder().url(URL1).buildPost(BODY0)
+      val req4 = RequestBuilder().url(URL0).buildDelete
+      val req5 = RequestBuilder().url(URL1).buildDelete
+      val req6 = RequestBuilder().url(URL0).buildPut(BODY0)
+      val req7 = RequestBuilder().url(URL1).buildPut(BODY0)
+      val req8 = RequestBuilder().url(URL0).buildPost(BODY0)
+      val req9 = RequestBuilder().url(URL1).buildPost(BODY0)
 
       val expected = "Basic am9lOmJsb3c="
-      req0.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
-      req1.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
-      req2.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
-      req3.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
-      req8.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
-      req9.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
-      req4.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
-      req5.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
-      req6.getHeader(HttpHeaders.Names.AUTHORIZATION) must_== expected
-      req7.getHeader(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req0.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
+      req1.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req2.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
+      req3.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req4.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
+      req5.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req6.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
+      req7.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
+      req8.headers.get(HttpHeaders.Names.AUTHORIZATION) must_== expected
+      req9.headers.get(HttpHeaders.Names.AUTHORIZATION) must beNull
     }
 
     "replace the empty path with /" in {
@@ -214,49 +214,49 @@ v3
         .url(URL0)
         .setHeader(A, B)
 
-      builder0.buildGet.getHeader(A) must_== B
-      builder0.buildHead.getHeader(A) must_== B
-      builder0.buildDelete.getHeader(A) must_== B
-      builder0.buildPut(BODY0).getHeader(A) must_== B
-      builder0.buildPost(BODY0).getHeader(A) must_== B
+      builder0.buildGet.headers.get(A) must_== B
+      builder0.buildHead.headers.get(A) must_== B
+      builder0.buildDelete.headers.get(A) must_== B
+      builder0.buildPut(BODY0).headers.get(A) must_== B
+      builder0.buildPost(BODY0).headers.get(A) must_== B
 
       val builder1 = builder0
         .setHeader(A, C)
 
-      builder1.buildGet.getHeader(A) must_== C
-      builder1.buildHead.getHeader(A) must_== C
-      builder1.buildDelete.getHeader(A) must_== C
-      builder1.buildPut(BODY0).getHeader(A) must_== C
-      builder1.buildPost(BODY0).getHeader(A) must_== C
+      builder1.buildGet.headers.get(A) must_== C
+      builder1.buildHead.headers.get(A) must_== C
+      builder1.buildDelete.headers.get(A) must_== C
+      builder1.buildPut(BODY0).headers.get(A) must_== C
+      builder1.buildPost(BODY0).headers.get(A) must_== C
 
       val builder2 = builder1
         .setHeader(A, Seq())
 
-      builder2.buildGet.getHeader(A) must beNull
-      builder2.buildHead.getHeader(A) must beNull
-      builder2.buildDelete.getHeader(A) must beNull
-      builder2.buildPut(BODY0).getHeader(A) must beNull
-      builder2.buildPost(BODY0).getHeader(A) must beNull
+      builder2.buildGet.headers.get(A) must beNull
+      builder2.buildHead.headers.get(A) must beNull
+      builder2.buildDelete.headers.get(A) must beNull
+      builder2.buildPut(BODY0).headers.get(A) must beNull
+      builder2.buildPost(BODY0).headers.get(A) must beNull
 
       val builder3 = builder2
         .setHeader(A, Seq(B, C))
 
       val pair = Seq(B,C).asJava
-      builder3.buildGet.getHeaders(A) must_== pair
-      builder3.buildHead.getHeaders(A) must_== pair
-      builder3.buildDelete.getHeaders(A) must_== pair
-      builder3.buildPut(BODY0).getHeaders(A) must_== pair
-      builder3.buildPost(BODY0).getHeaders(A) must_== pair
+      builder3.buildGet.headers.getAll(A) must_== pair
+      builder3.buildHead.headers.getAll(A) must_== pair
+      builder3.buildDelete.headers.getAll(A) must_== pair
+      builder3.buildPut(BODY0).headers.getAll(A) must_== pair
+      builder3.buildPost(BODY0).headers.getAll(A) must_== pair
 
       val builder4 = builder3
         .addHeader(A, D)
 
       val triple = Seq(B,C, D).asJava
-      builder4.buildGet.getHeaders(A) must_== triple
-      builder4.buildHead.getHeaders(A) must_== triple
-      builder4.buildDelete.getHeaders(A) must_== triple
-      builder4.buildPut(BODY0).getHeaders(A) must_== triple
-      builder4.buildPost(BODY0).getHeaders(A) must_== triple
+      builder4.buildGet.headers.getAll(A) must_== triple
+      builder4.buildHead.headers.getAll(A) must_== triple
+      builder4.buildDelete.headers.getAll(A) must_== triple
+      builder4.buildPut(BODY0).headers.getAll(A) must_== triple
+      builder4.buildPost(BODY0).headers.getAll(A) must_== triple
     }
 
     "build form" in {

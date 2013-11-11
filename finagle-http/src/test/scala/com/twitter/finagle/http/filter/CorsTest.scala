@@ -38,14 +38,14 @@ class CorsTest extends FlatSpec with MustMatchers {
   "Cors.HttpFilter" should "handle preflight requests" in {
     val request = Request()
     request.method = HttpMethod.OPTIONS
-    request.setHeader("Origin", "thestreet")
-    request.setHeader("Access-Control-Request-Method", "BRR")
+    request.headers.set("Origin", "thestreet")
+    request.headers.set("Access-Control-Request-Method", "BRR")
 
     val response = Await result service(request)
-    response.headers.get("Access-Control-Allow-Origin") must be(Some("thestreet"))
-    response.headers.get("Access-Control-Allow-Credentials") must be(Some("true"))
-    response.headers.get("Access-Control-Allow-Methods") must be(Some("BRR, TRAP"))
-    response.headers.get("Vary") must be(Some("Origin"))
+    response.headerMap.get("Access-Control-Allow-Origin") must be(Some("thestreet"))
+    response.headerMap.get("Access-Control-Allow-Credentials") must be(Some("true"))
+    response.headerMap.get("Access-Control-Allow-Methods") must be(Some("BRR, TRAP"))
+    response.headerMap.get("Vary") must be(Some("Origin"))
     response.contentString must be("")
   }
 
@@ -55,37 +55,37 @@ class CorsTest extends FlatSpec with MustMatchers {
     
     val response = Await result service(request)
     response.status must be(Status.Ok)
-    response.headers.get("Access-Control-Allow-Origin") must be(None)
-    response.headers.get("Access-Control-Allow-Credentials") must be(None)
-    response.headers.get("Access-Control-Allow-Methods") must be(None)
-    response.headers.get("Vary") must be(Some("Origin"))
+    response.headerMap.get("Access-Control-Allow-Origin") must be(None)
+    response.headerMap.get("Access-Control-Allow-Credentials") must be(None)
+    response.headerMap.get("Access-Control-Allow-Methods") must be(None)
+    response.headerMap.get("Vary") must be(Some("Origin"))
     response.contentString must be("")
   }
 
   it should "respond to unacceptable cross-origin requests without CORS headers" in {
     val request = Request()
     request.method = HttpMethod.OPTIONS
-    request.setHeader("Origin", "theclub")
+    request.headers.set("Origin", "theclub")
     
     val response = Await result service(request)
     response.status must be(Status.Ok)
-    response.headers.get("Access-Control-Allow-Origin") must be(None)
-    response.headers.get("Access-Control-Allow-Credentials") must be(None)
-    response.headers.get("Access-Control-Allow-Methods") must be(None)
-    response.headers.get("Vary") must be(Some("Origin"))
+    response.headerMap.get("Access-Control-Allow-Origin") must be(None)
+    response.headerMap.get("Access-Control-Allow-Credentials") must be(None)
+    response.headerMap.get("Access-Control-Allow-Methods") must be(None)
+    response.headerMap.get("Vary") must be(Some("Origin"))
     response.contentString must be("")
   }
 
   it should "handle simple requests" in {
     val request = Request()
     request.method = TRAP
-    request.headers += ("Origin" -> "juughaus")
+    request.headers.set("Origin", "juughaus")
     
     val response = Await result service(request)
-    response.headers.get("Access-Control-Allow-Origin") must be(Some("juughaus"))
-    response.headers.get("Access-Control-Allow-Credentials") must be(Some("true"))
-    response.headers.get("Access-Control-Expose-Headers") must be(Some("Icey"))
-    response.headers.get("Vary") must be(Some("Origin"))
+    response.headerMap.get("Access-Control-Allow-Origin") must be(Some("juughaus"))
+    response.headerMap.get("Access-Control-Allow-Credentials") must be(Some("true"))
+    response.headerMap.get("Access-Control-Expose-Headers") must be(Some("Icey"))
+    response.headerMap.get("Vary") must be(Some("Origin"))
     response.contentString must be("#guwop")
   }
 
@@ -94,10 +94,10 @@ class CorsTest extends FlatSpec with MustMatchers {
     request.method = TRAP
     
     val response = Await result service(request)
-    response.headers.get("Access-Control-Allow-Origin") must be(None)
-    response.headers.get("Access-Control-Allow-Credentials") must be(None)
-    response.headers.get("Access-Control-Expose-Headers") must be(None)
-    response.headers.get("Vary") must be(Some("Origin"))
+    response.headerMap.get("Access-Control-Allow-Origin") must be(None)
+    response.headerMap.get("Access-Control-Allow-Credentials") must be(None)
+    response.headerMap.get("Access-Control-Expose-Headers") must be(None)
+    response.headerMap.get("Vary") must be(Some("Origin"))
     response.contentString must be("#guwop")
   }
 }
