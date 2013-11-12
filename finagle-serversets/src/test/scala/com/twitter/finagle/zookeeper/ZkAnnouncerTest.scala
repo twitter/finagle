@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 
 @RunWith(classOf[JUnitRunner])
 class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
@@ -31,6 +31,12 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
 
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
   def hostPath = "localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort)
+
+  // TODO: remove when no longer flaky.
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    if (!sys.props.contains("SKIP_FLAKY"))
+      super.test(testName, testTags:_*)(f)
+  }
 
   test("announce a primary endpoint") {
     val ann = new ZkAnnouncer(factory)
@@ -67,26 +73,24 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     eventually { assert(Var.sample(va1) === Addr.Bound(addr1)) }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) {
-    test("unannounce additional endpoints, but not primary endpoints") {
-      val ann = new ZkAnnouncer(factory)
-      val res = new ZkResolver(factory)
-      val addr1 = new InetSocketAddress(8080)
-      val addr2 = new InetSocketAddress(8081)
+  test("unannounce additional endpoints, but not primary endpoints") {
+    val ann = new ZkAnnouncer(factory)
+    val res = new ZkResolver(factory)
+    val addr1 = new InetSocketAddress(8080)
+    val addr2 = new InetSocketAddress(8081)
 
-      val anm1 = Await.result(ann.announce(addr1, "%s!0".format(hostPath)))
-      val anm2 = Await.result(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
-      val va1 = res.bind(hostPath)
-      val va2 = res.bind("%s!addr2".format(hostPath))
+    val anm1 = Await.result(ann.announce(addr1, "%s!0".format(hostPath)))
+    val anm2 = Await.result(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
+    val va1 = res.bind(hostPath)
+    val va2 = res.bind("%s!addr2".format(hostPath))
 
-      eventually { assert(Var.sample(va1) === Addr.Bound(addr1)) }
-      eventually { assert(Var.sample(va2) === Addr.Bound(addr2)) }
+    eventually { assert(Var.sample(va1) === Addr.Bound(addr1)) }
+    eventually { assert(Var.sample(va2) === Addr.Bound(addr2)) }
 
-      Await.result(anm2.unannounce())
+    Await.result(anm2.unannounce())
 
-      eventually { assert(Var.sample(va2) === Addr.Bound()) }
-      assert(Var.sample(va1) === Addr.Bound(addr1))
-    }
+    eventually { assert(Var.sample(va2) === Addr.Bound()) }
+    assert(Var.sample(va1) === Addr.Bound(addr1))
   }
 
   test("unannounce primary endpoints and additional endpoints") {
