@@ -185,7 +185,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    */
   @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
   def newIface[Iface](group: Group[SocketAddress], cls: Class[_]): Iface = group match {
-    case NamedGroup(label) => newIface(Name.fromGroup(group), label, cls)
+    case LabelledGroup(g, label) => newIface(Name.fromGroup(g), label, cls)
     case _ => newIface(Name.fromGroup(group), "", cls)
   }
 

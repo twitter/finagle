@@ -5,7 +5,7 @@ import com.twitter.common.zookeeper.{ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
 import com.twitter.conversions.common._
 import com.twitter.conversions.common.quantity._
-import com.twitter.finagle.group.StabilizingGroup.State._
+import com.twitter.finagle.addr.StabilizingAddr.State._
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.finagle.InetResolver
 import com.twitter.util.Duration
@@ -40,7 +40,8 @@ private[finagle] class ZkClientFactory(val sessionTimeout: Duration) {
 
   def get(zkHosts: Set[InetSocketAddress]): (ZooKeeperClient, Offer[Health]) = synchronized {
     val client = zkClients.getOrElseUpdate(zkHosts, new ZooKeeperClient(
-        Amount.of(sessionTimeout.inMillis.toInt, CommonTime.MILLISECONDS), zkHosts.asJava))
+        Amount.of(sessionTimeout.inMillis.toInt, CommonTime.MILLISECONDS),
+        zkHosts.asJava))
     // TODO: Watchers are tied to the life of the client,
     // which, in turn, is tied to the life of ZkClientFactory.
     // Maybe we should expose a way to unregister watchers.

@@ -63,7 +63,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
     Await.ready(ann.announce(addr2, "%s!0!addr2".format(hostPath)))
     val va2 = res.bind("%s!addr2".format(hostPath))
     eventually { assert(Var.sample(va2) != Addr.Pending) }
-    assert(Var.sample(va2) === Addr.Bound())
+    assert(Var.sample(va2) === Addr.Neg)
 
     Await.ready(ann.announce(addr1, "%s!0".format(hostPath)))
 
@@ -89,7 +89,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
 
     Await.result(anm2.unannounce())
 
-    eventually { assert(Var.sample(va2) === Addr.Bound()) }
+    eventually { assert(Var.sample(va2) === Addr.Neg) }
     assert(Var.sample(va1) === Addr.Bound(addr1))
   }
 

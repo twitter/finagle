@@ -8,6 +8,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Future, Time, Timer, Duration, Var}
 import scala.collection.immutable.Queue
 
+@deprecated("Use StabilizingAddr instead", "6.7.5")
 object StabilizingGroup {
   object State extends Enumeration {
     type Health = Value
@@ -18,6 +19,7 @@ object StabilizingGroup {
     val Unhealthy = Value(-1)
   }
 
+  @deprecated("Use StabilizingAddr instead", "6.7.5")
   def apply[T](
     underlying: Group[T],
     pulse: Offer[State.Health],

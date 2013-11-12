@@ -104,21 +104,16 @@ object Resolver {
    * resolver name is present, the inet resolver is used.
    *
    * Names resolved by this mechanism are also a
-   * [[com.twitter.finagle.NamedGroup]]. By default, this name is
+   * [[com.twitter.finagle.LabelledGroup]]. By default, this name is
    * simply the `addr` string, but it can be overriden by prefixing
    * a name separated by an equals sign from the rest of the addr.
    * For example, the addr "www=inet!google.com:80" resolves
    * "google.com:80" with the inet resolver, but the returned group's
-   * [[com.twitter.finagle.NamedGroup]] name is "www".
+   * [[com.twitter.finagle.LabelledGroup]] name is "www".
    */
   @deprecated("Use Resolver.eval", "6.7.x")
   def resolve(addr: String): Try[Group[SocketAddress]] =
-    Try { eval(addr) } flatMap { n =>
-      n.bind() match {
-        case Var.Sampled(Addr.Failed(e)) => Throw(e)
-        case va => Return(Group.fromVarAddr(va))
-      }
-    }
+    Try { eval(addr) } map { n => NameGroup(n) }
 
   /**
    * Parse and evaluate the argument into a Name. Eval parses

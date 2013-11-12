@@ -46,7 +46,7 @@ trait Group[T] { outer =>
   // identity to repeated calls to Group.members
   final protected[finagle] lazy val ref = {
     val r = new AtomicReference[Set[T]]()
-    set.observe { v => r.set(v) }
+    set.observeTo(r)
     r
   }
 
@@ -90,23 +90,29 @@ trait Group[T] { outer =>
   /**
    * Name the group `n`.
    *
-   * @return `this` mixed in with `NamedGroup`, named `n`
+   * @return `this` mixed in with `LabelledGroup`, named `n`
    */
-  def named(n: String): Group[T] =
-    new Group[T]
-      with Proxy
-      with NamedGroup
-    {
-      val self = outer
-      val set = self.set
-      val name = n
-    }
+  def named(n: String): Group[T] = LabelledGroup(this, n)
 
   def +(other: Group[T]): Group[T] = new Group[T] {
     protected[finagle] val set = for { a <- outer.set; b <- other.set } yield a++b
   }
 
   override def toString = "Group(%s)".format(this() mkString ", ")
+}
+
+/**
+ * A group that simply contains a name. Getting at the set binds the
+ * name, but mostly this is to ship names under the cover of old
+ * APIs. (And hopefully will be deprecated soon enough.)
+ */
+private[finagle] case class NameGroup(name: Name) 
+    extends Group[SocketAddress] {
+
+  protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.bind() map {
+    case Addr.Bound(set) => set
+    case _ => Set()
+  }
 }
 
 trait MutableGroup[T] extends Group[T] {
@@ -117,15 +123,8 @@ trait MutableGroup[T] extends Group[T] {
  * A mixin trait to assign a ``name`` to the group. This is used
  * to assign labels to groups that ascribe meaning to them.
  */
-trait NamedGroup {
-  def name: String
-}
-
-object NamedGroup {
-  def unapply(g: Group[_]): Option[String] = g match {
-    case n: NamedGroup => Some(n.name)
-    case _ => None
-  }
+case class LabelledGroup[T](underlying: Group[T], name: String) extends Group[T] {
+  protected[finagle] lazy val set: Var[Set[T]] = underlying.set
 }
 
 object Group {

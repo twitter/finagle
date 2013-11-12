@@ -53,9 +53,13 @@ object Name {
    * addresses. Empty sets could indicate either pending or negative
    * resolutions.
    */
-  def fromGroup(g: Group[SocketAddress]): Name = new Name {
-    def bind() = g.set map { newSet => Addr.Bound(newSet) }
-    val reified = "fail!"
+  def fromGroup(g: Group[SocketAddress]): Name = g match {
+    case NameGroup(n) => n
+    case g =>
+      new Name {
+        def bind() = g.set map { newSet => Addr.Bound(newSet) }
+        val reified = "fail!"
+      }
   }
 
   /**
