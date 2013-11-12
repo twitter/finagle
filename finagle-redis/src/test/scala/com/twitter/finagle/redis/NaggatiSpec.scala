@@ -796,6 +796,61 @@ class NaggatiSpec extends SpecificationWithJUnit {
         }
 
       }
+      "nested multi-bulk replies" >> {
+        codec(wrap("*3\r\n")) mustEqual Nil
+        codec(wrap(":1\r\n")) mustEqual Nil
+        codec(wrap("*2\r\n")) mustEqual Nil
+        codec(wrap("$3\r\n")) mustEqual Nil
+        codec(wrap("one\r\n")) mustEqual Nil
+        codec(wrap("$5\r\n")) mustEqual Nil
+        codec(wrap("three\r\n")) mustEqual Nil
+        codec(wrap(":3\r\n")) match {
+          case reply :: Nil => reply match {
+            case MBulkReply(List(a, b, c)) =>
+              a mustEqual IntegerReply(1)
+              b match {
+                case MBulkReply(xs) =>
+                  ReplyFormat.toString(xs) mustEqual List("one", "three")
+                case xs => fail("Expected MBulkReply, got: %s" format xs)
+              }
+              c mustEqual IntegerReply(3)
+            case xs => fail("Expected 3-element MBulkReply, got: %s" format xs)
+          }
+          case xs => fail("Expected one reply, got: %s" format xs)
+        }
+
+        codec(wrap("*4\r\n")) mustEqual Nil
+        codec(wrap(":0\r\n")) mustEqual Nil
+        codec(wrap(":1\r\n")) mustEqual Nil
+        codec(wrap("*3\r\n")) mustEqual Nil
+        codec(wrap(":10\r\n")) mustEqual Nil
+        codec(wrap("*0\r\n")) mustEqual Nil
+        codec(wrap("*2\r\n")) mustEqual Nil
+        codec(wrap("*0\r\n")) mustEqual Nil
+        codec(wrap(":100\r\n")) mustEqual Nil
+        codec(wrap(":2\r\n")) match {
+          case reply :: Nil => reply match {
+            case MBulkReply(List(a, b, c, d)) =>
+              a mustEqual IntegerReply(0)
+              b mustEqual IntegerReply(1)
+              c match {
+                case MBulkReply(List(aa, ab, ac)) =>
+                  aa mustEqual IntegerReply(10)
+                  ab mustEqual EmptyMBulkReply()
+                  ac match {
+                    case MBulkReply(List(aaa, aab)) =>
+                      aaa mustEqual EmptyMBulkReply()
+                      aab mustEqual IntegerReply(100)
+                    case xs => fail("Expected 2-element MBulkReply, got: %s" format xs)
+                  }
+                case xs => fail("Expected 3-element, got: %s" format xs)
+              }
+              d mustEqual IntegerReply(2)
+            case xs => fail("Expected 4-element MBulkReply, got: %s" format xs)
+          }
+          case xs => fail("Expected one reply, got: %s" format xs)
+        }
+      }
     }
 
     "Properly encode" >> {
