@@ -4,46 +4,44 @@ import java.nio.charset.{Charset => JCharset}
 import com.twitter.finagle.exp.mysql.transport.Buffer
 
 object Type {
-  /** MySQL type codes */
-  val DECIMAL     = 0x00;
-  val TINY        = 0x01;
-  val SHORT       = 0x02;
-  val LONG        = 0x03;
-  val FLOAT       = 0x04;
-  val DOUBLE      = 0x05;
-  val NULL        = 0x06;
-  val TIMESTAMP   = 0x07;
-  val LONGLONG    = 0x08;
-  val INT24       = 0x09;
-  val DATE        = 0x0a;
-  val TIME        = 0x0b;
-  val DATETIME    = 0x0c;
-  val YEAR        = 0x0d;
-  val NEWDATE     = 0x0e;
-  val VARCHAR     = 0x0f;
-  val BIT         = 0x10;
-  val NEWDECIMAL  = 0xf6;
-  val ENUM        = 0xf7;
-  val SET         = 0xf8;
-  val TINY_BLOB   = 0xf9;
-  val MEDIUM_BLOB = 0xfa;
-  val LONG_BLOB   = 0xfb;
-  val BLOB        = 0xfc;
-  val VAR_STRING  = 0xfd;
-  val STRING      = 0xfe;
-  val GEOMETRY    = 0xff;
+  /**
+   * MySQL type codes as enumerated here:
+   * http://dev.mysql.com/doc/internals/en/com-query-response.html#column-type
+   */
+  val Decimal: Short    = 0x00
+  val Tiny: Short       = 0x01
+  val Short: Short      = 0x02
+  val Long: Short       = 0x03
+  val Float: Short      = 0x04
+  val Double: Short     = 0x05
+  val Null: Short       = 0x06
+  val Timestamp: Short  = 0x07
+  val LongLong: Short   = 0x08
+  val Int24: Short      = 0x09
+  val Date: Short       = 0x0a
+  val Time: Short       = 0x0b
+  val DateTime: Short   = 0x0c
+  val Year: Short       = 0x0d
+  val NewDate: Short    = 0x0e
+  val VarChar: Short    = 0x0f
+  val Bit: Short        = 0x10
+  val NewDecimal: Short = 0xf6
+  val Enum: Short       = 0xf7
+  val Set: Short        = 0xf8
+  val TinyBlob: Short   = 0xf9
+  val MediumBlob: Short = 0xfa
+  val LongBlob: Short   = 0xfb
+  val Blob: Short       = 0xfc
+  val VarString: Short  = 0xfd
+  val String: Short     = 0xfe
+  val Geometry: Short   = 0xff
 
   /**
    * Returns the sizeof the given parameter in
    * its MySQL binary representation. If the size
    * is unknown -1 is returned.
    */
-  def sizeOf(any: Any, charset: JCharset = Charset.defaultCharset) = any match {
-    case s: String => {
-      val bytes = s.getBytes(charset)
-      Buffer.sizeOfLen(bytes.size) + bytes.size
-    }
-    case b: Array[Byte] => Buffer.sizeOfLen(b.size) + b.size
+  private[mysql] def sizeOf(any: Any): Int = any match {
     case b: Boolean     => 1
     case b: Byte        => 1
     case s: Short       => 2
@@ -51,11 +49,17 @@ object Type {
     case l: Long        => 8
     case f: Float       => 4
     case d: Double      => 8
-    case null           => 0
-    // Date and Time
     case t: java.sql.Timestamp    => 12
     case d: java.sql.Date         => 5
     case d: java.util.Date        => 12
+    case s: String =>
+      val bytes = s.getBytes(Charset.defaultCharset)
+      Buffer.sizeOfLen(bytes.size) + bytes.size
+    case b: Array[Byte] =>
+      Buffer.sizeOfLen(b.size) + b.size
+    case RawValue(_, _, true, b)  =>
+      Buffer.sizeOfLen(b.size) + b.size
+    case null => 0
     case _ => -1
   }
 
@@ -64,49 +68,26 @@ object Type {
    * given parameter. If the parameter type
    * mapping is unknown -1 is returned.
    */
-  def getCode(any: Any) = any match {
+  private[mysql] def getCode(any: Any): Short = any match {
     // primitives
-    case s: String  => VARCHAR
-    case b: Boolean => TINY
-    case b: Byte    => TINY
-    case s: Short   => SHORT
-    case i: Int     => LONG
-    case l: Long    => LONGLONG
-    case f: Float   => FLOAT
-    case d: Double  => DOUBLE
-    case null       => NULL
+    case s: String  => VarChar
+    case b: Boolean => Tiny
+    case b: Byte    => Tiny
+    case s: Short   => Short
+    case i: Int     => Long
+    case l: Long    => LongLong
+    case f: Float   => Float
+    case d: Double  => Double
+    case null       => Null
     // blobs
-    case b: Array[Byte] if b.size <= 255         => TINY_BLOB
-    case b: Array[Byte] if b.size <= 65535       => BLOB
-    case b: Array[Byte] if b.size <= 16777215    => MEDIUM_BLOB
-
-    // No support for LONG_BLOBS. In order to implement this correctly
-    // in Java/Scala we need to represent this set of bytes as a composition
-    // of buffers.
-    // case b: Array[Byte] if b.size <= 4294967295L => LONG_BLOB
-
+    case b: Array[Byte] if b.size <= 255         => TinyBlob
+    case b: Array[Byte] if b.size <= 65535       => Blob
+    case b: Array[Byte] if b.size <= 16777215    => MediumBlob
     // Date and Time
-    case t: java.sql.Timestamp => TIMESTAMP
-    case d: java.sql.Date => DATE
-    case d: java.util.Date => DATETIME
+    case t: java.sql.Timestamp => Timestamp
+    case d: java.sql.Date => Date
+    case d: java.util.Date => DateTime
+    case RawValue(typ, _, _, _) => typ
     case _ => -1
   }
-}
-
-/**
- * Timestamp object that can appropriately
- * represent MySQL zero Timestamp.
- */
-case object SQLZeroTimestamp extends java.sql.Timestamp(0) {
-  override val getTime = 0L
-  override val toString = "0000-00-00 00:00:00"
-}
-
-/**
- * Date object that can appropriately
- * represent MySQL zero Date.
- */
-case object SQLZeroDate extends java.sql.Date(0) {
-  override val getTime = 0L
-  override val toString = "0000-00-00"
 }

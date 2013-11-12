@@ -72,11 +72,13 @@ object OK extends Decoder[OK] {
   }
 }
 
-case class OK(affectedRows: Long,
-              insertId: Long,
-              serverStatus: Int,
-              warningCount: Int,
-              message: String) extends Result
+case class OK(
+  affectedRows: Long,
+  insertId: Long,
+  serverStatus: Int,
+  warningCount: Int,
+  message: String
+) extends Result
 
 /**
  * Represents the Error Packet received from the server and the data sent along with it.
@@ -119,7 +121,7 @@ object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
 /**
  * Represents the column meta-data associated with a query.
  * Sent during ResultSet transmission and as part of the
- * meta-data associated with a PreparedStatement.
+ * meta-data associated with a Row.
  * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41]]
  */
 object Field extends Decoder[Field] {
@@ -131,7 +133,7 @@ object Field extends Decoder[Field] {
     val bytesOrigTable = bw.readLengthCodedBytes()
     val bytesName = bw.readLengthCodedBytes()
     val bytesOrigName = bw.readLengthCodedBytes()
-    bw.skip(1) // filler
+    bw.readLengthCodedBinary() // length of the following fields (always 0x0c)
     val charset = bw.readShort()
     val jCharset = Charset(charset)
     val catalog = new String(bytesCatalog, jCharset)
@@ -169,11 +171,12 @@ case class Field(
   origName: String,
   charset: Short,
   displayLength: Int,
-  fieldType: Int,
+  fieldType: Short,
   flags: Short,
   decimals: Byte
 ) extends Result {
   def id: String = if (name.isEmpty) origName else name
+  override val toString = "Field(%s)".format(id)
 }
 
 /**
@@ -218,7 +221,7 @@ object ResultSet {
   ): Try[ResultSet] = Try(decode(isBinaryEncoded)(header, fieldPackets, rowPackets))
 
   def decode(isBinaryEncoded: Boolean)(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]) = {
-    val fields = fieldPackets map { Field.decode(_) }
+    val fields = fieldPackets.map(Field.decode(_)).toIndexedSeq
 
     // A name -> index map used to allow quick lookups for rows based on name.
     val indexMap = fields.map(_.id).zipWithIndex.toMap
@@ -240,9 +243,5 @@ object ResultSet {
 }
 
 case class ResultSet(fields: Seq[Field], rows: Seq[Row]) extends Result {
-  override def toString = {
-    val header = fields map { _.id } mkString("\t")
-    val content = rows map { _.values.mkString("\t") } mkString("\n")
-    header + "\n" + content
-  }
+  override def toString = "ResultSet(%d, %d)".format(fields.size, rows.size)
 }

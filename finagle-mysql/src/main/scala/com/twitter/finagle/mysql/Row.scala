@@ -4,14 +4,16 @@ import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
 
 /**
  * Defines an interface that allows for easily
- * reading the values in a row.
+ * reading the values in a mysql row.
  */
 trait Row {
   /**
    * Contains a Field object for each
-   * Column in the Row.
+   * Column in the Row. The data is 0-indexed
+   * so fields(0) contains the column meta-data
+   * for the first column in the Row.
    */
-  val fields: Seq[Field]
+  val fields: IndexedSeq[Field]
 
   /** The values for this Row. */
   val values: IndexedSeq[Value]
@@ -44,16 +46,45 @@ trait Row {
  * text-based protocol.
  * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
  */
-class StringEncodedRow(rawRow: Buffer, val fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
-  val br = BufferReader(rawRow)
+class StringEncodedRow(rawRow: Buffer, val fields: IndexedSeq[Field], indexMap: Map[String, Int]) extends Row {
+  val buffer = BufferReader(rawRow)
 
   /**
    * Convert the string representation of each value
    * into an appropriate Value object.
+   * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
    */
-  val values: IndexedSeq[Value] =
-    for (field: Field <- fields.toIndexedSeq) yield {
-      Value(field.fieldType, br.readLengthCodedString(Charset(field.charset)))
+  lazy val values: IndexedSeq[Value] =
+    for (field <- fields) yield {
+      val bytes = buffer.readLengthCodedBytes()
+      if (bytes == null)
+        NullValue
+      else if (bytes.isEmpty)
+        EmptyValue
+      else if (!Charset.isCompatible(field.charset))
+        RawValue(field.fieldType, field.charset, false, bytes)
+      else {
+        val str = new String(bytes, Charset(field.charset))
+        field.fieldType match {
+          case Type.Tiny       => ByteValue(str.toByte)
+          case Type.Short      => ShortValue(str.toShort)
+          case Type.Int24      => IntValue(str.toInt)
+          case Type.Long       => IntValue(str.toInt)
+          case Type.LongLong   => LongValue(str.toLong)
+          case Type.Float      => FloatValue(str.toFloat)
+          case Type.Double     => DoubleValue(str.toDouble)
+          case Type.Year       => ShortValue(str.toShort)
+          // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
+          case Type.VarChar | Type.String | Type.VarString |
+               Type.TinyBlob | Type.Blob | Type.MediumBlob
+               if !Charset.isBinary(field.charset) => StringValue(str)
+          // LongBlobs indicate a sequence of bytes with length >= 2^24 which
+          // can't fit into a Array[Byte]. This should be streamed and
+          // support for this needs to begin at the transport layer.
+          case Type.LongBlob => throw new UnsupportedOperationException("LongBlob is not supported!")
+          case typ => RawValue(typ, field.charset, false, bytes)
+        }
+      }
     }
 
   def indexOf(name: String) = indexMap.get(name)
@@ -64,7 +95,7 @@ class StringEncodedRow(rawRow: Buffer, val fields: Seq[Field], indexMap: Map[Str
  * mysql binary protocol.
  * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html]]
  */
-class BinaryEncodedRow(rawRow: Buffer, val fields: Seq[Field], indexMap: Map[String, Int]) extends Row {
+class BinaryEncodedRow(rawRow: Buffer, val fields: IndexedSeq[Field], indexMap: Map[String, Int]) extends Row {
   val buffer = BufferReader(rawRow, offset = 1)
 
   /**
@@ -89,12 +120,27 @@ class BinaryEncodedRow(rawRow: Buffer, val fields: Seq[Field], indexMap: Map[Str
    * Convert the binary representation of each value
    * into an appropriate Value object.
    */
-  val values: IndexedSeq[Value] =
-    for ((field, idx) <- fields.toIndexedSeq.zipWithIndex) yield {
-      if (isNull(idx))
-        NullValue
-      else
-        Value(field.fieldType, buffer, Charset(field.charset))
+  lazy val values: IndexedSeq[Value] =
+    for ((field, idx) <- fields.zipWithIndex) yield {
+      if (isNull(idx)) NullValue
+      else field.fieldType match {
+        case Type.Tiny        => ByteValue(buffer.readByte())
+        case Type.Short       => ShortValue(buffer.readShort())
+        case Type.Int24       => IntValue(buffer.readInt())
+        case Type.Long        => IntValue(buffer.readInt())
+        case Type.LongLong    => LongValue(buffer.readLong())
+        case Type.Float       => FloatValue(buffer.readFloat())
+        case Type.Double      => DoubleValue(buffer.readDouble())
+        case Type.Year        => ShortValue(buffer.readShort())
+        // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
+        case Type.VarChar | Type.String | Type.VarString |
+             Type.TinyBlob | Type.Blob | Type.MediumBlob
+             if !Charset.isBinary(field.charset) && Charset.isCompatible(field.charset) =>
+               StringValue(buffer.readLengthCodedString(Charset(field.charset)))
+
+        case Type.LongBlob => throw new UnsupportedOperationException("LongBlob is not supported!")
+        case typ => RawValue(typ, field.charset, true, buffer.readLengthCodedBytes())
+      }
     }
 
   def indexOf(name: String) = indexMap.get(name)

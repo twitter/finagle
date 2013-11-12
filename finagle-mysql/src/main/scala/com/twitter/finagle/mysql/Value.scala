@@ -1,129 +1,96 @@
 package com.twitter.finagle.exp.mysql
 
-import java.sql.{Timestamp, Date => SQLDate}
 import java.util.Calendar
-import java.nio.charset.{Charset => JCharset}
+import java.sql.{Date, Timestamp, Time}
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter}
 
 /**
- * Defines a Value ADT that represents values
- * contained in a mysql Row.
+ * Defines a Value ADT that represents the domain of values
+ * received from a mysql server.
  */
 sealed trait Value
-case class StringValue(s: String) extends Value
-case class BooleanValue(b: Boolean) extends Value
 case class ByteValue(b: Byte) extends Value
 case class ShortValue(s: Short) extends Value
 case class IntValue(i: Int) extends Value
 case class LongValue(l: Long) extends Value
 case class FloatValue(f: Float) extends Value
 case class DoubleValue(d: Double) extends Value
-case class TimestampValue(t: Timestamp) extends Value
-case class DateValue(d: SQLDate) extends Value
-
-/**
- * Raw values are returned when the value is not supported, that is,
- * the decode method for the type is not implemented.
- */
-case class RawStringValue(s: String) extends Value
-case class RawBinaryValue(bytes: Array[Byte]) extends Value
-
-/**
- * "" -> EmptyValue
- * SQL NULL -> NullValue
- */
+case class StringValue(s: String) extends Value
 case object EmptyValue extends Value
 case object NullValue extends Value
 
 /**
- * Defines convenient methods for decoding bytes
- * based on type and wrapping them in their appropriate Value.
- * [[http://dev.mysql.com/doc/internals/en/binary-protocol-value.html]]
+ * A RawValue contains the raw bytes that represent
+ * a value and enough meta data to decode the
+ * bytes.
+ *
+ * @param typ The mysql type code for this value.
+ * @param charset The charset encoding of the bytes.
+ * @param isBinary Disambiguates between the text and binary protocol.
+ * @param bytes The raw bytes for this value.
  */
-object Value {
-  /**
-   * Creates a Value given a MySQL type code
-   * and a value string. If the mapping is unknown
-   * a RawStringValue is returned.
-   */
-  def apply(typeCode: Int, value: String) =
-    if (value == null)
-      NullValue
-    else if (value.isEmpty)
-      EmptyValue
-    else
-      typeCode match {
-        case Type.STRING     => StringValue(value)
-        case Type.VAR_STRING => StringValue(value)
-        case Type.VARCHAR    => StringValue(value)
-        case Type.TINY       => ByteValue(value.toByte)
-        case Type.SHORT      => ShortValue(value.toShort)
-        case Type.INT24      => IntValue(value.toInt)
-        case Type.LONG       => IntValue(value.toInt)
-        case Type.LONGLONG   => LongValue(value.toLong)
-        case Type.FLOAT      => FloatValue(value.toFloat)
-        case Type.DOUBLE     => DoubleValue(value.toDouble)
-        case Type.TIMESTAMP  => TimestampValue(value)
-        case Type.DATETIME   => TimestampValue(value)
-        case Type.DATE       => DateValue(value)
-        case _               => RawStringValue(value)
-      }
-
-  /**
-   * Creates a Value given a MySQL type code
-   * and a byte buffer. If the mapping is unknwon
-   * a RawBinaryValue is returned.
-   */
-  def apply(typeCode: Int, buffer: BufferReader, charset: JCharset) = typeCode match {
-    case Type.STRING      => StringValue(buffer.readLengthCodedString(charset))
-    case Type.VAR_STRING  => StringValue(buffer.readLengthCodedString(charset))
-    case Type.VARCHAR     => StringValue(buffer.readLengthCodedString(charset))
-    case Type.TINY        => ByteValue(buffer.readByte())
-    case Type.SHORT       => ShortValue(buffer.readShort())
-    case Type.INT24       => IntValue(buffer.readInt24())
-    case Type.LONG        => IntValue(buffer.readInt())
-    case Type.LONGLONG    => LongValue(buffer.readLong())
-    case Type.FLOAT       => FloatValue(buffer.readFloat())
-    case Type.DOUBLE      => DoubleValue(buffer.readDouble())
-    case Type.TIMESTAMP   => TimestampValue(buffer.readLengthCodedBytes())
-    case Type.DATETIME    => TimestampValue(buffer.readLengthCodedBytes())
-    case Type.DATE        => DateValue(buffer.readLengthCodedBytes())
-
-    // TO DO: Verify that Type.{ENUM, SET, NEWDATE} can be read as
-    // a length coded set of bytes.
-    case _ => RawBinaryValue(buffer.readLengthCodedBytes())
-  }
-}
-
+case class RawValue(
+  typ: Short,
+  charset: Short,
+  isBinary: Boolean,
+  bytes: Array[Byte]
+) extends Value
 
 object TimestampValue {
   /**
-   * Creates a Value from a MySQL String
-   * that represents a Timestamp. Falls back
-   * onto java.sql.Timestamp to do the string
-   * parsing.
-   * @param A MySQL formatted TIMESTAMP string YYYY-MM-DD HH:MM:SS.
+   * Creates a RawValue from a java.sql.Timestamp
    */
-  def apply(s: String): Value = {
-    if (s == null)
-      NullValue
-    else if (s.isEmpty)
-      EmptyValue
-    else if (s == SQLZeroTimestamp.toString)
-      TimestampValue(SQLZeroTimestamp)
-    else
-      TimestampValue(Timestamp.valueOf(s))
+  def apply(ts: Timestamp): Value = {
+    val bytes = new Array[Byte](11)
+    val bw = BufferWriter(bytes)
+    val cal = Calendar.getInstance
+    cal.setTimeInMillis(ts.getTime)
+    bw.writeShort(cal.get(Calendar.YEAR))
+    bw.writeByte(cal.get(Calendar.MONTH) + 1) // increment 0 indexed month
+    bw.writeByte(cal.get(Calendar.DATE))
+    bw.writeByte(cal.get(Calendar.HOUR_OF_DAY))
+    bw.writeByte(cal.get(Calendar.MINUTE))
+    bw.writeByte(cal.get(Calendar.SECOND))
+    bw.writeInt(ts.getNanos)
+    RawValue(Type.Timestamp, Charset.Binary, true, bytes)
   }
 
   /**
-   * Creates a TimestampValue from its
-   * MySQL binary representation.
+   * Value extractor for java.sql.Timestamp
+   */
+  def unapply(v: Value): Option[Timestamp] = v match {
+    case RawValue(t, Charset.Binary, false, bytes)
+      if (t == Type.Timestamp || t == Type.DateTime) =>
+        val str = new String(bytes, Charset(Charset.Binary))
+        if (str == Zero.toString) Some(Zero)
+        else Some(Timestamp.valueOf(str))
+
+    case RawValue(t, Charset.Binary, true, bytes)
+      if (t == Type.Timestamp || t == Type.DateTime) =>
+        Some(fromBytes(bytes))
+
+    case _ => None
+  }
+
+  /**
+   * Timestamp object that can appropriately
+   * represent MySQL zero Timestamp.
+   */
+  private[this] object Zero extends Timestamp(0) {
+    override val getTime = 0L
+    override val toString = "0000-00-00 00:00:00"
+  }
+
+  /**
+   * Creates a Timestamp from a Mysql binary representation.
+   * Invalid DATETIME or TIMESTAMP values are converted to
+   * the “zero” value ('0000-00-00 00:00:00').
    * @param An array of bytes representing a TIMESTAMP written in the
    * MySQL binary protocol.
    */
-   def apply(bytes: Array[Byte]): Value = {
-    if (bytes.size == 0) {
-      return TimestampValue(SQLZeroTimestamp)
+  private[this] def fromBytes(bytes: Array[Byte]): Timestamp = {
+    if (bytes.isEmpty) {
+      return Zero
     }
 
     var year, month, day, hour, min, sec, nano = 0
@@ -136,11 +103,8 @@ object TimestampValue {
       month = br.readUnsignedByte()
       day = br.readUnsignedByte()
     } else {
-      // Instead of throwing an exception, return
-      // a RawBinaryValue and allow the user to handle this.
-      return RawBinaryValue(bytes)
+      return Zero
     }
-
 
     // if the time-part is 00:00:00, it isn't included.
     if (br.readable(3)) {
@@ -160,58 +124,59 @@ object TimestampValue {
     val ts = new Timestamp(0)
     ts.setTime(cal.getTimeInMillis)
     ts.setNanos(nano)
-    TimestampValue(ts)
+    ts
    }
-
-  /**
-   * Write a java.sql.Timestamp into its
-   * MySQL binary representation.
-   * @param Timestamp to write
-   * @param BufferWriter to write to.
-   */
-  def write(ts: Timestamp, buffer: BufferWriter) = {
-    val cal = Calendar.getInstance
-    cal.setTimeInMillis(ts.getTime)
-    buffer.writeByte(11)
-    buffer.writeShort(cal.get(Calendar.YEAR))
-    buffer.writeByte(cal.get(Calendar.MONTH) + 1) // increment 0 indexed month
-    buffer.writeByte(cal.get(Calendar.DATE))
-    buffer.writeByte(cal.get(Calendar.HOUR_OF_DAY))
-    buffer.writeByte(cal.get(Calendar.MINUTE))
-    buffer.writeByte(cal.get(Calendar.SECOND))
-    buffer.writeInt(ts.getNanos)
-    buffer
-  }
 }
 
 object DateValue {
   /**
-   * Creates a Value from a MySQL String
-   * that represents a Date. Falls back
-   * onto java.sql.Date to do the string
-   * parsing.
-   * @param A MySQL formatted TIMESTAMP string YYYY-MM-DD.
+   * Creates a RawValue from a java.sql.Date
    */
-  def apply(s: String): Value = {
-    if (s == null)
-      NullValue
-    else if (s.isEmpty)
-      EmptyValue
-    else if (s == SQLZeroDate.toString)
-      DateValue(SQLZeroDate)
-    else
-      DateValue(SQLDate.valueOf(s))
+  def apply(date: Date): Value = {
+    val bytes = new Array[Byte](4)
+    val bw = BufferWriter(bytes)
+    val cal = Calendar.getInstance
+    cal.setTimeInMillis(date.getTime)
+    bw.writeShort(cal.get(Calendar.YEAR))
+    bw.writeByte(cal.get(Calendar.MONTH) + 1) // increment 0 indexed month
+    bw.writeByte(cal.get(Calendar.DATE))
+    RawValue(Type.Date, Charset.Binary, true, bytes)
   }
 
   /**
-   * Creates a DateValue from its
-   * MySQL binary representation.
+   * Value extractor for java.sql.Date
+   */
+  def unapply(v: Value): Option[Date] = v match {
+    case RawValue(Type.Date, Charset.Binary, false, bytes) =>
+      val str = new String(bytes, Charset(Charset.Binary))
+      if (str == Zero.toString) Some(Zero)
+      else Some(Date.valueOf(str))
+
+    case RawValue(Type.Date, Charset.Binary, true, bytes) =>
+      Some(fromBytes(bytes))
+    case _ => None
+  }
+
+  /**
+   * Date object that can appropriately
+   * represent MySQL zero Date.
+   */
+  private[this] object Zero extends Date(0) {
+    override val getTime = 0L
+    override val toString = "0000-00-00"
+  }
+
+  /**
+   * Creates a DateValue from its MySQL binary representation.
+   * Invalid DATE values are converted to
+   * the “zero” value of the appropriate type
+   * ('0000-00-00' or '0000-00-00 00:00:00').
    * @param An array of bytes representing a DATE written in the
    * MySQL binary protocol.
    */
-  def apply(bytes: Array[Byte]): Value = {
-    if(bytes.size == 0) {
-      return DateValue(SQLZeroDate)
+  private[this] def fromBytes(bytes: Array[Byte]): Date = {
+    if(bytes.isEmpty) {
+      return Zero
     }
 
     var year, month, day = 0
@@ -222,28 +187,25 @@ object DateValue {
       month = br.readUnsignedByte()
       day = br.readUnsignedByte()
     } else {
-      return RawBinaryValue(bytes)
+      return Zero
     }
 
     val cal = Calendar.getInstance
     cal.set(year, month-1, day)
 
-    DateValue(new SQLDate(cal.getTimeInMillis))
+    new Date(cal.getTimeInMillis)
+  }
+}
+
+object BigDecimalValue {
+  def apply(b: BigDecimal): Value = {
+    val str = b.toString.getBytes(Charset(Charset.Binary))
+    RawValue(Type.NewDecimal, Charset.Binary, true, str)
   }
 
-  /**
-   * Writes a java.sql.Date into its
-   * MySQL binary representation.
-   * @param Date to write
-   * @param BufferWriter to write to.
-   */
-  def write(date: SQLDate, buffer: BufferWriter) = {
-    val cal = Calendar.getInstance
-    cal.setTimeInMillis(date.getTime)
-    buffer.writeByte(4)
-    buffer.writeShort(cal.get(Calendar.YEAR))
-    buffer.writeByte(cal.get(Calendar.MONTH) + 1) // increment 0 indexed month
-    buffer.writeByte(cal.get(Calendar.DATE))
-    buffer
+  def unapply(v: Value): Option[BigDecimal] = v match {
+    case RawValue(Type.NewDecimal, Charset.Binary, _, bytes) =>
+      Some(BigDecimal(new String(bytes, Charset(Charset.Binary))))
+    case _ => None
   }
 }

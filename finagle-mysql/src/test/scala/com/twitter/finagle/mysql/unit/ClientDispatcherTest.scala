@@ -110,7 +110,7 @@ class ClientDispatcherTest extends FunSuite {
           fieldName,
           33.toShort,
           maxLen,
-          Type.VARCHAR,
+          Type.VarChar,
           0,
           0
         )

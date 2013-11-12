@@ -188,14 +188,13 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
 
     private[this] def writeTypeCode(param: Any, writer: BufferWriter): Unit = {
       val typeCode = Type.getCode(param)
-
       if (typeCode != -1)
         writer.writeShort(typeCode)
       else {
         // Unsupported type. Write the error to log, and write the type as null.
         // This allows us to safely skip writing the parameter without corrupting the buffer.
         log.warning("Unknown parameter %s will be treated as SQL NULL.".format(param.getClass.getName))
-        writer.writeShort(Type.NULL)
+        writer.writeShort(Type.Null)
       }
     }
 
@@ -216,8 +215,7 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
     /**
      * Writes the parameter into its MySQL binary representation.
      */
-    private[this] def writeParam(param: Any, writer: BufferWriter) = param match {
-      // TODO: defaults to UTF-8.  this is ok for ascii, not for every encoding.
+    private[this] def writeParam(param: Any, writer: BufferWriter): BufferWriter = param match {
       case s: String      => writer.writeLengthCodedString(s)
       case b: Boolean     => writer.writeBoolean(b)
       case b: Byte        => writer.writeByte(b)
@@ -228,10 +226,13 @@ case class ExecuteRequest(ps: PreparedStatement, flags: Byte = 0, iterationCount
       case d: Double      => writer.writeDouble(d)
       case b: Array[Byte] => writer.writeLengthCodedBytes(b)
       // Dates
-      case t: java.sql.Timestamp    => TimestampValue.write(t, writer)
-      case d: java.sql.Date         => DateValue.write(d, writer)
-      case d: java.util.Date        => TimestampValue.write(new java.sql.Timestamp(d.getTime), writer)
-      case _  => writer // skip null and uknown values
+      case t: java.sql.Timestamp    => writeParam(TimestampValue(t), writer)
+      case d: java.sql.Date         => writeParam(DateValue(d), writer)
+      case d: java.util.Date        => writeParam(TimestampValue(new java.sql.Timestamp(d.getTime)), writer)
+      // allows for generic binary values as params to a prepared statement.
+      case RawValue(_, _, true, bytes) => writer.writeLengthCodedBytes(bytes)
+      // skip null and unknown values
+      case _  => writer
     }
 
     override val toPacket = {
