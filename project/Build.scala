@@ -11,7 +11,7 @@ object Finagle extends Build {
   val utilVersion = "6.8.0"
   val ostrichVersion = "9.2.0"
   val jacksonVersion = "2.2.2"
-  val nettyLib = "io.netty" % "netty" % "3.7.0.Final"
+  val nettyLib = "io.netty" % "netty" % "3.8.0.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -39,8 +39,8 @@ object Finagle extends Build {
         case "2.10.0" => "2.10"
         case x => x
       },
-      "junit" % "junit" % "4.8.1" % "test",
-      "org.mockito" % "mockito-all" % "1.8.5" % "test"
+      "junit" % "junit" % "4.10" % "test",
+      "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
 
@@ -467,6 +467,15 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1"
     )
   ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin)
+
+  lazy val finagleTesters = Project(
+    id = "finagle-testers",
+    base = file("finagle-testers"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-testers"
+  ).dependsOn(finagleCore)
 
   /*
   lazy val finagleSwift = Project(
