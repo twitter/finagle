@@ -62,7 +62,7 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>ostrich</artifactId>
-      <version>9.1.4-SNAPSHOT</version>
+      <version>9.2.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
