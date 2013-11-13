@@ -1,9 +1,47 @@
 .. Author notes: this file is formatted with restructured text
-  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
-  as it is included in Finagle's user's guide.
+(http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+as it is included in Finagle's user's guide.
 
 6.x
 -----
+
+6.8.0
+~~~~~
+
+- `finagle-serversets`: Higher fidelity addrs from ZK We do the best we can with the current server set implementation.
+- `finagle-mysql`: better type support
+- `finagle-http`: Allow Integer to extract negative number
+- `finagle-redis`: Decode nested multi-bulk replies
+- `finagle-redis`: Allow expirations in the past
+- `finagle-core`: bump Netty to 3.8.0.Final
+- `finagle`: Return empty string when resolving an unlabeled address
+- `finagle`: Don't re-scope StatsReceivers per request failure
+- `finagle-thrift`: Unconditionally set TraceId and ClientId on servers
+- `finagle-core`: Take -com.twitter.server.serversetZkHosts flag (for tunnelling)
+- `finagle-native`: tomcat-native-1.1.27
+- `finagle-mysql`: fix readLengthCodedBinary to read longs
+- `finagle-testers`: library for integration testing of - `finagle services
+- `finagle`: scaladoc warning cleanup
+- `finagle-doc`: documented all of the stats in - `finagle-core
+- `finagle-serversets`: bump server-set dependency to 1.0.56
+- `finagle-stats`: adds a cautious registration to HttpMuxer / adds a default metrics endpoint to twitter-server
+- `finagle-core`: verifies that statsfilter has the correct behavior
+- `finagle-serversets`: Add support for parsing a !shardId on the end of a serverset address
+finahle-http`: Use Reader for streaming
+- `finagle-core`: no longer makes an anonymous exception in DefaultClient
+- `finagle-core`: Using system class loader does not work when run inside sbt
+- `finagle-core`: add pool_num_waited counter to WatermarkPool
+- `finagle-core`: Protocol support for Wily: HTTP, thrift, mux (& thus thriftmux).
+- `finagle-core`: respect standard socksProxyHost / socksProxyPort properties in ClientBuilder and Netty3Transporter default args
+- `finagle-core`: buffers requests until Var[Addr] is in a ready state
+- `finagle-core`: Add putLong and getLong functions to util.ByteArrays
+- `finagle-core`: don't blow up if we don't have a resolvable host name
+- `finagle-core`: rm allocation in RichChannelFuture.apply's operationComplete
+- `finagle-core`: remove Var.apply; introduce Var.sample
+- `finagle-thriftmux`: Support ClientIds at the protocol level
+- `finagle-kestrel`: memory allocation improvements
+- `finagle-http`: allow PUT requests to use RequestParamMap.postParams
+- `finagle-memcached`: more performance and less allocations in Decoder
 
 6.7.4
 ~~~~~
