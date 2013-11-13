@@ -23,7 +23,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.9.2")
+    "com.twitter" %% "scrooge-core" % "3.11.0")
 
   def util(which: String) = "com.twitter" %% ("util-"+which) % utilVersion
 
